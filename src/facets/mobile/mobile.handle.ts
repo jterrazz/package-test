@@ -12,6 +12,7 @@ import type { AppiumServer, MobileDevice, RunServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
 import { sessionLedger } from './session-ledger.js';
+import { sameRuntime } from './simulator.js';
 
 // ── Types ──
 
@@ -143,7 +144,8 @@ function named({ name, os, udid }: MobileDevice): string {
 export function runDevice(device: MobileDevice, run: RunServer): MobileDevice {
     const agrees =
         device.name === run.device.name &&
-        (device.os === undefined || device.os === run.device.os) &&
+        (device.os === undefined ||
+            (run.device.os !== undefined && sameRuntime(device.os, run.device.os))) &&
         (device.udid === undefined || device.udid === run.udid);
     if (!agrees) {
         throw new Error(

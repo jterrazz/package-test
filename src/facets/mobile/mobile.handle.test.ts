@@ -64,8 +64,24 @@ describe('runDevice — the device the run serves', () => {
         });
     });
 
+    test("a specification spelling the project's os another way drives the booted simulator", () => {
+        // Given - the os with its platform, in another case, where the project wrote the bare version
+        // Then - the same runtime, so the project's device on the booted udid
+        expect(runDevice({ name: 'iPhone 17', os: 'IOS 26.5' }, run)).toStrictEqual({
+            name: 'iPhone 17',
+            os: '26.5',
+            udid: 'SIM-17',
+        });
+        expect(
+            runDevice(
+                { name: 'iPhone 17', os: '26.5' },
+                { ...run, device: { name: 'iPhone 17', os: 'iOS 26.5' } },
+            ),
+        ).toStrictEqual({ name: 'iPhone 17', os: 'iOS 26.5', udid: 'SIM-17' });
+    });
+
     test('a specification naming another device is refused, naming both', () => {
-        // Given - another name, then the same name on another os, then another udid
+        // Given - another name, the same name on another os or platform, an os the run cannot confirm, another udid
         // Then - each is refused with the device the run drives
         expect(() => runDevice({ name: 'iPad Pro' }, run)).toThrow(
             "specification.mobile() names the device 'iPad Pro', and the run's Appium server drives 'iPhone 17' (26.5) [SIM-17], the device its mobile({ device }) project declares — name that device, or declare no device on mobile() so each file serves its own",
@@ -73,6 +89,15 @@ describe('runDevice — the device the run serves', () => {
         expect(() => runDevice({ name: 'iPhone 17', os: '18.0' }, run)).toThrow(
             "names the device 'iPhone 17' (18.0)",
         );
+        expect(() =>
+            runDevice(
+                { name: 'iPhone 17', os: 'tvOS 26.5' },
+                { ...run, device: { name: 'iPhone 17', os: 'iOS 26.5' } },
+            ),
+        ).toThrow("names the device 'iPhone 17' (tvOS 26.5)");
+        expect(() =>
+            runDevice({ name: 'iPhone 17', os: '26.5' }, { ...run, device: { name: 'iPhone 17' } }),
+        ).toThrow("names the device 'iPhone 17' (26.5)");
         expect(() => runDevice({ name: 'iPhone 17', udid: 'SIM-OTHER' }, run)).toThrow(
             "names the device 'iPhone 17' [SIM-OTHER]",
         );

@@ -52,10 +52,25 @@ export function listSimulators(listJson: string): SimulatorDevice[] {
     );
 }
 
-/** `iOS 26.5` matches `os: 'iOS 26.5'` and the bare version `'26.5'`, case-insensitive. */
-function osMatches(deviceOs: string, wanted: string): boolean {
-    const normalized = wanted.toLowerCase();
-    return deviceOs.toLowerCase() === normalized || deviceOs.split(' ')[1] === wanted;
+/** `'iOS 26.5'` → `{ platform: 'ios', version: '26.5' }`; a bare `'26.5'` names no platform. */
+function runtimeOf(os: string): { platform: string | undefined; version: string } {
+    const [first = '', second] = os.trim().toLowerCase().split(/\s+/u);
+    return second === undefined
+        ? { platform: undefined, version: first }
+        : { platform: first, version: second };
+}
+
+/**
+ * Do two `os` spellings name one runtime? `'iOS 26.5'` and the bare version
+ * `'26.5'` do, case-insensitive; two that both name a platform must name the
+ * same one.
+ */
+export function sameRuntime(one: string, other: string): boolean {
+    const [a, b] = [runtimeOf(one), runtimeOf(other)];
+    return (
+        a.version === b.version &&
+        (a.platform === undefined || b.platform === undefined || a.platform === b.platform)
+    );
 }
 
 function formatListing(devices: SimulatorDevice[]): string {
@@ -77,7 +92,7 @@ export function selectSimulator(
     const matches = available.filter(
         (device) =>
             device.name === criteria.name &&
-            (criteria.os === undefined || osMatches(device.os, criteria.os)),
+            (criteria.os === undefined || sameRuntime(device.os, criteria.os)),
     );
 
     const wanted =
