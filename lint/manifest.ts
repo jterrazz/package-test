@@ -485,7 +485,7 @@ export const RULE_DOCS = {
     'd2-await-io-matcher': {
         channel: 'statique',
         convention:
-            'An IO matcher (a table compared whole, `toMatch(<rows>)`; `toMatch(directory(…))`; `toBeEmpty`; `toBeRunning`) must be awaited or returned; otherwise the assertion never runs → error.',
+            'A `toMatch` that is IO — a table compared whole, `toMatch(<rows>)`, or a tree, `toMatch(directory(…))` — must be awaited or returned; otherwise the assertion never runs → error. `toBeEmpty` and `toBeRunning`, typed `Promise<void>` whatever their argument, are refused dropped by the type-aware `typescript/no-floating-promises` every profile of `@jterrazz/typescript` turns on.',
         facet: 'model',
         family: 'D',
         fix: 'Put `await` in front of the `expect(...)`.',

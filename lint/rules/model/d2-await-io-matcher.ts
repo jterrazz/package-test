@@ -5,9 +5,6 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Matchers backed by IO (SQL query, docker) whatever their argument — must be awaited (D2). */
-const IO_MATCHERS = new Set(['toBeEmpty', 'toBeRunning']);
-
 /** The `expect(…)` call a matcher's member chain starts from, through any `.not`. */
 function expectCallOf(node: AstNode | undefined): AstNode | undefined {
     let current = node;
@@ -82,11 +79,17 @@ function isDropped(node: AstNode): boolean {
 }
 
 /**
- * CONVENTIONS D2 — the IO-backed matchers (a table's whole-table `toMatch`
- * runs SQL, `toMatch(directory(…))` walks a tree, `toBeEmpty` queries a table,
- * `toBeRunning` queries docker) return a promise and must be `await`ed (or
- * returned). A bare `expect(result.table('users')).toMatch([…])` silently
- * resolves nothing and the assertion never runs.
+ * CONVENTIONS D2 — a `toMatch` whose argument or subject makes it IO (a
+ * table's whole-table comparison runs SQL, `toMatch(directory(…))` walks a
+ * tree) returns a promise and must be `await`ed (or returned). A bare
+ * `expect(result.table('users')).toMatch([…])` silently resolves nothing and
+ * the assertion never runs.
+ *
+ * `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever their
+ * argument, so the type-aware `typescript/no-floating-promises`, on in every
+ * profile of the toolchain, refuses them dropped; `toMatch` keeps this rule,
+ * because its type follows the subject and the rows written in place are read
+ * here by their shape.
  */
 export const d2AwaitIoMatcher: LintRule = {
     createOnce(context: Context): Visitor {
@@ -102,9 +105,7 @@ export const d2AwaitIoMatcher: LintRule = {
                         ? 'toMatch(directory(…))'
                         : name === 'toMatch' && comparesTable(node)
                           ? 'toMatch(<rows>)'
-                          : name !== undefined && IO_MATCHERS.has(name)
-                            ? `${name}(…)`
-                            : undefined;
+                          : undefined;
                 if (matcher === undefined) {
                     return;
                 }

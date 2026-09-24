@@ -17,6 +17,8 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 | container subjects                                                     | Talks to the Docker daemon           |
 | every accessor of a COMPONENT result (`tree`, `html`, `content`, …)    | The capture crosses the browser seam |
 
+A missed `await` has two judges. `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever they are handed, so the type-aware `typescript/no-floating-promises` refuses one dropped; a `toMatch` is IO by its subject or its argument, so D2 reads the shape — a `.table(…)` read, rows written in place, `directory(…)` — and refuses it dropped.
+
 Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
 ### One verb compares a whole result, and its argument says where the expectation lives (rule D3)
@@ -132,7 +134,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatch([
 ]);
 ```
 
-`toBeEmpty` is a table's matcher, and async: rule D2 refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
+`toBeEmpty` is a table's matcher, and async: the type-aware `typescript/no-floating-promises`, on in every profile of `@jterrazz/typescript`, refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
 A failing table `toMatch` prints the expected grid against the actual rows, every column named, cell by cell: a row that matches prints once, unmarked, and each stated row that matches none is shown against the unpaired row of the table it resembles most (the most cells in common), a row too many or too few alone — matcher cells render as their placeholder text (`Matcher.toString()`): `match.uuid()` shows as `{{uuid}}`, `match.ref('order')` as `{{ref#order}}`, `match.ref('intent', { not: 'order' })` as `{{ref#intent!order}}`, `match.regex(/…/)` as `{{regex:…}}`. A failing `toBeEmpty` reports how many rows it found (the count, not the rows themselves). `.not` inverts both (`.not.toBeEmpty()` = at least one row).
 

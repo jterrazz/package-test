@@ -165,7 +165,7 @@ test('a crashed job leaves what it wrote first', async () => {
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
 - **Forgetting `times` on the leading contract of a sequence.** With no `times` the first contract is unlimited, so it answers every call and the recovery contract behind it is never reached.
 - **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).
-- **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule D2).
+- **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule D2 for `toMatch(<rows>)`, the type-aware `typescript/no-floating-promises` for `toBeEmpty`).
 - **Bounding the tail of a sequence.** The last contract of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule D7).
 
 ## Related
