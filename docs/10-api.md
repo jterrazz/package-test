@@ -303,6 +303,8 @@ import { defineConfig } from '@jterrazz/typescript/config';
 export default defineConfig({ test: { routes: './openapi.yaml' } });
 ```
 
+A route the app takes on any method — `app.all('/mcp', …)` — is one the member names in `jterrazz.config.ts`, `test: { methodless: ['/mcp'] }`, so the checker files its specs under its path whatever verb they send ([18 — Conventions § The subject, and its standard name](18-conventions.md#the-subject-and-its-standard-name)). The run holds that list to the app's own table: a route the table takes on any method that the list misses, or a path the list names that the table takes on its own methods only or holds nowhere, fails the run naming each — under `TEST_UPDATE=1` too, since the list is written by hand and nothing records it. A table read from an OpenAPI document holds no route of any method, and leaves the list unjudged.
+
 The measure is the `api()` project's global setup; a project written by hand measures nothing.
 
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).

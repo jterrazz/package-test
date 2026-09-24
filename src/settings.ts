@@ -19,7 +19,8 @@ export type TestSettings = {
     /**
      * The routes the member's api takes on any method — `app.all('/mcp', …)` —
      * by their path. The conventions checker files a spec of one under its
-     * path segments (`mcp/`), whatever verb a test sends it.
+     * path segments (`mcp/`), whatever verb a test sends it, and the api run
+     * fails when the list and the app's route table disagree.
      */
     methodless?: readonly string[];
     /**

@@ -171,20 +171,63 @@ describe('route coverage — the api run judged', () => {
     });
 
     test('an ALL route is reached by a request of any method', async () => {
-        // Given - one app.all() route, reached by a POST
-        const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
-        onTestFinished(() => {
-            rmSync(root, { force: true, recursive: true });
-        });
-        const directory = join(root, 'ledgers');
-        writeLedger(directory, {
-            declared: [{ method: 'ALL', path: '/mcp' }],
-            reached: [{ method: 'POST', path: '/mcp' }],
-        });
+        // Given - one app.all() route the member declares method-less, reached by a POST
+        const { directory, root } = methodlessRun(['/mcp']);
 
         // Then - reached
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            line: 'api routes: all 1 declared routes reached',
+            line: 'api routes: all 2 declared routes reached',
+        });
+    });
+
+    test('an ALL route the member does not declare method-less fails the run, in update mode too', async () => {
+        // Given - the app takes /mcp on any method, and jterrazz.config.ts names no route so
+        const { directory, root } = methodlessRun([]);
+
+        // Then - the drift is named, whatever the mode
+        const failure = {
+            failure:
+                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp'",
+        };
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(failure);
+        await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
+    });
+
+    test('a method-less route the app takes on its own methods only, or not at all, fails the run', async () => {
+        // Given - /mcp, /health and /gone declared method-less, the app taking /health on GET alone and no /gone
+        const { directory, root } = methodlessRun(['/mcp', '/health', '/gone']);
+
+        // Then - each declaration that drifted is named
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
+            failure:
+                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  /health — the list names it, and the app takes it on its own methods only: remove '/health'\n  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
         });
     });
 });
+
+/**
+ * A run over an app taking `/mcp` on any method and `/health` on GET, both
+ * reached, whose `jterrazz.config.ts` names `methodless` routes.
+ */
+function methodlessRun(methodless: readonly string[]): { directory: string; root: string } {
+    const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
+    onTestFinished(() => {
+        rmSync(root, { force: true, recursive: true });
+    });
+    const directory = join(root, 'ledgers');
+    writeLedger(directory, {
+        declared: [
+            { method: 'ALL', path: '/mcp' },
+            { method: 'GET', path: '/health' },
+        ],
+        reached: [
+            { method: 'POST', path: '/mcp' },
+            { method: 'GET', path: '/health' },
+        ],
+    });
+    writeFileSync(
+        join(root, 'jterrazz.config.ts'),
+        `export default { test: { methodless: ${JSON.stringify(methodless)} } };\n`,
+    );
+    return { directory, root };
+}

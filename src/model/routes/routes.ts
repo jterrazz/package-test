@@ -128,24 +128,42 @@ export function openApiRoutes(text: string, json: boolean): Route[] {
 }
 
 /**
- * The routes the member at `root` declares in its `jterrazz.config.ts` —
- * `test.routes`, a path to an OpenAPI document — or `undefined` when it
- * declares none. Node loads the file, types stripped, as the toolchain loads
- * its own section.
+ * The `test` section of the member's `jterrazz.config.ts` at `root` —
+ * `undefined` when it has none. Node loads the file, types stripped, as the
+ * toolchain loads its own section.
  */
-export async function declaredRoutes(root: string): Promise<Route[] | undefined> {
+async function testSectionAt(root: string): Promise<Record<string, unknown> | undefined> {
     const settings = join(root, 'jterrazz.config.ts');
     if (!existsSync(settings)) {
         return undefined;
     }
     const loaded: unknown = await import(pathToFileURL(settings).href);
     const config = isRecord(loaded) ? loaded.default : undefined;
-    const test = isRecord(config) ? config.test : undefined;
-    const source = isRecord(test) ? test.routes : undefined;
+    return isRecord(config) && isRecord(config.test) ? config.test : undefined;
+}
+
+/**
+ * The routes the member at `root` declares in its `jterrazz.config.ts` —
+ * `test.routes`, a path to an OpenAPI document — or `undefined` when it
+ * declares none.
+ */
+export async function declaredRoutes(root: string): Promise<Route[] | undefined> {
+    const test = await testSectionAt(root);
+    const source = test?.routes;
     if (typeof source !== 'string') {
         return undefined;
     }
     return openApiRoutes(readFileSync(join(root, source), 'utf8'), source.endsWith('.json'));
+}
+
+/**
+ * The paths the member at `root` names method-less in its
+ * `jterrazz.config.ts` — `test.methodless` — or none.
+ */
+export async function declaredMethodless(root: string): Promise<string[]> {
+    const test = await testSectionAt(root);
+    const paths = test?.methodless;
+    return Array.isArray(paths) ? paths.filter((path) => typeof path === 'string') : [];
 }
 
 /** Forget the ledgers a previous run left in `directory` — the run measures from nothing. */

@@ -3,6 +3,7 @@ import type { TestProject } from 'vitest/node';
 
 import {
     clearLedgers,
+    declaredMethodless,
     declaredRoutes,
     heldUnreached,
     measure,
@@ -30,6 +31,13 @@ import { shouldUpdateSnapshots } from './update.js';
  * The run is the key's one judge: it alone counts the routes. An app whose
  * table is unknown — no `app.routes`, no OpenAPI document declared — fails
  * the run too: a measure against nothing reads as every route reached.
+ *
+ * The app's own table also holds the member's `test: { methodless }` to what
+ * it declares: the routes it takes on any method (`ALL`) are exactly the paths
+ * the list names, or the run fails naming each drift — the checker files a
+ * spec of such a route by its path, and a list nothing checks would drift
+ * from the app unseen. A table read from an OpenAPI document has no `ALL`,
+ * and leaves the list unjudged.
  */
 
 /** The failure of a run whose app exposes no route table, and names none. */
@@ -45,6 +53,42 @@ function spelled(route: Route): string {
 
 /** What the judge is told of the run: whether it records, and how many of its files failed. */
 export type RouteRun = { failed: number; update: boolean };
+
+/** A path with its parameters' names dropped: `/mcp/:id` and `/mcp/:session` are one route. */
+function shapeOf(path: string): string {
+    return path.replaceAll(/:[^/]+/gu, ':');
+}
+
+/**
+ * Where the method-less list and the app's table disagree: each route the
+ * table takes on any method that the list misses, then each path the list
+ * names that the table does not take on any method — nothing when they agree.
+ */
+function methodlessDrift(table: readonly Route[], methodless: readonly string[]): string[] {
+    const named = new Set(methodless.map((path) => shapeOf(path)));
+    const any = [
+        ...new Map(
+            table
+                .filter((route) => route.method === 'ALL')
+                .map((route) => [shapeOf(route.path), route.path]),
+        ),
+    ];
+    const taken = new Set(any.map(([shape]) => shape));
+    const missed = any
+        .filter(([shape]) => !named.has(shape))
+        .map(
+            ([, path]) =>
+                `  ALL ${path} — the app takes it on any method, and the list misses it: add '${path}'`,
+        );
+    const stale = methodless
+        .filter((path) => !taken.has(shapeOf(path)))
+        .map((path) =>
+            table.some((route) => shapeOf(route.path) === shapeOf(path))
+                ? `  ${path} — the list names it, and the app takes it on its own methods only: remove '${path}'`
+                : `  ${path} — the list names it, and the app's table holds no such route: remove '${path}'`,
+        );
+    return [...missed, ...stale];
+}
 
 /**
  * Judge the run's measure: the line the report prints, or the error that
@@ -71,6 +115,15 @@ export async function judgeRoutes(
     const table = (await declaredRoutes(root)) ?? run.declared;
     if (table === undefined) {
         return { failure: UNKNOWN_TABLE };
+    }
+    const drift =
+        run.declared === undefined
+            ? []
+            : methodlessDrift(run.declared, await declaredMethodless(root));
+    if (drift.length > 0) {
+        return {
+            failure: `api routes: \`test: { methodless }\` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n${drift.join('\n')}`,
+        };
     }
     // Every specification of the run declares the same table: a route counts once.
     const declared = [...new Map(table.map((route) => [spelled(route), route])).values()];
