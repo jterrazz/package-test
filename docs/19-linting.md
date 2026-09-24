@@ -481,6 +481,16 @@ What it checks:
 
 It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). The exit code is the ratchet's ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)): with no `test` section in `jterrazz.baseline.json`, 1 on any error and 0 when only warnings remain.
 
+**In a repository's `make fix`, the checker's `--fix` runs FIRST and the toolchain's `typescript fix` LAST.** The checker's fixers write code — a moved helper, a view declared once, a value written in place — and none of it is formatted until the formatter runs over it; run the other way round, a `make fix` leaves the checker's writes for the next `make lint` to refuse. The recipe that runs every fixer whatever the one before it said is the toolchain's, `@jterrazz/typescript` `docs/06-quality-checks.md` § The six gestures; the order of the two lines is this one:
+
+```make
+fix:
+	@status=0; \
+	npx jterrazz-test-check --fix || status=1; \
+	npx typescript fix || status=1; \
+	exit $$status
+```
+
 ## The member pass, and the JSON contract
 
 Three findings are about a MEMBER rather than about a spec tree, and a member with no `specs/` root has to be judged all the same — the first of the three is precisely "this member has tests and no configuration for them".
