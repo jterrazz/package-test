@@ -688,7 +688,7 @@ implementation (the commits say what was broken).
     body to `requests/`; C2 still refuses any file in `requests/` that is
     not a `.http`, and its fix sends it to `fixtures/`, which C24 then
     refuses. No body file can satisfy both. The body specs
-    (`specs/api/sending/`) carry a C2 suppression until it is decided: does
+    (the api facet's `sending/` folder, since filed by subject) carry a C2 suppression until it is decided: does
     `requests/` hold the body files a verb names (C2 relaxed to what a
     chain sends), or does a body file live elsewhere (C24's row moved)?
 42. Tracked files (iteration 3, owner): the conventions checker still
@@ -863,7 +863,7 @@ implementation (the commits say what was broken).
   file, and refuses a file under `requests/` with no extension — the
   extension is how the builder sends a body (`.json` parsed, anything else
   verbatim), the ground C6 stands on for a golden; a folder there is not
-  judged. The `specs/api/sending/` suppression is gone.
+  judged. The `sending/` suppression is gone.
 - **`region()` (52).** `ElementMatch.contextName` carries the landmark's
   accessible name (`aria-label`, else what `aria-labelledby` points at),
   read by both adapters; a named `<section>` is offered as
