@@ -1,7 +1,7 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
 import { describe, expect, test, vi } from 'vitest';
 
-import { button } from '../../model/elements/elements.js';
+import { button, testId, within } from '../../model/elements/elements.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
 /**
@@ -224,5 +224,64 @@ describe('appium adapter — names are exact', () => {
         // Then - the verb runs to its deadline on an exact name, and no substring is widened to
         await expect(opened).rejects.toThrow(/timed out/u);
         expect(state.taps).toBe(0);
+    });
+});
+
+/**
+ * A screen with two "Buy" buttons, one inside the `card` container: the
+ * screen answers both, the card only its own. Records which one is tapped.
+ */
+function scopedDriver(): { remote: never; tapped: string[] } {
+    const tapped: string[] = [];
+    const buy = (id: string) => ({
+        click: async () => {
+            tapped.push(id);
+            await Promise.resolve();
+        },
+        elementId: id,
+    });
+    const card = {
+        $$: async (selector: string) =>
+            await Promise.resolve(selector.includes('Buy') ? [buy('inside')] : []),
+        elementId: 'card',
+    };
+    const remote = async () =>
+        await Promise.resolve({
+            $$: async (selector: string) =>
+                await Promise.resolve(selector.includes("'card'") ? [card] : [buy('outside')]),
+            deleteSession: async () => {
+                await Promise.resolve();
+            },
+            executeScript: async () => {
+                await Promise.resolve();
+            },
+            getPageSource: async () =>
+                await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
+            takeScreenshot: async () =>
+                await Promise.reject(new Error('no screenshots in the stub')),
+        });
+    return { remote: asRemote(remote), tapped };
+}
+
+describe('appium adapter — a scope is translated on the device', () => {
+    test('within() resolves its target inside the scope, not on the whole screen', async () => {
+        // Given - a screen with a Buy button outside the card and one inside it
+        const { remote, tapped } = scopedDriver();
+        const adapter = new AppiumAdapter({
+            remote,
+            serverUrl: SERVER_URL,
+            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
+        });
+
+        // When - the scenario taps the card's Buy
+        await adapter.open({
+            bundleId: BUNDLE_ID,
+            scenario: async (visitor) => {
+                await visitor.tap(within(testId('card'), button('Buy')));
+            },
+        });
+
+        // Then - the one inside the card is tapped
+        expect(tapped).toStrictEqual(['inside']);
     });
 });

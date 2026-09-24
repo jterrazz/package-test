@@ -391,7 +391,7 @@ const componentVisitor = {
     unmount: true,
 } satisfies Record<keyof ComponentVisitor, Published>;
 
-/** What scopes a descriptor on a device rather than naming an element: no kind of its own, translated by the device. */
+/** What scopes a descriptor on a device rather than naming an element: no kind of its own, translated by the appium adapter — `appium.adapter.test.ts` taps through one. */
 const MOBILE_SCOPES = ['within'];
 
 /** The mobile element kinds, as the vocabulary spells them (`text` is `content()`). */
