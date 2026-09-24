@@ -213,6 +213,8 @@ const CODE_GROUND = groundTree({
     'cli/fixtures/binary/binary.ts': '',
     'cli/fixtures/binary/orphan.test.ts': '',
     'cli/fixtures/binary/binary.specification.ts': '',
+    // A first-level folder of helpers, holding no test.
+    'support/next-cursor.ts': '',
 });
 
 ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as OxlintRule, {
@@ -236,6 +238,13 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
             filename: `${CODE_GROUND}/cli/fixtures/binary/orphan.test.ts`,
             options: [{ depth: 'off' }],
         },
+        // A module in a first-level folder holding no test, in every mode.
+        ...['facet-domain', 'off'].map((depth) => ({
+            code: 'const x = 1;',
+            errors: [{ messageId: 'strayFolder' }],
+            filename: `${CODE_GROUND}/support/next-cursor.ts`,
+            options: [{ depth }],
+        })),
         // The four names are reserved: a domain named with one is ground, and refused.
         ...['expected', 'fixtures', 'requests', 'seeds'].map((reserved) => ({
             code: 'const x = 1;',

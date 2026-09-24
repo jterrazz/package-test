@@ -71,6 +71,11 @@ written straight into the suite folder is refused for the same reason one at a
 facet root is — the level that says what a file covers would be missing. This
 package's own `specs/lint/` is two levels deep for that reason.
 
+**A suite is a door because it holds tests.** A first-level folder that holds
+none — a `support/` of helpers and mocks — is no suite, no facet and not
+`shared/`, and C1 refuses each module in it, in every mode: a test helper lives
+beside the tests it serves, a fixture under `specs/shared/fixtures/`.
+
 ### The two names the estate shares
 
 Two suites carry names the whole estate shares, because two repositories

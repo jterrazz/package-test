@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/setup/runner.ts:3:39  jterrazz(a1-specification-file)
+          specs/cli/setup/runner.ts:3:39  jterrazz(a1-specification-file)

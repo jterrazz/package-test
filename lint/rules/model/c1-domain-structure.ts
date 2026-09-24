@@ -1,6 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 
 import { isGroundName, SHARED_GROUND } from '../../../src/model/chain/ground.js';
+import { declaresTests, isStrayFolder } from '../../first-level.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
@@ -117,6 +118,11 @@ function testsItsNeighbour(filename: string): boolean {
  * and the clause lets that one pair through. Nothing else: a test with no module
  * beside it, or a `*.specification.ts`, is a spec that wandered into the ground.
  *
+ * A first-level folder is a facet, `shared/`, or a repository suite — which
+ * holds tests of its own — in every mode. One holding no test (a `support/` of
+ * helpers and mocks) is none of the three: each module in it is refused, and
+ * the message names where it belongs.
+ *
  * Module tests under `src/` follow the neighbour rule (I2) and are out of scope
  * in every mode.
  */
@@ -131,6 +137,15 @@ export const c1DomainStructure: LintRule = {
                 }
                 const depth = (context.options[0] as Options | undefined)?.depth ?? DEFAULT_DEPTH;
                 const base = anchor.relative.at(-1) ?? '';
+                const module = !declaresTests(base) && !base.endsWith(SPECIFICATION_SUFFIX);
+                if (module && isStrayFolder(anchor.directory, anchor.relative)) {
+                    context.report({
+                        data: { folder: anchor.relative[0] ?? '' },
+                        messageId: 'strayFolder',
+                        node,
+                    });
+                    return;
+                }
                 // Segments strictly between `specs` and the file: [facet, domain, …].
                 const nesting = anchor.relative.length - 1;
 
@@ -220,6 +235,10 @@ export const c1DomainStructure: LintRule = {
             specNotAtFacetRoot: {
                 found: 'a `*.specification.ts` below its facet root',
                 fix: 'move it to `specs/<facet>/<name>.specification.ts`',
+            },
+            strayFolder: {
+                found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `shared/`, and holds no test of its own',
+                fix: 'move a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
             },
             testAtFacetRoot: {
                 found: 'a spec directly at its facet root',

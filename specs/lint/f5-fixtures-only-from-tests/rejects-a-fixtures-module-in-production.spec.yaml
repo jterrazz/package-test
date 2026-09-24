@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/widget/helper.ts:1:28  jterrazz(f5-fixtures-only-from-tests)
+          specs/api/widget/helper.ts:1:28  jterrazz(f5-fixtures-only-from-tests)
