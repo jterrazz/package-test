@@ -1,3 +1,4 @@
+import { readBody } from '../../model/http-files/http-file.js';
 import type {
     ServerPort,
     ServerRequestOptions,
@@ -77,7 +78,7 @@ export class HonoAdapter implements ServerPort {
 
         this.reached.push(template === undefined ? { method, path } : { method, path, template });
         const response = await this.app.request(path, init);
-        const responseBody = await response.json().catch(() => null);
+        const responseBody = readBody(await response.text()) ?? null;
 
         const responseHeaders: Record<string, string> = {};
         response.headers.forEach((value, key) => {

@@ -166,6 +166,7 @@ Location: /users/{{uuid#user}}
 - First line: `HTTP/1.1 <status>` — mandatory.
 - Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule C3).
 - Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](15-tokens.md).
+- The body is a JSON value when its text parses as JSON, and the text itself otherwise — an HTML page, an event stream, a plain message is compared as the text it is, its surrounding blank lines trimmed on both sides.
 
 ## The result
 
@@ -175,7 +176,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 | --------------------------- | ---------------- | ------------------------------------------------------------------------------------------------------- |
 | `result.status`             | `number`         | HTTP status code — assert with native `expect(...).toBe(...)`                                           |
 | `result.response`           | response subject | Full response (status + headers + body) — compared whole, `toMatch(<.http text>)` or `toMatch(file(…))` |
-| `result.response.body`      | parsed body      | Raw body for native assertions (`toEqual`, `toMatchObject`)                                             |
+| `result.response.body`      | body             | The JSON value, or the text of a body that is not JSON; `null` when empty — for native assertions       |
 | `result.table(name, opts?)` | table subject    | Database table — compared whole, `toMatch(<rows>)` / `toBeEmpty()` (async, `await expect`)              |
 
 `expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).

@@ -114,7 +114,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 73    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 140   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 142   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 169   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 40    |
 
@@ -282,7 +282,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability   | api | jobs | cli | integration | website | mobile | component | module |
 | ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.get()`     | 19  | —    | —   | —           | —       | —      | —         | —      |
+| `.get()`     | 21  | —    | —   | —           | —       | —      | —         | —      |
 | `.post()`    | 5   | —    | —   | —           | —       | —      | —         | —      |
 | `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
@@ -348,7 +348,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 20  | —    | —   | —           | —       | —      | —         | —      |
+| `.response`     | 22  | —    | —   | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —    | —   | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —    | 9   | 1           | —       | —      | —         | —      |

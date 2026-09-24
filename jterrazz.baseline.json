@@ -34,7 +34,7 @@
         "typescript/no-non-null-assertion": 68,
         "typescript/no-unnecessary-type-conversion": 2,
         "typescript/no-unsafe-argument": 9,
-        "typescript/no-unsafe-assignment": 27,
+        "typescript/no-unsafe-assignment": 26,
         "typescript/no-unsafe-call": 24,
         "typescript/no-unsafe-member-access": 89,
         "typescript/no-unsafe-return": 8,

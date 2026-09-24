@@ -1,10 +1,11 @@
 /**
- * HTTP response returned by a server port, with parsed JSON body.
+ * HTTP response returned by a server port, its body read as a response `.http`
+ * reads one.
  */
 export type ServerResponse = {
     /** HTTP status code. */
     status: number;
-    /** Parsed JSON response body, or null if parsing failed. */
+    /** The JSON value the body holds, or its text when it is not JSON (HTML, an event stream, plain text); null when the body is empty. */
     body: unknown;
     /** Response headers as a flat key-value map. */
     headers: Record<string, string>;

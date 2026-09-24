@@ -50,3 +50,34 @@ describe('the hono adapter — the requests it sent', () => {
         ]);
     });
 });
+
+describe('the hono adapter — the body it read', () => {
+    test('a JSON body is its value, any other body its text, an empty body nothing', async () => {
+        // Given - a route per kind of body an app answers with
+        const app = new Hono();
+        app.get('/json', (context) => context.json({ ok: true }));
+        app.get('/page', (context) => context.html('<h1>Hello</h1>\n'));
+        app.get('/feed', (context) =>
+            context.body('data: one\n\ndata: two\n\n', 200, {
+                'content-type': 'text/event-stream',
+            }),
+        );
+        app.get('/nothing', (context) => context.body(null, 204));
+        const adapter = new HonoAdapter(app);
+
+        // When - each is requested
+        const responses = await Promise.all(
+            ['/json', '/page', '/feed', '/nothing'].map(
+                async (path) => await adapter.request('GET', path),
+            ),
+        );
+
+        // Then - the value, the texts without their trailing blank lines, and null
+        expect(responses.map((response) => response.body)).toStrictEqual([
+            { ok: true },
+            '<h1>Hello</h1>',
+            'data: one\n\ndata: two',
+            null,
+        ]);
+    });
+});

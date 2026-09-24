@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 import { Hono } from 'hono';
+import { streamSSE } from 'hono/streaming';
 
 interface AppOptions {
     databaseUrl: string;
@@ -134,6 +135,17 @@ export function createApp(options: AppOptions) {
         const { label } = (await response.json()) as { label: string };
         return c.json({ label });
     });
+
+    // A page, not a document: what a response that is not JSON reads as.
+    app.get('/page', (c) => c.html('<main>\n    <h1>Welcome</h1>\n</main>\n'));
+
+    // A server-sent event stream, closed after its last event.
+    app.get('/ticks', (c) =>
+        streamSSE(c, async (stream) => {
+            await stream.writeSSE({ data: JSON.stringify({ tick: 1 }) });
+            await stream.writeSSE({ data: 'over', event: 'done' });
+        }),
+    );
 
     app.get('/events', async (c) => {
         const events = await analyticsQuery('SELECT type, payload FROM "events" ORDER BY id');

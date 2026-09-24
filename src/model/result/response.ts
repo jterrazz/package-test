@@ -6,11 +6,11 @@ import type { ServerResponse } from '../ports/server.port.js';
  *
  * Assertions go through `expect()`:
  * `expect(result.response).toMatch('created.http')` compares status,
- * a subset of headers, and the JSON body against `expected/<name>` —
+ * a subset of headers, and the body — a JSON value or a text — against `expected/<name>` —
  * with `{{placeholder}}` support in all three.
  */
 export class ResponseAccessor {
-    /** The parsed JSON response body (null when parsing failed). */
+    /** The JSON value the body holds, or its text when it is not JSON; null when the body is empty. */
     readonly body: unknown;
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;

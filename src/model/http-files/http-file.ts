@@ -99,6 +99,24 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
     };
 }
 
+/**
+ * The value a body's text holds, read the way a response `.http` reads its
+ * body section: the surrounding whitespace dropped, then the JSON value the
+ * text parses to — or the text itself when it is not JSON (an HTML page, an
+ * event stream, a plain message). A blank text holds no body: `undefined`.
+ */
+export function readBody(text: string): unknown {
+    const body = text.trim();
+    if (body.length === 0) {
+        return undefined;
+    }
+    try {
+        return JSON.parse(body);
+    } catch {
+        return body;
+    }
+}
+
 /** Parse a response `.http` file. First line must be `HTTP/1.1 <status>`. */
 export function parseResponseFile(content: string, fileName: string): ParsedResponseFile {
     const { body, headerLines, startLine } = splitSections(content);
@@ -111,17 +129,8 @@ export function parseResponseFile(content: string, fileName: string): ParsedResp
         );
     }
 
-    let parsedBody: unknown;
-    if (body.length > 0) {
-        try {
-            parsedBody = JSON.parse(body);
-        } catch {
-            parsedBody = body;
-        }
-    }
-
     return {
-        body: parsedBody,
+        body: readBody(body),
         hasBody: body.length > 0,
         headers: parseHeaders(headerLines, fileName),
         status,
