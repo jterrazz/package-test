@@ -1,5 +1,8 @@
-import { describe, expect, test } from 'vitest';
+import { rmSync } from 'node:fs';
+import { dirname, join, sep } from 'node:path';
+import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { EVIDENCE_DIR } from '../../model/artifacts/artifacts.js';
 import { createSharedBrowser, PlaywrightAdapter } from './playwright.adapter.js';
 
 /**
@@ -108,7 +111,8 @@ function isBrowser(value: object): value is Browser {
  * A stub chromium for the adapter: each context it hands out records whether
  * it was closed, and its page either answers a plain visit or, when `hold` is
  * set, never finishes loading — a visit still open. `loading(n)` resolves once
- * n held visits have started loading.
+ * n held visits have started loading; `shots` holds the path of every
+ * screenshot the page was asked for, none written.
  */
 type StubContext = { closed: boolean };
 
@@ -117,11 +121,13 @@ function stubChromium(hold = false): {
     launch: () => Promise<Browser>;
     launches: () => number;
     loading: (count: number) => Promise<void>;
+    shots: string[];
 } {
     const contexts: StubContext[] = [];
     const state = { closed: false, contexts };
     const never = Promise.withResolvers<never>().promise;
     const waiters: { count: number; resolve: () => void }[] = [];
+    const shots: string[] = [];
     let launches = 0;
     let loads = 0;
     const goto = async (): Promise<null> => {
@@ -147,6 +153,10 @@ function stubChromium(hold = false): {
         goto,
         locator: () => ({ ariaSnapshot: async () => await Promise.resolve('') }),
         on: () => {},
+        screenshot: async ({ path }: { path: string }) => {
+            shots.push(path);
+            await Promise.resolve();
+        },
         url: () => 'http://site.test/',
     };
     const browser = {
@@ -185,7 +195,7 @@ function stubChromium(hold = false): {
         }
         await waiter.promise;
     };
-    return { browser: state, launch, launches: () => launches, loading };
+    return { browser: state, launch, launches: () => launches, loading, shots };
 }
 
 const VISIT = { baseUrl: 'http://site.test', external: 'allow' } as const;
@@ -250,5 +260,32 @@ describe('the PlaywrightAdapter — the runners of a worker share its browser', 
 
         // Then - the ended visit's context was no longer held
         expect(context.closed).toBe(false);
+    });
+});
+
+/** A scenario that fails before it touches the page. */
+async function failingScenario(): Promise<void> {
+    await Promise.reject(new Error('the button is gone'));
+}
+
+describe('the PlaywrightAdapter — a failed scenario leaves its evidence', () => {
+    test("screenshots into the project's evidence folder, which outlives the run's temp root", async () => {
+        // Given - a runner whose scenario fails, and the evidence folder removed after the test
+        const chromium = stubChromium();
+        const adapter = new PlaywrightAdapter({ launch: chromium.launch });
+        onTestFinished(() => {
+            for (const shot of chromium.shots) {
+                rmSync(dirname(shot), { force: true, recursive: true });
+            }
+        });
+
+        // When - the visit runs it
+        const visit = adapter.open('http://site.test/', { ...VISIT, scenario: failingScenario });
+
+        // Then - the error names the one screenshot, taken under the evidence folder
+        await expect(visit).rejects.toThrow(/the button is gone\nEvidence: .*failure\.png$/u);
+        const evidence = join(process.cwd(), EVIDENCE_DIR);
+        expect(chromium.shots).toHaveLength(1);
+        expect(chromium.shots[0]?.startsWith(`${evidence}${sep}website-`)).toBe(true);
     });
 });
