@@ -1,5 +1,27 @@
 # Vision 17 — the plan the three `vision/17` branches implement
 
+## Overnight, 2026-09-24 — read this first
+
+**Where things stand.** Three local `vision/17` branches, every gate green: package-test (17.0.0, 2362 tests), package-typescript (11.0.0, 400 tests), signews-api on both (429 tests, `make check` 32 s). Nothing pushed or released.
+
+**What landed overnight** (iterations 20–28, details below in their sections):
+
+- Production never imports test code: every target × form refused by F2 through one production reader, proven case by case; production = every non-test module outside `specs/` and ground; a reasoned `test.production.allow` in `jterrazz.config.ts` for a legitimate case (spwn's gate runs playwright).
+- Route templates in tests: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`; route coverage and the subject rules read the template; an ambiguous literal path is reported, never guessed.
+- Size and complexity: `max-lines` 300 and `max-lines-per-function` 60 (off in test files), `complexity` 12 `modified`; a test body at most 60 lines (C34); every tsgolint rule decided by name; empty directories reported and removed by `make fix`.
+- Performance: package-test's own lint 8.4 s → 2.5 s (a file's role computed once, cached reach walks, rules skipping what they do not judge); `typescript check` runs oxlint once and renders the human log from its JSON; a project without a config is handed the default one (no parent-folder walk).
+- Upgrades: oxlint 1.85, tsgolint 7.0.2002, oxfmt 0.70, knip 6.38, tsdown 0.23, better-sqlite3 13 (prebuilt binding), perfectionist, dependency-cruiser, prettier, @types/*; research in the session notes; not taken: oxfmt for Astro (unsupported), tsgo declarations (output differs), the React Compiler transform (experimental), Rust replacements for the Markdown/secret passes (immature).
+- Defects fixed along the way: the `toMatch(file())` false green on a string; table order; route tables; C4; seeds shared by nested routes; `make fix` order (checker first, formatter last); hooks copied by the split; the `prefer-spread` / `no-misused-spread` fix loop; wrong code frame after an in-place update.
+
+**Waiting for you:**
+
+1. ADR-009 (every type-aware rule decided, nursery included) and ADR-010 (a spec file's size has one judge) in package-typescript, `Proposed`.
+2. Fix mode's nested configs: the unsafe-fixer wrapper (passed with `-c`) turns nested configs off during `fix`. Re-declare them in the wrapper, or rely on oxlint's own safe/dangerous fix split?
+3. C28 vs C34: an unshared expectation up to 150 lines stays inline, but a test body is capped at 60 — nine signews tests are exactly this. Proposal: C34 does not count the lines of a `toMatch(<value>)` argument (the claim may be long, the gestures may not).
+4. The route template form is longer (8 chart tests repeat it): accept, or let `with({ params })`… carry a file's template?
+
+**Decided overnight by the orchestrator (reversible):** every call listed in iterations 21–28 below; the route template (your default was asked, none came).
+
 A working document for the owner and the orchestrator to iterate on. It lives
 on the `vision/17` branch of package-test only, and is deleted once its
 content has moved into the chapters. Nothing here is published: the branches
@@ -2154,13 +2176,13 @@ playwright: 'the gate drives a browser in production' } } }` — and F2
   passed, 1 skipped).
 - **Timings.** Toolchain reinstalled at package-typescript's HEAD
   (`npm ci`, clone at `f9f2d92`) before measuring. `oxlint --type-aware
-  --debug=timings` produced no visible timing output in this environment
+--debug=timings` produced no visible timing output in this environment
   — text, JSON (`--format=json`) and even a clean single-file run all
   print nothing beyond the diagnostics themselves; `--help` lists the
   flag, and the JS-plugin side does collect per-rule timings internally
   (`node_modules/oxlint/dist/lint.js`'s `collectTimings`), but nothing
   surfaces it here. Measured wall time instead (`/usr/bin/time -p
-  npx oxlint --type-aware --format=json`, two runs each): before
+npx oxlint --type-aware --format=json`, two runs each): before
   (package-typescript HEAD, this branch's tree at `f619e951`) 3.38 s /
   2.80 s; after (123–125 together) 2.52 s / 2.51 s. No F2/A1/JS-total
   breakdown could be measured this way.
