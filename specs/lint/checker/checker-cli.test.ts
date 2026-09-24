@@ -206,6 +206,21 @@ describe('lint — checker CLI contract', () => {
         `);
     });
 
+    test('a checker that ran oxlint itself prints the plugin diagnostics it saw', async () => {
+        // Given - no report handed in, and a project oxlint reporting one diagnostic of the plugin
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-oxlint-run/'))
+            .exec('.');
+
+        // Then - the checker is the one printer of the diagnostic, in full, and counts it nowhere else
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
+            jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
+            Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
+        `);
+    });
+
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
     test('a report path that names no file fails loudly instead of counting nothing', async () => {

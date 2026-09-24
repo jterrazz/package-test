@@ -91,8 +91,9 @@ import { codeOf } from './rule-code.js';
  * project that keeps no section prints `jterrazz.baseline.json › test: nothing
  * held`, and a run that defers names the judging file relative to the project. A
  * failing one prints every finding it counted before its reasons, so a verdict
- * and its evidence are one log — and the plugin's diagnostics as one count,
- * since oxlint's own pass prints each of them. `--verbose`
+ * and its evidence are one log — and the plugin's diagnostics as one count
+ * when they come from `--oxlint-report`, whose pass prints each of them, or
+ * each in full when the checker ran oxlint itself and is their one printer. `--verbose`
  * adds to the green line where the run stood and every pass that ran.
  * `baseline [root]` writes the `test` section from the current counts, and
  * leaves every other section of the file as it stands.
@@ -180,11 +181,28 @@ function codeOfFinding(violation: TokenViolation): string {
     return `${CHECKER_NAMESPACE}(${codeOf(violation.rule)})`;
 }
 
+/** A plugin diagnostic on the checker's own report line, as oxlint's pass would print it. */
+function formatDiagnostic({
+    code,
+    column,
+    file,
+    line,
+    message,
+    severity,
+}: PluginDiagnostic): string {
+    return `${file}:${line}:${column}: ${severity === 'error' ? 'error' : 'warning'} ${code}: ${message}`;
+}
+
 /**
- * The one line that stands for the plugin's diagnostics a run judges: oxlint's
- * own pass prints each of them, and a second print is the same finding twice.
+ * The lines that stand for the plugin's diagnostics a run judges. Read from a
+ * report `--oxlint-report` hands in, they are one count: the pass that wrote
+ * the report prints each of them. Read from an oxlint the checker ran itself,
+ * no other pass saw them, and each is printed in full.
  */
-function pluginCount(plugin: PluginDiagnostic[]): string[] {
+function pluginLines(plugin: PluginDiagnostic[]): string[] {
+    if (oxlintReport === undefined) {
+        return plugin.map(formatDiagnostic);
+    }
     return plugin.length > 0
         ? [
               `conventions checker: ${plugin.length} plugin diagnostic(s) judged, printed by oxlint's own pass`,
@@ -194,8 +212,7 @@ function pluginCount(plugin: PluginDiagnostic[]): string[] {
 
 /**
  * Print the findings: one JSON array of the checker's own, or the lines a
- * human reads — the count of the plugin's diagnostics after them, when the run
- * judges any.
+ * human reads — the plugin's diagnostics after them, when the run judges any.
  */
 function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] = []): void {
     if (json) {
@@ -212,7 +229,7 @@ function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] 
         );
         return;
     }
-    const lines = [...violations.map(formatViolation), ...pluginCount(plugin)];
+    const lines = [...violations.map(formatViolation), ...pluginLines(plugin)];
     if (lines.length > 0) {
         const failing =
             violations.some(({ severity }) => severity === 'error') ||
@@ -291,8 +308,8 @@ type RatchetRun = {
  * The ratchet run's verdict: the project's findings and its plugin diagnostics,
  * counted against `jterrazz.baseline.json › test` at `root` — or, with no section, its own
  * findings and the plugin diagnostics judged one by one. Either way it prints
- * its own findings and the count of the plugin's, so a verdict and its
- * evidence are one log beside oxlint's.
+ * its own findings and the plugin's as {@link pluginLines} prints them, so a
+ * verdict and its evidence are one log beside oxlint's.
  */
 function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): never {
     if (keepsBaseline(root)) {
