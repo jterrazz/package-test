@@ -6,19 +6,25 @@ import { describe, expect, test } from 'vitest';
 
 import { MAKE_TARGETS, makefileAt, makeTargets } from './makefile.js';
 
-/** The one target beside the six: the mobile specs on a real simulator, which no flow speaks. */
+/** The mobile specs on a real simulator — a target beside the six, which no flow speaks. */
 const MOBILE_TARGET = 'test-mobile';
+
+/**
+ * The targets beside the six: the simulator run, the local run of what changed,
+ * and the merge of a sharded run's reports.
+ */
+const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge'];
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
 describe('the Makefile — the six targets a repository answers', () => {
-    test('this repository declares the six, and test-mobile beside them, each phony', () => {
+    test('this repository declares the six, and the three beside them, each phony', () => {
         // Given - this repository's Makefile
         const targets = makefileAt(ROOT);
-        const verbs = [...MAKE_TARGETS, MOBILE_TARGET].toSorted();
+        const verbs = [...MAKE_TARGETS, ...BESIDE_TARGETS].toSorted();
 
-        // Then - the verbs are the six plus the simulator run; the one other rule is the install stamp, a file
+        // Then - the verbs are the six plus the three no flow speaks; the one other rule is the install stamp, a file
         expect(targets.get('.PHONY')?.prerequisites.toSorted()).toStrictEqual(verbs);
         expect(
             [...targets.keys()]
@@ -27,7 +33,7 @@ describe('the Makefile — the six targets a repository answers', () => {
         ).toStrictEqual(verbs);
     });
 
-    test('`check` never reaches the simulator run', () => {
+    test('`check` never reaches a target beside the six', () => {
         // Given - the targets `check` runs, and what they run in turn
         const targets = makefileAt(ROOT);
         const reached = new Set<string>();
@@ -48,8 +54,8 @@ describe('the Makefile — the six targets a repository answers', () => {
         };
         visit('check');
 
-        // Then - no gate of CI's waits on a simulator
-        expect(reached.has(MOBILE_TARGET)).toBe(false);
+        // Then - no gate of CI's waits on a simulator, a partial run or a merge
+        expect(BESIDE_TARGETS.filter((name) => reached.has(name))).toStrictEqual([]);
         expect(reached.has('test')).toBe(true);
     });
 

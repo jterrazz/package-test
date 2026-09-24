@@ -9,6 +9,7 @@ import type {
 
 import {
     ATTACHMENTS_DIR,
+    BLOB_DIR,
     COVERAGE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
@@ -190,6 +191,33 @@ const COVERAGE = {
     reportsDirectory: COVERAGE_DIR,
 };
 
+/** The shard a run was started for, `<index>/<count>`, read off its arguments. */
+function shardOf(argv: readonly string[]): string | undefined {
+    for (const [index, argument] of argv.entries()) {
+        if (argument.startsWith('--shard=')) {
+            return argument.slice('--shard='.length);
+        }
+        if (argument === '--shard') {
+            return argv[index + 1];
+        }
+    }
+    return undefined;
+}
+
+/**
+ * What each file-writing reporter writes, the blob named for the run's shard:
+ * the shards of one run write side by side under one folder, which is what
+ * `vitest --merge-reports` reads back as one run.
+ *
+ * @internal
+ */
+export function reporterOutputFiles(argv: readonly string[]): Record<string, string> {
+    const shard = shardOf(argv);
+    return shard === undefined
+        ? REPORTER_OUTPUT_FILES
+        : { ...REPORTER_OUTPUT_FILES, blob: `${BLOB_DIR}/blob-${shard.replace('/', '-')}.json` };
+}
+
 /** Defaults for the root config — the project ones, plus what only a root carries. */
 function rootDefaults(): ViteUserConfig {
     return {
@@ -201,7 +229,7 @@ function rootDefaults(): ViteUserConfig {
             globalSetup: [inPlaceSetup(), tempRootSetup()],
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,
-            outputFile: REPORTER_OUTPUT_FILES,
+            outputFile: reporterOutputFiles(process.argv),
             testTimeout: TEST_TIMEOUT_MS,
         },
     };

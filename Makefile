@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test check test-mobile
+.PHONY: install build lint fix test test-merge test-changed check test-mobile
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -26,9 +26,28 @@ fix: build
 # Coverage because `coverage:check` reads the report of the LAST `--coverage`
 # Run — a plain `npm test` would leave it judging an older run, or nothing at
 # All on a fresh clone, where `.artifacts/` does not exist yet.
+#
+# `SHARD=<index>/<count>` runs one shard of that suite, for a CI job that
+# Splits the run: its blob report lands under `.artifacts/vitest/blob/`, and
+# The floor is judged once, on the merged report — `make test-merge`, run
+# After every shard, never on a shard's partial coverage.
 test: node_modules/.install
+ifdef SHARD
+	npm test -- --coverage --shard=$(SHARD) --reporter=default --reporter=blob
+else
 	npm test -- --coverage
 	npm run coverage:check
+endif
+
+# The shards' blob reports read back as one run, and the floor judged on it.
+test-merge: node_modules/.install
+	npx vitest --merge-reports .artifacts/vitest/blob --coverage
+	npm run coverage:check
+
+# The local loop: only the tests the uncommitted changes reach. Never a
+# Verdict — `check` runs the whole suite.
+test-changed: node_modules/.install
+	npm test -- --changed
 
 # The whole verdict, in the order a failure is cheapest to read: the build the
 # lint and the specs both need, then the linters, then the suite and the floor

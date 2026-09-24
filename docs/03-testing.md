@@ -513,6 +513,8 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 **`make test` carries the floor.** It runs the suite WITH coverage and then `npm run coverage:check`, so the ratchet is judged on every push rather than trusted to whoever remembered to type `make check` — a gate CI never runs is a courtesy, not a gate. `make check` is still the whole verdict locally: build, lint, then that same target.
 
+**A run can be split.** `make test SHARD=<index>/<count>` runs one shard of the suite with coverage, and writes its blob report to `.artifacts/vitest/blob/blob-<index>-<count>.json` — the preset names the blob for its shard, so the shards of one run land side by side. A shard judges no floor, since its coverage is a part of the tree. `make test-merge`, run once every shard's blob is in that folder, reads them back as one run with coverage and judges the floor on it. The shared workflow does not split the run yet: it has no shard input.
+
 ## Pitfalls
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.

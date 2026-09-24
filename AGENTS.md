@@ -41,6 +41,8 @@ make fix                          # the fixers: the checker's --fix, then typesc
 make test                         # every project, with coverage — needs Docker and chromium
 make check                        # the whole verdict: build, lint, test
 make test-mobile                  # the mobile specs on a real iOS simulator — never in check, needs Xcode
+make test-changed                 # only the tests the uncommitted changes reach — the loop, never a verdict
+make test SHARD=1/3               # one shard, with its blob report; make test-merge judges the floor on them all
 npx vitest --run --project unit   # the loop, no infrastructure
 npm run docs                      # regenerate the generated tables and the schema
 ```

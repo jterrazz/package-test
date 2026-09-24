@@ -6,7 +6,7 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../model/artifacts/artifacts.js';
-import { defineSpecConfig, inPlaceSetup, tempRootSetup } from './preset.js';
+import { defineSpecConfig, inPlaceSetup, reporterOutputFiles, tempRootSetup } from './preset.js';
 import { unit } from './projects.js';
 
 describe('defineSpecConfig() — artefact paths', () => {
@@ -35,6 +35,20 @@ describe('defineSpecConfig() — artefact paths', () => {
                 path.startsWith(VITEST_ARTIFACTS_DIR),
             ),
         ).toBe(true);
+    });
+
+    test('names the blob of a shard for its shard, so the shards of one run land side by side', () => {
+        // Given - the arguments of a whole run, and of two shards spelled both ways
+        const whole = reporterOutputFiles(['node', 'vitest', 'run']);
+        const first = reporterOutputFiles(['node', 'vitest', 'run', '--shard=1/3']);
+        const second = reporterOutputFiles(['node', 'vitest', 'run', '--shard', '2/3']);
+
+        // Then - one blob per shard in the one blob folder, and the run's own when there is none
+        expect(whole.blob).toBe(`${VITEST_ARTIFACTS_DIR}/blob/blob.json`);
+        expect([first.blob, second.blob]).toStrictEqual([
+            `${VITEST_ARTIFACTS_DIR}/blob/blob-1-3.json`,
+            `${VITEST_ARTIFACTS_DIR}/blob/blob-2-3.json`,
+        ]);
     });
 
     test('gives a project the attachments directory too', () => {

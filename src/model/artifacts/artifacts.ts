@@ -62,8 +62,14 @@ export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;
  * four at once rather than leaving a repository to discover them one CI run at
  * a time.
  */
+/**
+ * Where the blob reporter writes: one file per run, or per shard of a run,
+ * so the shards of one run land side by side for `--merge-reports`.
+ */
+export const BLOB_DIR = `${VITEST_ARTIFACTS_DIR}/blob`;
+
 export const REPORTER_OUTPUT_FILES: Record<string, string> = {
-    blob: `${VITEST_ARTIFACTS_DIR}/blob`,
+    blob: `${BLOB_DIR}/blob.json`,
     html: `${VITEST_ARTIFACTS_DIR}/html/index.html`,
     json: `${VITEST_ARTIFACTS_DIR}/json/output.json`,
     junit: `${VITEST_ARTIFACTS_DIR}/junit/output.xml`,
