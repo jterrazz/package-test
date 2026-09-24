@@ -28,9 +28,11 @@ describe('mobile-session', () => {
             .env({ DOUBLE_SETUP })
             .exec('run --configLoader runner');
 
-        // Then - both files passed, over the one session the run's own server opened and ended
+        // Then - both files passed, over the one session the run's own server opened on the booted simulator, then stopped
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('Tests  2 passed');
         expect(result.stdout.text).toContain('appium double: 1 session(s) created, 1 deleted');
+        expect(result.file('app/udid').content).toBe('SIM-17\n');
+        expect(result.file('app/stopped').exists).toBe(true);
     });
 });
