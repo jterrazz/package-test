@@ -12,6 +12,8 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, Fix, LintRule, RuleContext, RuleFixer, Visitor } from '../../oxlint-api.js';
 import { roleOf } from '../../role.js';
+import { subjectFolder, subjectsOf } from '../../subject.js';
+import type { Subject } from '../../subject.js';
 
 /** The settings a facet's `with()` takes — what a whole file may share. */
 const SETTINGS: Record<string, readonly string[]> = {
@@ -118,15 +120,54 @@ function sharedSettings(chains: Chain[]): Setting[] {
     );
 }
 
-/** The name the view takes: the file's aspect in camelCase when it is free, else `<handle>InFile`. */
-function viewName(handle: string, text: string, filename: string): string {
-    const aspect = (filename.split('/').at(-1) ?? '').replace(/\.spec\.ts$/u, '');
-    const camel = aspect.replaceAll(/-(?<letter>[a-z0-9])/gu, (_, letter: string) =>
+/** The actions a route's folder ends on — never the name of what it acts on. */
+const ACTIONS = new Set(['create', 'delete', 'get', 'list', 'update']);
+
+/** A kebab or path word in camelCase: `report-refresh` → `reportRefresh`. */
+function camelOf(word: string): string {
+    return word.replaceAll(/[-_.](?<letter>[a-z0-9])/gu, (_, letter: string) =>
         letter.toUpperCase(),
     );
+}
+
+/**
+ * The word a subject is called by: the resource a route's folder ends on
+ * (`events/list/` → `events`, `indicators/chart/` → `chart`), the job, the
+ * command's first word — `undefined` for a subject with no standard name.
+ */
+function subjectWord(subject: Subject): string | undefined {
+    if (subject.facet === 'jobs') {
+        return subject.job;
+    }
+    if (subject.facet === 'cli') {
+        return subject.command[0];
+    }
+    const folder = subjectFolder(subject)?.split('/') ?? [];
+    return folder.findLast((segment) => !ACTIONS.has(segment));
+}
+
+/**
+ * The name the view takes: the file's subject — so every file of one folder
+ * names its view alike — `<subject>View` when the file already holds that
+ * name, and `<handle>InFile` for a file whose chains reach no named subject.
+ */
+function viewName(handle: string, text: string, program: AstNode): string {
+    const taken = new Set<string>();
+    walk(program, (node) => {
+        const name = identifierName(node);
+        if (name !== undefined) {
+            taken.add(name);
+        }
+    });
     const free = (name: string): boolean =>
-        /^[a-z][A-Za-z0-9]*$/u.test(name) && !new RegExp(String.raw`\b${name}\b`, 'u').test(text);
-    return free(camel) && camel !== handle ? camel : `${handle}InFile`;
+        /^[a-z][A-Za-z0-9]*$/u.test(name) && name !== handle && !taken.has(name);
+    const reached = subjectsOf(text).find(({ subject }) => subject.facet === handle)?.subject;
+    const word = reached === undefined ? undefined : subjectWord(reached);
+    if (word === undefined) {
+        return `${handle}InFile`;
+    }
+    const name = camelOf(word);
+    return free(name) ? name : `${name}View`;
 }
 
 /** The edits that declare the view once and start every chain from it, its shared settings dropped. */
@@ -193,7 +234,7 @@ export const b16wFileContext: LintRule = {
                     if (first === undefined) {
                         continue;
                     }
-                    const view = viewName(handle, text, context.filename);
+                    const view = viewName(handle, text, program);
                     context.report({
                         data: {
                             context: shared

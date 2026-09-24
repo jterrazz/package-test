@@ -179,7 +179,7 @@ export const RULE_DOCS = {
             "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → warning at the first chain. A file of one chain is not judged; a seed and a contract are a test’s Given, never a setting.",
         facet: 'model',
         family: 'B',
-        fix: 'Declare the view once after the imports, `const <view> = <handle>.with({ … })`, and start every chain from it — `make fix` writes it and drops the setting from each chain.',
+        fix: 'Declare the view once after the imports, `const <view> = <handle>.with({ … })`, and start every chain from it — `make fix` writes it, named for the file’s subject so every file of one folder names it alike (`events/list/` → `events`, a job → its name, a command → its first word; `<subject>View` when the file already holds the name, `<handle>InFile` for no named subject), and drops the setting from each chain.',
         id: 'B16',
         rationale:
             'A setting repeated on every chain reads as a choice each test made; stated once, it reads as what it is — the condition of the whole file — and the next test cannot forget it.',

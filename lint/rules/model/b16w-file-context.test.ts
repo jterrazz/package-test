@@ -18,9 +18,9 @@ ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
             output: [
                 IMPORT,
                 '',
-                "const pagination = api.with({ clock: '2026-01-01T00:00:00Z' });",
-                "test('a', async () => { await pagination.get('/events'); });",
-                "test('b', async () => { await pagination.seed(file('./seeds/x.sql')).get('/events?page=2'); });",
+                "const events = api.with({ clock: '2026-01-01T00:00:00Z' });",
+                "test('a', async () => { await events.get('/events'); });",
+                "test('b', async () => { await events.seed(file('./seeds/x.sql')).get('/events?page=2'); });",
             ].join('\n'),
         },
         // The message spells the view it would write.
@@ -33,16 +33,52 @@ ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
             errors: [
                 {
                     message:
-                        /fix: state it once for the file — `const pagination = api\.with\(\{ headers: \{ 'accept-language': 'fr' \} \}\)`/u,
+                        /fix: state it once for the file — `const events = api\.with\(\{ headers: \{ 'accept-language': 'fr' \} \}\)`/u,
                 },
             ],
             filename: SPEC,
             output: [
                 IMPORT,
                 '',
-                "const pagination = api.with({ headers: { 'accept-language': 'fr' } });",
-                "test('a', async () => { await pagination.get('/events'); });",
-                "test('b', async () => { await pagination.get('/events'); });",
+                "const events = api.with({ headers: { 'accept-language': 'fr' } });",
+                "test('a', async () => { await events.get('/events'); });",
+                "test('b', async () => { await events.get('/events'); });",
+            ].join('\n'),
+        },
+        // The view is named for the subject, whatever the file's aspect: the job it triggers.
+        {
+            code: [
+                "import { jobs } from '../jobs.specification.js';",
+                "test('a', async () => { await jobs.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
+                "test('b', async () => { await jobs.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
+            ].join('\n'),
+            errors: [{ messageId: 'repeated' }],
+            filename: '/repo/specs/jobs/report-refresh/stale-reports.spec.ts',
+            output: [
+                "import { jobs } from '../jobs.specification.js';",
+                '',
+                "const reportRefresh = jobs.with({ clock: '2026-01-01T00:00:00Z' });",
+                "test('a', async () => { await reportRefresh.trigger('report-refresh'); });",
+                "test('b', async () => { await reportRefresh.trigger('report-refresh'); });",
+            ].join('\n'),
+        },
+        // A route under an item is named for the resource its folder ends on; a name the file already holds takes `View`.
+        {
+            code: [
+                IMPORT,
+                'const chart = { symbol: "btc" };',
+                "test('a', async () => { await api.clock('x').get('/indicators/:symbol/chart', { params: chart }); });",
+                "test('b', async () => { await api.clock('x').get('/indicators/:symbol/chart', { params: chart }); });",
+            ].join('\n'),
+            errors: [{ messageId: 'repeated' }],
+            filename: '/repo/specs/api/indicators/chart/range.spec.ts',
+            output: [
+                IMPORT,
+                '',
+                "const chartView = api.with({ clock: 'x' });",
+                'const chart = { symbol: "btc" };',
+                "test('a', async () => { await chartView.get('/indicators/:symbol/chart', { params: chart }); });",
+                "test('b', async () => { await chartView.get('/indicators/:symbol/chart', { params: chart }); });",
             ].join('\n'),
         },
     ],
