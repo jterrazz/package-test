@@ -11,7 +11,12 @@ import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
-import { applyOwnFixes, OWN_FIXES_WRAPPER, ownFixesConfig } from './ratchet-own-fixes.js';
+import {
+    applyOwnFixes,
+    nestedConfigDirectories,
+    OWN_FIXES_WRAPPER,
+    ownFixesConfig,
+} from './ratchet-own-fixes.js';
 
 /** A project root holding `files`, each written as given. */
 function projectWith(files: Record<string, string>): string {
@@ -71,6 +76,26 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
         });
     });
 
+    test('the wrapper carries no `extends`, so an extended rulebook arms nothing', async () => {
+        // Given - a base config extending another that arms a foreign rule
+        const root = projectWith({
+            'base.json': '{ "rules": { "no-debugger": "error" } }\n',
+            'oxlint.config.mjs': [
+                'export default {',
+                "    extends: ['./base.json'],",
+                "    rules: { 'jterrazz/b16w-file-context': 'warn' },",
+                '};',
+            ].join('\n'),
+        });
+        const wrapper = join(root, 'wrapper.mjs');
+        writeFileSync(wrapper, ownFixesConfig(join(root, 'oxlint.config.mjs')));
+
+        // Then - the extended config is not carried
+        const module: unknown = await import(pathToFileURL(wrapper).href);
+        expect(module).not.toHaveProperty('default.extends');
+        expect(module).toHaveProperty('default.rules', { 'jterrazz/b16w-file-context': 'warn' });
+    });
+
     test('a JSON config is imported as JSON', () => {
         // Given - a root config written as `.oxlintrc.json`
         // Then - the import carries its type attribute
@@ -95,6 +120,29 @@ describe('the checker’s own fix pass — the plugin’s fixers, and no one els
             ownFixesConfig(join(root, 'oxlint.config.ts')),
         );
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
+    });
+
+    test('every subtree under a nested oxlint config is ignored by the pass', () => {
+        // Given - a nested config at sub/, another inside it, one under a skipped folder, one oxlint never nests
+        const root = projectWith({
+            'loose/oxlint.config.mjs': 'export default {};\n',
+            'node_modules/pkg/oxlint.config.ts': 'export default {};\n',
+            'oxlint.config.ts': 'export default {};\n',
+            'plain/index.ts': 'export {};\n',
+            'specs/cli/fixtures/project/.oxlintrc.json': '{}\n',
+            'sub/deeper/.oxlintrc.json': '{}\n',
+            'sub/oxlint.config.ts': 'export default {};\n',
+        });
+        stubOxlint(root, 0);
+
+        // When - the pass runs
+        applyOwnFixes(root);
+
+        // Then - the outermost nested directory alone is ignored
+        expect(nestedConfigDirectories(root)).toStrictEqual(['sub']);
+        expect(readFileSync(join(root, 'args.txt'), 'utf8')).toBe(
+            `--fix -c ${OWN_FIXES_WRAPPER} --ignore-pattern ${OWN_FIXES_WRAPPER} --ignore-pattern sub/**\n`,
+        );
     });
 
     test('an oxlint that could not run is a failure naming the binary, and leaves no wrapper', () => {
