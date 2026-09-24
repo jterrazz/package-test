@@ -2311,3 +2311,77 @@ The four questions of the overnight summary, and 129 and 130 raised above.
   awaited-later check forced true (the never-awaited case, 1 of 15).
 - **Gates.** `make fix` then `make check` exit 0 after each commit
   (2372 tests passed, 1 skipped, on the last).
+
+## Iteration 30 — the shared pool has a name (owner, 2026-09-24)
+
+The specs root holds only its facets and ONE more folder, `specs/shared/`,
+which holds the shared ground: `specs/shared/{fixtures,seeds,requests,expected}/`.
+A path leaves its leaf only to reach `specs/shared/<role>/` (C15); a pool
+entry one leaf uses moves beside it (C14, now C28's level half); identical
+copies across leaves move to `specs/shared/<role>/` (C27); C24 judges the
+role folder under `shared/`. `shared` is a reserved name under `specs/` (C1:
+no facet or domain named `shared`). The mover and the fixers move
+`specs/<role>/` → `specs/shared/<role>/` and rewrite every path; leaves keep
+their ground beside them (`./seeds/`…). The toolchain allows the name
+`shared` (package-typescript `1bbb661`, installed here with `npm ci`).
+
+### What the package-test branch did (iteration 30)
+
+- **The drift line** (`611109f9`). `typescript check` printed
+  `jterrazz.baseline.json › test 78` where the checker held 76: the drift
+  block sums the section as recorded, the held line what the run found.
+  `jterrazz/c34-test-body-size` stood at 3 against the 2 found since C34
+  stopped counting a `toMatch(<value>)` argument, and was re-recorded;
+  `routes/unreached` (1) is the run's key, which the checker never counts,
+  so the two lines now read 77 and 76 by design.
+- **A path after a template hole** (`17f73568`). The fixers' literal scan
+  lost its place at a template holding `${…}`, and the paths written after
+  it were never rewritten; it now reads with `literalSpans`. Red: a C27 fix
+  over such a spec (exit 1, C8 at the path the move left behind).
+- **The shared ground** (`577a150e`). `SHARED_GROUND` in
+  `src/model/chain/ground.ts`; C9, C15, C27, C28 and C29 read and write
+  `specs/shared/<role>/`, and the walks prune `specs/shared/` whole. A role
+  folder at the specs root is refused as a folder (C15), and `--fix` moves
+  its entries under `shared/` and rewrites every source literal and document
+  key of the specs tree that named one. This package's own tree moved with
+  that fixer. Red on each of: the pool read at the root, the fixer off, the
+  folder finding off, C15's pools at the root, C27's target at the root,
+  C29's lift at the root, `shared/` kept when emptied, `shared/` not pruned,
+  C24's old message.
+- **The mover** (`1d6ce990`). A 16 `<specs>/_fixtures/` goes straight to
+  `<specs>/shared/fixtures/`, `$FIXTURES/` climbs there, and C13 names that
+  rename. Red: the pool renamed in place; `$FIXTURES/` climbing to the root;
+  the old rename named.
+- **C1 reserves `shared`** (`7933db45`). A spec or specification under
+  `specs/shared/` is refused in every mode; a domain named `shared` under
+  `facet-domain` and `facet`. Ground under `shared/` keeps its module tests.
+  Red: each check off, and the facet check skipped under `off`.
+- **The history** (`23be665a`). Ten lines of earlier iterations spelled
+  the old pool as backticked paths the Markdown pass holds to the disk;
+  they name it with the `<specs>` placeholder now.
+- **Gates.** `make fix` then `make check` exit 0 after each commit (2382
+  tests passed, 1 skipped, on the last); `npm run build` exit 0.
+
+### Raised by the package-test branch, iteration 30
+
+131. C30 files `GET /shared` under `<specs>/api/shared/get/`, and C1 now
+     refuses a domain named `shared`: a product with a `/shared` route has
+     no legal folder for its spec. Keep the domain reservation (and let C30
+     derive another name for that segment), or reserve `shared` at the
+     facet level only?
+132. The root-ground fixer rewrites the relative literals of the specs
+     tree. It does not reach a module test outside `specs/` that names the
+     pool (`lint/checker-member.test.ts` here), nor a path spelled from the
+     project root inside a string (`command: 'node specs/fixtures/…'` in
+     three website specifications): both were moved by hand here, and C8
+     does not see either. Extend the fixer to the member's module tests and
+     to `specs/<role>/` spelled from the root, or leave them to the author?
+133. The capability matrix counts a file by a literal probe, by design: its
+     `.toMatch(directory(` misses a call the formatter splits after the
+     paren, and two cli files left the count (5 → 3) when their paths grew
+     by `shared/`. Accept the undercount, or let the probe ignore the
+     whitespace a formatter inserts?
+134. Both ratchets let a count fall below its entry without a word: the
+     `typescript` section held 1293 against 1396 recorded on the same run.
+     Keep the slack (the entry is a ceiling), or fail a count below its
+     entry the way an entry at zero fails?
