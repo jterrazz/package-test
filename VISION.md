@@ -2650,7 +2650,7 @@ The only conflicts were in the generated `docs/03-testing.md`; chore commit
   headers on every chain it starts, and a chain's own headers win for that
   chain alone. docs/19 now states that a test run under `TEST_UPDATE=1` is
   the only recorder of `routes/unreached`. What stays open: the spec lives
-  at `specs/api/echo/create/headers.spec.ts` rather than beside
+  at `api/echo/create/headers.spec.ts` rather than beside
   `users/create/sending.spec.ts`, and `specs/website/clock/` is untouched.
 
 ## Batch 2 of 2026-09-24 (hybrid): typescript
@@ -2770,7 +2770,7 @@ held`.
       `jobs/intercept/`. Rename it.
     - `api/initiation-errors/` is neither a capability nor a route,
       and C35 misses it because its runners are built inline. Together with
-      the VISION-pinned `specs/api/echo/create/headers.spec.ts`, it
+      the VISION-pinned `api/echo/create/headers.spec.ts`, it
       contradicts docs/03's "every spec here". Move it, or name both
       exceptions in docs/03.
     - `capabilityFolders()` ignores each row's `columns`, so

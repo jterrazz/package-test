@@ -1,9 +1,8 @@
-// checker-disable-next-line c35 -- VISION.md names this path until its batch notes are folded into the chapters
 import { describe, expect, test } from 'vitest';
 
-import { api } from '../../api.specification.js';
+import { api } from '../api.specification.js';
 
-describe('headers', () => {
+describe('views', () => {
     test("a view made with() sends its headers on every chain, and a chain's own headers win for that chain alone", async () => {
         // Given - the header a whole file shares, two chains of it, one overriding it, then one more chain of it
         const tagged = api.with({ headers: { 'x-chain': 'file' } });
