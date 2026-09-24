@@ -6,4 +6,8 @@ runs:
       stderr: |
           src/report/report.test.ts:9:48  jterrazz-check(c8)
           src/report/report.test.ts:10:21  jterrazz-check(c8)
-          src/report/report.test.ts:18:41  jterrazz-check(c8)
+          src/report/report.test.ts:13:42  jterrazz-check(c8)
+          src/report/report.test.ts:14:46  jterrazz-check(c8)
+          src/report/report.test.ts:15:32  jterrazz-check(c8)
+          src/report/report.test.ts:16:35  jterrazz-check(c8)
+          src/report/report.test.ts:24:41  jterrazz-check(c8)

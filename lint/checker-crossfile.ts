@@ -10,10 +10,12 @@ import {
     SPEC_EXTENSION,
 } from '../src/model/literate/spec-document.js';
 import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
-import { specsAnchor } from './ast.js';
+import { parseProgram } from '../src/seams/oxc-parser/parse.js';
+import { isNode, nodeStart, specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
 import { moduleTestsOf } from './module-tests.js';
+import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 import { literalSpans } from './spec-values.js';
 
@@ -1728,31 +1730,41 @@ function crossedTarget(
 }
 
 /**
- * A path a test resolves from its own directory with one literal —
- * `resolve(import.meta.dirname, '…')`, `join(…)` alike, `__dirname` alike —
- * and the same by URL, `new URL('…', import.meta.url)` — spelled `./` or `../`,
- * as a `file()` is. A path spelled into a
- * command a process runs is the author's: no pattern reads it.
+ * The paths a test resolves from its own directory, each where its first
+ * literal starts: every piece a literal (path-references' reader), and one
+ * piece alone only when it is spelled `./` or `../`, as a `file()` is — a lone
+ * bare piece (`resolve(import.meta.dirname, 'expected')`) is an output folder
+ * the test makes as often as a path it reads. A piece opening on `/` restarts
+ * the path, and leaves the call out. A path spelled into a command a process
+ * runs is the author's: no call names it.
  */
-const ANCHORED_PATHS = [
-    /(?<![\w$.])(?:path\.)?(?:join|resolve)\(\s*(?:import\.meta\.dirname|__dirname)\s*,\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*,?\s*\)/gu,
-    /(?<![\w$.])new\s+URL\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*,\s*import\.meta\.url\s*,?\s*\)/gu,
-];
-
-/** The paths a source resolves from its own directory, each where its literal starts. */
-function anchoredPaths(file: string): { column: number; line: number; path: string }[] {
-    const text = readSource(file);
-    const quoted = stringMask(text);
-    return ANCHORED_PATHS.flatMap((pattern) =>
-        [...text.matchAll(pattern)].flatMap((match) => {
-            const path = match.groups?.path ?? '';
-            if (quoted[match.index] === true || !isRelativePath(path) || path.includes('${')) {
-                return [];
+function anchoredPaths(
+    file: string,
+): { column: number; line: number; named: string; target: string }[] {
+    const text = readText(file);
+    const program = parseProgram(file, text);
+    if (!isNode(program)) {
+        return [];
+    }
+    const found: { column: number; line: number; named: string; target: string }[] = [];
+    visitProgram(
+        program,
+        literalPathVisitor(({ node, pieces }) => {
+            const [only] = pieces;
+            const lone = pieces.length === 1 && !isRelativePath(only ?? '');
+            if (lone || pieces.some((piece) => isAbsolute(piece))) {
+                return;
             }
-            const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
-            return [{ column: columnAt(text, at), line: lineAt(text, at), path }];
+            const at = nodeStart(node);
+            found.push({
+                column: columnAt(text, at),
+                line: lineAt(text, at),
+                named: pieces.map((piece) => `'${piece}'`).join(', '),
+                target: resolve(dirname(file), ...pieces),
+            });
         }),
     );
+    return found;
 }
 
 export function diskTargetFindings(file: string, rootDir: string): TokenViolation[] {
@@ -1761,8 +1773,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
         ? new Set<number>()
         : suppressedLines(readText(file), 'c8');
     if (!file.endsWith(SPEC_EXTENSION)) {
-        for (const { column, line, path } of anchoredPaths(file)) {
-            const target = resolve(dirname(file), path);
+        for (const { column, line, named, target } of anchoredPaths(file)) {
             if (treeKind(target) !== undefined || suppressed.has(line)) {
                 continue;
             }
@@ -1770,7 +1781,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
                 column,
                 file: relative(rootDir, file),
                 line,
-                ...missingTarget(`'${path}'`, relative(rootDir, target), existsSync(target)),
+                ...missingTarget(named, relative(rootDir, target), existsSync(target)),
                 rule: 'c8-disk-target-exists',
                 severity: 'error',
             });

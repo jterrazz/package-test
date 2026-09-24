@@ -3,7 +3,12 @@ import { describe, expect, test } from 'vitest';
 
 import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
-import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
+import {
+    literalPathVisitor,
+    mergeVisitors,
+    pathReferenceVisitor,
+    visitProgram,
+} from './path-references.js';
 import type { AstNode } from './rule-shape.js';
 import { packageWith } from './rule-tester.fixtures.js';
 
@@ -58,6 +63,55 @@ describe('pathReferenceVisitor', () => {
 
         // Then - none of them is the module's own tree
         expect(pathsIn(source)).toStrictEqual([]);
+    });
+});
+
+/** The literal pieces of each path a module resolves from its own directory, in the order they are written. */
+function literalPathsIn(source: string): string[][] {
+    const program = parseProgram(join(ROOT, 'src/a.ts'), source);
+    const paths: string[][] = [];
+    if (isNode(program)) {
+        visitProgram(
+            program,
+            literalPathVisitor(({ pieces }) => {
+                paths.push(pieces);
+            }),
+        );
+    }
+    return paths;
+}
+
+describe('literalPathVisitor', () => {
+    test('hands every piece of a path built from the directory with literals alone', () => {
+        // Given - each anchor, each builder, one piece and several, and a URL
+        const source = [
+            "const a = join(import.meta.dirname, 'expected', 'x.txt');",
+            "const b = resolve(__dirname, '..', 'fixtures', 'gone');",
+            "const c = path.join(import.meta.dirname, './seeds/rows.sql');",
+            "const d = new URL('./fixtures/a.json', import.meta.url);",
+        ].join('\n');
+
+        // Then - the pieces of each, as written
+        expect(literalPathsIn(source)).toStrictEqual([
+            ['expected', 'x.txt'],
+            ['..', 'fixtures', 'gone'],
+            ['./seeds/rows.sql'],
+            ['./fixtures/a.json'],
+        ]);
+    });
+
+    test('hands no path with a computed piece, nor one built from another root', () => {
+        // Given - a computed piece, a binding of the directory, a file for an anchor
+        const source = [
+            'const here = import.meta.dirname;',
+            "const a = join(import.meta.dirname, 'fixtures', name);",
+            "const b = join(here, 'fixtures');",
+            "const c = resolve(import.meta.filename, 'x');",
+            'const d = resolve(import.meta.dirname);',
+        ].join('\n');
+
+        // Then - none of them is a path named whole
+        expect(literalPathsIn(source)).toStrictEqual([]);
     });
 });
 

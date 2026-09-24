@@ -1,4 +1,4 @@
-description: a module test's golden and resolved paths pass; a call in a string or a command is not read
+description: a module test's golden and resolved paths pass; a lone bare piece, a string, a command go unread
 fixture: ./fixtures/module-present/
 runs:
     - command: checker --member .

@@ -10,7 +10,8 @@ import type { AstNode, Visitor } from './rule-shape.js';
  * template opening on `__dirname`) or reads by a relative literal
  * (`readFileSync('./…')`). F2 judges each for the module oxlint hands it,
  * and the walk through a module that is not production judges the same
- * forms in the module it parses.
+ * forms in the module it parses; C8 reads the ones built from literals alone,
+ * whole, for existence.
  */
 
 /** A path a module names, and the node that names it. */
@@ -24,6 +25,16 @@ const PATH_BUILDERS = new Set(['join', 'resolve']);
 
 /** The names a CommonJS module is handed for where it sits. */
 const COMMONJS_ANCHORS = new Set(['__dirname', '__filename']);
+
+/** The names the directory a module sits in goes by, spelled as itself. */
+function isOwnDirectory(node: AstNode | undefined): boolean {
+    return (
+        identifierName(node) === '__dirname' ||
+        (node?.type === 'MemberExpression' &&
+            child(node, 'object')?.type === 'MetaProperty' &&
+            memberPropertyName(node) === 'dirname')
+    );
+}
 
 /** The name a call's callee goes by — `readFileSync`, `fs.readFileSync`, `path.join`. */
 function calleeName(node: AstNode): string | undefined {
@@ -131,6 +142,18 @@ function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string
     return undefined;
 }
 
+/** The literal a `new URL('…', import.meta.url)` resolves, and its node. */
+function urlLiteral(node: AstNode): undefined | { literal: string; target: AstNode } {
+    const [target, base] = argumentsOf(node);
+    const literal = stringValue(target);
+    return identifierName(child(node, 'callee')) === 'URL' &&
+        target !== undefined &&
+        literal !== undefined &&
+        isImportMetaUrl(base)
+        ? { literal, target }
+        : undefined;
+}
+
 /**
  * Visitor fragment for every path a module names in its own tree — the module
  * `file()` returns, asked when its program is entered, so one fragment serves
@@ -165,15 +188,9 @@ export function pathReferenceVisitor(
             }
         },
         NewExpression(node: AstNode) {
-            const [target, base] = argumentsOf(node);
-            const literal = stringValue(target);
-            if (
-                identifierName(child(node, 'callee')) === 'URL' &&
-                target !== undefined &&
-                literal !== undefined &&
-                isImportMetaUrl(base)
-            ) {
-                onPath({ node: target, path: resolve(here, literal) });
+            const url = urlLiteral(node);
+            if (url !== undefined) {
+                onPath({ node: url.target, path: resolve(here, url.literal) });
             }
         },
         Program(node: AstNode) {
@@ -181,6 +198,39 @@ export function pathReferenceVisitor(
             anchors = anchorsOf(node);
         },
         TemplateLiteral: anchored,
+    };
+}
+
+/** A path a module resolves from its own directory with literals alone: each piece, and the node of the first. */
+export type LiteralPath = { node: AstNode; pieces: string[] };
+
+/**
+ * Visitor fragment for every path a module resolves from its own directory
+ * with nothing but literals — `resolve`/`join` handed `import.meta.dirname`
+ * or `__dirname` and then literal pieces only, `new URL('…',
+ * import.meta.url)` — the forms {@link pathReferenceVisitor} reads, held to
+ * the path they name whole: a piece that is not a literal leaves the call
+ * out, and an anchor made of anything else than the directory itself too.
+ */
+export function literalPathVisitor(onPath: (entry: LiteralPath) => void): Visitor {
+    return {
+        CallExpression(node: AstNode) {
+            if (!PATH_BUILDERS.has(calleeName(node) ?? '')) {
+                return;
+            }
+            const [anchor, ...rest] = argumentsOf(node);
+            const pieces = literalTail(rest);
+            const [head] = rest;
+            if (isOwnDirectory(anchor) && head !== undefined && pieces.length === rest.length) {
+                onPath({ node: head, pieces });
+            }
+        },
+        NewExpression(node: AstNode) {
+            const url = urlLiteral(node);
+            if (url !== undefined) {
+                onPath({ node: url.target, pieces: [url.literal] });
+            }
+        },
     };
 }
 
