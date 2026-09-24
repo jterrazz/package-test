@@ -33,6 +33,15 @@ ruleTester().run('d29-no-foreign-expectation', asOxlintRule(d29NoForeignExpectat
             code: "import { quote } from '../contracts/quotes.contracts.js';\ntest('a', () => { expect(a).toBe(quote); });",
             filename: SPEC,
         },
+        // The product's own data, outside the specs tree, is the subject's.
+        {
+            code: "import manifest from '../../../../../package.json' with { type: 'json' };\ntest('a', () => { expect(result.stdout.text).toBe(manifest.version); });",
+            filename: SPEC,
+        },
+        {
+            code: "import { DEFAULT_PAGE } from '../../../../../src/events/defaults.js';\ntest('a', () => { expect(result.json).toMatch(DEFAULT_PAGE); });",
+            filename: SPEC,
+        },
         // A package is no expectation of this repository.
         {
             code: "import { value } from 'some-package';\ntest('a', () => { expect(a).toBe(value); });",

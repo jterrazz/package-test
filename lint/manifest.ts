@@ -485,7 +485,7 @@ export const RULE_DOCS = {
     'd29-no-foreign-expectation': {
         channel: 'statique',
         convention:
-            'A spec imports no expectation: a name imported from a relative module — neither its `*.specification` runner nor a module under `contracts/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; F4 already refuses importing a test file at all.',
+            'A spec imports no expectation: a name imported from another module of its specs tree — neither its `*.specification` runner nor a module under `contracts/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; a module outside the specs tree is the product’s, and a spec may compare against its data (`package.json`’s version, a constant the product exports); F4 already refuses importing a test file at all.',
         facet: 'model',
         family: 'D',
         fix: 'Write the expected value in the test — in place, or `file(…)` when several tests of the leaf share it — and drop the import.',

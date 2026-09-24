@@ -1,8 +1,9 @@
 import type { Context } from '@oxlint/plugins';
+import { dirname, resolve, sep } from 'node:path';
 
 import { assertionOf, child, childList, identifierName, stringValue, walk } from '../../ast.js';
 import { lessons } from '../../lesson.js';
-import { identityOf } from '../../linted-file.js';
+import { identityOf, specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
@@ -14,15 +15,21 @@ function isRunnerOrContract(source: string): boolean {
     return /\.specification(?:\.[jt]s)?$/u.test(source) || /(?:^|\/)contracts\//u.test(source);
 }
 
-/** The names a spec imports from a relative module that is neither its runner nor a contract. */
-function foreignNames(program: AstNode): Map<string, string> {
+/**
+ * The names a spec imports from another module of its specs tree that is
+ * neither its runner nor a contract. A module outside the tree — the product's
+ * own source, its `package.json` — is the subject's data, not an expectation
+ * someone wrote for the test.
+ */
+function foreignNames(program: AstNode, filename: string, specs: string): Map<string, string> {
     const names = new Map<string, string>();
     for (const statement of childList(program, 'body')) {
         const source = stringValue(child(statement, 'source')) ?? '';
         if (
             statement.type !== 'ImportDeclaration' ||
             !/^\.\.?\//u.test(source) ||
-            isRunnerOrContract(source)
+            isRunnerOrContract(source) ||
+            !resolve(dirname(filename), source).startsWith(`${specs}${sep}`)
         ) {
             continue;
         }
@@ -47,18 +54,22 @@ function rootRead(argument: AstNode): string | undefined {
 
 /**
  * CONVENTIONS D29 — a spec states its own expectations. A value imported
- * from another module and handed to a matcher as the expected value is an
- * expectation written elsewhere: the reader of the test cannot see what it
+ * from another module of the specs tree and handed to a matcher as the
+ * expected value is an expectation written elsewhere: the reader of the test cannot see what it
  * asserts, and a change to the shared module moves assertions nobody reviews
  * as such. The runner and the contracts are imported, and so are typed
- * helpers — a helper is CALLED, and what it builds is the test's own.
+ * helpers — a helper is CALLED, and what it builds is the test's own. A
+ * module outside the specs tree is the product's: a spec may compare against
+ * its data (`package.json`'s version, a constant the product exports).
  */
 export const d29NoForeignExpectation: LintRule = {
     createOnce(context: Context): Visitor {
         return {
-            before: () => identityOf(context).role === 'spec',
+            before: () =>
+                identityOf(context).role === 'spec' && specsAnchorOf(context) !== undefined,
             Program(program: AstNode) {
-                const foreign = foreignNames(program);
+                const specs = specsAnchorOf(context)?.directory ?? '';
+                const foreign = foreignNames(program, context.physicalFilename, specs);
                 if (foreign.size === 0) {
                     return;
                 }
