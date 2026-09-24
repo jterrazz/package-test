@@ -18,6 +18,8 @@ const ROOT = packageWith({
     'tests/data.ts': "export * from '../specs/fixtures/users.js';\n",
     'tests/render.ts': "export { render } from '@testing-library/react';\n",
     'tests/format.ts': 'export const format = String;\n',
+    'tests/rows.ts':
+        "export const rows = new URL('../specs/fixtures/rows.json', import.meta.url);\n",
     'tsconfig.json': [
         '{',
         '    // The aliases a module may be reached by.',
@@ -95,6 +97,8 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         // A reach through a module that is not production — a retired test root: the barrel re-exports it.
         refused('export * from "../tests/render.js";', 'reachThrough', BARREL),
         refused('export { users } from "../tests/data.js";', 'reachThrough', BARREL),
+        // That module is parsed: a path it builds into test material is a reach too.
+        refused('export { rows } from "../tests/rows.js";', 'reachThrough', BARREL),
         // Production is every module outside the test material: `lint/`, a script, a bin, the root.
         refused('import { it } from "vitest";', 'reach', join(ROOT, 'lint/rule.ts')),
         refused('import { expect } from "vitest";', 'reach', join(ROOT, 'scripts/seed.ts')),

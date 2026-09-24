@@ -6,7 +6,6 @@ import {
     materialAt,
     reachOf,
     resolveSpecifier,
-    specifiersIn,
     testPackageOf,
 } from './production.js';
 import { packageWith } from './rule-tester.fixtures.js';
@@ -17,6 +16,17 @@ const ROOT = packageWith({
     'src/domain/order.ts': 'export const order = 1;\n',
     'src/news/contracts/http/events.ts': 'export default {};\n',
     'src/news/contracts/news.contracts.ts': 'export const news = {};\n',
+    'tests/anchored.ts':
+        "export const rows = new URL('../specs/fixtures/rows.json', import.meta.url);\n",
+    'tests/named.ts': [
+        "// import { users } from '../specs/fixtures/users.js';",
+        'const note = "import { x } from \'../specs/fixtures/x.js\'";',
+        'export { note };',
+    ].join('\n'),
+    'tests/read.ts':
+        "import { readFileSync } from 'node:fs';\nexport const sql = readFileSync('./specs/seeds/a.sql');\n",
+    'tests/typed.ts':
+        "import type { Row } from '../specs/fixtures/row.js';\nexport type { Row };\n",
     'tools/a.ts': "import { b } from './b.js';\nexport { b };\n",
     'tools/b.ts': "import { a } from './a.js';\nexport { a };\n",
     'tsconfig.json': '{ "compilerOptions": { "baseUrl": "./src", "paths": { "@/*": ["*"] } } }',
@@ -109,30 +119,26 @@ describe('resolveSpecifier', () => {
     });
 });
 
-describe('specifiersIn', () => {
-    test('reads every form a module names another in, and never a comment', () => {
-        // Given - one module using each form
-        const text = [
-            "import type { A } from './a.js';",
-            "export * from './b.js';",
-            "const c = await import('./c.js');",
-            "const d = require('./d.js');",
-            "const e = require.resolve('./e.js');",
-            "// import { f } from './f.js';",
-        ].join('\n');
-
-        // Then - the five it names, and not the one a comment mentions
-        expect(specifiersIn(text)).toStrictEqual([
-            './a.js',
-            './b.js',
-            './c.js',
-            './d.js',
-            './e.js',
-        ]);
-    });
-});
-
 describe('reachOf', () => {
+    test.each([
+        { module: 'anchored', what: 'specs/fixtures/rows.json' },
+        { module: 'read', what: 'specs/seeds/a.sql' },
+        { module: 'typed', what: 'specs/fixtures/row.js' },
+    ])('sees what the non-production module `$module` names, parsed', ({ module, what }) => {
+        // Given - production importing a module under a retired test root
+        const reach = reachOf(join(ROOT, 'src/domain/order.ts'), `../../tests/${module}.js`);
+
+        // Then - the walk reads that module's program: a path it builds or reads, a type it imports
+        expect(reach?.what).toBe(join(ROOT, what));
+        expect(reach?.through).toStrictEqual([join(ROOT, 'tests', `${module}.ts`)]);
+    });
+
+    test('reads no reference in a comment or a string', () => {
+        // Given - a module that only mentions a specifier, in prose and in a value
+        // Then - nothing is reached
+        expect(reachOf(join(ROOT, 'src/domain/order.ts'), '../../tests/named.js')).toBeUndefined();
+    });
+
     test('ends on a cycle of modules that reach nothing', () => {
         // Given - two tool modules importing each other
         // Then - the walk visits each once and finds no material

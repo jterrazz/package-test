@@ -1,17 +1,20 @@
 import { basename, dirname, join, resolve } from 'node:path';
 
 import { isGroundName } from '../src/model/chain/ground.js';
+import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import {
     child,
     childList,
     identifierName,
     importSourceVisitor,
+    isNode,
     memberPropertyName,
     stringValue,
 } from './ast.js';
 import type { ImportSource } from './ast.js';
 import { isFile, listDirectory, readFileCached } from './fs-cache.js';
 import type { AstNode } from './oxlint-api.js';
+import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
 import { withoutComments } from './subject.js';
 
@@ -41,8 +44,10 @@ import { withoutComments } from './subject.js';
  * specifier is a test package, when it resolves — relatively, through a
  * tsconfig `paths` alias or through the package's `imports` map — to test
  * material, or when it resolves to a local module that is neither production
- * nor test material and reaches some in turn. A production module on the way
- * ends the walk: it is judged for its own references.
+ * nor test material and reaches some in turn — that module parsed, so every
+ * form it names a module or a path in is read as F2 reads a production one. A
+ * production module on the way ends the walk: it is judged for its own
+ * references.
  */
 
 /** A source module, whatever its dialect. */
@@ -305,24 +310,34 @@ export function resolveSpecifier(from: string, specifier: string): string[] {
     return targets.map((target) => onDisk(target));
 }
 
-/**
- * Every specifier a module's text names: imports and re-exports (`type` ones
- * included), `import()`, `require()` and `require.resolve()`. Comments are
- * prose, so they are blanked first.
- */
-export function specifiersIn(text: string): string[] {
-    const code = withoutComments(text);
-    const found: string[] = [];
-    const patterns = [
-        /\b(?:import|export)\s+(?:type\s+)?(?:[\w$*{}\s,]+?\s+from\s+)?(?<quote>['"])(?<name>[^'"\n]+)\k<quote>/gu,
-        /\b(?:import|require|require\.resolve)\s*\(\s*(?<quote>['"])(?<name>[^'"\n]+)\k<quote>\s*\)/gu,
-    ];
-    for (const pattern of patterns) {
-        for (const match of code.matchAll(pattern)) {
-            found.push(match.groups?.name ?? '');
-        }
+/** What a module names: the specifiers of its references, and the paths it builds or reads. */
+type Named = { paths: string[]; specifiers: string[] };
+
+/** What each module walked names, kept while its text is the one it was parsed from. */
+const parsed = new Map<string, { named: Named; text: string }>();
+
+/** What a module names, read from its parsed program — nothing when it does not parse. */
+function namedIn(module: string, text: string): Named {
+    const cached = parsed.get(module);
+    if (cached?.text === text) {
+        return cached.named;
     }
-    return found;
+    const named: Named = { paths: [], specifiers: [] };
+    parsed.set(module, { named, text });
+    const program = parseProgram(module, text);
+    if (!isNode(program)) {
+        return named;
+    }
+    const visitor = mergeVisitors(
+        moduleReferenceVisitor(({ source }) => {
+            named.specifiers.push(source);
+        }),
+        pathReferenceVisitor(module, ({ path }) => {
+            named.paths.push(path);
+        }),
+    );
+    visitProgram(program, visitor);
+    return named;
 }
 
 /** What a module that is neither production nor test material reaches, if anything. */
@@ -335,7 +350,14 @@ function reachThrough(module: string, seen: Set<string>): Reach | undefined {
     if (text === null) {
         return undefined;
     }
-    for (const specifier of specifiersIn(text)) {
+    const { paths, specifiers } = namedIn(module, text);
+    for (const path of paths) {
+        const kind = materialNamed(path);
+        if (kind !== undefined) {
+            return { kind, through: [module], what: path };
+        }
+    }
+    for (const specifier of specifiers) {
         const reach = reachFrom(module, specifier, seen);
         if (reach !== undefined) {
             return { ...reach, through: [module, ...reach.through] };

@@ -26,11 +26,12 @@ import { testing } from './dist/oxlint.js';
  *   container exec produces).
  * - `runner/` — the config surface: the preset, the project index, update
  *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
- * - `lint/` — zero runtime imports: no external packages, and from `model/`
- *   only the pure helpers (the token list, the case conversions, fixture
- *   markers, the root walk a rule must share with the runner, the
- *   spec-document parser, the indentation a value written in place shares
- *   with the test around it).
+ * - `lint/` — no external package of its own: from `model/` only the pure
+ *   helpers (the token list, the case conversions, fixture markers, the root
+ *   walk a rule must share with the runner, the spec-document parser, the
+ *   indentation a value written in place shares with the test around it),
+ *   and a dependency only through the seam that owns it (the yaml document,
+ *   the git tree, the module parser).
  *
  * `src/index.ts`, `src/surface.ts` and `src/browser/` are composition roots and
  * name no layer, so they are out of scope; module tests and `*.fixtures.ts`
@@ -87,6 +88,8 @@ const FRAMEWORK_LAYERS = {
             'model/chain/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
             'model/chain/resolve',
+            // A module a rule walks past is parsed into the tree oxlint hands the rule.
+            'seams/oxc-parser/parse',
             // Every gate judges the tree the runtime reads: what git does not ignore.
             'seams/git/tree',
             // A finding and a refusal teach in one form: the four parts, and how they read.
@@ -145,6 +148,7 @@ const FRAMEWORK_LAYERS = {
             hono: ['hono', '@hono/node-server'],
             msw: ['msw'],
             openai: ['openai'],
+            'oxc-parser': ['oxc-parser'],
             playwright: ['playwright'],
             postgres: ['pg'],
             process: [],

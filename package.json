@@ -72,6 +72,7 @@
     },
     "dependencies": {
         "msw": "^2.15.0",
+        "oxc-parser": "^0.150.0",
         "vitest-mock-extended": "^5.0.0",
         "yaml": "^2.9.0"
     },
