@@ -327,9 +327,9 @@ What it does **not** write there: the fresh temp directory each CLI spec runs in
 
 ### Scratch lives in the run's temp root
 
-A run keeps every scratch folder it makes in ONE folder of its own, and removes that folder when it ends. The preset's temp-root setup creates `jterrazz-test-run-<pid>-…` in the OS temp directory before the first worker starts, and points `TMPDIR` (with `TMP` and `TEMP`) at it. So every `mkdtemp` under `os.tmpdir()` lands inside it: in a worker, in a child a spec spawns, in a tool that child runs. The last project's teardown removes it and restores the variables.
+A run keeps every scratch folder it makes in ONE folder of its own, and removes that folder when it ends. The preset's temp-root setup creates `jterrazz-test-runs/<pid>-…` in the OS temp directory before the first worker starts, and points `TMPDIR` (with `TMP` and `TEMP`) at it. So every `mkdtemp` under `os.tmpdir()` lands inside it: in a worker, in a child a spec spawns, in a tool that child runs. The teardown of the project whose setup made it (the first project, which vitest tears down last) removes it and restores the variables.
 
-A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root whose pid no longer runs.
+A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root in `jterrazz-test-runs/` whose pid no longer runs. It reads that folder alone, never the OS temp directory itself, which can hold hundreds of thousands of entries.
 
 A CLI spec's working directory does not wait for the run to end: it is removed once its test has finished, after the test's `afterEach` hooks.
 
