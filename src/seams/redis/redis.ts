@@ -1,4 +1,5 @@
 import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
+import type { ContainerOptions } from '../../model/ports/container.port.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
@@ -9,12 +10,21 @@ export type RedisOptions = {
     image?: string;
 };
 
+/** The indexes a container serves: 0 is its own, and every other is one worker's. */
+const DATABASES = 256;
+
+/** A container with an index for every worker a run can hold. */
+const WORKER_INDEXES: ContainerOptions = {
+    command: ['redis-server', '--databases', String(DATABASES)],
+};
+
 export class RedisHandle implements ServiceHandle {
     readonly type = 'redis';
     serviceName: null | string = null;
     readonly defaultPort = 6379;
     readonly defaultImage: string;
     readonly environment: Record<string, string> = {};
+    readonly containerOptions = WORKER_INDEXES;
 
     connectionString = '';
     started = false;
@@ -83,9 +93,13 @@ export class RedisHandle implements ServiceHandle {
     isolation(): IsolationStrategy {
         return {
             acquire: async (workerId: string) => {
-                // Use Redis database index 1-15 for workers (0 is default/shared)
                 const numericId = Number.parseInt(workerId, 10) || 0;
-                this.dbIndex = (numericId % 15) + 1;
+                if (numericId + 1 >= DATABASES) {
+                    throw new Error(
+                        `redis: worker ${workerId} has no database index — a container serves ${DATABASES - 1} workers; run with fewer (--maxWorkers)`,
+                    );
+                }
+                this.dbIndex = numericId + 1;
                 // The index is in the string the app is handed, or the app
                 // Would write to the shared index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;

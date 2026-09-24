@@ -160,7 +160,7 @@ Vitest runs test files in parallel workers; the framework isolates them automati
 | Service      | Isolation strategy                                                                                   |
 | ------------ | ---------------------------------------------------------------------------------------------------- |
 | `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path |
-| `redis()`    | Dedicated database index per worker (1–15), the connection string's path                             |
+| `redis()`    | A database index per worker (1–255), acquired empty — the connection string's path                   |
 | `sqlite()`   | Template file copied per worker                                                                      |
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address talks to another worker.

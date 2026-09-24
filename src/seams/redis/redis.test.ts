@@ -67,4 +67,23 @@ describe('redis handle', () => {
         // Then - the reset fails rather than reporting a flush that never happened
         await expect(unreachable.reset()).rejects.toThrow();
     });
+
+    test('asks its container for an index for every worker a run can hold', () => {
+        // Given - the command a redis container is started with
+        // Then - it serves 256 indexes, 0 its own and one per worker
+        expect(redis().containerOptions).toStrictEqual({
+            command: ['redis-server', '--databases', '256'],
+        });
+    });
+
+    test('refuses a worker past its container indexes, naming the way out', async () => {
+        // Given - a handle acquired by pool id 255, the first with no index left
+        const crowded = redis();
+        crowded.connectionString = 'redis://localhost:1';
+
+        // Then - it refuses before it connects, rather than sharing an index
+        await expect(crowded.isolation().acquire('255')).rejects.toThrow(
+            'redis: worker 255 has no database index — a container serves 255 workers; run with fewer (--maxWorkers)',
+        );
+    });
 });

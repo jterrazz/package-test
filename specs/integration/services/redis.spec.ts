@@ -123,6 +123,47 @@ describe('redis', () => {
         expect(result.value).toMatch(['/2', '/3']);
     });
 
+    // RUNTIME G2 — a pool id is a worker at any --maxWorkers, not modulo a count of indexes.
+    test('workers 1 and 16 take two indexes, and a key one writes the other never reads', async () => {
+        // Given - two handles acquired by pool ids 1 and 16, the first writing
+        const result = await integration.call(async ({ cache }) => {
+            const { createClient } = await import('redis');
+            const container = new URL(cache.connectionString);
+            container.pathname = '';
+            const [first, sixteenth] = [redis(), redis()];
+            await Promise.all(
+                (
+                    [
+                        [first, '1'],
+                        [sixteenth, '16'],
+                    ] as const
+                ).map(async ([handle, worker]) => {
+                    handle.connectionString = container.toString().replace(/\/$/u, '');
+                    handle.started = true;
+                    await handle.isolation().acquire(worker);
+                }),
+            );
+
+            const writer = createClient({ url: first.connectionString });
+            await writer.connect();
+            await writer.set('worker-key', 'first');
+            await writer.quit();
+            const reader = createClient({ url: sixteenth.connectionString });
+            await reader.connect();
+            const seen = await reader.get('worker-key');
+            await reader.quit();
+
+            await first.isolation().release();
+            await sixteenth.isolation().release();
+            return { seen };
+        });
+
+        // Then - the sixteenth worker saw nothing of the first's
+        expect(result.value).toMatch({
+            seen: null,
+        });
+    });
+
     // RUNTIME G2 — the run's container outlives a file, and a file that died
     // Before its release left its keys at its index.
     test('a worker acquires its index empty, whatever a worker before it left there', async () => {
