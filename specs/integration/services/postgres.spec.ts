@@ -60,6 +60,39 @@ describe('postgres', () => {
         ]);
     });
 
+    test('runs in a container labelled for cleanup, its data on a memory disk, reused only when asked', async () => {
+        // Given - the container publishing the service's port, as the runtime describes it
+        const result = await integration.call(async ({ db }) => {
+            const { getContainerRuntimeClient } = await import('testcontainers');
+            const runtime = await getContainerRuntimeClient();
+            const { dockerode } = runtime.container;
+            const port = Number(new URL(db.connectionString).port);
+            const listed = await dockerode.listContainers();
+            const running = listed.find(({ Ports }) =>
+                Ports.some(({ PublicPort }) => PublicPort === port),
+            );
+            const inspected = await dockerode.getContainer(running?.Id ?? '').inspect();
+            const labels = inspected.Config.Labels;
+            return {
+                data: inspected.HostConfig.Tmpfs?.['/var/lib/postgresql/data'],
+                hashed: 'org.testcontainers.container-hash' in labels,
+                labelled: labels['com.jterrazz.test'],
+                reused: labels['com.jterrazz.test.reuse'] === 'true',
+            };
+        });
+
+        // Then - a cleanup finds it, its data never touches a disk, and reuse is on exactly when the run asked
+        const asked =
+            process.env.TESTCONTAINERS_REUSE_ENABLE === 'true' &&
+            [undefined, '', 'false'].includes(process.env.CI);
+        expect(result.value).toMatch({
+            data: 'rw',
+            hashed: asked,
+            labelled: 'true',
+            reused: asked,
+        });
+    });
+
     test('passes its healthcheck on a reachable container', async () => {
         // Given - the started service asked whether it answers
         const result = await integration.call(async ({ db }) => {
