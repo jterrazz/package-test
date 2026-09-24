@@ -4,7 +4,14 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { COLUMNS } from './facet-matrix.js';
-import { layers, matrixRows, spliceLayers, spliceMatrix } from './matrix.js';
+import {
+    capabilityFolder,
+    capabilityFolders,
+    layers,
+    matrixRows,
+    spliceLayers,
+    spliceMatrix,
+} from './matrix.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -135,5 +142,36 @@ describe('capability matrix (meta-test K6)', () => {
         for (const layer of found) {
             expect(layer.count, `${layer.layer} is empty`).toBeGreaterThan(0);
         }
+    });
+});
+
+describe('the capability folders — the vocabulary a spec of a specimen is filed by', () => {
+    test.each([
+        ['.seed()', 'seed'],
+        ['toMatch(file())', 'to-match'],
+        ['.exitCode', 'exit-code'],
+        ['{{uuid}}', 'uuid'],
+        ['.http exchange', 'http-exchange'],
+        ['{ frozen }', 'frozen'],
+        ['testId', 'test-id'],
+    ])('the capability %s is the folder %s', (name, folder) => {
+        // Given - a capability as the matrix names it
+        const named = capabilityFolder(name);
+
+        // Then - the words before the first parenthesis, kebab-cased
+        expect(named).toBe(folder);
+    });
+
+    test('the vocabulary is the matrix, closed', () => {
+        // Given - the folders the matrix names
+        const folders = capabilityFolders();
+
+        // Then - the capabilities are in it, a route's word and a grab-bag are not
+        expect(
+            ['seed', 'intercept', 'clock', 'to-match', 'exec'].every((name) => folders.has(name)),
+        ).toBe(true);
+        expect(['users', 'label', 'assertions', 'misc'].some((name) => folders.has(name))).toBe(
+            false,
+        );
     });
 });

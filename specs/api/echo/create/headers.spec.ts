@@ -1,3 +1,4 @@
+// checker-disable-next-line c35 -- VISION.md names this path until its batch notes are folded into the chapters
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../../api.specification.js';

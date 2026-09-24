@@ -1,0 +1,5 @@
+description: a spec of a specimen filed under a capability of the matrix passes, whatever route it reaches
+fixture: ./fixtures/filed/
+runs:
+    - command: checker .
+      exit: 0

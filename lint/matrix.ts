@@ -261,6 +261,28 @@ export function capabilities(): Capability[] {
     return [...CAPABILITIES, ...tokens];
 }
 
+/**
+ * A capability's name as a folder: the words before its first parenthesis,
+ * kebab-cased — `.seed()` is `seed`, `toMatch(file())` is `to-match`,
+ * `.exitCode` is `exit-code`, `{{uuid}}` is `uuid`.
+ */
+export function capabilityFolder(name: string): string {
+    return (name.split('(')[0] ?? '')
+        .replaceAll(/(?<lower>[a-z0-9])(?<upper>[A-Z])/gu, '$<lower> $<upper>')
+        .toLowerCase()
+        .split(/[^a-z0-9]+/u)
+        .filter((word) => word !== '')
+        .join('-');
+}
+
+/**
+ * The folders a spec of a specimen may be filed under: one per capability the
+ * matrix declares, closed — a capability the matrix does not name is no folder.
+ */
+export function capabilityFolders(): Set<string> {
+    return new Set(capabilities().map(({ name }) => capabilityFolder(name)));
+}
+
 /** The probe, as a matcher. */
 const ESCAPE = /[$()*+.?[\\\]^{|}]/gu;
 

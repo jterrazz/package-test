@@ -16,6 +16,7 @@ import {
 } from '../src/model/literate/spec-document.js';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { treeEntries } from '../src/seams/git/tree.js';
+import { checkCapabilityFolder } from './checker-capability.js';
 import {
     checkCopiedGround,
     checkDatabaseProperty,
@@ -130,6 +131,7 @@ export const TREE_PASS_IDS = [
     'c28-ground-shared-or-inline',
     'c29-one-subject',
     'c30-subject-folder',
+    'c35-capability-folder',
     'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
@@ -537,6 +539,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkGroundSharing(rootDir),
         ...checkOneSubject(rootDir),
         ...checkSubjectFolder(rootDir),
+        ...checkCapabilityFolder(rootDir),
         ...checkCopiedGround(rootDir),
         ...checkLocalFixtureReach(rootDir),
         ...checkDiskTargetsExist(rootDir),
