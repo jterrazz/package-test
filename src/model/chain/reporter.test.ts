@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
-import { formatStartupReport, formatStdoutDiff } from './reporter.js';
+import { formatResponseDiff, formatStartupReport, formatStdoutDiff } from './reporter.js';
 
 /** The diff as a reader sees it, ANSI stripped. */
 const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
@@ -100,5 +100,42 @@ describe('formatStartupReport — one shape of world, reported in one block', ()
 
         // Then - the report says nothing rather than something wrong
         expect(report).not.toContain('app:');
+    });
+});
+
+describe('formatResponseDiff — a body read the way it was written', () => {
+    test('a text body is diffed line by line, as its own lines', () => {
+        // Given - an HTML page whose heading changed
+        const expected = '<main>\n    <h1>Welcome</h1>\n</main>';
+        const actual = '<main>\n    <h1>Goodbye</h1>\n</main>';
+
+        // Then - the page's lines, only the heading marked
+        expect(plain(formatResponseDiff('page.http', expected, actual)).slice(5)).toStrictEqual([
+            '  <main>',
+            '-     <h1>Welcome</h1>',
+            '+     <h1>Goodbye</h1>',
+            '  </main>',
+        ]);
+    });
+
+    test('a JSON value is diffed as its pretty-printed lines', () => {
+        // Given - one field of an object changed
+        const lines = plain(formatResponseDiff('user.http', { name: 'Alice' }, { name: 'Bob' }));
+
+        // Then - the object's lines, only the field marked
+        expect(lines.slice(5)).toStrictEqual([
+            '  {',
+            '-   "name": "Alice"',
+            '+   "name": "Bob"',
+            '  }',
+        ]);
+    });
+
+    test('a text against a value that is not text shows both as JSON, so the kinds differ visibly', () => {
+        // Given - a number where the text "42" was expected
+        const lines = plain(formatResponseDiff('count.http', '42', 42));
+
+        // Then - the quotes say which side is text
+        expect(lines.slice(5)).toStrictEqual(['- "42"', '+ 42']);
     });
 });

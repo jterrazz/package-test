@@ -186,6 +186,17 @@ export function formatTableDiff(
 
 // ── Response diff ──
 
+/** A body's lines as the diff shows them: a text pair as its own lines, anything else as JSON. */
+function bodyLines(expected: unknown, actual: unknown): [string[], string[]] {
+    if (typeof expected === 'string' && typeof actual === 'string') {
+        return [expected.split('\n'), actual.split('\n')];
+    }
+    return [
+        JSON.stringify(expected, null, 2).split('\n'),
+        JSON.stringify(actual, null, 2).split('\n'),
+    ];
+}
+
 export function formatResponseDiff(file: string, expected: unknown, actual: unknown): string {
     const lines: string[] = [];
 
@@ -197,8 +208,7 @@ export function formatResponseDiff(file: string, expected: unknown, actual: unkn
         '',
     );
 
-    const expectedLines = JSON.stringify(expected, null, 2).split('\n');
-    const actualLines = JSON.stringify(actual, null, 2).split('\n');
+    const [expectedLines, actualLines] = bodyLines(expected, actual);
     const maxLines = Math.max(expectedLines.length, actualLines.length);
 
     for (let i = 0; i < maxLines; i++) {
