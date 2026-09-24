@@ -8,14 +8,14 @@ How a change is made. The first half is this repository's own loop — the toolc
 
 The repository answers six `make` targets, the same six every repository of the estate answers, and no other:
 
-| Target         | Does                                                                                                                                    |
-| -------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
-| `make install` | Install the dependencies (`npm ci`, again only when the lockfile moves)                                                                 |
-| `make build`   | Build the bundle — before `lint` and before the `unit` project                                                                          |
-| `make lint`    | Typecheck, lint, format check, knip, then the conventions checker                                                                       |
-| `make fix`     | Build, then the two fixers — `npx typescript fix` and the checker's `--fix` — each run whatever the other said, and fails if either did |
-| `make test`    | Every suite, with coverage, then the coverage floor                                                                                     |
-| `make check`   | The whole verdict: build, lint, test                                                                                                    |
+| Target         | Does                                                                                                                                                                                      |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `make install` | Install the dependencies (`npm ci`, again only when the lockfile moves)                                                                                                                   |
+| `make build`   | Build the bundle — before `lint` and before the `unit` project                                                                                                                            |
+| `make lint`    | Typecheck, lint, format check, knip, then the conventions checker                                                                                                                         |
+| `make fix`     | Build, then the two fixers — the checker's `--fix`, then `npx typescript fix`, whose formatter formats what the checker wrote — each run whatever the other said, and fails if either did |
+| `make test`    | Every suite, with coverage, then the coverage floor                                                                                                                                       |
+| `make check`   | The whole verdict: build, lint, test                                                                                                                                                      |
 
 Every target installs first. CI calls `build`, `lint` and `test` — [03 — Testing](03-testing.md) § What CI runs. Two gestures sit below the six, for the loop: `npx vitest --run --project unit` runs the fast suite with no infrastructure, and `npm run docs` regenerates the generated tables.
 

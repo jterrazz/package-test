@@ -65,9 +65,9 @@ describe('the Makefile — the six targets a repository answers', () => {
                 },
             );
 
-            // Then - both fixers ran, in order, and the verdict is theirs combined
+            // Then - both fixers ran, the formatter's last so it formats what the checker wrote, and the verdict is theirs combined
             expect(readFileSync(log, 'utf8')).toBe(
-                'npx typescript fix\nnode dist/checker.js --fix\n',
+                'node dist/checker.js --fix\nnpx typescript fix\n',
             );
             expect(run.status === 0).toBe(toolchain === 0 && checker === 0);
         },

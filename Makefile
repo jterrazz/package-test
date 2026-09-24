@@ -13,12 +13,13 @@ lint: node_modules/.install
 	npm run lint
 
 # Every fixer runs, whatever the one before it said, and the verdict is theirs
-# Combined, at the end: the toolchain's, then the checker's (which `build`
-# Puts in `dist/`). Nothing judges after them — that is `lint`'s, run apart.
+# Combined, at the end: the checker's (which `build` puts in `dist/`), then the
+# Toolchain's, whose formatter runs last so what the checker wrote is formatted
+# In the same run. Nothing judges after them — that is `lint`'s, run apart.
 fix: build
 	@status=0; \
-	npx typescript fix || status=1; \
 	node dist/checker.js --fix || status=1; \
+	npx typescript fix || status=1; \
 	exit $$status
 
 # What CI calls, so the floor is judged on every push: the suite runs WITH
