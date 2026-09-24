@@ -37,6 +37,8 @@ const GATE = packageWith({
     'jterrazz.config.ts':
         "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
     'package.json': JSON.stringify({ name: 'gate' }),
+    'tests/browser.ts': "export { chromium } from 'playwright';\n",
+    'tests/server.ts': "export { setupServer } from 'msw/node';\n",
 });
 const GATE_SERVICE = join(GATE, 'src/browser/service.ts');
 const BARREL = join(ROOT, 'src/index.ts');
@@ -52,6 +54,12 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
     invalid: [
         // An allowed package is the only one: the unit's other test packages stay refused.
         refused('import { expect } from "vitest";', 'reach', GATE_SERVICE),
+        // Through a relay that is not production, the other packages stay refused too.
+        refused(
+            'export { setupServer } from "../../tests/server.js";',
+            'reachThrough',
+            GATE_SERVICE,
+        ),
         // The test packages.
         refused('import { expect } from "vitest";', 'reach'),
         refused('import { mockOf } from "@jterrazz/test";', 'reach'),
@@ -126,6 +134,8 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
     valid: [
         // A test package the unit's `test.production.allow` names, with its reason.
         { code: 'import { chromium } from "playwright";', filename: GATE_SERVICE },
+        // An allowed package reaches nothing through a relay that is not production either.
+        { code: 'export { chromium } from "../../tests/browser.js";', filename: GATE_SERVICE },
         // Prod importing prod — a name that merely contains a ground word included.
         { code: 'import { other } from "./other.js";', filename: PROD },
         { code: 'import { seedsOf } from "./seeds-of.js";', filename: PROD },
