@@ -1,0 +1,207 @@
+import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { relative, resolve } from 'node:path';
+import { describe, expect, onTestFinished, test } from 'vitest';
+
+import { file, text } from '../../../src/index.js';
+import type { DiskFile, RelativePath } from '../../../src/index.js';
+import { cli } from '../literate-cli.specification.js';
+
+/**
+ * The spec-document format run through the BRIDGE door (`cli.run`). The same
+ * documents also run through the plugin door — `vitest.config.ts` collects
+ * `specs/cli/run/*.spec.yaml` as test files — so every scenario here is
+ * proven twice, once per entry point, against one engine.
+ *
+ * The `fixtures/` twins are the deliberately-wrong inputs: a document whose
+ * golden or shape is wrong on purpose, kept out of the plugin's glob so the
+ * runner never tries to pass them.
+ */
+
+function scratchFile(content: string): string {
+    const dir = mkdtempSync(resolve(tmpdir(), 'spec-document-'));
+    onTestFinished(() => {
+        rmSync(dir, { force: true, recursive: true });
+    });
+    const path = resolve(dir, 'case.spec.yaml');
+    writeFileSync(path, content);
+    return path;
+}
+
+/** A scratch document, named the one way `cli.run()` accepts: `file()`, from this spec. */
+function documentAt(path: string): DiskFile<'.spec.yaml'> {
+    return file(relative(import.meta.dirname, path) as RelativePath<'.spec.yaml'>);
+}
+
+async function failureOf(run: Promise<unknown>): Promise<string> {
+    const error = await errorOf(run);
+    return error.message;
+}
+
+async function errorOf(run: Promise<unknown>): Promise<Error> {
+    try {
+        await run;
+    } catch (error) {
+        return error as Error;
+    }
+    throw new Error('expected the spec document to fail, but it passed');
+}
+
+/** The `at …` frames of an error's stack, trimmed. */
+function frames(error: Error): string[] {
+    return (error.stack ?? '')
+        .split('\n')
+        .filter((line) => line.trimStart().startsWith('at '))
+        .map((line) => line.trim());
+}
+
+describe('refusals', () => {
+    test('a key outside the closed set names the key, the line and the vocabulary', async () => {
+        // Given - a `when:` line
+        const message = await failureOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
+
+        // Then - the closed vocabulary is spelled out in the refusal
+        expect(message).toContain('unknown key "when:"');
+        expect(message).toContain('description, fixture, env, serve, runs');
+        expect(message).toContain('unknown-key.spec.yaml:2');
+    });
+
+    test('a wrong stdout renders the description, the command and a line diff', async () => {
+        // Given - a golden nobody updated (frozen: its mismatch IS the subject)
+        const message = await failureOf(
+            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+        );
+
+        // Then - the whole rendering, tokens covering the path and the run cwd
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose golden stdout is deliberately wrong
+
+            $ help
+
+            Output mismatch (stdout)
+
+            - Expected
+            + Received
+
+              Usage: cli <command>
+              
+              Commands:
+                build   Build the project
+            -   lint    A command this binary does not have
+            +   check   Check code quality
+              
+
+            specs/cli/run/fixtures/wrong-stdout.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+    });
+
+    test('a wrong exit code names both codes and what stderr carried', async () => {
+        // Given - a golden claiming a failing command succeeds
+        const message = await failureOf(
+            cli.run(file('./fixtures/wrong-exit.spec.yaml'), { frozen: true }),
+        );
+
+        // Then - the whole rendering, stderr included
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose golden exit code is deliberately wrong
+
+            $ fail
+
+            exit code mismatch
+              expected: 0
+              received: 2
+
+            stderr was:
+            Starting...
+            Fatal: something went wrong
+
+            specs/cli/run/fixtures/wrong-exit.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+    });
+
+    test('failing files: assertions render as path, expected and got', async () => {
+        // Given - a contains that does not, an absent that is there, and a missing file that should exist
+        const message = await failureOf(
+            cli.run(file('./fixtures/wrong-files.spec.yaml'), { frozen: true }),
+        );
+
+        // Then - the whole rendering, one line per rejected assertion
+        expect(text(message)).toMatch(`
+            Spec mismatch
+
+            a run whose files assertions are deliberately wrong
+
+            $ scaffold
+
+            files mismatch
+
+              out/main.go: expected to contain "package rust", got "package main\\n"
+              out/go.mod: expected absent, got a file
+              out/nothing.txt: expected to exist, got nothing at that path
+
+            specs/cli/run/fixtures/wrong-files.spec.yaml:3
+            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+    });
+
+    test('the stack carries ONE frame, on the run that failed', async () => {
+        // Given - a golden whose run is deliberately wrong
+        const error = await errorOf(
+            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+        );
+
+        // Then - no engine frames, no generated-module frame: the `command:` line, which is what the message names too
+        expect(frames(error)).toStrictEqual([
+            `at ${resolve(import.meta.dirname, 'fixtures/wrong-stdout.spec.yaml')}:3:1`,
+        ]);
+        expect(error.message).toContain('fixtures/wrong-stdout.spec.yaml:3');
+    });
+
+    test('a grammar refusal points at the offending line, not at the engine', async () => {
+        // Given - a document carrying a key outside the closed set (line 2)
+        const error = await errorOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
+
+        // Then - the frame is that line, not a parser frame
+        expect(frames(error)).toStrictEqual([
+            `at ${resolve(import.meta.dirname, 'fixtures/unknown-key.spec.yaml')}:2:1`,
+        ]);
+    });
+
+    test('a matched token line is not marked as a difference beside the real one', async () => {
+        // Given - a run whose {{url}} matched and whose next line did not
+        const path = scratchFile(
+            [
+                'description: renders only the real cause',
+                'serve: echo',
+                'runs:',
+                '  - command: backend',
+                '    exit: 0',
+                '    stdout: |',
+                '      backend {{url}}',
+                '      not printed at all',
+                '',
+            ].join('\n'),
+        );
+
+        // Then - the token line is shown as equal, with its token
+        const message = await failureOf(cli.run(documentAt(path)));
+        expect(message).toContain('  backend {{url}}');
+        expect(message).not.toContain('- backend {{url}}');
+        expect(message).toContain('- not printed at all');
+    });
+
+    test('an unregistered server name lists what the runner declares', async () => {
+        // Given - a document naming a server nobody registered
+        const path = scratchFile(
+            `description: names a server that does not exist\nserve: ghost\nruns:\n  - command: help\n    exit: 0\n`,
+        );
+
+        const document = documentAt(path);
+
+        // Then - the refusal lists what specification.cli() actually declares
+        await expect(failureOf(cli.run(document))).resolves.toContain('registered servers: echo');
+    });
+});

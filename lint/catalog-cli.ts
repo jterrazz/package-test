@@ -4,7 +4,6 @@ import { dirname, resolve } from 'node:path';
 
 import { renderSchema } from '../src/model/literate/spec-document.js';
 import { spliceCatalog } from './catalog.js';
-import { spliceDomains } from './domains.js';
 import { spliceFork } from './fork.js';
 import { spliceLayers, spliceMatrix } from './matrix.js';
 import { spliceMetaTests } from './meta-tests.js';
@@ -23,10 +22,9 @@ import { spliceSiblings } from './siblings.js';
  *   `lint/manifest.ts`;
  * - `schema/spec.schema.json`, the published JSON Schema of the `<case>.spec.yaml`
  *   document, from the grammar's own constants;
- * - the layered reading, the capability matrix, the domain vocabulary, the
- *   meta-test channel and the siblingless-module table inside
- *   `docs/03-testing.md`, from the facet declaration and a scan of the
- *   package's own trees;
+ * - the layered reading, the capability matrix, the meta-test channel and
+ *   the siblingless-module table inside `docs/03-testing.md`, from the facet
+ *   declaration and a scan of the package's own trees;
  * - the fork inside `docs/18-conventions.md`, from `lint/fork.ts`.
  *
  * Deterministic — re-running with no source change is a no-op. `plugin.test.ts`
@@ -48,8 +46,7 @@ const testing = readFileSync(testingPath, 'utf8');
 const withMatrix = spliceMatrix(testing, root);
 const withLayers = spliceLayers(withMatrix, root);
 const withSiblings = spliceSiblings(withLayers, root);
-const withDomains = spliceDomains(withSiblings, root);
-const nextTesting = spliceMetaTests(withDomains, root);
+const nextTesting = spliceMetaTests(withSiblings, root);
 if (nextTesting !== testing) {
     writeFileSync(testingPath, nextTesting);
 }

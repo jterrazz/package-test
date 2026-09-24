@@ -6,7 +6,7 @@ import { specification } from '../../src/index.js';
 /**
  * The runner the `<case>.spec.yaml` documents are bound to — the one the
  * `literate()` plugin names in `vitest.config.ts`, and the one
- * `specs/cli/literate/literate.test.ts` drives through the `cli.run()` bridge.
+ * `specs/cli/run/` drives through the `cli.run()` bridge.
  *
  * It declares the two registries a document names by WORD: `env` (named
  * environment sets) and `serve` (named servers). A scenario states WHICH ground

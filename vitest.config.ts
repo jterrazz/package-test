@@ -48,10 +48,10 @@ const config = defineSpecConfig({
             // The cli helper wires the literate door: the package's documents
             // Are collected as TEST FILES by the project that owns the facet.
             // The glob stops at depth 1 so the deliberately-wrong twins under
-            // `literate/fixtures/` stay inputs to the negative specs.
+            // `run/fixtures/` stay inputs to the negative specs.
             cli({
                 literate: {
-                    include: ['specs/cli/literate/*.spec.yaml'],
+                    include: ['specs/cli/run/*.spec.yaml'],
                     specification: './specs/cli/literate-cli.specification.ts',
                 },
             }),
