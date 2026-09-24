@@ -2115,3 +2115,62 @@ playwright: 'the gate drives a browser in production' } } }` — and F2
      install-links; that clone still says 10.3.2 against the peer
      `^11.0.0`. npm did not refuse it: the dev dependency is a `file:`
      link. The peer only resolves once the toolchain's prototype is 11.0.0.
+
+## Iteration 28 — the calls on 123 to 125 (owner, 2026-09-24)
+
+- **123.** F2's per-run cache is keyed like the tree listing (git index +
+  directory mtimes) so an editor never gets a stale answer.
+- **124.** `projectRootOf` remembers each folder's project root.
+- **125.** A1 skips a file that never says `specification.` (text
+  pre-check). Measure.
+
+### What the package-test branch did (iteration 28)
+
+- **123** (`9b0b6fe`). `lintBegins` resets the reach cache when a file's
+  own folder answers a tree listing differently than the last time this
+  run asked it (`folderChanged`, `lint/fs-cache.ts`), reading the tree
+  seam's own freshness stamp (`treeStamp`, `src/seams/git/tree.ts` — the
+  same git index and directory modification times its own staleness
+  check already reads). The file-linted-twice and walked-then-linted
+  triggers stay: a content edit of a module the walk passed through
+  moves no directory's time, so only they catch it.
+- **124** (`9913a91`). `projectRootOf` memoises its answer per starting
+  directory, invalidated by the same `folderChanged` signal — a
+  `package.json` written or removed AT a directory already answered is
+  seen next time, a directory above or below it is a fresh walk's to see.
+- **125** (`30b8c58`). A1's `before()` checks `context.sourceCode.text`
+  for the literal `specification.` first: a file that never writes it
+  cannot hold the `specification.<member>(…)` call the visitor looks for.
+- **Red on a broken implementation:** 123's boundary with the
+  `folderChanged` trigger removed (1); `treeStamp` reading the directory's
+  own time alone, blind to the git index (1); 124's memo with no
+  invalidation (1); 125's pre-check inverted (both of A1's existing
+  `invalid` cases, 2).
+- **Verdicts unchanged.** `oxlint --type-aware --format=json` reports the
+  same 1370 diagnostics before and after, byte-identical but for one
+  message (`lint/production.ts`'s grown line count, from the added code).
+  `npx vitest --run --project unit`: 389 files, 2016 tests, green across
+  all three commits. `make fix` then `make check` exit 0 (2362 tests
+  passed, 1 skipped).
+- **Timings.** Toolchain reinstalled at package-typescript's HEAD
+  (`npm ci`, clone at `f9f2d92`) before measuring. `oxlint --type-aware
+  --debug=timings` produced no visible timing output in this environment
+  — text, JSON (`--format=json`) and even a clean single-file run all
+  print nothing beyond the diagnostics themselves; `--help` lists the
+  flag, and the JS-plugin side does collect per-rule timings internally
+  (`node_modules/oxlint/dist/lint.js`'s `collectTimings`), but nothing
+  surfaces it here. Measured wall time instead (`/usr/bin/time -p
+  npx oxlint --type-aware --format=json`, two runs each): before
+  (package-typescript HEAD, this branch's tree at `f619e951`) 3.38 s /
+  2.80 s; after (123–125 together) 2.52 s / 2.51 s. No F2/A1/JS-total
+  breakdown could be measured this way.
+
+### Raised by the package-test branch, iteration 28
+
+128. `oxlint --type-aware --debug=timings` (oxlint 1.85.0, this
+     repository) prints no timing report in any of text, `--format=json`
+     or a one-file run, though `--help` documents the flag and the
+     JS-plugin runtime collects the numbers internally. HYPOTHESIS
+     (2026-09-24): the flag's aggregation/print side is not wired in this
+     release. Settled by reading oxlint's own source at the pinned tag,
+     or filing upstream — the toolchain round already tracks its debt.
