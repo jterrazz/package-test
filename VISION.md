@@ -1853,3 +1853,59 @@ the module out of the entry`; read the F2 row.
 | 115             | The coverage floor is re-recorded from CI during the real refactor.                                                                                                                                                                                                                                                                                                                                                                                                       |
 | route params    | A test writes the route template: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`; the subject reader reads the template.                                                                                                                                                                                                                                                                                                                              |
 | signews defects | (1) `toMatch(file())` on a plain string is refused (types + runtime) and C28 never extracts a string comparison to a file; (2) a seed shared by a route and its sub-route goes to their common level the route can reach; (3) the checker's fixes are formatted in the same `make fix`; (4) `with()` views are named `<subject>` consistently by the fixer; (5) seed names capped (done, 107); (6) the split copies a hook only into files whose tests read what it sets. |
+
+### What the package-test branch did (iteration 24)
+
+- **110** (`c18ed82`). The seven constructors are `src/facets/<facet>/<facet>.handle.ts`;
+  the F2 override for the two barrels is gone. F2 then judged the api
+  constructor for the first time and found its `import('vitest')` of the
+  route ledger, which moved to `src/runner/provided.ts`. A meta-test reads
+  every bundle's source map and fails on a module that is test material
+  (`materialAt`), the local half of the Publish contract of iteration 20.
+- **111** (`074dd4c`). Production is every source module that is no test
+  material, but a tool's config (`*.config.*`) and a module under a retired
+  test root (`__tests__/`, a root `test/`/`tests/`, I2's). F2 alone over the
+  estate, new findings: package-typescript 3 (fixture projects under
+  `specs/` with their own `package.json`) and spwn 3
+  (spwn's web fixture app, in a `specs/` package, and
+  the gate's browser service entry, a service that drives playwright at run
+  time — question 116).
+- **113** (`77d98c6`). The walk parses the relay module with `oxc-parser`
+  (a new runtime dependency, behind `src/seams/oxc-parser/`) and runs F2's
+  own visitors over it; the regex reader is gone.
+- **114** (`48ec2f6`). `paths` is folded through the `extends` chain the
+  compiler's way (string or array, relative or a package's config, `baseUrl`
+  read where stated).
+- **Route params** (`ef64b32`, `a79cbf7`). `get`/`delete(template, { params })`,
+  `post`/`put(template, body, { params })`; the params are inferred from the
+  template and required exactly when it holds one; `{ params: {} }` states a
+  literal path is the route. New row B12 (type + runtime). The server port's
+  fourth argument is `{ headers, template }`; route coverage matches a
+  templated request by its template. The subject reader reads the template;
+  the rule for a filled path: a lowercase word right after a collection,
+  with more path after it, reads two ways — C30 reports it at its chain,
+  naming the template to write (or `{ params: {} }`), and never moves it. The
+  last segment keeps the literal reading.
+- **Defects.** (1) `532e041`: a `file()`/`directory()` carries a
+  `Symbol.match` that refuses, so no string matches it runner or none (the
+  false green was vitest reading the path object as the pattern
+  `[object Object]`); C28 never writes a plain subject's value to a file and
+  names `text()`. (2) `246c610`: C15 accepts an enclosing leaf's ground, C28
+  moves a pool entry only a route and the routes under it read into the
+  route's ground. (3) `62ebef8`: `make fix` runs the checker, then the
+  toolchain. (4) `94771b8`: B16w names the view for the subject. (6)
+  `6130bb3`: the split keeps a hook only where the tests read what it sets.
+
+### Raised by the package-test branch, iteration 24
+
+116. spwn's gate browser service (`gate/browser/index.js`) requires `playwright` at run time:
+     a service whose product IS a browser. F2 reads playwright as a test
+     package. Allow it for a package that declares it in `dependencies`
+     (the rule iteration 20 set for the dist guard), or suppress there?
+117. The consumer Makefiles still run `typescript fix` before the checker
+     (signews-api `c50effa3`). Carry the new order into each repository's
+     wave row, or have the toolchain own the `fix` recipe?
+118. C28 reads a plain subject by its spelling (`expect(name)` or a string
+     literal): an accessor held in a variable (`const out = result.stdout;
+expect(out).toMatch(…)`) is now left in place with the `text()`
+     advice. Accept, or resolve the binding?
