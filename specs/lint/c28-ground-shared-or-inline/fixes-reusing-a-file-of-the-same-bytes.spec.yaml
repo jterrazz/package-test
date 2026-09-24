@@ -1,0 +1,15 @@
+description: --fix names the seed and the golden that already hold a value's bytes, and writes no -2 file
+fixture: ./fixtures/same-bytes/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/api/users/list/seeds/lists-everyone-2.sql: absent
+          specs/api/users/list/expected/lists-everyone-2.json: absent
+          specs/api/users/list/seeds/lists-everyone.sql:
+              equals: |-
+                  INSERT INTO users (name) VALUES ('Ada');
+          specs/api/users/list/listed.spec.ts:
+              contains:
+                  - api.seed(file('./seeds/lists-everyone.sql'))
+                  - expect(result.json).toMatch(file('./expected/lists-everyone.json'))
