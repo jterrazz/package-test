@@ -623,4 +623,43 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
             moved: created.includes('function answered'),
         }).toStrictEqual({ copy: true, imported: true, moved: false });
     });
+
+    test("the split leaves an author's fixtures module as written, and each file keeps its own copy", () => {
+        // Given - two routes sharing a helper, beside a fixtures module the author wrote
+        const authored = "export const SEEDED = 'the author wrote this';\n";
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.fixtures.ts': authored,
+            'api/orders/orders.spec.ts': [
+                "import { expect, test } from 'vitest';",
+                '',
+                "import { api } from '../api.specification.js';",
+                '',
+                'function answered(result) {',
+                '    expect(result.status).toBe(200);',
+                '}',
+                '',
+                "test('lists', async () => {",
+                "    answered(await api.get('/orders'));",
+                '});',
+                '',
+                "test('creates', async () => {",
+                "    answered(await api.post('/orders', {}));",
+                '});',
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the module is untouched, and both files still declare the helper they read
+        expect({
+            copies: ['api/orders/list/orders.spec.ts', 'api/orders/create/orders.spec.ts'].map(
+                (file) =>
+                    readFileSync(join(root, file), 'utf8').includes('function answered(result)'),
+            ),
+            module: readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8'),
+        }).toStrictEqual({ copies: [true, true], module: authored });
+    });
 });
