@@ -203,13 +203,32 @@ describe('route coverage — the api run judged', () => {
                 "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  /health — the list names it, and the app takes it on its own methods only: remove '/health'\n  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
         });
     });
+
+    test('a method-less route is the app’s whatever its parameters are named', async () => {
+        // Given - the app takes /mcp/:id on any method, the list naming /mcp/:session, then /mcp/:id/x
+        const agreeing = methodlessRun(['/mcp/:session'], '/mcp/:id');
+        const drifted = methodlessRun(['/mcp/:id/x'], '/mcp/:id');
+
+        // Then - one route by its shape, and a deeper path is another route
+        await expect(judgeRoutes(agreeing.root, agreeing.directory, GREEN)).resolves.toStrictEqual({
+            line: 'api routes: all 2 declared routes reached',
+        });
+        await expect(judgeRoutes(drifted.root, drifted.directory, GREEN)).resolves.toStrictEqual({
+            failure:
+                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'\n  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
+        });
+    });
 });
 
 /**
- * A run over an app taking `/mcp` on any method and `/health` on GET, both
- * reached, whose `jterrazz.config.ts` names `methodless` routes.
+ * A run over an app taking `any` (`/mcp` unless named) on any method and
+ * `/health` on GET, both reached, whose `jterrazz.config.ts` names
+ * `methodless` routes.
  */
-function methodlessRun(methodless: readonly string[]): { directory: string; root: string } {
+function methodlessRun(
+    methodless: readonly string[],
+    any = '/mcp',
+): { directory: string; root: string } {
     const root = mkdtempSync(join(tmpdir(), 'route-coverage-'));
     onTestFinished(() => {
         rmSync(root, { force: true, recursive: true });
@@ -217,11 +236,11 @@ function methodlessRun(methodless: readonly string[]): { directory: string; root
     const directory = join(root, 'ledgers');
     writeLedger(directory, {
         declared: [
-            { method: 'ALL', path: '/mcp' },
+            { method: 'ALL', path: any },
             { method: 'GET', path: '/health' },
         ],
         reached: [
-            { method: 'POST', path: '/mcp' },
+            { method: 'POST', path: any.replaceAll(/:[^/]+/gu, '7') },
             { method: 'GET', path: '/health' },
         ],
     });
