@@ -98,9 +98,9 @@ function isOptions(value: unknown): value is InterceptOptions {
 /**
  * Resolve every relative request against `origin` for the life of the scope.
  *
- * The framework owns the seam so a test never has to: this is the one place
- * `fetch` is wrapped, it is put back when the scope ends, and what it does is
- * the one thing a page would have done for free — turn `/api/posts` into a URL.
+ * The framework owns the seam so a test never has to: the wrapper goes on for
+ * the scope, `fetch` is put back when the scope ends, and what it does is the
+ * one thing a page would have done for free — turn `/api/posts` into a URL.
  *
  * Validating the origin and INSTALLING the wrapper are two steps because they
  * happen at two moments: the refusal of a bad origin belongs before anything
