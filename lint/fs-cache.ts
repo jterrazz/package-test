@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from 'node:fs';
 
-import { forgetTree, treeKind, treeNames } from '../src/seams/git/tree.js';
+import { forgetTree, treeKind, treeNames, treeStamp } from '../src/seams/git/tree.js';
 
 /**
  * Filesystem probes for the plugin's fs-anchored rules — every rule that reads
@@ -72,8 +72,26 @@ export function readFileCached(path: string): null | string {
     return text;
 }
 
+/** The tree stamp a folder answered with, the last time this run asked. */
+const folderStamps = new Map<string, string>();
+
+/**
+ * Has `folder`'s tree listing changed since this run last asked about it —
+ * false the first time, since there is nothing yet to compare against. A
+ * caller that memoises an answer about a folder reads this before trusting
+ * its memo, so a file created or removed there is seen without keeping the
+ * answer only until a heuristic run boundary happens to clear it.
+ */
+export function folderChanged(folder: string): boolean {
+    const stamp = treeStamp(folder);
+    const previous = folderStamps.get(folder);
+    folderStamps.set(folder, stamp);
+    return previous !== undefined && previous !== stamp;
+}
+
 /** Test seam: forget everything probed so far. */
 export function resetFsCache(): void {
     fileContents.clear();
+    folderStamps.clear();
     forgetTree();
 }

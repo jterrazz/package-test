@@ -252,4 +252,19 @@ describe('reachOf across a run', () => {
             /specs\/fixtures\/users\.js$/u,
         );
     });
+
+    test('a file created beside a folder already answered is seen by a sibling never linted before', () => {
+        // Given - a folder answered about a sibling that did not exist yet
+        const root = packageWith({ 'src/a.ts': 'export {};\n' });
+        const from = (name: string): string => join(root, 'src', name);
+        lintBegins(from('a.ts'));
+        expect(reachOf(from('a.ts'), './x.test')).toBeUndefined();
+
+        // When - that sibling is created, and never itself linted or walked
+        writeFileSync(from('x.test.ts'), 'export const x = 1;\n');
+
+        // Then - a module of the same folder, linted for the first time, sees it
+        lintBegins(from('b.ts'));
+        expect(reachOf(from('b.ts'), './x.test')?.kind).toBe('a test file');
+    });
 });

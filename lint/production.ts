@@ -12,7 +12,7 @@ import {
     stringValue,
 } from './ast.js';
 import type { ImportSource } from './ast.js';
-import { isFile, listDirectory, readFileCached } from './fs-cache.js';
+import { folderChanged, isFile, listDirectory, readFileCached } from './fs-cache.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
 import type { AstNode } from './rule-shape.js';
@@ -479,12 +479,15 @@ export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
  * the walk from one folder is the same whichever production module of it
  * asks, since a production module on the way ends the walk.
  *
- * A run is every lint until a file is linted a second time, or until a module
- * a walk passed through is linted: a CLI run lints each file once, and the
- * editor's host lints again the file that changed. Only a walk's middle can
- * move its answer — the tree it resolves in and the modules that are neither
- * production nor test material — and a change there reaches this cache
- * through the file linted next.
+ * A run is every lint until a file is linted a second time, until a module a
+ * walk passed through is linted, or until a folder already asked about
+ * answers a tree listing it did not before: a CLI run lints each file once,
+ * and the editor's host lints again the file that changed — or creates one
+ * beside a file it never touches, which only the tree listing sees. Only a
+ * walk's middle can move its answer — the tree it resolves in and the
+ * modules that are neither production nor test material — and a change there
+ * reaches this cache through the file linted next, or the folder it is kept
+ * for read again.
  */
 const reaches = new Map<string, Reach | undefined>();
 
@@ -495,11 +498,13 @@ const linted = new Set<string>();
 const walked = new Set<string>();
 
 /**
- * A file's lint begins: when it was linted in this run already, or a walk
- * passed through it, a new run begins and every reach is walked again.
+ * A file's lint begins: when it was linted in this run already, a walk
+ * passed through it, or its folder's tree listing answers differently than
+ * it did the last time this run asked, a new run begins and every reach is
+ * walked again.
  */
 export function lintBegins(filename: string): void {
-    if (linted.has(filename) || walked.has(filename)) {
+    if (linted.has(filename) || walked.has(filename) || folderChanged(dirname(filename))) {
         reaches.clear();
         linted.clear();
         walked.clear();

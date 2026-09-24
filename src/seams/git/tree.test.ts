@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { forgetTree, moveKeepingHistory, treeKind, treeNames } from './tree.js';
+import { forgetTree, moveKeepingHistory, treeKind, treeNames, treeStamp } from './tree.js';
 
 /** A directory on disk holding `files`, a git repository when `git` says what to add. */
 function project(files: string[], git?: { add: string[]; ignore?: string }): string {
@@ -138,6 +138,53 @@ describe('the tree git does not ignore', () => {
 
         // Then - a missing directory is not an empty one
         expect(() => treeNames(join(root, 'specs', 'gone'))).toThrow(/ENOENT/u);
+    });
+});
+
+describe("the listing's own freshness stamp", () => {
+    test('stays the same while neither the folder nor the index changed', () => {
+        // Given - a repository, its `src/` stamped once
+        const root = project(['src/old.ts'], { add: ['src'] });
+        const first = treeStamp(join(root, 'src'));
+
+        // Then - asking again names the same stamp
+        expect(treeStamp(join(root, 'src'))).toBe(first);
+    });
+
+    test('changes once a file is written into the folder', () => {
+        // Given - a folder stamped before a sibling of its one file exists
+        const root = project(['src/old.ts'], { add: ['src'] });
+        const before = treeStamp(join(root, 'src'));
+
+        // When - a new file is written there
+        writeFileSync(join(root, 'src', 'new.ts'), 'new\n');
+
+        // Then - the stamp moves — the listing itself would answer differently now
+        expect(treeStamp(join(root, 'src'))).not.toBe(before);
+    });
+
+    test("changes once the index moves, the folder's own files untouched", () => {
+        // Given - a tracked file, its folder stamped once
+        const root = project(['src/a.ts'], { add: ['src'] });
+        const before = treeStamp(join(root, 'src'));
+
+        // When - git stops tracking it, the file itself left on disk
+        execFileSync('git', ['rm', '--cached', '--quiet', 'src/a.ts'], { cwd: root });
+
+        // Then - the stamp moves — what the tree lists there changed too
+        expect(treeStamp(join(root, 'src'))).not.toBe(before);
+    });
+
+    test('is the folder alone outside any work tree', () => {
+        // Given - two files and no repository
+        const root = project(['src/a.ts']);
+        const before = treeStamp(join(root, 'src'));
+
+        // When - a sibling is written
+        writeFileSync(join(root, 'src', 'b.ts'), 'b\n');
+
+        // Then - the folder's own time still moves the stamp with no index to read
+        expect(treeStamp(join(root, 'src'))).not.toBe(before);
     });
 });
 

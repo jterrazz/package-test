@@ -203,6 +203,20 @@ export function treeNames(dir: string): string[] {
 }
 
 /**
+ * `dir`'s own freshness stamp — the git index and directory modification
+ * times {@link stale} reads for it, the same two signals, so a cache keyed by
+ * this string goes stale exactly when a listing of `dir` would answer
+ * differently. `0` stands for the index where `dir` lies in no work tree —
+ * the directory's own time is the only signal there is.
+ */
+export function treeStamp(dir: string): string {
+    const absolute = resolve(dir);
+    const tree = workTreeOf(absolute, absolute);
+    const index = tree === null ? 0 : changedAt(tree.index);
+    return `${index}:${changedAt(absolute)}`;
+}
+
+/**
  * What one path names, read through the same listing: `directory` or `file` as
  * the disk types it (a link followed), or undefined when it is not on disk or,
  * inside a work tree, when git ignores it and everything below it.
