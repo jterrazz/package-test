@@ -382,6 +382,80 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         ]);
     });
 
+    test('the types a moved helper reads move with it, and a type only the tests read stays', () => {
+        // Given - three routes: two share a helper typed by an alias and an interface and a type they read themselves, one reads only the interface
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { expect, test } from 'vitest';",
+                '',
+                "import { api } from '../api.specification.js';",
+                '',
+                'type Status = number;',
+                '',
+                '/** What an answer carries. */',
+                'interface Answer {',
+                '    status: Status;',
+                '}',
+                '',
+                'type Order = { item: string };',
+                '',
+                'function answered(result: Answer) {',
+                '    expect(result.status).toBe(200);',
+                '}',
+                '',
+                "test('lists', async () => {",
+                "    const answer: Answer = await api.get('/orders');",
+                '    const none: Order[] = [];',
+                '    answered(answer);',
+                '    expect(none).toStrictEqual([]);',
+                '});',
+                '',
+                "test('creates', async () => {",
+                "    const order: Order = { item: 'book' };",
+                "    answered(await api.post('/orders', order));",
+                '});',
+                '',
+                "test('deletes', async () => {",
+                "    const answer: Answer = await api.delete('/orders/1');",
+                '    expect(answer.status).toBe(204);',
+                '});',
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the helper's types live in the fixtures module, exported; the test's own type is copied
+        const fixtures = readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8');
+        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
+        const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
+        const deleted = readFileSync(join(root, 'api/orders/delete/orders.spec.ts'), 'utf8');
+        expect({
+            clauses: [
+                listed.includes("import { type Answer, answered } from '../orders.fixtures.js';"),
+                deleted.includes("import type { Answer } from '../orders.fixtures.js';"),
+            ],
+            answer: fixtures.includes('export interface Answer {'),
+            imported: created.includes("import { answered } from '../orders.fixtures.js';"),
+            order: [
+                fixtures.includes('Order'),
+                created.includes('type Order = { item: string };'),
+                listed.includes('type Order = { item: string };'),
+            ],
+            status: fixtures.includes('export type Status = number;'),
+            typesLeft: created.includes('Answer') || created.includes('Status'),
+        }).toStrictEqual({
+            answer: true,
+            clauses: [true, true],
+            imported: true,
+            order: [false, true, true],
+            status: true,
+            typesLeft: false,
+        });
+    });
+
     test('a helper the split leaves to several files moves once into the leaf fixtures module', () => {
         // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
         const root = specsTree({

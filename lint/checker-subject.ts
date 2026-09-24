@@ -410,14 +410,14 @@ function isRead(text: string, name: string, declared: Span): boolean {
     ).test(body);
 }
 
-/** A file-level declaration, the comment lines above it included. */
-type Declaration = Span & { name: string };
+/** A file-level declaration, the comment lines above it included — a type's or a value's. */
+type Declaration = Span & { name: string; type: boolean };
 
-/** A top-level declaration's head: `const X`, `let X`, `function x`, `async function x`. */
+/** A top-level declaration's head: `const X`, `let X`, `function x`, `async function x`, `type X`, `interface X`. */
 const DECLARATION =
-    /^(?:(?:const|let)\s+(?<variable>[\w$]+)|(?:async\s+)?function\s*\*?\s*(?<fn>[\w$]+))/gmu;
+    /^(?:(?:const|let)\s+(?<variable>[\w$]+)|(?:async\s+)?function\s*\*?\s*(?<fn>[\w$]+)|type\s+(?<alias>[\w$]+)|interface\s+(?<shape>[\w$]+))/gmu;
 
-/** Where a top-level statement that opens at `start` ends: its `;`, or the brace closing a function. */
+/** Where a top-level statement that opens at `start` ends: its `;`, or the brace closing a function's or an interface's body. */
 function statementEnd(blank: string, start: number, isFunction: boolean): number {
     let index = start;
     while (index < blank.length) {
@@ -449,21 +449,27 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
     return blank.length;
 }
 
-/** The top-level `const`/`let`/`function` declarations of a file — an export is read elsewhere, and kept. */
+/** The top-level `const`/`let`/`function`/`type`/`interface` declarations of a file — an export is read elsewhere, and kept. */
 function declarationsOf(text: string): Declaration[] {
     const blank = withoutComments(text);
     return [...blank.matchAll(DECLARATION)].flatMap((match) => {
-        const name = match.groups?.variable ?? match.groups?.fn;
+        const { alias, fn, shape, variable } = match.groups ?? {};
+        const name = variable ?? fn ?? alias ?? shape;
         if (name === undefined) {
             return [];
         }
         const end = statementEnd(
             blank,
             match.index + match[0].length,
-            match.groups?.fn !== undefined,
+            fn !== undefined || shape !== undefined,
         );
         return [
-            { end: lineEnd(text, end - 1), name, start: withLeadingComments(text, match.index) },
+            {
+                end: lineEnd(text, end - 1),
+                name,
+                start: withLeadingComments(text, match.index),
+                type: alias !== undefined || shape !== undefined,
+            },
         ];
     });
 }
@@ -703,9 +709,11 @@ function reads(code: string, name: string): boolean {
 
 /**
  * The file-level declarations a split moves into the leaf's fixtures module:
- * those two files or more still read, with every declaration they read in
- * turn — never one that builds a `file()` or a `directory()` (C26), nor one
- * that reads such a declaration, which stay copied where they are read.
+ * the values two files or more still read, with every declaration they read
+ * in turn — a type alias or an interface among them — never one that builds a
+ * `file()` or a `directory()` (C26), nor one that reads such a declaration,
+ * which stay copied where they are read. A type only tests read is no helper:
+ * it stays in each file that reads it.
  */
 function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
     const declarations = declarationsOf(spec.text);
@@ -718,7 +726,9 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
             .map((d) => d.name),
     );
     const moved = new Set(
-        declarations.filter((d) => readers(d.name) > 1 && !excluded.has(d.name)).map((d) => d.name),
+        declarations
+            .filter((d) => !d.type && readers(d.name) > 1 && !excluded.has(d.name))
+            .map((d) => d.name),
     );
     for (let changed = true; changed;) {
         changed = false;
@@ -762,7 +772,7 @@ function commonFolder(paths: readonly string[]): string {
 
 /** A declaration's code, exported: `export` written before its head, its doc comment kept above. */
 function exported(code: string): string {
-    const head = /^(?:const|let|async\s|function)/mu.exec(withoutComments(code));
+    const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(withoutComments(code));
     return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
 }
 
@@ -772,6 +782,19 @@ function withImportLine(text: string, line: string): string {
     return last === undefined
         ? `${line}\n${text}`
         : `${text.slice(0, last.end)}${line}\n${text.slice(last.end)}`;
+}
+
+/**
+ * The clause importing what a file reads from the fixtures module: `import
+ * type` when it reads only types, a `type` before each type among values
+ * otherwise, so no type becomes a runtime import.
+ */
+function importLine(read: readonly string[], types: ReadonlySet<string>, from: string): string {
+    if (read.every((name) => types.has(name))) {
+        return `import type { ${read.join(', ')} } from '${from}';`;
+    }
+    const names = read.map((name) => (types.has(name) ? `type ${name}` : name));
+    return `import { ${names.join(', ')} } from '${from}';`;
 }
 
 /**
@@ -787,6 +810,7 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
         return { drafts };
     }
     const names = new Set(moved.map((d) => d.name));
+    const types = new Set(moved.filter((d) => d.type).map((d) => d.name));
     const holds = (draft: Draft): boolean =>
         declarationsOf(draft.text).some((d) => names.has(d.name));
     const folder = commonFolder(drafts.filter(holds).map((draft) => dirname(draft.target)));
@@ -818,9 +842,7 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
             const specifier = relativePath(dirname(draft.target), module).replace(/\.ts$/u, '.js');
             return {
                 target: draft.target,
-                text: pruned(
-                    withImportLine(kept, `import { ${read.join(', ')} } from '${specifier}';`),
-                ),
+                text: pruned(withImportLine(kept, importLine(read, types, specifier))),
             };
         }),
         fixtures,
