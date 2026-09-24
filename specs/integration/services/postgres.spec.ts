@@ -1,7 +1,7 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import { describe, expect, test } from 'vitest';
+import { describe, expect, inject, test } from 'vitest';
 
 import { file, postgres } from '../../../src/index.js';
 import { integration } from '../integration.specification.js';
@@ -90,6 +90,35 @@ describe('postgres', () => {
             hashed: asked,
             labelled: 'true',
             reused: asked,
+        });
+    });
+
+    test('reaches the container the run started, not one of its own', async () => {
+        // Given - the run's containers asked for the one this handle's request names
+        const result = await integration.call(async ({ db }) => {
+            const run = inject('serviceContainers');
+            const asked = await fetch(`${run}/containers`, {
+                body: JSON.stringify({
+                    env: { ...db.environment },
+                    image: db.defaultImage,
+                    port: db.defaultPort,
+                    ...db.containerOptions,
+                }),
+                method: 'POST',
+            });
+            const address: unknown = JSON.parse(await asked.text());
+            const handle = Number(new URL(db.connectionString).port);
+            const sameServer =
+                typeof address === 'object' &&
+                address !== null &&
+                'port' in address &&
+                address.port === handle;
+            return { sameServer };
+        });
+
+        // Then - the handle's server is the run's: one container for every file
+        expect(result.value).toMatch({
+            sameServer: true,
         });
     });
 
