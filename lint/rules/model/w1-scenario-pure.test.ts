@@ -6,8 +6,8 @@ import { w1ScenarioPure } from './w1-scenario-pure.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: oxlint does not export its `Rule` type, and our structural
-// `LintRule` is intentionally decoupled from its internal (alpha) typings.
+// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
+// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
