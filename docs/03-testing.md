@@ -25,7 +25,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
 | `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component/**/*.test.tsx`, built by `component()`                                         | the same chromium; no Docker. Runs in its own group, after `website` |
-| `mobile`      | `specs/mobile/**`, built by `mobile({ serial: true })`                                          | Nothing — the Appium protocol double                                 |
+| `mobile`      | `specs/mobile/**`, built by `mobile()` — serial by default, one simulator                       | Nothing — the Appium protocol double                                 |
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
 

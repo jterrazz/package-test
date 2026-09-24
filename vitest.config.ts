@@ -64,9 +64,8 @@ const config = defineSpecConfig({
             integration({ serial: true }),
             // Needs playwright + `npx playwright install chromium`; no Docker.
             website(),
-            // Serial: every file's runner opens its own session, and a
-            // Simulator drives one session at a time.
-            mobile({ serial: true }),
+            // Serial by default — a simulator drives one session at a time.
+            mobile(),
             component({
                 // Every render's context, stated away from every default so the
                 // Component app proves each one reaches the page (locale-note).

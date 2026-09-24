@@ -305,6 +305,13 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(testOf(integration()).fileParallelism).toBeUndefined();
     });
 
+    test('mobile() runs serial by default — one simulator, no `serial` to pass', () => {
+        // Given - the canonical mobile project, stated by nobody
+        // Then - files run one at a time, whether or not the caller says so
+        expect(testOf(mobile()).fileParallelism).toBe(false);
+        expect(testOf(mobile({ serial: true })).fileParallelism).toBe(false);
+    });
+
     test('every helper takes it, not only the ones 15.2 shipped it on', () => {
         // Given - the four other helpers this release adds
         const serial = [api, jobs, mobile].map((helper) => testOf(helper({ serial: true })));
