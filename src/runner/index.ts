@@ -21,6 +21,7 @@ export {
     type JobsProjectOptions,
     type LiterateDoor,
     mobile,
+    type MobileProjectOptions,
     unit,
     type UnitProjectOptions,
     website,

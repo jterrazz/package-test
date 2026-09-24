@@ -1,7 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
+import type { ProvidedContext } from 'vitest';
 import type { TestProject } from 'vitest/node';
 
+import { serveAppium } from '../facets/mobile/appium-server.js';
 import { endSessions, MOBILE_SESSIONS_DIR } from '../facets/mobile/session-ledger.js';
 
 /**
@@ -11,14 +13,30 @@ import { endSessions, MOBILE_SESSIONS_DIR } from '../facets/mobile/session-ledge
  * one per project and per run. The first runner that opens the app records
  * its session there and every later file attaches to it. After the last
  * file, it ends every session recorded.
+ *
+ * A project that declares its device (`mobile({ device, root })`) has this
+ * setup own the server too: it boots the simulator, spawns the project's
+ * Appium server once for the run and provides both to the workers, and it
+ * stops the server after the sessions are ended.
  */
-/** What the setup reads of the project: its root, and the channel to its workers. */
-type SessionProject = Pick<TestProject, 'provide'> & { config: { root: string } };
+/** What the setup reads of the project: its root, what it declared, and the channel to its workers. */
+type SessionProject = Pick<TestProject, 'provide'> & {
+    config: { provide?: Partial<ProvidedContext>; root: string };
+};
 
-export default function setup(project: SessionProject): () => Promise<void> {
+export default async function setup(project: SessionProject): Promise<() => Promise<void>> {
     const directory = join(project.config.root, MOBILE_SESSIONS_DIR, randomUUID());
     project.provide('mobileSessions', directory);
+    const declared = project.config.provide?.mobileAppium;
+    const served =
+        declared === undefined
+            ? undefined
+            : await serveAppium(declared.device, resolve(project.config.root, declared.root));
+    if (served !== undefined) {
+        project.provide('mobileServer', { udid: served.udid, url: served.server.url });
+    }
     return async () => {
         await endSessions(directory);
+        await served?.server.stop();
     };
 }

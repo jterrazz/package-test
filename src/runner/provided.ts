@@ -30,3 +30,16 @@ export async function mobileSessions(): Promise<string | undefined> {
         return undefined;
     }
 }
+
+/**
+ * The run's Appium server — what a `mobile({ device })` project's global
+ * setup spawned and provides; `undefined` when each runner reaches its own.
+ */
+export async function mobileServer(): Promise<undefined | { udid: string; url: string }> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('mobileServer');
+    } catch {
+        return undefined;
+    }
+}

@@ -14,7 +14,7 @@ describe('the mobile session setup — one driver session per run', () => {
             rmSync(root, { force: true, recursive: true });
         });
         const provided = new Map<string, unknown>();
-        const teardown = setup({
+        const teardown = await setup({
             config: { root },
             provide: (key: string, value: unknown) => {
                 provided.set(key, value);

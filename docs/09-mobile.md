@@ -59,7 +59,7 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 });
 ```
 
-Without a declared `appium`, the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
+Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
@@ -77,14 +77,21 @@ export const { cleanup, mobile } = await specification.mobile({
 
 ### One session per run
 
-Under a declared `appium` server, a `mobile()` project opens **one driver session for the whole run**, not one per spec file. The project's global setup hands every file an empty ledger under `.artifacts/vitest/mobile-sessions/`. The first `.open()` of the run creates the session and records it there, and every later file asking the same server for the same capabilities attaches to it instead of creating its own. `cleanup` leaves that session alone; the setup ends it once the last file has run.
+Under a server that outlives the file — a declared `appium` server, or the run's own — a `mobile()` project opens **one driver session for the whole run**, not one per spec file. The project's global setup hands every file an empty ledger under `.artifacts/vitest/mobile-sessions/`. The first `.open()` of the run creates the session and records it there, and every later file asking the same server for the same capabilities attaches to it instead of creating its own. `cleanup` leaves that session alone; the setup ends it once the last file has run.
+
+**The run's own server** is the project's to declare: `mobile({ device, root })` names the simulator and where the `appium` binary is resolved from (`<root>/node_modules/.bin/appium`, `root` read against the config's root, `.` when absent). The project's global setup resolves and boots that simulator, spawns the server once for the run, and hands both to the workers. A runner with no `appium` of its own drives that server, asking it for its own `device` — the booted simulator's UDID standing in when that `device` names none — and spawns nothing. The setup stops the server once it has ended the run's sessions.
+
+```typescript
+// vitest.config.ts — one simulator, one Appium server, one session for the run
+mobile({ device: { name: 'iPhone 17', os: '26.5' }, root: 'apps/mobile' }),
+```
 
 The session is keyed on the server's URL and the capabilities asked for, so a second specification naming another app or another device gets a session of its own, recorded and ended the same way. Files still run one at a time (`fileParallelism: false` is `mobile()`'s default): the app is terminated and relaunched by every `.open()`, and two files driving it at once would fight over it.
 
 Two runs keep a session per runner instead, which `cleanup` ends:
 
 - **A project written by hand**, with no `mobile()`: nothing provides the ledger.
-- **A spawned Appium server.** It stops with the runner that started it, so its session cannot outlive the file.
+- **A server the runner spawns itself**, under a `mobile()` project that declares no `device`. It stops with the runner that started it, so its session cannot outlive the file.
 
 ### Declared timeouts
 

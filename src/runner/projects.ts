@@ -24,7 +24,7 @@ export { cli, type CliProjectOptions } from '../facets/cli/cli.project.js';
 export { component, type ComponentProjectOptions } from '../facets/component/component.project.js';
 export { integration } from '../facets/integration/integration.project.js';
 export { jobs, type JobsProjectOptions } from '../facets/jobs/jobs.project.js';
-export { mobile } from '../facets/mobile/mobile.project.js';
+export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
 export { type FacetProjectOptions, type LiterateDoor } from './facet-project.js';
 

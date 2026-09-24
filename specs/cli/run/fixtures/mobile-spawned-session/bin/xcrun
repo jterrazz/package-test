@@ -1,0 +1,6 @@
+#!/bin/sh
+# The simulator tools, answering for one booted iPhone 17.
+case "$2" in
+    list) printf '{ "devices": { "com.apple.CoreSimulator.SimRuntime.iOS-26-0": [{ "name": "iPhone 17", "state": "Booted", "udid": "SIM-17" }] } }\n' ;;
+esac
+exit 0

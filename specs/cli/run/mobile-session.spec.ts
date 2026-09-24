@@ -20,4 +20,17 @@ describe('mobile-session', () => {
         expect(result.stdout.text).toContain('Tests  2 passed');
         expect(result.stdout.text).toContain('appium double: 1 session(s) created, 1 deleted');
     });
+
+    test('a run whose project declares the device spawns one server, and its files drive one session', async () => {
+        // Given - a scratch project declaring its simulator and appium root, and two files spawning no server of their own
+        const result = await vitestCli
+            .fixture(directory('./fixtures/mobile-spawned-session/'))
+            .env({ DOUBLE_SETUP })
+            .exec('run --configLoader runner');
+
+        // Then - both files passed, over the one session the run's own server opened and ended
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toContain('Tests  2 passed');
+        expect(result.stdout.text).toContain('appium double: 1 session(s) created, 1 deleted');
+    });
 });

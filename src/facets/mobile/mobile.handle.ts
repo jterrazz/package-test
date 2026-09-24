@@ -6,13 +6,12 @@ import type { ServiceRecord, StartedServices } from '../../model/chain/services.
 import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
-import { mobileSessions } from '../../runner/provided.js';
-import { startAppiumServer } from './appium-server.js';
-import type { AppiumServer } from './appium-server.js';
+import { mobileServer, mobileSessions } from '../../runner/provided.js';
+import { serveAppium } from './appium-server.js';
+import type { AppiumServer, MobileDevice } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
 import { sessionLedger } from './session-ledger.js';
-import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 
 // ── Types ──
 
@@ -57,15 +56,12 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
      * `backendUrl` — inject it into your bundler env yourself.
      */
     backend?: MobileBackendOptions;
-    /** The simulator to run on — resolved through `xcrun simctl`. */
-    device: {
-        /** Simulator name, matched exactly (`iPhone 17`). */
-        name: string;
-        /** OS narrowing when the name exists on several runtimes — `'26.5'` or `'iOS 26.5'`. */
-        os?: string;
-        /** Explicit UDID — skips name/os resolution entirely. */
-        udid?: string;
-    };
+    /**
+     * The simulator to run on — resolved through `xcrun simctl`. Under a
+     * `mobile({ device })` project the run's server already drives one: its
+     * UDID stands for a device that declares none.
+     */
+    device: MobileDevice;
     /**
      * Project-root override (CONVENTIONS A9): where the appium binary is
      * resolved from (`node_modules/.bin`). Auto-discovered from the calling
@@ -104,7 +100,8 @@ export type MobileHandle = {
     backendUrl?: string | undefined;
     /**
      * End the driver session — unless it is the run's, which the project's
-     * global setup ends — and stop the appium server and the stub backend.
+     * global setup ends — and stop the appium server this runner spawned and
+     * the stub backend.
      */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
@@ -118,39 +115,46 @@ export type MobileHandle = {
 
 // ── Constructor ──
 
+/** A server this runner did not start, and so never stops. */
+function notOurs(url: string): AppiumServer {
+    return {
+        stop: async () => {
+            await Promise.resolve();
+        },
+        url,
+    };
+}
+
 /**
- * The Appium server the runner drives, and the simulator it asks it for. A
- * declared server owns its devices: the runner neither resolves nor boots one,
- * and stops nothing it did not start. Otherwise the simulator is resolved and
- * booted here, and the project's own server spawned beside it.
+ * The Appium server the runner drives, the simulator it asks it for, and
+ * whether that server outlives the file. A declared server owns its devices:
+ * the runner neither resolves nor boots one. The run's server, spawned by a
+ * `mobile({ device })` project's global setup, drives the device that setup
+ * booted. Otherwise the simulator is resolved and booted here, and the
+ * project's own server spawned beside it, for this file alone.
  */
 async function reachAppium(
     options: MobileSpecificationOptions,
     root: string,
-): Promise<{ appium: AppiumServer; udid: string | undefined }> {
+): Promise<{ appium: AppiumServer; outlivesFile: boolean; udid: string | undefined }> {
     const { appium: declared, device } = options;
     if (declared !== undefined) {
-        return {
-            appium: {
-                stop: async () => {
-                    await Promise.resolve();
-                },
-                url: declared.url,
-            },
-            udid: device.udid,
-        };
+        return { appium: notOurs(declared.url), outlivesFile: true, udid: device.udid };
     }
-    const udid = device.udid ?? (await resolveSimulatorUdid(device));
-    await ensureBooted(udid);
-    return { appium: await startAppiumServer(root), udid };
+    const run = await mobileServer();
+    if (run !== undefined) {
+        return { appium: notOurs(run.url), outlivesFile: true, udid: device.udid ?? run.udid };
+    }
+    const { server, udid } = await serveAppium(device, root);
+    return { appium: server, outlivesFile: false, udid };
 }
 
 /**
  * The run's session ledger, when the runner may share the run's session: its
  * server outlives the file, and a `mobile()` project provided the ledger.
  */
-async function runLedger(declared: boolean): Promise<SessionLedger | undefined> {
-    const directory = declared ? await mobileSessions() : undefined;
+async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefined> {
+    const directory = outlivesFile ? await mobileSessions() : undefined;
     return directory === undefined ? undefined : sessionLedger(directory);
 }
 
@@ -163,7 +167,7 @@ export async function startMobile<Services extends ServiceRecord>(
     await registerMatchers();
 
     const root = resolveRoot(options.root, callerDir);
-    const { appium, udid } = await reachAppium(options, root);
+    const { appium, outlivesFile, udid } = await reachAppium(options, root);
 
     // The declared services come up before the app is ever launched: a dev
     // Build reaches its bundler on the first frame it renders.
@@ -189,10 +193,11 @@ export async function startMobile<Services extends ServiceRecord>(
     }
 
     // One driver session per runner, opened lazily on the first `.open()` —
-    // Or, under a declared server in a `mobile()` project, one per RUN: the
-    // Project's global setup provides the ledger the session is recorded in.
-    // A spawned server stops with this runner, so its session cannot outlive
-    // The file. The appium/webdriverio integration stays a lazy import
+    // Or, under a server that outlives the file (a declared one, or the run's
+    // Own) in a `mobile()` project, one per RUN: the project's global setup
+    // Provides the ledger the session is recorded in. A server this runner
+    // Spawned stops with it, so its session cannot outlive the file. The
+    // Appium/webdriverio integration stays a lazy import
     // (CONVENTIONS I1) — the dependency is optional and only loaded when a
     // Spec actually opens the app.
     let device: DevicePort | null = null;
@@ -202,7 +207,7 @@ export async function startMobile<Services extends ServiceRecord>(
             device = new AppiumAdapter({
                 device: { name: options.device.name, os: options.device.os, udid },
                 serverUrl: appium.url,
-                ledger: await runLedger(options.appium !== undefined),
+                ledger: await runLedger(outlivesFile),
                 timeouts: options.timeouts,
             });
         }
