@@ -49,4 +49,18 @@ test('sends the cursor read in place', async () => {
         {"items": [{"id": "f3"}], "next_cursor": null, "total": 3}
     `);
 });
+
+test('sends the cursor through a request held in a name', async () => {
+    // Given - the first page, and the next request built from its cursor
+    const first = await api.get('/facts?limit=2');
+    const next = api.get(`/facts?cursor=${nextCursor(first.response)}`);
+
+    // Then - the held request, awaited, brings the remaining item
+    const second = await next;
+    expect(second.response).toMatch(`
+        HTTP/1.1 200 OK
+
+        {"items": [{"id": "f3"}], "next_cursor": null, "total": 3}
+    `);
+});
 });

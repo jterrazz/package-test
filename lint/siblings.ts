@@ -184,6 +184,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'lint/carried.ts',
             'lint/catalog.ts',
             'lint/checker-facets.ts',
             'lint/checker-placement.ts',

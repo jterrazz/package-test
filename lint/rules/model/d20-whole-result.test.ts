@@ -40,8 +40,19 @@ ruleTester.run('d20-whole-result', d20WholeResult as unknown as OxlintRule, {
             errors: [{ message: /reads result\.table\('b'\)/u }],
             filename: SPEC,
         },
+        // A chain held in a name and never awaited sends nothing: the read is a read.
+        {
+            code: "test('t', async () => { const first = await api.get('/facts'); const next = api.get('/facts?cursor=' + first.json.next); expect(next).toBeDefined(); });",
+            errors: [{ message: /reads first\.json and never compares it whole/u }],
+            filename: SPEC,
+        },
     ],
     valid: [
+        // A value carried into a request held in a name, and awaited through it.
+        {
+            code: "test('t', async () => { const first = await api.get('/facts'); const next = api.get('/facts?cursor=' + first.json.next); const second = await next; expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
+            filename: SPEC,
+        },
         // The whole response, and a precise assertion beside it.
         {
             code: "test('t', async () => { const result = await api.get('/users'); expect(result.response).toMatch(`HTTP/1.1 200 OK`); expect(result.response.body.total).toBe(1); });",
