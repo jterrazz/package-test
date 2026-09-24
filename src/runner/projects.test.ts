@@ -3,6 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import { servicesSetup } from './facet-project.js';
 import nestedApp from './fixtures/nested-app/vitest.config.js';
 import { api, cli, component, integration, jobs, mobile, unit, website } from './projects.js';
 
@@ -264,6 +265,17 @@ describe('the node facet helpers — one canonical project per kind', () => {
         // The word for that is `.spec.ts`.
         expect(testOf(api()).include).toStrictEqual(['specs/api/**/*.spec.ts']);
         expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
+    });
+
+    test('the facets that declare services carry the setup that starts them once per run', () => {
+        // Given - the global setups of the three facets whose specs declare containers
+        const setups = [api(), jobs(), integration()].map((project) => testOf(project).globalSetup);
+
+        // Then - each serves the run's containers, which a file without it starts per specification
+        for (const carried of setups) {
+            expect(carried).toContain(servicesSetup());
+        }
+        expect(servicesSetup()).toMatch(/run-setup\.ts$/u);
     });
 
     test('node facets run first, and the simulator runs alone at the end', () => {
