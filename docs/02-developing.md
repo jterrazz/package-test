@@ -6,7 +6,7 @@ How a change is made. The first half is this repository's own loop — the toolc
 
 ### The loop
 
-The repository answers six `make` targets, the same six every repository of the estate answers, and no other:
+The repository answers six `make` targets, the same six every repository of the estate answers:
 
 | Target         | Does                                                                                                                                                                                      |
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -17,7 +17,7 @@ The repository answers six `make` targets, the same six every repository of the 
 | `make test`    | Every suite, with coverage, then the coverage floor                                                                                                                                       |
 | `make check`   | The whole verdict: build, lint, test                                                                                                                                                      |
 
-Every target installs first. CI calls `build`, `lint` and `test` — [03 — Testing](03-testing.md) § What CI runs. Two gestures sit below the six, for the loop: `npx vitest --run --project unit` runs the fast suite with no infrastructure, and `npm run docs` regenerates the generated tables.
+One target stands beside them, and no flow speaks it: `make test-mobile` runs the mobile specs on a real iOS simulator, which no CI job provisions — [03 — Testing](03-testing.md) says when it is owed. Every target installs first. CI calls `build`, `lint` and `test` — [03 — Testing](03-testing.md) § What CI runs. Two gestures sit below the six, for the loop: `npx vitest --run --project unit` runs the fast suite with no infrastructure, and `npm run docs` regenerates the generated tables.
 
 `better-sqlite3` is a native dependency, and this repository runs its 13 line, which ships its binding prebuilt for every platform it supports: an npm that withholds install scripts leaves nothing unbuilt, so the `sqlite()` specs of the `unit` project need no rebuild after `npm ci`.
 

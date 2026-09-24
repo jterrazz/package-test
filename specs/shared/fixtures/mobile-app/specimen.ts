@@ -1,12 +1,19 @@
 import type { ScriptedApp } from '../appium-double/app.js';
 
 /**
+ * The simulator Specimen runs on: the one the runner asks the server for,
+ * and the one `make test-mobile` installs the app on.
+ */
+export const simulator = { name: 'iPhone 17', os: '26.5' };
+
+/**
  * Specimen — the native app the mobile specs drive, described as data.
  *
  * The protocol double draws it in `make check`; `ios/` is the same app in
- * SwiftUI, installed on a simulator for `make test-mobile`. The two are kept
- * screen for screen: a spec that passes on one and fails on the other has
- * found a gap between the double and a device.
+ * SwiftUI, installed on a simulator by `make test-mobile`
+ * (`on-simulator.mjs`). The two are kept screen for screen: a spec that
+ * passes on one and fails on the other has found a gap between the double
+ * and a device.
  */
 export const specimen: ScriptedApp = {
     bundleId: 'com.jterrazz.specimen',

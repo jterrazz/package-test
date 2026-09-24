@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test check
+.PHONY: install build lint fix test check test-mobile
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -37,3 +37,9 @@ check: node_modules/.install
 	npm run build
 	npm run lint
 	$(MAKE) test
+
+# The mobile specs on a real iOS simulator — the proof the protocol double
+# Tells the truth about a device. Needs Xcode and a simulator; no CI job runs
+# It, and `check` never calls it (docs/03 § the mobile tree).
+test-mobile: build
+	node specs/shared/fixtures/mobile-app/on-simulator.mjs

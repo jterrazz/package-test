@@ -40,6 +40,7 @@ make lint                         # typescript check + the conventions checker
 make fix                          # the fixers: the checker's --fix, then typescript fix (the formatter last), each whatever the other said
 make test                         # every project, with coverage — needs Docker and chromium
 make check                        # the whole verdict: build, lint, test
+make test-mobile                  # the mobile specs on a real iOS simulator — never in check, needs Xcode
 npx vitest --run --project unit   # the loop, no infrastructure
 npm run docs                      # regenerate the generated tables and the schema
 ```

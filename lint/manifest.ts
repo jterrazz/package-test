@@ -1445,7 +1445,7 @@ export const META_ROWS: CatalogEntry[] = [
     {
         channel: 'meta',
         convention:
-            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol, because CI provisions no simulator.',
+            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.',
         facet: 'model',
         family: 'M',
         fix: 'Specify the facet on the package itself before a rule presumes it.',
