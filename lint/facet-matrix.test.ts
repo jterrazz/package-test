@@ -23,6 +23,7 @@ import type {
     MobileSpecification,
     WebsiteSpecification,
 } from '../src/index.js';
+import type { RouteOptionsAny } from '../src/model/chain/route.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
 import * as elements from '../src/model/elements/elements.js';
 import type { Visitor } from '../src/model/ports/browser.port.js';
@@ -173,6 +174,12 @@ const CHAINS: Record<Exclude<Column, 'module'>, Record<string, FacetRole>> = {
 };
 
 // ── The constructor options (component's are the PROJECT's) ──
+
+/** What an api action is handed beside its route's template. */
+const routeOptions = { params: true } satisfies Record<
+    KeysOf<NonNullable<RouteOptionsAny>>,
+    Published
+>;
 
 const apiOptions = {
     root: true,
@@ -415,6 +422,12 @@ describe('facet capability declaration (K1 guard)', () => {
                 published(OPTIONS[column]),
             );
         }
+    });
+
+    test('the api declares exactly the options a route action takes', () => {
+        // Given - the options `.get()`, `.post()`, `.put()` and `.delete()` take, pinned to their own `keyof`
+        // Then - the declaration names the same options
+        expect(declared('api', 'Route option')).toStrictEqual(published(routeOptions));
     });
 
     test('each kind declares exactly the accessors its result publishes', () => {

@@ -153,6 +153,7 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
         ['{{uuid}}', 'uuid'],
         ['.http exchange', 'http-exchange'],
         ['{ frozen }', 'frozen'],
+        ['{ params }', 'params'],
         ['testId', 'test-id'],
     ])('the capability %s is the folder %s', (name, folder) => {
         // Given - a capability as the matrix names it
@@ -168,7 +169,9 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
 
         // Then - the capabilities are in it, a route's word and a grab-bag are not
         expect(
-            ['seed', 'intercept', 'clock', 'to-match', 'exec'].every((name) => folders.has(name)),
+            ['seed', 'intercept', 'clock', 'to-match', 'exec', 'params'].every((name) =>
+                folders.has(name),
+            ),
         ).toBe(true);
         expect(['users', 'label', 'assertions', 'misc'].some((name) => folders.has(name))).toBe(
             false,

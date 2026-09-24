@@ -166,6 +166,7 @@ const WRITTEN_IN_CODE = new Set<Capability['group']>([
     'Constructor option',
     'Descriptor',
     'Result accessor',
+    'Route option',
     'Setup',
     'Terminal action',
     'Verb',

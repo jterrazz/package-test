@@ -2,9 +2,10 @@
  * The facet capability declaration — the one statement of WHICH capability
  * each kind of test has, and the literal a test exercising it carries.
  *
- * It is not a third copy of the surface: every row of the four groups a facet
+ * It is not a third copy of the surface: every row of the five groups a facet
  * interface can answer for (constructor options, setups, terminal actions,
- * result accessors) and every verb of a visitor is pinned to the real `keyof`
+ * the options a route action takes, result accessors) and every verb of a
+ * visitor is pinned to the real `keyof`
  * of that interface by `facet-matrix.test.ts`, in BOTH directions — a member
  * added to a facet and forgotten here fails the build, and a row naming a
  * member no interface has fails it too. The element vocabulary is pinned to
@@ -47,6 +48,7 @@ export type CapabilityGroup =
     | 'Descriptor'
     | 'Golden'
     | 'Result accessor'
+    | 'Route option'
     | 'Setup'
     | 'Terminal action'
     | 'Time & doubles'
@@ -289,6 +291,15 @@ export const CAPABILITIES: Capability[] = [
         probe: '.open(',
     },
     { columns: ['component'], group: 'Terminal action', name: '.render()', probe: '.render(' },
+
+    // ── What an api action is handed beside its route's template ──
+    {
+        columns: ['api'],
+        group: 'Route option',
+        member: 'params',
+        name: '{ params }',
+        probe: 'params:',
+    },
 
     // ── The verbs a scenario drives (the visitor's own members) ──
     { columns: DRAWS, group: 'Verb', name: 'see', probe: '.see(' },
