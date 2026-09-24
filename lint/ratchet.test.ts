@@ -14,7 +14,7 @@ import {
     writeBaseline,
 } from './ratchet.js';
 
-describe('the test ratchet — counts that may fall and never rise', () => {
+describe('the test ratchet — exact counts that a fix may lower and never raise', () => {
     test('a published code is recorded under its plugin and rule', () => {
         // Given - one code per namespace this package owns
         // Then - the key is the code spelled as a path
@@ -45,13 +45,26 @@ describe('the test ratchet — counts that may fall and never rise', () => {
         ]);
     });
 
-    test('holds when every count is within its entry', () => {
-        // Given - the debt fell under one entry and stayed under the other
-        // Then - nothing breaks
+    test('breaks on a count below its entry: the entry states where the project stands', () => {
+        // Given - the debt fell under one entry and stayed at the other
+        // Then - the fall is named, with the gesture that records it
         expect(
             judge(
                 { 'jterrazz-check/c9': 1, 'jterrazz/j6w': 4 },
                 { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4 },
+            ),
+        ).toStrictEqual([
+            'jterrazz-check/c9 is at 1, below its baseline of 2 — the debt fell, `--fix` re-records it',
+        ]);
+    });
+
+    test('holds when every count is at its entry', () => {
+        // Given - each count exactly where it was recorded, and the run's own key
+        // Then - nothing breaks
+        expect(
+            judge(
+                { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4 },
+                { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4, 'routes/unreached': 3 },
             ),
         ).toStrictEqual([]);
     });

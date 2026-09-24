@@ -110,7 +110,12 @@ const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
  * — one project tripping every checker pass at once, asserted as a single
  * full-output golden — legitimately outside the rule↔fixture inventory below.
  */
-const CLI_CONTRACT_SPECS = new Set(['checker-cli', 'kitchen-sink', 'member-pass']);
+const CLI_CONTRACT_SPECS = new Set([
+    'checker-cli',
+    'checker-ratchet',
+    'kitchen-sink',
+    'member-pass',
+]);
 
 describe('the composable fragment — what a consumer wires', () => {
     test('`testing` is an oxlint config, so compose(<profile>, testing) needs no assertion', () => {

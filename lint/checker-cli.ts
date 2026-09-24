@@ -20,6 +20,7 @@ import {
     TREE_PASS_IDS,
 } from './checker.js';
 import type { TokenViolation } from './checker.js';
+import { tightened } from './ratchet-fix.js';
 import {
     BASELINE_FILE,
     BASELINE_LABEL,
@@ -79,7 +80,7 @@ import { codeOf } from './rule-code.js';
  * every checker finding of the project and every diagnostic of this package's
  * oxlint plugin (the toolchain sets those aside, so they are judged here or
  * nowhere) against the `test` section of `jterrazz.baseline.json` at the root:
- * within it, exit 0; grown, new, or an entry at zero, exit 1. The retired
+ * at it, exit 0; grown, new, fallen, or an entry at zero, exit 1. The retired
  * `test.baseline.json` is never read: `typescript check` owns the refusal of a
  * leftover per-package file. A project that keeps no section fails on
  * any ERROR finding and on any plugin diagnostic. Every other run under a
@@ -111,7 +112,9 @@ import { codeOf } from './rule-code.js';
  * C14, which MOVES a single-reader pool entry beside its leaf and rewrites the
  * literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
- * fixes everything exits 0. With no path it applies them to every `specs/` root
+ * fixes everything exits 0. The ratchet run under `--fix` also re-records every
+ * entry whose count fell — lowered, or dropped at zero — and never one that
+ * rose. With no path it applies them to every `specs/` root
  * it discovers, and moves the module tests of every member that still stand on
  * a 16 folder: `--fix` means the same thing whichever run the operator typed.
  *
@@ -320,7 +323,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
             ...findings.map(codeOfFinding),
             ...plugin.map((diagnostic) => diagnostic.code),
         ]);
-        const broken = judge(counts, readBaseline(root));
+        const broken = judge(counts, fix ? reRecorded(root, counts) : readBaseline(root));
         if (json || broken.length > 0) {
             printFindings(findings, plugin);
         }
@@ -348,6 +351,28 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
         process.exit(1);
     }
     verdict(own, what, passes);
+}
+
+/**
+ * Under `--fix`, record every entry whose count fell — lowered, or dropped at
+ * zero — and name each; a count that rose is left for the verdict. Returns the
+ * section the verdict judges against.
+ */
+function reRecorded(root: string, counts: Record<string, number>): Record<string, number> {
+    const held = readBaseline(root);
+    const next = tightened(counts, held);
+    if (next === undefined) {
+        return held;
+    }
+    writeBaseline(root, next);
+    for (const [key, allowed] of Object.entries(held).toSorted(([a], [b]) => (a < b ? -1 : 1))) {
+        if (!json && (next[key] ?? 0) !== allowed) {
+            console.log(
+                `conventions checker: re-recorded ${BASELINE_LABEL} › ${key} ${allowed} → ${next[key] ?? 0}`,
+            );
+        }
+    }
+    return readBaseline(root);
 }
 
 /**

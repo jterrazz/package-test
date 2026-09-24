@@ -15,10 +15,14 @@ import { ROUTES_KEY } from '../src/model/routes/routes.js';
  * writes that section alone: every other section is another package's, kept
  * byte for byte when this one is recorded.
  *
- * Three things break the ratchet: a rule above its entry (the debt grew), a
- * rule with findings and no entry (new debt), an entry whose rule is at zero
- * (the debt was paid — the entry goes). Severity is not read: a warning is
- * exactly the debt a ratchet exists to hold down.
+ * The ratchet is EXACT: an entry states where the project stands, not a
+ * ceiling. Four things break it: a rule above its entry (the debt grew), a
+ * rule with findings and no entry (new debt), a rule below its entry (the debt
+ * fell — the entry is re-recorded), an entry whose rule is at zero (the debt
+ * was paid — the entry goes). The two falls are what `--fix` records
+ * (`ratchet-fix.ts`); the two rises only a recording by hand accepts.
+ * Severity is not read: a warning is exactly the debt a ratchet exists to hold
+ * down.
  */
 
 /** The family's ratchet file, at the project root. */
@@ -74,6 +78,10 @@ export function judge(
             broken.push(`${key} has ${count} finding(s) and no entry — it is new debt`);
         } else if (count > allowed) {
             broken.push(`${key} is at ${count}, above its baseline of ${allowed}`);
+        } else if (count < allowed) {
+            broken.push(
+                `${key} is at ${count}, below its baseline of ${allowed} — the debt fell, \`--fix\` re-records it`,
+            );
         }
     }
     for (const key of Object.keys(baseline).toSorted()) {

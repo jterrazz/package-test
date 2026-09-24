@@ -22,8 +22,10 @@ import { shouldUpdateSnapshots } from './update.js';
  * to the workers — each `specification.api()` writes what its app declares
  * and what it was sent when it cleans up. After the last test it reads every
  * ledger and judges the declared routes no request reached against the
- * ratchet: more than `jterrazz.baseline.json › test` holds fails the run,
- * naming each; `TEST_UPDATE=1` records where the run stands. An app whose
+ * ratchet, which is exact: more than `jterrazz.baseline.json › test` holds
+ * fails the run, naming each, and fewer fails it too — the debt fell, and the
+ * entry says where the run stood; `TEST_UPDATE=1` records where it stands.
+ * The run is the key's one judge: it alone counts the routes. An app whose
  * table is unknown — no `app.routes`, no OpenAPI document declared — fails
  * the run too: a measure against nothing reads as every route reached.
  */
@@ -71,6 +73,11 @@ export async function judgeRoutes(
     if (missing.length > held) {
         return {
             failure: `api routes: ${missing.length} declared route(s) no test reached, the ratchet holds ${held} — send each from a spec, or record them with TEST_UPDATE=1:\n${named}`,
+        };
+    }
+    if (missing.length < held) {
+        return {
+            failure: `api routes: ${missing.length} declared route(s) no test reached, below the ${held} the ratchet holds — the debt fell, record it with TEST_UPDATE=1`,
         };
     }
     return {

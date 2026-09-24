@@ -47,6 +47,21 @@ describe('route coverage — the api run judged', () => {
         });
     });
 
+    test('a run that reaches more than the ratchet holds fails, until it is recorded', async () => {
+        // Given - the run recorded, then one more route reached
+        const { directory, root } = runWithOneRouteReached();
+        await judgeRoutes(root, directory, true);
+        writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/users' }] });
+
+        // Then - the fall is a failure naming the gesture; recorded, the run passes
+        await expect(judgeRoutes(root, directory, false)).resolves.toStrictEqual({
+            failure:
+                'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds — the debt fell, record it with TEST_UPDATE=1',
+        });
+        await judgeRoutes(root, directory, true);
+        expect(heldUnreached(root)).toBe(1);
+    });
+
     test('a route two specifications declare counts once', async () => {
         // Given - the same table in two ledgers, every route reached
         const { directory, root } = runWithOneRouteReached();

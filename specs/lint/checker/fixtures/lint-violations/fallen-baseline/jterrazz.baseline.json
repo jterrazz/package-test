@@ -1,0 +1,8 @@
+{
+    "typescript": { "eslint/complexity": 3 },
+    "test": {
+        "jterrazz-check/c15": 2,
+        "jterrazz-check/c9": 3,
+        "routes/unreached": 2
+    }
+}
