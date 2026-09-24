@@ -107,6 +107,47 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.file('oxlint.test-fix.config.mjs').exists).toBe(false);
     });
 
+    test("`--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
+        // Given - a spec still named `.test.ts`, whose chains all state one clock, fixed on the root member
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes-moved/'))
+            .exec(['--member . --fix', '--member .']);
+
+        // Then - the renamed and moved spec carries its view, and the check after the fix holds nothing
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
+        expect(result.file('specs/api/events/archive/archive.test.ts').exists).toBe(false);
+        expect(result.file('specs/api/archive/get/archive.spec.ts').content).toBe(
+            [
+                "import { describe, expect, test } from 'vitest';",
+                '',
+                "import { api } from '../../api.specification.js';",
+                '',
+                "const archive = api.with({ clock: '2026-03-04T09:30:00Z' });",
+                '',
+                "describe('archive', () => {",
+                "    test('lists the archive', async () => {",
+                '        // Given - the calendar the file reads',
+                "        const result = await archive.get('/archive');",
+                '',
+                '        // Then - the whole page',
+                '        expect(result.response).toMatch(`HTTP/1.1 200 OK`);',
+                '    });',
+                '',
+                "    test('lists the archive of a year', async () => {",
+                '        // Given - the same calendar',
+                "        const result = await archive.get('/archive?year=2025');",
+                '',
+                '        // Then - the whole page',
+                '        expect(result.response).toMatch(`HTTP/1.1 200 OK`);',
+                '    });',
+                '});',
+                '',
+            ].join('\n'),
+        );
+    });
+
     test('`--fix` refuses a report written before its fixes', async () => {
         // Given - the fixable project, and a report handed in beside the fixer
         const result = await cli

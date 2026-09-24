@@ -410,29 +410,37 @@ function requireDirectory(path: string, what: string): string {
 }
 
 /**
- * Every finding of the project at `root`: each `specs/` root it discovers, with
- * the rewritable passes applied first under `--fix`, and every member.
+ * Under `--fix`, every rewrite of the project at `root`, before anything is
+ * counted: the rewritable passes over each `specs/` root, the members' 16 → 17
+ * movers, then the plugin's own autofixes (`ratchet-own-fixes.ts`) — so the
+ * checker's findings and the plugin's diagnostics are counted over one tree.
  */
+function fixProject(root: string): void {
+    if (!fix) {
+        return;
+    }
+    for (const specsRoot of discoverSpecRoots(root)) {
+        applyFixes(specsRoot);
+    }
+    for (const memberDir of discoverMembers(root)) {
+        reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
+        for (const move of migrateLintConfig(memberDir, root)) {
+            reportLintConfigMove(move);
+        }
+    }
+    applyOwnFixes(root);
+}
+
+/** Every finding of the project at `root`: each `specs/` root it discovers, and every member. */
 function projectFindings(root: string): TokenViolation[] {
     const found: TokenViolation[] = [];
     for (const specsRoot of discoverSpecRoots(root)) {
         const prefix = relative(root, specsRoot);
-        if (fix) {
-            applyFixes(specsRoot);
-        }
         for (const violation of runAllChecks(specsRoot)) {
             // A tree pass reports relative to the tree it walked; the
             // Project-wide run has to say WHICH tree, or two members' findings
             // Read alike.
             found.push({ ...violation, file: `${prefix}/${violation.file}` });
-        }
-    }
-    if (fix) {
-        for (const memberDir of discoverMembers(root)) {
-            reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
-            for (const move of migrateLintConfig(memberDir, root)) {
-                reportLintConfigMove(move);
-            }
         }
     }
     found.push(...checkMembers(root));
@@ -687,17 +695,6 @@ if (fix && reportFile !== undefined) {
     process.exit(1);
 }
 
-/**
- * The plugin's diagnostics a ratchet run counts: under `--fix`, what is left
- * once the plugin's own autofixes are applied (`ratchet-own-fixes.ts`).
- */
-function judgedPluginDiagnostics(root: string): PluginDiagnostic[] {
-    if (fix) {
-        applyOwnFixes(root);
-    }
-    return pluginDiagnostics(root, reportFile);
-}
-
 // ── Record the ratchet ──
 
 if (recording) {
@@ -725,11 +722,12 @@ if (member !== undefined) {
         // The project root's own member run — the one `typescript check`
         // Always makes — is the ratchet run: it judges, and prints, the whole
         // Project's counts where a file keeps them.
+        fixProject(root);
         ratchet({
             counted: () => projectFindings(root),
             own: checkMember(dir, root),
             passes: MEMBER_PASSES,
-            plugin: judgedPluginDiagnostics(root),
+            plugin: pluginDiagnostics(root, reportFile),
             root,
             what,
         });
@@ -756,12 +754,13 @@ if (positional !== undefined && discoverSpecRoots(root).length === 0) {
     );
     process.exit(1);
 }
+fixProject(root);
 const findings = projectFindings(root);
 ratchet({
     counted: () => findings,
     own: findings,
     passes: PROJECT_PASSES,
-    plugin: judgedPluginDiagnostics(root),
+    plugin: pluginDiagnostics(root, reportFile),
     root,
     what: `under ${root}`,
 });
