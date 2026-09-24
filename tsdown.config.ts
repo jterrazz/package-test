@@ -31,6 +31,7 @@ export default defineConfig([
             coverage: 'lint/coverage-cli.ts',
             index: 'src/index.ts',
             'in-place-setup': 'src/runner/in-place-setup.ts',
+            'mobile-session': 'src/runner/mobile-session.ts',
             'route-coverage': 'src/runner/route-coverage.ts',
             vitest: 'src/runner/index.ts',
         },

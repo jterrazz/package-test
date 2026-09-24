@@ -59,13 +59,13 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 });
 ```
 
-Without a declared `appium`, the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
+Without a declared `appium`, the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server process group is terminated (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [website](08-website.md) serve adapter.
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
 ### A declared Appium server
 
-`appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile facet against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` ends the session and stops nothing it did not start.
+`appium: { url }` points the runner at a server someone else runs — a device farm, a Mac across the network, the protocol double this package specifies its own mobile facet against. The runner connects to it instead of spawning the project's own, and it hands the server the device by capabilities (`appium:deviceName`, `appium:platformVersion` from `os`, `appium:udid` when declared) instead of resolving and booting it through `simctl`: the machine the server runs on owns its simulators. `cleanup` stops nothing it did not start, and under `mobile()` the run's one session outlives it ([One session per run](#one-session-per-run)).
 
 ```typescript
 export const { cleanup, mobile } = await specification.mobile({
@@ -74,6 +74,17 @@ export const { cleanup, mobile } = await specification.mobile({
     device: { name: 'iPhone 17', os: '26.5' },
 });
 ```
+
+### One session per run
+
+Under a declared `appium` server, a `mobile()` project opens **one driver session for the whole run**, not one per spec file. The project's global setup hands every file an empty ledger under `.artifacts/vitest/mobile-sessions/`. The first `.open()` of the run creates the session and records it there, and every later file asking the same server for the same capabilities attaches to it instead of creating its own. `cleanup` leaves that session alone; the setup ends it once the last file has run.
+
+The session is keyed on the server's URL and the capabilities asked for, so a second specification naming another app or another device gets a session of its own, recorded and ended the same way. Files still run one at a time (`fileParallelism: false` is `mobile()`'s default): the app is terminated and relaunched by every `.open()`, and two files driving it at once would fight over it.
+
+Two runs keep a session per runner instead, which `cleanup` ends:
+
+- **A project written by hand**, with no `mobile()`: nothing provides the ledger.
+- **A spawned Appium server.** It stops with the runner that started it, so its session cannot outlive the file.
 
 ### Declared timeouts
 
@@ -117,7 +128,7 @@ test('shows the events feed behind its deep link', async () => {
 });
 ```
 
-Without a deep link, the app opens on its launch screen. There is **one driver session per runner**, created lazily on the first `.open()` and reused — the expensive part is WebDriverAgent startup, not the app relaunch.
+Without a deep link, the app opens on its launch screen. The driver session is opened lazily on the first `.open()` and reused — the expensive part is WebDriverAgent startup, not the app relaunch. How long it lives is [one session per run](#one-session-per-run)'s.
 
 ### Open scenarios — the When
 

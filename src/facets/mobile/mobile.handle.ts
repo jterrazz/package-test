@@ -5,11 +5,13 @@ import { releaseIsolation, startServices } from '../../model/chain/services.js';
 import type { ServiceRecord, StartedServices } from '../../model/chain/services.js';
 import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
-import type { DevicePort, DeviceTimeouts } from '../../model/ports/device.port.js';
+import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
+import { mobileSessions } from '../../runner/provided.js';
 import { startAppiumServer } from './appium-server.js';
 import type { AppiumServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
+import { sessionLedger } from './session-ledger.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 
 // ── Types ──
@@ -100,7 +102,10 @@ export type MobileHandle = {
      * (e.g. `EXPO_PUBLIC_API_URL`); the framework never touches the bundler.
      */
     backendUrl?: string | undefined;
-    /** End the driver session, stop the appium server and the stub backend. */
+    /**
+     * End the driver session — unless it is the run's, which the project's
+     * global setup ends — and stop the appium server and the stub backend.
+     */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
     /**
@@ -140,6 +145,15 @@ async function reachAppium(
     return { appium: await startAppiumServer(root), udid };
 }
 
+/**
+ * The run's session ledger, when the runner may share the run's session: its
+ * server outlives the file, and a `mobile()` project provided the ledger.
+ */
+async function runLedger(declared: boolean): Promise<SessionLedger | undefined> {
+    const directory = declared ? await mobileSessions() : undefined;
+    return directory === undefined ? undefined : sessionLedger(directory);
+}
+
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
@@ -174,10 +188,13 @@ export async function startMobile<Services extends ServiceRecord>(
         backendUrl = await backend.start();
     }
 
-    // One driver session per runner, created lazily on the first `.open()`.
-    // The appium/webdriverio integration stays a lazy import (CONVENTIONS
-    // I1) — the dependency is optional and only loaded when a spec actually
-    // Opens the app.
+    // One driver session per runner, opened lazily on the first `.open()` —
+    // Or, under a declared server in a `mobile()` project, one per RUN: the
+    // Project's global setup provides the ledger the session is recorded in.
+    // A spawned server stops with this runner, so its session cannot outlive
+    // The file. The appium/webdriverio integration stays a lazy import
+    // (CONVENTIONS I1) — the dependency is optional and only loaded when a
+    // Spec actually opens the app.
     let device: DevicePort | null = null;
     const getDevice = async (): Promise<DevicePort> => {
         if (!device) {
@@ -185,6 +202,7 @@ export async function startMobile<Services extends ServiceRecord>(
             device = new AppiumAdapter({
                 device: { name: options.device.name, os: options.device.os, udid },
                 serverUrl: appium.url,
+                ledger: await runLedger(options.appium !== undefined),
                 timeouts: options.timeouts,
             });
         }

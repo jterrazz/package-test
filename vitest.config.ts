@@ -1,4 +1,5 @@
 import { resolve } from 'node:path';
+import { mergeConfig } from 'vitest/config';
 
 import {
     api,
@@ -64,8 +65,22 @@ const config = defineSpecConfig({
             integration({ serial: true }),
             // Needs playwright + `npx playwright install chromium`; no Docker.
             website(),
-            // Serial by default — a simulator drives one session at a time.
-            mobile(),
+            // Serial by default, one driver session per run. The protocol
+            // Double is served once for the run too, its setup placed first
+            // So it still answers when `mobile()`'s own ends the session.
+            mergeConfig(
+                {
+                    test: {
+                        globalSetup: [
+                            resolve(
+                                import.meta.dirname,
+                                'specs/shared/fixtures/appium-double/per-run.ts',
+                            ),
+                        ],
+                    },
+                },
+                mobile(),
+            ),
             component({
                 // Every render's context, stated away from every default so the
                 // Component app proves each one reaches the page (locale-note).

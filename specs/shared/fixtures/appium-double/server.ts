@@ -40,8 +40,14 @@ class ProtocolError extends Error {
 
 type Json = Record<string, unknown>;
 
-/** A running double: the URL to hand `appium: { url }`, and its stop. */
-export type AppiumDouble = { stop: () => Promise<void>; url: string };
+/** How many sessions the double created and deleted since it started. */
+export type SessionCount = { created: number; deleted: number };
+
+/** A running double: the URL to hand `appium: { url }`, its stop, and its session count. */
+export type AppiumDouble = { sessions: SessionCount; stop: () => Promise<void>; url: string };
+
+/** What a request is routed onto: the app, the live sessions, and their count. */
+type Served = { app: ScriptedApp; count: SessionCount; sessions: Map<string, Session> };
 
 async function bodyOf(request: IncomingMessage): Promise<Json> {
     const chunks: Buffer[] = [];
@@ -183,8 +189,7 @@ class Session {
 
 /** Route one request onto the sessions; the value to send, or a protocol error. */
 async function route(
-    app: ScriptedApp,
-    sessions: Map<string, Session>,
+    { app, count, sessions }: Served,
     method: string,
     path: string[],
     body: Json,
@@ -193,7 +198,9 @@ async function route(
         return { message: 'The Appium protocol double is ready', ready: true };
     }
     if (method === 'POST' && path.length === 1 && path[0] === 'session') {
-        return await createSession(app, sessions, body);
+        const created = await createSession(app, sessions, body);
+        count.created += 1;
+        return created;
     }
     const [head, sessionId, ...rest] = path;
     const session = head === 'session' ? sessions.get(sessionId ?? '') : undefined;
@@ -205,6 +212,7 @@ async function route(
     switch (command) {
         case 'DELETE ': {
             sessions.delete(sessionId ?? '');
+            count.deleted += 1;
             return null;
         }
         case 'POST execute/sync': {
@@ -273,14 +281,14 @@ async function createSession(
 
 /** Start the double for one scripted app, on a free loopback port. */
 export async function startAppiumDouble(app: ScriptedApp): Promise<AppiumDouble> {
-    const sessions = new Map<string, Session>();
+    const served: Served = { app, count: { created: 0, deleted: 0 }, sessions: new Map() };
     const server = createServer((request, response) => {
         void (async () => {
             try {
                 const url = new URL(request.url ?? '/', 'http://double');
                 const path = url.pathname.split('/').filter((part) => part !== '');
                 const body = request.method === 'POST' ? await bodyOf(request) : {};
-                send(response, 200, await route(app, sessions, request.method ?? 'GET', path, body));
+                send(response, 200, await route(served, request.method ?? 'GET', path, body));
             } catch (error) {
                 const failure =
                     error instanceof ProtocolError
@@ -297,6 +305,7 @@ export async function startAppiumDouble(app: ScriptedApp): Promise<AppiumDouble>
     });
     const { port } = server.address() as AddressInfo;
     return {
+        sessions: served.count,
         stop: async () => {
             await new Promise<void>((resolveClose) => {
                 server.closeAllConnections();

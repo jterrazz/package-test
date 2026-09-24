@@ -1,7 +1,6 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
-import type { remote } from 'webdriverio';
 
 import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
 import { projectScreen } from '../../facets/mobile/projection.js';
@@ -15,13 +14,10 @@ import type {
     MobileElementMatch,
     MobileElementRef,
     MobileVisitor,
+    SessionLedger,
 } from '../../model/ports/device.port.js';
-
-/** The session factory — webdriverio's `remote`, the adapter's single seam onto it. */
-type RemoteFn = typeof remote;
-
-/** The driver session type, derived so webdriverio stays a type-only import. */
-type Driver = Awaited<ReturnType<RemoteFn>>;
+import { openSession } from './appium.session.js';
+import type { AdapterDevice, AttachFn, Driver, RemoteFn } from './appium.session.js';
 
 /** The element list a predicate search resolves to. */
 type ElementList = Awaited<ReturnType<Driver['$$']>>;
@@ -131,22 +127,6 @@ function scopeChain(element: MobileElementRef): MobileElementRef[] {
     return chain;
 }
 
-/**
- * Load webdriverio's session factory, naming the install when the optional
- * peer dependency is absent. Lazy: the dependency is only required by a spec
- * that actually opens the app.
- */
-async function loadRemote(): Promise<RemoteFn> {
-    try {
-        const { remote: remoteFn } = await import('webdriverio');
-        return remoteFn;
-    } catch {
-        throw new Error(
-            '.open() requires webdriverio (optional peer dependency): npm install -D appium webdriverio && npx appium driver install xcuitest',
-        );
-    }
-}
-
 /** Capture one candidate's evidence for the ambiguity refusal. */
 async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
     const [type, label, value, identifier] = await Promise.all([
@@ -164,20 +144,13 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     };
 }
 
-/** The device a session asks the server for: the simulator's name, its OS, its UDID when known. */
-type AdapterDevice = { name: string; os?: string | undefined; udid?: string | undefined };
-
-/** `'iOS 26.5'` or `'26.5'` → the `appium:platformVersion` XCUITest reads, `'26.5'`. */
-function platformVersion(os: string): string {
-    return os.replace(/^ios\s+/iu, '');
-}
-
 /**
  * Device adapter backed by appium's XCUITest driver over webdriverio.
  *
- * ONE driver session per adapter (= per runner = per vitest worker), created
- * lazily on the first `open()` and reused — WebDriverAgent startup is the
- * expensive part, not the app relaunch. Every `open()` terminates and
+ * ONE driver session per adapter, opened lazily on the first `open()` and
+ * reused — WebDriverAgent startup is the expensive part, not the app
+ * relaunch. Under the run's {@link SessionLedger} it is the run's session,
+ * which `close()` leaves to the run to end. Every `open()` terminates and
  * relaunches the app, so each spec starts from a deterministic fresh state.
  *
  * Webdriverio is an optional peer dependency: it is only imported here, and
@@ -186,9 +159,13 @@ function platformVersion(os: string): string {
 export class AppiumAdapter implements DevicePort {
     /** The verb poll budget — the runner's `timeouts.action`, or the default. */
     private readonly actionTimeoutMs: number;
+    /** The injected `attach`, beside {@link remote}. */
+    private readonly attach?: AttachFn | undefined;
     private driver: Driver | null = null;
     /** The WebDriverAgent launch budget — the runner's `timeouts.launch`, or the default. */
     private readonly launchTimeoutMs: number;
+    /** The run's session ledger — absent when the run shares no session. */
+    private readonly ledger?: SessionLedger | undefined;
     private readonly options: { device: AdapterDevice; serverUrl: string };
     /**
      * The session factory. Absent in production — webdriverio is then loaded
@@ -197,24 +174,30 @@ export class AppiumAdapter implements DevicePort {
      * (mocks are CODE here, CONVENTIONS I4).
      */
     private readonly remote?: RemoteFn | undefined;
+    /** Whether the driver is the run's session rather than this adapter's. */
+    private shared = false;
 
     constructor(options: {
+        attach?: AttachFn | undefined;
         device: AdapterDevice;
+        ledger?: SessionLedger | undefined;
         remote?: RemoteFn | undefined;
         serverUrl: string;
         timeouts?: DeviceTimeouts | undefined;
     }) {
         this.options = { device: options.device, serverUrl: options.serverUrl };
+        this.attach = options.attach;
+        this.ledger = options.ledger;
         this.remote = options.remote;
         this.actionTimeoutMs = options.timeouts?.action ?? DEFAULT_ACTION_TIMEOUT_MS;
         this.launchTimeoutMs = options.timeouts?.launch ?? DEFAULT_WDA_LAUNCH_TIMEOUT_MS;
     }
 
     async close(): Promise<void> {
-        if (this.driver) {
+        if (this.driver && !this.shared) {
             await this.driver.deleteSession();
-            this.driver = null;
         }
+        this.driver = null;
     }
 
     async open(options: DeviceOpenOptions): Promise<DeviceScreen> {
@@ -425,29 +408,22 @@ export class AppiumAdapter implements DevicePort {
         );
     }
 
-    /** Create the shared driver session (once), with an actionable error when webdriverio is absent. */
+    /** The driver session, opened once — with an actionable error when webdriverio is absent. */
     private async session(bundleId: string): Promise<Driver> {
         if (this.driver) {
             return this.driver;
         }
-        const remoteFn = this.remote ?? (await loadRemote());
-        const url = new URL(this.options.serverUrl);
-        const { name, os, udid } = this.options.device;
-        this.driver = await remoteFn({
-            capabilities: {
-                'appium:automationName': 'XCUITest',
-                'appium:bundleId': bundleId,
-                'appium:deviceName': name,
-                'appium:noReset': true,
-                ...(os === undefined ? {} : { 'appium:platformVersion': platformVersion(os) }),
-                ...(udid === undefined ? {} : { 'appium:udid': udid }),
-                'appium:wdaLaunchTimeout': this.launchTimeoutMs,
-                platformName: 'iOS',
-            },
-            hostname: url.hostname,
-            logLevel: 'error',
-            port: Number(url.port),
+        const opened = await openSession({
+            attach: this.attach,
+            bundleId,
+            device: this.options.device,
+            launchTimeoutMs: this.launchTimeoutMs,
+            ledger: this.ledger,
+            remote: this.remote,
+            serverUrl: this.options.serverUrl,
         });
+        this.shared = opened.shared;
+        this.driver = opened.driver;
         return this.driver;
     }
 }

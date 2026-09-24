@@ -25,7 +25,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
 | `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component/**/*.test.tsx`, built by `component()`                                         | the same chromium; no Docker. Runs in its own group, after `website` |
-| `mobile`      | `specs/mobile/**`, built by `mobile()` — serial by default, one simulator                       | Nothing — the Appium protocol double                                 |
+| `mobile`      | `specs/mobile/**`, built by `mobile()` — serial by default, one driver session per run          | Nothing — the Appium protocol double, served once per run            |
 
 Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
 
@@ -112,9 +112,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 69    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 73    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 138   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 139   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 165   |
 | Meta-tests              | `lint/*.test.ts`                                    | the corpus itself: the catalogue, the matrix, the skill, the floor       | 40    |
 
@@ -199,7 +199,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **79 modules** have no sibling test, and every one of them is claimed:
+Today **78 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -207,7 +207,7 @@ Today **79 modules** have no sibling test, and every one of them is claimed:
 | type-only declaration (11)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                           |
 | constant data (3)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifest)                                                                                                  |
 | the facet file set, as a re-export (12) | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
-| a facet's vitest project (7)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
+| a facet's vitest project (6)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
 | a mobile module that needs a device (1) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
 | a facet module (8)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
 | a result accessor (7)                   | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
@@ -273,8 +273,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.seed()`      | 9   | 1    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 2   | —    | —   | —           | 1       | —      | —         | —      |
 | `.with()`      | 2   | 1    | 1   | 1           | 1       | —      | —         | —      |
-| `.fixture()`   | —   | —    | 27  | —           | —       | —      | —         | —      |
-| `.env()`       | —   | —    | 3   | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —    | 28  | —           | —       | —      | —         | —      |
+| `.env()`       | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
 | `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
 
@@ -289,7 +289,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 6    | —   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —    | —   | 7           | —       | —      | —         | —      |
-| `.exec()`    | —   | —    | 33  | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —    | 34  | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
@@ -353,9 +353,9 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.table()`      | 7   | 3    | 1   | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —    | 9   | 1           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —    | 4   | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —    | 16  | —           | —       | —      | —         | —      |
+| `.stdout`       | —   | —    | 17  | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —    | 24  | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —    | 25  | —           | —       | —      | —         | —      |
 | `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —    | 2   | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |

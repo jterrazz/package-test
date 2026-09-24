@@ -104,3 +104,13 @@ export function routeCoverageSetup(): string {
     const source = join(import.meta.dirname, 'route-coverage.ts');
     return existsSync(source) ? source : join(import.meta.dirname, 'route-coverage.js');
 }
+
+/**
+ * The global setup that holds one driver session per run — the module beside
+ * this one, `mobile-session.ts` in a source checkout, `mobile-session.js` in
+ * the built package.
+ */
+export function mobileSessionSetup(): string {
+    const source = join(import.meta.dirname, 'mobile-session.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'mobile-session.js');
+}

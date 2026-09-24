@@ -16,3 +16,17 @@ export async function routesLedger(): Promise<string | undefined> {
         return undefined;
     }
 }
+
+/**
+ * Where the run records its driver sessions — what the mobile project's
+ * global setup provides; `undefined` for a run that shares no session, where
+ * each runner opens and ends its own.
+ */
+export async function mobileSessions(): Promise<string | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('mobileSessions');
+    } catch {
+        return undefined;
+    }
+}
