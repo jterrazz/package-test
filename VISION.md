@@ -3050,10 +3050,12 @@ conflict. @jterrazz/test was reinstalled from package-test `2d54d941`
   `baseline-record-names-refused.spec.yaml` pins the product command's
   refusal. `6b5fd94` publishes the oxlint config-name list as the subpath
   `@jterrazz/typescript/oxlint-config-names`, so the test section's
-  **Toolchain owner** row can be struck. `7fc5dcd` repairs docs/03's unit
-  row and spawn list from the review. It also carries three batch-3 items:
-  `f3a33a6` (the sweep drops a tracked file under an unswept build folder)
-  and `b955029`, `95bb352` (the ignore-pattern documents). What stays open:
+  **Toolchain owner** row can be struck.
+
+    `7fc5dcd` repairs docs/03's unit row and spawn list from the review.
+    It also carries three batch-3 items: `f3a33a6` (the sweep drops a
+    tracked file under an unswept build folder) and `b955029`, `95bb352`
+    (the ignore-pattern documents). What stays open:
     - The CONFIG_NAMES swap in this package (lint/checker-cli.ts,
       lint/checker-member.ts, lint/ratchet-own-fixes.ts): import the new
       subpath once a @jterrazz/typescript carrying `6b5fd94` is installable.
@@ -3065,6 +3067,7 @@ conflict. @jterrazz/test was reinstalled from package-test `2d54d941`
     - No timeout on `oxlint --print-config` (check-drift.js:67) or on the
       spawnSync calls in `src/cli/check-drift.test.ts`. A stall in
       `os.tmpdir()` would hang the unit project, which runs first.
+
 - **A spec runs only the pass it specifies; shared sandbox template and temp
   dir** (branch `vision17-typescript-toolchain-spec-speed`, 12 commits).
   Skipped, because its review came back `fix-first` after one round. The
