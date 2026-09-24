@@ -881,6 +881,74 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
     };
 }
 
+/** A hook call, opening its line — at the top level or in a describe's body. */
+const HOOK_CALL = /^[ \t]*(?:afterAll|afterEach|beforeAll|beforeEach)\s*\(/gmu;
+
+/** The names a hook's body may read that no test sets: the runner's own, and the language's. */
+const AMBIENT = new Set([
+    'afterAll',
+    'afterEach',
+    'async',
+    'await',
+    'beforeAll',
+    'beforeEach',
+    'console',
+    'const',
+    'expect',
+    'false',
+    'let',
+    'new',
+    'null',
+    'process',
+    'Promise',
+    'return',
+    'this',
+    'true',
+    'undefined',
+    'vi',
+]);
+
+/** The names a piece of code reads — never a property after a dot, never a word inside a string. */
+function namesRead(code: string): Set<string> {
+    const bare = codeOnly(code);
+    return new Set(
+        [...bare.matchAll(/(?<![\w$.])[A-Za-z_$][\w$]*/gu)]
+            .map((found) => found[0])
+            .filter((name) => !AMBIENT.has(name)),
+    );
+}
+
+/**
+ * The code without the hooks nothing else in it reads the state of: a hook
+ * whose names — the source it clears, the double it resets — the rest of the
+ * file (its imports and the name's own declaration aside) never reads, went
+ * with the tests that did. A hook reading nothing but the runner's names is
+ * every test's, and stays.
+ */
+function withoutIdleHooks(text: string): string {
+    const blank = withoutComments(text);
+    const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {
+        const open = found.index + found[0].length - 1;
+        return {
+            end: lineEnd(text, closingOf(blank, open)),
+            start: withLeadingComments(text, found.index),
+        };
+    });
+    const idle = hooks.filter((hook) => {
+        const names = [...namesRead(text.slice(hook.start, hook.end))];
+        const rest = without(text, [hook, ...importsOf(text)]);
+        const declared = declarationsOf(rest);
+        return (
+            names.length > 0 &&
+            names.every((name) => {
+                const own = declared.find((d) => d.name === name) ?? { end: 0, start: 0 };
+                return !isRead(rest, name, own);
+            })
+        );
+    });
+    return without(text, idle);
+}
+
 /** The files a split writes, one per subject: each with its tests, paths rebased, unread code pruned. */
 function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
     const [first = ''] = openedSubjects(spec);
@@ -895,7 +963,7 @@ function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
             spec.text,
             spec.tests.filter((test) => !kept.has(test)),
         );
-        const text = oneDescribe(cut, aspectOf(target));
+        const text = oneDescribe(withoutIdleHooks(cut), aspectOf(target));
         return { target, text: pruned(rebased(text, dirname(spec.file), dirname(target))) };
     });
 }

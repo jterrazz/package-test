@@ -184,6 +184,56 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         expect(existsSync(join(root, 'api/charts/filled.spec.ts'))).toBe(true);
     });
 
+    test('the split copies a hook only into the files whose tests read what it sets', () => {
+        // Given - two routes, a ticker source only the list test sets, and the hook that clears it
+        const root = specsTree({
+            'api/api.specification.ts': RUNNER,
+            'api/orders/orders.spec.ts': [
+                "import { afterEach, describe, expect, test } from 'vitest';",
+                '',
+                "import { api } from '../api.specification.js';",
+                '',
+                'const tickers = new Map();',
+                '',
+                "describe('orders', () => {",
+                '    afterEach(() => {',
+                '        tickers.clear();',
+                '    });',
+                '',
+                "    test('lists the orders', async () => {",
+                '        // Given - one ticker',
+                "        tickers.set('BTC', 1);",
+                "        const result = await api.get('/orders');",
+                '',
+                '        // Then - the list',
+                '        expect(result.status).toBe(200);',
+                '    });',
+                '',
+                "    test('creates an order', async () => {",
+                '        // Given - an empty table',
+                "        const result = await api.post('/orders', {});",
+                '',
+                '        // Then - created',
+                '        expect(result.status).toBe(201);',
+                '    });',
+                '});',
+                '',
+            ].join('\n'),
+        });
+
+        // When - the fix splits it
+        fixSubjects(root);
+
+        // Then - the hook and what it clears stay with the test that sets it, and leave the other file
+        const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
+        const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
+        expect({
+            createdHook: created.includes('afterEach'),
+            createdSource: created.includes('tickers'),
+            listedHook: listed.includes('tickers.clear()'),
+        }).toStrictEqual({ createdHook: false, createdSource: false, listedHook: true });
+    });
+
     test('a spec of one route outside its folder is moved there, its paths rebased', () => {
         // Given - GET /orders filed under a folder of its own choosing
         const root = specsTree({
