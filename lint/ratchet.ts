@@ -249,7 +249,7 @@ export function writeBaseline(root: string, counts: Readonly<Record<string, numb
  * above the root — a fixture project inside another repository would be
  * linted with that repository's config.
  */
-function oxlintOf(root: string): string | undefined {
+export function oxlintOf(root: string): string | undefined {
     const candidate = join(root, 'node_modules', '.bin', 'oxlint');
     return existsSync(candidate) ? candidate : undefined;
 }

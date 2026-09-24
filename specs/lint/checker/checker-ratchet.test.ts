@@ -63,4 +63,60 @@ describe('lint — checker CLI, the ratchet is exact', () => {
             '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {}\n}\n',
         );
     });
+
+    test("`--fix` applies the plugin's own fixes before it counts: one run settles what they write", async () => {
+        // Given - every chain of a spec states one clock, and another rulebook's fixer is armed
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
+            .exec('. --fix');
+
+        // Then - the view written and held, the other fixer left to the toolchain, no wrapper behind
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 0 held across 0 rules\n');
+        expect(result.file('specs/api/events/list/pagination.spec.ts').content).toBe(
+            [
+                "import { describe, expect, test } from 'vitest';",
+                '',
+                "import { api } from '../../api.specification.js';",
+                '',
+                "const events = api.with({ clock: '2026-03-04T09:30:00Z' });",
+                '',
+                "describe('pagination', () => {",
+                "    test('lists the first page', async () => {",
+                '        // Given - the calendar the file reads',
+                "        const result = await events.get('/events');",
+                '',
+                '        // Then - the whole page',
+                '        expect(result.response).toMatch(`HTTP/1.1 200 OK`);',
+                '    });',
+                '',
+                "    test('lists the second page', async () => {",
+                '        // Given - the same calendar',
+                "        const result = await events.get('/events?page=2');",
+                '',
+                '        // Then - the whole page',
+                '        expect(result.response).toMatch(`HTTP/1.1 200 OK`);',
+                '    });',
+                '});',
+                '',
+            ].join('\n'),
+        );
+        expect(result.file('src/nothing.ts').content).toBe(
+            "export function nothing(value?: string): string {\n    return value ?? 'nothing';\n}\n\nexport const empty = nothing(undefined);\n",
+        );
+        expect(result.file('oxlint.test-fix.config.mjs').exists).toBe(false);
+    });
+
+    test('`--fix` refuses a report written before its fixes', async () => {
+        // Given - the fixable project, and a report handed in beside the fixer
+        const result = await cli
+            .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
+            .exec('. --fix --oxlint-report package.json');
+
+        // Then - the run stops before it writes, naming the flag to drop
+        expect(result.exitCode).toBe(1);
+        expect(result.stderr).toMatch(`
+            conventions checker: \`--fix\` counts what its own fixes leave, and a report written before them counts the tree they changed — drop \`--oxlint-report\`
+        `);
+    });
 });

@@ -21,6 +21,7 @@ import {
 } from './checker.js';
 import type { TokenViolation } from './checker.js';
 import { tightened } from './ratchet-fix.js';
+import { applyOwnFixes } from './ratchet-own-fixes.js';
 import {
     BASELINE_FILE,
     BASELINE_LABEL,
@@ -112,7 +113,10 @@ import { codeOf } from './rule-code.js';
  * C14, which MOVES a single-reader pool entry beside its leaf and rewrites the
  * literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
- * fixes everything exits 0. The ratchet run under `--fix` also re-records every
+ * fixes everything exits 0. The ratchet run under `--fix` applies this
+ * package's own oxlint autofixes before it counts the plugin's diagnostics
+ * (`ratchet-own-fixes.ts`), so one `make fix` settles what they write — and it
+ * refuses `--oxlint-report`, a report of the tree before them. It also re-records every
  * entry whose count fell — lowered, or dropped at zero — and never one that
  * rose. With no path it applies them to every `specs/` root
  * it discovers, and moves the module tests of every member that still stand on
@@ -672,6 +676,23 @@ function requireReport(path: string | undefined): string | undefined {
 }
 
 const reportFile = requireReport(oxlintReport);
+if (fix && reportFile !== undefined) {
+    console.error(
+        'conventions checker: `--fix` counts what its own fixes leave, and a report written before them counts the tree they changed — drop `--oxlint-report`',
+    );
+    process.exit(1);
+}
+
+/**
+ * The plugin's diagnostics a ratchet run counts: under `--fix`, what is left
+ * once the plugin's own autofixes are applied (`ratchet-own-fixes.ts`).
+ */
+function judgedPluginDiagnostics(root: string): PluginDiagnostic[] {
+    if (fix) {
+        applyOwnFixes(root);
+    }
+    return pluginDiagnostics(root, reportFile);
+}
 
 // ── Record the ratchet ──
 
@@ -704,7 +725,7 @@ if (member !== undefined) {
             counted: () => projectFindings(root),
             own: checkMember(dir, root),
             passes: MEMBER_PASSES,
-            plugin: pluginDiagnostics(root, reportFile),
+            plugin: judgedPluginDiagnostics(root),
             root,
             what,
         });
@@ -736,7 +757,7 @@ ratchet({
     counted: () => findings,
     own: findings,
     passes: PROJECT_PASSES,
-    plugin: pluginDiagnostics(root, reportFile),
+    plugin: judgedPluginDiagnostics(root),
     root,
     what: `under ${root}`,
 });
