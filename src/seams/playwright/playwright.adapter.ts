@@ -1,9 +1,9 @@
 import { mkdtempSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserType, Locator, Page } from 'playwright';
 
+import { evidenceDirectory } from '../../model/artifacts/artifacts.js';
 import {
     AmbiguousElementError,
     describeAmbiguity,
@@ -475,7 +475,7 @@ export class PlaywrightAdapter implements BrowserPort {
     /** Screenshot the failing state into a temp file; never masks the original error. */
     private async captureEvidence(page: Page): Promise<null | string> {
         try {
-            const dir = mkdtempSync(resolve(tmpdir(), 'spec-website-'));
+            const dir = mkdtempSync(evidenceDirectory('website-'));
             const path = resolve(dir, 'failure.png');
             await page.screenshot({ fullPage: true, path });
             return path;

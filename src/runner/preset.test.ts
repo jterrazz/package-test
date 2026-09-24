@@ -6,7 +6,7 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../model/artifacts/artifacts.js';
-import { defineSpecConfig, inPlaceSetup } from './preset.js';
+import { defineSpecConfig, inPlaceSetup, tempRootSetup } from './preset.js';
 import { unit } from './projects.js';
 
 describe('defineSpecConfig() — artefact paths', () => {
@@ -231,18 +231,19 @@ describe('defineSpecConfig() — the hygiene a suite does not have to write', ()
     });
 });
 
-describe('defineSpecConfig() — update mode writes once the run is reported', () => {
-    test('the root and every inline project carry the setup that writes the rewrites', () => {
+describe("defineSpecConfig() — the run's global setups", () => {
+    test('the root and every inline project carry the update-mode setup and the temp-root setup', () => {
         // Given - a config with one inline project
         const config = defineSpecConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
-        // Then - both carry the setup, which exists where the preset names it
+        // Then - both carry the two setups, each existing where the preset names it
         const [project] = config.test?.projects ?? [];
-        expect(config.test?.globalSetup).toStrictEqual([inPlaceSetup()]);
-        expect(project).toMatchObject({ test: { globalSetup: [inPlaceSetup()] } });
+        expect(config.test?.globalSetup).toStrictEqual([inPlaceSetup(), tempRootSetup()]);
+        expect(project).toMatchObject({ test: { globalSetup: [inPlaceSetup(), tempRootSetup()] } });
         expect(inPlaceSetup()).toMatch(/in-place-setup\.ts$/u);
+        expect(tempRootSetup()).toMatch(/temp-root\.ts$/u);
     });
 });
 

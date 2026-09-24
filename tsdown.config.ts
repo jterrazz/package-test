@@ -37,6 +37,7 @@ export default defineConfig([
             'mobile-session': 'src/runner/mobile-session.ts',
             'route-coverage': 'src/runner/route-coverage.ts',
             'services-setup': 'src/seams/testcontainers/run-setup.ts',
+            'temp-root': 'src/runner/temp-root.ts',
             vitest: 'src/runner/index.ts',
         },
         format: ['esm'],

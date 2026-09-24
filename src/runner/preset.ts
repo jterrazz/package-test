@@ -100,6 +100,15 @@ export function inPlaceSetup(): string {
 }
 
 /**
+ * The global setup that gives the run its own temp root, removed at teardown —
+ * `temp-root.ts` in a source checkout, `temp-root.js` in the built package.
+ */
+export function tempRootSetup(): string {
+    const source = join(import.meta.dirname, 'temp-root.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'temp-root.js');
+}
+
+/**
  * Options are a vite/vitest config plus one key of the framework's own.
  * Everything stated here wins over the preset's defaults.
  */
@@ -132,7 +141,7 @@ export function projectDefaults(): TestProjectInlineConfiguration {
         test: {
             attachmentsDir: ATTACHMENTS_DIR,
             exclude: EXCLUDE,
-            globalSetup: [inPlaceSetup()],
+            globalSetup: [inPlaceSetup(), tempRootSetup()],
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,
             testTimeout: TEST_TIMEOUT_MS,
@@ -189,7 +198,7 @@ function rootDefaults(): ViteUserConfig {
             attachmentsDir: ATTACHMENTS_DIR,
             coverage: COVERAGE,
             exclude: EXCLUDE,
-            globalSetup: [inPlaceSetup()],
+            globalSetup: [inPlaceSetup(), tempRootSetup()],
             hookTimeout: HOOK_TIMEOUT_MS,
             ...HYGIENE,
             outputFile: REPORTER_OUTPUT_FILES,

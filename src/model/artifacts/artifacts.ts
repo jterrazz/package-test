@@ -1,3 +1,6 @@
+import { mkdirSync } from 'node:fs';
+import { join, resolve } from 'node:path';
+
 /**
  * Where a tool writes what it generates: `.artifacts/<tool>/` at the project
  * root, one folder per tool (`dist/` is the ecosystem's single exception).
@@ -32,6 +35,20 @@ export const SQLITE_TEMPLATE_DIR = `${VITEST_ARTIFACTS_DIR}/sqlite`;
  * and one no `.gitignore` rule of ours covers.
  */
 export const ATTACHMENTS_DIR = `${VITEST_ARTIFACTS_DIR}/attachments`;
+
+/**
+ * Where a website or mobile scenario that failed leaves its screenshot — under
+ * the project, because the run's temp root is removed when the run ends and
+ * the error that names the file is read after it.
+ */
+export const EVIDENCE_DIR = `${VITEST_ARTIFACTS_DIR}/evidence`;
+
+/** The `mkdtemp` prefix of one failure's evidence folder, its parent made. */
+export function evidenceDirectory(prefix: string): string {
+    const parent = resolve(EVIDENCE_DIR);
+    mkdirSync(parent, { recursive: true });
+    return join(parent, prefix);
+}
 
 /** Where the browser provider drops a screenshot of a failing test. */
 export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;

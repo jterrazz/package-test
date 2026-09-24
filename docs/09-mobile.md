@@ -251,7 +251,7 @@ The stub behaves exactly as on the website facet ([08 — Website specs](08-webs
 
 ### Evidence on failure
 
-When a scenario throws — an element never appears, a `see()` times out — the error carries a screenshot of the state the scenario died in, referenced by its temp path in the error message. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
+When a scenario throws — an element never appears, a `see()` times out — the error carries a screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, so it outlives the run and its temp root. A timeout additionally includes a compact excerpt of the labels currently on screen, so the failure reads without relaunching anything. The original error is never masked.
 
 ### Requirements — what the machine must have
 

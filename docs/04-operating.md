@@ -67,7 +67,7 @@ The package refuses to guess at its environment, so several things it uses are t
 
 ## The footprint it leaves
 
-Nothing persistent. Inside a consuming project the framework writes only under `.artifacts/` — vite's transform cache, the coverage directory if a provider is installed, and the SQLite schema template it reuses across runs. Everything else it creates is per-RUN scratch in the OS temp directory: the fresh working directory of each CLI spec, the per-worker database copies, the profile directory a browser or a simulator needs. One `rm -rf .artifacts` is a clean slate, and [02 — Developing](02-developing.md) holds the table of what lands where.
+Nothing persistent. Inside a consuming project the framework writes only under `.artifacts/` — vite's transform cache, the coverage directory if a provider is installed, the SQLite schema template it reuses across runs, and the screenshot a failed website or mobile scenario leaves as evidence. Everything else it creates is per-RUN scratch in one temp root of the run, below the OS temp directory, removed when the run ends: the fresh working directory of each CLI spec, the per-worker database copies, the profile directory a browser or a simulator needs. One `rm -rf .artifacts` is a clean slate, and [02 — Developing](02-developing.md) holds the table of what lands where.
 
 Containers are the one resource that outlives a process badly, which is why `afterAll(cleanup)` is a rule and not a suggestion: a suite that forgets it leaks its infrastructure into the next one.
 

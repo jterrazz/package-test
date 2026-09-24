@@ -1,9 +1,9 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
 import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
 import { projectScreen } from '../../facets/mobile/projection.js';
+import { evidenceDirectory } from '../../model/artifacts/artifacts.js';
 import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
 import { refusal } from '../../model/lesson/refusal.js';
 import type {
@@ -372,7 +372,7 @@ export class AppiumAdapter implements DevicePort {
     /** Screenshot the failing state into a temp file; never masks the original error. */
     private async captureEvidence(driver: Driver): Promise<null | string> {
         try {
-            const dir = mkdtempSync(resolve(tmpdir(), 'spec-mobile-'));
+            const dir = mkdtempSync(evidenceDirectory('mobile-'));
             const path = resolve(dir, 'failure.png');
             writeFileSync(path, Buffer.from(await driver.takeScreenshot(), 'base64'));
             return path;

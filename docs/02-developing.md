@@ -244,7 +244,7 @@ What every helper accepts, on top of the project it already is:
 | `test.restoreMocks`              | `true`                                                         | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                                                                                                                                                                                                                  |
 | `test.unstubGlobals`             | `true`                                                         | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule J6w)                                                                                                                                                                                                     |
 | `test.unstubEnvs`                | `true`                                                         | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule E9w)                                                                                                                                                                                                         |
-| `test.globalSetup`               | the update-mode setup                                          | Update mode writes a value in place after the run is reported, so a failure's code frame reads the lines the run loaded ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test))                                                                                                         |
+| `test.globalSetup`               | the update-mode setup, the temp-root setup                     | Update mode writes a value in place after the run is reported, so a failure's code frame reads the lines the run loaded ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)); the temp root is [below](#scratch-lives-in-the-runs-temp-root)                                         |
 | `plugins`                        | `literate()`, when `literate:` is given                        | Turns every matching `<case>.spec.yaml` into a test file (see [20 — Spec documents](20-documents.md))                                                                                                                                                                                                  |
 
 It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not), stated by the project rather than by the preset — a helper states it for you when you pass `serial`, and a hand-written project states it itself; so do `reporters`, `environment`, `env`, every other `globalSetup` — the preset's own is ADDED to a project's, vite concatenating the lists — and every `include`: a preset that guessed those would be wrong more often than right.
@@ -312,13 +312,22 @@ The `.artifacts/<tool>/` convention is [`@jterrazz/typescript`](https://github.c
 
 What this framework writes there:
 
-| Path                                             | Written by                   | Lifetime                        |
-| ------------------------------------------------ | ---------------------------- | ------------------------------- |
-| `.artifacts/vitest/`                             | vite's transform cache       | Reused across runs              |
-| `.artifacts/vitest/coverage/`                    | v8, which the preset selects | Rewritten per coverage run      |
-| `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template | Reused until the schema changes |
+| Path                                             | Written by                                               | Lifetime                        |
+| ------------------------------------------------ | -------------------------------------------------------- | ------------------------------- |
+| `.artifacts/vitest/`                             | vite's transform cache                                   | Reused across runs              |
+| `.artifacts/vitest/coverage/`                    | v8, which the preset selects                             | Rewritten per coverage run      |
+| `.artifacts/vitest/sqlite/template-<key>.sqlite` | `sqlite()`'s schema template                             | Reused until the schema changes |
+| `.artifacts/vitest/evidence/`                    | a website or mobile scenario that failed, its screenshot | Kept until you remove it        |
 
-What it does **not** write there: the fresh temp directory each CLI spec runs in, the per-worker SQLite copies, the profile dirs a browser or a simulator needs. Those are per-RUN scratch, they stay in the OS temp dir, and moving them into the project would only put a `package.json` above a spec that must not see one.
+What it does **not** write there: the fresh temp directory each CLI spec runs in, the per-worker SQLite copies, the profile dirs a browser or a simulator needs. Those are per-RUN scratch, in the run's temp root, and moving them into the project would only put a `package.json` above a spec that must not see one.
+
+### Scratch lives in the run's temp root
+
+A run keeps every scratch folder it makes in ONE folder of its own, and removes that folder when it ends. The preset's temp-root setup creates `jterrazz-test-run-<pid>-…` in the OS temp directory before the first worker starts, and points `TMPDIR` (with `TMP` and `TEMP`) at it. So every `mkdtemp` under `os.tmpdir()` lands inside it: in a worker, in a child a spec spawns, in a tool that child runs. The last project's teardown removes it and restores the variables.
+
+A run that dies before its teardown leaves its root behind, named by its pid. The next run removes every root whose pid no longer runs.
+
+A CLI spec's working directory does not wait for the run to end: it is removed once its test has finished, after the test's `afterEach` hooks.
 
 ### Framework environment variables
 

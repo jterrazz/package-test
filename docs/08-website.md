@@ -359,7 +359,7 @@ The default follows the mode: `'block'` with `server` (you own the deployment, t
 
 ### Evidence on failure
 
-When a scenario throws — an element never becomes visible, a `see()` times out — the error carries a full-page screenshot of the state the scenario died in, referenced by its temp path in the error message. The original error is never masked; the screenshot is attached evidence, not a replacement.
+When a scenario throws — an element never becomes visible, a `see()` times out — the error carries a full-page screenshot of the state the scenario died in, referenced by its path in the error message. It is written under `.artifacts/vitest/evidence/`, so it outlives the run and its temp root. The original error is never masked; the screenshot is attached evidence, not a replacement.
 
 ### Playwright — the optional peer
 

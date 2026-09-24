@@ -214,6 +214,8 @@ const config: OxlintConfig = defineConfig(
                     'src/seams/msw/**',
                     'src/seams/playwright/**',
                     'src/model/clock/**',
+                    // A scratch directory ends with the test that asked for it.
+                    'src/model/chain/scratch.ts',
                     'src/model/doubles/**',
                     'src/model/goldens/**',
                 ],

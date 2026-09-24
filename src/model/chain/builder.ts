@@ -1,6 +1,5 @@
-import { cpSync, mkdtempSync, readFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { relative, resolve } from 'node:path';
+import { cpSync, readFileSync } from 'node:fs';
+import { relative } from 'node:path';
 
 import { HttpResult } from '../../facets/api/api.result.js';
 import { CliResult } from '../../facets/cli/cli.result.js';
@@ -34,6 +33,7 @@ import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
 import { routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
+import { scratchDirectory } from './scratch.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
 import type { StubBackend } from './stub-backend.js';
@@ -956,7 +956,7 @@ export class SpecificationBuilder
         // Every command spec runs in a fresh, empty temp directory. Fixtures
         // Are layered in afterwards via .fixture() (see executeSetup) — the
         // Runner never writes into the source tree.
-        return mkdtempSync(resolve(tmpdir(), 'spec-command-'));
+        return scratchDirectory('spec-command-');
     }
 
     private async runCallAction<T>(
