@@ -46,8 +46,19 @@ ruleTester.run('d20-whole-result', d20WholeResult as unknown as OxlintRule, {
             errors: [{ message: /reads first\.json and never compares it whole/u }],
             filename: SPEC,
         },
+        // A cursor passed through five names is past the carry depth: the read is a read.
+        {
+            code: "test('t', async () => { const first = await api.get('/facts'); const a = first.json.next; const b = a; const c = b; const d = c; const e = d; const second = await api.get('/facts?cursor=' + e); expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
+            errors: [{ column: 73, message: /reads first\.json and never compares it whole/u }],
+            filename: SPEC,
+        },
     ],
     valid: [
+        // A cursor passed through four names on its way to the next request is still carried.
+        {
+            code: "test('t', async () => { const first = await api.get('/facts'); const a = first.json.next; const b = a; const c = b; const d = c; const second = await api.get('/facts?cursor=' + d); expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
+            filename: SPEC,
+        },
         // A value carried into a request held in a name, and awaited through it.
         {
             code: "test('t', async () => { const first = await api.get('/facts'); const next = api.get('/facts?cursor=' + first.json.next); const second = await next; expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
