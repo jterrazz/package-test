@@ -224,14 +224,14 @@ export const RULE_DOCS = {
     'b9w-product-command': {
         channel: 'statique',
         convention:
-            "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → warning (a suppression with a reason is accepted).",
+            "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → warning (a suppression with a reason is accepted). Reach: a specification file — a runner created anywhere else is A1's.",
         facet: 'cli',
         family: 'B',
         fix: "Point the runner at the product's own binary; assert on a tool's output through `result.grep`.",
         id: 'B9',
         rationale:
             "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
-        reach: 'all',
+        reach: 'specification',
     },
     'c1-domain-structure': {
         channel: 'statique',

@@ -44,6 +44,11 @@ ruleTester.run('b9w-product-command', b9wProductCommand as unknown as OxlintRule
             code: "const { cli } = await specification.cli('../fixtures/cli-app/cli.sh');",
             filename: '/repo/specs/cli/cli.specification.ts',
         },
+        // Outside a specification file the runner is A1's to refuse, not this rule's.
+        {
+            code: "const { cli } = await specification.cli('./node_modules/.bin/oxlint');",
+            filename: '/repo/specs/cli/lint/binary.spec.ts',
+        },
         // Not a cli() constructor.
         {
             code: 'const { api } = await specification.api({ server });',
