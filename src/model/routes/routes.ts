@@ -29,11 +29,14 @@ import { VITEST_ARTIFACTS_DIR } from '../artifacts/artifacts.js';
 /** One route: an HTTP method and a path, parameters written `:id` or `{id}`. */
 export type Route = { method: string; path: string };
 
+/** A request a test sent: the path it reached, and the route template it was written as, when it was. */
+export type SentRequest = Route & { template?: string };
+
 /**
  * What one specification of the run declared and sent — `declared` absent
  * when its app exposes no route table.
  */
-export type Ledger = { declared?: Route[] | undefined; reached: Route[] };
+export type Ledger = { declared?: Route[] | undefined; reached: SentRequest[] };
 
 /** The ratchet key the run owns in the `test` section — the unreached routes it holds. */
 export const ROUTES_KEY = 'routes/unreached';
@@ -49,35 +52,54 @@ function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/** Does a declared segment take the sent one: a parameter takes any, a literal itself. */
-function takesSegment(declared: string, sent: string | undefined): boolean {
+/** Is this segment a parameter — `:id` in a table or a template, `{id}` in an OpenAPI document? */
+function isParameter(segment: string): boolean {
+    return segment.startsWith(':') || /^\{[^}]+\}$/u.test(segment);
+}
+
+/**
+ * Does a declared segment take the sent one? A parameter takes any value and,
+ * from a template, only a parameter; a literal takes itself.
+ */
+function takesSegment(declared: string, sent: string | undefined, template: boolean): boolean {
     if (sent === undefined) {
         return false;
     }
-    const parameter = declared.startsWith(':') || /^\{[^}]+\}$/u.test(declared);
-    return parameter ? sent.length > 0 : sent === declared;
+    if (template && isParameter(sent)) {
+        return isParameter(declared);
+    }
+    return isParameter(declared) ? sent.length > 0 && !template : sent === declared;
 }
 
-/** Does a request sent reach a declared route? An `ALL` route takes any method, a `*` tail the rest of the path. */
-export function reachesRoute(route: Route, sent: Route): boolean {
+/**
+ * Does a request sent reach a declared route? A request written as a template
+ * is matched by its template — a parameter where the route has one, each
+ * literal segment itself — and any other by its path. An `ALL` route takes any
+ * method, a `*` tail the rest of the path.
+ */
+export function reachesRoute(route: Route, sent: SentRequest): boolean {
     if (route.method !== 'ALL' && route.method !== sent.method) {
         return false;
     }
+    const template = sent.template !== undefined;
     const declared = route.path.split('/');
-    const segments = (sent.path.split('?')[0] ?? '').split('/');
+    const segments = ((sent.template ?? sent.path).split('?')[0] ?? '').split('/');
     if (declared.at(-1) === '*') {
         return declared
             .slice(0, -1)
-            .every((segment, index) => takesSegment(segment, segments[index]));
+            .every((segment, index) => takesSegment(segment, segments[index], template));
     }
     return (
         declared.length === segments.length &&
-        declared.every((segment, index) => takesSegment(segment, segments[index]))
+        declared.every((segment, index) => takesSegment(segment, segments[index], template))
     );
 }
 
 /** The declared routes no request reached, each named once, in the order they were declared. */
-export function unreachedRoutes(declared: readonly Route[], reached: readonly Route[]): Route[] {
+export function unreachedRoutes(
+    declared: readonly Route[],
+    reached: readonly SentRequest[],
+): Route[] {
     const seen = new Set<string>();
     return declared.filter((route) => {
         const key = `${route.method} ${route.path}`;

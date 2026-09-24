@@ -32,6 +32,8 @@ import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
+import { routeRequest } from './route.js';
+import type { RouteArguments, RouteOptionsAny } from './route.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
 import type { StubBackend } from './stub-backend.js';
@@ -165,6 +167,8 @@ export type RequestEntry = {
     path: string;
     /** A complete request to send: a `.http` file, or its text written in the test. */
     request?: DiskFile | string | undefined;
+    /** The route template the path was written as, when the test wrote one. */
+    template?: string | undefined;
 };
 
 /**
@@ -211,14 +215,25 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
         options?: { database?: DatabaseKey },
     ) => ApiSpecification<DatabaseKey>;
 
-    /** Send a DELETE request and resolve with the result. */
-    delete: (path: string) => Promise<HttpResult>;
-    /** Send a GET request and resolve with the result. */
-    get: (path: string) => Promise<HttpResult>;
+    /** Send a DELETE request to a route — `(template, { params })` — and resolve with the result. */
+    delete: <Path extends string>(
+        path: Path,
+        ...options: RouteArguments<Path>
+    ) => Promise<HttpResult>;
+    /** Send a GET request to a route — `(template, { params })` — and resolve with the result. */
+    get: <Path extends string>(path: Path, ...options: RouteArguments<Path>) => Promise<HttpResult>;
     /** Send a POST request — the body a value or a `file()` — and resolve with the result. */
-    post: (path: string, body?: unknown) => Promise<HttpResult>;
+    post: <Path extends string>(
+        path: Path,
+        body?: unknown,
+        ...options: RouteArguments<Path>
+    ) => Promise<HttpResult>;
     /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
-    put: (path: string, body?: unknown) => Promise<HttpResult>;
+    put: <Path extends string>(
+        path: Path,
+        body?: unknown,
+        ...options: RouteArguments<Path>
+    ) => Promise<HttpResult>;
     /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
     request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
     /**
@@ -614,12 +629,14 @@ export class SpecificationBuilder
 
     /**
      * Send a GET request to the server adapter and resolve with the result.
+     * A route with parameters is written as its template, the values beside it.
      *
      * @example
      *   const result = await api.get("/api/items");
+     *   const result = await api.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } });
      */
-    async get(path: string): Promise<HttpResult> {
-        return await this.executeHttp({ method: 'GET', path });
+    async get(path: string, options?: RouteOptionsAny): Promise<HttpResult> {
+        return await this.executeHttp({ method: 'GET', ...routeRequest('GET', path, options) });
     }
 
     /**
@@ -632,18 +649,29 @@ export class SpecificationBuilder
      *   const result = await api.post("/api/items", { name: "Widget" });
      *   const result = await api.post("/api/items", file('./requests/widget.json'));
      */
-    async post(path: string, body?: unknown): Promise<HttpResult> {
-        return await this.executeHttp({ body, method: 'POST', path });
+    async post(path: string, body?: unknown, options?: RouteOptionsAny): Promise<HttpResult> {
+        return await this.executeHttp({
+            body,
+            method: 'POST',
+            ...routeRequest('POST', path, options),
+        });
     }
 
     /** Send a PUT request to the server adapter and resolve with the result. */
-    async put(path: string, body?: unknown): Promise<HttpResult> {
-        return await this.executeHttp({ body, method: 'PUT', path });
+    async put(path: string, body?: unknown, options?: RouteOptionsAny): Promise<HttpResult> {
+        return await this.executeHttp({
+            body,
+            method: 'PUT',
+            ...routeRequest('PUT', path, options),
+        });
     }
 
     /** Send a DELETE request to the server adapter and resolve with the result. */
-    async delete(path: string): Promise<HttpResult> {
-        return await this.executeHttp({ method: 'DELETE', path });
+    async delete(path: string, options?: RouteOptionsAny): Promise<HttpResult> {
+        return await this.executeHttp({
+            method: 'DELETE',
+            ...routeRequest('DELETE', path, options),
+        });
     }
 
     // ── Command actions (terminal) ──
@@ -980,12 +1008,10 @@ export class SpecificationBuilder
         }
 
         const headers = { ...fileHeaders, ...this.requestHeaders };
-        const response = await this.config.server.request(
-            method,
-            path,
-            body,
-            Object.keys(headers).length > 0 ? headers : undefined,
-        );
+        const response = await this.config.server.request(method, path, body, {
+            headers: Object.keys(headers).length > 0 ? headers : undefined,
+            template: request.template,
+        });
 
         return new HttpResult({
             config: this.config,
@@ -1276,12 +1302,12 @@ function apiView(builder: SpecificationBuilder): ApiSpecification {
     }
     const view: ApiSpecification = {
         clock: (iso) => apiView(builder.clock(iso)),
-        delete: async (path) => await builder.delete(path),
-        get: async (path) => await builder.get(path),
+        delete: async (path, ...options) => await builder.delete(path, ...options),
+        get: async (path, ...options) => await builder.get(path, ...options),
         headers: (headers) => apiView(builder.headers(headers)),
         intercept: interceptInto(() => builder, apiView),
-        post: async (path, body) => await builder.post(path, body),
-        put: async (path, body) => await builder.put(path, body),
+        post: async (path, body, ...options) => await builder.post(path, body, ...options),
+        put: async (path, body, ...options) => await builder.put(path, body, ...options),
         request: async (source) => await builder.request(source),
         seed: (source, options) => apiView(builder.seed(source, options)),
         with: (context) => apiView(builder.with(context)),
@@ -1302,12 +1328,12 @@ export function createApiFacet(config: SpecificationConfig): ApiSpecification {
 function apiFacet(start: () => SpecificationBuilder): ApiSpecification {
     return {
         clock: (iso) => apiView(start().clock(iso)),
-        delete: async (path) => await start().delete(path),
-        get: async (path) => await start().get(path),
+        delete: async (path, ...options) => await start().delete(path, ...options),
+        get: async (path, ...options) => await start().get(path, ...options),
         headers: (headers) => apiView(start().headers(headers)),
         intercept: interceptInto(start, apiView),
-        post: async (path, body) => await start().post(path, body),
-        put: async (path, body) => await start().put(path, body),
+        post: async (path, body, ...options) => await start().post(path, body, ...options),
+        put: async (path, body, ...options) => await start().put(path, body, ...options),
         request: async (source) => await start().request(source),
         seed: (source, options) => apiView(start().seed(source, options)),
         with: (context) => apiFacet(() => start().with(context)),

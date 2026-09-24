@@ -79,6 +79,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 ## Pitfalls
 
 - **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
+- **A filled path where the route has parameters** — `.get('/indicators/btc/chart')` hides that `btc` is a value. Write the route as the app declares it, the values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })` — the template types the params, files the spec and is what route coverage reads.
 - **A probe where the whole result belongs** — a test reading a response, a json or a table compares it WHOLE, its value written in place (``toMatch(`HTTP/1.1 200 OK …`)``), then adds a precise assertion only if one property is the subject.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`** — the names are reserved for ground; C1 refuses a spec under one.
 - **Reaching into a sibling leaf** — a path may leave its leaf only into the specs root's own ground, `specs/<role>/` (C15). Shared ground goes there, in the folder of its role.

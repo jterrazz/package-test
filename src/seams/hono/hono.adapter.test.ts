@@ -33,3 +33,20 @@ describe('the hono adapter — the routes an app declares', () => {
         expect(adapter.declared()).toBeUndefined();
     });
 });
+
+describe('the hono adapter — the requests it sent', () => {
+    test('records each request by its path, and by the template it was written as', async () => {
+        // Given - an item route, reached once written as a template and once as a path
+        const app = new Hono();
+        app.get('/users/:id', (context) => context.json({ id: context.req.param('id') }));
+        const adapter = new HonoAdapter(app);
+        await adapter.request('GET', '/users/7', undefined, { template: '/users/:id' });
+        await adapter.request('GET', '/users/8');
+
+        // Then - the ledger route coverage reads
+        expect(adapter.reached).toStrictEqual([
+            { method: 'GET', path: '/users/7', template: '/users/:id' },
+            { method: 'GET', path: '/users/8' },
+        ]);
+    });
+});

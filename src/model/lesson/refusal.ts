@@ -12,6 +12,8 @@ export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
 export const REFUSAL_WHY = {
     'a7-database-runtime':
         'With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
+    'b12-route-params-runtime':
+        'A request written as its route template is handed exactly the parameters the template names.',
     'b2-relative-path-runtime':
         'A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
     'd14-one-verb-per-meaning':

@@ -124,6 +124,18 @@ export async function typeRows(): Promise<void> {
 
     const result = await api.get('/orders/1');
 
+    // B12 — a route with parameters is written as its template, and the
+    // Template types the params: every name it holds, and no other.
+    await api.get('/orders/:id/lines/:line?full=1', { params: { id: 1, line: 'a' } });
+    await api.post('/orders/:id/lines', file('./requests/line.json'), { params: { id: 1 } });
+    await api.get('/orders/latest', { params: {} });
+    // @ts-expect-error B12 — a template's params are handed with it [`Expected 2 arguments, but got 1`]
+    await api.get('/orders/:id');
+    // @ts-expect-error B12 — every parameter of the template has a value [`Property 'line' is missing in type '{ id: number; }'`]
+    await api.get('/orders/:id/lines/:line', { params: { id: 1 } });
+    // @ts-expect-error B12 — a value no parameter takes is refused [`'orderId' does not exist in type 'Record<"id", string | number>'`]
+    await api.delete('/orders/:id', { params: { orderId: 1 } });
+
     // B1 — exactly one terminal action closes a chain: what a terminal action
     // Answers is a RESULT, and a result has no verbs to continue with.
     // @ts-expect-error B1 — one terminal action closes the chain [`Property 'get' does not exist on type 'HttpResult'`]

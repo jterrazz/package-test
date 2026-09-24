@@ -1461,6 +1461,19 @@ export const TYPE_ROWS: CatalogEntry[] = [
     {
         channel: 'type',
         convention:
+            "A request to a route with parameters is written as the route's template, its values beside it — `api.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })` — and the template types them: every `:name` it holds takes a value, and no other name does. `get` and `delete` take the options second, `post` and `put` third, after the body; a path with no parameter takes none, or `{ params: {} }` to state that it is the route itself.",
+        facet: 'api',
+        family: 'B',
+        fix: "Write the route as the app declares it and hand its values: `.get('/events/:id', { params: { id } })`.",
+        id: 'B12',
+        name: 'b12-route-template',
+        rationale:
+            'A filled path hides which of its segments are values: the reader, the subject reader and route coverage all have to guess that `btc` in `/indicators/btc/chart` is a symbol. The template says it, and the compiler holds the values to it.',
+        reach: 'tests',
+    },
+    {
+        channel: 'type',
+        convention:
             "A string is a value and the disk is `file()` or `directory()`: `seed('./seeds/x.sql')` (a bare string where a file is meant), `seed(file('./seeds/x.json'))` (the wrong extension), `file('x.sql')` (not a relative path), `directory('./fixtures/shop')` (a directory without its `/`), `get(file(…))` (a file where a value is meant) and `toMatch(directory(…))` on a stream do not compile.",
         facet: 'model',
         family: 'B',
@@ -1623,6 +1636,18 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
  * cannot reach (network, container lifecycle). Several double a static pass.
  */
 export const RUNTIME_RULES: CatalogEntry[] = [
+    {
+        channel: 'runtime',
+        convention: `${REFUSAL_WHY['b12-route-params-runtime']} The chain fills each \`:name\` segment with its value, URI-encoded, the query kept, and sends the filled path; route coverage reads the request by its template — a parameter where the route declares one, each literal segment as itself. A template handed no params, a parameter with no value and a value no parameter takes are refused before a request is sent, naming the call to write.`,
+        facet: 'api',
+        family: 'B',
+        fix: "Hand exactly the template's parameters: `.get('/events/:id', { params: { id } })`.",
+        id: 'B12',
+        name: 'b12-route-params-runtime',
+        rationale:
+            'The compiler holds a typed spec to its template; a cast or a JavaScript spec is held here, before a request the app would answer 404 is taken for a finding about the app.',
+        reach: 'tests',
+    },
     {
         channel: 'runtime',
         convention:

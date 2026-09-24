@@ -100,7 +100,11 @@ export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './model/
 export type { DatabasePort } from './model/ports/database.port.js';
 export type { IsolationStrategy } from './model/ports/isolation.port.js';
 export type { ServiceHandle } from './model/ports/service.port.js';
-export type { ServerPort, ServerResponse } from './model/ports/server.port.js';
+export type {
+    ServerPort,
+    ServerRequestOptions,
+    ServerResponse,
+} from './model/ports/server.port.js';
 export type { ContainerPort } from './model/ports/container.port.js';
 
 // Services

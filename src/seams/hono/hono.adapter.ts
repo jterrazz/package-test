@@ -1,5 +1,9 @@
-import type { ServerPort, ServerResponse } from '../../model/ports/server.port.js';
-import type { Route } from '../../model/routes/routes.js';
+import type {
+    ServerPort,
+    ServerRequestOptions,
+    ServerResponse,
+} from '../../model/ports/server.port.js';
+import type { Route, SentRequest } from '../../model/routes/routes.js';
 
 /** One entry of an app's route table: a method, a path, and — a Hono app's — the handler it runs. */
 type TableEntry = { handler?: unknown; method: string; path: string };
@@ -38,7 +42,7 @@ function isMiddleware(entry: TableEntry): boolean {
 export class HonoAdapter implements ServerPort {
     private readonly app: InProcessApp;
     /** Every request sent through this adapter, in the order it was sent. */
-    readonly reached: Route[] = [];
+    readonly reached: SentRequest[] = [];
 
     constructor(app: InProcessApp) {
         this.app = app;
@@ -58,7 +62,7 @@ export class HonoAdapter implements ServerPort {
         method: string,
         path: string,
         body?: unknown,
-        headers?: Record<string, string>,
+        { headers, template }: ServerRequestOptions = {},
     ): Promise<ServerResponse> {
         const init: RequestInit = {
             method,
@@ -71,7 +75,7 @@ export class HonoAdapter implements ServerPort {
             init.body = typeof body === 'string' ? body : JSON.stringify(body);
         }
 
-        this.reached.push({ method, path });
+        this.reached.push(template === undefined ? { method, path } : { method, path, template });
         const response = await this.app.request(path, init);
         const responseBody = await response.json().catch(() => null);
 

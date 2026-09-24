@@ -107,12 +107,14 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 | ---------------------------------------- | ------------------------------------------------------------------------------------- |
 | ``.request(`POST /users …`)``            | Execute the complete request written in the test, `.http` text, dedented              |
 | `.request(file('./requests/file.http'))` | Execute the complete request that `.http` file describes — when several tests send it |
-| `.get(path)`                             | Inline GET — for simple cases where a file would be excessive                         |
-| `.post(path, body?)`                     | Inline POST                                                                           |
-| `.put(path, body?)`                      | Inline PUT                                                                            |
-| `.delete(path)`                          | Inline DELETE                                                                         |
+| `.get(path, { params }?)`                | Inline GET — for simple cases where a file would be excessive                         |
+| `.post(path, body?, { params }?)`        | Inline POST                                                                           |
+| `.put(path, body?, { params }?)`         | Inline PUT                                                                            |
+| `.delete(path, { params }?)`             | Inline DELETE                                                                         |
 
 The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: the surrounding blank lines are trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
+
+A route with parameters is written as the app declares it, its values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`. The template types the params — every `:name` it holds takes a value, and no other name does (rule B12) — and the chain sends the path filled, each value URI-encoded, the query kept. The template is what the test's reader, the subject reader (C29, C30) and route coverage read, so none of them has to guess that `btc` is a value. A path with no parameter takes no options, or `{ params: {} }` to state that it is the route itself.
 
 There is no label argument: the vitest test name is the spec's only description (rule B3).
 
@@ -285,7 +287,7 @@ A journey — a request carrying what an earlier response returned — is code: 
 
 ### Route coverage
 
-Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. An entry whose handler takes `next` is a middleware, left out by Hono's own rule; a route `app.all()` declares is judged like any other, reached by a request of any method. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path.
+Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. An entry whose handler takes `next` is a middleware, left out by Hono's own rule; a route `app.all()` declares is judged like any other, reached by a request of any method. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path. A request written as a template is matched by its template: a parameter where the route declares one, each literal segment as itself — so `.get('/users/:id', { params: { id: 'me' } })` reaches `GET /users/:id` and never a `GET /users/me` the filled path also fits.
 
 ```
 api routes: all 12 declared routes reached
