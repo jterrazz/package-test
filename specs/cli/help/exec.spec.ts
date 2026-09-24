@@ -14,7 +14,7 @@ import { cli } from '../cli.specification.js';
 describe('exec', () => {
     test('surfaces the whole usage banner on stdout', async () => {
         // Given - the help command
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - the whole usage banner is surfaced on stdout
         expect(result.exitCode).toBe(0);
@@ -30,7 +30,7 @@ describe('exec', () => {
     test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — returns non-zero when the process exits without matching', async () => {
         // Given - help exits immediately without matching pattern
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 1 (pattern not matched before process exited)

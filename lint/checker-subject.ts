@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { GROUND_DIRS } from '../src/model/chain/ground.js';
+import { GROUND_DIRS, SHARED_GROUND } from '../src/model/chain/ground.js';
 import { forgetTree, moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { listFiles, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
@@ -33,7 +33,7 @@ import { testSettingsAt } from './test-settings.js';
  * about one subject whose name the tree derives (api, jobs, cli) lives in that
  * folder, and `--fix` moves it there. Either move keeps every path the code
  * names pointing where it pointed, and sends the ground the old leaf holds for
- * another leaf up to the specs root's own ground, where C28's own fix moves
+ * another leaf up to the specs root's shared ground, where C28's own fix moves
  * each entry down to the one leaf that reads it.
  */
 
@@ -680,7 +680,7 @@ function isAtOrBelow(entry: string, path: string): boolean {
 /**
  * The ground a moved or split spec leaves behind: every entry of the old
  * leaf's four folders a file of another leaf reads goes up to the specs
- * root's folder of its role, and every path that named it follows.
+ * root's shared folder of its role, and every path that named it follows.
  */
 function liftGround(specsRoot: string, leaf: string): string[] {
     const lifted: string[] = [];
@@ -696,7 +696,7 @@ function liftGround(specsRoot: string, leaf: string): string[] {
             if (readers.every(({ file }) => dirname(file) === leaf)) {
                 continue;
             }
-            const destination = join(specsRoot, role, entry.name);
+            const destination = join(specsRoot, SHARED_GROUND, role, entry.name);
             // The pool holds that name: C15 keeps reporting the reach.
             if (existsSync(destination)) {
                 continue;

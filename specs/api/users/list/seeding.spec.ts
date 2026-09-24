@@ -42,7 +42,7 @@ describe('seeding', () => {
     test('lays a leaf seed over a shared one', async () => {
         // Given - the shared pool's two users, and a third from the leaf's own seed
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .seed(file('./seeds/carol.sql'), { database: 'db' })
             .get('/users');
 

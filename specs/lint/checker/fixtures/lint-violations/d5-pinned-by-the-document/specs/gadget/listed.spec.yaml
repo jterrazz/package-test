@@ -1,5 +1,5 @@
 description: lists the stamps the console answered with
-fixture: ../fixtures/console/
+fixture: ../shared/fixtures/console/
 env:
     - frozen
 serve:

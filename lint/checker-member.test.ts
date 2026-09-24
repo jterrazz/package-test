@@ -8,7 +8,7 @@ import { codeOf } from './rule-code.js';
 import { checkoutUnder } from './rule-tester.fixtures.js';
 
 /** The fixture workspace: one member per finding, plus one that is clean. */
-const WORKSPACE = resolve(import.meta.dirname, '../specs/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../specs/shared/fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 /** The codes a run produced, in order. */

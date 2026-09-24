@@ -7,7 +7,7 @@ describe('sending', () => {
     test('a put renames the user, its fields written in the test', async () => {
         // Given - one user, and the fields it is renamed to
         const result = await api
-            .seed(file('../../../seeds/alice.sql'), {
+            .seed(file('../../../shared/seeds/alice.sql'), {
                 database: 'db',
             })
             .put('/users/1', { email: 'updated@test.com', name: 'Alice Updated' });

@@ -45,7 +45,7 @@ function catchMessage(assertion: () => unknown): string {
 describe('assertions', () => {
     test('text exposes the comparable string', async () => {
         // Given - a help run
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - the text is readable
         expect(result.stdout.text).toContain('Usage: cli <command>');
@@ -53,7 +53,7 @@ describe('assertions', () => {
 
     test('coerces to primitive string via String()', async () => {
         // Given - a help run
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - toString/valueOf keep string coercion working
         expect(String(result.stdout)).toContain('Usage:');
@@ -62,7 +62,7 @@ describe('assertions', () => {
 
     test('the stdout mismatch diff is goldened in full (failure-message quality is the product)', async () => {
         // Given - a run whose output differs from a committed, deliberately-wrong fixture
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - the whole -/+ stdout diff is captured and asserted against a golden. frozen - stdout-wrong.txt is deliberately wrong (its diff IS the subject); only the error golden updates, never the wrong fixture
         const message = catchMessage(() => {
@@ -87,7 +87,7 @@ describe('assertions', () => {
     // `requests/`.
     test('toMatch on a missing stream fixture names the path it resolved, and TEST_UPDATE', async () => {
         // Given - a fixture name that was never created
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - the failure names the path it resolved and explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
         const message = catchMessage(() => {
@@ -106,14 +106,14 @@ describe('assertions', () => {
         // Given - a fixture written via update mode with a slash in its name
         const fixtureName = `sub/help-${Date.now()}.txt`;
         try {
-            const a = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+            const a = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
             inUpdateMode(() => {
                 expect(a.stdout).toMatch(file(`./expected/${fixtureName}`));
             });
 
             // Then - the file landed at expected/sub/<name> and matches on re-run
             expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBeTruthy();
-            const b = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+            const b = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
             expect(b.stdout).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, 'sub'));
@@ -122,7 +122,7 @@ describe('assertions', () => {
 
     test("toContain is vitest's, on the captured text", async () => {
         // Given - a help run
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - vitest's own substring check and its own failure, on .text as on any string or array
         expect(result.stdout.text).toContain('Usage: cli <command>');
@@ -135,7 +135,7 @@ describe('assertions', () => {
 
     test('throws a clear error when stdout is not JSON', async () => {
         // Given - non-JSON output
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('help');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('help');
 
         // Then - reading .value throws with context
         expect(() => result.json.value).toThrow(/stdout is not valid JSON/u);
@@ -154,7 +154,7 @@ describe('assertions', () => {
     test('a directory named by file() is refused with the form to write', async () => {
         // Given - the shared cli-app project named as if it were one file
         // checker-disable-next-line c8 -- negative spec: a directory named by file() IS the behaviour under test
-        const run = cli.fixture(file('../../fixtures/cli-app')).exec('help');
+        const run = cli.fixture(file('../../shared/fixtures/cli-app')).exec('help');
 
         // Then - the path states the kind, so the wrong one is refused rather than guessed
         await expect(run).rejects.toThrow(/names a directory\n.*\nfix: end its path in \//u);

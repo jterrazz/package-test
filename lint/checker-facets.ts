@@ -29,9 +29,9 @@ export const FACETS: string[] = ['api', 'cli', 'integration', 'jobs', 'mobile', 
 /**
  * Directories no facet walk enters.
  *
- * The pool (`specs/fixtures/`) is verbatim material — the reusable apps AND the trees
- * that fail on purpose — never live specs, so every pass prunes it exactly as
- * the token checker does.
+ * A `fixtures/` folder — a leaf's, or the pool's (`specs/shared/fixtures/`) —
+ * is verbatim material, the reusable apps AND the trees that fail on purpose,
+ * never live specs, so every pass prunes it exactly as the token checker does.
  */
 const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 

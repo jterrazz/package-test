@@ -9,7 +9,7 @@ import { specification } from '../../src/index.js';
  * unknown D4 tokens in fixture files (`requests/**`, `expected/**`).
  * Requires `npm run build` first (the checker runs from dist/).
  */
-const CHECKER_BIN = resolve(import.meta.dirname, '../fixtures/checker-cli/check.sh');
+const CHECKER_BIN = resolve(import.meta.dirname, '../shared/fixtures/checker-cli/check.sh');
 
 export const { cleanup, cli } = await specification.cli(CHECKER_BIN);
 

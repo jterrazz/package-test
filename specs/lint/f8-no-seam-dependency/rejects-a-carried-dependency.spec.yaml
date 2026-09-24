@@ -1,5 +1,5 @@
 description: a dependency the framework carries, or a seam it replaced, is refused where declared
-fixture: ../../fixtures/member-workspace/
+fixture: ../../shared/fixtures/member-workspace/
 runs:
     - command: checker --member packages/seam-dependency .
       exit: 1

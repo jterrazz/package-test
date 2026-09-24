@@ -4,8 +4,8 @@ runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/seeds/one-user.sql: absent
-          specs/seeds: absent
+          specs/shared/seeds/one-user.sql: absent
+          specs/shared/seeds: absent
           specs/api/users/seeds/one-user.sql: exists
           specs/api/users/listed.spec.ts:
               contains: file('./seeds/one-user.sql')

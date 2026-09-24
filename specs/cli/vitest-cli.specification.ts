@@ -8,7 +8,7 @@ import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';
 
-const VITEST_BIN = resolve(import.meta.dirname, '../fixtures/vitest-cli/vitest.sh');
+const VITEST_BIN = resolve(import.meta.dirname, '../shared/fixtures/vitest-cli/vitest.sh');
 
 export const { cleanup, cli } = await specification.cli(VITEST_BIN);
 

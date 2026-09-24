@@ -1,5 +1,5 @@
 description: a member config drawing a browser with a simulated DOM is refused
-fixture: ../../fixtures/member-workspace/
+fixture: ../../shared/fixtures/member-workspace/
 runs:
     - command: checker --member packages/simulated-dom .
       exit: 1

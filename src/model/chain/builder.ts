@@ -463,7 +463,7 @@ export class SpecificationBuilder
      *
      * @example
      *   api.seed(file('./seeds/ada.sql'), { database: 'db' }).get('/users');
-     *   api.seed(file('../../seeds/users.sql'), { database: 'db' }).get('/users');
+     *   api.seed(file('../../shared/seeds/users.sql'), { database: 'db' }).get('/users');
      */
     seed(source: SeedSource, options?: { database?: string }): this {
         const { path } = requireDiskFile('seed', source, '.sql');
@@ -479,7 +479,7 @@ export class SpecificationBuilder
      * files written by an earlier one.
      *
      * @example
-     *   cli.fixture(directory('../../fixtures/cli-app/')).exec('build');   // the shared pool
+     *   cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('build');   // the shared pool
      *   cli.fixture(file('./fixtures/config.toml')).exec('migrate');
      */
     fixture(source: DiskTarget): this {

@@ -10,7 +10,9 @@ const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 describe('tokens', () => {
     test('matches dynamic values via typed tokens including {{workdir}}', async () => {
         // Given - output mixing a semver, a uuid, a timestamp, the cwd, and a duration
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .exec('version');
 
         // Then - the committed fixture matches through the token grammar
         expect(result.exitCode).toBe(0);
@@ -19,7 +21,9 @@ describe('tokens', () => {
 
     test('{{workdir}} is the exact cwd of the spec — a different path fails', async () => {
         // Given - two runs, each with its own temp cwd
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .exec('version');
 
         // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
         expect(result.stdout.text).toContain('cwd /');
@@ -31,7 +35,9 @@ describe('tokens', () => {
         const fixtureName = `version-transient-${Date.now()}.txt`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
-            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+            const result = await cli
+                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .exec('version');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
                 expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
@@ -45,7 +51,9 @@ describe('tokens', () => {
             expect(written).not.toMatch(/cwd \//u);
 
             // Then - a second run (different cwd) matches the updated fixture
-            const second = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+            const second = await cli
+                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .exec('version');
             expect(second.stdout).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             rmSync(fixturePath, { force: true });
@@ -65,7 +73,9 @@ describe('tokens', () => {
             );
 
             // When - update mode rewrites from actual output
-            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('version');
+            const result = await cli
+                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .exec('version');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
                 expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));

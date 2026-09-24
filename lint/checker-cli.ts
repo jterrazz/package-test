@@ -3,7 +3,7 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { moveKeepingHistory } from '../src/seams/git/tree.js';
-import { fixCopiedGround } from './checker-crossfile.js';
+import { fixCopiedGround, fixRootGround } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
 import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 import type { LintConfigMove, Migration } from './checker-migration.js';
@@ -105,9 +105,11 @@ import { codeOf } from './rule-code.js';
  *
  * `--fix` applies the rewritable passes — C13, which moves a 16.x tree to 17
  * (bare ground folders, every file named by its path: `checker-migration.ts`),
- * the two document ones (key order and block scalars), C27, which moves ground copied into several leaves up to
- * the specs root's folder of its role, C14, which MOVES a single-reader pool entry beside its leaf
- * and rewrites the literals that named it, and C12, which RENAMES a `.test.ts`
+ * C15, which moves a role folder at the specs root into `specs/shared/`, the
+ * two document ones (key order and block scalars), C27, which moves ground
+ * copied into several leaves up to the specs root's shared folder of its role,
+ * C14, which MOVES a single-reader pool entry beside its leaf and rewrites the
+ * literals that named it, and C12, which RENAMES a `.test.ts`
  * under a facet folder to `.spec.ts` — then checks what is left, so a run that
  * fixes everything exits 0. With no path it applies them to every `specs/` root
  * it discovers, and moves the module tests of every member that still stand on
@@ -119,7 +121,7 @@ import { codeOf } from './rule-code.js';
  * nothing, the run stays green with fewer files, and nothing else in the
  * toolchain would have said a word.
  *
- * Every move — C12's, C13's, C14's, C27's — goes through `git mv` where the tree is a
+ * Every move — C12's, C13's, C14's, C15's, C27's — goes through `git mv` where the tree is a
  * git working tree, so the history follows the file across a migration that
  * touches hundreds of them and the moved file stays in the listing the next
  * check walks; outside one it falls back to a plain rename.
@@ -590,6 +592,9 @@ function reportLintConfigMove({ file, removed, renamed }: LintConfigMove): void 
 /** Apply every rewritable pass over one tree, printing what it did. */
 function applyFixes(root: string): void {
     reportMigration(migrateTo17(root, moveKeepingHistory));
+    for (const move of fixRootGround(root)) {
+        console.log(`conventions checker: moved ${move} (C15)`);
+    }
     const renamed = fixSpecSuffixes(root);
     for (const { from, to } of renamed) {
         console.log(

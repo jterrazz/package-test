@@ -115,7 +115,7 @@ function diskValue(brand: 'directory' | 'file', path: string): object {
  * Name one directory, by its path from the spec file — ending in `/`.
  *
  * @example
- *   await cli.fixture(directory('../../fixtures/shop/')).exec('build');
+ *   await cli.fixture(directory('../../shared/fixtures/shop/')).exec('build');
  *   await expect(result.directory('out')).toMatch(directory('./expected/scaffold/'));
  */
 export function directory<const Path extends RelativePath<'/'>>(

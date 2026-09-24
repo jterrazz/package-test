@@ -1,14 +1,14 @@
-description: --fix moves one copy to the specs root's seeds/ and rewrites the paths that named either
+description: --fix moves one copy to the specs root's shared/seeds/ and rewrites the paths that named either
 fixture: ./fixtures/copied/
 runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/seeds/two-users.sql: exists
+          specs/shared/seeds/two-users.sql: exists
           specs/api/users/seeds/two-users.sql: absent
           specs/api/orders/seeds/two-users.sql: absent
           specs/api/orders/seeds: absent
           specs/api/users/listed.spec.ts:
-              contains: file('../../seeds/two-users.sql')
+              contains: file('../../shared/seeds/two-users.sql')
           specs/api/orders/orders.spec.ts:
-              contains: file('../../seeds/two-users.sql')
+              contains: file('../../shared/seeds/two-users.sql')

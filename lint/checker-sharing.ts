@@ -39,8 +39,8 @@ import { closingOf, literalEnd, withoutComments } from './subject.js';
  *   a program reads, and `seeds/`: SQL is never written in a test, so a seed
  *   one test reads lives beside it, in `./seeds/`;
  * - read by several tests of ONE leaf → beside them, in the leaf's own ground;
- *   a specs-root entry one leaf alone reaches is moved down (what C14 was);
- * - read from several leaves → the specs root's own ground, where C15 already
+ *   a shared entry one leaf alone reaches is moved down (what C14 was);
+ * - read from several leaves → the specs root's shared ground, where C15 already
  *   holds a path that leaves its leaf, and C27 finds copies.
  *
  * The caps hold the other way too: a request written in the test longer than
@@ -464,8 +464,8 @@ function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
 /**
  * C28 — every ground file of the inline roles one test alone reads, reported
  * where the test names it; every value past its role's cap and every SQL
- * written in a test, reported where it is written; and every specs-root entry
- * one leaf alone reaches, reported where it sits.
+ * written in a test, reported where it is written; and every entry of the
+ * shared ground one leaf alone reaches, reported where it sits.
  */
 export function checkGroundSharing(rootDir: string): TokenViolation[] {
     const single = singleUseFiles(rootDir).map(({ reference, target }) => ({
@@ -607,8 +607,8 @@ function removeEmptied(folders: Set<string>): void {
 /**
  * Apply C28: write every SQL a test holds to a seed file beside it, and every
  * value past its cap to a file beside it; inline each single-use file into its
- * one test and delete it; then move every specs-root entry one leaf alone
- * reaches beside that leaf. Returns what changed, relative to `rootDir`, each
+ * one test and delete it; then move every entry of the shared ground one leaf
+ * alone reaches beside that leaf. Returns what changed, relative to `rootDir`, each
  * line opening on its verb — `wrote`, `inlined`, `moved`.
  */
 export function fixGroundSharing(rootDir: string): string[] {

@@ -5,10 +5,10 @@
 import { afterAll } from 'vitest';
 
 import { postgres, redis, specification } from '../../src/index.js';
-import { createApp } from '../fixtures/app/app.js';
+import { createApp } from '../shared/fixtures/app/app.js';
 
 export const { api, cleanup } = await specification.api({
-    root: '../fixtures/app',
+    root: '../shared/fixtures/app',
     server: ({ analyticsDb, cache, db }) =>
         createApp({
             analyticsDatabaseUrl: analyticsDb.connectionString,

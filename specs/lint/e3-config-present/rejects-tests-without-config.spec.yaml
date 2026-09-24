@@ -1,5 +1,5 @@
 description: a member with a test script of its own and no vitest config is refused
-fixture: ../../fixtures/member-workspace/
+fixture: ../../shared/fixtures/member-workspace/
 runs:
     - command: checker --member packages/tested-no-config .
       exit: 1

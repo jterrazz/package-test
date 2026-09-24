@@ -4,4 +4,4 @@ runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/seeds/single-base.sql:1:1  jterrazz-check(c28)
+          specs/shared/seeds/single-base.sql:1:1  jterrazz-check(c28)

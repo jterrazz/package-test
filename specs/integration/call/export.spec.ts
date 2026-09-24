@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { directory, file } from '../../../src/index.js';
-import { exportOrders } from '../../fixtures/orders/orders.js';
+import { exportOrders } from '../../shared/fixtures/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
 describe('export', () => {

@@ -6,7 +6,7 @@ import { api } from '../api.specification.js';
 test('the users are listed over the shared users', async () => {
     // Given - the seeds it stands on
     const result = await api
-        .seed(file('../../seeds/two-users.sql'))
+        .seed(file('../../shared/seeds/two-users.sql'))
         .get('/users');
 
     // Then - the app answered

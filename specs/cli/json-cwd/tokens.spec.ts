@@ -21,7 +21,9 @@ describe('tokens', () => {
         const fixtureName = `json-cwd-transient-${Date.now()}.json`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
-            const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json-cwd');
+            const result = await cli
+                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .exec('json-cwd');
             const rawCwd = (result.json.value as { cwd: string }).cwd;
             vi.stubEnv('TEST_UPDATE', '1');
             try {
@@ -37,7 +39,9 @@ describe('tokens', () => {
             expect(written).not.toContain(rawCwd);
 
             // Then - a second run (different cwd) matches the updated fixture
-            const second = await cli.fixture(directory('../../fixtures/cli-app/')).exec('json-cwd');
+            const second = await cli
+                .fixture(directory('../../shared/fixtures/cli-app/'))
+                .exec('json-cwd');
             expect(second.json).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             removeGolden(fixturePath);

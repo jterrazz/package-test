@@ -10,7 +10,7 @@ import { resolveSpecPath } from './resolve.js';
  *
  * The source is a path relative to the spec (or document) naming it, and the
  * shared pool is reached the same way, by the path that climbs to it
- * (`../../fixtures/shop/`). The trailing `/` is what says which of the two a
+ * (`../../shared/fixtures/shop/`). The trailing `/` is what says which of the two a
  * path is, in both doors (see {@link copyPlan}).
  */
 

@@ -149,7 +149,7 @@
             "description": "A bare word names an env set registered in code; KEY=value is inline. $WORKDIR expands."
         },
         "fixture": {
-            "description": "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/fixtures/ reached by the path that climbs to it.",
+            "description": "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/shared/fixtures/ reached by the path that climbs to it.",
             "oneOf": [
                 {
                     "pattern": "^\\.\\.?/(?:(?!(?:expected|fixtures|requests|seeds)/)[^/]+/)*?fixtures/.*$",

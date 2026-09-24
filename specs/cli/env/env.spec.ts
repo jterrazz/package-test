@@ -44,7 +44,7 @@ describe('env', () => {
     test('passes user-supplied env vars to the process', async () => {
         // Given - a custom env var
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ MY_VAR: 'hello' })
             .exec('env');
 
@@ -57,7 +57,7 @@ describe('env', () => {
         // Given - the environment a whole file shares, and one chain adding to it
         const shared = cli.with({ env: { MY_VAR: 'shared' } });
         const result = await shared
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ EXTRA: 'own' })
             .exec('env');
 
@@ -69,7 +69,7 @@ describe('env', () => {
     test('merges multiple .env() calls', async () => {
         // Given - two .env() calls setting different keys
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ MY_VAR: 'first' })
             .env({ EXTRA: 'second' })
             .exec('env');
@@ -82,7 +82,7 @@ describe('env', () => {
     test('the later .env() call wins for the same key', async () => {
         // Given - the same key set by two successive .env() calls
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ MY_VAR: 'first' })
             .env({ MY_VAR: 'second' })
             .exec('env');
@@ -95,7 +95,7 @@ describe('env', () => {
     test('expands $WORKDIR token to the actual cwd', async () => {
         // Given - $WORKDIR placeholder for HOME (the typical isolation pattern)
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ HOME: '$WORKDIR' })
             .exec('env');
 
@@ -120,7 +120,7 @@ describe('env', () => {
     test('null value unsets a variable', async () => {
         // Given - set then unset (HOME is set on the host)
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .env({ HOME: null })
             .exec('env');
 
@@ -130,7 +130,7 @@ describe('env', () => {
 
     test('env without .env() keeps process.env intact', async () => {
         // Given - no .env() — host PATH should still be available so the script runs
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('env');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('env');
 
         // Then - HOME should be the host's HOME, not "unset"
         expect(result.exitCode).toBe(0);
@@ -178,7 +178,7 @@ describe('env', () => {
 
     test('runner without services injects nothing', async () => {
         // Given - the plain runner (no services record)
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('env');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('env');
 
         // Then - no URL vars appear in the child env
         expect(result.stdout.text).toContain('DB_URL=unset');

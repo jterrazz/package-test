@@ -1,6 +1,6 @@
 description: prints back the instant, the directory and the origin it was handed
 fixture:
-    - ../fixtures/console/
+    - ../shared/fixtures/console/
     - ./fixtures/served/
 env:
     - frozen

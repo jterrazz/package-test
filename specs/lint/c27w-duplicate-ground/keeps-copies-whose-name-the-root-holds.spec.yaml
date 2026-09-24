@@ -9,5 +9,5 @@ runs:
       files:
           specs/api/users/seeds/two-users.sql: exists
           specs/api/orders/seeds/two-users.sql: exists
-          specs/seeds/two-users.sql:
+          specs/shared/seeds/two-users.sql:
               contains: Carol

@@ -5,7 +5,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 /** The fixture workspace the member pass is exercised against. */
-const WORKSPACE = resolve(import.meta.dirname, '../../fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
 
 describe('lint — c12 spec file name (CONVENTIONS C12)', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the

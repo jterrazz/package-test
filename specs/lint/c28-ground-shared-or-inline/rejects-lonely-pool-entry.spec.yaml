@@ -4,4 +4,4 @@ runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/fixtures/lonely-stub:1:1  jterrazz-check(c28)
+          specs/shared/fixtures/lonely-stub:1:1  jterrazz-check(c28)

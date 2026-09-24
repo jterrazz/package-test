@@ -1,5 +1,5 @@
 description: a member config on the node environment passes
-fixture: ../../fixtures/member-workspace/
+fixture: ../../shared/fixtures/member-workspace/
 runs:
     - command: checker --member packages/clean .
       exit: 0

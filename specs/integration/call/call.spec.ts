@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
-import { listOrders, placeOrder } from '../../fixtures/orders/orders.js';
+import { listOrders, placeOrder } from '../../shared/fixtures/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
 describe('call', () => {

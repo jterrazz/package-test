@@ -9,4 +9,4 @@ runs:
       files:
           specs/api/orders/seeds/two-users.sql: exists
           specs/api/users/seeds/pair.sql: exists
-          specs/seeds: absent
+          specs/shared/seeds: absent

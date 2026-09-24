@@ -4,8 +4,8 @@ runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/fixtures/lonely-stub/main.js: absent
-          specs/fixtures: absent
+          specs/shared/fixtures/lonely-stub/main.js: absent
+          specs/shared/fixtures: absent
           specs/widget/fixtures/lonely-stub/main.js: exists
           specs/widget/widget.test.ts:
               contains: ./fixtures/lonely-stub/

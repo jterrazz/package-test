@@ -13,7 +13,7 @@ import { lintReport, specification } from '../../src/index.js';
  * Requires `npm run build` first: the wrapper runs `dist/oxlint.js` and
  * `dist/checker.js`.
  */
-const REPORT_BIN = resolve(import.meta.dirname, '../fixtures/lint-cli/report.sh');
+const REPORT_BIN = resolve(import.meta.dirname, '../shared/fixtures/lint-cli/report.sh');
 
 export const { cleanup, cli } = await specification.cli(REPORT_BIN, { transform: lintReport });
 

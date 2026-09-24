@@ -4,7 +4,7 @@ runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/seeds: absent
+          specs/shared/seeds: absent
           specs/api/map/pois/seeds/single-base.sql: exists
           specs/api/map/pois/listing.spec.ts:
               contains: file('./seeds/single-base.sql')

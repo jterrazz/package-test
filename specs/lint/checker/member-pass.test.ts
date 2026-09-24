@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { cli } from '../checker.specification.js';
 
 /** The fixture workspace the member pass is exercised against. */
-const WORKSPACE = resolve(import.meta.dirname, '../../fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
 const member = (name: string): string => `${WORKSPACE}/packages/${name}`;
 
 describe('checker CLI — the member pass', () => {

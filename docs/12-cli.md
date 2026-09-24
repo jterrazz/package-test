@@ -65,7 +65,7 @@ test('shows help', async () => {
 test('dev server boots', async () => {
     // Given - long-running: resolved on pattern match, killed at timeout otherwise
     const result = await cli
-        .fixture(directory('../../fixtures/base-shop/'))
+        .fixture(directory('../../shared/fixtures/base-shop/'))
         .exec('dev --port 0', { waitFor: 'Listening on', timeout: 10_000 });
 
     // Then
@@ -87,7 +87,7 @@ Quoting is identical between the one-shot and `waitFor` forms: both run the full
 test('build then start chain stops at first failure', async () => {
     // Given - a sequence in the SAME working directory
     const result = await cli
-        .fixture(directory('../../fixtures/base-shop/'))
+        .fixture(directory('../../shared/fixtures/base-shop/'))
         .exec(['build', 'start --check']);
 
     // Then
@@ -107,20 +107,20 @@ Two disjoint verbs shape a spec's state (rule C7): **`.fixture()` carries file s
 
 A fixture is named by `file()` or `directory()`, with its path from the spec file spelled in full — the wrapper states what it names:
 
-| Call                                           | Names                          | Copy effect                                   |
-| ---------------------------------------------- | ------------------------------ | --------------------------------------------- |
-| `.fixture(file('./fixtures/config.toml'))`     | one file beside the spec       | `<cwd>/config.toml` (the file under its name) |
-| `.fixture(directory('./fixtures/base-shop/'))` | a directory beside the spec    | its **contents spread** into `<cwd>`          |
-| `.fixture(directory('../../fixtures/shop/'))`  | a directory of the shared pool | its **contents spread** into `<cwd>`          |
+| Call                                                 | Names                          | Copy effect                                   |
+| ---------------------------------------------------- | ------------------------------ | --------------------------------------------- |
+| `.fixture(file('./fixtures/config.toml'))`           | one file beside the spec       | `<cwd>/config.toml` (the file under its name) |
+| `.fixture(directory('./fixtures/base-shop/'))`       | a directory beside the spec    | its **contents spread** into `<cwd>`          |
+| `.fixture(directory('../../shared/fixtures/shop/'))` | a directory of the shared pool | its **contents spread** into `<cwd>`          |
 
-A directory's path ends in `/`, and the type refuses one that does not; a `file()` that names a directory on disk, or a `directory()` that names a file, is refused with the form to write (rule B2). A command that expects the project one level down gets a fixture tree shaped that way: `./fixtures/nested/shop/…`, spread. The shared pool is `specs/fixtures/`, and a spec reaches it by the path that climbs to it — nothing hides behind a marker. Chained fixtures **layer** in order — a later one overwrites files from an earlier one.
+A directory's path ends in `/`, and the type refuses one that does not; a `file()` that names a directory on disk, or a `directory()` that names a file, is refused with the form to write (rule B2). A command that expects the project one level down gets a fixture tree shaped that way: `./fixtures/nested/shop/…`, spread. The shared pool is `specs/shared/fixtures/`, and a spec reaches it by the path that climbs to it — nothing hides behind a marker. Chained fixtures **layer** in order — a later one overwrites files from an earlier one.
 
-| Setup                                              | Effect on the cwd                                                    |
-| -------------------------------------------------- | -------------------------------------------------------------------- |
-| _(nothing)_                                        | Empty directory                                                      |
-| `.fixture(directory('../../fixtures/base-shop/'))` | Spread a whole shared project into the cwd                           |
-| `.fixture(file('./fixtures/config.toml'))`         | Copy the leaf's own `fixtures/config.toml` into the cwd              |
-| `.seed(file('./seeds/users.sql'))`                 | SQL into a service database (rule A7 governs the `database:` option) |
+| Setup                                                     | Effect on the cwd                                                    |
+| --------------------------------------------------------- | -------------------------------------------------------------------- |
+| _(nothing)_                                               | Empty directory                                                      |
+| `.fixture(directory('../../shared/fixtures/base-shop/'))` | Spread a whole shared project into the cwd                           |
+| `.fixture(file('./fixtures/config.toml'))`                | Copy the leaf's own `fixtures/config.toml` into the cwd              |
+| `.seed(file('./seeds/users.sql'))`                        | SQL into a service database (rule A7 governs the `database:` option) |
 
 ```typescript
 test('scaffolds a new shop', async () => {
@@ -139,7 +139,7 @@ test('scaffolds a new shop', async () => {
 
 test('upgrade rewrites the workspace predictably', async () => {
     // Given
-    const result = await cli.fixture(directory('../../fixtures/base-shop/')).exec('upgrade');
+    const result = await cli.fixture(directory('../../shared/fixtures/base-shop/')).exec('upgrade');
 
     // Then - snapshot of the ENTIRE cwd + flat read of the file list
     await expect(result.filesystem).toMatch(directory('./expected/upgraded-shop/'));
@@ -226,7 +226,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-A fixture tree sits beside the one leaf that reads it, `./fixtures/<name>/`, or — when several leaves share it — in the specs root's own `specs/fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (C15, C27, C28).
+A fixture tree sits beside the one leaf that reads it, `./fixtures/<name>/`, or — when several leaves share it — in the specs root's shared ground, `specs/shared/fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (C15, C27, C28).
 
 ### The chain never reaches a real system
 
@@ -234,11 +234,11 @@ A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a
 
 The framework supplies the ground; the chain states the sandbox, in three verbs:
 
-| Verb                                            | What it closes                                                                             |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `.fixture(directory('../../fixtures/<name>/'))` | spreads a `bin/` of stub binaries into the spec's temp cwd                                 |
-| `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })`  | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
-| `.env({ HOME: '$WORKDIR' })`                    | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
+| Verb                                                   | What it closes                                                                             |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------ |
+| `.fixture(directory('../../shared/fixtures/<name>/'))` | spreads a `bin/` of stub binaries into the spec's temp cwd                                 |
+| `.env({ PATH: '$WORKDIR/bin:/usr/bin:/bin' })`         | puts those stubs FIRST — the binary finds the stub, never the tool installed on the host   |
+| `.env({ HOME: '$WORKDIR' })`                           | moves config dirs, caches and credential stores onto the temp cwd, off the operator's home |
 
 `PATH` is not rewritten for you: `.fixture(directory(…))` lays the tree down, `.env()` decides what the child is allowed to find. Pin the tail of `PATH` too — inheriting the developer's own `PATH` re-opens the door the stub was there to close.
 
@@ -246,7 +246,7 @@ The framework supplies the ground; the chain states the sandbox, in three verbs:
 test('reports what the cluster holds', async () => {
     // Given - stubs first on PATH, HOME on the temp cwd: nothing can reach out
     const result = await cli
-        .fixture(directory('../../fixtures/cluster-stub/'))
+        .fixture(directory('../../shared/fixtures/cluster-stub/'))
         .env({ HOME: '$WORKDIR', PATH: '$WORKDIR/bin:/usr/bin:/bin', TZ: 'UTC' })
         .exec('cluster pods');
 
@@ -261,7 +261,7 @@ test('reports what the cluster holds', async () => {
 A stub fixture is a `bin/` holding one script per binary the run must not find for real:
 
 ```
-specs/fixtures/cluster-stub/
+specs/shared/fixtures/cluster-stub/
 └── bin/
     ├── kubectl
     └── helm
@@ -340,7 +340,7 @@ test('emits machine-readable config', async () => {
 
 test('lints a shop and reports per-file blocks', async () => {
     // Given
-    const result = await cli.fixture(directory('../../fixtures/base-shop/')).exec('lint');
+    const result = await cli.fixture(directory('../../shared/fixtures/base-shop/')).exec('lint');
 
     // Then - snapshot the whole surface; grep is the scalpel for targeted probes
     expect(result.stdout).toMatch(file('./expected/lint-output.txt')); // full snapshot, tokens for volatile parts
@@ -412,7 +412,7 @@ A Docker-aware runner **requires `await using`** on every result (rule B5 — th
 test('deploy spawns a labelled container', async () => {
     // Given - await using ⇒ containers force-removed at scope exit (rule B5)
     await using result = await deploy
-        .fixture(directory('../../fixtures/two-shops/'))
+        .fixture(directory('../../shared/fixtures/two-shops/'))
         .exec('deploy alpha');
 
     // Then - lazy access (zero Docker calls if you never touch .container)
@@ -453,9 +453,9 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
 - **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
-- **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/fixtures/` pool are templates and stay pristine.
+- **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/shared/fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule C7).
-- **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./fixtures/shop/` beside it, `../../fixtures/shop/` in the pool (rule B2).
+- **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./fixtures/shop/` beside it, `../../shared/fixtures/shop/` in the pool (rule B2).
 - **Forgetting the extension in `file('./expected/help')`.** The extension is part of the path (rule C6); a tree is `directory('./expected/help/')`.
 
 ## Related

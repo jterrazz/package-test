@@ -188,12 +188,12 @@ describe('the tree the checker judges — what git does not ignore', () => {
 /** A tree whose pool holds `app/`, reached from the one leaf `specs/api/`. */
 function singleReaderPool(git: boolean): string {
     const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
-    mkdirSync(join(root, 'specs', 'fixtures', 'app'), { recursive: true });
+    mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });
     mkdirSync(join(root, 'specs', 'api'), { recursive: true });
-    writeFileSync(join(root, 'specs', 'fixtures', 'app', 'index.txt'), 'app\n');
+    writeFileSync(join(root, 'specs', 'shared', 'fixtures', 'app', 'index.txt'), 'app\n');
     writeFileSync(
         join(root, 'specs', 'api', 'boot.spec.ts'),
-        "await api.fixture(directory('../fixtures/app/')).get('/');\n",
+        "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
     );
     if (git) {
         execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -227,7 +227,7 @@ describe('the moves the fixers make', () => {
 
         // Then - the disk holds it at its new place only
         expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);
-        expect(existsSync(join(root, 'specs', 'fixtures', 'app'))).toBe(false);
+        expect(existsSync(join(root, 'specs', 'shared'))).toBe(false);
     });
 });
 
@@ -235,14 +235,14 @@ describe('the single paths the checker probes — through the same tree', () => 
     test('an ignored pool directory is no fixture to move (C14)', () => {
         // Given - a pool directory `.gitignore` names, reached from one leaf
         const root = repository(
-            ['specs/fixtures/app/index.txt', 'specs/fixtures/kept.txt'],
+            ['specs/shared/fixtures/app/index.txt', 'specs/shared/fixtures/kept.txt'],
             [],
-            'specs/fixtures/app/\n',
+            'specs/shared/fixtures/app/\n',
         );
         mkdirSync(join(root, 'specs', 'api'));
         writeFileSync(
             join(root, 'specs', 'api', 'boot.spec.ts'),
-            "await api.fixture(directory('../fixtures/app/')).get('/');\n",
+            "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
         );
 
         // Then - C8 names the path, and C14 has nothing to move

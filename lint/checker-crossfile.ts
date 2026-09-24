@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
-import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
+import { GROUND_DIRS, isGroundName, SHARED_GROUND } from '../src/model/chain/ground.js';
 import { isRelativePath } from '../src/model/chain/spec-path.js';
 import {
     documentPaths,
@@ -40,9 +40,10 @@ import { literalSpans } from './spec-values.js';
  * - **A7 database property** — a spec's `services:` record fixes how many SQL
  *   databases exist; importing tests must (≥2) or must not (==1) pass
  *   `{ database }` to every `.seed()` / `.table()`.
- * - **C28 / C15 where ground lives** — an entry of the specs root's own ground
- *   only ONE spec directory reaches for belongs beside that leaf (autofixed),
- *   and a path leaves its leaf only into that ground.
+ * - **C28 / C15 where ground lives** — an entry of the specs root's shared
+ *   ground (`<specs>/shared/<role>/`) only ONE spec directory reaches for
+ *   belongs beside that leaf (autofixed), and a path leaves its leaf only
+ *   into that ground.
  */
 
 /** Directories the cross-file walks never descend into. */
@@ -57,30 +58,40 @@ const NON_RUNNER_BINDINGS = new Set(['cleanup', 'docker', 'orchestrator']);
 /** The specification constructors whose records/options the passes read. */
 const CONSTRUCTORS = 'api|cli|jobs';
 
+/** Is this the shared folder of a specs root — `<specs>/shared/`? */
+function isSharedFolder(dir: string): boolean {
+    return basename(dir) === SHARED_GROUND && basename(dirname(dir)) === 'specs';
+}
+
 /**
- * A pool is a ground folder of the specs root itself — `specs/fixtures/`,
- * `specs/seeds/`, `specs/requests/`, `specs/expected/`: the four roles, one
- * level up, holding what several leaves share. The cross-file walks prune it
- * as they prune every ground folder; {@link checkPoolFixtures} inspects its
- * top level separately.
+ * A pool is a role folder of the specs root's shared ground —
+ * `specs/shared/fixtures/`, `specs/shared/seeds/`, `specs/shared/requests/`,
+ * `specs/shared/expected/`, holding what several leaves share. The cross-file
+ * walks prune it with the shared folder; {@link checkPoolFixtures} inspects
+ * its top level separately.
  */
 function isPool(dir: string): boolean {
-    return isGroundName(basename(dir)) && basename(dirname(dir)) === 'specs';
+    return isGroundName(basename(dir)) && isSharedFolder(dirname(dir));
 }
 
 /** The four pools a specs root may hold, whether or not they exist. */
-function poolsOf(specsRoot: string): string[] {
-    return GROUND_DIRS.map((ground) => join(specsRoot, ground));
+export function poolsOf(specsRoot: string): string[] {
+    return GROUND_DIRS.map((ground) => join(specsRoot, SHARED_GROUND, ground));
+}
+
+/** The specs root a pool belongs to. */
+function specsRootOfPool(pool: string): string {
+    return dirname(dirname(pool));
 }
 
 /**
- * Is this a directory the walks do not enter? Ground — the pool and every
- * leaf's own — holds material a spec stands on, never a live spec: a fixture
- * project with a `specs/` tree of its own is an input, judged where a spec
- * runs the checker over it.
+ * Is this a directory the walks do not enter? Ground — the shared folder and
+ * every leaf's own — holds material a spec stands on, never a live spec: a
+ * fixture project with a `specs/` tree of its own is an input, judged where a
+ * spec runs the checker over it.
  */
 function isPruned(dir: string): boolean {
-    return PRUNED.has(basename(dir)) || isGroundName(basename(dir));
+    return PRUNED.has(basename(dir)) || isGroundName(basename(dir)) || isSharedFolder(dir);
 }
 
 /** Recursively list every file under `dir`, skipping pruned dirs and the pool. */
@@ -787,7 +798,7 @@ type References = { paths: Set<string>; patterns: LiteralPattern[] };
  * document. A source's `file()`/`directory()` arguments are read from the
  * file; so is each word of its other literals, and from the project root as
  * well — a path bound first to a name, or written into a command a process
- * service runs from the root (`node specs/fixtures/app/server.mjs`).
+ * service runs from the root (`node specs/shared/fixtures/app/server.mjs`).
  */
 function referencesOf(file: string, into: References): void {
     const from = dirname(file);
@@ -856,7 +867,7 @@ function isConventionalSubdir(path: string): boolean {
 export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const dir of listDirs(rootDir)) {
-        // A `specs/fixtures` pool is not a feature; it is scanned separately.
+        // The specs root is no feature: its shared ground is scanned separately.
         if (basename(dir) === 'specs') {
             continue;
         }
@@ -929,11 +940,11 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/** Unreferenced top-level entries of the pools (`specs/fixtures/`, `specs/seeds/`, …). */
+/** Unreferenced top-level entries of the pools (`specs/shared/fixtures/`, `specs/shared/seeds/`, …). */
 function checkPoolFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const pool of findPools(rootDir)) {
-        const specsRoot = dirname(pool);
+        const specsRoot = specsRootOfPool(pool);
         // Every reference in the specs tree, excluding those made from
         // Inside the pool itself (a dead entry cannot vouch for another).
         const references: References = { paths: new Set(), patterns: [] };
@@ -1123,7 +1134,7 @@ type MisplacedPoolFixture = {
 function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     const misplaced: MisplacedPoolFixture[] = [];
     for (const pool of findPools(rootDir)) {
-        const usage = poolUsage(dirname(pool), pool);
+        const usage = poolUsage(specsRootOfPool(pool), pool);
         for (const [entry, leaves] of usage) {
             const leaf = commonLeaf([...leaves.keys()]);
             if (leaf === undefined || treeKind(join(pool, entry)) === undefined) {
@@ -1137,8 +1148,8 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
 
 /**
  * CONVENTIONS C28, its level half — a pool entry is SHARED, or it is local. An entry of one of
- * the specs root's ground folders — `fixtures/`, `seeds/`, `requests/`,
- * `expected/` — that exactly one spec directory reaches for is misplaced: it
+ * the specs root's shared folders — `shared/fixtures/`, `shared/seeds/`,
+ * `shared/requests/`, `shared/expected/` — that exactly one spec directory reaches for is misplaced: it
  * belongs beside that leaf, in the leaf's folder of the same role
  * (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`).
  *
@@ -1176,7 +1187,8 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
  * Apply C28's level half: move each single-reader pool entry beside its leaf and rewrite the
  * paths that climbed to it into the path from the leaf. The move is a `git mv`
  * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
- * A pool the move empties goes with it, as C27's leaf folder does. Returns what
+ * A pool the move empties goes with it, and the shared folder when it was the
+ * last, as C27's leaf folder does. Returns what
  * moved, relative to `rootDir`.
  */
 export function fixPoolFixtures(rootDir: string): string[] {
@@ -1201,9 +1213,8 @@ export function fixPoolFixtures(rootDir: string): string[] {
                 writeFileSync(file, next);
             }
         }
-        if (readdirSync(pool).length === 0) {
-            rmSync(pool, { recursive: true });
-        }
+        removeIfEmpty(pool);
+        removeIfEmpty(dirname(pool));
         moved.push(`${relative(rootDir, join(pool, entry))} → ${relative(rootDir, destination)}`);
     }
     return moved;
@@ -1236,6 +1247,13 @@ function fingerprintOf(path: string): string {
     return `${isDir(path) ? 'tree' : 'file'}:${hash.digest('hex')}`;
 }
 
+/** Remove a folder that holds nothing. */
+function removeIfEmpty(folder: string): void {
+    if (existsSync(folder) && readdirSync(folder).length === 0) {
+        rmSync(folder, { recursive: true });
+    }
+}
+
 /** One entry of ground copied into several leaves, and where the copies belong. */
 type CopiedGround = {
     /** The copies, sorted — the first is the one a fix moves. */
@@ -1243,7 +1261,7 @@ type CopiedGround = {
     /** What every copy holds. */
     fingerprint: string;
     /**
-     * The specs root's folder of the copies' role, holding the entry by its
+     * The specs root's shared folder of the copies' role, holding the entry by its
      * name — or `null` when the copies go by several names, and none of them
      * is the one to keep.
      */
@@ -1294,7 +1312,10 @@ function copiedGround(rootDir: string): CopiedGround[] {
             copied.push({
                 copies: copies.toSorted(),
                 fingerprint,
-                target: names.size === 1 && name !== undefined ? join(specsRoot, role, name) : null,
+                target:
+                    names.size === 1 && name !== undefined
+                        ? join(specsRoot, SHARED_GROUND, role, name)
+                        : null,
             });
         }
     }
@@ -1316,8 +1337,8 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
 /**
  * CONVENTIONS C27 — ground several leaves share lives once. An entry of a
  * leaf's ground that another leaf holds byte for byte, under the same role,
- * is a copy, whatever it is called: it belongs in the specs root's folder of
- * its role, named by the path that climbs to it.
+ * is a copy, whatever it is called: it belongs in the specs root's shared
+ * folder of its role, named by the path that climbs to it.
  *
  * The catch: a seed copied into every leaf that needs it. The copies drift —
  * one leaf's gains a column, the next does not — and the reader of either
@@ -1407,8 +1428,8 @@ function repointDocument(file: string, move: (path: string) => string | undefine
 }
 
 /**
- * Apply C27: one copy of each copied entry moves to the specs root's folder
- * of its role — a `git mv` in a work tree — the others are deleted, and every
+ * Apply C27: one copy of each copied entry moves to the specs root's shared
+ * folder of its role — a `git mv` in a work tree — the others are deleted, and every
  * path of the specs tree that named a copy names the moved entry. An entry the
  * target already holds byte for byte keeps it and deletes every copy; one
  * holding something else is the author's call, and nothing moves; so are
@@ -1425,7 +1446,7 @@ export function fixCopiedGround(rootDir: string): string[] {
         if (held && fingerprintOf(target) !== fingerprint) {
             continue;
         }
-        const specsRoot = dirname(dirname(target));
+        const specsRoot = specsRootOfPool(dirname(target));
         for (const file of listFiles(specsRoot, isReferrer)) {
             const from = dirname(file);
             const move = (path: string): string | undefined =>
@@ -1488,13 +1509,21 @@ function enclosingGround(specsRoot: string, leaf: string): string[] {
     return ground;
 }
 
+/** The ground folders at the specs root itself — the shared ground outside `shared/`. */
+function rootGroundOf(specsRoot: string): string[] {
+    return GROUND_DIRS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
+}
+
 /**
- * CONVENTIONS C15 — a path leaves its leaf only into the specs root's own
- * ground, or into the ground of a leaf that encloses it. Every `file()` and `directory()` names its entry from the spec file;
- * a path whose target stays under the spec's own directory is the leaf's
- * ground, one under `<specs>/fixtures/`, `seeds/`, `requests/` or `expected/`
- * is a pool, and anything else reaches into a sibling's ground — a pool by
- * another door, with none of its visibility.
+ * CONVENTIONS C15 — a path leaves its leaf only into the specs root's shared
+ * ground, or into the ground of a leaf that encloses it. Every `file()` and
+ * `directory()` names its entry from the spec file; a path whose target stays
+ * under the spec's own directory is the leaf's ground, one under
+ * `<specs>/shared/fixtures/`, `seeds/`, `requests/` or `expected/` is a pool,
+ * and anything else reaches into a sibling's ground — a pool by another door,
+ * with none of its visibility. A role folder at the specs root itself
+ * (`<specs>/seeds/`) is shared ground outside `shared/`: reported as a folder,
+ * and every path into it as a path.
  *
  * The catch: a leaf quietly depending on a neighbour's ground. The neighbour's
  * author has no way to know, edits their own files, and breaks a spec two
@@ -1505,7 +1534,18 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         const pools = poolsOf(specsRoot);
-        for (const file of listReferrers(specsRoot, join(specsRoot, GROUND_FIXTURES))) {
+        for (const folder of rootGroundOf(specsRoot)) {
+            const role = basename(folder);
+            violations.push({
+                file: relative(rootDir, folder),
+                line: 1,
+                fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_GROUND, role))}/ — \`make fix\` moves it and rewrites every path that names it`,
+                found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_GROUND))}/`,
+                rule: 'c15-local-fixture-reach',
+                severity: 'error',
+            });
+        }
+        for (const file of listReferrers(specsRoot, join(specsRoot, SHARED_GROUND))) {
             const leaf = dirname(file);
             for (const { column, line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);
@@ -1521,7 +1561,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                     column,
                     file: rel,
                     line,
-                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the specs root's folder of its role: ${GROUND_DIRS.map((ground) => `${relative(rootDir, join(specsRoot, ground))}/`).join(', ')}`,
+                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the specs root's shared folder of its role: ${pools.map((pool) => `${relative(rootDir, pool)}/`).join(', ')}`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
                     rule: 'c15-local-fixture-reach',
                     severity: 'error',
@@ -1530,6 +1570,53 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
         }
     }
     return violations;
+}
+
+/**
+ * Apply C15 to the shared ground outside `shared/`: every entry of a role
+ * folder at the specs root moves to the shared folder of its role — a `git mv`
+ * in a work tree — and every path of the specs tree that named it, a source's
+ * literal or a document's key, names it there. An entry the shared folder
+ * already holds by that name stays, for the author. A root folder the move
+ * empties goes with it. Returns what moved, relative to `rootDir`.
+ */
+export function fixRootGround(rootDir: string): string[] {
+    const moved: string[] = [];
+    for (const specsRoot of findSpecsRoots(rootDir)) {
+        for (const folder of rootGroundOf(specsRoot)) {
+            const shared = join(specsRoot, SHARED_GROUND, basename(folder));
+            const moves = treeEntries(folder)
+                .map((entry) => ({
+                    copy: join(folder, entry.name),
+                    target: join(shared, entry.name),
+                }))
+                .filter(({ target }) => !existsSync(target));
+            if (moves.length === 0) {
+                continue;
+            }
+            for (const file of listReferrers(specsRoot, folder)) {
+                const from = dirname(file);
+                const move = (path: string): string | undefined =>
+                    moves
+                        .map((each) => repointed(from, path, each))
+                        .find((next) => next !== undefined);
+                const text = readText(file);
+                const next = file.endsWith(SPEC_EXTENSION)
+                    ? repointDocument(file, move)
+                    : repointSource(file, move);
+                if (next !== text) {
+                    writeFileSync(file, next);
+                }
+            }
+            mkdirSync(shared, { recursive: true });
+            for (const { copy, target } of moves) {
+                moveKeepingHistory(copy, target);
+            }
+            removeIfEmpty(folder);
+            moved.push(`${relative(rootDir, folder)}/ → ${relative(rootDir, shared)}/`);
+        }
+    }
+    return moved;
 }
 
 /**
@@ -1606,7 +1693,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
 /** C8 over every `specs/` tree below `rootDir` — its specs and its documents. */
 export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
-        listReferrers(specsRoot, join(specsRoot, GROUND_FIXTURES)).flatMap((file) =>
+        listReferrers(specsRoot, join(specsRoot, SHARED_GROUND)).flatMap((file) =>
             diskTargetFindings(file, rootDir),
         ),
     );

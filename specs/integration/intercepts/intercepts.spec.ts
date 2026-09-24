@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { http } from '../../../src/index.js';
-import { quoteOrder } from '../../fixtures/orders/orders.js';
+import { quoteOrder } from '../../shared/fixtures/orders/orders.js';
 import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';

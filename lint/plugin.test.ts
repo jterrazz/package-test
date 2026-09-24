@@ -399,7 +399,7 @@ describe('testing fragment — standalone oxlint config', () => {
     });
 
     test('declares no `categories` — every rule it ships is decided by name', () => {
-        // Given - the fragment, top level and every override entry (the `categories` block in specs/fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
+        // Given - the fragment, top level and every override entry (the `categories` block in specs/shared/fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
         const layers: Record<string, unknown>[] = [
             testing as unknown as Record<string, unknown>,
             ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),
@@ -768,14 +768,14 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
         // Given - the two standalone configs the lint E2E specs run with
 
         // Then - the reach fixture is judged by the SAME catalogue; only C1's declared depth differs, which is what the fixture is there to state
-        expect(rulesOf('specs/fixtures/lint-cli/oxlint.reach.json').toSorted()).toStrictEqual(
-            rulesOf('specs/fixtures/lint-cli/oxlint.e2e.json').toSorted(),
-        );
+        expect(
+            rulesOf('specs/shared/fixtures/lint-cli/oxlint.reach.json').toSorted(),
+        ).toStrictEqual(rulesOf('specs/shared/fixtures/lint-cli/oxlint.e2e.json').toSorted());
     });
 
     test('the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {
         // Given - the standalone oxlint config the checker E2E specs lint their violation fixtures with
-        const config = JSON.parse(read('specs/fixtures/lint-cli/oxlint.e2e.json')) as {
+        const config = JSON.parse(read('specs/shared/fixtures/lint-cli/oxlint.e2e.json')) as {
             rules: Record<string, unknown>;
         };
 

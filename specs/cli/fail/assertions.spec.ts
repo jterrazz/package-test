@@ -35,7 +35,7 @@ function inUpdateMode(block: () => void): void {
 describe('assertions', () => {
     test('text exposes stderr content', async () => {
         // Given - a failing run
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('fail');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('fail');
 
         // Then - stderr text is readable
         expect(result.stderr.text).toContain('Fatal: something went wrong');
@@ -45,13 +45,13 @@ describe('assertions', () => {
         // Given - a stderr fixture created via update mode
         const fixtureName = `stderr-transient-${Date.now()}.txt`;
         try {
-            const a = await cli.fixture(directory('../../fixtures/cli-app/')).exec('fail');
+            const a = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('fail');
             inUpdateMode(() => {
                 expect(a.stderr).toMatch(file(`./expected/${fixtureName}`));
             });
 
             // Then - a second identical run matches
-            const b = await cli.fixture(directory('../../fixtures/cli-app/')).exec('fail');
+            const b = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('fail');
             expect(b.stderr).toMatch(file(`./expected/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, fixtureName));

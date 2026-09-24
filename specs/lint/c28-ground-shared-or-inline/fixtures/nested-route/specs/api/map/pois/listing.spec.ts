@@ -6,7 +6,7 @@ import { api } from '../../api.specification.js';
 describe('listing', () => {
     test('the points are listed over the base', async () => {
         // Given - the one base the route and its detail share
-        const result = await api.seed(file('../../../seeds/single-base.sql')).get('/map/pois');
+        const result = await api.seed(file('../../../shared/seeds/single-base.sql')).get('/map/pois');
 
         // Then - the app answered
         expect(result.status).toBe(200);

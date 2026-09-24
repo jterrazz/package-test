@@ -22,7 +22,7 @@ describe('assertions', () => {
     test('response matches expected file', async () => {
         // Given - seeded data
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - status + body match expected/all-users.http
@@ -42,7 +42,7 @@ describe('assertions', () => {
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error names the fixture and shows the full -/+ diff of both values frozen - wrong-body.http is deliberately wrong (its diff IS the subject). The error golden below legitimately updates, but the wrong fixture must never be rewritten
@@ -121,7 +121,7 @@ describe('assertions', () => {
     test('table details — shows diff on multi-column mismatch', async () => {
         // Given - two users in table, expecting wrong values
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - error shows both columns in the full -/+ diff
@@ -153,7 +153,7 @@ describe('assertions', () => {
     test('table details — shows diff on extra rows', async () => {
         // Given - table has more rows than expected
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - row count mismatch + extra rows with + marker (full diff)

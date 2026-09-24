@@ -10,7 +10,7 @@ describe('triggering', () => {
     test('trigger resets databases at the start of each chain', async () => {
         // Given - a previous spec left synced events behind
         await jobs
-            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../shared/seeds/two-users.sql'), { database: 'db' })
             .trigger('sync-events');
         const result = await jobs.trigger('sync-events');
 
@@ -33,7 +33,7 @@ describe('triggering', () => {
     test('the job copies one event per seeded user', async () => {
         // Given - the two users the specs root shares
         const result = await jobs
-            .seed(file('../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../shared/seeds/two-users.sql'), { database: 'db' })
             .trigger('sync-events');
 
         // Then - one synced event each, in order

@@ -6,6 +6,6 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 # Forward every argument, so a spec can exercise the fixer (`. --fix`) too.
 exec node "$REPO_ROOT/dist/checker.js" "${@:-.}"

@@ -139,9 +139,9 @@ describe('c29 and c30 — one subject per file, filed under its standard name', 
         // Then - the list file keeps its helper, and names the golden from where it now stands
         const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
         expect({
-            golden: existsSync(join(root, 'expected/listed.http')),
+            golden: existsSync(join(root, 'shared/expected/listed.http')),
             helper: listed.includes('function listed(result)'),
-            path: listed.includes("file('../../../expected/listed.http')"),
+            path: listed.includes("file('../../../shared/expected/listed.http')"),
             unread: listed.includes('ORDER'),
         }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
     });

@@ -19,7 +19,7 @@ import { isRelativePath } from '../chain/spec-path.js';
  * command, its exit code, its streams and what it left on disk:
  *
  *     description: removes a post and names what is gone
- *     fixture: ../../fixtures/posts-stub/
+ *     fixture: ../../shared/fixtures/posts-stub/
  *     env:
  *       - frozen
  *     runs:
@@ -581,7 +581,7 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
     }
     const found = groundOf(value);
     if (found !== role.folder) {
-        const where = `./${role.folder}/ beside the document, or in specs/${role.folder}/ if several leaves share it`;
+        const where = `./${role.folder}/ beside the document, or in specs/shared/${role.folder}/ if several leaves share it`;
         at(
             `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (C24)`,
         );
@@ -928,7 +928,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         },
         fixture: {
             description:
-                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/fixtures/ reached by the path that climbs to it.",
+                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/shared/fixtures/ reached by the path that climbs to it.",
             ...oneOrMany(fixturePath()),
         },
         runs: {

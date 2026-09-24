@@ -75,8 +75,9 @@ function groundOf(path: string): string | undefined {
  * `seeds/`, `request()` and a request body read `requests/`, `fixture()` reads
  * `fixtures/`, a golden reads `expected/`, and `run()` reads a document beside
  * the test — or, for a document that is an input, under `fixtures/`. The same
- * four folders at the specs root hold what several leaves share, so
- * `../../seeds/x.sql` is a seed and `../../fixtures/seeds/x.sql` is not. A
+ * four folders under the specs root's `shared/` hold what several leaves
+ * share, so `../../shared/seeds/x.sql` is a seed and
+ * `../../shared/fixtures/seeds/x.sql` is not. A
  * `file()`/`directory()` handed to a verb is judged by the FIRST ground folder
  * its literal path passes through —
  * handed inline, or bound first to a `const` of the same file, which the rule
@@ -117,7 +118,7 @@ export const c24GroundRole: LintRule = {
                         where:
                             reads === undefined
                                 ? 'the folder its verb reads'
-                                : `./${reads}/ beside the test, or in specs/${reads}/ if several leaves share it`,
+                                : `./${reads}/ beside the test, or in specs/shared/${reads}/ if several leaves share it`,
                     },
                     messageId: 'crossed',
                     node: argument?.type === 'Identifier' ? argument : disk.node,

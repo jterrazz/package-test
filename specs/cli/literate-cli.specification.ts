@@ -12,7 +12,7 @@ import { specification } from '../../src/index.js';
  * environment sets) and `serve` (named servers). A scenario states WHICH ground
  * it stands on; how that ground is built stays in code, once.
  */
-const CLI_BIN = resolve(import.meta.dirname, '../fixtures/cli-app/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/cli-app/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
@@ -20,7 +20,7 @@ export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     },
     // A served command runs from the project root: stated here as the server's
     // Own folder, so the command names the file where it lives.
-    root: '../fixtures/literate-server',
+    root: '../shared/fixtures/literate-server',
     serve: {
         echo: {
             command: 'node server.mjs',

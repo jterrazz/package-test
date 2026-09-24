@@ -7,7 +7,7 @@
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-REPO_ROOT="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 # npm hoists oxlint to the repository's own .bin when nothing else claims it,
 # And nests it under the toolchain that depends on it when something does.
 # Both layouts are ordinary installs, so the wrapper looks in both rather than

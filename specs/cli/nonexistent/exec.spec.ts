@@ -14,7 +14,9 @@ import { cli } from '../cli.specification.js';
 describe('exec', () => {
     test('captures unknown command failure', async () => {
         // Given - a command the fixture does not know
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('nonexistent');
+        const result = await cli
+            .fixture(directory('../../shared/fixtures/cli-app/'))
+            .exec('nonexistent');
 
         // Then - non-zero exit with a useful stderr
         expect(result.exitCode).toBe(1);

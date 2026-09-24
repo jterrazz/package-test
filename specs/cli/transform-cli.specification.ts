@@ -10,7 +10,7 @@ import { specification } from '../../src/index.js';
  * itself (raw `.text` untouched, fixture side never transformed, update mode
  * writing the post-normalisation form).
  */
-const CLI_BIN = resolve(import.meta.dirname, '../fixtures/cli-app/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/cli-app/cli.sh');
 
 const stripAnsi = (text: string): string => text.replaceAll(/\u001B\[[0-9;]*m/gu, '');
 

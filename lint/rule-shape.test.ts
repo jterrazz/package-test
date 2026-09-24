@@ -13,7 +13,7 @@ const ROOT = resolve(import.meta.dirname, '..');
 /** The options the E2E config hands each rule, by rule id. */
 function e2eOptions(): Map<string, unknown[]> {
     const config: unknown = JSON.parse(
-        readFileSync(join(ROOT, 'specs/fixtures/lint-cli/oxlint.e2e.json'), 'utf8'),
+        readFileSync(join(ROOT, 'specs/shared/fixtures/lint-cli/oxlint.e2e.json'), 'utf8'),
     );
     const rules =
         typeof config === 'object' && config !== null && 'rules' in config ? config.rules : {};

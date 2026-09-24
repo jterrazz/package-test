@@ -3,7 +3,7 @@
         "correctness": "off"
     },
     "jsPlugins": [
-        "../../../dist/oxlint.js"
+        "../../../../dist/oxlint.js"
     ],
     "rules": {
         "jterrazz/a1-specification-file": "error",

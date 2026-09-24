@@ -8,7 +8,7 @@ import { specification } from '../../src/index.js';
  * used by specs/cli/assertions to prove the transform is ASYMMETRIC: it runs
  * on the actual output only, never on the expected/ fixture.
  */
-const CLI_BIN = resolve(import.meta.dirname, '../fixtures/cli-app/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/cli-app/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     transform: (text) => text.replaceAll(' plain', ''),

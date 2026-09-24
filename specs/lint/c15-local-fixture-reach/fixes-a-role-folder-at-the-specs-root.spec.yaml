@@ -1,0 +1,17 @@
+description: --fix moves a role folder at the specs root under shared/ and rewrites every path to it
+fixture: ./fixtures/root-ground/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/seeds: absent
+          specs/fixtures: absent
+          specs/shared/seeds/catalog.sql: exists
+          specs/shared/fixtures/stub/main.js: exists
+          specs/api/orders/seeds/delta.sql: exists
+          specs/api/users/users.spec.ts:
+              contains: file('../../shared/seeds/catalog.sql')
+          specs/api/orders/listed-over-the-catalog.spec.ts:
+              contains: file('../../shared/seeds/catalog.sql')
+          specs/tool/widget/renders.spec.yaml:
+              contains: 'fixture: ../../shared/fixtures/stub/'

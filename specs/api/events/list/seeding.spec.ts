@@ -7,7 +7,7 @@ describe('seeding', () => {
     test('each database is seeded on its own, and each holds only its rows', async () => {
         // Given - two users in one database, two events in the other
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .seed(file('./seeds/two-events.sql'), { database: 'analyticsDb' })
             .get('/events');
 

@@ -14,7 +14,7 @@ describe('assertions', () => {
     test('copies fixture file into working dir before exec', async () => {
         // Given - fixture file that triggers check failure
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .fixture(file('./fixtures/invalid.ts'))
             .exec('check');
 
@@ -25,7 +25,7 @@ describe('assertions', () => {
 
     test('clean project has no invalid files', async () => {
         // Given - the pristine project fixture
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('check');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('check');
 
         // Then - check passes
         expect(result.exitCode).toBe(0);

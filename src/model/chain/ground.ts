@@ -36,6 +36,13 @@ export const GROUND_DIRS = [
     GROUND_SEEDS,
 ] as const;
 
+/**
+ * The one folder of a specs root that holds the ground several leaves share:
+ * `<specs>/shared/<role>/`, the four roles below it. It is reserved beside the
+ * four: no facet or domain takes the name.
+ */
+export const SHARED_GROUND = 'shared';
+
 /** Is this folder name one of the four reserved ground names? */
 export function isGroundName(name: string): boolean {
     return (GROUND_DIRS as readonly string[]).includes(name);

@@ -7,7 +7,7 @@ describe('sending', () => {
     test('the users seeded are the users listed, in the order they were inserted', async () => {
         // Given - the two users the specs root shares
         const result = await api
-            .seed(file('../../../seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../../shared/seeds/two-users.sql'), { database: 'db' })
             .get('/users');
 
         // Then - both, in order

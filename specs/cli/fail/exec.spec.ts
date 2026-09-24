@@ -14,7 +14,7 @@ import { cli } from '../cli.specification.js';
 describe('exec', () => {
     test('captures non-zero exit code', async () => {
         // Given - a command that exits 2
-        const result = await cli.fixture(directory('../../fixtures/cli-app/')).exec('fail');
+        const result = await cli.fixture(directory('../../shared/fixtures/cli-app/')).exec('fail');
 
         // Then - the exit code is preserved
         expect(result.exitCode).toBe(2);
@@ -23,7 +23,7 @@ describe('exec', () => {
     test('multi-exec — stops on first failure', async () => {
         // Given - fail then build (fail exits non-zero, build should not run)
         const result = await cli
-            .fixture(directory('../../fixtures/cli-app/'))
+            .fixture(directory('../../shared/fixtures/cli-app/'))
             .exec(['fail', 'build']);
 
         // Then - stopped at fail
