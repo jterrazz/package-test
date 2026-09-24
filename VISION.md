@@ -3093,3 +3093,60 @@ conflict. @jterrazz/test was reinstalled from package-test `2d54d941`
     - Now that drift-and-names has landed, rebase the branch on
       `vision/17`: `drift.spec.ts` lost two cases to
       `src/cli/check-drift.test.ts`, and the baseline file may re-record.
+
+## Speed batch of 2026-09-24: test
+
+No unit landed: both reviews came back `fix-first` after one round, so
+neither branch was cherry-picked. Their worktrees and branches are kept.
+The toolchain was reinstalled from package-typescript `7fc5dcd` (`npm ci`
+there and here). `make fix` exit 0, `make check` exit 0 (558 files, 2549
+tests).
+
+- **The config-name swap** (`340a0909`). `lint/ratchet-own-fixes.ts`
+  imports `@jterrazz/typescript/oxlint-config-names`, bundled inline into
+  `dist/checker.js`. Its fix test runs once per listed name, so a
+  narrowed list is red. This closes the **Toolchain owner** row for that
+  file. The lists in `lint/checker-cli.ts` and `lint/checker-member.ts`
+  name vitest configs, not oxlint's, so they were never copies of it.
+- `c450aa6c` splits the typescript batch's 14-line drift bullet, which
+  failed the Markdown pass at HEAD.
+- **Declared services once per run, fast postgres, pinned slim images**
+  (branch `vision17-test-service-containers`, worktree
+  `pt-service-containers`). Skipped, `fix-first`. What stays open:
+    - **Major.** Two `redis()` services in one record share one container
+      and one index, so one's `reset()` wipes the other's keys
+      (`RunContainers.keyOf`, run-containers.ts:37). Keep a two-redis
+      spec, red on HEAD, and a redis sentence at docs/17-services.md:140.
+    - **Major.** Nothing proves a worker reaches the run's container: the
+      mutation `new ServiceContainer(request, async () => undefined)`
+      (src/index.ts:122) stays green. Add a spec asserting the handle's
+      port is the run container's.
+    - The failure log window (orchestrator.ts:123, :146) drops a fresh
+      container's boot lines. Take `since` before Phase 1.
+    - docs/17-services.md:150 asserts the reaper guarantee the open leak
+      question doubts. The redis capacity is 254 workers, not 255
+      (redis.ts:97-100, docs/17:163).
+    - The load-matched after-run (`scratchpad/sc-after/run.sh`, load1 < 6)
+      and the leak's root cause are not done. The leak question needs a
+      follow-ups page, which is the maintainer's to create.
+- **Dedicated temp root, per-worker browser, preset speed knobs, build
+  cache** (branch `vision17-test-runner-browser-temp`, worktree
+  `pt-runner-browser-temp`). Skipped, `fix-first`. What stays open:
+    - **Major.** `make test SHARD=4/4` exits 2: the route ratchet
+      (route-coverage.ts:158-164) judges one shard's partial ledger, and
+      `test-merge` judges no routes. Make a shard skip the judgement and
+      let the merge judge it, or pull SHARD out of Makefile, AGENTS.md:45,
+      docs/02:20 and docs/03:516.
+    - **Major.** Brief items 3 (the component flake under `--coverage`),
+      8 (in-process checker specs) and 9 (CONFIG_NAMES, now closed by
+      `340a0909`) are neither done nor in its notDone.
+    - The temp-root timing compares against its own a6147881, not
+      `vision/17`. The browser singleton has no measured gain.
+    - `npm run docs` and `coverage` bypass the clean dist and telemetry
+      opt-out that `make build` has, which docs/02:28-30 claims for both.
+    - The per-test removal and the evidence relocation lack a caller
+      spec. A shared `/tmp` gives a second user EACCES
+      (temp-root.ts:53-58, :80-83). `packageManager` ships in the
+      published package.json:165.
+    - About 540k `spec-command-*` entries leaked into the system TMPDIR
+      await a one-off removal by the owner.
