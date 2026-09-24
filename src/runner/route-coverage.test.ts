@@ -4,13 +4,13 @@ import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { heldUnreached, writeLedger } from '../model/routes/routes.js';
-import { judgeRoutes, UNKNOWN_TABLE } from './route-coverage.js';
+import { judgeRoutes, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-coverage.js';
 
 /** A green run, judged. */
-const GREEN = { failed: 0, update: false };
+const GREEN = { failed: 0, shard: false, update: false };
 
 /** A green run, recorded with TEST_UPDATE=1. */
-const RECORDING = { failed: 0, update: true };
+const RECORDING = { failed: 0, shard: false, update: true };
 
 /** A project root holding one run's ledgers: two specifications of one table of three routes, one request. */
 function runWithOneRouteReached(): { directory: string; root: string } {
@@ -76,7 +76,7 @@ describe('route coverage — the api run judged', () => {
 
         // Then - the refusal names why, and the ratchet still holds where the green run stood
         await expect(
-            judgeRoutes(root, directory, { failed: 1, update: true }),
+            judgeRoutes(root, directory, { failed: 1, shard: false, update: true }),
         ).resolves.toStrictEqual({
             failure:
                 'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
@@ -90,7 +90,7 @@ describe('route coverage — the api run judged', () => {
 
         // Then - one neutral line, never the ratchet's failure naming routes the failed files may have sent
         await expect(
-            judgeRoutes(root, directory, { failed: 2, update: false }),
+            judgeRoutes(root, directory, { failed: 2, shard: false, update: false }),
         ).resolves.toStrictEqual({
             line: 'api routes: not judged — 2 file(s) of the run failed, and a failed file may not have sent its requests',
         });
@@ -217,6 +217,24 @@ describe('route coverage — the api run judged', () => {
             failure:
                 "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'\n  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
         });
+    });
+});
+
+describe('route coverage — a shard of a split run', () => {
+    test('a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {
+        // Given - one shard's ledgers, reaching one route of three
+        const { directory, root } = runWithOneRouteReached();
+
+        // Then - no failure, judged or recording, and no entry written
+        await expect(
+            Promise.all(
+                [false, true].map(
+                    async (update) =>
+                        await judgeRoutes(root, directory, { failed: 0, shard: true, update }),
+                ),
+            ),
+        ).resolves.toStrictEqual([{ line: SHARD_UNJUDGED }, { line: SHARD_UNJUDGED }]);
+        expect(heldUnreached(root)).toBe(0);
     });
 });
 

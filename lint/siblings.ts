@@ -184,7 +184,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)',
     },
     {
-        claims: oneOf('lint/catalog-cli.ts', 'lint/checker-cli.ts', 'lint/coverage-cli.ts'),
+        claims: oneOf(
+            'lint/catalog-cli.ts',
+            'lint/checker-cli.ts',
+            'lint/coverage-cli.ts',
+            'src/runner/route-split-cli.ts',
+        ),
         name: 'a bundled CLI entry',
         why: 'it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end',
     },

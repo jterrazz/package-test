@@ -44,6 +44,17 @@ export const ROUTES_KEY = 'routes/unreached';
 /** Where the run's ledgers are written, below the project root. */
 export const ROUTES_DIR = `${VITEST_ARTIFACTS_DIR}/routes`;
 
+/** One shard of a split run: its index, from 1, and the count of shards. */
+export type Shard = { count: number; index: number };
+
+/**
+ * Where one shard of a split run writes its ledgers, below the project root —
+ * a folder of its own in the run's, so a whole run clears every shard's too.
+ */
+export function shardLedgersDir(shard: Shard): string {
+    return `${ROUTES_DIR}/shard-${shard.index}-${shard.count}`;
+}
+
 /** The HTTP methods an OpenAPI path item may hold. */
 const METHODS = new Set(['delete', 'get', 'head', 'options', 'patch', 'post', 'put', 'trace']);
 
@@ -185,6 +196,16 @@ export function readLedgers(directory: string): Ledger[] {
     return readdirSync(directory)
         .filter((name) => name.endsWith('.json'))
         .map((name) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as Ledger);
+}
+
+/** Every ledger the shards of a split run wrote into their folders of `directory`. */
+export function readShardLedgers(directory: string): Ledger[] {
+    if (!existsSync(directory)) {
+        return [];
+    }
+    return readdirSync(directory, { withFileTypes: true })
+        .filter((entry) => entry.isDirectory() && entry.name.startsWith('shard-'))
+        .flatMap((entry) => readLedgers(join(directory, entry.name)));
 }
 
 /**

@@ -32,10 +32,11 @@ fix: build
 # All on a fresh clone, where `.artifacts/` does not exist yet.
 #
 # `SHARD=<index>/<count>` runs one shard of that suite, for a CI job that
-# Splits the run: its blob report lands under `.artifacts/vitest/blob/`, and
-# The floor is judged once, on the merged report — `make test-merge`, run
-# After every shard, never on a shard's partial coverage. A whole run empties
-# That folder, so a merge reads the shards of one split alone.
+# Splits the run: its blob report lands under `.artifacts/vitest/blob/`, its
+# Route ledgers in a folder of their own, and the floor and the route ratchet
+# Are judged once, on the merged run — `make test-merge`, run after every
+# Shard, never on a shard's part of the run. A whole run empties both, so a
+# Merge reads the shards of one split alone.
 test: node_modules/.install
 ifdef SHARD
 	@if [ -f .artifacts/vitest/blob ]; then rm .artifacts/vitest/blob; fi
@@ -46,10 +47,12 @@ else
 	npm run coverage:check
 endif
 
-# The shards' blob reports read back as one run, and the floor judged on it.
+# The shards' blob reports read back as one run, then the floor and the route
+# Ratchet judged on it — the merge runs no global setup, so no teardown judges.
 test-merge: node_modules/.install
 	npx vitest --merge-reports .artifacts/vitest/blob --coverage
 	npm run coverage:check
+	node dist/route-split.js
 
 # The local loop: only the tests the uncommitted changes reach. Never a
 # Verdict — `check` runs the whole suite.

@@ -36,6 +36,7 @@ export default defineConfig([
             'in-place-setup': 'src/runner/in-place-setup.ts',
             'mobile-session': 'src/runner/mobile-session.ts',
             'route-coverage': 'src/runner/route-coverage.ts',
+            'route-split': 'src/runner/route-split-cli.ts',
             'services-setup': 'src/seams/testcontainers/run-setup.ts',
             'temp-root': 'src/runner/temp-root.ts',
             vitest: 'src/runner/index.ts',

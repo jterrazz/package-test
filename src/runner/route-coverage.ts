@@ -11,9 +11,10 @@ import {
     recordUnreached,
     ROUTES_DIR,
     ROUTES_KEY,
+    shardLedgersDir,
     unreachedRoutes,
 } from '../model/routes/routes.js';
-import type { Route } from '../model/routes/routes.js';
+import type { Ledger, Route, Shard } from '../model/routes/routes.js';
 import { shouldUpdateSnapshots } from './update.js';
 
 /**
@@ -31,6 +32,11 @@ import { shouldUpdateSnapshots } from './update.js';
  * The run is the key's one judge: it alone counts the routes. An app whose
  * table is unknown — no `app.routes`, no OpenAPI document declared — fails
  * the run too: a measure against nothing reads as every route reached.
+ *
+ * A shard of a split run (`--shard`) judges nothing: its ledgers are a part
+ * of the run's, so it writes them to a folder of its own and prints that they
+ * wait for the merge, whose judge is `route-split.ts` — `vitest
+ * --merge-reports` runs no global setup, so the merge calls it itself.
  *
  * The app's own table also holds the member's `test: { methodless }` to what
  * it declares: the routes it takes on any method (`ALL`) are exactly the paths
@@ -52,8 +58,15 @@ function spelled(route: Route): string {
     return `${route.method} ${route.path}`;
 }
 
-/** What the judge is told of the run: whether it records, and how many of its files failed. */
-export type RouteRun = { failed: number; update: boolean };
+/**
+ * What the judge is told of the run: whether it records, how many of its
+ * files failed, and whether it is one shard of a split run.
+ */
+export type RouteRun = { failed: number; shard: boolean; update: boolean };
+
+/** The line a shard prints in place of a verdict. */
+export const SHARD_UNJUDGED =
+    "api routes: not judged — a shard's ledgers are a part of the run, and the merge of the split judges them";
 
 /** A path with its parameters' names dropped: `/mcp/:id` and `/mcp/:session` are one route. */
 function shapeOf(path: string): string {
@@ -91,26 +104,49 @@ function methodlessDrift(table: readonly Route[], methodless: readonly string[])
     return [...missed, ...stale];
 }
 
+/** What the judge returns: the line the report prints, or the error that fails the run. */
+export type RouteVerdict = { failure?: string; line?: string };
+
 /**
- * Judge the run's measure: the line the report prints, or the error that
- * fails the run — `undefined` for a run no api specification wrote to.
+ * Judge the run's measure, read from the ledgers in `directory` — nothing for
+ * a run no api specification wrote to.
  */
 export async function judgeRoutes(
     root: string,
     directory: string,
-    { failed, update }: RouteRun,
-): Promise<{ failure?: string; line?: string }> {
-    const ledgers = readLedgers(directory);
+    run: RouteRun,
+): Promise<RouteVerdict> {
+    return await judgeLedgers(root, readLedgers(directory), run);
+}
+
+/** What a run no verdict may be read from prints: a shard's, or one a file of which failed. */
+function unjudgedRun({ failed, shard, update }: RouteRun): RouteVerdict | undefined {
+    if (shard) {
+        return { line: SHARD_UNJUDGED };
+    }
+    if (failed === 0) {
+        return undefined;
+    }
+    const why = `${failed} file(s) of the run failed, and a failed file may not have sent its requests`;
+    return update
+        ? {
+              failure: `api routes: not recorded — ${why}; make the run green, then record with TEST_UPDATE=1`,
+          }
+        : { line: `api routes: not judged — ${why}` };
+}
+
+/** Judge the run's measure over its ledgers — nothing when there are none. */
+export async function judgeLedgers(
+    root: string,
+    ledgers: readonly Ledger[],
+    { failed, shard, update }: RouteRun,
+): Promise<RouteVerdict> {
     if (ledgers.length === 0) {
         return {};
     }
-    if (failed > 0) {
-        const why = `${failed} file(s) of the run failed, and a failed file may not have sent its requests`;
-        return update
-            ? {
-                  failure: `api routes: not recorded — ${why}; make the run green, then record with TEST_UPDATE=1`,
-              }
-            : { line: `api routes: not judged — ${why}` };
+    const unjudged = unjudgedRun({ failed, shard, update });
+    if (unjudged !== undefined) {
+        return unjudged;
     }
     const run = measure(ledgers);
     const table = (await declaredRoutes(root)) ?? run.declared;
@@ -157,12 +193,14 @@ export async function judgeRoutes(
 
 export default function setup(project: TestProject): () => Promise<void> {
     const { root } = project.config;
-    const directory = join(root, ROUTES_DIR);
+    const shard: Shard | undefined = project.vitest.config.shard;
+    const directory = join(root, shard === undefined ? ROUTES_DIR : shardLedgersDir(shard));
     clearLedgers(directory);
     project.provide('routesLedger', directory);
     return async () => {
         const { failure, line } = await judgeRoutes(root, directory, {
             failed: project.vitest.state.getFailedFilepaths().length,
+            shard: shard !== undefined,
             update: shouldUpdateSnapshots(),
         });
         if (failure !== undefined) {
