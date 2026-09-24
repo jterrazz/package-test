@@ -1134,7 +1134,7 @@ type MisplacedPoolFixture = {
  * pieces — the paths C8 reads. A module test reads its ground from outside
  * every leaf, so what it names is shared, whatever the specs say.
  */
-function pathsModuleTestsName(member: string): string[] {
+export function pathsModuleTestsName(member: string): string[] {
     const named: string[] = [];
     for (const file of moduleTestsOf(member)) {
         for (const { value } of relativeLiterals(readText(file))) {

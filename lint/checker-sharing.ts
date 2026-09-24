@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { dirname, extname, join, relative, resolve } from 'node:path';
+import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
 import { GROUND_EXPECTED, GROUND_REQUESTS, isGroundName } from '../src/model/chain/ground.js';
@@ -12,6 +12,7 @@ import {
     findSpecsRoots,
     fixPoolFixtures,
     listFiles,
+    pathsModuleTestsName,
     suppressedLines,
 } from './checker-crossfile.js';
 import { withEntryImport, withoutEntryImport } from './checker-migration.js';
@@ -31,6 +32,10 @@ import { closingOf, literalEnd, withoutComments } from './subject.js';
  * when several tests pay it together. So the checker counts the TESTS each
  * ground file is read by — a `test()`/`it()` whose body names it, a document —
  * and judges its level:
+ *
+ * A module test reads from outside every leaf, so a file one names — or a
+ * folder holding it — is shared whatever the specs say: never written in
+ * place, never moved down.
  *
  * - read by ONE test → it belongs in that test, written in place: a golden as
  *   the value `toMatch` compares, a request as its text or its body value. A
@@ -213,12 +218,22 @@ function inlinable(reference: Reference, target: string): boolean {
     );
 }
 
-/** Every ground file of the inline roles one test alone reads, under `rootDir`. */
+/** Is `path` strictly inside `directory`? */
+function within(directory: string, path: string): boolean {
+    const rest = relative(directory, path);
+    return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
+}
+
+/** Every ground file of the inline roles one test alone reads, and no module test names, under `rootDir`. */
 function singleUseFiles(rootDir: string): SingleUse[] {
-    const references = findSpecsRoots(rootDir).flatMap((root) =>
+    const roots = findSpecsRoots(rootDir);
+    const references = roots.flatMap((root) =>
         listFiles(root, (path) => /\.[cm]?[jt]sx?$/u.test(path)).flatMap((file) =>
             referencesIn(file),
         ),
+    );
+    const namedOutside = roots.flatMap((root) =>
+        pathsModuleTestsName(dirname(root)).filter((path) => within(root, path)),
     );
     const byTarget = new Map<string, Reference[]>();
     for (const reference of references) {
@@ -227,7 +242,8 @@ function singleUseFiles(rootDir: string): SingleUse[] {
     const single: SingleUse[] = [];
     for (const [target, named] of byTarget) {
         const only = oneTestReads(named);
-        if (only !== undefined && inlinable(only, target)) {
+        const shared = namedOutside.some((path) => path === target || within(path, target));
+        if (only !== undefined && !shared && inlinable(only, target)) {
             single.push({ reference: only, references: named.length, target });
         }
     }
