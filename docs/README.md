@@ -6,7 +6,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | [01 — Architecture](01-architecture.md)     | The runner model behind the six constructors, the five source trees and their edges, the seven enforcement channels, the four entries, what the tarball publishes |
 | [02 — Developing](02-developing.md)         | The repository's own loop and what a change owes; then install, first specs, the vitest preset and its helpers                                                    |
-| [03 — Testing](03-testing.md)               | The vitest projects, the generated capability matrix, the layered reading, the coverage ratchet, the meta-test channel, what CI runs                              |
+| [03 — Testing](03-testing.md)               | The vitest projects, the generated capability matrix, the layered reading, the coverage ratchet, the meta-test channel, the package's own rules, what CI runs     |
 | [04 — Operating](04-operating.md)           | The npm release; the peers a consumer brings — required, optional, the provider's exact pin, the native seams; Node 24; the ARIA dialect                          |
 | [05 — Module tests](05-module-tests.md)     | The majority kind: what a `*.test.ts` beside its module may and may not do — `mockOf`, `vi.fn`, `clock`, `intercept`, `vi.stubEnv`, `*.fixtures.ts`, `test.each`  |
 | [06 — Integration specs](06-integration.md) | `specification.integration()`: a module against real services or a golden — `.call()`, `value`/`error`, the `integration()` project                               |
@@ -21,7 +21,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | [15 — Tokens](15-tokens.md)                 | The `{{token}}` grammar: all 21 tokens, `#ref` captures, `match.*`, and update mode end to end                                                                    |
 | [16 — Contracts](16-contracts.md)           | `defineContract` / `defineContracts`, the facade layout, selection, provider builders, `intercept()` and its origin, streams, the browser transport               |
 | [17 — Services](17-services.md)             | `postgres` / `redis` / `sqlite` / `process`, the services record, init scripts, per-worker isolation, the optional peer each one names                            |
-| [18 — Conventions](18-conventions.md)       | The constitution: the principles, the fork, the doubles ladder, the rule families, the backlog, what stays human, the naming recap, retro-propagation (K1)        |
+| [18 — Conventions](18-conventions.md)       | The constitution: the principles, the fork, the doubles ladder, the rule families, the backlog, what stays human, the naming recap                                |
 | [19 — Linting](19-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED catalogue of the rules a consumer meets                                   |
 | [20 — Spec documents](20-documents.md)      | The `<case>.spec.yaml` format of the cli facet and the lint rules: one file one test, the keys, paths, the three doors, update                                    |
 

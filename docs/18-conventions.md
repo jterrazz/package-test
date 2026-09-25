@@ -26,7 +26,7 @@ The catalogue is organized by family. Each family's usage is illustrated in the 
 | G     | Infrastructure                                                       | [12](12-cli.md), [17](17-services.md), [07](07-component.md)          |
 | I     | Source-code architecture (declared layers, sibling module tests)     | below · [01](01-architecture.md) for this repo's own layer map        |
 | J     | Hygiene (no arbitrary sleeps, honest spec documents)                 | [19](19-linting.md)                                                   |
-| K     | Retro-propagation — every defect class grows its own guard           | below                                                                 |
+| K     | Retro-propagation — every defect class grows its own guard           | [03](03-testing.md#the-packages-own-rules), this package's own rules  |
 
 ## The reach of the conventions
 
@@ -149,10 +149,6 @@ Ground is not always inert. It may be **code** the specs stand on — the build 
 - **(e)** probes into **third-party-formatted** output.
 
 Every other use is converted to a full snapshot. A single "kitchen-sink" project + full snapshot serves as the whole-surface regression net (it churns — that is its job). The static channel cannot tell a legitimate grep from a lazy one, hence the process channel. The mechanized boundary for a result (a response, a json or a table read and never compared whole) is D20, and a lone HTTP-status probe `d15w`; the negative-fixture guard is `d13w` (wrapped forms) plus a process rule for helper-routed residue.
-
-### K1 — retro-propagation
-
-Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its rule joins `lint/manifest.ts` and the catalogue regenerates.
 
 ## One file, one subject
 
@@ -334,7 +330,7 @@ A facet pins the same instant for the chain it is stated on — `.clock(iso)` on
 ## The backlog — the criterion written, coded on its first occurrence
 
 A rule is written when its defect class has been SEEN once and its criterion is
-decidable (rule K1). A class nobody has seen yet is not a rule: it is a line
+decidable. A class nobody has seen yet is not a rule: it is a line
 here, with the criterion it would be written against, so the day it appears the
 guard is a translation rather than a design. The R8 dry run — the whole
 catalogue run over every repository of the workbench — is what moves a line
@@ -371,7 +367,6 @@ takes of them anyway, so neither side is silently dropped.
 | C1 grouping — own domain vs sibling aspects       | what the assets will become is a reading of the domain                | C21w flags the one-owner half                                                                                             |
 | D11 the legitimacy of a probe                     | absence, cut output and a third-party format are meanings, not shapes | D20 / d15w / D19w draw the cluster boundary                                                                               |
 | D13 residue routed through a helper               | inter-procedural analysis is out of an oxlint JS plugin's reach       | d13w's bounded heuristic                                                                                                  |
-| K1 — whether a defect is a CLASS                  | a judgement about what will happen again                              | K2–K5 hold the catalogue complete and true                                                                                |
 | the truth of a Given/Then sentence, or of a title | a sentence can be well-formed and false                               | B4/B10/B11 and `vitest/valid-title` hold the shape                                                                        |
 | whether an updated golden is RIGHT                | correctness is the diff, read at review                               | d5 holds the volatile literals, in a document and under `expected/` alike; the pinned-value half of ground waits for D21w |
 | whether an allow-listed `vi.mock` has no seam     | the claim is disputable, and recorded in the config comment           | I4 holds the list                                                                                                         |

@@ -37,6 +37,8 @@
         "!dist/self-*",
         "!dist/**/*.map",
         "docs",
+        "!docs/03-testing.md",
+        "!docs/decisions",
         "schema"
     ],
     "type": "module",

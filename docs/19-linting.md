@@ -104,7 +104,7 @@ specs/api/users/users.spec.ts:7:5: error jterrazz-check(c15): found: "../orders/
 
 A refusal the runtime throws is a block, a part per line: vitest prints an error whole, and what it found (the candidates of an ambiguous element) may take several lines.
 
-The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessons()` in `lint/lesson.ts`, a finding's two fields in the checker), and the row gives the other two — its convention's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part (K11, [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
+The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessons()` in `lint/lesson.ts`, a finding's two fields in the checker), and the row gives the other two — its convention's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
 
 ## The rule catalogue
 

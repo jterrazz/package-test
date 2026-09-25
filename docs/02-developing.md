@@ -49,7 +49,7 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 
 Four things land in the SAME commit as the change that makes them true.
 
-- **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. That is rule K1, and it is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
+- **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. It is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
 - **The regenerated tables.** `npm run docs` rewrites them all at once — the rule catalogue spliced into [19 — Linting](19-linting.md), the capability matrix, the siblingless table and the package's own rules in [03 — Testing](03-testing.md), the fork in [18 — Conventions](18-conventions.md), and `schema/spec.schema.json`. Never edit one by hand: the freshness meta-tests fail on a hand edit.
 
 - **The chapter the behaviour falsified.** A page that still describes the old behaviour is a defect that ships. The corpus is mapped by [`docs/README.md`](README.md).
@@ -337,7 +337,7 @@ A CLI spec's working directory does not wait for the run to end: it is removed o
 
 ### Framework environment variables
 
-You set exactly one variable, prefixed `TEST_` (rule E1): `TEST_UPDATE=1` turns on update mode, which [15 — Tokens § Update mode](15-tokens.md#update-mode-tokens-are-preserved) owns whole — what it writes, what it preserves, and the discipline it asks of a reviewer. The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema and index.
+You set exactly one variable, prefixed `TEST_`: `TEST_UPDATE=1` turns on update mode, which [15 — Tokens § Update mode](15-tokens.md#update-mode-tokens-are-preserved) owns whole — what it writes, what it preserves, and the discipline it asks of a reviewer. The framework also reads vitest's own `VITEST_POOL_ID` (set by vitest, not you) to isolate each parallel worker's database schema and index.
 
 ### Directory layout at a glance
 

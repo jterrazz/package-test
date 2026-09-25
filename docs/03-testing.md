@@ -521,6 +521,12 @@ A rule that is both is two: its consumer half ships, its self half stays home. K
 
 <!-- /GENERATED:self-rules -->
 
+### Retro-propagation
+
+Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its row joins `lint/manifest.ts` — `lint/self-manifest.ts` for a rule only this package is held to — and the catalogue regenerates.
+
+Whether a defect is a CLASS is the one judgement here no channel settles: it is a reading of what will happen again. What the machine takes of it is the rest — K2 to K5 hold the catalogue complete and true once the row is written.
+
 ### A specimen's capability folder
 
 Every app this repository's specs drive is a specimen, so every spec here is one that C29 and C30 leave alone ([18 — Conventions § A specimen's spec](18-conventions.md#a-specimens-spec)), and C35 files it instead. Its folder is the CAPABILITY it asks about, one below its facet: `specs/api/seed/files.spec.ts`, never under the route the specimen answers on (`users/list/`). The vocabulary is closed and nobody's to invent: each capability the matrix declares for the facet's own column ([§ The capability matrix](#the-capability-matrix)), the words before its first parenthesis kebab-cased — `seed`, `intercept`, `clock`, `to-match`, `exit-code`. A capability of another column is no folder of this facet: `appium` is mobile's, and never a folder of `cli/`. The file is one ASPECT of the capability — what it does when it works, what it refuses, its edges — never a folder per verb.
