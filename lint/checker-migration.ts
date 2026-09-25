@@ -10,6 +10,7 @@ import {
 import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
 import { treeEntries, treeKind } from '../src/seams/git/tree.js';
 import { repointModuleTests } from './checker-crossfile.js';
+import { migrateStubs } from './checker-migration-stubs.js';
 import { isTestFileName } from './role.js';
 
 /**
@@ -59,7 +60,11 @@ import { isTestFileName } from './role.js';
  * 6. in a member's oxlint config, an override of a rule 17 renamed names its
  *    new id, and an override of a static rule 17 retired is removed with the
  *    comment lines that stood directly above it — oxlint refuses to start on
- *    a rule the plugin does not define.
+ *    a rule the plugin does not define;
+ * 7. in every file walked, the stub vocabulary: 16's contracts are 17's
+ *    stubs — a `contracts/` folder is `stubs/`, a `*.contracts.ts` facade is
+ *    `*.stubs.ts`, `defineContract(s)` is `defineStub(s)`
+ *    (`checker-migration-stubs.ts`).
  *
  * The `…File`/`…Directory` verbs of the 17 prototype are read too
  * (`.seedFile('./seeds/x.sql')` → `.seed(file('./seeds/x.sql'))`), so a tree
@@ -73,10 +78,15 @@ import { isTestFileName } from './role.js';
 
 /**
  * What the mover did, relative to the tree it walked: the folders renamed, the
- * 16.x-shaped files rewritten, and the other files whose directives alone
- * were renamed.
+ * 16.x-shaped files rewritten, the other files whose directives alone were
+ * renamed, and the files whose stub vocabulary moved to 17.
  */
-export type Migration = { directives: string[]; renamed: string[]; rewritten: string[] };
+export type Migration = {
+    directives: string[];
+    renamed: string[];
+    rewritten: string[];
+    stubs: string[];
+};
 
 /** A rename, injected so the CLI can keep git's history of what it moves. */
 export type Rename = (from: string, to: string) => void;
@@ -213,7 +223,10 @@ function migrateSource(text: string, file: string, root: string): string {
 
 /** The rules 17 renamed: the 16 id → the id a directive names now. */
 const RENAMED_RULES: Readonly<Record<string, string>> = {
+    'c10-contracts-boundary': 'c10-stubs-boundary',
+    'c11-contract-data-pairing': 'c11-stub-data-pairing',
     'c2-http-only-requests': 'c2-request-extension',
+    'c4-contract-shape': 'c4-stub-shape',
     'd8w-text-bypass': 'd8w-raw-bypass',
 };
 
@@ -770,6 +783,7 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
         directives: [],
         renamed: renameFolders(root, { folders, specsRoot }, rename),
         rewritten: [],
+        stubs: [],
     };
     for (const file of files()) {
         const text = readFileSync(file, 'utf8');
@@ -805,7 +819,13 @@ export function migrateTo17(root: string, rename: Rename): Migration {
         },
     );
     const rewritten = repointModuleTests(root, moves).map((file) => relative(root, file));
-    return { ...migration, rewritten: [...migration.rewritten, ...rewritten] };
+    const stubs = migrateStubs(root, 'specs', rename);
+    return {
+        ...migration,
+        renamed: [...migration.renamed, ...stubs.renamed],
+        rewritten: [...migration.rewritten, ...rewritten],
+        stubs: stubs.rewritten,
+    };
 }
 
 /**
@@ -840,5 +860,15 @@ function moduleTests(member: string): Omit<Walked, 'specsRoot'> {
 
 /** Apply the 16 → 17 migration to the module tests of a member, gated per file like a specs tree. */
 export function migrateModuleTestsTo17(member: string, rename: Rename): Migration {
-    return migrate(member, { ...moduleTests(member), specsRoot: join(member, 'specs') }, rename);
+    const migration = migrate(
+        member,
+        { ...moduleTests(member), specsRoot: join(member, 'specs') },
+        rename,
+    );
+    const stubs = migrateStubs(member, 'member', rename);
+    return {
+        ...migration,
+        renamed: [...migration.renamed, ...stubs.renamed],
+        stubs: stubs.rewritten,
+    };
 }

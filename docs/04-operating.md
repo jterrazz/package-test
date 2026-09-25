@@ -92,12 +92,25 @@ value read its text — `expect(result.stdout).toContain('x')` to
 text, `await expect(result.stderr).toBeEmpty()` to
 `expect(result.stderr.text).toBe('')`. A table keeps its `toBeEmpty`.
 
+A contract is a stub in 17 ([16 — Stubs](16-stubs.md)): the mover renames
+every `contracts/` folder of a `specs/` tree to `stubs/` — and, beside a
+member's module tests, every `contracts/` folder that holds a
+`*.contracts.ts` facade — and each facade `<name>.contracts.ts` to
+`<name>.stubs.ts`. It rewrites every relative literal that named one
+(`./contracts/news.contracts.js` to `./stubs/news.stubs.js`), and gives
+each name 16 published its 17 name wherever a file imports it from the
+entry: `defineContract` and `defineContracts` to `defineStub` and
+`defineStubs`, `Contract`, `Contracts` and the `Contract…` types to
+`Stub`, `Stubs` and `Stub…`.
+
 Its gate is per file: it moves only a file C13 still finds 16.x-shaped — one
 with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —
 so a second run, a run over a tree already on 17, or a 17 file beside a 16 one
-in the same tree changes nothing. The one gesture outside that gate is the
-directive rename below: it runs on every file of every run, and a renamed
-directive no longer matches. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
+in the same tree changes nothing. Two gestures run outside that gate, on
+every file of every run: the stubs move above, which finds nothing on a
+second run since 17 publishes none of the 16 names and leaves no `contracts/`
+folder; and the directive rename below, since a renamed directive no longer
+matches. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
 has run. What it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
@@ -125,10 +138,18 @@ has run. What it leaves to the reader:
 - **A 16.x file with no 16 folder beside it is not moved.** Nothing in it
   tells a 16 string from a 17 value, so the compiler names each call the
   types refuse, and each is written by hand.
-- **A suppression follows the rule it names.** `d8w-text-bypass` and `c2-http-only-requests` no longer exist
-  under those names: the mover rewrites
-  a directive naming one to `d8w-raw-bypass` or `c2-request-extension` on every
-  file, a tree an earlier mover already moved included, and the line a
+- **A folder of the product named `contracts/` stays.** Outside a `specs/`
+  tree the mover moves only a folder that holds a `*.contracts.ts` facade, so a
+  product's own `contracts/` domain, and a type of its own called `Contract`,
+  are left as written.
+- **A composite's list is `.stubs`.** A file reading `.contracts` off a
+  `defineStubs(…)` composite is not rewritten — the property is not an import —
+  and the compiler names each read.
+- **A suppression follows the rule it names.**
+  `d8w-text-bypass`, `c2-http-only-requests`, `c4-contract-shape`, `c10-contracts-boundary` and `c11-contract-data-pairing` no longer exist under those names:
+  the mover rewrites a directive naming one to `d8w-raw-bypass`,
+  `c2-request-extension`, `c4-stub-shape`, `c10-stubs-boundary` or
+  `c11-stub-data-pairing` on every file, a tree an earlier mover already moved included, and the line a
   `-next-line` or `-line` directive naming D8w covers reads `.raw` — the
   capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
   and the toolchain's Suppressions pass reports it: delete it.

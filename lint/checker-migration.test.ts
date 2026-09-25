@@ -93,6 +93,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             directives: [],
             renamed: [],
             rewritten: [],
+            stubs: [],
         });
     });
 
@@ -117,7 +118,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         const migration = migrateTo17(root, renameSync);
 
         // Then - nothing renamed, nothing rewritten, the spec byte for byte as it was
-        expect(migration).toStrictEqual({ directives: [], renamed: [], rewritten: [] });
+        expect(migration).toStrictEqual({ directives: [], renamed: [], rewritten: [], stubs: [] });
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
 
@@ -268,6 +269,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             directives: [],
             renamed: ['src/report/_expected → src/report/expected'],
             rewritten: ['src/report/report.test.ts'],
+            stubs: [],
         });
         expect(readFileSync(join(member, 'src/report/report.test.ts'), 'utf8')).toBe(
             [
@@ -300,6 +302,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             directives: [],
             renamed: [],
             rewritten: [],
+            stubs: [],
         });
     });
 
@@ -379,6 +382,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             directives: ['cli/build/build.spec.ts'],
             renamed: [],
             rewritten: [],
+            stubs: [],
         });
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
             [
@@ -388,7 +392,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
                 '',
             ].join('\n'),
         );
-        expect(second).toStrictEqual({ directives: [], renamed: [], rewritten: [] });
+        expect(second).toStrictEqual({ directives: [], renamed: [], rewritten: [], stubs: [] });
     });
 
     test('renames the directive of a module test on 17 too', () => {

@@ -613,6 +613,11 @@ function reportMigration(migration: Migration): void {
             `conventions checker: renamed the directives naming a renamed rule in ${migration.directives.length} file(s)`,
         );
     }
+    if (migration.stubs.length > 0) {
+        console.log(
+            `conventions checker: named the stubs of ${migration.stubs.length} file(s) as 17 does — defineStub, stubs/, *.stubs.ts (C13)`,
+        );
+    }
 }
 
 /** Print what the 16 → 17 mover did to one oxlint config. */

@@ -1430,7 +1430,7 @@ function relativeLiterals(text: string): { end: number; start: number; value: st
 }
 
 /** The literal paths a source writes, rewritten where one names a copy. */
-function repointSource(file: string, move: (path: string) => string | undefined): string {
+export function repointSource(file: string, move: (path: string) => string | undefined): string {
     const text = readText(file);
     let next = '';
     let last = 0;
