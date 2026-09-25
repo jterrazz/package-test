@@ -1,6 +1,8 @@
 import type { StubRequest, StubResponse } from '../exchange.js';
 import { matchesText } from '../filters.js';
 import type { TextFilter } from '../filters.js';
+import { http } from '../http/http.js';
+import type { SseEvent } from '../http/http.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
@@ -49,6 +51,50 @@ function buildReply(data: unknown): StubResponse {
     };
 }
 
+/** Init options for a streamed Anthropic reply. */
+export type AnthropicStreamInit = {
+    /** Milliseconds between two events. Default 0 — every event at once. */
+    delay?: number;
+};
+
+/**
+ * A Messages stream: named events — the message and its one text block
+ * opened, a `ping`, one `text_delta` per piece, the block closed, the stop
+ * reason, and `message_stop` last.
+ */
+function streamEvents(pieces: readonly string[]): SseEvent[] {
+    const bodies: { [field: string]: unknown; type: string }[] = [
+        {
+            type: 'message_start',
+            message: {
+                id: 'msg-test',
+                type: 'message',
+                role: 'assistant',
+                content: [],
+                model: 'claude-sonnet-4-20250514',
+                stop_reason: null,
+                stop_sequence: null,
+                usage: { input_tokens: 10, output_tokens: 1 },
+            },
+        },
+        { type: 'content_block_start', index: 0, content_block: { type: 'text', text: '' } },
+        { type: 'ping' },
+        ...pieces.map((text) => ({
+            type: 'content_block_delta',
+            index: 0,
+            delta: { type: 'text_delta', text },
+        })),
+        { type: 'content_block_stop', index: 0 },
+        {
+            type: 'message_delta',
+            delta: { stop_reason: 'end_turn', stop_sequence: null },
+            usage: { output_tokens: 10 },
+        },
+        { type: 'message_stop' },
+    ];
+    return bodies.map((data) => ({ data, event: data.type }));
+}
+
 /**
  * Anthropic API intercept helpers.
  */
@@ -85,6 +131,18 @@ export const anthropic = {
     /** Response: wrap data in Anthropic messages format. */
     reply(data: unknown): StubResponse {
         return buildReply(data);
+    },
+
+    /**
+     * Response: the assistant's text STREAMED, as the Messages API serves it
+     * with `stream: true` — server-sent events under `text/event-stream`, one
+     * `text_delta` per piece, in order, closed by `message_stop`.
+     *
+     * @example
+     *   defineStub({ request: anthropic.messages(), response: anthropic.stream(['Hel', 'lo']) })
+     */
+    stream(pieces: readonly string[], init?: AnthropicStreamInit): StubResponse {
+        return http.sse(streamEvents(pieces), { delay: init?.delay ?? 0 });
     },
 
     /** Response: return an Anthropic error. */

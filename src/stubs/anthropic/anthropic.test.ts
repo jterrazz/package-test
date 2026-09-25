@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { isStreamBody } from '../exchange.js';
 import { anthropic } from './anthropic.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
@@ -198,5 +199,71 @@ describe('intercept — anthropic', () => {
         expect(response.status).toBe(200);
         expect(response.body).toStrictEqual({});
         expect(response.delay).toBe(30_000);
+    });
+});
+
+/** One named server-sent event, framed the way the Messages API writes it. */
+function frame(data: { [field: string]: unknown; type: string }): string {
+    return `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+
+describe('intercept — anthropic streamed replies', () => {
+    test('stream() serves the Messages events — one text_delta per piece — closed by message_stop', () => {
+        // Given - two pieces
+        const response = anthropic.stream(['Hel', 'lo'], { delay: 5 });
+        if (!isStreamBody(response.body)) {
+            throw new Error('the reply is not a stream');
+        }
+
+        // Then - each event is named for its type, the deltas are the pieces in order, and the stream ends on message_stop
+        expect(response.body.chunks).toStrictEqual([
+            frame({
+                type: 'message_start',
+                message: {
+                    id: 'msg-test',
+                    type: 'message',
+                    role: 'assistant',
+                    content: [],
+                    model: 'claude-sonnet-4-20250514',
+                    stop_reason: null,
+                    stop_sequence: null,
+                    usage: { input_tokens: 10, output_tokens: 1 },
+                },
+            }),
+            frame({
+                type: 'content_block_start',
+                index: 0,
+                content_block: { type: 'text', text: '' },
+            }),
+            frame({ type: 'ping' }),
+            frame({
+                type: 'content_block_delta',
+                index: 0,
+                delta: { type: 'text_delta', text: 'Hel' },
+            }),
+            frame({
+                type: 'content_block_delta',
+                index: 0,
+                delta: { type: 'text_delta', text: 'lo' },
+            }),
+            frame({ type: 'content_block_stop', index: 0 }),
+            frame({
+                type: 'message_delta',
+                delta: { stop_reason: 'end_turn', stop_sequence: null },
+                usage: { output_tokens: 10 },
+            }),
+            frame({ type: 'message_stop' }),
+        ]);
+        expect({
+            contentType: response.body.contentType,
+            delay: response.body.delayBetweenChunks,
+            headers: response.headers,
+            status: response.status,
+        }).toStrictEqual({
+            contentType: 'text/event-stream',
+            delay: 5,
+            headers: { 'cache-control': 'no-cache' },
+            status: 200,
+        });
     });
 });

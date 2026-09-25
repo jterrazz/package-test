@@ -138,7 +138,7 @@ The rules, enforced by [C4, C10 and C11](19-linting.md):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; C4 judges the default by where its builder comes from, since the linter reads no types.
-- A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A server-sent stream is an `http` stub.
+- A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
 - **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
 - Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `shared/` folder.
@@ -332,6 +332,8 @@ Exactness is the default because a substring filter silently cross-matches: two 
 | `openai.error(status)` / `anthropic.error` | Provider HTTP error (e.g. `429` rate limit)                                         |
 | `openai.timeout()` / `anthropic.timeout()` | A provider that never answers within the caller's timeout                           |
 | `openai.malformed(text)`                   | HTTP 200 whose assistant content is `text` — an unparseable payload to handle       |
+| `openai.stream(pieces, init?)`             | The assistant's text streamed, one delta per piece — see Streamed replies           |
+| `anthropic.stream(pieces, init?)`          | The assistant's text streamed as Messages events, one delta per piece               |
 
 The point: your stub states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
@@ -367,7 +369,25 @@ test('renders a streamed reply as its pieces land', async () => {
 | `id`             | the `id:` the client echoes as `Last-Event-ID` when it reconnects |
 | `retry`          | the `retry:` hint, in milliseconds                                |
 
-Provider streams — `openai.reply({ stream: true })` and its Anthropic twin — are not here: no test on the workbench mocks a provider's wire protocol for a stream, and the three that stream mock the AI SDK's model instead. They arrive when one does.
+A provider's streamed reply is its provider's stub, not an `http` one: `openai.stream(pieces)` and `anthropic.stream(pieces)` serve the text as the provider does under `stream: true`, one delta per piece in order, so the unit sits in `stubs/openai/` or `stubs/anthropic/` with the request it answers.
+
+| Builder                                       | Wire                                                                                                              |
+| --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `openai.stream(pieces)`                       | Chat Completions: unnamed `chat.completion.chunk` events — the role, the deltas, the finish — then `data: [DONE]` |
+| `openai.stream(pieces, { api: 'responses' })` | Responses: named, numbered events, one `response.output_text.delta` per piece, `response.completed` last          |
+| `anthropic.stream(pieces)`                    | Messages: `message_start`, a text block, a `ping`, one `text_delta` per piece, `message_stop` last                |
+
+Both take `delay`, the milliseconds between two events. Any other server-sent stream is an `http.sse()` stub.
+
+```typescript
+// specs/api/assistant/stubs/openai/greeting.ts
+import { defineStub, openai } from '@jterrazz/test';
+
+export default defineStub({
+    request: openai.chat({ user: 'Say hello' }),
+    response: openai.stream(['Hel', 'lo, ', 'world']),
+});
+```
 
 ### Dynamic responses
 

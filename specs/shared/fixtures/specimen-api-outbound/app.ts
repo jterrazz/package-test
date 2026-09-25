@@ -9,6 +9,9 @@ export const NEWS_URL = 'https://news.spec.test/api/latest';
 export const QUOTES_URL = 'https://quotes.spec.test/api/quote';
 export const STREAM_URL = 'https://tokens.spec.test/api/stream';
 const UNREGISTERED_URL = 'https://unregistered.spec.test/thing';
+const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
+const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
+const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
 /** Every piece a streamed reply was written in, in the order it arrived. */
 async function readChunks(response: Response, decoder: TextDecoder): Promise<string[]> {
@@ -19,6 +22,45 @@ async function readChunks(response: Response, decoder: TextDecoder): Promise<str
     return await Array.fromAsync(stream, (piece: Uint8Array) => decoder.decode(piece));
 }
 
+/** One server-sent event as a client reads it: its name, when it has one, and its data line. */
+type ServerEvent = { data: string; event: string | undefined };
+
+/**
+ * The events of a server-sent stream, in order — what an SDK client parses
+ * before it reads a single token: frames end on a blank line, and a frame's
+ * `event:` and `data:` lines are its name and its payload.
+ */
+async function readEvents(response: Response): Promise<ServerEvent[]> {
+    const text = await response.text();
+    return text
+        .split('\n\n')
+        .filter((frame) => frame !== '')
+        .map((frame) => {
+            const lines = frame.split('\n');
+            const field = (name: string): string | undefined =>
+                lines.find((line) => line.startsWith(`${name}: `))?.slice(name.length + 2);
+            return { data: field('data') ?? '', event: field('event') };
+        });
+}
+
+/** POST a streamed completion request, the way an LLM client asks for one. */
+async function askStreamed(url: string): Promise<Response> {
+    return await fetch(url, {
+        body: JSON.stringify({ messages: [{ content: 'Say hello', role: 'user' }], stream: true }),
+        headers: { 'content-type': 'application/json' },
+        method: 'POST',
+    });
+}
+
+/**
+ * What an assistant streamed, as the app answers it: the text assembled from
+ * the deltas — the one field of the one event each provider's client reads —
+ * and the event that closed the stream.
+ */
+function streamed(closedBy: string | undefined, deltas: string[]): Response {
+    return Response.json({ closedBy, text: deltas.join('') });
+}
+
 /**
  * The routes, one per shape of outgoing traffic a stub has to answer.
  *
@@ -27,6 +69,36 @@ async function readChunks(response: Response, decoder: TextDecoder): Promise<str
  * nobody can hold in their head.
  */
 const routes: Record<string, () => Promise<Response>> = {
+    '/assistant/anthropic': async () => {
+        // Anthropic's Messages stream: a `text_delta` per content_block_delta.
+        const events = await readEvents(await askStreamed(ANTHROPIC_MESSAGES_URL));
+        return streamed(
+            events.at(-1)?.event,
+            events
+                .filter(({ event }) => event === 'content_block_delta')
+                .map(({ data }) => JSON.parse(data).delta.text),
+        );
+    },
+    '/assistant/openai-chat': async () => {
+        // OpenAI's Chat Completions stream: unnamed chunks, then the `[DONE]` sentinel.
+        const events = await readEvents(await askStreamed(OPENAI_CHAT_URL));
+        return streamed(
+            events.at(-1)?.data,
+            events
+                .filter(({ data }) => data !== '[DONE]')
+                .map(({ data }) => JSON.parse(data).choices[0].delta.content ?? ''),
+        );
+    },
+    '/assistant/openai-responses': async () => {
+        // OpenAI's Responses stream: named events, the text in each output_text delta.
+        const events = await readEvents(await askStreamed(OPENAI_RESPONSES_URL));
+        return streamed(
+            events.at(-1)?.event,
+            events
+                .filter(({ event }) => event === 'response.output_text.delta')
+                .map(({ data }) => JSON.parse(data).delta),
+        );
+    },
     '/cancel': async () => {
         // The subject drops the body it did not need — what an SDK client does
         // Before a retry.

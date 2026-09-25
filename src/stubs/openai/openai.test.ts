@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import { clock } from '../../model/clock/clock.js';
 import type { StubRequest } from '../exchange.js';
+import { isStreamBody } from '../exchange.js';
 import { openai } from './openai.js';
 
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
@@ -153,6 +155,89 @@ describe('intercept — openai responses', () => {
             },
             status: 200,
         });
+    });
+});
+
+/** Each frame of a streamed reply, read the way an SSE client reads it: its event name and its data, parsed. */
+function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
+    if (!isStreamBody(body)) {
+        throw new Error('the reply is not a stream');
+    }
+    return body.chunks.map((chunk) => {
+        const lines = chunk.trimEnd().split('\n');
+        const field = (name: string): string =>
+            lines.find((line) => line.startsWith(`${name}: `))?.slice(name.length + 2) ?? '';
+        return { data: JSON.parse(field('data')) as unknown, event: field('event') };
+    });
+}
+
+/** One unnamed Chat Completions chunk, framed, created at the pinned instant. */
+function chatChunk(delta: object, finish: null | string): string {
+    return `data: ${JSON.stringify({
+        id: 'chatcmpl-test',
+        object: 'chat.completion.chunk',
+        created: 1_772_616_600,
+        model: 'gpt-4o-test',
+        choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
+    })}\n\n`;
+}
+
+/** A Responses event that carries no text, as a client reads it: named for its type, numbered. */
+function opened(type: string, sequence: number): object {
+    return { data: { sequence_number: sequence, type }, event: type };
+}
+
+describe('intercept — openai streamed replies', () => {
+    test('stream() serves Chat Completions chunks — the role, one delta per piece, the finish — closed by [DONE]', () => {
+        // Given - two pieces, at a pinned instant
+        using _ = clock.at('2026-03-04T09:30:00Z');
+        const response = openai.stream(['Hel', 'lo']);
+
+        // Then - one unnamed data frame per chunk, under text/event-stream, and the sentinel last
+        expect(response).toStrictEqual({
+            body: {
+                chunks: [
+                    chatChunk({ role: 'assistant', content: '' }, null),
+                    chatChunk({ content: 'Hel' }, null),
+                    chatChunk({ content: 'lo' }, null),
+                    chatChunk({}, 'stop'),
+                    'data: [DONE]\n\n',
+                ],
+                contentType: 'text/event-stream',
+                delayBetweenChunks: 0,
+                kind: '@jterrazz/test:stream',
+            },
+            headers: { 'cache-control': 'no-cache' },
+            status: 200,
+        });
+    });
+
+    test('stream() on the Responses API serves named, numbered events, one text delta per piece, completed last', () => {
+        // Given - two pieces on the Responses wire, spaced 5 ms apart
+        const response = openai.stream(['Hel', 'lo'], { api: 'responses', delay: 5 });
+
+        // Then - every event is named for its type and numbered in order; the deltas are the pieces, the closing events carry the whole text
+        expect(framesOf(response.body)).toMatchObject([
+            opened('response.created', 0),
+            opened('response.output_item.added', 1),
+            opened('response.content_part.added', 2),
+            { data: { delta: 'Hel', sequence_number: 3 }, event: 'response.output_text.delta' },
+            { data: { delta: 'lo', sequence_number: 4 }, event: 'response.output_text.delta' },
+            { data: { sequence_number: 5, text: 'Hello' }, event: 'response.output_text.done' },
+            opened('response.content_part.done', 6),
+            opened('response.output_item.done', 7),
+            {
+                data: {
+                    response: {
+                        output: [{ content: [{ text: 'Hello', type: 'output_text' }] }],
+                        status: 'completed',
+                    },
+                    sequence_number: 8,
+                },
+                event: 'response.completed',
+            },
+        ]);
+        expect(isStreamBody(response.body) && response.body.delayBetweenChunks).toBe(5);
     });
 });
 
