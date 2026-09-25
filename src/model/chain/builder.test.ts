@@ -1,15 +1,13 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { defineContracts } from '../../stubs/contract.js';
 import type { Contract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
-import type { BrowserOpenOptions, BrowserPage, BrowserPort } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
-import { createCliFacet, createWebsiteFacet, SpecificationBuilder } from './builder.js';
+import { createCliFacet, SpecificationBuilder } from './builder.js';
 import { directory, file } from './spec-path.js';
 
 // ── Fakes — mocks are code (CONVENTIONS I4) ──
@@ -37,22 +35,6 @@ function fakeDatabase(): DatabasePort {
         query: async () => [],
         reset: async () => {},
         seed: async () => {},
-    };
-}
-
-/** A page with nothing rendered — what a visit hands back when only its request matters. */
-function blankPage(): BrowserPage {
-    return {
-        consoleMessages: [],
-        html: '',
-        jsonLdBlocks: [],
-        links: [],
-        metas: [],
-        status: 200,
-        text: '',
-        title: '',
-        tree: '',
-        url: 'http://127.0.0.1:9/',
     };
 }
 
@@ -232,38 +214,6 @@ describe('builder — the request a chain declares', () => {
 // ── Stub-backend facets ──
 
 describe('builder — contracts on the stub facets', () => {
-    test('a website chain queues its contracts for the declared stub backend', () => {
-        // Given - a website-shaped config carrying a stub backend
-        const builder = new SpecificationBuilder(
-            { backend: new StubBackend(), baseUrl: 'http://127.0.0.1:9' },
-            import.meta.dirname,
-        );
-
-        // When - the chain declares two contracts
-        builder.intercept([
-            { request: http.get('/events'), response: http.json({ n: 1 }) },
-            { request: http.get('/articles'), response: http.json({ n: 2 }) },
-        ]);
-
-        // Then - both are held for the stub, in declaration order
-        expect(declaredNumbers(builder)).toStrictEqual([1, 2]);
-    });
-
-    test('a website chain without a backend option names the fix', () => {
-        // Given - a website-shaped config with no stub backend declared
-        const builder = new SpecificationBuilder(
-            { baseUrl: 'http://127.0.0.1:9' },
-            import.meta.dirname,
-        );
-
-        // Then - the error points at the specification options
-        expect(() =>
-            builder.intercept({ request: http.get('/events'), response: http.empty() }),
-        ).toThrow(
-            '.intercept(): this runner has no declared backend — add `backend` to the specification options (specification.website({ …, backend: { … } }))',
-        );
-    });
-
     test('a mobile chain without a backend option names its own constructor', () => {
         // Given - a mobile-shaped config (a device accessor, no backend)
         const builder = new SpecificationBuilder(
@@ -427,50 +377,18 @@ describe('builder — what a file shares, with()', () => {
         expect(command.lastEnv).toMatchObject({ LANG: 'fr', TZ: 'UTC' });
     });
 
-    test("a website view sends its headers on every visit, and a chain's own headers win for that chain alone", async () => {
-        // Given - a website view over a browser recording the headers of each visit
-        const sent: BrowserOpenOptions['headers'][] = [];
-        const browser: BrowserPort = {
-            close: async () => {
-                await Promise.resolve();
-            },
-            open: async (_url, options) => {
-                sent.push(options.headers);
-                return await Promise.resolve(blankPage());
-            },
-        };
-        const website = createWebsiteFacet({
-            baseUrl: 'http://127.0.0.1:9',
-            browser: async () => await Promise.resolve(browser),
-        }).with({ headers: { 'x-chain': 'file' } });
-
-        // When - two chains of the view, one setting its own header, then one more chain of the view
-        await website.visit('/');
-        await website.visit('/');
-        await website.headers({ 'x-chain': 'own' }).visit('/');
-        await website.visit('/');
-
-        // Then - the shared header on every chain, the chain's own replacing it on that chain alone
-        expect(sent).toStrictEqual([
-            { 'x-chain': 'file' },
-            { 'x-chain': 'file' },
-            { 'x-chain': 'own' },
-            { 'x-chain': 'file' },
-        ]);
-    });
-
-    test('a context states only what it names: no clock, no headers, nothing set', () => {
+    test('a context states only what it names: no clock, no environment, nothing set', () => {
         // Given - a chain handed an empty context
         const builder = new SpecificationBuilder({}, '/tmp').with({});
 
-        // Then - it pins nothing and carries no header
+        // Then - it pins nothing and carries no variable
         const internals = builder as unknown as {
+            commandEnv: object;
             pinnedClock: null | string;
-            requestHeaders: object;
         };
-        expect({ clock: internals.pinnedClock, headers: internals.requestHeaders }).toStrictEqual({
+        expect({ clock: internals.pinnedClock, env: internals.commandEnv }).toStrictEqual({
             clock: null,
-            headers: {},
+            env: {},
         });
     });
 });

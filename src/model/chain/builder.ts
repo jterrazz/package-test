@@ -9,16 +9,14 @@ import type { SeedSource } from '../../capabilities/seed/seed.capability.js';
 import type { ChainContext } from '../../capabilities/with/with.capability.js';
 import { CallResult } from '../../results/call.result.js';
 import { CliResult } from '../../results/cli.result.js';
-import { FetchResult } from '../../results/fetch.result.js';
-import { PageResult } from '../../results/page.result.js';
 import { ScreenResult } from '../../results/screen.result.js';
 import { copyPlan } from '../../seams/fs/fixtures.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
+import { stubBackend } from '../../seams/stub-backend/stub-network.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
-import type { VisitScenario } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, ExecOptions } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
 import type { MobileScenario } from '../ports/device.port.js';
@@ -120,38 +118,6 @@ export type CliSpecification<DatabaseKey extends string = string> = {
 };
 
 /**
- * The `website` facet — page chain entry handed out by
- * `specification.website()`. Setup methods chain; action methods are
- * terminal. `.visit()` renders the page in the shared browser; `.fetch()`
- * performs one raw HTTP exchange and never follows redirects.
- */
-export type WebsiteSpecification = {
-    /**
-     * Pin the PAGE's `Date` at `iso` for this chain — what the site's own
-     * scripts read. A `.fetch()` opens no page and refuses the setup.
-     */
-    clock: (iso: string) => WebsiteSpecification;
-    /** Set HTTP headers for the exchange (incl. User-Agent overrides). Multiple calls merge. */
-    headers: (headers: Record<string, string>) => WebsiteSpecification;
-    /**
-     * Declare the chain's backend contracts — served by the declared stub
-     * backend (requires the runner's `backend` option). Multiple calls append.
-     */
-    intercept: InterceptMethod<WebsiteSpecification>;
-
-    /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
-    fetch: (path: string) => Promise<FetchResult>;
-    /**
-     * Render the page in the shared browser and resolve with the captured
-     * document. With a scenario, the visitor interacts first (the When) and
-     * the capture reflects the FINAL page state.
-     */
-    visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
-    /** The facet with the clock and headers a whole file shares, every chain it starts beginning with them. */
-    with: (context: Pick<ChainContext, 'clock' | 'headers'>) => WebsiteSpecification;
-};
-
-/**
  * The `mobile` facet — screen chain entry handed out by
  * `specification.mobile()`. `.open()` is the single, terminal action: it
  * terminates and relaunches the app (deterministic fresh state), applies the
@@ -185,18 +151,13 @@ export type MobileSpecification = {
  * only surfaces the methods that make sense for it.
  */
 export class SpecificationBuilder
-    implements
-        CliSpecification,
-        IntegrationSpecification,
-        MobileSpecification,
-        WebsiteSpecification
+    implements CliSpecification, IntegrationSpecification, MobileSpecification
 {
     private pinnedClock: null | string = null;
     private commandEnv: CliEnv = {};
     private readonly config: SpecificationConfig;
     private readonly contracts: Contract[] = [];
     private readonly fixtures: DiskTarget[] = [];
-    private requestHeaders: Record<string, string> = {};
     private readonly seeds: SeedEntry[] = [];
     private readonly testDir: string;
 
@@ -210,13 +171,12 @@ export class SpecificationBuilder
     /**
      * Pin the clock at `iso` for this chain.
      *
-     * In-process facets (api, jobs, integration) pin the runner's own `Date`,
-     * which is the app's; a website visit pins the PAGE's, through the browser.
-     * Either way the clock is released when the action resolves, so a chain
-     * never leaks its instant into the next one (CONVENTIONS D16).
+     * An in-process facet (integration) pins the runner's own `Date`, which is
+     * the module's, released when the action resolves, so a chain never leaks
+     * its instant into the next one (CONVENTIONS D16).
      *
      * @example
-     *   const result = await api.clock('2026-03-04T09:30:00Z').get('/now');
+     *   const result = await integration.clock('2026-03-04T09:30:00Z').call(() => now());
      */
     clock(iso: string): this {
         this.pinnedClock = iso;
@@ -275,35 +235,20 @@ export class SpecificationBuilder
     }
 
     /**
-     * Set HTTP headers for the request. Multiple calls merge; chain headers
-     * win over headers from a `.request()` document.
+     * Start from what a whole file shares: its clock, its environment — each
+     * as its own setup would state it, so a later setup of the chain
+     * overrides or merges exactly as it would over an earlier one.
      *
      * @example
-     *   api.headers({ 'Accept-Language': 'fr' }).get("/articles");
+     *   const tools = cli.with({ env: { TZ: 'UTC' } });
+     *   await tools.exec('status');
      */
-    headers(headers: Record<string, string>): this {
-        this.requestHeaders = { ...this.requestHeaders, ...headers };
-        return this;
-    }
-
-    /**
-     * Start from what a whole file shares: its clock, its headers, its
-     * environment — each as its own setup would state it, so a later setup of
-     * the chain overrides or merges exactly as it would over an earlier one.
-     *
-     * @example
-     *   const events = api.with({ clock: '2026-03-04T09:30:00Z', headers: { 'Accept-Language': 'fr' } });
-     *   await events.get('/events');
-     */
-    with({ clock, env, headers }: ChainContext): this {
+    with({ clock, env }: ChainContext): this {
         if (clock !== undefined) {
             this.clock(clock);
         }
         if (env !== undefined) {
             this.env(env);
-        }
-        if (headers !== undefined) {
-            this.headers(headers);
         }
         return this;
     }
@@ -317,7 +262,7 @@ export class SpecificationBuilder
      * append; composition and overriding live in `defineContracts()` /
      * `.with()`, not in call order.
      *
-     * api/jobs chains serve them through MSW; website/mobile chains through
+     * An integration chain serves them through MSW; a mobile chain through
      * the declared stub backend. Same queue, same semantics: first matching
      * non-exhausted contract wins, no `times` means unlimited.
      *
@@ -343,16 +288,11 @@ export class SpecificationBuilder
         requestOrContracts: ContractInput | ContractRequest,
         maybeResponse?: ContractResponder | ContractResponse,
     ): this {
-        // Website/mobile chains have no in-process network to intercept — the
-        // App under test runs in its own process (server child, simulator).
-        // Their contracts are served by the declared stub backend instead.
-        const stubFacet = this.config.baseUrl !== undefined || this.config.device !== undefined;
-        if (stubFacet && !this.config.backend) {
-            const facet = this.config.device === undefined ? 'website' : 'mobile';
-            throw new Error(
-                `.intercept(): this runner has no declared backend — add \`backend\` to the specification options ` +
-                    `(specification.${facet}({ …, backend: { … } })) so the chain's contracts have a stub to serve them.`,
-            );
+        // A mobile chain has no in-process network to intercept — the app
+        // Runs on the simulator. Its contracts are served by the declared
+        // Stub backend instead.
+        if (this.config.device !== undefined) {
+            stubBackend(this.config.backend, 'mobile').accepts();
         }
 
         this.contracts.push(...declaredContracts('.intercept', requestOrContracts, maybeResponse));
@@ -415,48 +355,6 @@ export class SpecificationBuilder
             workDir,
             async () => await this.runLiterateAction(workDir, source.path, options),
         );
-    }
-
-    // ── Website actions (terminal) ──
-
-    /**
-     * Perform one raw HTTP GET against the website under test and resolve
-     * with the exchange. Redirects are never followed — a 308 IS the result,
-     * with its `location` readable on the result. The scalpel for wire-level
-     * surfaces: robots.txt, sitemaps, llms.txt, redirect policies.
-     *
-     * @example
-     *   const result = await website.fetch('/robots.txt');
-     *   expect(result.status).toBe(200);
-     *   expect(result.body).toMatch(file('./expected/robots.txt'));
-     */
-    async fetch(path: string): Promise<FetchResult> {
-        if (this.pinnedClock !== null) {
-            throw new Error(
-                '.clock() pins the clock of a PAGE, and .fetch() opens none — it is one raw HTTP ' +
-                    'exchange. Assert the moment with a token ({{iso8601}}) in the golden, or visit the page.',
-            );
-        }
-        return await this.executeSetup(null, async () => await this.runFetchAction(path));
-    }
-
-    /**
-     * Render the page in the shared browser instance and resolve with the
-     * captured document — rendered title, head elements, JSON-LD blocks,
-     * body text, console errors. One browser per runner; each visit gets a
-     * fresh, isolated context.
-     *
-     * @example
-     *   const result = await website.visit('/articles');
-     *   expect(result.head).toMatch(file('./expected/articles.head.json'));
-     *
-     *   const result = await website.visit('/', async (visitor) => {
-     *       await visitor.click(link('Articles'));
-     *   });
-     *   expect(result.url).toContain('/articles');
-     */
-    async visit(path: string, scenario?: VisitScenario): Promise<PageResult> {
-        return await this.executeSetup(null, async () => await this.runVisitAction(path, scenario));
     }
 
     // ── Mobile actions (terminal) ──
@@ -569,7 +467,7 @@ export class SpecificationBuilder
             }
         }
 
-        // Serve the chain's contracts. Website/mobile chains have a declared
+        // Serve the chain's contracts. A mobile chain has a declared
         // Stub backend — it resets between chains the way databases do: this
         // Chain's contracts replace the previous chain's and the unmatched log
         // Clears. Every other facet registers them with MSW.
@@ -586,12 +484,9 @@ export class SpecificationBuilder
             registration = await registerContracts(this.contracts);
         }
 
-        // Pin the in-process calendar for the action alone. A website chain
-        // Pins the PAGE's instead (the site runs in its own process), so its
-        // Instant travels with the visit and never touches this one.
+        // Pin the in-process calendar for the action alone.
         const instant = this.pinnedClock;
-        const pinned =
-            instant !== null && this.config.baseUrl === undefined ? timeClock.at(instant) : null;
+        const pinned = instant === null ? null : timeClock.at(instant);
 
         // Execute action
         try {
@@ -643,53 +538,6 @@ export class SpecificationBuilder
         return new CallResult({ config: this.config, outcome, testDir: this.testDir });
     }
 
-    private async runFetchAction(path: string): Promise<FetchResult> {
-        const baseUrl = this.requireBaseUrl('fetch');
-
-        const response = await fetch(`${baseUrl}${path}`, {
-            headers: this.requestHeaders,
-            redirect: 'manual',
-        });
-        const body = await response.text();
-        const responseHeaders: Record<string, string> = {};
-        response.headers.forEach((value, key) => {
-            responseHeaders[key] = value;
-        });
-
-        return new FetchResult({
-            config: this.config,
-            exchange: { body, headers: responseHeaders, status: response.status },
-            testDir: this.testDir,
-        });
-    }
-
-    private async runVisitAction(path: string, scenario?: VisitScenario): Promise<PageResult> {
-        const baseUrl = this.requireBaseUrl('visit');
-        if (!this.config.browser) {
-            throw new Error('.visit() requires a browser adapter (use specification.website())');
-        }
-
-        const browser = await this.config.browser();
-        const headers =
-            Object.keys(this.requestHeaders).length > 0 ? this.requestHeaders : undefined;
-        const page = await browser.open(`${baseUrl}${path}`, {
-            allowedOrigins: this.config.backendUrl
-                ? [new URL(this.config.backendUrl).origin]
-                : undefined,
-            baseUrl,
-            ...(this.pinnedClock === null ? {} : { clock: this.pinnedClock }),
-            external: this.config.external ?? 'allow',
-            headers,
-            scenario,
-        });
-
-        return new PageResult({
-            config: this.config,
-            page,
-            testDir: this.testDir,
-        });
-    }
-
     private async runOpenAction(
         deepLink?: string,
         scenario?: MobileScenario,
@@ -710,15 +558,6 @@ export class SpecificationBuilder
             screen,
             testDir: this.testDir,
         });
-    }
-
-    private requireBaseUrl(method: string): string {
-        if (!this.config.baseUrl) {
-            throw new Error(
-                `.${method}() requires a website under test (use specification.website())`,
-            );
-        }
-        return this.config.baseUrl;
     }
 
     /**
@@ -897,25 +736,6 @@ function integrationFacet<Services extends Record<string, unknown>, DatabaseKey 
         intercept: interceptOn(start),
         seed: (source, options) => start().seed(source, options),
         with: (context) => integrationFacet(() => start().with(context)),
-    };
-}
-
-/**
- * Create the `website` facet bound to the given adapter configuration.
- */
-export function createWebsiteFacet(config: SpecificationConfig): WebsiteSpecification {
-    return websiteFacet(() => new SpecificationBuilder(config, getCallerDir()));
-}
-
-/** The website facet over a chain start. */
-function websiteFacet(start: () => SpecificationBuilder): WebsiteSpecification {
-    return {
-        clock: (iso) => start().clock(iso),
-        fetch: async (path) => await start().fetch(path),
-        headers: (headers) => start().headers(headers),
-        intercept: interceptOn(start),
-        visit: async (path, scenario) => await start().visit(path, scenario),
-        with: (context) => websiteFacet(() => start().with(context)),
     };
 }
 

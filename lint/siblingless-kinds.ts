@@ -90,7 +90,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
         name: 'the facet file set, as a re-export',
-        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`, `api`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
+        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`, `api`, `website`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
     },
     {
         claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),
@@ -152,6 +152,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/seams/msw/msw-node.ts',
             'src/seams/msw/server.ts',
             'src/seams/msw/worker.ts',
+            'src/seams/playwright/page-clock.ts',
             'src/seams/playwright/playwright.adapter.ts',
             'src/seams/postgres/template.ts',
             'src/seams/vitest/clock.engine.ts',
@@ -191,6 +192,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'src/actions/fetch/fetch.action.ts',
             'src/capabilities/headers/headers.capability.ts',
             'src/model/chain/action.ts',
             'src/model/chain/capability.ts',

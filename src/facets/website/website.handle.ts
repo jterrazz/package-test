@@ -12,8 +12,8 @@ import { releaseIsolation, startServices } from '../../model/services/services.j
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
-import { createWebsiteFacet } from './website.chain.js';
 import type { WebsiteSpecification } from './website.chain.js';
+import { websiteFacet } from './website.facet.js';
 
 /**
  * The command a `server` states, where it states one.
@@ -304,6 +304,6 @@ export async function startWebsite<Services extends ServiceRecord>(
             }
         },
         url: baseUrl,
-        website: createWebsiteFacet(config),
+        website: websiteFacet.open(config),
     };
 }
