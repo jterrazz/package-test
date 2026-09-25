@@ -33,9 +33,9 @@ export const env = defineCapability<'env', CliEnv, [env: CliEnv], Record<never, 
  * raw path made `HOME=$WORKDIR` on macOS echo `/var/folders/…` against a
  * `{{workdir}}` holding `/private/var/folders/…` — a golden no run could match.
  */
-export function expandWorkdir(env: CliEnv, workdir: string): CliEnv {
+export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     const expanded: CliEnv = {};
-    for (const [key, value] of Object.entries(env)) {
+    for (const [key, value] of Object.entries(variables)) {
         expanded[key] = typeof value === 'string' ? value.replaceAll('$WORKDIR', workdir) : value;
     }
     return expanded;
