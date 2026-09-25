@@ -110,38 +110,6 @@ export function formatResponseDiff(file: string, expected: unknown, actual: unkn
     return lines.join('\n');
 }
 
-// ── Exit code error ──
-
-export function formatExitCodeError(
-    expected: number,
-    received: number,
-    stdout: string,
-    stderr: string,
-): string {
-    const lines: string[] = [];
-
-    lines.push(
-        `Expected exit code: ${GREEN}${expected}${RESET}`,
-        `Received exit code: ${RED}${received}${RESET}`,
-    );
-
-    if (stdout.trim()) {
-        lines.push('', `${DIM}stdout:${RESET}`);
-        for (const line of stdout.trim().split('\n').slice(-15)) {
-            lines.push(`  ${DIM}${line}${RESET}`);
-        }
-    }
-
-    if (stderr.trim()) {
-        lines.push('', `${DIM}stderr:${RESET}`);
-        for (const line of stderr.trim().split('\n').slice(-15)) {
-            lines.push(`  ${RED}${line}${RESET}`);
-        }
-    }
-
-    return lines.join('\n');
-}
-
 // ── Stdout/stderr diff ──
 
 /** Line-level equality for the diff. Defaults to strict string equality. */
@@ -301,32 +269,6 @@ function countLineDifferences(expected: string[], actual: string[]): number {
     return count;
 }
 
-// ── File assertions ──
-
-export function formatFileMissing(path: string): string {
-    return `Expected file to exist: ${RED}${path}${RESET}`;
-}
-
-export function formatFileUnexpected(path: string): string {
-    return `Expected file NOT to exist: ${RED}${path}${RESET}`;
-}
-
-export function formatFileContentMismatch(path: string, expected: string, actual: string): string {
-    const lines: string[] = [];
-    lines.push(
-        `File "${path}" does not contain expected content`,
-        '',
-        `${GREEN}Expected to contain:${RESET}`,
-        `  ${GREEN}${expected}${RESET}`,
-        '',
-    );
-    lines.push(`${RED}Actual content (first 20 lines):${RESET}`);
-    for (const line of actual.split('\n').slice(0, 20)) {
-        lines.push(`  ${DIM}${line}${RESET}`);
-    }
-    return lines.join('\n');
-}
-
 // ── Helpers ──
 
 function rowLabel(n: number): string {
@@ -335,21 +277,4 @@ function rowLabel(n: number): string {
 
 function formatRow(row: readonly unknown[]): string {
     return row.map((v) => String(v ?? 'null')).join('  |  ');
-}
-
-// ── Test utilities ──
-
-/** Strip ANSI escape codes from a string. */
-export function stripAnsi(str: string): string {
-    // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
-    return str.replaceAll(/\u001B\[[0-9;]*m/gu, '');
-}
-
-/** Strip ANSI codes and replace volatile tokens (ports, durations) with placeholders. */
-export function normalizeOutput(str: string): string {
-    return stripAnsi(str)
-        .replaceAll(/localhost:\d+/gu, 'localhost:PORT')
-        .replaceAll(/\d+ms/gu, 'Xms')
-        .replaceAll(/\d+\.\d+s/gu, 'X.Xs')
-        .trim();
 }

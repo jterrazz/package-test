@@ -13,7 +13,6 @@ const BLACK = '\u001B[30m';
 const CHECK = '✓';
 const CROSS = '×';
 const ARROW = '→';
-const DASH = '⎯';
 
 // ── Types ──
 
@@ -95,70 +94,4 @@ export function formatStartupReport(services: ServiceReport[], app?: AppInfo): s
     lines.push('');
 
     return lines.join('\n');
-}
-
-// ── Error divider ──
-
-export function formatErrorDivider(label: string): string {
-    const dashes = DASH.repeat(30);
-    return `\n${RED}${dashes} ${label} ${dashes}${RESET}\n`;
-}
-
-// ── Status error ──
-
-export function formatStatusError(
-    expectedStatus: number,
-    receivedStatus: number,
-    request: { method: string; path: string; body?: unknown },
-    responseBody: unknown,
-): string {
-    const lines: string[] = [];
-
-    lines.push(
-        `Expected status: ${GREEN}${expectedStatus}${RESET}`,
-        `Received status: ${RED}${receivedStatus}${RESET}`,
-        '',
-        `${DIM}${request.method} ${request.path}${RESET}`,
-    );
-
-    if (request.body) {
-        lines.push(formatJson(request.body, DIM));
-    }
-
-    if (responseBody) {
-        lines.push('', `${DIM}Response:${RESET}`, formatJson(responseBody, RED));
-    }
-
-    return lines.join('\n');
-}
-
-// ── Service logs section ──
-
-export function formatServiceLogs(services: { name: string; logs: string }[]): string {
-    const lines: string[] = [];
-
-    for (const { name, logs } of services) {
-        if (!logs.trim()) {
-            continue;
-        }
-
-        lines.push('');
-        lines.push(`${DIM}${name} logs (last 10 lines):${RESET}`);
-
-        const logLines = logs.trim().split('\n').slice(-10);
-        for (const line of logLines) {
-            lines.push(`  ${DIM}${line}${RESET}`);
-        }
-    }
-
-    return lines.join('\n');
-}
-
-// ── Helpers ──
-
-function formatJson(value: unknown, color: string): string {
-    return JSON.stringify(value, null, 2)
-        .split('\n')
-        .map((line) => `${color}${line}${RESET}`)
-        .join('\n');
 }
