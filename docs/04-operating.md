@@ -101,7 +101,9 @@ member's module tests, every `contracts/` folder that holds a
 each name 16 published its 17 name wherever a file imports it from the
 entry: `defineContract` and `defineContracts` to `defineStub` and
 `defineStubs`, `Contract`, `Contracts` and the `Contract…` types to
-`Stub`, `Stubs` and `Stub…`.
+`Stub`, `Stubs` and `Stub…`. A `contracts/` folder still beside a test, in
+the same scope, is a C13 error that names the mover, so a tree that
+reintroduces the 16 name after the move is caught.
 
 Its gate is per file: it moves only a file C13 still finds 16.x-shaped — one
 with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —

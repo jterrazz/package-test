@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder } from '../../rule-tester.fixtures.js';
+import { checkoutUnder, packageWith } from '../../rule-tester.fixtures.js';
 import { c13BareGround } from './c13-bare-ground.js';
 
 RuleTester.describe = describe;
@@ -20,6 +20,15 @@ const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 /** A package whose module test still stands on the 16 `_expected/`. */
 const MODULE_16 = checkoutUnder('work', ['src/report/_expected']);
+
+/** A tree left on the 16 stub vocabulary: `contracts/` beside a spec and beside a module test. */
+const ON_16_STUBS = `${SPECS_LINT}/c13-bare-ground/fixtures/on-16-stubs`;
+
+/** A product whose own folder is named `contracts/` — no 16 facade in it. */
+const PRODUCT_CONTRACTS = packageWith({
+    'src/billing/billing.test.ts': 'test("x", () => {});\n',
+    'src/billing/contracts/invoice.ts': 'export type Invoice = { total: number };\n',
+});
 
 ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
     invalid: [
@@ -50,8 +59,30 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
             errors: 1,
             filename: `${MODULE_16}/src/report/report.test.ts`,
         },
+        // A 16 stubs folder left beside a spec is named, with the mover that moves it.
+        {
+            code: 'test("x", () => {});',
+            errors: [
+                {
+                    message:
+                        /^found: "contracts\/" is the 16\.x name of a stubs folder · .* · fix: rename it "stubs\/", .*`jterrazz-test-check --fix`/u,
+                },
+            ],
+            filename: `${ON_16_STUBS}/specs/api/news/list/list.spec.ts`,
+        },
+        // Beside a module test, a `contracts/` holding a 16 facade is the same leftover.
+        {
+            code: 'test("x", () => {});',
+            errors: [{ message: /"contracts\/" is the 16\.x name of a stubs folder/u }],
+            filename: `${ON_16_STUBS}/src/rates/rates.test.ts`,
+        },
     ],
     valid: [
+        // Outside a specs tree, a product's own `contracts/` — no `*.contracts.ts` facade — is not a stubs folder.
+        {
+            code: 'test("x", () => {});',
+            filename: `${PRODUCT_CONTRACTS}/src/billing/billing.test.ts`,
+        },
         // The compliant twin carries `expected/`.
         {
             code: 'test("x", () => {});',
