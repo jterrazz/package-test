@@ -1,13 +1,4 @@
-import {
-    clock,
-    component,
-    content,
-    http,
-    intercept,
-    mockOf,
-    required,
-    waitUntil,
-} from '@jterrazz/test';
+import { component, content, http, intercept, mockOf, required, waitUntil } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { SurfacePanel } from './page-surface.js';
@@ -16,8 +7,8 @@ import type { SurfacePort } from './page-surface.js';
 /**
  * The names 15.3 adds, exercised in a REAL browser rather than compared by
  * name against the node build. Each one runs on the page's own engine: the
- * service worker behind `intercept()`, the page's `Date` behind `clock`, and
- * the two helpers that belong to no runtime at all.
+ * service worker behind `intercept()`, and the two helpers that belong to no
+ * runtime at all.
  *
  * `intercept()` is the double for a test with NO chain: a render declares its
  * network on the chain instead, because D7 is total on this facet and the
@@ -54,14 +45,6 @@ test('a shallow double answers here the way it answers in a module test', () => 
     // Then - the call is recorded, in a page, by the same name
     port.announce('hello');
     expect(port.announce).toHaveBeenCalledWith('hello');
-});
-
-test('the page clock is pinned by the name a module test uses', () => {
-    // Given - a scope that freezes the page's own calendar
-    using _ = clock.at('2026-03-04T09:30:00Z');
-
-    // Then - `Date` in the page answers the instant the scope stated
-    expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
 });
 
 test('waitUntil polls a condition inside the page too', async () => {

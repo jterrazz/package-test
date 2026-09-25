@@ -6,9 +6,9 @@ export type SurfacePort = {
 };
 
 /**
- * A unit that fetches, stamps and reports — the three things a page does that
- * the 15.3 surface has to answer for INSIDE a browser: `intercept()` on the
- * worker, `clock` on the page's `Date`, and a port double as a callback prop.
+ * A unit that fetches and reports — the two things a page does that the 15.3
+ * surface has to answer for INSIDE a browser: `intercept()` on the worker, and
+ * a port double as a callback prop.
  */
 export function SurfacePanel({ port }: { port: SurfacePort }) {
     const [label, setLabel] = useState('');
@@ -26,7 +26,6 @@ export function SurfacePanel({ port }: { port: SurfacePort }) {
     return (
         <section aria-label="Surface">
             <h1>Surface</h1>
-            <p>Stamped at {new Date().toISOString()}</p>
             {label === '' ? null : <p>{label}</p>}
         </section>
     );

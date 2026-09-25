@@ -1,4 +1,4 @@
-import { component, content } from '@jterrazz/test';
+import { clock, component, content } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { ClockStamp } from './clock-stamp.js';
@@ -33,4 +33,12 @@ test("reads the project's instant when the chain pins none", async () => {
 
     // Then - the page's Date is on the project's clock
     expect(result.content.text).toContain('Rendered at 2026-01-02T03:04:05.000Z');
+});
+
+test('the page clock is pinned by the name a module test uses', () => {
+    // Given - a scope that freezes the page's own calendar
+    using _ = clock.at('2026-03-04T09:30:00Z');
+
+    // Then - `Date` in the page answers the instant the scope stated
+    expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
 });
