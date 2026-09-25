@@ -96,6 +96,17 @@ describe('seed', () => {
         expect(() => chain.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
     });
 
+    test('.seed() — the SQL files a chain runs first — refuses a named seed when one database is declared, the option being redundant (A7)', () => {
+        // Given - one database declared, as "db"
+        const chain = chainOver([], { databaseKeys: ['db'] });
+
+        // Then - the seed is refused before any chain is armed
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        expect(() => chain.seed(file('./seeds/users.sql'), { database: 'db' })).toThrow(
+            'found: seed() names a database, and "db" is the only one declared',
+        );
+    });
+
     test('.seed() — the SQL files a chain runs first — refuses what is not one .sql file, naming file()', () => {
         // Given - a caller the compiler does not see
         const chain = chainOver([], {});

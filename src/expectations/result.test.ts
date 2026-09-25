@@ -1,42 +1,68 @@
-import { resolve } from 'node:path';
-import { afterAll, describe, expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import { file, specification, sqlite } from '../index.js';
+import { BaseResult } from './result.js';
+import type { TableSource } from './table/table.js';
 
-const CLI_BIN = resolve(import.meta.dirname, '../../specs/shared/fixtures/specimen-cli/cli.sh');
-
-// Given - a runner with exactly ONE database in the services record
-const { cleanup, cli } = await specification.cli(CLI_BIN, {
-    services: { db: sqlite() },
-});
-
-afterAll(cleanup);
+/** A database double holding one table, `users`, whose rows are the given ones. */
+function holding(rows: unknown[][]): TableSource {
+    return {
+        columns: async (table) => await Promise.resolve(table === 'users' ? ['id', 'name'] : []),
+        query: async () => await Promise.resolve(rows),
+    };
+}
 
 describe('BaseResult', () => {
-    test('database option rule (CONVENTIONS A7) — with a single database, passing database is redundant and throws', () => {
-        // Given - one declared database ("db")
-        // Then - the explicit option is rejected as redundant, synchronously
-        // checker-disable-next-line c8 -- the A7 refusal fires before the seed is read: the path names nothing on purpose
-        expect(() => cli.seed(file('./seeds/anything.sql'), { database: 'db' })).toThrow(
-            'found: seed() names a database, and "db" is the only one declared',
-        );
+    test('table() — the lone declared database — reads the named table from it, whole', async () => {
+        // Given - a result over one database, declared as "db"
+        const result = new BaseResult({
+            config: { database: holding([[1, 'Ada']]), databaseKeys: ['db'] },
+            testDir: '/specs/users',
+        });
+
+        // When - the test reads a table with no database option
+        const table = result.table('users');
+
+        // Then - the accessor names the table and reads its columns and rows from that database
+        expect(table.name).toBe('users');
+        await expect(table.content()).resolves.toStrictEqual({
+            columns: ['id', 'name'],
+            rows: [[1, 'Ada']],
+        });
     });
 
-    test('database option rule (CONVENTIONS A7) — with a single database, table() rejects the option too', async () => {
-        // Given - any executed spec
-        const result = await cli.exec('help');
+    test('table() — two declared databases — reads from the one the option names', async () => {
+        // Given - a result over two databases, each holding its own rows
+        const result = new BaseResult({
+            config: {
+                databaseKeys: ['analytics', 'db'],
+                databases: new Map([
+                    ['analytics', holding([[2, 'Grace']])],
+                    ['db', holding([[1, 'Ada']])],
+                ]),
+            },
+            testDir: '/specs/users',
+        });
 
-        // Then - table() with a database option violates A7
-        expect(() => result.table('t', { database: 'db' })).toThrow(
+        // When - the test names the database it reads
+        const table = result.table('users', { database: 'analytics' });
+
+        // Then - the rows are that database's
+        await expect(table.content()).resolves.toStrictEqual({
+            columns: ['id', 'name'],
+            rows: [[2, 'Grace']],
+        });
+    });
+
+    test('table() — the database option rule (CONVENTIONS A7) — with a single database, the option is refused as redundant', () => {
+        // Given - a result over one database, declared as "db"
+        const result = new BaseResult({
+            config: { database: holding([]), databaseKeys: ['db'] },
+            testDir: '/specs/users',
+        });
+
+        // Then - naming it is refused, synchronously
+        expect(() => result.table('users', { database: 'db' })).toThrow(
             'found: table() names a database, and "db" is the only one declared',
         );
-    });
-
-    test('database option rule (CONVENTIONS A7) — with a single database, omitting the option is valid', async () => {
-        // Given - any executed spec
-        const result = await cli.exec('help');
-
-        // Then - table() without the option resolves the lone database
-        expect(() => result.table('t')).not.toThrow();
     });
 });
