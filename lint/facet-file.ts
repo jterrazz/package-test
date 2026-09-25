@@ -22,10 +22,13 @@ export type FacetFinding = {
     readonly node: AstNode;
 };
 
-/** The layer an import source names inside `src/`, when it is one a definition or a result lives in. */
-export function layerOf(source: string): 'definition' | 'result' | undefined {
+/** The layer an import source names inside `src/`, when it is one a definition, a facet or a result lives in. */
+export function layerOf(source: string): 'definition' | 'facet' | 'result' | undefined {
     if (/(?:^|\/)(?:capabilities|actions)\//u.test(source)) {
         return 'definition';
+    }
+    if (source.endsWith('.facet.js')) {
+        return 'facet';
     }
     return /(?:^|\/)results\//u.test(source) ? 'result' : undefined;
 }

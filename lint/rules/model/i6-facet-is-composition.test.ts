@@ -110,6 +110,16 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
             errors: [{ messageId: 'runsStep' }, { messageId: 'buildsResult' }],
             filename: '/repo/src/facets/jobs/jobs.handle.ts',
         },
+        // A step reached through a namespace import, a destructured step, and one reached through the facet.
+        {
+            code: `${OPENS}\nimport * as defs from '../../capabilities/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobsFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
+            errors: [
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+            ],
+            filename: '/repo/src/facets/jobs/jobs.handle.ts',
+        },
     ],
     valid: [
         { code: COMPOSED, filename: '/repo/src/facets/jobs/jobs.facet.ts' },
