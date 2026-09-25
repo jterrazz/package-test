@@ -1,5 +1,6 @@
 import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
 import { loadPeer } from '../peer.js';
+import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';
 import { TestcontainersAdapter } from './testcontainers.js';
 
@@ -21,7 +22,8 @@ export const DOCKER_ABSENT =
     'declared services need Docker, and no Docker daemon answered — start Docker (Docker Desktop, OrbStack, colima…) and run again';
 
 /**
- * Reach the container runtime, then pull each default image it lacks.
+ * Reach the container runtime, then remove the containers dead sessions left
+ * behind and pull each default image it lacks.
  * Unreachable is the one refusal: {@link DOCKER_ABSENT}, with the runtime's
  * own reason after it.
  */
@@ -38,8 +40,9 @@ export async function prepareDocker(): Promise<void> {
         const reason = error instanceof Error ? error.message : String(error);
         throw new Error(`${DOCKER_ABSENT} (${reason})`, { cause: error });
     }
-    await Promise.all(
-        Object.values(SERVICE_IMAGES).map(async (image) => {
+    await Promise.all([
+        sweepOrphans(client.container.dockerode).catch(() => []),
+        ...Object.values(SERVICE_IMAGES).map(async (image) => {
             const name = ImageName.fromString(image);
             if (await client.image.exists(name)) {
                 return;
@@ -50,7 +53,7 @@ export async function prepareDocker(): Promise<void> {
                 /* The start that needs the image pulls it again, and reports what failed */
             }
         }),
-    );
+    ]);
 }
 
 /** What the setup reads of its project: the channel to its workers. */

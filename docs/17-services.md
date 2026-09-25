@@ -149,7 +149,9 @@ The setup reaches Docker in the background and pulls each pinned default image t
 
 Every container the package starts carries the label `com.jterrazz.test=true`, and a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it.
 
-The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper, which is not proven to catch every one: containers started before the label existed have been seen to outlive it, and why is an open question. Whatever the reaper did, the label lists every container the package started, and the reused ones are removed by hand:
+The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper (Ryuk), which removes a session's containers once its last client is gone — a run killed mid-way is reaped within its window. The reaper removes nothing once it is gone itself, and it runs with auto-remove: a runtime that stops every container, or a `docker stop` of them all, takes the reaper away and leaves the session's containers stopped behind it. So every services setup sweeps first: a container that carries a testcontainers session, has ended, and whose session no running reaper holds is removed as the project starts, beside the image pulls — whichever package or version started it.
+
+The label lists every container the package started, and the reused ones, which carry no session and no sweep touches, are removed by hand:
 
 ```bash
 docker ps -a --filter label=com.jterrazz.test=true
