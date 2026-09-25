@@ -1,7 +1,11 @@
 import { consumerCatalog, ordered, statiqueRows } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
 import type { RuleDoc } from './rule-shape.js';
-import { ARCHITECTURE_META_ROWS, ARCHITECTURE_RULE_DOCS } from './self/architecture-rows.js';
+import {
+    ARCHITECTURE_META_ROWS,
+    ARCHITECTURE_PASSES,
+    ARCHITECTURE_RULE_DOCS,
+} from './self/architecture-rows.js';
 
 /**
  * The `self` rows — the rules only this package is held to: its own suite,
@@ -14,9 +18,8 @@ import { ARCHITECTURE_META_ROWS, ARCHITECTURE_RULE_DOCS } from './self/architect
  */
 
 /**
- * The chapter a `self` row is read at — where the package says how it tests
- * itself. A rule only this package is held to has no row in the public
- * catalogue, so its message routes here instead.
+ * The chapter a `self` row is read at, where the package says how it tests
+ * itself: a self rule has no row in the public catalogue, so its message routes here.
  */
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
@@ -57,6 +60,7 @@ export const SELF_CHECKER_PASSES: CatalogEntry[] = [
             'A specimen exists to exercise the framework, and its routes are nobody’s product: filed by the route, the framework’s own specs read as an app’s, and the reader looking for what `.seed()` promises opens a folder named for a URL. The component tree is a specimen too, and flat it answers the same question only by opening every test.',
         reach: 'specs',
     },
+    ...ARCHITECTURE_PASSES,
 ];
 
 /**
@@ -290,8 +294,5 @@ export function selfRowOf(name: string): CatalogEntry {
     return row;
 }
 
-/**
- * Every row of both audiences, in catalogue order — what the generator and
- * the meta-tests read.
- */
+/** Every row of both audiences, in catalogue order: what the generator and meta-tests read. */
 export const catalog: CatalogEntry[] = ordered([...consumerCatalog, ...selfCatalog]);

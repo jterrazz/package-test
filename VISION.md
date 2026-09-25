@@ -3844,8 +3844,9 @@ The owner approved this structure decision, and it is now in force.
 - `kernel/`, the machinery that builds a facet and knows none.
 
 Edges point one way: `kernel ← world · elements · expectations ← facets ←
-vitest · entries`. `FRAMEWORK_LAYERS` states it. The meta-tests I9–I12
-over `lint/tree.ts` hold what a layer map cannot:
+vitest · entries`. `FRAMEWORK_LAYERS` states it. The self checker passes I9–I12
+over `lint/checker-source-tree.ts` and `lint/checker-source-imports.ts`
+hold what a layer map cannot:
 
 - the source root;
 - a facet never importing another, and being entered only by its root
@@ -3894,7 +3895,9 @@ Where the work deviated from the inventory:
   consistent-type-definitions suppression. Declaration merging was
   tried and dropped, because the bundled `.d.ts` keeps an internal
   `declare module` that no longer resolves.
-- The locks are meta-tests (I9–I12), not oxlint rules, like I7 and I8.
+- The locks first landed as meta-tests. They are now self checker
+  passes, run by `make lint`: each finding names its place (the entry,
+  the import, the folder) and teaches in the four K11 parts.
 
 Open, **for the owner**:
 

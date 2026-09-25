@@ -54,11 +54,20 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
             'A facet composes a setup by its definition and the chain calls it by its name: a module and a name that disagree are two places to look for one setup, and an engine reached without a port is an adapter the definition knows.',
         reach: 'module',
     },
+];
+
+/**
+ * The **checker** rows: the passes `dist/self-checker.js` runs over this
+ * package's source tree (`lint/checker-source-tree.ts`,
+ * `lint/checker-source-imports.ts`) — the shape of `src/`
+ * beyond the direction I1 holds between its layers.
+ */
+export const ARCHITECTURE_PASSES: CatalogEntry[] = [
     {
         audience: 'self',
-        channel: 'meta',
+        channel: 'checker',
         convention:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the entry\u2019s test `index.test.ts`, the type channel `type-channel.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else.',
+            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the entry\u2019s test `index.test.ts`, the type channel `type-channel.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
         facet: 'model',
         family: 'I',
         fix: 'Move the module into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`).',
@@ -70,9 +79,9 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     },
     {
         audience: 'self',
-        channel: 'meta',
+        channel: 'checker',
         convention:
-            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module — an entry, `facets/specification.ts`, `vitest/`, `lint/` — reaches only the facet\u2019s root files (its face, handle, composition and project), never a concept folder, but for the modules reached for their reason: the cli\u2019s literate plugin, which the preset wires, and the route ledgers and the `.spec.yaml` grammar the checker reads with the runner.',
+            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module — an entry, `facets/specification.ts`, `vitest/`, `lint/` — reaches only the facet\u2019s root files (its face, handle, composition and project), never a concept folder, but for the modules reached for their reason: the cli\u2019s literate plugin, which the preset wires, and the route ledgers and the `.spec.yaml` grammar the checker reads with the runner. An error at the import.',
         facet: 'model',
         family: 'I',
         fix: 'Move what two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and export what the entries publish from the facet\u2019s `index.ts`.',
@@ -84,9 +93,9 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     },
     {
         audience: 'self',
-        channel: 'meta',
+        channel: 'checker',
         convention:
-            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vitest-browser-react` and `vitest/browser` by `facets/component/` (`@vitest/browser-playwright` also by `vitest/`), `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/interceptor/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/files/yaml-document.ts` and `oxc-parser` by `lint/module-parser.ts`.',
+            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vitest-browser-react` and `vitest/browser` by `facets/component/` (`@vitest/browser-playwright` also by `vitest/`), `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/interceptor/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/files/yaml-document.ts` and `oxc-parser` by `lint/module-parser.ts`. An error at the import.',
         facet: 'model',
         family: 'I',
         fix: 'Reach the engine through the port its owner implements, handed in by the facet — or import only what the owner exports.',
@@ -98,9 +107,9 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     },
     {
         audience: 'self',
-        channel: 'meta',
+        channel: 'checker',
         convention:
-            'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a facet with concept folders holds at its root its face alone: `index.ts` (and the component\u2019s `index.browser.ts`), `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts` and their tests. Ground (`fixtures/`, `expected/`, `requests/`, `seeds/`, `shared/`) is exempt.',
+            'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a facet with concept folders holds at its root its face alone: `index.ts` (and the component\u2019s `index.browser.ts`), `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts` and their tests. Ground (`fixtures/`, `expected/`, `requests/`, `seeds/`) is exempt. An error at the folder, or at the stray file.',
         facet: 'model',
         family: 'I',
         fix: 'Name the folder for what its files are about, fold a lone file into its parent, and move a facet\u2019s other root files into the concept folder they belong to.',

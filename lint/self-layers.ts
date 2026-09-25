@@ -34,8 +34,8 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * layer, so they are out of scope; module tests and `*.fixtures.ts` files are
  * governed by F2/I4. What this map cannot express — a facet reaching another,
  * a concept folder reached from outside its facet, an engine outside its one
- * owner, a folder named for a role — is held by the meta-tests I9 to I12
- * (`lint/tree.ts`).
+ * owner, a folder named for a role — is held by the self checker passes I9
+ * to I12 (`lint/checker-source-tree.ts`, `lint/checker-source-imports.ts`).
  */
 export const FRAMEWORK_LAYERS = {
     // The machinery that builds a facet and knows none: imports nothing else from src/.

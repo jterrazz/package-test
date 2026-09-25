@@ -1,0 +1,9 @@
+description: a role folder, a one-file folder and a stray file at a facet root are each refused where they sit
+fixture: ./fixtures/roles/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          src/facets/api/route.ts:1:1  jterrazz-check(i12)
+          src/world/clock:1:1  jterrazz-check(i12)
+          src/world/utils:1:1  jterrazz-check(i12)

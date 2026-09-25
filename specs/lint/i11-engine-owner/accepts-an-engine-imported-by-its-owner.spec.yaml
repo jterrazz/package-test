@@ -1,0 +1,5 @@
+description: an engine imported by the one slice that owns it passes
+fixture: ./fixtures/owned/
+runs:
+    - command: self-checker .
+      exit: 0

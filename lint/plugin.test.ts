@@ -111,7 +111,6 @@ function metaProofs(): Set<string> {
         read('lint/matrix.test.ts'),
         read('lint/port-readers.test.ts'),
         read('lint/siblings.test.ts'),
-        read('lint/tree.test.ts'),
     ];
     for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {
         const path = String(entry).replaceAll('\\', '/');

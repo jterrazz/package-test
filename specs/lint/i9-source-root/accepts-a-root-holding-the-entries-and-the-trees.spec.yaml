@@ -1,0 +1,5 @@
+description: the source root holding the entry and a tree passes
+fixture: ./fixtures/rooted/
+runs:
+    - command: self-checker .
+      exit: 0
