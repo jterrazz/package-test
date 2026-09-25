@@ -3844,9 +3844,9 @@ The owner approved this structure decision, and it is now in force.
 - `kernel/`, the machinery that builds a facet and knows none.
 
 Edges point one way: `kernel ← world · elements · expectations ← facets ←
-vitest · entries`. `FRAMEWORK_LAYERS` states it. The self checker passes I9–I12
-over `lint/checker-source-tree.ts` and `lint/checker-source-imports.ts`
-hold what a layer map cannot:
+vitest · entries`. `FRAMEWORK_LAYERS` states it. The self checker passes
+I9–I12, in `lint/checker-source-tree.ts` and
+`lint/checker-source-imports.ts`, hold what a layer map cannot:
 
 - the source root;
 - a facet never importing another, and being entered only by its root
@@ -3879,10 +3879,10 @@ It landed in seven commits on `vision/17`, and every one was green:
   takes its types via `export type *`.
 - **The locks.**
 
-Every PENDING seam is gone. `make check` is green: 648 test files, 2780
-tests, coverage 95.28/85.80/96.91/95.31 (statements, branches,
-functions, lines), after the review pass below. `package.json` did not change, and neither did the
-dist entry names.
+Every PENDING seam is gone. `make check` is green: 655 test files, 2804
+tests, coverage 95.39/86.03/97.14/95.39 (statements, branches,
+functions, lines), after the two review passes below. `package.json` did
+not change, and neither did the dist entry names.
 
 Where the work deviated from the inventory:
 
@@ -3923,9 +3923,10 @@ judge's five points:
   judge a result, and `expectations/` may not import `world/`.
 - **Lock 2 has its spec**: `lint/self-layers.test.ts` runs I1 with the
   real `FRAMEWORK_LAYERS` on the reverse edges it forbids.
-- **Suffixes**: only `testcontainers.adapter.ts` and
-  `process.adapter.ts` implement a port and took `.adapter`; the
-  spawner is `serve.ts`. The other engine wrappers keep concept names.
+- **Suffixes**: of the engine wrappers this pass renamed, only
+  `testcontainers.adapter.ts` and `process.adapter.ts` implement a port
+  and took `.adapter`; the spawner is `serve.ts`, and the others keep
+  concept names. (The tree's ten `*.adapter.ts` each implement a port.)
 - **vitest/** holds the hooks: each global setup is resolved by its
   owner, the literate plugin is reached through the cli project, and
   the project defaults moved to `vitest/project-kit.ts`, which broke the
@@ -3937,6 +3938,47 @@ judge's five points:
   `world/stubs/http/`); and renaming the component's `golden/` (the ARIA
   tree it serves is the outline a golden pins).
 
+C31 then reached every test file (`89d5b9f5`, `1237d257`, `2c97d241`,
+`373be835`): each holds one `describe`, a spec titled with its aspect, a
+colocated test with its subject, the export of the module beside it
+(`lint/test-title.ts`); `make fix` retitled, wrapped or merged the 234
+files it reached (`lint/describe-merge.ts`).
+
+A second review pass applied its 52 findings, each verified, in 29
+commits, all green:
+
+- **One owner per fact**: a global setup's source-or-bundle path
+  (`kernel/files/setup-entry.ts`, each setup locating itself — the api
+  and mobile ones moved beside their modules); one reader of a V8 stack
+  (`stackFrames` in `caller.ts`, under the component project, the caller
+  search and update mode's call site); `pause()` for every wait; the
+  ground glob built from `GROUND_DIRS`; `rootDefaults()` on
+  `projectDefaults()`; ANSI stripping in `text/ansi.ts`; `Intersect`
+  once, `ContextKey` as `keyof ChainContext`; `findRoot` for the
+  installer's root; msw's worker path in `world/stubs/network/`; and
+  `ENGINE_OWNERS` in `lint/self-engines.ts`, from which the layer map
+  builds each folder's engines, while I10 reads a facet's readers off
+  the map's `facets/` edges.
+- **Right slice**: `resolveCommand` and `lintReport` in
+  `facets/cli/process/`; the Appium reach in `mobile/server/`;
+  `external` on the website config; spelling and landmarks out of the
+  ambiguity refusal; the page face arming its own matchers.
+- **Names**: C31's rule 3 also tries the base less its role suffix
+  (`request.action` → `request`); `module-intercept.ts`,
+  `run-containers.fixtures.ts`.
+- **Tests with an oracle**: the browser commands, a stream's spacing,
+  `BaseResult.table` over a hand-built config, `.seed()`'s one-database
+  refusal beside `.seed()`, `setupEntry`, `stripAnsiCodes`.
+- **Words**: comments state the invariant (the bug stories stay in the
+  commits); 345 wrapped `//` lines continue in lowercase; the vitrine,
+  05, 06, 07, 09 and the skill teach C31's one describe.
+
+Where it deviated: `lintReport` went to `process/`, not the cli root,
+which I12 keeps for the face; counting only modules toward I12 stays
+rejected, as above; 01's constructor table was already aligned; and the
+shipped docs name the self checker's locks without their ids, which the
+audience test forbids in the tarball.
+
 Open, **for the owner**:
 
 - The component project failed twice during this work, each time on the
@@ -3944,6 +3986,7 @@ Open, **for the owner**:
   threw a SyntaxError, and the rerun was green. HYPOTHESIS (2026-09-25): a
   stale Vite dependency cache is re-optimised mid-run, and the cause is
   not the move. One read would settle it: run `make check` twice on
-  `2b161302` after touching one `src/` file.
+  `2b161302` after touching one `src/` file. It did not recur in the
+  second review pass's two full runs.
 - `projects.test.ts` split into three test files, and the small `testOf`
   helper is now repeated in each of them.
