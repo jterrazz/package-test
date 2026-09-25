@@ -38,7 +38,7 @@
         "typescript/no-unsafe-call": 24,
         "typescript/no-unsafe-member-access": 85,
         "typescript/no-unsafe-return": 8,
-        "typescript/no-unsafe-type-assertion": 248,
+        "typescript/no-unsafe-type-assertion": 247,
         "typescript/prefer-nullish-coalescing": 5,
         "typescript/require-await": 11,
         "typescript/restrict-template-expressions": 1,

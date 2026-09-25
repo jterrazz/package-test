@@ -90,6 +90,12 @@ ruleTester.run('c4-stub-shape', c4StubShape as unknown as OxlintRule, {
             errors: [{ messageId: 'foreignBuilder' }, { messageId: 'foreignBuilder' }],
             filename: UNIT,
         },
+        // A namespace import reaches a builder too: `t.http` under `stubs/openai/` is the http kind.
+        {
+            code: `import * as t from '@jterrazz/test';\nexport default t.defineStub({ request: t.openai.chat({ user: 'u' }), response: t.http.error(500) });`,
+            errors: [{ messageId: 'foreignBuilder' }],
+            filename: `${FEATURE}/openai/classify.ts`,
+        },
         // Nested below the kind folder.
         {
             code: `export default 1;`,
@@ -118,6 +124,11 @@ ruleTester.run('c4-stub-shape', c4StubShape as unknown as OxlintRule, {
         {
             code: `import { defineStubs } from '@jterrazz/test';\nimport events from './http/events.js';\nexport const newsroom = defineStubs(events);\nexport function pipeline(options: { ingestion: string }) {\n    return newsroom.with();\n}`,
             filename: FACADE,
+        },
+        // A unit built through a namespace import of the entry, with its own kind alone.
+        {
+            code: `import * as t from '@jterrazz/test';\nexport default t.defineStub({ request: t.http.get('u'), response: t.http.json({}) });`,
+            filename: UNIT,
         },
         // A composition re-export is a legitimate default.
         {

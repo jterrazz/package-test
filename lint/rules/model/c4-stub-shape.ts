@@ -44,23 +44,28 @@ function exportsDefault(node: AstNode): boolean {
     });
 }
 
-/** Is this node a `defineStub(...)` call? */
-function isDefineStub(node: AstNode): boolean {
-    const callee = node.callee as AstNode | undefined;
+/** Is this node a `defineStub(...)` call — bare, or on a namespace the entry is bound to? */
+function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
+    const callee = child(node, 'callee');
+    if (node.type !== 'CallExpression' || callee === undefined) {
+        return false;
+    }
+    if (callee.type === 'Identifier') {
+        return callee.name === 'defineStub';
+    }
     return (
-        node.type === 'CallExpression' &&
-        callee?.type === 'Identifier' &&
-        callee.name === 'defineStub'
+        memberPropertyName(callee) === 'defineStub' &&
+        namespaces.has(identifierName(child(callee, 'object')) ?? '')
     );
 }
 
 /** A default export that may legitimately produce a stub (value or factory). */
-function producesStub(declaration: AstNode | undefined): boolean {
+function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<string>): boolean {
     if (declaration === undefined) {
         return false;
     }
     return (
-        isDefineStub(declaration) ||
+        isDefineStub(declaration, namespaces) ||
         declaration.type === 'ArrowFunctionExpression' ||
         declaration.type === 'FunctionDeclaration' ||
         declaration.type === 'FunctionExpression' ||
@@ -73,9 +78,12 @@ function producesStub(declaration: AstNode | undefined): boolean {
 /** The package's own entry — published, or a repository's source. */
 const ENTRY = /^@jterrazz\/test$|(?:^|\/)src\/index\.js$/u;
 
-/** The local name each stub builder the file imports from the entry is bound to → its kind. */
-function builderNames(program: AstNode): Map<string, string> {
-    const names = new Map<string, string>();
+/** What a file binds from the entry: each stub builder's local name → its kind, and the namespaces. */
+type EntryBindings = { builders: Map<string, string>; namespaces: Set<string> };
+
+/** The local names the file binds from the entry — named builders, and `import * as` namespaces. */
+function entryBindings(program: AstNode): EntryBindings {
+    const bindings: EntryBindings = { builders: new Map(), namespaces: new Set() };
     for (const statement of childList(program, 'body')) {
         if (
             statement.type !== 'ImportDeclaration' ||
@@ -84,15 +92,38 @@ function builderNames(program: AstNode): Map<string, string> {
             continue;
         }
         for (const specifier of childList(statement, 'specifiers')) {
+            const local = identifierName(child(specifier, 'local'));
+            if (specifier.type === 'ImportNamespaceSpecifier' && local !== undefined) {
+                bindings.namespaces.add(local);
+                continue;
+            }
             const imported = child(specifier, 'imported');
             const kind = identifierName(imported) ?? stringValue(imported);
-            const local = identifierName(child(specifier, 'local'));
             if (kind !== undefined && local !== undefined && isStubKind(kind)) {
-                names.set(local, kind);
+                bindings.builders.set(local, kind);
             }
         }
     }
-    return names;
+    return bindings;
+}
+
+/**
+ * The stub kind a member expression reaches the builder of — `http.get` through
+ * a named import, `t.http` through a namespace — or `undefined`.
+ */
+function kindReached(node: AstNode, bindings: EntryBindings): string | undefined {
+    if (node.type !== 'MemberExpression') {
+        return undefined;
+    }
+    const object = identifierName(child(node, 'object')) ?? '';
+    const named = bindings.builders.get(object);
+    if (named !== undefined) {
+        return named;
+    }
+    const property = memberPropertyName(node);
+    return bindings.namespaces.has(object) && property !== undefined && isStubKind(property)
+        ? property
+        : undefined;
 }
 
 /**
@@ -276,19 +307,18 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
     }
     let hasDefault = false;
     let wellFormed = false;
-    const builders = builderNames(program);
+    const bindings = entryBindings(program);
     walk(program, (node) => {
         if (node.type === 'ExportDefaultDeclaration') {
             hasDefault = true;
-            wellFormed = producesStub(node.declaration as AstNode | undefined) || wellFormed;
+            wellFormed =
+                producesStub(node.declaration as AstNode | undefined, bindings.namespaces) ||
+                wellFormed;
         } else if (node.type === 'ExportNamedDeclaration' && exportsDefault(node)) {
             hasDefault = true;
             wellFormed = true; // `export { stub as default }` — built above.
         }
-        const used =
-            node.type === 'MemberExpression'
-                ? builders.get(identifierName(child(node, 'object')) ?? '')
-                : undefined;
+        const used = kindReached(node, bindings);
         if (used !== undefined && used !== kind) {
             context.report({ data: { kind, used }, messageId: 'foreignBuilder', node });
         }
