@@ -108,7 +108,7 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 ## `result.table(name, { database }?)` — database tables (api, job, cli)
 
-Always `await expect(…)` (IO). `database:` is **mandatory when the services record declares ≥ 2 databases, forbidden with exactly 1** (rule A7).
+Always `await expect(…)` (IO). When to name the `database:` is [17 § The `database:` rule (A7)](17-services.md#the-database-rule-a7)'s.
 
 | Matcher           | Sync/async | Example                                                                |
 | ----------------- | ---------- | ---------------------------------------------------------------------- |
@@ -125,14 +125,7 @@ await expect(result.table('orders', { database: 'db' })).toMatch([
 ]);
 ```
 
-Cell values are literals, [tokens](15-tokens.md) or `match.*` matchers — including `match.ref(name)` to capture a generated value in one table and require equality in another, and `match.ref(name, { not: other })` to require inequality:
-
-```typescript
-await expect(result.table('orders', { database: 'db' })).toMatch([[match.ref('order'), 'pending']]);
-await expect(result.table('payment_intents', { database: 'db' })).toMatch([
-    [match.ref('intent', { not: 'order' }), match.ref('order')],
-]);
-```
+Cell values are literals, [tokens](15-tokens.md) or `match.*` matchers — including `match.ref(name)`, which captures a generated value in one table and requires it in another ([15 § `match.*`](15-tokens.md#match--the-same-vocabulary-in-code)).
 
 `toBeEmpty` is a table's matcher, and async: the type-aware `typescript/no-floating-promises`, on in every profile of `@jterrazz/typescript`, refuses the bare `expect(x).toBeEmpty();` — dropped, it passes the test and surfaces the real failure as an unhandled rejection. A stream is not a table: an empty one is an empty text, `expect(result.stderr.text).toBe('')` — vitest's own, sync, on the text a golden compares. `toBeEmpty` handed a stream does not compile, and at run time it is refused with that form.
 
@@ -342,9 +335,9 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 - **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule D14).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule B2).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule D6) — and a substring check on it warns (D8).
-- **`database:` on a single-database project** (or missing on a multi-database one) — rule A7 cuts both ways.
+- **`database:` on a single-database project** (or missing on a multi-database one) — [17 § The `database:` rule (A7)](17-services.md#the-database-rule-a7).
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
-- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it with the real output, destroying the negative case. Freeze any golden matcher whose mismatch (or missing golden) is the behaviour under test (rule `d13w-unfrozen-negative-fixture`).
+- **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [15 § Frozen fixtures](15-tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).
 
 ## Related
 
