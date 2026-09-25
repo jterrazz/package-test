@@ -33,7 +33,7 @@ const REACHED_INSIDE_A_FACET = new Set([
  */
 export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
-    '@vitest/browser-playwright': ['src/facets/component/', 'src/vitest/'],
+    '@vitest/browser-playwright': ['src/facets/component/'],
     'better-sqlite3': ['src/world/services/sqlite/'],
     hono: ['src/facets/api/'],
     msw: ['src/world/stubs/network/'],
@@ -44,6 +44,7 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     'react-dom': ['src/facets/component/'],
     redis: ['src/world/services/redis/'],
     testcontainers: ['src/world/services/containers/'],
+    vite: ['src/facets/component/'],
     'vitest-browser-react': ['src/facets/component/'],
     'vitest-mock-extended': ['src/world/mocks/'],
     'vitest/browser': ['src/facets/component/'],

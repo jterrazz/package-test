@@ -95,7 +95,7 @@ export const ARCHITECTURE_PASSES: CatalogEntry[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vitest-browser-react` and `vitest/browser` by `facets/component/` (`@vitest/browser-playwright` also by `vitest/`), `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/network/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/files/yaml-document.ts` and `oxc-parser` by `lint/module-parser.ts`. An error at the import.',
+            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vite`, `@vitest/browser-playwright`, `vitest-browser-react` and `vitest/browser` by `facets/component/`, `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/network/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/files/yaml-document.ts` and `oxc-parser` by `lint/module-parser.ts`. An error at the import.',
         facet: 'model',
         family: 'I',
         fix: 'Reach the engine through the port its owner implements, handed in by the facet — or import only what the owner exports.',

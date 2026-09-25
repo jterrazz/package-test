@@ -117,8 +117,6 @@ export const FRAMEWORK_LAYERS = {
         imports: [
             'vitest/',
             'kernel/',
-            'expectations/',
-            'world/',
             'facets/api/api.project',
             'facets/cli/cli.project',
             'facets/component/component.project',
@@ -129,7 +127,7 @@ export const FRAMEWORK_LAYERS = {
             // The literate door: the one vite plugin a facet owns.
             'facets/cli/documents/literate-plugin',
         ],
-        packages: ['@vitest/browser-playwright', 'vite', 'vitest'],
+        packages: ['vitest'],
     },
     lint: {
         imports: [
