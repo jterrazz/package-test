@@ -8,6 +8,7 @@ import type { Shard } from '../model/routes/routes.js';
 import { setupRoutes } from './route-coverage.js';
 import type { RouteProject } from './route-coverage.js';
 import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
+import { judgeSplit, partialSplitUnjudged } from './route-split.js';
 
 describe('route coverage — the global setup reads the run', () => {
     test("a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {
@@ -62,6 +63,26 @@ describe('route coverage — the global setup reads the run', () => {
         // Then - no verdict
         await expect(teardown()).resolves.toBeUndefined();
         expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
+    });
+
+    test('a shard a test name filters leaves its merge unjudged, not judged as a whole run', async () => {
+        // Given - shard 1/2 of a split filtered by -t, and shard 2/2 unfiltered, each reaching one route of three
+        const { project, provided, root } = stubProject({
+            ran: ['a.spec.ts'],
+            shard: { count: 2, index: 1 },
+            testNamePattern: /users/u,
+        });
+        recordedLines();
+        const teardown = setupRoutes(project);
+        writeOneOfThree(String(provided.get('routesLedger')));
+        await teardown();
+        writeOneOfThree(join(root, shardLedgersDir({ count: 2, index: 2 })));
+
+        // When - the split is merged
+        const verdict = await judgeSplit(root, { failed: 0, update: false });
+
+        // Then - the merge names the filtered shard and judges nothing
+        expect(verdict).toStrictEqual({ line: partialSplitUnjudged(['shard-1-2']) });
     });
 
     test('a run of every project file is judged', async () => {

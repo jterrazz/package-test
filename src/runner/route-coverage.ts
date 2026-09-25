@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
-import { clearLedgers, ROUTES_DIR, shardLedgersDir } from '../model/routes/routes.js';
+import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from '../model/routes/routes.js';
 import type { Shard } from '../model/routes/routes.js';
 import { judgeRoutes } from './route-judge.js';
 import type { RunScope } from './route-judge.js';
@@ -26,7 +26,9 @@ import { shouldUpdateSnapshots } from './update.js';
  * A shard of a split run (`--shard`) judges nothing: its ledgers are a part
  * of the run's, so it writes them to a folder of its own, and the judge of
  * every shard's ledgers is `route-split.ts` — `vitest --merge-reports` runs
- * no global setup, so the merge calls it itself.
+ * no global setup, so the merge calls it itself. A shard a test name filters
+ * marks its folder partial, and the merge of a split holding one judges
+ * nothing either.
  *
  * Neither is any other partial run judged or recorded — `--changed`, a file
  * filter, `-t`: one that ran some of the project's files, or some of its
@@ -83,6 +85,9 @@ export function setupRoutes(project: RouteProject): () => Promise<void> {
     const shard: Shard | undefined = project.vitest.config.shard;
     const directory = join(root, shard === undefined ? ROUTES_DIR : shardLedgersDir(shard));
     clearLedgers(directory);
+    if (shard !== undefined && project.vitest.config.testNamePattern !== undefined) {
+        markPartial(directory);
+    }
     project.provide('routesLedger', directory);
     return async () => {
         const { failure, line } = await judgeRoutes(root, directory, {

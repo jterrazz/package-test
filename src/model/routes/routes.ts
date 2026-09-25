@@ -198,6 +198,31 @@ export function readLedgers(directory: string): Ledger[] {
         .map((name) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as Ledger);
 }
 
+/** The file a shard that ran only some of its tests (`-t`) leaves beside its ledgers. */
+const PARTIAL_MARK = 'partial';
+
+/** Mark a shard's ledger folder as a part of its shard's tests: its merge is no whole run. */
+export function markPartial(directory: string): void {
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(join(directory, PARTIAL_MARK), '');
+}
+
+/** The shard folders of `directory` whose shard ran only some of its tests. */
+export function partialShards(directory: string): string[] {
+    if (!existsSync(directory)) {
+        return [];
+    }
+    return readdirSync(directory, { withFileTypes: true })
+        .filter(
+            (entry) =>
+                entry.isDirectory() &&
+                entry.name.startsWith('shard-') &&
+                existsSync(join(directory, entry.name, PARTIAL_MARK)),
+        )
+        .map((entry) => entry.name)
+        .toSorted();
+}
+
 /** Every ledger the shards of a split run wrote into their folders of `directory`. */
 export function readShardLedgers(directory: string): Ledger[] {
     if (!existsSync(directory)) {
