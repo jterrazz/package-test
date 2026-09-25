@@ -3,6 +3,7 @@ import type {
     AnyCapability,
     Capability,
     ContextKey,
+    Intersect,
     MatrixRow,
     SetupContext,
     Sharing,
@@ -34,13 +35,6 @@ type NeedsOf<Member> =
         : Member extends Action<string, infer _Args, infer _Result, infer _Signature, infer Needs>
           ? Needs
           : unknown;
-
-/** A union of object types, as the one type that is all of them. */
-type Intersect<Union> = (Union extends unknown ? (member: Union) => void : never) extends (
-    all: infer All,
-) => void
-    ? All
-    : never;
 
 /** The engines a composition needs: one per port key its definitions name. */
 type EnginesOf<C extends Composition> = Intersect<

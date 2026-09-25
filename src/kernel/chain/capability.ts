@@ -1,3 +1,4 @@
+import type { ChainContext } from '../context/with.capability.js';
 import type { ChainConfig } from './config.js';
 
 /** The sections of the capability matrix a definition can state a row in. */
@@ -24,7 +25,14 @@ export type MatrixRow = {
 };
 
 /** The settings a file may share through `with({ … })`: `ChainContext`'s keys. */
-export type ContextKey = 'clock' | 'env' | 'headers';
+export type ContextKey = keyof ChainContext;
+
+/** A union of object types, as the one type that is all of them. */
+export type Intersect<Union> = (Union extends unknown ? (member: Union) => void : never) extends (
+    all: infer All,
+) => void
+    ? All
+    : never;
 
 /** The type parameters of a facet every signature may read. */
 export type FacetParams = {

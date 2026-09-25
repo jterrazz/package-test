@@ -1,5 +1,5 @@
 import type { ChainContext } from '../context/with.capability.js';
-import type { Capability, ChainSignature, FacetParams } from './capability.js';
+import type { Capability, ChainSignature, FacetParams, Intersect } from './capability.js';
 import type { Composition } from './define-facet.js';
 
 /** The names a list of definitions puts on the chain. */
@@ -36,13 +36,6 @@ type SharingOf<C extends Composition, Self> =
               with: (context: Pick<ChainContext, ContextOf<C>>) => Self;
           }
         : unknown;
-
-/** A union of object types, as the one type that is all of them. */
-type Intersect<Union> = (Union extends unknown ? (member: Union) => void : never) extends (
-    all: infer All,
-) => void
-    ? All
-    : never;
 
 /** The methods one definition puts on a chain, its signature filled in with the chain and the params. */
 type MethodsOf<Member, P extends FacetParams, Self> = Member extends {
