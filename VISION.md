@@ -3239,3 +3239,34 @@ was dropped. No speed gain is claimed for either unit.
       `make -n`.
     - **Owner call:** whether the split judge (`route-split.js`) is
       published as a bin for consumers.
+
+## Audience batch of 2026-09-25: typescript
+
+No unit landed on package-typescript's `vision/17`. @jterrazz/test was
+reinstalled from package-test `0ecd7a76` (`npm ci`). HEAD stays `cc9c3a4`.
+`make fix` exit 0, `make check` exit 0 (157 files, 458 tests).
+
+- **Every rule declares its audience** (branch
+  `vision17-typescript-audience`, worktree `ptc-audience`, HEAD `fa13781`).
+  Skipped: its review came back `fix-first` after one round. The worktree
+  and the branch are kept. What stays open:
+    - The fragment walk (specs/surface/package/lint-fragments.ts:29, :39-41)
+      reads only `.js` files and default exports. A named-export, `.mjs` or
+      `src/` self fragment ships with the meta-tests green. Walk `.js`,
+      `.mjs` and `.cjs`, collect every fragment-shaped export, and walk the
+      packed `lint/` and `src/` in tarball.test.ts.
+    - tarball.test.ts never checks what the packed profiles expose. Every
+      rule key of the six profiles and `hexagonal` should be a consumer
+      catalogue entry, or a hexagonal/layers decision.
+    - lint/README.md:17 and docs/03-testing.md:112 claim more than the
+      audit covers.
+    - The classification table in `78213be`'s body is wrong in two rows:
+      the selector, and the id refusal.
+    - No registry declares the `self` rules or the runtime refusals in
+      shipped builders (layers id and disjoint, the unsafe-fixer refusal,
+      drift-unreasoned). A `self-rules.json` registry, checked by
+      audience.test.ts, would do it.
+    - **Owner call:** accepting ADR-011, then the "superseded in part by
+      ADR-011" line under ADR-003's status.
+    - The estate page for the family-wide audience decision is not written.
+      It is maintainer work.
