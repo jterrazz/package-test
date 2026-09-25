@@ -3831,3 +3831,78 @@ The three worktrees and branches are removed.
 package-typescript refreshed on 5e18e724 (vision/17 at a5b4018): npm ci, make fix and make check exit 0 with no diff, 161 files and 478 tests passed.
 
 Facet `jobs` renamed `job` — every facet name is singular.
+
+## `src/` reads the sentence of a test (2026-09-25): test
+
+The owner approved this structure decision, and it is now in force.
+`src/` holds `index.ts`, `index.browser.ts`, `vitest/` and six trees:
+
+- `facets/<facet>/`, what is tested, one slice per constructor.
+- `world/`, what surrounds the subject: stubs, services, clock, mocks.
+- `elements/`, how a screen is designated and touched.
+- `expectations/`, how a result is judged.
+- `kernel/`, the machinery that builds a facet and knows none.
+
+Edges point one way: `kernel ← world · elements · expectations ← facets ←
+vitest · entries`. `FRAMEWORK_LAYERS` states it. The meta-tests I9–I12
+over `lint/tree.ts` hold what a layer map cannot:
+
+- the source root;
+- a facet never importing another, and being entered only by its root
+  files;
+- each engine belonging to exactly one slice;
+- concept folders, never role folders, each holding at least two entries.
+
+Inside a slice, concept folders carry the grouping and file suffixes
+carry the role. A facet's face is `index.ts`, `<f>.facet.ts`,
+`<f>.handle.ts` and `<f>.project.ts`.
+
+It landed in seven commits on `vision/17`, and every one was green:
+
+- **The move** (`git mv`): every edge the old tree hid was declared as a
+  PENDING seam.
+- **expectations** owns what it judges: `CliOutput`, `ServerResponse`,
+  `TableSource`, and the diff formatters split from the startup
+  reporter.
+- **kernel config**: `ChainConfig` plus `Started<>`. Each field is
+  declared by its owner, and `SpecificationConfig` is the intersection
+  in `facets/specification.ts`.
+- **kernel chain**: each definition declares its own signature, a
+  `this`-typed `ChainSignature`. `ChainOf` computes the chain from the
+  composition, and both signature tables are deleted.
+- **Provided readers**: each sits beside its provider. The registry
+  defaults to `ServiceContainer`, and each setup path moved into its
+  facet's project.
+- **Faces**: every facet has one. `surface.ts` is dissolved, the vitest
+  augmentation now lives in `match-options.ts`, and the browser entry
+  takes its types via `export type *`.
+- **The locks.**
+
+Every PENDING seam is gone. `make check` is green: 626 test files, 2745
+tests, coverage 94.95/85.78/96.54/94.92 (statements, branches,
+functions, lines). `package.json` did not change, and neither did the
+dist entry names.
+
+Where the work deviated from the inventory:
+
+- The api's route-coverage folder is `routes/`. The toolchain's
+  artefact gate refuses any tracked `coverage/`.
+- `DockerSpecConfig` lives in `expectations/command/cli.result.ts`, not
+  the cli handle. The result reads it, and expectations may not import a
+  facet.
+- D2 took the preferred `this`-kind form: 10 interfaces, each with its
+  consistent-type-definitions suppression. Declaration merging was
+  tried and dropped, because the bundled `.d.ts` keeps an internal
+  `declare module` that no longer resolves.
+- The locks are meta-tests (I9–I12), not oxlint rules, like I7 and I8.
+
+Open, **for the owner**:
+
+- The component project failed twice during this work, each time on the
+  first `make check` after a source edit: `import('vitest-browser-react')`
+  threw a SyntaxError, and the rerun was green. HYPOTHESIS (2026-09-25): a
+  stale Vite dependency cache is re-optimised mid-run, and the cause is
+  not the move. One read would settle it: run `make check` twice on
+  `2b161302` after touching one `src/` file.
+- `projects.test.ts` split into three test files, and the small `testOf`
+  helper is now repeated in each of them.
