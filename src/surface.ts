@@ -33,11 +33,11 @@ import type { TextAccessor as TextAccessorType } from './results/text.js';
 // The component facet — the chain lives in whichever build can run it (the
 // Page's), and the SHAPE is stated once so both entries publish the same one.
 export type {
-    ComponentChain,
     ComponentScenario,
     ComponentVisitor,
     RenderSubject,
-} from './facets/component/component.shape.js';
+} from './actions/render/scenario.js';
+export type { ComponentChain } from './facets/component/component.shape.js';
 export type { RenderResult } from './results/render.result.js';
 export type { RenderedText } from './results/rendered-text.js';
 export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';

@@ -1,3 +1,4 @@
+import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
 import { RenderResult } from '../../results/render.result.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
@@ -20,7 +21,7 @@ import type { MountedSurface } from '../../seams/vitest-browser/vitest-browser.a
 import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
-import type { ComponentChain, ComponentScenario, RenderSubject } from './component.shape.js';
+import type { ComponentChain } from './component.shape.js';
 
 /**
  * `component` — the chain a rendered unit is specified through.

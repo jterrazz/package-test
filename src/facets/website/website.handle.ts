@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
+import type { SpecificationConfig } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { BrowserPort } from '../../model/ports/browser.port.js';

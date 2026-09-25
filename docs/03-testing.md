@@ -83,7 +83,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 84    |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 86    |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 143   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 171   |
@@ -162,7 +162,7 @@ missing is the LIST of the ones that do not, and why — a module with real
 behaviour, no sibling test and nobody able to say what covers it is the silence
 this section closes.
 
-`lint/siblings.ts` declares the kinds, each naming the PATHS it claims —
+`lint/siblingless-kinds.ts` declares the kinds, each naming the PATHS it claims —
 never a prefix, because a kind claiming `src/seams/` would claim every module
 written there next year and K7 would be a poster. **K7** fails on a module that
 matches none of them, which is what makes a new, unclaimed module fail the
@@ -170,22 +170,22 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **84 modules** have no sibling test, and every one of them is claimed:
+Today **102 modules** have no sibling test, and every one of them is claimed:
 
-| Kind                                    | Proven instead by                                                                                                                                                                                                                              |
-| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| composition root or barrel (4)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                       |
-| type-only declaration (11)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                           |
-| constant data (6)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests, `make lint` for the layer map, which judges every module by it)                             |
-| the facet file set, as a re-export (7)  | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
-| a facet's vitest project (6)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
-| a mobile module that needs a device (1) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |
-| a facet module (7)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                   |
-| a result accessor (15)                  | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                  |
-| a seam adapter (9)                      | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                            |
-| a bundled CLI entry (5)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                |
-| a lint-layer module (6)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                 |
-| a chain or runner internal (7)          | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                            |
+| Kind                                    | Proven instead by                                                                                                                                                                                                                                      |
+| --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| composition root or barrel (4)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                               |
+| type-only declaration (25)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                   |
+| constant data (7)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds) |
+| the facet file set, as a re-export (7)  | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                               |
+| a facet's vitest project (6)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                        |
+| a mobile module that needs a device (1) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest         |
+| a facet module (7)                      | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                           |
+| a result accessor (15)                  | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                          |
+| a seam adapter (9)                      | a seam is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<seam>/` (chapter 03)                                                                                    |
+| a bundled CLI entry (5)                 | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                        |
+| a lint-layer module (6)                 | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects                                                                                         |
+| a chain or runner internal (10)         | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                    |
 
 <!-- /GENERATED:siblings -->
 

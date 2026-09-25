@@ -1,5 +1,5 @@
-import type { JobHandle, SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
+import type { JobHandle, SpecificationConfig } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { Orchestrator } from '../../model/services/orchestrator.js';

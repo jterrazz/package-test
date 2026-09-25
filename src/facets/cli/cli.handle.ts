@@ -1,6 +1,6 @@
 import type { LiterateServeRegistration } from '../../actions/run/literate.js';
-import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
+import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/config.js';
 import { resolveCommand, resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { CliEnv } from '../../model/ports/cli.port.js';

@@ -4,7 +4,8 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { classified, siblingless, SIBLINGLESS_KINDS, spliceSiblings } from './siblings.js';
+import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
+import { classified, siblingless, spliceSiblings } from './siblings.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');

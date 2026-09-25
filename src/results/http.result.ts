@@ -1,4 +1,4 @@
-import type { SpecificationConfig } from '../model/chain/builder.js';
+import type { SpecificationConfig } from '../model/chain/config.js';
 import type { ServerResponse } from '../model/ports/server.port.js';
 import { ResponseAccessor } from './response.js';
 import { BaseResult } from './result.js';

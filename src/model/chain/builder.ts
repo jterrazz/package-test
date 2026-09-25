@@ -2,9 +2,12 @@ import { cpSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 
 import { runSpecDocument } from '../../actions/run/literate.js';
-import type { LiterateRunFlags, LiterateServeRegistration } from '../../actions/run/literate.js';
+import type { LiterateRunFlags } from '../../actions/run/literate.js';
+import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
 import { routeRequest } from '../../capabilities/params/route.js';
 import type { RouteArguments, RouteOptionsAny } from '../../capabilities/params/route.js';
+import type { SeedSource } from '../../capabilities/seed/seed.capability.js';
+import type { ChainContext } from '../../capabilities/with/with.capability.js';
 import { CallResult } from '../../results/call.result.js';
 import { CliResult } from '../../results/cli.result.js';
 import { FetchResult } from '../../results/fetch.result.js';
@@ -16,132 +19,27 @@ import { ScreenResult } from '../../results/screen.result.js';
 import { copyPlan } from '../../seams/fs/fixtures.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
-import type { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
 import { parseRequestFile } from '../http-files/http-file.js';
 import { dedent } from '../matching/dedent.js';
-import type { BrowserPort, VisitScenario } from '../ports/browser.port.js';
-import type { CliEnv, CliOutput, CliPort, ExecOptions } from '../ports/cli.port.js';
+import type { VisitScenario } from '../ports/browser.port.js';
+import type { CliEnv, CliOutput, ExecOptions } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
-import type { DevicePort, MobileScenario } from '../ports/device.port.js';
-import type { ServerPort } from '../ports/server.port.js';
+import type { MobileScenario } from '../ports/device.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 import { toConstantCase } from '../services/binding.js';
 import { validateDatabaseOption } from '../services/database-option.js';
 import { getCallerDir } from './caller.js';
+import type { SpecificationConfig } from './config.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
 import { scratchDirectory } from './scratch.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
 
 // ── Types ──
-
-/** A named job that can be triggered via jobs.trigger(). */
-export type JobHandle = {
-    name: string;
-    execute: () => Promise<void>;
-};
-
-/**
- * Configuration for the docker-aware cli mode. When set on
- * {@link SpecificationConfig}, the cli runner generates a test-run id, injects
- * it into the child env under `envVar`, then queries Docker for every
- * container carrying `testRunLabel=<id>` after the command exits.
- */
-export type DockerSpecConfig = {
-    envVar: string;
-    nameLabel: string;
-    testRunLabel: string;
-};
-
-/** Adapter configuration passed to the specification facets at setup time. */
-export type SpecificationConfig = {
-    /**
-     * The declared stub backend (website/mobile facets) — armed with the
-     * chain's contracts before every terminal action.
-     */
-    backend?: StubBackend | undefined;
-    /**
-     * Base URL of the running stub backend — allow-listed through the
-     * browser's `external: 'block'` policy so client-side fetches reach it.
-     */
-    backendUrl?: string | undefined;
-    /** Base URL of the website under test (website facet only). */
-    baseUrl?: string | undefined;
-    /**
-     * Lazy browser accessor (website facet only). The first `.visit()`
-     * launches the shared browser instance; `.fetch()`-only spec files never
-     * pay the browser cost.
-     */
-    browser?: (() => Promise<BrowserPort>) | undefined;
-    /**
-     * Cross-origin request policy for visits (website facet only): `'block'`
-     * aborts requests leaving the site under test — the browser-side analog
-     * of strict intercepts.
-     */
-    external?: 'allow' | 'block' | undefined;
-    /** Bundle id of the app under test (mobile facet only) — the app `.open()` relaunches. */
-    bundleId?: string | undefined;
-    command?: CliPort | undefined;
-    database?: DatabasePort | undefined;
-    /**
-     * Keys of the declared services record that are databases. Drives the
-     * CONVENTIONS A7 rule: with 2+ databases the `database` option is
-     * mandatory on `.seed()` / `.table()`; with exactly one it is forbidden.
-     */
-    databaseKeys?: string[] | undefined;
-    databases?: Map<string, DatabasePort> | undefined;
-    /**
-     * Lazy device accessor (mobile facet only). The first `.open()` creates
-     * the driver session, or attaches to the run's; the appium/webdriverio
-     * integration stays a lazy import so the optional peer is only loaded
-     * when a spec opens the app.
-     */
-    device?: (() => Promise<DevicePort>) | undefined;
-    dockerConfig?: DockerSpecConfig | undefined;
-    /**
-     * Unique id shared by every spec from this runner instance.
-     * Stable for the runner's lifetime so multi-step tests (spawn in
-     * one run, inspect in another) see the same container scope. The
-     * facet factories auto-populate this when `dockerConfig` is present.
-     */
-    dockerTestRunId?: string | undefined;
-    /**
-     * Environment applied to every run of the declared binary
-     * (`specification.cli({ defaults })`) — under a chain's own `.env()` and
-     * under a document's `env:`, both of which win.
-     */
-    defaultEnv?: CliEnv | undefined;
-    /**
-     * Named environment SETS a spec document may name by bare word
-     * (`env: frozen`). Declared once per app in `specification.cli()`.
-     */
-    envSets?: Record<string, CliEnv> | undefined;
-    jobs?: JobHandle[] | undefined;
-    /** The project root — the working directory a document's `serve:` command runs from. */
-    root?: string | undefined;
-    server?: ServerPort | undefined;
-    /**
-     * Named servers a spec document may start (`serve: [mcp]`). Declared once
-     * per app in `specification.cli()`.
-     */
-    serveRegistry?: Record<string, LiterateServeRegistration> | undefined;
-    /**
-     * The declared services record. In cli mode, drives the automatic
-     * connection-URL injection into the child env (CONVENTIONS B6):
-     * `<KEY>_URL` per service, plus `DATABASE_URL` / `REDIS_URL` when
-     * unambiguous.
-     */
-    services?: Record<string, ServiceHandle> | undefined;
-    /**
-     * Optional normaliser applied to command stdout/stderr before every
-     * comparison, and read by `.text`; `.raw` keeps the capture.
-     */
-    transform?: ((text: string) => string) | undefined;
-};
 
 /** A SQL seed to execute before the action, optionally targeting a named database. */
 type SeedEntry = {
@@ -151,9 +49,6 @@ type SeedEntry = {
     /** Relative to the spec file, or to the document that named it. */
     path: string;
 };
-
-/** What `.seed()` takes: a `.sql` file, never the statements themselves — SQL is not written in a test. */
-export type SeedSource = DiskFile<'.sql'>;
 
 /** An HTTP request to perform against the server adapter. */
 export type RequestEntry = {
@@ -169,27 +64,6 @@ export type RequestEntry = {
     /** The route template the path was written as, when the test wrote one. */
     template?: string | undefined;
 };
-
-/**
- * What a FILE shares on every chain it starts: the settings, never the state.
- * A clock, headers, an environment are how the file reaches its subject; a
- * seed or a contract is the Given of one test, and stays on its chain.
- */
-export type ChainContext = {
-    /** The instant every chain pins — a chain's own `.clock()` wins. */
-    clock?: string;
-    /** The environment every command runs with — a chain's own `.env()` merges over it. */
-    env?: CliEnv;
-    /** The headers every request carries — a chain's own `.headers()` merges over them. */
-    headers?: Record<string, string>;
-};
-
-/**
- * The `.intercept()` overload set, identical on every facet: one contract, a
- * list, a composite — or the inline `(request, response)` pair for a one-off.
- */
-export type InterceptMethod<T> = ((contracts: ContractInput) => T) &
-    ((request: ContractRequest, response: ContractResponder | ContractResponse) => T);
 
 // ── Facet views ──
 

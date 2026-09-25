@@ -1,7 +1,7 @@
 import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
-import type { SpecificationConfig } from '../../model/chain/builder.js';
+import type { SpecificationConfig } from '../../model/chain/config.js';
 import { expandWorkdir, safeRealpath } from '../../model/chain/resolve.js';
 import {
     readSpecFile,

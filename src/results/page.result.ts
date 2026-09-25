@@ -1,4 +1,4 @@
-import type { SpecificationConfig } from '../model/chain/builder.js';
+import type { SpecificationConfig } from '../model/chain/config.js';
 import type {
     BrowserLinkElement,
     BrowserMetaElement,

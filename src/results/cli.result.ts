@@ -1,4 +1,4 @@
-import type { DockerSpecConfig, SpecificationConfig } from '../model/chain/builder.js';
+import type { DockerSpecConfig, SpecificationConfig } from '../model/chain/config.js';
 import type { CliOutput } from '../model/ports/cli.port.js';
 import {
     findContainersByLabel,

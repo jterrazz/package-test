@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { SpecificationConfig } from '../model/chain/builder.js';
+import type { SpecificationConfig } from '../model/chain/config.js';
 import { safeRealpath } from '../model/chain/resolve.js';
 import { CaptureScope } from '../model/matching/match.js';
 import type { DatabasePort } from '../model/ports/database.port.js';

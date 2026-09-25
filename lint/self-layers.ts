@@ -74,7 +74,7 @@ export const FRAMEWORK_LAYERS = {
         },
         imports: ['model/', 'results/', 'capabilities/', 'stubs/', 'runner/update'],
         seams: {
-            'actions/render/render.types.ts': ['seams/vitest-browser/'],
+            'actions/render/scenario.ts': ['seams/vitest-browser/'],
             'actions/run/literate.ts': ['seams/fs/', 'seams/process/'],
             'actions/signatures.ts': ['actions/'],
         },
@@ -219,7 +219,14 @@ export const FRAMEWORK_LAYERS = {
             // Chain's `.intercept()`; a fixture is laid by the copy plan of
             // the filesystem seam; a website or mobile chain arms the stub
             // Backend its constructor started.
-            'model/chain/builder.ts': ['seams/fs/', 'seams/msw/', 'seams/stub-backend/'],
+            'model/chain/builder.ts': [
+                'capabilities/intercept/',
+                'capabilities/seed/',
+                'capabilities/with/',
+                'seams/fs/',
+                'seams/msw/',
+                'seams/stub-backend/',
+            ],
             // What a constructor hands its chain names the stub backend a
             // Website or mobile constructor started.
             'model/chain/config.ts': ['seams/stub-backend/'],

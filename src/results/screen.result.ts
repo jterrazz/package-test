@@ -1,4 +1,4 @@
-import type { SpecificationConfig } from '../model/chain/builder.js';
+import type { SpecificationConfig } from '../model/chain/config.js';
 import type { DeviceScreen } from '../model/ports/device.port.js';
 import { JsonAccessor } from './json.js';
 import { BaseResult } from './result.js';

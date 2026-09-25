@@ -1,4 +1,4 @@
-import type { SpecificationConfig } from '../chain/builder.js';
+import type { SpecificationConfig } from '../chain/config.js';
 import { refusal } from '../lesson/refusal.js';
 
 /**

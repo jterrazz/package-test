@@ -1,6 +1,6 @@
+import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
 import type { RenderResult } from '../../results/render.result.js';
-import type { ComponentUi, DomMount } from '../../seams/vitest-browser/ui.js';
-import type { componentVerbs } from '../../seams/vitest-browser/vitest-browser.adapter.js';
+import type { ComponentUi } from '../../seams/vitest-browser/ui.js';
 import type { ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 
@@ -12,19 +12,6 @@ import type { ContractRequest, ContractResponder, ContractResponse } from '../..
  * the line that rendered rather than on a missing export. The published types
  * are the node build's, so this file is the one description of the facet.
  */
-
-/** The interaction vocabulary a render scenario is handed — the When. */
-export type ComponentVisitor = ReturnType<typeof componentVerbs>;
-
-/** The behaviour of a render; assertions stay in the Then, on the result (W1). */
-export type ComponentScenario = (visitor: ComponentVisitor) => Promise<void>;
-
-/**
- * What `.render()` mounts. A React tree is an element (`<PostTable />`); a
- * vanilla DOM subject is the FUNCTION that fills a container, which is how a
- * DOM-only module is called in production too.
- */
-export type RenderSubject = ComponentUi | DomMount;
 
 /**
  * The chain. Every setup returns a new one, so the handle a spec imports never

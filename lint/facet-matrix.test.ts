@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
+import type { ComponentVisitor } from '../src/actions/render/scenario.js';
 import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
 import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
 import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
-import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.shape.js';
+import type { ComponentChain } from '../src/facets/component/component.shape.js';
 import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
 import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.handle.js';
 import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.handle.js';
