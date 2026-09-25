@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          scenario.test.ts:6:5  jterrazz(b11-marker-one-line)
+          scenario.test.ts:7:5  jterrazz(b11-marker-one-line)

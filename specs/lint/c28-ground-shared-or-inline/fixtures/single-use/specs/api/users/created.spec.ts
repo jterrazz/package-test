@@ -1,8 +1,9 @@
 import { file, text } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
+describe('created', () => {
 test('a user is created over its seed', async () => {
     // Given - one user, and a second posted
     const result = await api.seed(file('./seeds/ada.sql')).post('/users', file('./requests/grace.json'));
@@ -27,4 +28,5 @@ test('a one-line golden, and a golden its one test reads twice', async () => {
     expect(text('one line')).toMatch(file('./expected/line.txt'));
     expect(result.response).toMatch(file('./expected/twice.http'));
     expect(result.response).not.toMatch(file('./expected/twice.http'));
+});
 });

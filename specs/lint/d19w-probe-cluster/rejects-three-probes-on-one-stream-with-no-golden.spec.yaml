@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          scenario.test.ts:5:1  jterrazz(d19w-probe-cluster)
+          scenario.test.ts:6:1  jterrazz(d19w-probe-cluster)

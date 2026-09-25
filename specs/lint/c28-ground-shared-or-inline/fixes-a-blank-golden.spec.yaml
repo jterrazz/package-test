@@ -8,12 +8,14 @@ runs:
           specs/widget/widget.test.ts:
               equals: |
                   import { text } from '@jterrazz/test';
-                  import { expect, test } from 'vitest';
+                  import { describe, expect, test } from 'vitest';
 
+                  describe('widget', () => {
                   test('a blank golden', () => {
                       expect(text('\n\n\n')).toMatch(`
 
 
 
                       `);
+                  });
                   });

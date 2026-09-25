@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/app/widget/widget.test.ts:11:40  jterrazz(c6-tomatch-extension)
+          specs/app/widget/widget.test.ts:12:40  jterrazz(c6-tomatch-extension)

@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/app/widget/widget.test.ts:7:36  jterrazz(j2-no-sleep)
+          specs/app/widget/widget.test.ts:8:36  jterrazz(j2-no-sleep)

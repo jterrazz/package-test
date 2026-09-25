@@ -4,5 +4,5 @@ runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/api/users/created.spec.ts:7:45  jterrazz-check(c28)
-          specs/api/users/created.spec.ts:85:37  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:8:45  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:86:37  jterrazz-check(c28)

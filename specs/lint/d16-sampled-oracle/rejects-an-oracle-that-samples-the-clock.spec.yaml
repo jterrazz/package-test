@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          scenario.test.ts:9:24  jterrazz(d16-sampled-oracle)
+          scenario.test.ts:10:24  jterrazz(d16-sampled-oracle)

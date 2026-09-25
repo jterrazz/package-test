@@ -1,6 +1,7 @@
 import { component, content } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
+describe('Widget', () => {
 test('builds a node in the browser that will run it', async () => {
     // Given - the rendered kind, beside the component it renders
     const result = await component.render(
@@ -14,4 +15,5 @@ test('builds a node in the browser that will run it', async () => {
 
     // Then - a document is exactly what this kind of test has
     expect(result.html).toContain('div');
+});
 });

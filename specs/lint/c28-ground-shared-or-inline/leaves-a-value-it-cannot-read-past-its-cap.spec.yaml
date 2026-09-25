@@ -4,20 +4,21 @@ runs:
     - command: checker . --fix
       exit: 1
       stderr: |
-          specs/api/users/create/created.spec.ts:9:45  jterrazz-check(c28)
-          specs/api/users/create/created.spec.ts:47:38  jterrazz-check(c28)
-          specs/api/users/create/created.spec.ts:90:33  jterrazz-check(c28)
+          specs/api/users/create/created.spec.ts:10:45  jterrazz-check(c28)
+          specs/api/users/create/created.spec.ts:48:38  jterrazz-check(c28)
+          specs/api/users/create/created.spec.ts:91:33  jterrazz-check(c28)
       files:
           specs/api/users/create/requests: absent
           specs/api/users/create/expected: absent
           specs/api/users/create/created.spec.ts:
               equals: |
-                  import { expect, test } from 'vitest';
+                  import { describe, expect, test } from 'vitest';
 
                   import { api } from '../../api.specification.js';
 
                   const ROLE = 'admin';
 
+                  describe('created', () => {
                   test('creates a crowd around its role', async () => {
                       // Given - a body of 31 lines past the requests cap, one value a name the fixer cannot read
                       const result = await api.post('/users', {
@@ -257,4 +258,5 @@ runs:
                               "role 149",
                           ]
                       });
+                  });
                   });

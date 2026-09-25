@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/api/events/events.test.ts:3:1  jterrazz(d15w-status-only-probe)
+          specs/api/events/events.test.ts:4:1  jterrazz(d15w-status-only-probe)

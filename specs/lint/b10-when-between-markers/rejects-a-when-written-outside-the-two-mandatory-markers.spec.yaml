@@ -4,5 +4,5 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          scenario.test.ts:5:1  jterrazz(b10-when-between-markers)
-          scenario.test.ts:13:1  jterrazz(b10-when-between-markers)
+          scenario.test.ts:6:1  jterrazz(b10-when-between-markers)
+          scenario.test.ts:14:1  jterrazz(b10-when-between-markers)

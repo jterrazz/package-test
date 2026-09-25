@@ -1,7 +1,7 @@
 import { join, resolve } from 'node:path';
 
 import { file, text } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { report } from './report.js';
 
@@ -18,6 +18,7 @@ const PIECES = resolve(__dirname, 'seeds', 'rows.sql');
 /** A sample a test only TALKS about: a call written in a string is text. */
 const SAMPLE = "expect(x).toMatch(file('./expected/sample.txt'));";
 
+describe('report', () => {
 test('reports the total', () => {
     // Given - the report of two rows
     // Then - it matches its golden, beside the module
@@ -26,4 +27,5 @@ test('reports the total', () => {
     expect(WORKSPACE).toContain('workspace');
     expect(LOG.pathname).toContain('log');
     expect([JOINED, CLIMBED, LEGACY, PIECES].join()).toContain('x.txt');
+});
 });

@@ -1,9 +1,11 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { sharedUser } from './widget.fixtures.js';
 
+describe('widget', () => {
 test('uses fixture data', () => {
     // Given - the fixtures neighbour
     // Then - allowed
     expect(sharedUser).toBeDefined();
+});
 });

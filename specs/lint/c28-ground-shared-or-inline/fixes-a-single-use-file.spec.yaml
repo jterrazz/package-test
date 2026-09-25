@@ -4,7 +4,7 @@ runs:
     - command: checker . --fix
       exit: 1
       stderr: |
-          specs/api/users/created.spec.ts:40:37  jterrazz-check(c28)
+          specs/api/users/created.spec.ts:41:37  jterrazz-check(c28)
       files:
           specs/api/users/seeds/ada.sql: exists
           specs/api/users/requests: absent
@@ -14,10 +14,11 @@ runs:
           specs/api/users/created.spec.ts:
               equals: |
                   import { file, text } from '@jterrazz/test';
-                  import { expect, test } from 'vitest';
+                  import { describe, expect, test } from 'vitest';
 
                   import { api } from '../api.specification.js';
 
+                  describe('created', () => {
                   test('a user is created over its seed', async () => {
                       // Given - one user, and a second posted
                       const result = await api.seed(file('./seeds/ada.sql')).post('/users', {
@@ -54,4 +55,5 @@ runs:
                       expect(text('one line')).toMatch(`one line`);
                       expect(result.response).toMatch(file('./expected/twice.http'));
                       expect(result.response).not.toMatch(file('./expected/twice.http'));
+                  });
                   });

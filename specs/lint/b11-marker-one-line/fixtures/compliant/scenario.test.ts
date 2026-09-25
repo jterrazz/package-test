@@ -1,7 +1,8 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { scenario } from './scenario.js';
 
+describe('scenario', () => {
 test('keeps each marker to one sentence', () => {
     // Given - a scenario built by its factory
     const value = scenario();
@@ -16,4 +17,5 @@ test('separates an ordinary note with a blank line', () => {
     const value = scenario();
     // Then - it names itself
     expect(value).toBe('scenario');
+});
 });

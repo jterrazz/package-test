@@ -1,4 +1,4 @@
-import { beforeEach, expect, test } from 'vitest';
+import { describe, beforeEach, expect, test } from 'vitest';
 
 import { scenario } from './scenario.js';
 
@@ -8,9 +8,11 @@ beforeEach(() => {
     value = scenario();
 });
 
+describe('scenario', () => {
 test('stands on a Given written above it', () => {
     // Given - whatever the hook left behind
     const named = value;
     // Then - it names itself
     expect(named).toBe('scenario');
+});
 });

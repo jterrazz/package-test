@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/cli/negative/negative.test.ts:9:18  jterrazz(d13w-unfrozen-negative-fixture)
+          specs/cli/negative/negative.test.ts:10:18  jterrazz(d13w-unfrozen-negative-fixture)

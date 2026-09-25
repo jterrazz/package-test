@@ -1,5 +1,6 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
+describe('scenario', () => {
 test('has Then before Given', () => {
     // Then - it works
     // Given - a thing
@@ -10,4 +11,5 @@ test('also orders Then before Given', () => {
     // Then - it still works
     // Given - another thing
     expect(run()).toBe(true);
+});
 });

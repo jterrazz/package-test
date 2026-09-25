@@ -1,10 +1,11 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { cli } from '../../setup/runner.specification.js';
 
 /** The port the double below stands in for. */
 type ClonePort = { clone: (url: string) => Promise<void> };
 
+describe('widget', () => {
 test('waits for the server', async () => {
     // Given - framework-level synchronisation
     const result = await cli.exec('serve', { waitFor: /listening/ });
@@ -26,4 +27,5 @@ test('lets a slow clone settle late', async () => {
 
     // Then - the run is clean
     expect(result.exitCode).toBe(0);
+});
 });

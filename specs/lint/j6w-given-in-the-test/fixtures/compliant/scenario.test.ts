@@ -1,4 +1,4 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { scenario } from './scenario.js';
 
@@ -7,9 +7,11 @@ function aScenario(): string {
     return scenario();
 }
 
+describe('scenario', () => {
 test('builds its own Given', () => {
     // Given - a scenario
     const value = aScenario();
     // Then - it names itself
     expect(value).toBe('scenario');
+});
 });

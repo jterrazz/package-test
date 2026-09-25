@@ -4,7 +4,7 @@ runs:
     - command: checker . --fix
       exit: 1
       stderr: |
-          specs/widget/widget.test.ts:5:29  jterrazz-check(c28)
+          specs/widget/widget.test.ts:6:29  jterrazz-check(c28)
       files:
           specs/widget/expected: absent
           specs/widget/widget.test.ts:

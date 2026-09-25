@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          specs/app/widget/widget.test.ts:10:40  jterrazz(d9w-single-use-ref)
+          specs/app/widget/widget.test.ts:11:40  jterrazz(d9w-single-use-ref)

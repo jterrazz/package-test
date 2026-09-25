@@ -1,7 +1,8 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { scenario } from './scenario.js';
 
+describe('scenario', () => {
 test('greps one output three times', () => {
     // Given - a result whose stream the test reads piece by piece
     const result = { stdout: scenario() };
@@ -9,4 +10,5 @@ test('greps one output three times', () => {
     expect(result.stdout).toContain('scen');
     expect(result.stdout).toContain('ari');
     expect(result.stdout).toContain('rio');
+});
 });

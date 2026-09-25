@@ -1,13 +1,14 @@
 import { join } from 'node:path';
 
 import { directory, file } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
 /** A golden the spec builds from pieces, which is there. */
 const BUILT = join(import.meta.dirname, 'expected', 'build.txt');
 
+describe('build', () => {
 test('names ground that is there', async () => {
     // Given - the committed fixture tree
     const result = await cli.fixture(directory('./fixtures/shop/')).exec('build');
@@ -16,4 +17,5 @@ test('names ground that is there', async () => {
     await expect(result.directory('out')).toMatch(directory('./expected/out/'));
     expect(result.stdout).toMatch(file('./expected/build.txt')); // checker-disable-line c28 -- an input tree of the c8-disk-target-exists spec: its file form is what the rule reads
     expect(BUILT).toContain('expected');
+});
 });

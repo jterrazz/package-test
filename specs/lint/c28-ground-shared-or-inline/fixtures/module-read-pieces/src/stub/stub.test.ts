@@ -1,11 +1,13 @@
 import { resolve } from 'node:path';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 /** The stub, named from this module test piece by piece. */
 const STUB = resolve(import.meta.dirname, '..', '..', 'specs', 'shared', 'fixtures', 'lonely-stub');
 
+describe('stub', () => {
 test('names the stub', () => {
     // Given - the stub's folder
     // Then - it is named
     expect(STUB).toContain('lonely-stub');
+});
 });

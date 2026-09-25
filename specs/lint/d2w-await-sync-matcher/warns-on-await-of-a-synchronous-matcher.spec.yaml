@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          scenario.test.ts:8:11  jterrazz(d2w-await-sync-matcher)
+          scenario.test.ts:9:11  jterrazz(d2w-await-sync-matcher)

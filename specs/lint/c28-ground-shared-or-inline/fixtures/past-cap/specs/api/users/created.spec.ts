@@ -1,7 +1,8 @@
-import { expect, test } from 'vitest'; // checker-disable-line c30 -- an input of C28: this folder is the case the rule reads, not a subject's standard name
+import { describe, expect, test } from 'vitest'; // checker-disable-line c30 -- an input of C28: this folder is the case the rule reads, not a subject's standard name
 
 import { api } from '../api.specification.js';
 
+describe('created', () => {
 test('creates a crowd', async () => {
     // Given - a body of 31 lines, past the requests cap
     const result = await api.post('/users', {
@@ -235,4 +236,5 @@ test('lists everyone', async () => {
         user 146
         user 147
     `);
+});
 });

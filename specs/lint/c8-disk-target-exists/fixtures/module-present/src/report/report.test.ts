@@ -1,7 +1,7 @@
 import { join, resolve } from 'node:path';
 
 import { file, text } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { report } from './report.js';
 
@@ -25,6 +25,7 @@ const COMMAND = 'node ./missing/tool.js';
 /** A sample a test only TALKS about: a call written in a string is text. */
 const SAMPLE = "expect(x).toMatch(file('./expected/sample.txt'));";
 
+describe('report', () => {
 test('reports the total', () => {
     // Given - the report of two rows
     // Then - it matches its golden, beside the module
@@ -33,4 +34,5 @@ test('reports the total', () => {
     expect(URL_GOLDEN.pathname.endsWith(GOLDEN.slice(-'total.json'.length))).toBe(true);
     expect(COMMAND).toContain('tool');
     expect([JOINED, CLIMBED, LEGACY, PIECES, OUTPUT, COMPUTED].join()).toContain('x.txt');
+});
 });

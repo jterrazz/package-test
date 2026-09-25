@@ -4,5 +4,5 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          src/widget.test.ts:3:1  jterrazz(d18w-existence-only-oracle)
-          src/widget.test.ts:5:18  jterrazz(g4-no-dom-in-module-test)
+          src/widget.test.ts:4:1  jterrazz(d18w-existence-only-oracle)
+          src/widget.test.ts:6:18  jterrazz(g4-no-dom-in-module-test)

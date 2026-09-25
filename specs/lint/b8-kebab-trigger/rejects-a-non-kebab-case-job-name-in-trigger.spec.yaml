@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/app/widget/widget.test.ts:7:38  jterrazz(b8-kebab-trigger)
+          specs/app/widget/widget.test.ts:8:38  jterrazz(b8-kebab-trigger)

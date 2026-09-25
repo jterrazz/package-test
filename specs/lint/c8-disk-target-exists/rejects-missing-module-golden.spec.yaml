@@ -10,4 +10,4 @@ runs:
           src/report/report.test.ts:14:46  jterrazz-check(c8)
           src/report/report.test.ts:15:32  jterrazz-check(c8)
           src/report/report.test.ts:16:35  jterrazz-check(c8)
-          src/report/report.test.ts:24:41  jterrazz-check(c8)
+          src/report/report.test.ts:25:41  jterrazz-check(c8)

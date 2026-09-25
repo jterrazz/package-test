@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          scenario.test.ts:7:21  jterrazz(d16w-ambient-value)
+          scenario.test.ts:8:21  jterrazz(d16w-ambient-value)

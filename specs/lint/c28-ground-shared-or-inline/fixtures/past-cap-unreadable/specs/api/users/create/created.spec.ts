@@ -1,9 +1,10 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../../api.specification.js';
 
 const ROLE = 'admin';
 
+describe('created', () => {
 test('creates a crowd around its role', async () => {
     // Given - a body of 31 lines past the requests cap, one value a name the fixer cannot read
     const result = await api.post('/users', {
@@ -243,4 +244,5 @@ test('creates a crowd and answers with its id', async () => {
             "role 149",
         ]
     });
+});
 });

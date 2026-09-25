@@ -1,5 +1,6 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
+describe('widget', () => {
 test('a long message', () => {
     const message = Array.from({ length: 160 }, (_, index) => `line ${index}`).join('\n');
     expect(message).toMatch(`
@@ -164,4 +165,5 @@ test('a long message', () => {
         line 158
         line 159
     `);
+});
 });

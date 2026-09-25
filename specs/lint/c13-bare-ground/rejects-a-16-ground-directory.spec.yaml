@@ -5,4 +5,4 @@ runs:
       exit: 1
       stdout: |
           specs/app/widget/widget.test.ts:1:1  jterrazz(c13-bare-ground)
-          specs/app/widget/widget.test.ts:11:40  jterrazz(c24-ground-role)
+          specs/app/widget/widget.test.ts:12:40  jterrazz(c24-ground-role)

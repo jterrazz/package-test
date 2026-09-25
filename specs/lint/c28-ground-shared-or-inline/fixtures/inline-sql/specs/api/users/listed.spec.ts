@@ -1,8 +1,9 @@
 import { file, sql } from '@jterrazz/test'; // checker-disable-line c30 -- an input of C28: this folder is the case the rule reads, not a subject's standard name
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
+describe('listed', () => {
 test('lists the users', async () => {
     // Given - two users, the first named by its comment, the second by this test's title, its filler dropped — a name another seed holds
     const result = await api
@@ -23,4 +24,5 @@ test('lists the user its seed file holds', async () => {
 
     // Then - the user
     expect(result.response).toMatch('HTTP/1.1 200 OK');
+});
 });

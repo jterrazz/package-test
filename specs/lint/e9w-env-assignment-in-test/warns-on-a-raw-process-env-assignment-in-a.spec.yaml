@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 0
       stdout: |
-          scenario.test.ts:7:5  jterrazz(e9w-env-assignment-in-test)
+          scenario.test.ts:8:5  jterrazz(e9w-env-assignment-in-test)

@@ -1,8 +1,9 @@
 import { file } from '@jterrazz/test'; // checker-disable-line c30 -- an input of C15: this folder is the case the rule reads, not a subject's standard name
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
+describe('listed-with-a-user', () => {
 test('orders are listed against a user seeded from the users leaf', async () => {
     // Given - the seeds it stands on
     const result = await api
@@ -11,4 +12,5 @@ test('orders are listed against a user seeded from the users leaf', async () => 
 
     // Then - the app answered
     expect(result.status).toBe(200);
+});
 });

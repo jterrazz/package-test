@@ -1,5 +1,6 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
+describe('scenario', () => {
 test('carries both markers', () => {
     // Given - a widget
     // Then - it works
@@ -17,4 +18,5 @@ test.skipIf(process.platform === 'win32')('is enforced through skipIf wrappers t
     // Given - a posix-only widget
     // Then - it works
     expect(build()).toBe(true);
+});
 });

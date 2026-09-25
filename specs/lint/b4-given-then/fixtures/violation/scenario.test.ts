@@ -1,5 +1,6 @@
-import { test } from 'vitest';
+import { describe, test } from 'vitest';
 
+describe('scenario', () => {
 test('is missing its Given marker', () => {
     // Then - only the outcome is documented
     build();
@@ -12,4 +13,5 @@ test('is missing its Then marker', () => {
 
 test('is missing both markers', () => {
     build();
+});
 });

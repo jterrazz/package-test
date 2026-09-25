@@ -1,8 +1,9 @@
 import { sql } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../../api.specification.js';
 
+describe('listed', () => {
 test('lists everyone', async () => {
     // Given - one user, its SQL the bytes its seed file already holds
     const result = await api.seed(sql`INSERT INTO users (name) VALUES ('Ada');`).get('/users');
@@ -162,4 +163,5 @@ test('lists everyone', async () => {
             "user 149",
         ]
     });
+});
 });

@@ -4,4 +4,4 @@ runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/widget/widget.test.ts:8:48  jterrazz-check(c15)
+          specs/widget/widget.test.ts:9:48  jterrazz-check(c15)

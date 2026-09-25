@@ -1,7 +1,8 @@
-import { expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 import { scenario } from './scenario.js';
 
+describe('scenario', () => {
 test('asserts what the subject produced, and what it asked of its port', () => {
     // Given - a double the test built
     const record = vi.fn();
@@ -10,4 +11,5 @@ test('asserts what the subject produced, and what it asked of its port', () => {
     // Then - the value comes first, the call log second
     expect(value).toBe('scenario');
     expect(record).toHaveBeenCalledWith('scenario');
+});
 });

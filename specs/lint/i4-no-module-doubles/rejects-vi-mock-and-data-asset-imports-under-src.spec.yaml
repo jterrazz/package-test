@@ -6,4 +6,4 @@ runs:
       stdout: |
           src/util.test.ts:3:21  jterrazz(i4-no-module-doubles)
           src/util.test.ts:5:1  jterrazz(i4-no-module-doubles)
-          src/util.test.ts:7:1  jterrazz(d18w-existence-only-oracle)
+          src/util.test.ts:8:1  jterrazz(d18w-existence-only-oracle)

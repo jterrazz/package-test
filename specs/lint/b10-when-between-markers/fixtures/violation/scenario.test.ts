@@ -1,7 +1,8 @@
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { scenario } from './scenario.js';
 
+describe('scenario', () => {
 test('narrates the action before the setup', () => {
     // When - the scenario runs
     // Given - a scenario
@@ -16,4 +17,5 @@ test('narrates the action after the outcome', () => {
     // Then - it names itself
     expect(value).toBe('scenario');
     // When - the scenario ran
+});
 });
