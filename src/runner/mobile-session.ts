@@ -3,8 +3,8 @@ import { join, resolve } from 'node:path';
 import type { ProvidedContext } from 'vitest';
 import type { TestProject } from 'vitest/node';
 
-import { serveAppium } from '../facets/mobile/appium-server.js';
-import { endSessions, MOBILE_SESSIONS_DIR } from '../facets/mobile/session-ledger.js';
+import { serveAppium } from '../seams/appium/appium-server.js';
+import { endSessions, MOBILE_SESSIONS_DIR } from '../seams/appium/session-ledger.js';
 
 /**
  * The mobile project's global setup: one driver session per run.

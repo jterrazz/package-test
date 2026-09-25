@@ -1,4 +1,4 @@
-import type { RunServer } from '../facets/mobile/appium-server.js';
+import type { RunServer } from '../seams/appium/appium-server.js';
 
 /**
  * What the run's global setups provide to a worker, read on the worker's side.

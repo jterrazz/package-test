@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { MOBILE_SESSIONS_DIR, sessionLedger } from '../facets/mobile/session-ledger.js';
+import { MOBILE_SESSIONS_DIR, sessionLedger } from '../seams/appium/session-ledger.js';
 import setup from './mobile-session.js';
 
 describe('the mobile session setup — one driver session per run', () => {

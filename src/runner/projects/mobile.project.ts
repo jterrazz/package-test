@@ -1,7 +1,7 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import type { MobileDevice } from '../../facets/mobile/appium-server.js';
+import type { MobileDevice } from '../../seams/appium/appium-server.js';
 import { facetProject, mobileSessionSetup } from '../facet-project.js';
 import type { FacetProjectOptions } from '../facet-project.js';
 

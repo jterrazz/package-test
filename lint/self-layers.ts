@@ -34,9 +34,9 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   constructor opens the seams its runtime needs, and each composition the
  *   adapters its engines are.
  * - `seams/<dep>/` — one folder = one external dependency (or one node
- *   builtin, as `process/` is), plus `model/`, the facet vocabulary an
- *   adapter projects into (the device's ambiguity reading), and the text
- *   accessor a page's golden answers through.
+ *   builtin, as `process/` is), plus `model/` and the text accessor a page's
+ *   golden answers through. The Appium server a runner spawns boots its
+ *   simulator through `simctl/` and runs as a `process/`.
  * - `runner/` — the config surface: the preset, the project index and each
  *   facet's project (`projects/<facet>.project.ts`), update mode, the
  *   literate plugin. It couples to `vite`/`vitest` by design; the run's
@@ -135,7 +135,6 @@ export const FRAMEWORK_LAYERS = {
             // `vitest` import the way `src/runner/` owns the config side.
             'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
             'facets/component/component.shape.ts': ['seams/vitest-browser/'],
-            'facets/mobile/appium-server.ts': ['seams/process/'],
             'facets/mobile/mobile.handle.ts': [
                 'seams/appium/',
                 'seams/simctl/',
@@ -246,10 +245,12 @@ export const FRAMEWORK_LAYERS = {
         imports: ['runner/', 'model/', 'facets/'],
         packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
         // The component project serves the page's golden commands; the run's
-        // Mobile session and what it provides reach the Appium seam.
+        // Mobile session, what it provides and the device a mobile project
+        // Declares reach the Appium seam.
         seams: {
             'runner/mobile-session.ts': ['seams/appium/'],
             'runner/projects/component.project.ts': ['seams/vitest-browser/commands'],
+            'runner/projects/mobile.project.ts': ['seams/appium/'],
             'runner/provided.ts': ['seams/appium/'],
         },
     },
@@ -285,12 +286,8 @@ export const FRAMEWORK_LAYERS = {
             // The page's golden commands answer through the text accessor
             // every stream is compared by, one `TextAccessor` for both builds.
             'results/text',
-            // What an adapter PROJECTS into: the device's own reading of an
-            // Ambiguity is the facet's vocabulary, and a seam that copied it
-            // Would answer in a second dialect. The SHARED readings are
-            // `model/elements/`.
-            'facets/mobile/ambiguity',
-            'facets/mobile/projection',
         ],
+        // The Appium server a runner spawns boots its simulator and runs as a process.
+        seams: { 'seams/appium/appium-server.ts': ['seams/process/', 'seams/simctl/'] },
     },
 } satisfies Record<string, LayerOptions>;

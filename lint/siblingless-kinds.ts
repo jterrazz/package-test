@@ -96,7 +96,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
     },
     {
-        claims: oneOf('src/facets/mobile/appium-server.ts', 'src/facets/mobile/mobile.handle.ts'),
+        claims: oneOf('src/facets/mobile/mobile.handle.ts', 'src/seams/appium/appium-server.ts'),
         name: 'a mobile module that needs a device',
         why: 'the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest',
     },

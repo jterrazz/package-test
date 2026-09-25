@@ -1,8 +1,6 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { describeMobileAmbiguity } from '../../facets/mobile/ambiguity.js';
-import { projectScreen } from '../../facets/mobile/projection.js';
 import { evidenceDirectory } from '../../model/artifacts/artifacts.js';
 import { AmbiguousElementError, formatElement } from '../../model/elements/ambiguity.js';
 import { refusal } from '../../model/lesson/refusal.js';
@@ -16,8 +14,10 @@ import type {
     MobileVisitor,
     SessionLedger,
 } from '../../model/ports/device.port.js';
+import { describeMobileAmbiguity } from './ambiguity.js';
 import { openSession } from './appium.session.js';
 import type { AdapterDevice, AttachFn, Driver, RemoteFn } from './appium.session.js';
+import { projectScreen } from './projection.js';
 
 /** The element list a predicate search resolves to. */
 type ElementList = Awaited<ReturnType<Driver['$$']>>;

@@ -6,13 +6,13 @@ import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/port
 import { releaseIsolation, startServices } from '../../model/services/services.js';
 import type { ServiceRecord, StartedServices } from '../../model/services/services.js';
 import { mobileServer, mobileSessions } from '../../runner/provided.js';
+import { serveAppium } from '../../seams/appium/appium-server.js';
+import type { AppiumServer, MobileDevice, RunServer } from '../../seams/appium/appium-server.js';
+import { sessionLedger } from '../../seams/appium/session-ledger.js';
+import { sameRuntime } from '../../seams/simctl/simulator.js';
 import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
-import { serveAppium } from './appium-server.js';
-import type { AppiumServer, MobileDevice, RunServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
-import { sessionLedger } from './session-ledger.js';
-import { sameRuntime } from './simulator.js';
 
 // ── Types ──
 

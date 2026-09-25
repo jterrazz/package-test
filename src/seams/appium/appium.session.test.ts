@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { sessionLedger } from '../../facets/mobile/session-ledger.js';
 import { openSession } from './appium.session.js';
+import { sessionLedger } from './session-ledger.js';
 
 const SERVER_URL = 'http://127.0.0.1:4723';
 

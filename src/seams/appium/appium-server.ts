@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { ServeAdapter } from '../../seams/process/serve.adapter.js';
-import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
+import { ServeAdapter } from '../process/serve.adapter.js';
+import { ensureBooted, resolveSimulatorUdid } from '../simctl/simulator.js';
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
 
