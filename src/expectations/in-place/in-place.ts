@@ -1,9 +1,9 @@
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-import { isFrameworkFrame } from '../../kernel/files/caller.js';
+import { isFrameworkFrame, stackFrames } from '../../kernel/files/caller.js';
+import type { StackFrame } from '../../kernel/files/caller.js';
 import { dedent } from '../text/dedent.js';
 
 /**
@@ -26,29 +26,18 @@ import { dedent } from '../text/dedent.js';
  */
 
 /** Where a `toMatch(<value>)` call stands in a test's source, 1-based. */
-export type CallSite = { column: number; file: string; line: number };
+export type CallSite = StackFrame;
 
 /** The span a value written in place occupies, and the indentation of its line. */
 type ArgumentSpan = { end: number; indent: string; start: number };
-
-const FRAME = /\(?(?<file>(?:file:\/\/)?\/[^():]+):(?<line>\d+):(?<column>\d+)\)?$/u;
 
 const TO_MATCH = /\btoMatch\s*\(/gu;
 
 /** The first frame of a stack that is the test's own: never the framework's, never a dependency's. */
 export function callSiteOf(stack: string): CallSite | undefined {
-    for (const frame of stack.split('\n')) {
-        const groups = FRAME.exec(frame.trim())?.groups;
-        if (groups?.file === undefined) {
-            continue;
-        }
-        const file = groups.file.startsWith('file://') ? fileURLToPath(groups.file) : groups.file;
-        if (file.includes(`${sep}node_modules${sep}`) || isFrameworkFrame(file)) {
-            continue;
-        }
-        return { column: Number(groups.column), file, line: Number(groups.line) };
-    }
-    return undefined;
+    return stackFrames(stack).find(
+        ({ file }) => !file.includes(`${sep}node_modules${sep}`) && !isFrameworkFrame(file),
+    );
 }
 
 /** The offset of a 1-based line and column in a source. */

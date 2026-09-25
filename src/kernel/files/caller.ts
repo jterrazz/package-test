@@ -1,21 +1,52 @@
-import { realpathSync } from 'node:fs';
 import { dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
+import { safeRealpath } from './resolve.js';
 
 /** Sibling module tests are callers, not internals (CONVENTIONS I2). */
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
+/** One frame of a V8 stack: the file it ran in, and where in it. */
+export type StackFrame = { column: number; file: string; line: number };
+
+/** A frame's location, in either shape V8 prints it in: `at fn (<location>)` or `at <location>`. */
+const FRAME_LOCATION = /^at (?:.*? \((?<wrapped>[^()]+)\)|(?:async )?(?<bare>[^()\s]+))$/u;
+
+/** A location's file, line and column. */
+const POSITION = /^(?<file>.+):(?<line>\d+):(?<column>\d+)$/u;
+
+/**
+ * The frames of a stack, innermost first: a `file:` URL reads as its path, and
+ * node's own internals (`node:`) are left out.
+ */
+export function stackFrames(stack: string): StackFrame[] {
+    const frames: StackFrame[] = [];
+    for (const text of stack.split('\n')) {
+        const groups = FRAME_LOCATION.exec(text.trim())?.groups;
+        const position = POSITION.exec(groups?.wrapped ?? groups?.bare ?? '')?.groups;
+        if (position?.file === undefined || position.file.startsWith('node:')) {
+            continue;
+        }
+        const file = position.file.startsWith('file:')
+            ? fileURLToPath(position.file)
+            : position.file;
+        frames.push({ column: Number(position.column), file, line: Number(position.line) });
+    }
+    return frames;
+}
+
+/**
+ * The frames of the stack where this is called, innermost first, less this
+ * module's own. The error is never thrown: asking V8 who called is what a
+ * stack is for, and its message says so where one prints.
+ */
+export function callerFrames(): StackFrame[] {
+    const { stack } = new Error('@jterrazz/test: reading the call site');
+    return stackFrames(stack ?? '').filter(({ file }) => file !== import.meta.filename);
+}
+
 /** Where this very module sits inside the framework's SOURCE tree. */
 const SOURCE_LOCATION = join('kernel', 'files');
-
-/** The real path of `path`, or `path` itself when it cannot be resolved. */
-function realPath(path: string): string {
-    try {
-        return realpathSync(path);
-    } catch {
-        return path;
-    }
-}
 
 /**
  * Directory of the running framework module itself. From the built package
@@ -23,7 +54,7 @@ function realPath(path: string): string {
  * `file:` link, where the real path carries neither `node_modules` nor
  * `/src/…` and would otherwise be mistaken for a caller frame.
  */
-const FRAMEWORK_DIR = realPath(import.meta.dirname);
+const FRAMEWORK_DIR = safeRealpath(import.meta.dirname);
 
 /**
  * The directories holding the framework's OWN modules, from the directory this
@@ -55,7 +86,7 @@ function isInside(directory: string, path: string): boolean {
  * calling it?
  *
  * Answered by IDENTITY — the frame is inside the framework's own directory —
- * and never by substring: a consumer's own `src/model/` is not this package's,
+ * and never by substring: a consumer's own `src/kernel/` is not this package's,
  * and reading it as one would skip the consumer's files as internals and
  * anchor fixture resolution on the wrong directory.
  *
@@ -70,8 +101,8 @@ export function isFrameworkFrame(
     }
     // Both sides go through realpath: an install reached by symlink (a `file:`
     // Link, a pnpm store, a worktree) must still compare equal to itself.
-    const real = realPath(filePath);
-    return frameworkTrees.some((tree) => isInside(realPath(tree), real));
+    const real = safeRealpath(filePath);
+    return frameworkTrees.some((tree) => isInside(safeRealpath(tree), real));
 }
 
 /**
@@ -82,34 +113,15 @@ export function isFrameworkFrame(
  * @internal
  */
 export function getCallerDir(): string {
-    const { stack } = new Error('caller detection');
-    if (!stack) {
-        throw new Error('Cannot detect caller directory: no stack trace');
-    }
-
-    const lines = stack.split('\n');
-    for (const line of lines) {
-        const match = /at\s+(?:.*?\()?(?:file:\/\/)?(?<filePath>[^:)]+):\d+:\d+/u.exec(line);
-        if (!match?.groups?.filePath) {
-            continue;
-        }
-
-        const { filePath } = match.groups;
-
-        if (filePath.includes('node_modules')) {
-            continue;
-        }
-        if (isFrameworkFrame(filePath)) {
-            continue;
-        }
-
-        return resolve(filePath, '..');
-    }
-
-    // Every frame is framework- or package-internal: the chain was started
-    // By code living in node_modules (e.g. a published rule pack declaring
-    // Tests itself). There is no consumer test file to anchor on — fall back
-    // To the working directory; such packs assert on results directly and
-    // Never resolve `expected/` fixtures.
-    return process.cwd();
+    const caller = callerFrames().find(
+        ({ file }) => !file.includes('node_modules') && !isFrameworkFrame(file),
+    );
+    /*
+     * Every frame framework- or package-internal: the chain was started by
+     * code living in node_modules (a published rule pack declaring tests
+     * itself). There is no consumer test file to anchor on, so the working
+     * directory stands in; such packs assert on results directly and never
+     * resolve `expected/` fixtures.
+     */
+    return caller === undefined ? process.cwd() : dirname(caller.file);
 }

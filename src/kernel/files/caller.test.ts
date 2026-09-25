@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { frameworkTreesOf, getCallerDir, isFrameworkFrame } from './caller.js';
+import { frameworkTreesOf, getCallerDir, isFrameworkFrame, stackFrames } from './caller.js';
 
 // Real directories: the check resolves real paths, so a made-up path would
 // Only ever exercise the fallback.
@@ -12,7 +12,7 @@ const base = mkdtempSync(resolve(tmpdir(), 'caller-frames-'));
 /** The framework as a consumer installs it: everything under one directory. */
 const framework = join(base, 'framework', 'dist');
 
-/** A consumer app that has its OWN src/model, src/integrations, src/vitest. */
+/** A consumer app that has its OWN src/core, src/integrations, src/vitest. */
 const app = join(base, 'app');
 
 for (const dir of [
@@ -39,6 +39,23 @@ for (const file of [
 describe('caller', () => {
     afterAll(() => {
         rmSync(base, { force: true, recursive: true });
+    });
+
+    test('stackFrames — reads both frame shapes V8 prints, a file: URL as its path, and leaves node internals and the message out', () => {
+        // Given - a stack whose message mentions a location, with every frame shape
+        const stack = [
+            'Error: expected at /not/a/frame.ts:1:1',
+            '    at Object.run (/work/specs/a.spec.ts:3:5)',
+            '    at async file:///work/specs/b.spec.ts:7:9',
+            '    at node:internal/process/task_queues:95:5',
+            '    at new Promise (<anonymous>)',
+        ].join('\n');
+
+        // Then - the two frames of files, innermost first
+        expect(stackFrames(stack)).toStrictEqual([
+            { column: 5, file: '/work/specs/a.spec.ts', line: 3 },
+            { column: 9, file: '/work/specs/b.spec.ts', line: 7 },
+        ]);
     });
 
     test('caller detection — returns the directory of the calling test file', () => {

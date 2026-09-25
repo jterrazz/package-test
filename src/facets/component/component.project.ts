@@ -1,12 +1,12 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../kernel/files/artifacts.js';
+import { callerFrames } from '../../kernel/files/caller.js';
 import type { FacetProjectOptions } from '../../vitest/project-kit.js';
 import { onProjectDefaults } from '../../vitest/project-kit.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
@@ -85,29 +85,12 @@ const requireFrom = createRequire(import.meta.url);
 /** This module's own file — the frames the caller search walks past. */
 const HELPERS_FILE = import.meta.filename;
 
-/** A stack frame's file, in either of the two shapes V8 prints it in. */
-const STACK_FRAME = /(?:\((?<wrapped>[^()]+):\d+:\d+\)|at (?<bare>[^()\s]+):\d+:\d+)$/u;
-
 /** A config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`. */
 const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
 
 /** The file of the first frame below this module — who called the helper. */
 function callerFile(): string | undefined {
-    // The error is never thrown and never read as a message: asking V8 who
-    // Called is what a stack is for, and the string says so where one prints.
-    const { stack } = new Error('@jterrazz/test: reading the call site of a project helper');
-    for (const frame of stack?.split('\n').slice(1) ?? []) {
-        const groups = STACK_FRAME.exec(frame.trim())?.groups;
-        const location = groups?.wrapped ?? groups?.bare;
-        if (location === undefined || location.startsWith('node:')) {
-            continue;
-        }
-        const file = location.startsWith('file:') ? fileURLToPath(location) : location;
-        if (file !== HELPERS_FILE) {
-            return file;
-        }
-    }
-    return undefined;
+    return callerFrames().find(({ file }) => file !== HELPERS_FILE)?.file;
 }
 
 /** The nearest directory at or above the cwd holding a file of this name. */
