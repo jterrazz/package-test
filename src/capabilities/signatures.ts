@@ -13,7 +13,10 @@ import type { WrapMethod } from './wrap/wrap.capability.js';
  * `Self` is the chain a setup hands back, `P` the facet's parameters.
  */
 export type SetupSignatures<Self, P extends FacetParams> = {
-    /** Pin the subject's `Date` at `iso` for this chain — the calendar it reads. */
+    /**
+     * Pin `Date` at `iso` for this chain: this process's own for an app, a job
+     * or a module run in it, the page's for a visit or a render.
+     */
     clock: ClockMethod<Self>;
     /** Set environment variables on the child process. `$WORKDIR` expands; `null` unsets. */
     env: EnvMethod<Self>;

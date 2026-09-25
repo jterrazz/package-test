@@ -24,8 +24,9 @@ type SharingOf<C extends Composition, Self> =
     'with' extends Names<C['capabilities']>
         ? {
               /**
-               * The facet with what a whole file shares — `const events = api.with({ clock })` —
-               * every chain it starts beginning with those settings.
+               * The facet with what a whole file shares, each setting one of
+               * the setups this facet composes — every chain it starts
+               * beginning with those settings.
                */
               with: (context: Pick<ChainContext, ContextOf<C>>) => Self;
           }

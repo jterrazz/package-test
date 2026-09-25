@@ -532,7 +532,7 @@ Standard oxlint disable comments work, and every suppression must carry its reas
 // oxlint-disable-next-line jterrazz/a1-specification-file -- negative constructor spec: the runner must fail to start
 ```
 
-The framework's own repo keeps its sanctioned exemptions visible: config `overrides` for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose) and for `src/runner/**` (each facet's `projects/<facet>.project.ts` among them), `src/seams/vitest-browser/**` and `src/model/{clock,doubles,goldens}/**` (the runner coupling imports `vitest` by design).
+The framework's own repo keeps its sanctioned exemptions visible, as config `overrides` in its `oxlint.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning F2 off by path for every module whose job is the runner coupling or a test package — [01 — Architecture § The source trees](01-architecture.md#the-source-trees) names them and says why.
 
 The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are a separate binary):
 
