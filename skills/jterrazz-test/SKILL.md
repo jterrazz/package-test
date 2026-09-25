@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, job, cli), vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
+description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, job, cli) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
 metadata:
     version: '17'
 ---
@@ -11,7 +11,7 @@ What to decide BEFORE writing a test. Everything else — every option, every ma
 
 ## Which kind — ask the fork first
 
-Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([docs/18-conventions.md](../../docs/18-conventions.md) carries the table).
+Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([docs/18 § The fork](../../docs/18-conventions.md#the-fork--which-kind-of-test-this-is) carries the table, and a meta-test holds this list to it).
 
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
 2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
@@ -28,6 +28,7 @@ The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<
 ## The shape every spec has
 
 ```typescript
+// specs/api/api.specification.ts
 import { afterAll } from 'vitest';
 import { postgres, specification } from '@jterrazz/test';
 
@@ -41,6 +42,11 @@ afterAll(cleanup);
 
 ```typescript
 // specs/api/users/create/shape.spec.ts — POST /users
+import { file } from '@jterrazz/test';
+import { describe, expect, test } from 'vitest';
+
+import { api } from '../../api.specification.js';
+
 describe('shape', () => {
     test('creates a user', async () => {
         // Given - one existing user
@@ -110,5 +116,4 @@ What a test stands on is named by one of two calls, with the path relative to th
 | what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |
 | a database, a cache, a process              | [docs/17-services.md](../../docs/17-services.md)         |
 | a rule id a diagnostic printed              | [docs/19-linting.md](../../docs/19-linting.md)           |
-
-The manual's map is [docs/README.md](../../docs/README.md); the API is the types the package publishes.
+| anything else — the API is the types        | [docs/README.md](../../docs/README.md), the manual's map |

@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { FORK } from './fork.js';
 import { SKILL_MAX_LINES, skillFindings } from './skill.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -46,6 +47,29 @@ describe('the skill names only what exists (meta-test)', () => {
             unknownCalls: ['fakeOf'],
             unknownImports: ['fakeOf from @jterrazz/test'],
         });
+    });
+});
+
+/** One answer of the skill's fork: `N. <question> → **<kind>**, `<path>``. */
+const SKILL_FORK_LINE = /^\d+\. .*→ \*\*(?<kind>[^*]+)\*\*, `(?<path>[^`]+)`/gmu;
+
+describe('the skill asks the fork the constitution states (meta-test)', () => {
+    test('the same kinds, in the same order, each at the place the generated fork names', () => {
+        // Given - the skill's hand-kept fork, and the one chapter 18 is generated from
+        const answers = [...readFileSync(SKILL, 'utf8').matchAll(SKILL_FORK_LINE)].map((match) => ({
+            kind: match.groups?.kind,
+            path: match.groups?.path ?? '',
+        }));
+
+        // Then - an agent following the skill lands where the constitution says
+        expect(answers.map((answer) => answer.kind)).toStrictEqual(FORK.map((row) => row.kind));
+        const misplaced = answers.filter(
+            (answer, index) =>
+                !answer.path.startsWith(
+                    /`(?<place>[^`]+)`/u.exec(FORK[index]?.livesAt ?? '')?.groups?.place ?? '\0',
+                ),
+        );
+        expect(misplaced).toStrictEqual([]);
     });
 });
 
