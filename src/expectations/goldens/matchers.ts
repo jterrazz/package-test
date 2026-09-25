@@ -251,7 +251,7 @@ export function compareResponse(
  * `toMatch(file('./expected/<name>.http'))` on a response — the golden, its
  * update included. A document's `response: ./expected/…` is this same call.
  */
-export function matchResponseFile(
+function matchResponseFile(
     accessor: ResponseAccessor,
     name: string,
     frozen: boolean,
@@ -413,7 +413,7 @@ function isRows(expected: unknown): expected is Rows {
  * in the table's order when `ordered` — the diff when they differ, `null`
  * when they match.
  */
-export function rowsMismatch(
+function rowsMismatch(
     name: string,
     expected: { columns: string[]; rows: Rows },
     actual: unknown[][],

@@ -50,8 +50,6 @@ export const SPEC_EXTENSION = '.spec.yaml';
  */
 export const DOCUMENT_KEYS = ['description', 'fixture', 'env', 'serve', 'runs'] as const;
 
-export type DocumentKey = (typeof DOCUMENT_KEYS)[number];
-
 /** The keys of one run, in the canonical order: what is given, then what came back. */
 export const RUN_KEYS = [
     'command',
@@ -65,13 +63,10 @@ export const RUN_KEYS = [
 ] as const;
 
 /** The keys of a `files:` content assertion. */
-export const FILE_CONTENT_KEYS = ['contains', 'equals'] as const;
+const FILE_CONTENT_KEYS = ['contains', 'equals'] as const;
 
 /** The bare states a `files:` entry may name instead of a content assertion. */
-export const FILE_STATES = ['absent', 'exists'] as const;
-
-/** The stream keys — the three block scalars an author writes as text. */
-export const STREAM_KEYS = ['stdin', 'stdout', 'stderr'] as const;
+const FILE_STATES = ['absent', 'exists'] as const;
 
 // ── Presence ──
 
@@ -201,7 +196,7 @@ export type SpecRun = {
 };
 
 /** A path a document names, with the line it names it on. */
-export type SpecPath = {
+type SpecPath = {
     line: number;
     path: string;
 };

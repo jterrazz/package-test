@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { VITEST_ARTIFACTS_DIR } from '../../../kernel/files/artifacts.js';
 
 /** A driver session the run recorded: where it lives, and what the server answered for it. */
-export type RecordedSession = {
+type RecordedSession = {
     /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
     capabilities: Record<string, unknown>;
     /** The Appium server's base URL. */

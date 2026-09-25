@@ -39,20 +39,20 @@ function goldenPath(testPath: string | undefined, name: string): string {
 }
 
 /** The ARIA snapshot of the rendered `<body>`, as YAML. */
-export const ariaTree: BrowserCommand<[], string> = async (context) => {
+const ariaTree: BrowserCommand<[], string> = async (context) => {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the provider merges its own context in at runtime; the playwright one is what `component()` pins
     const frame = await (context as unknown as PlaywrightCommandContext).frame();
     return await frame.locator('body').ariaSnapshot();
 };
 
 /** The golden's current content, or `null` when it does not exist yet. */
-export const goldenRead: BrowserCommand<[string], null | string> = (context, name) => {
+const goldenRead: BrowserCommand<[string], null | string> = (context, name) => {
     const path = goldenPath(context.testPath, name);
     return existsSync(path) ? readFileSync(path, 'utf8') : null;
 };
 
 /** Write the golden — update mode's half, and the path it wrote, for the message. */
-export const goldenWrite: BrowserCommand<[string, string], string> = (context, name, content) => {
+const goldenWrite: BrowserCommand<[string, string], string> = (context, name, content) => {
     const path = goldenPath(context.testPath, name);
     mkdirSync(dirname(path), { recursive: true });
     writeFileSync(path, content, 'utf8');
@@ -65,7 +65,7 @@ export const goldenWrite: BrowserCommand<[string, string], string> = (context, n
  * maps it back to the test's own source, and the frame of the test file is
  * the call to rewrite.
  */
-export const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, text) => {
+const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, text) => {
     const file = context.testPath;
     const frame = context.project.browser
         ?.parseStacktrace(stack)
