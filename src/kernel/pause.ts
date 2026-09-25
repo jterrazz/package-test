@@ -1,5 +1,5 @@
 /**
- * One answer to "wait" — the only `setTimeout` the model owns.
+ * One answer to "wait" — the only `setTimeout` the kernel owns.
  *
  * Two things in the framework genuinely have to wait: the spacing between the
  * pieces of a declared stream, and the poll behind `waitUntil`. Everything

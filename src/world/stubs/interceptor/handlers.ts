@@ -13,7 +13,7 @@ import { toReadableStream } from '../exchange/stream.js';
  *
  * Typed loosely on purpose: `msw` is reached through a lazy import by both
  * sides (it is a dependency, never a peer), and the namespace it returns is
- * the seam's to describe, not the model's.
+ * this engine's to describe, not the kernel's.
  */
 import type { Stub } from '../stub.js';
 

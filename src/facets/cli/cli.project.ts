@@ -49,7 +49,7 @@ export type CliProjectOptions = FacetProjectOptions & LiterateDoor;
 /**
  * A cli project collects the facet's `.spec.ts` files AND its documents:
  * `specs/cli/**\/*.spec.yaml`, bound to `specs/cli/cli.specification.ts`
- * unless `literate` says otherwise (docs/12 § the literate door).
+ * unless `literate` says otherwise (docs/20 § The three doors, one engine).
  */
 export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
     return documentProject('cli', options);

@@ -1,5 +1,5 @@
-import type { ChainSignature } from '../../kernel/chain/capability.js';
 import { defineCapability } from '../chain/capability.js';
+import type { ChainSignature } from '../chain/capability.js';
 
 /** `.headers(record)`, handing back the chain it was called on. */
 export type HeadersMethod<Self> = (headers: Record<string, string>) => Self;

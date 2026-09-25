@@ -54,7 +54,7 @@ export async function ensureStubServer(): Promise<void> {
 /**
  * Register a chain's stubs as MSW handlers. A trailing catch-all handler
  * records any request no stub accepted — the chain's pipeline
- * (`model/chain/perform.ts`) rethrows it as the spec failure (rejecting the
+ * (`kernel/chain/perform.ts`) rethrows it as the spec failure (rejecting the
  * action promise, never an unhandled rejection).
  */
 export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {

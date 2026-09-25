@@ -54,7 +54,7 @@ export const call = defineAction<
     perform: async ([subject], _read, { services }, { config, testDir }) => {
         let outcome: CallOutcome;
         try {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the record's TYPE is the facet's `Services` parameter, which the signature index states; the definition holds it as the record it is at run time
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the record's TYPE is the facet's `Services` parameter, which `CallSignature` reads through `this['params']`; the definition holds it as the record it is at run time
             outcome = { error: null, threw: false, value: await subject(services as never) };
         } catch (error) {
             outcome = { error, threw: true, value: null };

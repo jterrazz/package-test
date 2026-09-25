@@ -7,7 +7,7 @@ import { frameworkTreesOf, getCallerDir, isFrameworkFrame } from './caller.js';
 
 describe('caller detection', () => {
     test('returns the directory of the calling test file', () => {
-        // Given - a direct call from this sibling test file (under src/specification/)
+        // Given - a direct call from this sibling test file (under src/kernel/files/)
         const dir = getCallerDir();
 
         // Then - sibling .test.ts frames are callers, not framework internals (CONVENTIONS I2)
@@ -85,7 +85,7 @@ describe('framework frames are recognised by identity', () => {
         expect(isFrameworkFrame(join(framework, 'match.test.js'), [framework])).toBeFalsy();
     });
 
-    test('a module of another facet is a framework frame, from the DEFAULT tree', () => {
+    test('a module of another layer is a framework frame, from the DEFAULT tree', () => {
         // Given - a sibling facet's module, judged against the tree this module derives from its own location (no explicit frameworkTree)
         const other = resolve(
             import.meta.dirname,

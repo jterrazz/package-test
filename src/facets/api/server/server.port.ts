@@ -10,10 +10,7 @@ export type ServerRequestOptions = {
     template?: string | undefined;
 };
 
-/**
- * Abstract server interface for specification runners.
- * Integration mode uses an in-process Hono app; E2E mode uses real HTTP via fetch.
- */
+/** The app a request is sent to — answered in this process (A8); `HonoAdapter` is its one adapter. */
 export type ServerPort = {
     /** Send an HTTP request and return the parsed response. */
     request: (

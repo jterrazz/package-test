@@ -13,8 +13,8 @@ import type { CollectionTag, Document, ScalarTag } from 'yaml';
  * a flow collection — is put back from the source by {@link renderYamlSource}.
  *
  * The node types and guards are re-exported rather than imported by each
- * consumer: one folder owns one external dependency (CONVENTIONS I1), and this
- * is that folder.
+ * consumer: one module owns the yaml engine (I11 pins it here), so consumers
+ * import its node types from this file.
  */
 
 export { isMap, isPair, isScalar, isSeq, Scalar } from 'yaml';

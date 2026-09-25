@@ -106,8 +106,8 @@ function resolveRelativeAgainst(origin: string): () => () => void {
 }
 
 /**
- * Build the module-scope double on one engine. The node entry hands it msw's
- * server, the page's entry hands it msw's worker: one shape, two transports,
+ * Build the module-scope double on one engine. `process-intercept.ts` hands
+ * it msw's server, `page-intercept.ts` msw's worker: one shape, two transports,
  * exactly as a chain's `.intercept()` already has it.
  *
  * @internal
