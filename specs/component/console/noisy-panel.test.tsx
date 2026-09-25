@@ -1,4 +1,5 @@
-import { component, content, testId, within } from '@jterrazz/test';
+import { component, content } from '@jterrazz/test';
+import type { TableAccessor } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { NoisyPanel } from './noisy-panel.js';
@@ -15,13 +16,16 @@ test('separates the console errors from the whole stream', async () => {
     expect(result.errors.text).toContain('the panel could not reach the cache');
 });
 
-test('scopes through a test id where the container carries no role', async () => {
-    // Given - a panel wrapped in a plain <div>: no landmark, no accessible name
+test('an empty stream is an empty text: toBeEmpty refuses a stream in the page too', async () => {
+    // Given - a render, whose console is a stream
     const result = await component.render(<NoisyPanel />, async (visitor) => {
-        // testId: the wrapper is a bare <div> — there is no role and no name to scope on
-        await visitor.see(within(testId('panel-body'), content('Panel')));
+        await visitor.see(content('Panel'));
     });
 
-    // Then - the escape hatch found its anchor, which is an attribute and not anything a user can see
-    expect(result.html.text).toContain('data-testid="panel-body"');
+    // Then - a table's matcher handed the console, past the compiler, names the form to write
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a stream handed to toBeEmpty
+    const table = result.console as unknown as TableAccessor;
+    await expect(expect(table).toBeEmpty()).rejects.toThrow(
+        /an empty stream is an empty text\n.*\nfix: compare its text: expect\(<result>\.console\.text\)\.toBe\(''\)/u,
+    );
 });
