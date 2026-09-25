@@ -7,7 +7,7 @@ import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { directory, file } from '../../../kernel/files/spec-path.js';
 import { fixture } from './fixture.capability.js';
 import type { FixtureMethod } from './fixture.capability.js';
-import { fsFixtures } from './fixtures.js';
+import { fsFixtures } from './fixtures.engine.js';
 
 /** A chain composed of `.fixture()` alone, ending on what its working directory holds. */
 type Chain = { fixture: FixtureMethod<Chain>; list: () => Promise<string[]> };

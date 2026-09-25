@@ -14,7 +14,7 @@ import {
 import { safeRealpath } from '../../../kernel/files/resolve.js';
 import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
 import type { CliConfig } from '../cli.handle.js';
-import { fsFixtures } from '../fixture/fixtures.js';
+import { fsFixtures } from '../fixture/fixtures.engine.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
 import { readSpecFile, SpecSyntaxError, updateSpecFile } from './spec-document.js';

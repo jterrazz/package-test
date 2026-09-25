@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { copyPlan } from './fixtures.js';
+import { copyPlan } from './fixtures.engine.js';
 
 describe('fixtures — source resolution', () => {
     let base: string;

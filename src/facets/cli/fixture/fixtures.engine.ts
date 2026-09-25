@@ -3,6 +3,7 @@ import { basename, resolve } from 'node:path';
 
 import { resolveSpecPath } from '../../../kernel/files/resolve.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
+import type { FixturePort } from './fixture.port.js';
 
 /**
  * Copy semantics for the file-state a command spec stands on — the chain's
@@ -69,9 +70,7 @@ export function copyPlan(path: string, specDir: string, workDir: string): Fixtur
  * The fixtures a chain lays, copied onto this machine's disk by
  * {@link copyPlan}: its refusals are the copy's.
  */
-export const fsFixtures: {
-    readonly layer: (path: string, testDir: string, workDir: string) => void;
-} = {
+export const fsFixtures: FixturePort = {
     layer: (path, testDir, workDir) => {
         const { dest, src } = copyPlan(path, testDir, workDir);
         cpSync(src, dest, { recursive: true });
