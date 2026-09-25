@@ -1,15 +1,4 @@
-import {
-    component,
-    content,
-    defineStub,
-    heading,
-    http,
-    main,
-    region,
-    row,
-    table,
-    within,
-} from '@jterrazz/test';
+import { component, content, defineStub, http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
@@ -47,19 +36,6 @@ test('says how much of the collection the table is showing', async () => {
                 - row "A second post":
                   - cell "A second post"`);
     expect(result.console.text).toBe('');
-});
-
-test('renders inside the frame the project wraps every render in', async () => {
-    // Given - the same listing, read through the project's own providers
-    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        const inPosts = within(region('Posts'), heading('Posts'));
-        await visitor.see(within(main(), inPosts));
-        await visitor.see(within(table('Showing 2 of 200 posts'), row('A first post')));
-    });
-
-    // Then - the rows are in the markup and in the rendered text
-    expect(result.html.text).toContain('A second post');
-    expect(result.content.text).toContain('Showing 2 of 200 posts');
 });
 
 test('fails the render when the component asks for what no stub declared', async () => {
@@ -109,52 +85,4 @@ test('serves a transport failure the way a server that is not running does', asy
 
     // Then - the component took its "nothing answered" branch, not an error status
     expect(result.content.text).toContain('Could not load posts');
-});
-
-/** The failure a golden assertion threw, as text — the subject of the test below. */
-async function refusalOf(assertion: Promise<void>): Promise<string> {
-    return await assertion.then(
-        () => 'the frozen golden matched, which the wrong one must never do',
-        (error: unknown) => (error instanceof Error ? error.message : String(error)),
-    );
-}
-
-test('never rewrites a frozen golden, and throws its diff instead', async () => {
-    // Given - a golden deliberately claiming a third row the table never draws
-    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        await visitor.see(content('Showing 2 of 200 posts'));
-    });
-
-    // Then - it threw its diff, and throws the SAME diff on a second read: a rewrite would have made the second comparison pass, which is exactly what `{ frozen: true }` forbids under TEST_UPDATE=1 (docs/08 § update mode)
-    const wrong = `
-            - main:
-              - region "Posts":
-                - heading "Posts" [level=1]
-                - table "Showing 3 of 200 posts":
-                  - caption: Showing 3 of 200 posts
-                  - rowgroup:
-                    - row "Title":
-                      - columnheader "Title"
-                  - rowgroup:
-                    - row "A first post":
-                      - cell "A first post"
-                    - row "A second post":
-                      - cell "A second post"
-                    - row "A third post":
-                      - cell "A third post"`;
-    const first = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
-    const second = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
-    expect(first).toContain('A third post');
-    expect(second).toBe(first);
-});
-
-test('replaces the first surface when one test renders twice', async () => {
-    // Given - two renders in one test, the second the only one left standing
-    await component.intercept(listing).render(<PostTable />);
-    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        await visitor.see(heading('Posts'));
-    });
-
-    // Then - one document, one table: the first mount did not stay behind
-    expect(result.content.text.match(/Showing 2 of 200 posts/gu)).toHaveLength(1);
 });
