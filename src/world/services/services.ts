@@ -14,6 +14,17 @@ export type DatabaseKeys<Services extends ServiceRecord> = {
     [K in keyof Services]: Services[K] extends DatabasePort ? K & string : never;
 }[keyof Services];
 
+/**
+ * The keys of a services record whose handles are databases, in the order
+ * the record declares them — the runtime twin of {@link DatabaseKeys}, and
+ * what `ServicesConfig.databaseKeys` holds.
+ */
+export function declaredDatabaseKeys(services: ServiceRecord): string[] {
+    return Object.entries(services)
+        .filter(([, service]) => service.createDatabaseAdapter() !== null)
+        .map(([key]) => key);
+}
+
 /** What a constructor that starts a services record hands its chain. */
 export type ServicesConfig = ChainConfig & {
     database?: DatabasePort | undefined;

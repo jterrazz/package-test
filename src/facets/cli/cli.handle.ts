@@ -6,13 +6,10 @@ import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveCommand, resolveRoot } from '../../kernel/files/resolve.js';
+import { declaredDatabaseKeys } from '../../world/services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
-import {
-    declaredDatabaseKeys,
-    releaseIsolation,
-    startServices,
-} from '../../world/services/startup/start-services.js';
+import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
 import type { StartedServices } from '../../world/services/startup/start-services.js';
 import type { CliSpecification } from './cli.facet.js';
 import { cliFacet } from './cli.facet.js';

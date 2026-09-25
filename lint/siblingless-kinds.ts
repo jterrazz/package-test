@@ -68,7 +68,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/services/isolation.port.ts',
             'src/facets/api/server/server.port.ts',
             'src/world/services/service.port.ts',
-            'src/world/services/services.ts',
             'src/kernel/config/settings.ts',
             'src/world/stubs/exchange/exchange.ts',
             'lint/config-shape.ts',

@@ -2,12 +2,9 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
+import { declaredDatabaseKeys } from '../../world/services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
-import {
-    declaredDatabaseKeys,
-    releaseIsolation,
-    startServices,
-} from '../../world/services/startup/start-services.js';
+import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
 import type { StartedServices } from '../../world/services/startup/start-services.js';
 import type { IntegrationSpecification } from './integration.facet.js';
 import { integrationFacet } from './integration.facet.js';

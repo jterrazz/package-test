@@ -31,12 +31,6 @@ export async function releaseIsolation(services: ServiceRecord): Promise<void> {
     }
 }
 
-export function declaredDatabaseKeys(services: ServiceRecord): string[] {
-    return Object.entries(services)
-        .filter(([, service]) => service.createDatabaseAdapter() !== null)
-        .map(([key]) => key);
-}
-
 export type StartedServices = {
     database?: DatabasePort | undefined;
     databases?: Map<string, DatabasePort> | undefined;
