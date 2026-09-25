@@ -250,7 +250,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 2    | —   | 1           | 1       | —      | 1         | —      |
+| `.clock()`     | 1   | 2    | —   | 2           | 1       | —      | 1         | —      |
 | `.intercept()` | 10  | 1    | —   | 2           | 1       | 1      | 5         | —      |
 | `.seed()`      | 9   | 1    | 1   | 3           | —       | —      | —         | —      |
 | `.headers()`   | 5   | —    | —   | —           | 1       | —      | —         | —      |
@@ -270,7 +270,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
 | `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7    | —   | —           | —       | —      | —         | —      |
-| `.call()`    | —   | —    | —   | 8           | —       | —      | —         | —      |
+| `.call()`    | —   | —    | —   | 9           | —       | —      | —         | —      |
 | `.exec()`    | —   | —    | 33  | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
@@ -347,7 +347,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —    | 2   | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.value`        | —   | —    | —   | 7           | —       | —      | —         | —      |
+| `.value`        | —   | —    | —   | 8           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
 | `.tree`         | —   | —    | —   | —           | 5       | —      | 4         | —      |
 | `.content`      | —   | —    | —   | —           | 9       | 5      | 14        | —      |
@@ -372,12 +372,12 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability             | api | jobs | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —    | 6   | 3           | 0       | —      | 0         | 3      |
+| `toMatch(file())`      | 1   | —    | 6   | 4           | 0       | —      | 0         | 3      |
 | `toMatch(directory())` | 1   | —    | 5   | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `.json body`           | 2   | —    | 2   | 2           | 0       | —      | —         | 10     |
+| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 10     |
 | `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 10     |
 | `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
 

@@ -90,7 +90,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
         name: 'the facet file set, as a re-export',
-        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`, `api`, `website`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
+        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`, `api`, `website`, `integration`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
     },
     {
         claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),

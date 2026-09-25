@@ -12,8 +12,8 @@ import type {
     ServiceRecord,
     StartedServices,
 } from '../../model/services/services.js';
-import { createIntegrationFacet } from './integration.chain.js';
 import type { IntegrationSpecification } from './integration.chain.js';
+import { integrationFacet } from './integration.facet.js';
 
 // ── Types ──
 
@@ -91,6 +91,10 @@ export async function startIntegration<Services extends ServiceRecord>(
                 await started.orchestrator.stop();
             }
         },
-        integration: createIntegrationFacet<Services, DatabaseKeys<Services>>(config),
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- one composition opens the chain for every record; `Services` is this constructor's type parameter, which the chain hands `.call()` as it was started
+        integration: integrationFacet.open(config) as IntegrationSpecification<
+            Services,
+            DatabaseKeys<Services>
+        >,
     };
 }
