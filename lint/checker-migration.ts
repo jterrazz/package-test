@@ -221,8 +221,9 @@ const RENAMED_RULES: Readonly<Record<string, string>> = {
 const QUOTES = new Set(["'", '"', '`']);
 
 /**
- * The static rules 16 defined and 17 no longer does — an override of one in
- * an oxlint config stops oxlint from starting. A rule 17 renamed is in
+ * The static rules 16 published and 17's published plugin no longer defines
+ * — an override of one in an oxlint config stops oxlint from starting. F3 is
+ * one: 17 keeps it home, a rule of the self plugin. A rule 17 renamed is in
  * {@link RENAMED_RULES} instead.
  */
 const RETIRED_RULES: readonly string[] = [
@@ -230,6 +231,7 @@ const RETIRED_RULES: readonly string[] = [
     'c13-underscored-ground',
     'c8-referenced-fixture-exists',
     'd12w-response-body-probe',
+    'f3-specs-public-entry',
 ];
 
 /** The files oxlint reads its config from, at a member's root. */

@@ -664,4 +664,26 @@ describe('the 16 → 17 mover — the oxlint config', () => {
         );
         expect(again).toStrictEqual([]);
     });
+
+    test('an override of F3, a rule 17 keeps home as a self rule, leaves too', () => {
+        // Given - a member that turned 16's F3 off for its specs
+        const member = tree16(
+            {
+                '.oxlintrc.json':
+                    '{\n    "rules": {\n        "eqeqeq": "error",\n        "jterrazz/f3-specs-public-entry": "off"\n    }\n}\n',
+            },
+            '',
+        );
+
+        // When - the mover runs over the member
+        const moves = migrateLintConfig(member, member);
+
+        // Then - the published plugin no longer defines it, so the override goes and oxlint starts
+        expect(readFileSync(join(member, '.oxlintrc.json'), 'utf8')).toBe(
+            '{\n    "rules": {\n        "eqeqeq": "error"\n    }\n}\n',
+        );
+        expect(moves).toStrictEqual([
+            { file: '.oxlintrc.json', removed: ['f3-specs-public-entry'], renamed: [] },
+        ]);
+    });
 });
