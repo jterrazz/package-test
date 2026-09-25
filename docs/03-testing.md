@@ -170,13 +170,13 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **83 modules** have no sibling test, and every one of them is claimed:
+Today **84 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                              |
 | --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | composition root or barrel (4)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                       |
 | type-only declaration (11)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                           |
-| constant data (5)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests)                                                                                             |
+| constant data (6)                       | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests, `make lint` for the layer map, which judges every module by it)                             |
 | the facet file set, as a re-export (7)  | the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name                                                                                       |
 | a facet's vitest project (6)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                |
 | a mobile module that needs a device (1) | the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest |

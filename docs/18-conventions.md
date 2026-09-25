@@ -236,7 +236,7 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 
 Family I governs the source tree rather than the spec tree, and it splits in two.
 
-**The layer map is the project's to declare.** `i1-layer-boundaries` ships **inert**: this package cannot know another repository's architecture, so the rule enforces nothing until the project states its own layers in `oxlint.config.ts`. What THIS repository declares there, and why each sanctioned edge exists, is [01 — Architecture](01-architecture.md) — a consumer's own map is its own chapter's, written the same way.
+**The layer map is the project's to declare.** `i1-layer-boundaries` ships **inert**: this package cannot know another repository's architecture, so the rule enforces nothing until the project states its own layers in `oxlint.config.ts`. What THIS repository declares, and why each sanctioned edge exists, is [01 — Architecture](01-architecture.md) — a consumer's own map is its own chapter's, written the same way.
 
 **The test-file rules need no declaration.** I2 (a module's test is its sibling) and I4 (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 

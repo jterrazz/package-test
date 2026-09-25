@@ -29,7 +29,7 @@ Three targets stand beside them, and no flow speaks them. `make test-mobile` run
 
 The key reads the lockfile, not the installed toolchain. `@jterrazz/typescript` installed from a sibling checkout (`file:../package-typescript`) is locked by version alone, so a preset change reinstalled at the same version leaves the key unchanged, and `make build` restores a bundle built under the old `compilerOptions`. After such a reinstall, run `npx turbo run build --force` or `rm -rf .artifacts/turbo`. A restore only adds files, so `npm run build:cached` removes `dist/` first: nothing left there by another branch survives into the bundle or a local `npm pack`.
 
-That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `oxlint.config.ts` is the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
+That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `lint/self-layers.ts`, which that config wires, is the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
 
 ### Which file a change opens
 

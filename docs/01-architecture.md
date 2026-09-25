@@ -40,7 +40,7 @@ Every seam is opened lazily rather than imported, and each one is an optional pe
 
 ## The source trees
 
-The code is trees with declared, one-directional edges: the product under `src/`, and `lint/` at the repository root beside it — the rules the package ships (the spine: `src/`, `lint/`, `specs/`, `docs/`, `skills/`). The map is not the linter's to assume — `i1-layer-boundaries` ships inert — so this package declares its own as `FRAMEWORK_LAYERS` in `oxlint.config.ts`, and that declaration is the enforced statement of what follows.
+The code is trees with declared, one-directional edges: the product under `src/`, and `lint/` at the repository root beside it — the rules the package ships (the spine: `src/`, `lint/`, `specs/`, `docs/`, `skills/`). The map is not the linter's to assume — `i1-layer-boundaries` ships inert — so this package declares its own as `FRAMEWORK_LAYERS` in `lint/self-layers.ts`, which `oxlint.config.ts` wires, and that declaration is the enforced statement of what follows.
 
 | Tree            | May import                                                                                                                                                                                                                                                             | Holds                                                                                                                                                                                                                      |
 | --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -60,7 +60,7 @@ Three of those edges carry their reason in the declaration itself. `model/` reac
 
 This package's product IS test tooling, so F2 — which keeps a consumer's production away from test material — is turned off by path wherever that is the job: the runner and the page seam above, the clock, the doubles, the goldens, and `seams/msw/` and `seams/playwright/`, whose dependencies are test packages. Every other module is held to it — the entries and the facet constructors included, which is why a constructor is named `<facet>.handle.ts` and never by a suffix F2 reads as test material; and no module a bundle is built from may be test material, which `package-exports.test.ts` reads from the build's source maps.
 
-The table's May-import column is a reading of `FRAMEWORK_LAYERS`, never a second statement of it: the declaration in `oxlint.config.ts` is what the linter enforces and what a change edits.
+The table's May-import column is a reading of `FRAMEWORK_LAYERS`, never a second statement of it: the declaration in `lint/self-layers.ts` is what the linter enforces and what a change edits.
 
 There are TWO composition roots and neither names a layer. `src/index.ts` is node's: it wires the container integrations into the registry seam and re-exports the public surface. `src/browser/index.ts` is the page's, and `src/surface.ts` is what they agree on — see [What the tree publishes](#what-the-tree-publishes).
 

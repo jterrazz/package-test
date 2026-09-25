@@ -27,4 +27,7 @@ export const selfRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
     ]),
 );
 
+/** This package's layer map, for the config that wires `i1-layer-boundaries`. */
+export { FRAMEWORK_LAYERS } from './self-layers.js';
+
 export default selfPlugin;
