@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { discoverRoot, findRoot, resolveCommand, resolveRoot, resolveSpecPath } from './resolve.js';
+import { discoverRoot, findRoot, resolveRoot, resolveSpecPath } from './resolve.js';
 
 /** A virtual filesystem: the probe the caller injects (fs, or a lint cache). */
 const probe =
@@ -13,7 +13,6 @@ const probe =
         present.includes(path);
 
 let base: string;
-let binRoot: string;
 
 describe('resolve', () => {
     beforeAll(() => {
@@ -23,15 +22,10 @@ describe('resolve', () => {
         writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
         mkdirSync(resolve(base, 'plain/tests/deep'), { recursive: true });
         writeFileSync(resolve(base, 'plain/package.json'), '{"name":"plain"}\n');
-        // And a root whose node_modules/.bin contains a tool
-        binRoot = mkdtempSync(resolve(tmpdir(), 'command-resolution-'));
-        mkdirSync(resolve(binRoot, 'node_modules/.bin'), { recursive: true });
-        writeFileSync(resolve(binRoot, 'node_modules/.bin/mytool'), '#!/bin/sh\n');
     });
 
     afterAll(() => {
         rmSync(base, { force: true, recursive: true });
-        rmSync(binRoot, { force: true, recursive: true });
     });
 
     test('findRoot — the one walk both the runner and A9 use — the NEAREST ancestor that declares itself a project wins', () => {
@@ -138,28 +132,6 @@ describe('resolve', () => {
 
         // Then - the override wins with no resolution against the caller
         expect(found).toBe(resolve(base, 'project'));
-    });
-
-    test('command resolution — absolute commands pass through untouched', () => {
-        // Given - an absolute binary path
-        // Then - it is returned as-is
-        expect(resolveCommand('/usr/bin/env', binRoot)).toBe('/usr/bin/env');
-    });
-
-    test('command resolution — prefers the root node_modules/.bin when the command exists there', () => {
-        // Given - mytool present under <root>/node_modules/.bin
-        // Then - the local bin path wins over bare PATH resolution
-        expect(resolveCommand('mytool', binRoot)).toBe(
-            resolve(binRoot, 'node_modules/.bin/mytool'),
-        );
-    });
-
-    test('command resolution — falls back to the bare command for PATH resolution', () => {
-        // Given - a command absent from every node_modules/.bin
-        // Then - the bare name is returned for the shell to resolve
-        expect(resolveCommand('definitely-not-installed-xyz', binRoot)).toBe(
-            'definitely-not-installed-xyz',
-        );
     });
 
     test('spec path resolution — a relative path resolves from the spec directory, climbing included', () => {

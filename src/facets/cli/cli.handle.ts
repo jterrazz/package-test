@@ -5,7 +5,7 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { resolveCommand, resolveRoot } from '../../kernel/files/resolve.js';
+import { resolveRoot } from '../../kernel/files/resolve.js';
 import { declaredDatabaseKeys } from '../../world/services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
@@ -14,6 +14,7 @@ import type { StartedServices } from '../../world/services/startup/start-service
 import type { CliSpecification } from './cli.facet.js';
 import { cliFacet } from './cli.facet.js';
 import type { CliEnv, CliPort } from './process/cli.port.js';
+import { resolveCommand } from './process/command.js';
 import { ExecAdapter } from './process/exec.adapter.js';
 
 // ── Types ──

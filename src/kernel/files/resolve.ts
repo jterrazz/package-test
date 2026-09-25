@@ -1,4 +1,4 @@
-import { existsSync, realpathSync } from 'node:fs';
+import { realpathSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 
 import { treeKind } from './git-tree.js';
@@ -59,27 +59,6 @@ export function resolveRoot(root: string | undefined, callerDir: string): string
         return root;
     }
     return resolve(callerDir, root);
-}
-
-/**
- * Resolve a command — checks node_modules/.bin, then treats as absolute/PATH.
- */
-export function resolveCommand(command: string, root: string): string {
-    if (isAbsolute(command)) {
-        return command;
-    }
-
-    const binPath = resolve(root, 'node_modules/.bin', command);
-    if (existsSync(binPath)) {
-        return binPath;
-    }
-
-    const cwdBinPath = resolve(process.cwd(), 'node_modules/.bin', command);
-    if (existsSync(cwdBinPath)) {
-        return cwdBinPath;
-    }
-
-    return command;
 }
 
 /**
