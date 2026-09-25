@@ -50,6 +50,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/facets/mobile/screen/open.port.ts',
             'src/facets/component/render/page.port.ts',
+            'src/facets/component/render/options.ts',
             'src/facets/component/render/scenario.ts',
             'src/world/clock/clock.port.ts',
             'src/facets/cli/fixture/fixture.port.ts',

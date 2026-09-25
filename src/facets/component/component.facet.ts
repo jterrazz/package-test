@@ -5,12 +5,12 @@ import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import { mswWorker } from '../../world/stubs/interceptor/worker.js';
-import type { ComponentProjectOptions, FacetProjectOptions } from './component.project.js';
 import { pageClock } from './page/clock.engine.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';
 import { vitestBrowserPage } from './page/page.engine.js';
 import { wrap } from './page/wrap.capability.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
+import type { ComponentOptions } from './render/options.js';
 import { render } from './render/render.action.js';
 import { viewport } from './viewport/viewport.capability.js';
 import { pageViewport } from './viewport/viewport.engine.js';
@@ -26,10 +26,7 @@ const composition = {
         viewport: { group: 'Constructor option', name: 'viewport', probe: 'viewport:' },
         vite: { group: 'Constructor option', name: 'vite', probe: 'vite:' },
         wrap: { group: 'Constructor option', name: 'wrap', probe: 'wrap:' },
-    } satisfies Record<
-        Exclude<keyof ComponentProjectOptions, keyof FacetProjectOptions>,
-        MatrixRow
-    >,
+    } satisfies Record<keyof ComponentOptions, MatrixRow>,
 } as const;
 
 /**

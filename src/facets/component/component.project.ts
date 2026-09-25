@@ -2,45 +2,18 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { basename, dirname, isAbsolute, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { Plugin, UserConfig, UserConfigFn } from 'vite';
+import type { Plugin, UserConfig } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../kernel/files/artifacts.js';
 import type { FacetProjectOptions } from '../../vitest/facet-project.js';
 import { onProjectDefaults } from '../../vitest/preset.js';
 import { COMPONENT_COMMANDS } from './page/commands.js';
+import type { ComponentOptions } from './render/options.js';
 
-// The options every project shares, named here for the composition that states this project's own.
-export type { FacetProjectOptions } from '../../vitest/facet-project.js';
 /** `component()` — rendered units, beside the components they cover. */
-export type ComponentProjectOptions = {
-    /** Freeze the page's `Date` for every render of the project. */
-    clock?: string;
-    /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
-    locale?: string;
-    /**
-     * The directory `vite` and `wrap` are resolved against. Default: the
-     * directory of the file that CALLED the helper — see
-     * {@link callerDirectory}. State it when the call is not written in the
-     * config it configures (a shared config factory).
-     */
-    root?: string;
-    /** IANA zone the page's `Date` reports in. Default `'UTC'`. */
-    timezone?: string;
-    /**
-     * The app's own Vite pipeline: a config path, the object, or the function
-     * a framework exports. Only the PIPELINE is adopted (see {@link reroot}).
-     */
-    vite?: Promise<UserConfig> | string | UserConfig | UserConfigFn;
-    /** The page size every render gets. Default 1280×720. */
-    viewport?: { height: number; width: number };
-    /**
-     * A module whose default export is `(ui) => ReactNode` — the providers
-     * every render of this project is dressed in (a theme, a store, an intl
-     * provider). A router belongs on the chain instead: it is a test's Given.
-     */
-    wrap?: string;
-} & FacetProjectOptions;
+export type ComponentProjectOptions = ComponentOptions & FacetProjectOptions;
 
 /** The pipeline keys a consumer's Vite config contributes, and nothing else. */
 const PIPELINE_KEYS = [
@@ -317,15 +290,6 @@ function assertProviderPin(): void {
     }
 }
 
-/** The framework's own update flag, read where `process` exists. */
-function updating(): boolean {
-    return (
-        process.env.TEST_UPDATE === '1' ||
-        process.argv.includes('-u') ||
-        process.argv.includes('--update')
-    );
-}
-
 /**
  * Hand the project's `wrap` to the page as a STATIC import.
  *
@@ -373,7 +337,7 @@ function providedToPage(options: ComponentProjectOptions): {
     return {
         ...(options.clock === undefined ? {} : { componentClock: options.clock }),
         componentViewport: viewportOf(options),
-        update: updating(),
+        update: shouldUpdateSnapshots(),
     };
 }
 
