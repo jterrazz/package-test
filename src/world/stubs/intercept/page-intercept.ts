@@ -1,6 +1,6 @@
 import { registerWorkerStubs } from '../network/worker.engine.js';
-import { interceptThrough } from './intercept.scope.js';
-import type { Intercept } from './intercept.scope.js';
+import { interceptThrough } from './module-intercept.js';
+import type { Intercept } from './module-intercept.js';
 
 /**
  * The module-scope network double, on msw's WORKER — the same stubs and the

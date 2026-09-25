@@ -65,7 +65,7 @@ export type {
     Intercept,
     InterceptOptions,
     InterceptScope,
-} from './world/stubs/intercept/intercept.scope.js';
+} from './world/stubs/intercept/module-intercept.js';
 // The services a record declares.
 export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';

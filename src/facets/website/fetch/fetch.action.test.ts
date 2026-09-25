@@ -5,7 +5,7 @@ import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { StubRequest, StubResponse } from '../../../world/stubs/exchange/exchange.js';
 import { http } from '../../../world/stubs/http/http.js';
-import { interceptThrough } from '../../../world/stubs/intercept/intercept.scope.js';
+import { interceptThrough } from '../../../world/stubs/intercept/module-intercept.js';
 import { registerStubs, stopStubServer } from '../../../world/stubs/network/server.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { rawFetch } from './fetch.action.js';

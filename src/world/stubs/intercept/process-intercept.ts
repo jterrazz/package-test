@@ -1,5 +1,5 @@
-import { interceptThrough } from './intercept.scope.js';
-import type { Intercept } from './intercept.scope.js';
+import { interceptThrough } from './module-intercept.js';
+import type { Intercept } from './module-intercept.js';
 
 /**
  * The module-scope network double, on msw's node server — what a test with no

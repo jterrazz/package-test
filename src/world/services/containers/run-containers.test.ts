@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { RunContainers } from './run-containers.js';
 import {
     fakeRuntime,
     POSTGRES,
     POSTGRES_REORDERED,
     REDIS,
     unreachable,
-} from './testcontainers.adapter.fixtures.js';
+} from './run-containers.fixtures.js';
+import { RunContainers } from './run-containers.js';
 
 describe('RunContainers', () => {
     test('the run containers — answer two requests alike with one container, started once', async () => {
