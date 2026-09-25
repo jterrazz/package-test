@@ -3,7 +3,7 @@ import { isBuiltin } from 'node:module';
 import { basename, dirname, relative, resolve } from 'node:path';
 
 import { parseProgram } from '../src/seams/oxc-parser/parse.js';
-import { child, childList, isNode, stringValue } from './ast.js';
+import { child, childList, isNode, stringValue, walk } from './ast.js';
 import type { AstNode } from './rule-shape.js';
 
 /**
@@ -39,14 +39,27 @@ function typeOnly(declaration: AstNode): boolean {
     return declaration.importKind === 'type' || declaration.exportKind === 'type';
 }
 
-/** The specifiers a module loads: its value imports and the modules it re-exports from. */
+/**
+ * The specifiers a module loads: its value imports, the modules it re-exports
+ * from, and every `import('…')` it names by a string, wherever it sits.
+ */
 function loadedBy(path: string): string[] {
     const program = parseProgram(path, readFileSync(path, 'utf8'));
-    const body = isNode(program) ? childList(program, 'body') : [];
-    return body.flatMap((statement) => {
+    if (!isNode(program)) {
+        return [];
+    }
+    const loaded = childList(program, 'body').flatMap((statement) => {
         const source = stringValue(child(statement, 'source'));
         return source !== undefined && !typeOnly(statement) ? [source] : [];
     });
+    walk(program, (node) => {
+        const source =
+            node.type === 'ImportExpression' ? stringValue(child(node, 'source')) : undefined;
+        if (source !== undefined) {
+            loaded.push(source);
+        }
+    });
+    return loaded;
 }
 
 /**

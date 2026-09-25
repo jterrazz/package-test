@@ -71,8 +71,8 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         expect(builtinsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('a builtin is reached through a value import at any depth, never through an `import type`', () => {
-        // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads one
+    test('a builtin is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
+        // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads one, one of them lazily
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));
         writeFileSync(
@@ -81,11 +81,12 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         );
         writeFileSync(
             join(root, 'src/next.ts'),
-            "import { cwd } from 'node:process';\nexport { join } from 'path';\nexport const here = cwd;\n",
+            "import { cwd } from 'node:process';\nexport { join } from 'path';\nexport const here = cwd;\nexport async function later() {\n    return import('node:os');\n}\n",
         );
 
-        // Then - the sibling's two builtins, and the inline-typed import, which still loads its module
+        // Then - the sibling's three builtins, the lazy one included, and the inline-typed import, which still loads its module
         expect(builtinsReached(root, ['src/start.ts'])).toStrictEqual([
+            'src/next.ts imports node:os',
             'src/next.ts imports node:process',
             'src/next.ts imports path',
             'src/start.ts imports node:fs',
