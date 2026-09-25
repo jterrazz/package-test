@@ -1,7 +1,7 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import type { FacetProjectOptions } from './facet-project.js';
-import { onProjectDefaults } from './preset.js';
+import type { FacetProjectOptions } from './project-kit.js';
+import { onProjectDefaults } from './project-kit.js';
 
 /**
  * The project helpers — one per kind of test, each the canonical project that
@@ -29,7 +29,7 @@ export {
 export { job, type JobProjectOptions } from '../facets/job/job.project.js';
 export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
-export { type FacetProjectOptions } from './facet-project.js';
+export { type FacetProjectOptions } from './project-kit.js';
 export { type LiterateDoor } from '../facets/cli/cli.project.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */

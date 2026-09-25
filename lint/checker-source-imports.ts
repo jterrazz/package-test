@@ -22,7 +22,6 @@ import type { AstNode } from './rule-shape.js';
  */
 const REACHED_INSIDE_A_FACET: Readonly<Record<string, string>> = {
     'src/facets/api/routes/baseline.ts': 'lint/',
-    'src/facets/cli/documents/literate-plugin.ts': 'src/vitest/',
     'src/facets/cli/documents/spec-document.ts': 'lint/',
 };
 

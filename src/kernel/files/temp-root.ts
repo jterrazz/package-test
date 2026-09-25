@@ -1,4 +1,4 @@
-import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
 
@@ -59,6 +59,16 @@ function setVariables(values: Record<string, string | undefined>): void {
             process.env[name] = value;
         }
     }
+}
+
+/**
+ * Where a project finds this setup: this module in a source checkout,
+ * `temp-root.js` in the built package, where the bundle and its entries share
+ * one folder.
+ */
+export function tempRootSetup(): string {
+    const source = join(import.meta.dirname, 'temp-root.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'temp-root.js');
 }
 
 /**

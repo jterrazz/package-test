@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { inPlaceSetup, tempRootSetup } from '../../vitest/preset.js';
+import { inPlaceSetup } from '../../expectations/in-place/in-place-setup.js';
+import { tempRootSetup } from '../../kernel/files/temp-root.js';
 import { mobile, mobileSessionSetup } from './mobile.project.js';
 
 describe('mobile() — one driver session per run', () => {

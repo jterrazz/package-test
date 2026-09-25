@@ -3,8 +3,9 @@ import { join } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, servicesSetup } from '../../vitest/facet-project.js';
-import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { facetProject } from '../../vitest/project-kit.js';
+import type { FacetProjectOptions } from '../../vitest/project-kit.js';
+import { servicesSetup } from '../../world/services/containers/run-setup.js';
 
 /**
  * The global setup that measures route coverage — this facet's

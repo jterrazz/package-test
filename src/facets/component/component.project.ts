@@ -7,8 +7,8 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../kernel/files/artifacts.js';
-import type { FacetProjectOptions } from '../../vitest/facet-project.js';
-import { onProjectDefaults } from '../../vitest/preset.js';
+import type { FacetProjectOptions } from '../../vitest/project-kit.js';
+import { onProjectDefaults } from '../../vitest/project-kit.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
 import type { ComponentOptions } from './render/options.js';
 

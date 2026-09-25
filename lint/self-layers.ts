@@ -103,15 +103,15 @@ export const FRAMEWORK_LAYERS = {
                 'facets/mobile/mobile.handle',
                 'facets/website/website.handle',
             ],
-            // A facet's project is built on the preset's project kit; both run in
+            // A facet's project is built on the project kit, which runs in
             // The Vitest main process only, never in test code.
-            'facets/api/api.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/cli/cli.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/component/component.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/integration/integration.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/job/job.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/mobile/mobile.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            'facets/website/website.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/api/api.project.ts': ['vitest/project-kit'],
+            'facets/cli/cli.project.ts': ['vitest/project-kit'],
+            'facets/component/component.project.ts': ['vitest/project-kit'],
+            'facets/integration/integration.project.ts': ['vitest/project-kit'],
+            'facets/job/job.project.ts': ['vitest/project-kit'],
+            'facets/mobile/mobile.project.ts': ['vitest/project-kit'],
+            'facets/website/website.project.ts': ['vitest/project-kit'],
         },
     },
     // @jterrazz/test/vitest — preset, projects, run lifecycle: assembles the facets' projects.
@@ -126,8 +126,9 @@ export const FRAMEWORK_LAYERS = {
             'facets/job/job.project',
             'facets/mobile/mobile.project',
             'facets/website/website.project',
-            // The literate door: the one vite plugin a facet owns.
-            'facets/cli/documents/literate-plugin',
+            // Update mode's global setup, which every project carries: its
+            // Owner resolves where it sits.
+            'expectations/in-place/in-place-setup',
         ],
         packages: ['vitest'],
     },

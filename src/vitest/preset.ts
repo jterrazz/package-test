@@ -1,14 +1,9 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { configDefaults, mergeConfig } from 'vitest/config';
-import type {
-    TestProjectConfiguration,
-    TestProjectInlineConfiguration,
-    ViteUserConfig,
-} from 'vitest/config';
+import { mergeConfig } from 'vitest/config';
+import type { TestProjectConfiguration, ViteUserConfig } from 'vitest/config';
 
-import { literate } from '../facets/cli/documents/literate-plugin.js';
-import type { LiterateOptions } from '../facets/cli/documents/literate-plugin.js';
+import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
+import { literate } from '../facets/cli/cli.project.js';
+import type { LiterateOptions } from '../facets/cli/cli.project.js';
 import {
     ATTACHMENTS_DIR,
     BLOB_DIR,
@@ -16,6 +11,15 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../kernel/files/artifacts.js';
+import { tempRootSetup } from '../kernel/files/temp-root.js';
+import {
+    EXCLUDE,
+    HOOK_TIMEOUT_MS,
+    HYGIENE,
+    onProjectDefaults,
+    statedOnce,
+    TEST_TIMEOUT_MS,
+} from './project-kit.js';
 
 /**
  * `defineSpecConfig()` — the shared vitest config every repository of the
@@ -44,73 +48,6 @@ import {
  */
 
 /**
- * A run's budget. Vitest's own 5s test / 10s hook defaults were raised by every
- * repository that starts real infrastructure, and none of them meant 5s — a
- * container boot, a `prisma db push` or a `next build` all outlive it. 30s is
- * the value the ecosystem's configs already converged on; a suite that needs
- * more (a simulator cold boot, a real image build) states its own per project.
- */
-const TEST_TIMEOUT_MS = 30_000;
-const HOOK_TIMEOUT_MS = 30_000;
-
-/**
- * What a spec STANDS ON is never itself a test: the four ground folders hold
- * inputs and goldens — deliberately-wrong twins, fixture projects a spec lints —
- * and collecting them runs a repository's own counter-examples as if they were
- * its suite. The names are ground wherever a test stands on a file — beside a
- * module under `src/` as much as under `specs/` — which is the glob the
- * toolchain ignores too. Every config that ever hit it added the same line by
- * hand.
- *
- * Merged, not replaced: vite concatenates arrays, so a consumer's `exclude`
- * ADDS to this list and never has to spread `configDefaults.exclude` again.
- */
-const EXCLUDE = [...configDefaults.exclude, '**/{fixtures,expected,seeds,requests}/**'];
-
-/**
- * What a test may never carry into the next one, and the one policy the
- * framework states rather than lints.
- *
- * `retry: 0` is the policy: a flaky test is fixed or deleted, never re-rolled
- * until it passes. A retry turns a real defect into a slow one and hides the
- * day it becomes permanent.
- *
- * The three restores are the other half of the same idea. `vi.spyOn`,
- * `vi.stubGlobal` and `vi.stubEnv` each own a teardown, and a test that forgets
- * one leaks into whatever runs next — a failure that appears in a FILE that did
- * nothing wrong and disappears when that file is run alone. Turning them on
- * here is what lets `clock.at()` and `vi.stubEnv()` be written without an
- * `afterEach`, which is the shape rule J6w asks for.
- */
-const HYGIENE = {
-    restoreMocks: true,
-    retry: 0,
-    unstubEnvs: true,
-    unstubGlobals: true,
-} as const;
-
-/**
- * The global setup that writes update mode's rewrites once the run is
- * reported — `expectations/in-place/in-place-setup.ts` in a source checkout,
- * `in-place-setup.js` in the built package, where the bundle and its entries
- * share one folder.
- */
-export function inPlaceSetup(): string {
-    const source = join(import.meta.dirname, '../expectations/in-place/in-place-setup.ts');
-    return existsSync(source) ? source : join(import.meta.dirname, 'in-place-setup.js');
-}
-
-/**
- * The global setup that gives the run its own temp root, removed at teardown —
- * `kernel/files/temp-root.ts` in a source checkout, `temp-root.js` in the
- * built package.
- */
-export function tempRootSetup(): string {
-    const source = join(import.meta.dirname, '../kernel/files/temp-root.ts');
-    return existsSync(source) ? source : join(import.meta.dirname, 'temp-root.js');
-}
-
-/**
  * Options are a vite/vitest config plus one key of the framework's own.
  * Everything stated here wins over the preset's defaults.
  */
@@ -125,25 +62,6 @@ export type SpecConfig = {
      */
     literate?: LiterateOptions;
 } & ViteUserConfig;
-
-/**
- * Defaults a vitest PROJECT accepts. `coverage` and `reporters` are root-only
- * options (vitest omits them from a project's config), so they are absent here
- * on purpose — setting them would be silently dropped.
- */
-function projectDefaults(): TestProjectInlineConfiguration {
-    return {
-        cacheDir: VITEST_ARTIFACTS_DIR,
-        test: {
-            attachmentsDir: ATTACHMENTS_DIR,
-            exclude: EXCLUDE,
-            globalSetup: [inPlaceSetup(), tempRootSetup()],
-            hookTimeout: HOOK_TIMEOUT_MS,
-            ...HYGIENE,
-            testTimeout: TEST_TIMEOUT_MS,
-        },
-    };
-}
 
 /**
  * Coverage, when `--coverage` asks for it.
@@ -228,45 +146,6 @@ function rootDefaults(): ViteUserConfig {
             testTimeout: TEST_TIMEOUT_MS,
         },
     };
-}
-
-/** A glob list with its repeats taken out, or nothing where there is no list. */
-function eachOnce(globs: string[] | undefined): string[] | undefined {
-    return globs === undefined ? undefined : [...new Set(globs)];
-}
-
-/**
- * The glob lists vite CONCATENATES rather than overrides, each glob kept once.
- *
- * A project built ON the defaults and then merged INTO them by
- * `defineSpecConfig` carried every default twice. Glob matching is idempotent,
- * so nothing collected differently — but the no-tests banner is the one place a
- * consumer ever reads that list, and it read as three merges of the same three
- * globs.
- */
-function statedOnce<T extends { exclude?: string[]; include?: string[] }>(test: T): T {
-    const exclude = eachOnce(test.exclude);
-    const include = eachOnce(test.include);
-    return {
-        ...test,
-        ...(exclude === undefined ? {} : { exclude }),
-        ...(include === undefined ? {} : { include }),
-    };
-}
-
-/**
- * Build a project ON the defaults — the ONE way a project is built here. The
- * project helpers build their canonical project through this rather than
- * beside it: a helper's project must carry the same budgets and the same
- * artefact directory as a hand-written one.
- *
- * @internal
- */
-export function onProjectDefaults(
-    stated: TestProjectInlineConfiguration,
-): TestProjectInlineConfiguration {
-    const merged = mergeConfig(projectDefaults(), stated) as TestProjectInlineConfiguration;
-    return merged.test === undefined ? merged : { ...merged, test: statedOnce(merged.test) };
 }
 
 /**

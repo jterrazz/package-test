@@ -1,10 +1,17 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject } from '../../vitest/facet-project.js';
-import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { facetProject } from '../../vitest/project-kit.js';
+import type { FacetProjectOptions } from '../../vitest/project-kit.js';
 import { literate } from './documents/literate-plugin.js';
 import type { LiterateOptions } from './documents/literate-plugin.js';
+
+// The literate door is the one vite plugin a facet owns; the runner config reaches it through this face.
+export {
+    literate,
+    type LiterateOptions,
+    type LiteratePlugin,
+} from './documents/literate-plugin.js';
 
 /** The literate door of the facet that reads documents — the cli. */
 export type LiterateDoor = {

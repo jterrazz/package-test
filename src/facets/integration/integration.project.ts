@@ -1,8 +1,9 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, servicesSetup } from '../../vitest/facet-project.js';
-import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { facetProject } from '../../vitest/project-kit.js';
+import type { FacetProjectOptions } from '../../vitest/project-kit.js';
+import { servicesSetup } from '../../world/services/containers/run-setup.js';
 
 /** `integration()` — a module against real services, or against a golden. */
 export type IntegrationProjectOptions = FacetProjectOptions;

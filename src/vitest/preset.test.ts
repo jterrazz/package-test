@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
+import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import {
     ATTACHMENTS_DIR,
     COVERAGE_DIR,
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../kernel/files/artifacts.js';
-import { defineSpecConfig, inPlaceSetup, reporterOutputFiles, tempRootSetup } from './preset.js';
+import { tempRootSetup } from '../kernel/files/temp-root.js';
+import { defineSpecConfig, reporterOutputFiles } from './preset.js';
 import { unit } from './projects.js';
 
 describe('defineSpecConfig() — artefact paths', () => {

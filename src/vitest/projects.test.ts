@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { servicesSetup } from './facet-project.js';
+import { servicesSetup } from '../world/services/containers/run-setup.js';
 import { api, cli, integration, job, mobile, unit } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */

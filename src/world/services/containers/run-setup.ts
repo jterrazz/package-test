@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
+
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';
@@ -54,6 +57,16 @@ export async function prepareDocker(): Promise<void> {
             }
         }),
     ]);
+}
+
+/**
+ * Where a project whose specs declare services finds this setup: this module
+ * in a source checkout, `services-setup.js` in the built package, where the
+ * bundle and its entries share one folder.
+ */
+export function servicesSetup(): string {
+    const source = join(import.meta.dirname, 'run-setup.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'services-setup.js');
 }
 
 /** What the setup reads of its project: the channel to its workers. */

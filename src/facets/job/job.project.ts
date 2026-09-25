@@ -1,8 +1,9 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, servicesSetup } from '../../vitest/facet-project.js';
-import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { facetProject } from '../../vitest/project-kit.js';
+import type { FacetProjectOptions } from '../../vitest/project-kit.js';
+import { servicesSetup } from '../../world/services/containers/run-setup.js';
 
 /** `job()` — the background jobs, run in this process. */
 export type JobProjectOptions = FacetProjectOptions;

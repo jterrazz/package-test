@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
@@ -14,6 +15,16 @@ import { writePendingRewrites } from './in-place.js';
  * after the last test and the printed report, writes each source waiting
  * there over its test file.
  */
+
+/**
+ * Where a project finds this setup: this module in a source checkout,
+ * `in-place-setup.js` in the built package, where the bundle and its entries
+ * share one folder.
+ */
+export function inPlaceSetup(): string {
+    const source = join(import.meta.dirname, 'in-place-setup.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'in-place-setup.js');
+}
 
 /** Where the pending folders of a run sit, below the project root. */
 export const IN_PLACE_DIR = `${VITEST_ARTIFACTS_DIR}/in-place`;
