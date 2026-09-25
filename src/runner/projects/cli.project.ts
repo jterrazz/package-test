@@ -1,7 +1,7 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { documentProject } from '../../runner/facet-project.js';
-import type { FacetProjectOptions, LiterateDoor } from '../../runner/facet-project.js';
+import { documentProject } from '../facet-project.js';
+import type { FacetProjectOptions, LiterateDoor } from '../facet-project.js';
 
 /** `cli()` — a binary, and the documents that specify it. */
 export type CliProjectOptions = FacetProjectOptions & LiterateDoor;

@@ -1,8 +1,10 @@
 import { cpSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 
-import { runSpecDocument } from '../../facets/cli/literate.js';
-import type { LiterateRunFlags, LiterateServeRegistration } from '../../facets/cli/literate.js';
+import { runSpecDocument } from '../../actions/run/literate.js';
+import type { LiterateRunFlags, LiterateServeRegistration } from '../../actions/run/literate.js';
+import { routeRequest } from '../../capabilities/params/route.js';
+import type { RouteArguments, RouteOptionsAny } from '../../capabilities/params/route.js';
 import { CallResult } from '../../results/call.result.js';
 import { CliResult } from '../../results/cli.result.js';
 import { FetchResult } from '../../results/fetch.result.js';
@@ -11,8 +13,10 @@ import type { JobsResult } from '../../results/jobs.result.js';
 import { PageResult } from '../../results/page.result.js';
 import { BaseResult } from '../../results/result.js';
 import { ScreenResult } from '../../results/screen.result.js';
+import { copyPlan } from '../../seams/fs/fixtures.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
+import type { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
@@ -28,14 +32,10 @@ import type { ServiceHandle } from '../ports/service.port.js';
 import { toConstantCase } from '../services/binding.js';
 import { validateDatabaseOption } from '../services/database-option.js';
 import { getCallerDir } from './caller.js';
-import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
-import { routeRequest } from './route.js';
-import type { RouteArguments, RouteOptionsAny } from './route.js';
 import { scratchDirectory } from './scratch.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
-import type { StubBackend } from './stub-backend.js';
 
 // ── Types ──
 

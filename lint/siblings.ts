@@ -79,7 +79,7 @@ const oneOf =
  * The declared kinds, first match wins.
  *
  * Every kind names its paths, or matches a shape the tree enforces
- * (`<facet>.chain.ts`, `<facet>.project.ts`). None of them is a prefix: a
+ * (`<facet>.chain.ts`, `projects/<facet>.project.ts`). None of them is a prefix: a
  * kind claiming `src/seams/` would claim every module written there next
  * year too, and K7 would be a poster rather than a gate.
  */
@@ -128,7 +128,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name',
     },
     {
-        claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
+        claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),
         name: "a facet's vitest project",
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
     },
@@ -139,9 +139,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'src/actions/run/literate.ts',
             'src/facets/api/api.handle.ts',
             'src/facets/cli/cli.handle.ts',
-            'src/facets/cli/literate.ts',
             'src/facets/component/component.handle.ts',
             'src/facets/integration/integration.handle.ts',
             'src/facets/jobs/jobs.handle.ts',

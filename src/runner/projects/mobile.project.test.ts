@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { mobileSessionSetup } from '../../runner/facet-project.js';
-import { inPlaceSetup, tempRootSetup } from '../../runner/preset.js';
+import { mobileSessionSetup } from '../facet-project.js';
+import { inPlaceSetup, tempRootSetup } from '../preset.js';
 import { mobile } from './mobile.project.js';
 
 describe('mobile() — one driver session per run', () => {

@@ -1,8 +1,8 @@
 import { existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
-import { refusal } from '../lesson/refusal.js';
-import { resolveSpecPath } from './resolve.js';
+import { resolveSpecPath } from '../../model/chain/resolve.js';
+import { refusal } from '../../model/lesson/refusal.js';
 
 /**
  * Copy semantics for the file-state a command spec stands on — the chain's

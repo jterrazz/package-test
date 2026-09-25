@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
+import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
 import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
 import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
-import type { ComponentProjectOptions } from '../src/facets/component/component.project.js';
 import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.shape.js';
 import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
 import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.handle.js';
@@ -17,7 +17,6 @@ import type {
     MobileSpecification,
     WebsiteSpecification,
 } from '../src/index.js';
-import type { RouteOptionsAny } from '../src/model/chain/route.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
 import * as elements from '../src/model/elements/elements.js';
 import type { Visitor } from '../src/model/ports/browser.port.js';
@@ -29,6 +28,7 @@ import type { HttpResult } from '../src/results/http.result.js';
 import type { PageResult } from '../src/results/page.result.js';
 import type { RenderResult } from '../src/results/render.result.js';
 import type { ScreenResult } from '../src/results/screen.result.js';
+import type { ComponentProjectOptions } from '../src/runner/projects/component.project.js';
 import { CAPABILITIES, COLUMNS, memberOf, methodsByRole } from './facet-matrix.js';
 import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
 

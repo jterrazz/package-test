@@ -1,4 +1,4 @@
-import { refusal } from '../lesson/refusal.js';
+import { refusal } from '../../model/lesson/refusal.js';
 
 /**
  * A request's route, written as the app declares it: the template, with its

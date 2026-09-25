@@ -1,9 +1,9 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, mobileSessionSetup } from '../../runner/facet-project.js';
-import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import type { MobileDevice } from './appium-server.js';
+import type { MobileDevice } from '../../facets/mobile/appium-server.js';
+import { facetProject, mobileSessionSetup } from '../facet-project.js';
+import type { FacetProjectOptions } from '../facet-project.js';
 
 /**
  * What `mobile()` accepts: the common options, and — for a run whose specs

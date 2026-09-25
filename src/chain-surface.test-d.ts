@@ -1,3 +1,4 @@
+import type { RouteArguments } from './capabilities/params/route.js';
 import type {
     ApiSpecification,
     CallResult,
@@ -31,7 +32,6 @@ import type {
     VisitScenario,
     WebsiteSpecification,
 } from './index.js';
-import type { RouteArguments } from './model/chain/route.js';
 
 /**
  * The seven chain types as they were published before the facets were

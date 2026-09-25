@@ -19,13 +19,13 @@ import { onProjectDefaults } from './preset.js';
 // One folder per facet. This module
 // Is their index: the one import `@jterrazz/test/vitest` re-exports, plus the
 // One project that is not a facet's.
-export { api, type ApiProjectOptions } from '../facets/api/api.project.js';
-export { cli, type CliProjectOptions } from '../facets/cli/cli.project.js';
-export { component, type ComponentProjectOptions } from '../facets/component/component.project.js';
-export { integration } from '../facets/integration/integration.project.js';
-export { jobs, type JobsProjectOptions } from '../facets/jobs/jobs.project.js';
-export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
-export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
+export { api, type ApiProjectOptions } from './projects/api.project.js';
+export { cli, type CliProjectOptions } from './projects/cli.project.js';
+export { component, type ComponentProjectOptions } from './projects/component.project.js';
+export { integration } from './projects/integration.project.js';
+export { jobs, type JobsProjectOptions } from './projects/jobs.project.js';
+export { mobile, type MobileProjectOptions } from './projects/mobile.project.js';
+export { website, type WebsiteProjectOptions } from './projects/website.project.js';
 export { type FacetProjectOptions, type LiterateDoor } from './facet-project.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */

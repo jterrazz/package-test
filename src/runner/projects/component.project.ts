@@ -6,9 +6,9 @@ import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../model/artifacts/artifacts.js';
-import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import { onProjectDefaults } from '../../runner/preset.js';
 import { COMPONENT_COMMANDS } from '../../seams/vitest-browser/commands.js';
+import type { FacetProjectOptions } from '../facet-project.js';
+import { onProjectDefaults } from '../preset.js';
 
 /** `component()` — rendered units, beside the components they cover. */
 export type ComponentProjectOptions = {

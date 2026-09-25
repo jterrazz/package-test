@@ -1,12 +1,12 @@
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
-import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
 import { releaseIsolation, startServices } from '../../model/services/services.js';
 import type { ServiceRecord, StartedServices } from '../../model/services/services.js';
 import { mobileServer, mobileSessions } from '../../runner/provided.js';
+import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { serveAppium } from './appium-server.js';
 import type { AppiumServer, MobileDevice, RunServer } from './appium-server.js';
 import { createMobileFacet } from './mobile.chain.js';

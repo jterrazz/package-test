@@ -1,7 +1,7 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import { onProjectDefaults } from '../../runner/preset.js';
+import type { FacetProjectOptions } from '../facet-project.js';
+import { onProjectDefaults } from '../preset.js';
 
 /** `website()` — the assembled product, met through a served page. */
 export type WebsiteProjectOptions = FacetProjectOptions;

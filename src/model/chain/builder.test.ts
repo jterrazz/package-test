@@ -1,6 +1,7 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { defineContracts } from '../../stubs/contract.js';
 import type { Contract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
@@ -10,7 +11,6 @@ import type { DatabasePort } from '../ports/database.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
 import { createCliFacet, createWebsiteFacet, SpecificationBuilder } from './builder.js';
 import { directory, file } from './spec-path.js';
-import { StubBackend } from './stub-backend.js';
 
 // ── Fakes — mocks are code (CONVENTIONS I4) ──
 

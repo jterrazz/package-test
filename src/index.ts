@@ -28,7 +28,7 @@ export {
     type HonoApp,
 } from './facets/api/api.handle.js';
 export { type CliHandle, type CliSpecificationOptions } from './facets/cli/cli.handle.js';
-export { type LiterateRunFlags, type LiterateServeRegistration } from './facets/cli/literate.js';
+export { type LiterateRunFlags, type LiterateServeRegistration } from './actions/run/literate.js';
 export {
     type SpecDocument,
     type SpecEnvToken,

@@ -28,7 +28,7 @@ export const SELF_RULE_DOCS = {
         audience: 'self',
         channel: 'statique',
         convention:
-            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{model,capabilities,stubs,results,facets,seams,runner,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
+            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{model,capabilities,actions,stubs,results,facets,seams,runner,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
         facet: 'model',
         family: 'F',
         fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',

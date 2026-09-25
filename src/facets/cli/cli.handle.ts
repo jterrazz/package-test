@@ -1,3 +1,4 @@
+import type { LiterateServeRegistration } from '../../actions/run/literate.js';
 import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import { resolveCommand, resolveRoot } from '../../model/chain/resolve.js';
@@ -19,7 +20,6 @@ import type { ContainerAccessor } from '../../results/container.js';
 import { createCliFacet } from './cli.chain.js';
 import type { CliSpecification } from './cli.chain.js';
 import { ExecAdapter } from './exec.adapter.js';
-import type { LiterateServeRegistration } from './literate.js';
 
 // ── Types ──
 

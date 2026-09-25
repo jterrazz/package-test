@@ -3,7 +3,6 @@ import { randomUUID } from 'node:crypto';
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
-import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { BrowserPort } from '../../model/ports/browser.port.js';
 import { ProcessHandle } from '../../model/services/process.js';
@@ -12,6 +11,7 @@ import type { ServiceRecord, StartedServices } from '../../model/services/servic
 import { releaseIsolation, startServices } from '../../model/services/services.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
+import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import { createWebsiteFacet } from './website.chain.js';
 import type { WebsiteSpecification } from './website.chain.js';
 

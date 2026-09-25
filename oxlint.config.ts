@@ -16,24 +16,31 @@ import { selfRules } from './dist/self-oxlint.js';
  *   carry no engine of their own (docker, process, yaml), the msw engine
  *   through the chain's one lazy import, the contracts in `stubs/`, and — to
  *   CONSTRUCT what a terminal action hands back, and to compare a golden
- *   through its accessor — `results/`.
+ *   through its accessor — `results/`. The builder also names what it runs
+ *   through until the facets are recomposed: the document engine, the route,
+ *   the fixture copy and the stub backend.
  * - `capabilities/<name>/` — a setup a chain offers, one folder each; today
- *   the module-scope `intercept()`, which names its engine's registration.
+ *   the module-scope `intercept()`, which names its engine's registration,
+ *   and the route a request names with its `params`.
+ * - `actions/<name>/` — a terminal action, one folder each; today `run/`, the
+ *   document engine, which starts servers and lays fixtures through the
+ *   process and filesystem seams.
  * - `stubs/` — the contract, its exchange, the queue that serves it, and the
  *   user-facing builders, one folder per kind (`http/`, `openai/`,
  *   `anthropic/`).
  * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
  *   per result, and the accessors they compose.
- * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`), the chain
- *   (`.chain.ts`) and the vitest project (`.project.ts`), plus what is
- *   unique to the facet. It reaches `model/` and `results/` freely, and each
- *   constructor opens the one seam its runtime needs.
+ * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`) and the chain
+ *   (`.chain.ts`), plus what is unique to the facet. It reaches `model/`,
+ *   `stubs/`, `results/` and `actions/` freely, and each constructor opens
+ *   the seams its runtime needs.
  * - `seams/<dep>/` — one folder = one external dependency (or one node
  *   builtin, as `process/` is), plus `model/`, the facet vocabulary an
  *   adapter projects into (the device's ambiguity reading), and the text
  *   accessor a page's golden answers through.
- * - `runner/` — the config surface: the preset, the project index, update
- *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
+ * - `runner/` — the config surface: the preset, the project index and each
+ *   facet's project (`projects/<facet>.project.ts`), update mode, the
+ *   literate plugin. It couples to `vite`/`vitest` by design.
  * - `lint/` — no external package of its own but oxlint's plugin types
  *   (`@oxlint/plugins`, erased from the bundle) and the toolchain's list of
  *   oxlint config names (inlined into the bundle): from `model/` only the pure
@@ -48,16 +55,25 @@ import { selfRules } from './dist/self-oxlint.js';
  * files are governed by F2/I4.
  */
 const FRAMEWORK_LAYERS = {
+    // A terminal action a chain ends on, one folder per action. A document
+    // Run starts the servers it names and lays its fixtures through the
+    // Process and filesystem seams.
+    actions: {
+        folders: { run: [] },
+        imports: ['model/', 'results/', 'capabilities/', 'stubs/', 'runner/update'],
+        seams: { 'actions/run/literate.ts': ['seams/fs/', 'seams/process/'] },
+    },
     // A setup a chain offers, one folder per capability, each owning only
     // Itself. The module-scope `intercept()` names the msw registration it
     // Hands its engine, a type the seam declares.
     capabilities: {
-        folders: { intercept: [] },
+        folders: { intercept: [], params: [] },
         imports: ['model/', 'stubs/'],
         seams: { 'capabilities/intercept/intercept.scope.ts': ['seams/msw/'] },
     },
     facets: {
         imports: [
+            'actions/',
             'facets/',
             'model/',
             'results/',
@@ -77,11 +93,13 @@ const FRAMEWORK_LAYERS = {
             // `vitest` import the way `src/runner/` owns the config side.
             'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
             'facets/component/component.shape.ts': ['seams/vitest-browser/'],
-            'facets/component/component.project.ts': ['seams/vitest-browser/commands'],
-            'facets/cli/literate.ts': ['seams/process/'],
             'facets/mobile/appium-server.ts': ['seams/process/'],
-            'facets/mobile/mobile.handle.ts': ['seams/appium/'],
-            'facets/website/website.handle.ts': ['seams/playwright/', 'seams/process/'],
+            'facets/mobile/mobile.handle.ts': ['seams/appium/', 'seams/stub-backend/'],
+            'facets/website/website.handle.ts': [
+                'seams/playwright/',
+                'seams/process/',
+                'seams/stub-backend/',
+            ],
         },
     },
     lint: {
@@ -135,7 +153,9 @@ const FRAMEWORK_LAYERS = {
             'stubs/',
             // And a document run is the cli's own engine, called by the
             // Builder's `run` the way its terminal actions are.
-            'facets/cli/literate',
+            'actions/run/literate',
+            // The route a request names, and its parameters.
+            'capabilities/params/route',
             // The four seams that carry no engine of their own: a docker
             // Lookup is a shell read, the tree git does not ignore is one
             // `git ls-files`, a yaml document is a parse, a process is
@@ -151,8 +171,10 @@ const FRAMEWORK_LAYERS = {
         packages: ['vitest', 'vitest-mock-extended'],
         seams: {
             // The contract engine is reached through a lazy import by the
-            // Chain's `.intercept()`.
-            'model/chain/builder.ts': ['seams/msw/'],
+            // Chain's `.intercept()`; a fixture is laid by the copy plan of
+            // the filesystem seam; a website or mobile chain arms the stub
+            // Backend its constructor started.
+            'model/chain/builder.ts': ['seams/fs/', 'seams/msw/', 'seams/stub-backend/'],
         },
     },
     // What a terminal action hands back: the result classes and the accessors
@@ -171,11 +193,14 @@ const FRAMEWORK_LAYERS = {
     runner: {
         imports: ['runner/', 'model/', 'facets/'],
         packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
+        // The component project serves the page's golden commands.
+        seams: { 'runner/projects/component.project.ts': ['seams/vitest-browser/commands'] },
     },
     seams: {
         folders: {
             appium: ['webdriverio'],
             docker: [],
+            fs: [],
             git: [],
             hono: ['hono', '@hono/node-server'],
             msw: ['msw'],
@@ -185,6 +210,7 @@ const FRAMEWORK_LAYERS = {
             process: [],
             redis: ['redis'],
             sqlite: ['better-sqlite3'],
+            'stub-backend': [],
             testcontainers: ['testcontainers'],
             'vitest-browser': ['react', 'vitest', 'vitest-browser-react'],
             yaml: ['yaml'],
@@ -238,10 +264,6 @@ const config: OxlintConfig = defineConfig(
                 // Framework's own seam, not prod leakage.
                 files: [
                     'src/runner/**',
-                    // A facet's `<facet>.project.ts` IS the runner-config side
-                    // Of that facet — it states the project the kind runs in,
-                    // And states nothing a spec imports.
-                    'src/facets/**/*.project.ts',
                     'src/seams/vitest-browser/**',
                     // The two seams whose dependency IS a test package: the
                     // Network double's engine and the browser the website

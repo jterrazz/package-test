@@ -1,8 +1,8 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, routeCoverageSetup, servicesSetup } from '../../runner/facet-project.js';
-import type { FacetProjectOptions } from '../../runner/facet-project.js';
+import { facetProject, routeCoverageSetup, servicesSetup } from '../facet-project.js';
+import type { FacetProjectOptions } from '../facet-project.js';
 
 /** `api()` — the app met through HTTP. */
 export type ApiProjectOptions = FacetProjectOptions;

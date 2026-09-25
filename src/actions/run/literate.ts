@@ -2,7 +2,6 @@ import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import type { SpecificationConfig } from '../../model/chain/builder.js';
-import { copyPlan } from '../../model/chain/fixtures.js';
 import { expandWorkdir, safeRealpath } from '../../model/chain/resolve.js';
 import {
     readSpecFile,
@@ -26,6 +25,7 @@ import { formatStdoutDiff } from '../../model/services/reporter.js';
 import { CliResult } from '../../results/cli.result.js';
 import { stripAnsiCodes } from '../../results/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';
+import { copyPlan } from '../../seams/fs/fixtures.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 
 /**
