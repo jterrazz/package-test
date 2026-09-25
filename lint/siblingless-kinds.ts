@@ -100,7 +100,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf('src/facets/mobile/server/appium-server.ts'),
         name: 'a mobile module that needs a device',
-        why: 'the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and the Appium server is the rest',
+        why: 'the server it starts is the real Appium, which no `make check` run starts — `specs/mobile/` connects to the Appium protocol double instead; what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and the Appium server is the rest',
     },
     {
         claims: oneOf(
@@ -169,7 +169,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/component/viewport/viewport.engine.ts',
         ),
         name: 'an engine adapter',
-        why: 'an engine is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/<engine>/` (chapter 03)',
+        why: 'an engine is proven through the facet that drives it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)',
     },
     {
         claims: oneOf(

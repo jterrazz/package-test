@@ -18,14 +18,13 @@ const FRAMEWORK_LAYERS = new Set([
     'expectations',
     'facets',
     'kernel',
-    'lint',
     'vitest',
     'world',
 ]);
 
 /**
  * CONVENTIONS F7 — from `specs/`, a relative import resolving inside the
- * framework repo's `src/{kernel,world,elements,expectations,facets,vitest,lint}/` is forbidden: a
+ * framework repo's `src/{kernel,world,elements,expectations,facets,vitest}/` is forbidden: a
  * spec of the framework reaches it through the public entry, as a consumer
  * does. A consumer's imports of its OWN app source are always allowed — that
  * is the pattern.
