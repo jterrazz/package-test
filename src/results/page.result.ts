@@ -125,7 +125,7 @@ export class PageResult extends BaseResult {
 
     /** Rendered body text as a text accessor. */
     get content(): TextAccessor {
-        return new TextAccessor(this.page.text, 'text', this.testDir, {
+        return new TextAccessor(this.page.text, 'content', this.testDir, {
             captures: this.captures,
             transform: this.config.transform,
         });
