@@ -12,7 +12,6 @@
  * compares the two builds' names on every run.
  */
 
-import { registerBrowserMatchers } from './facets/component/index.browser.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';
@@ -26,10 +25,6 @@ import type { sqlite as sqliteFn } from './world/services/sqlite/sqlite.adapter.
 // ── The types, whole: the node entry's, which the one `types` entry publishes ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: its types are the node entry's by design, so the two runtimes cannot publish two type surfaces
 export type * from './index.js';
-
-// The page's own matchers, armed by the import that brought `component` in: a
-// Component test writes no setup file and no hook for them.
-registerBrowserMatchers();
 
 // ── The component facet — real here, and only here ──
 export { component } from './facets/component/index.browser.js';
