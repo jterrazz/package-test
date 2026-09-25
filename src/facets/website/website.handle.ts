@@ -55,17 +55,23 @@ function resolveServer<Services extends ServiceRecord>(
 }
 
 /** What `specification.website()` hands its chain: the site, the browser that visits it, and the stub backend it talks to. */
-export type WebsiteConfig = Pick<ResultConfig, 'transform'> &
-    StubsConfig & {
-        /** Base URL of the website under test. */
-        baseUrl?: string | undefined;
-        /**
-         * Lazy browser accessor. The first `.visit()` launches the shared
-         * browser instance; `.fetch()`-only spec files never pay the browser
-         * cost.
-         */
-        browser?: (() => Promise<BrowserPort>) | undefined;
-    };
+export type WebsiteConfig = {
+    /** Base URL of the website under test. */
+    baseUrl?: string | undefined;
+    /**
+     * Lazy browser accessor. The first `.visit()` launches the shared
+     * browser instance; `.fetch()`-only spec files never pay the browser
+     * cost.
+     */
+    browser?: (() => Promise<BrowserPort>) | undefined;
+    /**
+     * Cross-origin request policy for visits: `'block'` aborts requests
+     * leaving the site under test — the browser-side analog of strict
+     * intercepts.
+     */
+    external?: 'allow' | 'block' | undefined;
+} & Pick<ResultConfig, 'transform'> &
+    StubsConfig;
 
 /**
  * The declared stub backend behind the site under test — started before the

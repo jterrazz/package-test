@@ -53,12 +53,6 @@ export type StubsConfig = {
      * browser's `external: 'block'` policy so client-side fetches reach it.
      */
     backendUrl?: string | undefined;
-    /**
-     * Cross-origin request policy for visits (website facet only): `'block'`
-     * aborts requests leaving the site under test — the browser-side analog
-     * of strict intercepts.
-     */
-    external?: 'allow' | 'block' | undefined;
 } & ChainConfig;
 
 /** One unmatched request family recorded during a chain. */
