@@ -38,12 +38,10 @@ export class FetchResult extends BaseResult {
 
     /** The response body parsed as JSON. */
     get json(): JsonAccessor {
-        return new JsonAccessor(
-            this.exchange.body,
-            this.testDir,
-            this.config.transform,
-            this.captures,
-        );
+        return new JsonAccessor(this.exchange.body, 'body', this.testDir, {
+            captures: this.captures,
+            transform: this.config.transform,
+        });
     }
 
     /** The `location` header of a redirect response, or undefined. */

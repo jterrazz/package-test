@@ -18,6 +18,14 @@ describe('surfaces-robots-txt', () => {
     `);
     });
 
+    test('refuses to read a plain-text body as JSON, naming the body', async () => {
+        // Given - the robots surface, which is no JSON
+        const result = await website.fetch('/robots.txt');
+
+        // Then - reading it as JSON names the stream it parsed and shows its start
+        expect(() => result.json.value).toThrow(/^body is not valid JSON: User-Agent: \*/u);
+    });
+
     test('sends chain headers on the raw exchange', async () => {
         // Given - an AI crawler user agent
         const result = await website.headers({ 'User-Agent': 'GPTBot/1.0' }).fetch('/robots.txt');

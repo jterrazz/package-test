@@ -83,12 +83,10 @@ export class PageResult extends BaseResult {
             metas: namedMetas(this.page.metas),
             title: this.page.title,
         };
-        return new JsonAccessor(
-            JSON.stringify(summary),
-            this.testDir,
-            this.config.transform,
-            this.captures,
-        );
+        return new JsonAccessor(JSON.stringify(summary), 'head', this.testDir, {
+            captures: this.captures,
+            transform: this.config.transform,
+        });
     }
 
     /** The rendered DOM serialization as a text accessor. */
@@ -105,7 +103,10 @@ export class PageResult extends BaseResult {
      */
     get jsonLd(): JsonAccessor {
         const combined = `[${this.page.jsonLdBlocks.join(',')}]`;
-        return new JsonAccessor(combined, this.testDir, this.config.transform, this.captures);
+        return new JsonAccessor(combined, 'jsonLd', this.testDir, {
+            captures: this.captures,
+            transform: this.config.transform,
+        });
     }
 
     /** `<link>` elements of the head, in DOM order. */

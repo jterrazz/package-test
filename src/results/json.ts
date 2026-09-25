@@ -2,7 +2,8 @@ import { CaptureScope } from '../model/matching/match.js';
 import { stripAnsiCodes } from './text.js';
 
 /**
- * Read-only accessor for a JSON payload parsed from a text stream (stdout).
+ * Read-only accessor for a JSON payload parsed from a text stream — stdout,
+ * a fetched body, a page's head, a device's screen.
  *
  * Lazily parses the JSON on first use; parse errors are deferred until the
  * value is read so that callers can still read the raw stream text without
@@ -21,6 +22,8 @@ export class JsonAccessor<Value = unknown> {
     readonly captures: CaptureScope;
     /** @internal */
     private readonly rawText: string;
+    /** The stream the text was read from, as a refusal names it ("stdout", "body"). */
+    private readonly streamName: string;
     /** @internal Test-file directory — fixture resolution root for matchers. */
     readonly testDir: string;
     /** @internal */
@@ -28,14 +31,18 @@ export class JsonAccessor<Value = unknown> {
 
     constructor(
         rawText: string,
+        streamName: string,
         testDir: string,
-        transform?: (text: string) => string,
-        captures?: CaptureScope,
+        options: {
+            captures?: CaptureScope | undefined;
+            transform?: ((text: string) => string) | undefined;
+        } = {},
     ) {
         this.rawText = rawText;
+        this.streamName = streamName;
         this.testDir = testDir;
-        this.transform = transform;
-        this.captures = captures ?? new CaptureScope();
+        this.transform = options.transform;
+        this.captures = options.captures ?? new CaptureScope();
     }
 
     /**
@@ -53,7 +60,7 @@ export class JsonAccessor<Value = unknown> {
             return JSON.parse(source) as Value;
         } catch {
             const preview = source.slice(0, 200);
-            throw new Error(`stdout is not valid JSON: ${preview}`);
+            throw new Error(`${this.streamName} is not valid JSON: ${preview}`);
         }
     }
 }

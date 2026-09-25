@@ -77,7 +77,9 @@ export class ContainerAccessor {
      */
     get inspect(): JsonAccessor {
         this.requireExists('inspect');
-        return new JsonAccessor(JSON.stringify(this.inspectData), this.testDir, this.transform);
+        return new JsonAccessor(JSON.stringify(this.inspectData), 'inspect', this.testDir, {
+            transform: this.transform,
+        });
     }
 
     /** Captured logs (stdout+stderr combined for v1). */

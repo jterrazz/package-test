@@ -28,11 +28,8 @@ export class ScreenResult extends BaseResult {
      * per screen: `expect(result.screen).toMatch('events.screen.json')`.
      */
     get screen(): JsonAccessor {
-        return new JsonAccessor(
-            JSON.stringify(this.capturedScreen.tree),
-            this.testDir,
-            undefined,
-            this.captures,
-        );
+        return new JsonAccessor(JSON.stringify(this.capturedScreen.tree), 'screen', this.testDir, {
+            captures: this.captures,
+        });
     }
 }

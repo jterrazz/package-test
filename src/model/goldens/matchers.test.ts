@@ -268,7 +268,7 @@ describe("toMatch is vitest's for a value, and the golden for the disk (D14)", (
         {
             name: 'a json',
             refusal: 'found: toMatch(a RegExp) on a json',
-            subject: () => new JsonAccessor('{ "id": 1 }', '/tmp'),
+            subject: () => new JsonAccessor('{ "id": 1 }', 'stdout', '/tmp'),
             value: /id/u,
         },
         {
@@ -383,7 +383,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
     test('json: a frozen missing fixture throws instead of being written', () => {
         // Given - a json subject and a fixture name that does not exist on disk
-        const accessor = new JsonAccessor('{ "id": 1 }', scratch);
+        const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
         const fixturePath = resolve(scratch, 'expected', 'frozen.json');
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
@@ -399,7 +399,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
         const fixturePath = resolve(scratch, 'expected', 'wrong.json');
         mkdirSync(resolve(scratch, 'expected'), { recursive: true });
         writeFileSync(fixturePath, '{\n    "id": 999\n}\n');
-        const accessor = new JsonAccessor('{ "id": 1 }', scratch);
+        const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
@@ -411,7 +411,7 @@ describe('frozen fixtures are never rewritten under TEST_UPDATE (per-subject wri
 
     test('json: without frozen, update mode writes the fixture (control)', () => {
         // Given - the same missing fixture, but NOT frozen
-        const accessor = new JsonAccessor('{ "id": 1 }', scratch);
+        const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
         const fixturePath = resolve(scratch, 'expected', 'written.json');
 
         // Then - update mode writes it and passes
@@ -489,7 +489,12 @@ describe('update mode records a golden whatever the file holds: nothing, or no f
             (dir: string) => new TextAccessor('built\n', 'stdout', dir),
             'built\n',
         ],
-        ['json', 'empty.json', (dir: string) => new JsonAccessor('{ "id": 1 }', dir), '"id": 1'],
+        [
+            'json',
+            'empty.json',
+            (dir: string) => new JsonAccessor('{ "id": 1 }', 'stdout', dir),
+            '"id": 1',
+        ],
         [
             'response',
             'empty.http',
@@ -793,7 +798,7 @@ describe('toMatch compares the whole result to the value written in place, and u
 
     test('a json against its value: tokens in its strings, every key compared', () => {
         // Given - a json
-        const subject = new JsonAccessor(`{ "id": "${UUID}", "tags": ["a"] }`, '/tmp');
+        const subject = new JsonAccessor(`{ "id": "${UUID}", "tags": ["a"] }`, 'stdout', '/tmp');
 
         // Then - the value matches whole; a missing key fails
         expect(subject).toMatch({ id: '{{uuid}}', tags: ['a'] });
@@ -966,7 +971,7 @@ describe('toMatch compares the whole result to the value written in place, and u
         );
 
         // When - compared
-        void wholeOf(new JsonAccessor(`{"id":"${UUID}","name":"Grace"}`, '/tmp'))(
+        void wholeOf(new JsonAccessor(`{"id":"${UUID}","name":"Grace"}`, 'stdout', '/tmp'))(
             { id: '{{uuid}}', name: 'Ada' },
             undefined,
             scratch.stack,

@@ -95,12 +95,9 @@ export class CallResult<Returned = unknown> extends BaseResult {
         const accessor =
             typeof produced === 'string'
                 ? new TextAccessor(produced, 'value', this.testDir, { captures: this.captures })
-                : new JsonAccessor(
-                      JSON.stringify(produced ?? null),
-                      this.testDir,
-                      undefined,
-                      this.captures,
-                  );
+                : new JsonAccessor(JSON.stringify(produced ?? null), 'value', this.testDir, {
+                      captures: this.captures,
+                  });
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the branch above IS the conditional type, chosen on the same runtime shape the type reads
         return accessor as CallValue<Returned>;
     }

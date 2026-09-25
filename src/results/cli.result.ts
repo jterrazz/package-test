@@ -96,12 +96,10 @@ export class CliResult extends BaseResult {
 
     /** Accessor for parsing stdout as JSON and asserting against JSON fixtures. */
     get json(): JsonAccessor {
-        return new JsonAccessor(
-            this.commandOutput.stdout,
-            this.testDir,
-            this.transform,
-            this.captures,
-        );
+        return new JsonAccessor(this.commandOutput.stdout, 'stdout', this.testDir, {
+            captures: this.captures,
+            transform: this.transform,
+        });
     }
 
     /** Accessor for the temporary working directory the command ran in. */
