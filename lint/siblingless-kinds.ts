@@ -185,7 +185,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/actions/fetch/fetch.action.ts',
-            'src/capabilities/headers/headers.capability.ts',
             'src/model/chain/action.ts',
             'src/model/chain/capability.ts',
             'src/model/chain/ground.ts',
