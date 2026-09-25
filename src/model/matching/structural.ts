@@ -417,7 +417,7 @@ export function renderExpected(value: unknown): unknown {
  * every string leaf of a structured value. The structural mirror of the text
  * path's `actual.replaceAll(workdir, '{{workdir}}')` — so a golden written under
  * `TEST_UPDATE=1` stores the token, not a run-specific temp path (CONVENTIONS
- * D5). A no-op when `workdir` is undefined (no cwd, e.g. api/jobs mode).
+ * D5). A no-op when `workdir` is undefined (no cwd, e.g. api/job mode).
  */
 function substituteWorkdirDeep(value: unknown, workdir: string): unknown {
     if (typeof value === 'string') {

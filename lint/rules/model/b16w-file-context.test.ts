@@ -48,16 +48,16 @@ ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
         // The view is named for the subject, whatever the file's aspect: the job it triggers.
         {
             code: [
-                "import { jobs } from '../jobs.specification.js';",
-                "test('a', async () => { await jobs.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
-                "test('b', async () => { await jobs.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
+                "import { job } from '../job.specification.js';",
+                "test('a', async () => { await job.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
+                "test('b', async () => { await job.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
             ].join('\n'),
             errors: [{ messageId: 'repeated' }],
-            filename: '/repo/specs/jobs/report-refresh/stale-reports.spec.ts',
+            filename: '/repo/specs/job/report-refresh/stale-reports.spec.ts',
             output: [
-                "import { jobs } from '../jobs.specification.js';",
+                "import { job } from '../job.specification.js';",
                 '',
-                "const reportRefresh = jobs.with({ clock: '2026-01-01T00:00:00Z' });",
+                "const reportRefresh = job.with({ clock: '2026-01-01T00:00:00Z' });",
                 "test('a', async () => { await reportRefresh.trigger('report-refresh'); });",
                 "test('b', async () => { await reportRefresh.trigger('report-refresh'); });",
             ].join('\n'),

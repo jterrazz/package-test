@@ -7,7 +7,7 @@ import type { AstNode } from './rule-shape.js';
 
 /** The program a facet file's source parses to. */
 function programOf(source: string): AstNode {
-    const program = parseProgram('jobs.facet.ts', source);
+    const program = parseProgram('job.facet.ts', source);
     if (!isNode(program)) {
         throw new Error('the facet file does not parse');
     }
@@ -35,7 +35,7 @@ const composition = {
     options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } },
 } as const;
 
-export const jobsFacet = defineFacet()({ ...composition, engines: ${engines}, locate: getCallerDir });
+export const jobFacet = defineFacet()({ ...composition, engines: ${engines}, locate: getCallerDir });
 `;
 }
 

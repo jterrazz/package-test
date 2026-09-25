@@ -24,7 +24,7 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'testAtFacetRoot' }],
-            filename: '/repo/specs/jobs/jobs.test.ts',
+            filename: '/repo/specs/job/job.test.ts',
         },
         // A test nested deeper than facet/domain.
         {
@@ -281,7 +281,7 @@ ruleTester.run('c1-domain-structure (depth: off)', c1DomainStructure as unknown 
         // Declared to be guarded somewhere else entirely.
         {
             code: 'const x = 1;',
-            filename: '/repo/specs/jobs/jobs.test.ts',
+            filename: '/repo/specs/job/job.test.ts',
             options: [{ depth: 'off' }],
         },
         {

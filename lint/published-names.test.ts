@@ -28,9 +28,9 @@ describe('published names — the surface a consumer imports, by name', () => {
         writeFileSync(
             join(root, 'consumer.ts'),
             [
-                `import type { JobsSpecification } from '${join(ROOT, 'dist', 'index.js')}';`,
-                'declare const jobs: JobsSpecification<never>;',
-                "jobs.with({ headers: { 'accept-language': 'fr' } });",
+                `import type { JobSpecification } from '${join(ROOT, 'dist', 'index.js')}';`,
+                'declare const job: JobSpecification<never>;',
+                "job.with({ headers: { 'accept-language': 'fr' } });",
             ].join('\n'),
         );
         const compiled = spawnSync(

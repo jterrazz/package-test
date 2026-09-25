@@ -7,8 +7,8 @@ import { handleFileFindings } from './facet-handle.js';
 /** What each finding of a constructor says, as `<messageId> <data values>`. */
 function findingsOf(body: string): string[] {
     const program = parseProgram(
-        'jobs.handle.ts',
-        `import { seed } from '../../capabilities/seed/seed.capability.js';\nimport * as results from '../../results/result.js';\nimport { jobsFacet } from './jobs.facet.js';\n${body}`,
+        'job.handle.ts',
+        `import { seed } from '../../capabilities/seed/seed.capability.js';\nimport * as results from '../../results/result.js';\nimport { jobFacet } from './job.facet.js';\n${body}`,
     );
     if (!isNode(program)) {
         throw new Error('the constructor does not parse');
@@ -25,7 +25,7 @@ describe('handleFileFindings', () => {
             'const run = () => late([]);',
             'const definition = seed;',
             "definition['perform']([]);",
-            'jobsFacet.composition.capabilities.reduce([]);',
+            'jobFacet.composition.capabilities.reduce([]);',
             'const { arm: late } = seed;',
         ].join('\n');
 
@@ -33,7 +33,7 @@ describe('handleFileFindings', () => {
         expect(findingsOf(source)).toStrictEqual([
             'runsStep seed arm',
             'runsStep definition perform',
-            'runsStep jobsFacet.composition.capabilities reduce',
+            'runsStep jobFacet.composition.capabilities reduce',
         ]);
     });
 
@@ -42,7 +42,7 @@ describe('handleFileFindings', () => {
         const source = [
             'const rows = [1, 2].reduce((sum, value) => sum + value, 0);',
             'const kind = results.BaseResult.name;',
-            'export const jobs = jobsFacet.open({ kind, rows });',
+            'export const job = jobFacet.open({ kind, rows });',
             'const built = new results.BaseResult({});',
         ].join('\n');
 

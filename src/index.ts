@@ -42,7 +42,7 @@ export {
     type IntegrationHandle,
     type IntegrationSpecificationOptions,
 } from './facets/integration/integration.handle.js';
-export { type JobsHandle, type JobsSpecificationOptions } from './facets/jobs/jobs.handle.js';
+export { type JobHandle, type JobSpecificationOptions } from './facets/job/job.handle.js';
 export {
     type MobileBackendOptions,
     type MobileHandle,
@@ -63,15 +63,15 @@ export { type DatabaseKeys, type ServiceRecord } from './model/services/services
 export type { ApiSpecification } from './facets/api/api.facet.js';
 export type { CliSpecification } from './facets/cli/cli.facet.js';
 export type { IntegrationSpecification } from './facets/integration/integration.facet.js';
-export type { JobsSpecification } from './facets/jobs/jobs.facet.js';
-export type { JobsResult } from './results/jobs.result.js';
+export type { JobSpecification } from './facets/job/job.facet.js';
+export type { JobResult } from './results/job.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.facet.js';
 export type { WebsiteSpecification } from './facets/website/website.facet.js';
 export type { ChainContext } from './capabilities/with/with.capability.js';
 export type { SeedSource } from './capabilities/seed/seed.capability.js';
 export type {
     DockerSpecConfig,
-    JobHandle,
+    Job,
     LiterateServeRegistration,
     SpecificationConfig,
 } from './model/chain/config.js';

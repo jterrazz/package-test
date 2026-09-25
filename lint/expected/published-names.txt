@@ -60,11 +60,11 @@ dist/index.d.ts:
     InterceptOptions
     InterceptScope
     IsolationStrategy
+    Job
     JobHandle
-    JobsHandle
-    JobsResult
-    JobsSpecification
-    JobsSpecificationOptions
+    JobResult
+    JobSpecification
+    JobSpecificationOptions
     JsonAccessor
     LandmarkKind
     LiterateRunFlags
@@ -237,7 +237,7 @@ dist/vitest.d.ts:
     CliProjectOptions
     ComponentProjectOptions
     FacetProjectOptions
-    JobsProjectOptions
+    JobProjectOptions
     LiterateDoor
     LiterateOptions
     LiteratePlugin
@@ -250,7 +250,7 @@ dist/vitest.d.ts:
     component
     defineSpecConfig
     integration
-    jobs
+    job
     literate
     mobile
     unit

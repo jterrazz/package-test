@@ -7,7 +7,7 @@ import {
     component,
     defineSpecConfig,
     integration,
-    jobs,
+    job,
     literate,
     mobile,
     unit,
@@ -58,7 +58,7 @@ const config = defineSpecConfig({
             // Parallel: the run's containers are shared, and each worker gets a
             // Database of its own and a Redis index.
             api(),
-            jobs(),
+            job(),
             // Serial: the facet's own probes of the container seams start
             // Their own infrastructure — a compose stack among them — and a
             // Docker daemon is the one thing every file of this project

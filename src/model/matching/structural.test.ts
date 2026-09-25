@@ -279,7 +279,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
     });
 
     test('no workdir given: string leaves are left untouched (no-op parity)', () => {
-        // Given - the same shape but no framework-known cwd (api/jobs mode)
+        // Given - the same shape but no framework-known cwd (api/job mode)
         const actual = { cwd: WORKDIR };
 
         // Then - nothing is substituted

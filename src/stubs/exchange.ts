@@ -1,6 +1,6 @@
 /**
  * The observed outgoing request, reduced to what stub matchers inspect.
- * Built once per request by the engine (MSW on api/jobs, the stub backend on
+ * Built once per request by the engine (MSW on api/job, the stub backend on
  * website/mobile) and handed to {@link StubRequest.match} and to a
  * {@link StubResponder}.
  */

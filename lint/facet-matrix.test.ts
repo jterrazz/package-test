@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { ComponentVisitor } from '../src/actions/render/scenario.js';
 import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
-import type { JobsResult } from '../src/index.js';
+import type { JobResult } from '../src/index.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
 import * as elements from '../src/model/elements/elements.js';
 import type { Visitor } from '../src/model/ports/browser.port.js';
@@ -49,7 +49,7 @@ const FACET_COLUMNS = [
     'cli',
     'component',
     'integration',
-    'jobs',
+    'job',
     'mobile',
     'website',
 ] as const satisfies readonly Exclude<Column, 'module'>[];
@@ -99,10 +99,10 @@ const apiResult = {
     table: true,
 } satisfies Record<keyof HttpResult, Published>;
 
-const jobsResult = {
+const jobResult = {
     captures: INTERNAL,
     table: true,
-} satisfies Record<keyof JobsResult, Published>;
+} satisfies Record<keyof JobResult, Published>;
 
 const cliResult = {
     [Symbol.asyncDispose]: 'the leak-free teardown a `await using` result runs, not an accessor',
@@ -184,7 +184,7 @@ const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = 
     cli: [cliResult],
     component: [componentResult],
     integration: [integrationResult],
-    jobs: [jobsResult],
+    job: [jobResult],
     mobile: [mobileResult],
     website: [websiteResult, fetchResult],
 };

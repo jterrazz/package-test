@@ -74,7 +74,7 @@ function rootName(node: AstNode | undefined): string | undefined {
         : identifierName(read);
 }
 
-/** What a value is read off, when that is a definition or a facet: `seed`, `jobsFacet.composition`. */
+/** What a value is read off, when that is a definition or a facet: `seed`, `jobFacet.composition`. */
 function ownerOf(node: AstNode | undefined, bindings: Bindings): string | undefined {
     const root = rootName(node);
     const layer = root === undefined ? undefined : bindings.layers.get(root);

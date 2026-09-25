@@ -8,7 +8,7 @@ import type { CallResult } from '../results/call.result.js';
 import type { CliResult } from '../results/cli.result.js';
 import type { FetchResult } from '../results/fetch.result.js';
 import type { HttpResult } from '../results/http.result.js';
-import type { JobsResult } from '../results/jobs.result.js';
+import type { JobResult } from '../results/job.result.js';
 import type { PageResult } from '../results/page.result.js';
 import type { RenderResult } from '../results/render.result.js';
 import type { ScreenResult } from '../results/screen.result.js';
@@ -74,7 +74,7 @@ export type ActionSignatures<P extends FacetParams> = {
      */
     run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<CliResult>;
     /** Execute the named job registered via the `jobs` option and resolve with the result. */
-    trigger: (name: string) => Promise<JobsResult>;
+    trigger: (name: string) => Promise<JobResult>;
     /**
      * Render the page in the shared browser and resolve with the captured
      * document. With a scenario, the visitor interacts first (the When) and

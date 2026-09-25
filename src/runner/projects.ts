@@ -23,7 +23,7 @@ export { api, type ApiProjectOptions } from './projects/api.project.js';
 export { cli, type CliProjectOptions } from './projects/cli.project.js';
 export { component, type ComponentProjectOptions } from './projects/component.project.js';
 export { integration } from './projects/integration.project.js';
-export { jobs, type JobsProjectOptions } from './projects/jobs.project.js';
+export { job, type JobProjectOptions } from './projects/job.project.js';
 export { mobile, type MobileProjectOptions } from './projects/mobile.project.js';
 export { website, type WebsiteProjectOptions } from './projects/website.project.js';
 export { type FacetProjectOptions, type LiterateDoor } from './facet-project.js';

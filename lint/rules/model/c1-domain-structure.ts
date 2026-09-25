@@ -63,7 +63,7 @@ function testsItsNeighbour(filename: string): boolean {
  *
  * `depth: 'facet-domain'` (the default, and the historical behaviour)
  *
- * A facet (`specs/<facet>/` — api, jobs, cli, integrations, lint, …) is the
+ * A facet (`specs/<facet>/` — api, job, cli, integrations, lint, …) is the
  * master folder. It carries its runner(s) at its ROOT
  * (`specs/<facet>/<name>.specification.ts`) and holds DOMAIN folders, each a
  * product command/area with one or more `<aspect>.test.ts` files plus their

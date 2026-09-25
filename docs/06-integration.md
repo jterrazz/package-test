@@ -71,7 +71,7 @@ Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })`
 const result = await integration.call(async ({ db }) => await listOrders(db.connectionString));
 ```
 
-Databases reset at the start of every chain, exactly as on api and jobs (rules B1, B7): one spec is one call, and no spec depends on a previous one.
+Databases reset at the start of every chain, exactly as on api and job (rules B1, B7): one spec is one call, and no spec depends on a previous one.
 
 ## The result
 

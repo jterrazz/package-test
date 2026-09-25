@@ -2,7 +2,7 @@
  * Vitest custom matchers for `@jterrazz/test` accessors.
  *
  * Auto-registered (idempotently) on the first `specification.api()` /
- * `specification.jobs()` / `specification.cli()` call via a dynamic
+ * `specification.job()` / `specification.cli()` call via a dynamic
  * `import('vitest')` — the library never hard-imports vitest at module load.
  *
  * All assertions go through `expect()` (CONVENTIONS D1). Only matchers that

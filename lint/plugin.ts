@@ -16,7 +16,7 @@ import { e8LiterateSpecificationExists } from './rules/cli/e8-literate-specifica
 import { e5NoSimulatedDom } from './rules/component/e5-no-simulated-dom.js';
 import { e6ComponentProjectHelper } from './rules/component/e6-component-project-helper.js';
 import { g4NoDomInModuleTest } from './rules/component/g4-no-dom-in-module-test.js';
-import { b8KebabTrigger } from './rules/jobs/b8-kebab-trigger.js';
+import { b8KebabTrigger } from './rules/job/b8-kebab-trigger.js';
 import { a1SpecificationFile } from './rules/model/a1-specification-file.js';
 import { a2KnownConstructors } from './rules/model/a2-known-constructors.js';
 import { a3NoDestructureAlias } from './rules/model/a3-no-destructure-alias.js';

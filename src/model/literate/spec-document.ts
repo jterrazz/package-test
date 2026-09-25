@@ -28,7 +28,7 @@ import { isRelativePath } from '../chain/spec-path.js';
  *         stdout: |
  *           Removed post-recap.
  *
- * A document is a cli case alone: an api or a jobs case is a TypeScript spec,
+ * A document is a cli case alone: an api or a job case is a TypeScript spec,
  * its whole result written in place.
  *
  * This module owns the grammar and NOTHING else: it resolves no path, runs no

@@ -106,7 +106,7 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 `.not`: `expect(result.response).not.toMatch(file('./expected/user-created.http'))` passes when any part diverges. Rarely useful — prefer positive fixtures.
 
-## `result.table(name, { database }?)` — database tables (api, jobs, cli)
+## `result.table(name, { database }?)` — database tables (api, job, cli)
 
 Always `await expect(…)` (IO). `database:` is **mandatory when the services record declares ≥ 2 databases, forbidden with exactly 1** (rule A7).
 
@@ -232,7 +232,7 @@ Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` 
 
 Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule B5). `result.container(name)` looks a container up by its `nameLabel` value — lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing.
 
-The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.jobs()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing.
+The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.job()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing.
 
 | Subject / matcher                                     | Sync/async | Example                                                                                                |
 | ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |

@@ -79,7 +79,7 @@ describe('subjectFolder — the standard name, derived from the subject', () => 
             { facet: 'api', method: 'GET', path: '/' },
             undefined,
         ],
-        ['a job is its name', { facet: 'jobs', job: 'digest' }, 'digest'],
+        ['a job is its name', { facet: 'job', job: 'digest' }, 'digest'],
         ['a cli command is its words', { command: ['db', 'migrate'], facet: 'cli' }, 'db/migrate'],
         ['a cli run with no command word has no name', { command: [], facet: 'cli' }, undefined],
         ['a page has no standard name', { facet: 'website', page: '/pricing' }, undefined],
@@ -187,8 +187,8 @@ describe('the subject a spec reaches, read statically', () => {
     test('reads a job, the words of a command, a page and a journey', () => {
         // Given - one chain of each other facet
         const source = [
-            "import { cli, jobs, mobile, website } from '../x.specification.js';",
-            "await jobs.trigger('digest');",
+            "import { cli, job, mobile, website } from '../x.specification.js';",
+            "await job.trigger('digest');",
             "await cli.exec('db migrate --dry-run');",
             "await cli.exec(['build', 'serve ./dist']);",
             "await website.visit('/articles/42', async () => {});",
@@ -313,7 +313,7 @@ describe('what a repository declares — its runner commands, its irregular coll
             run: '../db-cli.specification.js',
         });
         expect(doorsOf(source, 'api')).toStrictEqual({ api: '../api.specification.js' });
-        expect(doorsOf(source, 'jobs')).toStrictEqual({});
+        expect(doorsOf(source, 'job')).toStrictEqual({});
     });
 
     test.each<[string, readonly string[], string | undefined]>([

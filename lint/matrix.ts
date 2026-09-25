@@ -51,7 +51,7 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
         roots: ['specs/component'],
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },
-    jobs: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/jobs'] },
+    job: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/job'] },
     mobile: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/mobile'] },
     module: { extensions: ['.test.ts', '.test.tsx'], roots: ['src'] },
     website: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/website'] },
@@ -109,7 +109,7 @@ function pastString(source: string, index: number): number {
  *
  * A cell counts the files that EXERCISE a capability, and a sentence about one
  * is not an exercise of it: before this, the comment naming `.intercept()` in
- * `specs/jobs/jobs.specification.ts` counted as a second jobs file, and the
+ * `specs/job/job.specification.ts` counted as a second job file, and the
  * word "wrapped" in a component test counted as a `wrap`.
  *
  * The scan walks the source character by character, because a regex cannot
@@ -224,7 +224,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
         cli: read('cli'),
         component: read('component'),
         integration: read('integration'),
-        jobs: read('jobs'),
+        job: read('job'),
         mobile: read('mobile'),
         module: read('module'),
         website: read('website'),
@@ -373,7 +373,7 @@ export function matrixRows(root: string): MatrixRow[] {
             cli: count(capability, 'cli'),
             component: count(capability, 'component'),
             integration: count(capability, 'integration'),
-            jobs: count(capability, 'jobs'),
+            job: count(capability, 'job'),
             mobile: count(capability, 'mobile'),
             module: count(capability, 'module'),
             website: count(capability, 'website'),

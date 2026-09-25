@@ -128,7 +128,7 @@ export const FRAMEWORK_LAYERS = {
                 'seams/vitest-browser/',
             ],
             'facets/integration/integration.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
-            'facets/jobs/jobs.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
+            'facets/job/job.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
             'facets/mobile/mobile.facet.ts': ['seams/stub-backend/', 'seams/appium/'],
             'facets/website/website.facet.ts': ['seams/stub-backend/', 'seams/playwright/'],
             'facets/api/api.handle.ts': ['seams/hono/'],

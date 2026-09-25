@@ -1,6 +1,6 @@
 # 20 — Spec documents (`<case>.spec.yaml`)
 
-A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's — and the lint rules', whose specifications are cli sessions of the linter; an api or a jobs case is a TypeScript spec, its whole result written in place ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)). This chapter owns the format, from the key a document opens with to the door that runs it.
+A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's — and the lint rules', whose specifications are cli sessions of the linter; an api or a job case is a TypeScript spec, its whole result written in place ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)). This chapter owns the format, from the key a document opens with to the door that runs it.
 
 - [One file, one test](#one-file-one-test) — the unit, and the golden of the whole session
 - [Paths](#paths) — `fixture:` names the disk the way `file()` and `directory()` do
@@ -182,7 +182,7 @@ A document that starts wanting a conditional is a chain wearing a header. Write 
 - **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — `d4b-spec-block-scalar` rejects it and `--fix` rewrites it.
 - **A `fixture:` naming a golden's folder.** It reads `fixtures/`; `./expected/shop/` is refused on its line.
 - **Listing cases in one file, or inheriting a given.** One file is one test, and the given is visible: a list of paths layers, `extends:` does not exist.
-- **Writing an api or a jobs case as a document.** The format is a cli session's; an api or jobs case is a spec, its whole result in place — `kind:` is an unknown key.
+- **Writing an api or a job case as a document.** The format is a cli session's; an api or job case is a spec, its whole result in place — `kind:` is an unknown key.
 
 ## Related
 

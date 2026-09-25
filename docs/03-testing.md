@@ -21,7 +21,7 @@ What proves a change here: this package specifies itself with itself. The suites
 | `unit`        | `src/**/*.test.ts` + `specs/lint/**/*.test.ts`, built by `unit()`                               | Nothing — the lint specs need `npm run build` first                  |
 | `cli`         | `specs/cli/**`, built by `cli()` — its documents included, through `literate()`                 | Nothing — the Docker specs self-skip                                 |
 | `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                   | Docker                                                               |
-| `jobs`        | `specs/jobs/**`, built by `jobs()`                                                              | Docker                                                               |
+| `job`         | `specs/job/**`, built by `job()`                                                                | Docker                                                               |
 | `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included | Docker                                                               |
 | `website`     | `specs/website/**`, built by `website()`                                                        | playwright + `npx playwright install chromium`; no Docker            |
 | `component`   | `specs/component/**/*.test.tsx`, built by `component()`                                         | the same chromium; no Docker. Runs in its own group, after `website` |
@@ -67,11 +67,11 @@ specs/
     └── seeds/                        # seeds/, requests/, expected/ share the same way
 ```
 
-**The folder names come from the capability matrix below, and nowhere else** — C35 holds them to it. A capability belongs to no facet in particular, so a facet that gives one a folder calls it by the matrix's name — `specs/api/clock/`, `specs/jobs/clock/` and `specs/website/clock/` are the same question asked of three constructors, and two names for one capability is the drift a closed vocabulary stops. A facet takes only the capabilities its own column declares: `appium` is mobile's, so the spec of a mobile run's one Appium session sits in `specs/mobile/appium/`, though it runs its vitest projects through the cli runner. It says nothing about where a METHOD may appear: `.seed()` is used inside integration's `call/` scenarios, because seeding is the Given there and not the subject; a capability earns a folder when it is what the specs in it are ABOUT. An integration spec reaches the module of the shared fixtures its chains call (`orders`, whose `stamp` and `tally` are what `clock/` and `table/` call), and is filed the same way. A spec that reaches no specimen is out of that reach, and its folder is its author's: an integration spec calling a module written inline, which this tree never does; integration's seam specs under `services/`, which call the redis or postgres handle itself; and `specs/api/services/initiation-errors.spec.ts`, whose runners never start — each hands a `broken-*` tree to its services as their root, and a root no server command runs from is no app.
+**The folder names come from the capability matrix below, and nowhere else** — C35 holds them to it. A capability belongs to no facet in particular, so a facet that gives one a folder calls it by the matrix's name — `specs/api/clock/`, `specs/job/clock/` and `specs/website/clock/` are the same question asked of three constructors, and two names for one capability is the drift a closed vocabulary stops. A facet takes only the capabilities its own column declares: `appium` is mobile's, so the spec of a mobile run's one Appium session sits in `specs/mobile/appium/`, though it runs its vitest projects through the cli runner. It says nothing about where a METHOD may appear: `.seed()` is used inside integration's `call/` scenarios, because seeding is the Given there and not the subject; a capability earns a folder when it is what the specs in it are ABOUT. An integration spec reaches the module of the shared fixtures its chains call (`orders`, whose `stamp` and `tally` are what `clock/` and `table/` call), and is filed the same way. A spec that reaches no specimen is out of that reach, and its folder is its author's: an integration spec calling a module written inline, which this tree never does; integration's seam specs under `services/`, which call the redis or postgres handle itself; and `specs/api/services/initiation-errors.spec.ts`, whose runners never start — each hands a `broken-*` tree to its services as their root, and a root no server command runs from is no app.
 
 A test at a facet root is forbidden and a `*.specification.ts` inside a domain is forbidden; `fixtures/`, `expected/`, `requests/` and `seeds/` are ground, never a domain, and `shared/` directly under `specs/` is the shared ground, never a facet — deeper, a domain or a route's segment may take the word. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
-The fixture apps the specs drive live in the pool, `specs/shared/fixtures/`, each a SPECIMEN named for the facet that drives it: `specimen-api` (which carries the jobs too), `specimen-api-outbound`, `specimen-jobs`, `specimen-website` and its `specimen-website-backend`, `specimen-cli` and its `-docker`, `-vitest` and `-literate` variants, and `specimen-mobile`, the mobile facet's; beside them, `checker-cli` and `lint-cli` for the lint suite, and the `broken-*` trees for the infrastructure failure paths. A lint rule's trees are not in the pool: a rule specified by documents keeps them in its own `specs/lint/<rule-id>/fixtures/`, and the checker's twins sit in `specs/lint/checker/fixtures/`.
+The fixture apps the specs drive live in the pool, `specs/shared/fixtures/`, each a SPECIMEN named for the facet that drives it: `specimen-api` (which carries the jobs too), `specimen-api-outbound`, `specimen-job`, `specimen-website` and its `specimen-website-backend`, `specimen-cli` and its `-docker`, `-vitest` and `-literate` variants, and `specimen-mobile`, the mobile facet's; beside them, `checker-cli` and `lint-cli` for the lint suite, and the `broken-*` trees for the infrastructure failure paths. A lint rule's trees are not in the pool: a rule specified by documents keeps them in its own `specs/lint/<rule-id>/fixtures/`, and the checker's twins sit in `specs/lint/checker/fixtures/`.
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
@@ -229,201 +229,201 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 ### Constructor option
 
-| Capability  | api | jobs | cli | integration | website | mobile | component | module |
-| ----------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `root`      | 2   | 1    | 1   | 2           | 1       | 1      | 1         | —      |
-| `server`    | 4   | —    | —   | —           | 4       | —      | —         | —      |
-| `services`  | 2   | 1    | 1   | 2           | 1       | 1      | —         | —      |
-| `jobs`      | —   | 2    | —   | —           | —       | —      | —         | —      |
-| `commands`  | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `defaults`  | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `docker`    | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `env`       | —   | —    | 5   | —           | —       | —      | —         | —      |
-| `serve`     | —   | —    | 3   | —           | —       | —      | —         | —      |
-| `transform` | —   | —    | 2   | —           | 1       | —      | —         | —      |
-| `backend`   | —   | —    | —   | —           | 1       | 1      | —         | —      |
-| `external`  | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `url`       | —   | —    | —   | —           | 2       | —      | —         | —      |
-| `app`       | —   | —    | —   | —           | —       | 1      | —         | —      |
-| `appium`    | —   | —    | —   | —           | —       | 1      | —         | —      |
-| `device`    | —   | —    | —   | —           | —       | 1      | —         | —      |
-| `timeouts`  | —   | —    | —   | —           | —       | 1      | —         | —      |
-| `clock`     | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `locale`    | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `timezone`  | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `viewport`  | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `vite`      | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `wrap`      | —   | —    | —   | —           | —       | —      | 1         | —      |
+| Capability  | api | job | cli | integration | website | mobile | component | module |
+| ----------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `root`      | 2   | 1   | 1   | 2           | 1       | 1      | 1         | —      |
+| `server`    | 4   | —   | —   | —           | 4       | —      | —         | —      |
+| `services`  | 2   | 1   | 1   | 2           | 1       | 1      | —         | —      |
+| `jobs`      | —   | 2   | —   | —           | —       | —      | —         | —      |
+| `commands`  | —   | —   | 1   | —           | —       | —      | —         | —      |
+| `defaults`  | —   | —   | 1   | —           | —       | —      | —         | —      |
+| `docker`    | —   | —   | 1   | —           | —       | —      | —         | —      |
+| `env`       | —   | —   | 5   | —           | —       | —      | —         | —      |
+| `serve`     | —   | —   | 3   | —           | —       | —      | —         | —      |
+| `transform` | —   | —   | 2   | —           | 1       | —      | —         | —      |
+| `backend`   | —   | —   | —   | —           | 1       | 1      | —         | —      |
+| `external`  | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `url`       | —   | —   | —   | —           | 2       | —      | —         | —      |
+| `app`       | —   | —   | —   | —           | —       | 1      | —         | —      |
+| `appium`    | —   | —   | —   | —           | —       | 1      | —         | —      |
+| `device`    | —   | —   | —   | —           | —       | 1      | —         | —      |
+| `timeouts`  | —   | —   | —   | —           | —       | 1      | —         | —      |
+| `clock`     | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `locale`    | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `timezone`  | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `viewport`  | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `vite`      | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `wrap`      | —   | —   | —   | —           | —       | —      | 1         | —      |
 
 ### Setup
 
-| Capability     | api | jobs | cli | integration | website | mobile | component | module |
-| -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 2    | —   | 2           | 1       | —      | 1         | —      |
-| `.headers()`   | 5   | —    | —   | —           | 1       | —      | —         | —      |
-| `.intercept()` | 10  | 1    | —   | 2           | 1       | 1      | 6         | —      |
-| `.seed()`      | 9   | 1    | 1   | 3           | —       | —      | —         | —      |
-| `.with()`      | 4   | 1    | 1   | 1           | 1       | —      | —         | —      |
-| `.env()`       | —   | —    | 4   | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —    | 29  | —           | —       | —      | —         | —      |
-| `.viewport()`  | —   | —    | —   | —           | —       | —      | 2         | —      |
-| `.wrap()`      | —   | —    | —   | —           | —       | —      | 1         | —      |
+| Capability     | api | job | cli | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.clock()`     | 1   | 2   | —   | 2           | 1       | —      | 1         | —      |
+| `.headers()`   | 5   | —   | —   | —           | 1       | —      | —         | —      |
+| `.intercept()` | 10  | 1   | —   | 2           | 1       | 1      | 6         | —      |
+| `.seed()`      | 9   | 1   | 1   | 3           | —       | —      | —         | —      |
+| `.with()`      | 4   | 1   | 1   | 1           | 1       | —      | —         | —      |
+| `.env()`       | —   | —   | 4   | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 29  | —           | —       | —      | —         | —      |
+| `.viewport()`  | —   | —   | —   | —           | —       | —      | 2         | —      |
+| `.wrap()`      | —   | —   | —   | —           | —       | —      | 1         | —      |
 
 ### Terminal action
 
-| Capability   | api | jobs | cli | integration | website | mobile | component | module |
-| ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
-| `.get()`     | 20  | —    | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 7   | —    | —   | —           | —       | —      | —         | —      |
-| `.put()`     | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.delete()`  | 1   | —    | —   | —           | —       | —      | —         | —      |
-| `.trigger()` | —   | 7    | —   | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —    | 34  | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —    | 5   | —           | —       | —      | —         | —      |
-| `.call()`    | —   | —    | —   | 9           | —       | —      | —         | —      |
-| `.visit()`   | —   | —    | —   | —           | 21      | —      | —         | —      |
-| `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.open()`    | —   | —    | —   | —           | —       | 7      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 30        | —      |
+| Capability   | api | job | cli | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.request()` | 2   | —   | —   | —           | —       | —      | —         | —      |
+| `.get()`     | 20  | —   | —   | —           | —       | —      | —         | —      |
+| `.post()`    | 7   | —   | —   | —           | —       | —      | —         | —      |
+| `.put()`     | 1   | —   | —   | —           | —       | —      | —         | —      |
+| `.delete()`  | 1   | —   | —   | —           | —       | —      | —         | —      |
+| `.trigger()` | —   | 7   | —   | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 34  | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —   | 5   | —           | —       | —      | —         | —      |
+| `.call()`    | —   | —   | —   | 9           | —       | —      | —         | —      |
+| `.visit()`   | —   | —   | —   | —           | 21      | —      | —         | —      |
+| `.fetch()`   | —   | —   | —   | —           | 3       | —      | —         | —      |
+| `.open()`    | —   | —   | —   | —           | —       | 7      | —         | —      |
+| `.render()`  | —   | —   | —   | —           | —       | —      | 30        | —      |
 
 ### Route option
 
-| Capability   | api | jobs | cli | integration | website | mobile | component | module |
-| ------------ | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{ params }` | 1   | —    | —   | —           | —       | —      | —         | —      |
+| Capability   | api | job | cli | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `{ params }` | 1   | —   | —   | —           | —       | —      | —         | —      |
 
 ### Verb
 
-| Capability | api | jobs | cli | integration | website | mobile | component | module |
-| ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 6      | 28        | —      |
-| `fill`     | —   | —    | —   | —           | 4       | 1      | 3         | —      |
-| `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
-| `gone`     | —   | —    | —   | —           | 3       | —      | 8         | —      |
-| `press`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
-| `hover`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `check`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
-| `select`   | —   | —    | —   | —           | 1       | —      | 3         | —      |
-| `goto`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `tap`      | —   | —    | —   | —           | —       | 3      | —         | —      |
-| `rerender` | —   | —    | —   | —           | —       | —      | 1         | —      |
-| `unmount`  | —   | —    | —   | —           | —       | —      | 1         | —      |
+| Capability | api | job | cli | integration | website | mobile | component | module |
+| ---------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `see`      | —   | —   | —   | —           | 11      | 6      | 28        | —      |
+| `fill`     | —   | —   | —   | —           | 4       | 1      | 3         | —      |
+| `click`    | —   | —   | —   | —           | 3       | —      | 8         | —      |
+| `gone`     | —   | —   | —   | —           | 3       | —      | 8         | —      |
+| `press`    | —   | —   | —   | —           | 1       | —      | 2         | —      |
+| `hover`    | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `check`    | —   | —   | —   | —           | 1       | —      | 2         | —      |
+| `select`   | —   | —   | —   | —           | 1       | —      | 3         | —      |
+| `goto`     | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `tap`      | —   | —   | —   | —           | —       | 3      | —         | —      |
+| `rerender` | —   | —   | —   | —           | —       | —      | 1         | —      |
+| `unmount`  | —   | —   | —   | —           | —       | —      | 1         | —      |
 
 ### Descriptor
 
-| Capability      | api | jobs | cli | integration | website | mobile | component | module |
-| --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —    | —   | —           | 4       | 3      | 8         | —      |
-| `field`         | —   | —    | —   | —           | 6       | 1      | 7         | —      |
-| `content`       | —   | —    | —   | —           | 7       | 6      | 17        | —      |
-| `testId`        | —   | —    | —   | —           | 1       | 1      | 1         | —      |
-| `heading`       | —   | —    | —   | —           | 3       | —      | 3         | —      |
-| `link`          | —   | —    | —   | —           | 3       | —      | 3         | —      |
-| `dialog`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `status`        | —   | —    | —   | —           | 1       | —      | 3         | —      |
-| `table`         | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `row`           | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `listitem`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `option`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `banner`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `complementary` | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `contentinfo`   | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `form`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `main`          | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `navigation`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `region`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `search`        | —   | —    | —   | —           | 2       | —      | 2         | —      |
-| `within`        | —   | —    | —   | —           | 4       | 1      | 6         | —      |
-| `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `valued`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `disabled`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `enabled`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
+| Capability      | api | job | cli | integration | website | mobile | component | module |
+| --------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `button`        | —   | —   | —   | —           | 4       | 3      | 8         | —      |
+| `field`         | —   | —   | —   | —           | 6       | 1      | 7         | —      |
+| `content`       | —   | —   | —   | —           | 7       | 6      | 17        | —      |
+| `testId`        | —   | —   | —   | —           | 1       | 1      | 1         | —      |
+| `heading`       | —   | —   | —   | —           | 3       | —      | 3         | —      |
+| `link`          | —   | —   | —   | —           | 3       | —      | 3         | —      |
+| `dialog`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `status`        | —   | —   | —   | —           | 1       | —      | 3         | —      |
+| `table`         | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `row`           | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `listitem`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `option`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `banner`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `complementary` | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `contentinfo`   | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `form`          | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `main`          | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `navigation`    | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `region`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `search`        | —   | —   | —   | —           | 2       | —      | 2         | —      |
+| `within`        | —   | —   | —   | —           | 4       | 1      | 6         | —      |
+| `focused`       | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `selected`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `valued`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `disabled`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| `enabled`       | —   | —   | —   | —           | 1       | —      | 1         | —      |
 
 ### Result accessor
 
-| Capability      | api | jobs | cli | integration | website | mobile | component | module |
-| --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 23  | —    | —   | —           | —       | —      | —         | —      |
-| `.status`       | 1   | —    | —   | —           | 3       | —      | —         | —      |
-| `.table()`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
-| `.file()`       | 1   | —    | 9   | 1           | —       | —      | —         | —      |
-| `.directory()`  | 1   | —    | 4   | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —    | 17  | —           | —       | —      | —         | —      |
-| `.stderr`       | —   | —    | 7   | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —    | 25  | —           | —       | —      | —         | —      |
-| `.json`         | —   | —    | 5   | —           | 2       | —      | —         | —      |
-| `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.container()`  | —   | —    | 2   | —           | —       | —      | —         | —      |
-| `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `.value`        | —   | —    | —   | 8           | —       | —      | —         | —      |
-| `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —    | —   | —           | 5       | —      | 6         | —      |
-| `.content`      | —   | —    | —   | —           | 10      | 5      | 18        | —      |
-| `.console`      | —   | —    | —   | —           | 4       | —      | 4         | —      |
-| `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
-| `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
-| `.title`        | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.url`          | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.head`         | —   | —    | —   | —           | 3       | —      | —         | —      |
-| `.jsonLd`       | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.canonical`    | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.alternates`   | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.links`        | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.meta()`       | —   | —    | —   | —           | 2       | —      | —         | —      |
-| `.body`         | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.headers`      | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.location`     | —   | —    | —   | —           | 1       | —      | —         | —      |
-| `.screen`       | —   | —    | —   | —           | —       | 3      | —         | —      |
+| Capability      | api | job | cli | integration | website | mobile | component | module |
+| --------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `.response`     | 23  | —   | —   | —           | —       | —      | —         | —      |
+| `.status`       | 1   | —   | —   | —           | 3       | —      | —         | —      |
+| `.table()`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 9   | 1           | —       | —      | —         | —      |
+| `.directory()`  | 1   | —   | 4   | 1           | —       | —      | —         | —      |
+| `.stdout`       | —   | —   | 17  | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —   | 7   | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 25  | —           | —       | —      | —         | —      |
+| `.json`         | —   | —   | 5   | —           | 2       | —      | —         | —      |
+| `.filesystem`   | —   | —   | 1   | —           | —       | —      | —         | —      |
+| `.container()`  | —   | —   | 2   | —           | —       | —      | —         | —      |
+| `.containerIds` | —   | —   | 1   | —           | —       | —      | —         | —      |
+| `.value`        | —   | —   | —   | 8           | —       | —      | —         | —      |
+| `.error`        | —   | —   | —   | 5           | —       | —      | —         | —      |
+| `.tree`         | —   | —   | —   | —           | 5       | —      | 6         | —      |
+| `.content`      | —   | —   | —   | —           | 10      | 5      | 18        | —      |
+| `.console`      | —   | —   | —   | —           | 4       | —      | 4         | —      |
+| `.errors`       | —   | —   | —   | —           | 8       | —      | 8         | —      |
+| `.html`         | —   | —   | —   | —           | 2       | —      | 5         | —      |
+| `.title`        | —   | —   | —   | —           | 3       | —      | —         | —      |
+| `.url`          | —   | —   | —   | —           | 3       | —      | —         | —      |
+| `.head`         | —   | —   | —   | —           | 3       | —      | —         | —      |
+| `.jsonLd`       | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.canonical`    | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.alternates`   | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.links`        | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.meta()`       | —   | —   | —   | —           | 2       | —      | —         | —      |
+| `.body`         | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.headers`      | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.location`     | —   | —   | —   | —           | 1       | —      | —         | —      |
+| `.screen`       | —   | —   | —   | —           | —       | 3      | —         | —      |
 
 ### Golden
 
-| Capability             | api | jobs | cli | integration | website | mobile | component | module |
-| ---------------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —    | 6   | 4           | 0       | —      | 0         | 3      |
-| `toMatch(directory())` | 1   | —    | 5   | 1           | —       | —      | —         | 1      |
-| `toMatch(<rows>)`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 4      |
-| `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 12     |
-| `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 11     |
-| `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
+| Capability             | api | job | cli | integration | website | mobile | component | module |
+| ---------------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `toMatch(file())`      | 1   | —   | 6   | 4           | 0       | —      | 0         | 3      |
+| `toMatch(directory())` | 1   | —   | 5   | 1           | —       | —      | —         | 1      |
+| `toMatch(<rows>)`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
+| `.http exchange`       | 3   | —   | —   | —           | —       | —      | —         | 4      |
+| `.aria.yaml tree`      | —   | —   | —   | —           | 0       | —      | 0         | —      |
+| `.json body`           | 2   | —   | 2   | 3           | 0       | —      | —         | 12     |
+| `.txt stream`          | 1   | —   | 7   | 1           | 1       | —      | —         | 11     |
+| `{ frozen }`           | 2   | —   | 11  | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
 
-| Capability    | api | jobs | cli | integration | website | mobile | component | module |
-| ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 7      |
-| `intercept()` | —   | —    | —   | —           | —       | —      | —         | 2      |
-| `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 1      |
-| `match.*`     | —   | —    | —   | —           | —       | —      | —         | 8      |
+| Capability    | api | job | cli | integration | website | mobile | component | module |
+| ------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `clock()`     | —   | —   | —   | —           | —       | —      | —         | 7      |
+| `intercept()` | —   | —   | —   | —           | —       | —      | —         | 2      |
+| `mockOf()`    | —   | —   | —   | —           | —       | —      | —         | 1      |
+| `match.*`     | —   | —   | —   | —           | —       | —      | —         | 8      |
 
 ### Token
 
-| Capability     | api | jobs | cli | integration | website | mobile | component | module |
-| -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | —    | 3   | 0           | 0       | —      | —         | 2      |
-| `{{base64}}`   | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
-| `{{date}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{duration}}` | 0   | —    | 1   | 0           | 0       | —      | —         | 2      |
-| `{{email}}`    | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{float}}`    | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
-| `{{hex}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
-| `{{int}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{ip}}`       | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{iso8601}}`  | 6   | —    | 0   | 1           | 0       | —      | —         | 2      |
-| `{{number}}`   | 1   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{path}}`     | 1   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{port}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
-| `{{semver}}`   | 0   | —    | 2   | 0           | 0       | —      | —         | 1      |
-| `{{sha}}`      | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{string}}`   | 2   | —    | 1   | 0           | 0       | —      | —         | 1      |
-| `{{time}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{ulid}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
-| `{{url}}`      | 0   | —    | 4   | 0           | 0       | —      | —         | 1      |
-| `{{uuid}}`     | 2   | —    | 0   | 0           | 0       | —      | —         | 3      |
-| `{{workdir}}`  | 0   | —    | 6   | 0           | 0       | —      | —         | 1      |
+| Capability     | api | job | cli | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
+| `{{any}}`      | 0   | —   | 3   | 0           | 0       | —      | —         | 2      |
+| `{{base64}}`   | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
+| `{{date}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{duration}}` | 0   | —   | 1   | 0           | 0       | —      | —         | 2      |
+| `{{email}}`    | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{float}}`    | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
+| `{{hex}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
+| `{{int}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{ip}}`       | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{iso8601}}`  | 6   | —   | 0   | 1           | 0       | —      | —         | 2      |
+| `{{number}}`   | 1   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{path}}`     | 1   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{port}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
+| `{{semver}}`   | 0   | —   | 2   | 0           | 0       | —      | —         | 1      |
+| `{{sha}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{string}}`   | 2   | —   | 1   | 0           | 0       | —      | —         | 1      |
+| `{{time}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{ulid}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
+| `{{url}}`      | 0   | —   | 4   | 0           | 0       | —      | —         | 1      |
+| `{{uuid}}`     | 2   | —   | 0   | 0           | 0       | —      | —         | 3      |
+| `{{workdir}}`  | 0   | —   | 6   | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions
 
@@ -592,7 +592,7 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 - **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
 - **Hand-editing a golden under `specs/lint/checker/expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
-- **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `jobs` and `integration` fail honestly.
+- **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `job` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `c1-domain-structure` in this repository's default depth — the runner lives at the root, the tests live one level down.
 - **Writing a facet spec with the unit’s suffix.** `c12-spec-file-name` refuses it and `jterrazz-test-check specs --fix` renames it with `git mv` — and names every `include`/`exclude` entry of the member the rename broke — the globs whose prefix covers a file it moved and the literals naming one — since an entry the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.
 

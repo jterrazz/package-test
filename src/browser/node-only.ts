@@ -16,7 +16,7 @@
 export function refuse(name: string): never {
     throw new Error(
         `${name} runs under node: a page has no filesystem, no child process and no socket. ` +
-            'Specify it from a test collected by a node project (unit/api/jobs/cli/website/mobile); ' +
+            'Specify it from a test collected by a node project (unit/api/job/cli/website/mobile); ' +
             'a rendered thing is a `.test.tsx` beside its component.',
     );
 }

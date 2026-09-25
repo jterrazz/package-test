@@ -712,7 +712,7 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
 
     test('m1 — every constructor has a specs tree in this package', () => {
         // Given - the six constructors, and the trees this package specifies itself on
-        const constructors = ['api', 'cli', 'integration', 'jobs', 'mobile', 'website'];
+        const constructors = ['api', 'cli', 'integration', 'job', 'mobile', 'website'];
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
 
         // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/03)

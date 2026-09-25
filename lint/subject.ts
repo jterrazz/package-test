@@ -3,11 +3,11 @@
  * is filed under.
  *
  * A spec file is about ONE subject (C29), and its folder is that subject's
- * standard name (C30): the route an api chain sends, the job a jobs chain
+ * standard name (C30): the route an api chain sends, the job a job chain
  * triggers, the command a cli chain runs, the page a website chain visits, the
  * journey a mobile chain opens. Both rules read the subject here, statically:
  * the chains of a file are the calls hanging off a runner handle the file
- * imports from a `*.specification` module (`api`, `jobs`, `cli`, `website`,
+ * imports from a `*.specification` module (`api`, `job`, `cli`, `website`,
  * `mobile`), or off a `const` bound to one's `.with(…)`.
  *
  * The standard name is DERIVED, never listed: `GET /events` is
@@ -53,7 +53,7 @@ export type Subject =
           /** Did the chain write the route's template — a `:name` segment, or `{ params }` beside the path? */
           template?: boolean;
       }
-    | { facet: 'jobs'; job: string }
+    | { facet: 'job'; job: string }
     | { facet: 'mobile'; journey: string }
     | { facet: 'website'; page: string };
 
@@ -61,7 +61,7 @@ export type Subject =
 export type SubjectAt = { index: number; subject: Subject };
 
 /** The facets whose chains reach a subject. */
-export const SUBJECT_FACETS = ['api', 'cli', 'jobs', 'mobile', 'website'] as const;
+export const SUBJECT_FACETS = ['api', 'cli', 'job', 'mobile', 'website'] as const;
 
 /** A path segment written as a hole: a template's `${…}`. */
 const HOLE = '\u0000';
@@ -169,7 +169,7 @@ export function subjectFolder(subject: Subject, reading: SubjectReading = {}): s
     if (subject.facet === 'cli') {
         return subject.command.length === 0 ? undefined : subject.command.join('/');
     }
-    return subject.facet === 'jobs' ? subject.job : undefined;
+    return subject.facet === 'job' ? subject.job : undefined;
 }
 
 /** How a subject reads in a message: `GET /events/:id`, `trigger digest`, … */
@@ -182,7 +182,7 @@ export function subjectName(subject: Subject): string {
             ? 'exec (no command)'
             : `exec ${subject.command.join(' ')}`;
     }
-    if (subject.facet === 'jobs') {
+    if (subject.facet === 'job') {
         return `trigger ${subject.job}`;
     }
     return subject.facet === 'mobile' ? `open ${subject.journey}` : `visit ${subject.page}`;
@@ -559,7 +559,7 @@ const TERMINALS: Record<string, TerminalReader> = {
     },
     trigger: (first) => {
         const job = literalOf(first);
-        return job === undefined ? [] : [{ facet: 'jobs', job }];
+        return job === undefined ? [] : [{ facet: 'job', job }];
     },
     visit: pageOf,
 };

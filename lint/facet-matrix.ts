@@ -13,7 +13,7 @@
 /** The columns of the capability matrix: the seven facets, plus the module test. */
 export const COLUMNS = [
     'api',
-    'jobs',
+    'job',
     'cli',
     'integration',
     'website',
@@ -108,7 +108,7 @@ export const CAPABILITIES: Capability[] = [
         probe: '.toMatch(directory(',
     },
     {
-        columns: ['api', 'jobs', 'cli', 'integration'],
+        columns: ['api', 'job', 'cli', 'integration'],
         group: 'Golden',
         name: 'toMatch(<rows>)',
         probe: ')).toMatch([',

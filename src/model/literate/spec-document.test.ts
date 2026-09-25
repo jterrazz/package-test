@@ -292,7 +292,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain('waitFor: is only allowed on the LAST run');
     });
 
-    test('a kind is no key: an api or jobs case is a TypeScript spec', () => {
+    test('a kind is no key: an api or job case is a TypeScript spec', () => {
         // Given - a document stating the kind the grammar once read
         const refusal = refusalOf(
             `kind: api\ndescription: x\nruns:\n  - command: a\n    exit: 0\n`,

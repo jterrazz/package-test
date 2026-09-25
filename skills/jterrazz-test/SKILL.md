@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, jobs, cli), vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
+description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, job, cli), vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
 metadata:
     version: '17'
 ---
@@ -17,7 +17,7 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
 3. A screen on a simulator? → **mobile**, `specs/mobile/<domain>/<aspect>.spec.ts`
 4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts` — the folder derived from the route (`GET /events` → `events/list/`)
-5. Triggered by name, in-process? → **jobs**, `specs/jobs/<job>/<aspect>.spec.ts`
+5. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
 6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
 7. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
 8. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
@@ -101,7 +101,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 | website                                     | [docs/08-website.md](../../docs/08-website.md)           |
 | mobile                                      | [docs/09-mobile.md](../../docs/09-mobile.md)             |
 | api                                         | [docs/10-api.md](../../docs/10-api.md)                   |
-| jobs                                        | [docs/11-jobs.md](../../docs/11-jobs.md)                 |
+| job                                         | [docs/11-job.md](../../docs/11-job.md)                   |
 | cli                                         | [docs/12-cli.md](../../docs/12-cli.md)                   |
 | a cli `<case>.spec.yaml`                    | [docs/20-documents.md](../../docs/20-documents.md)       |
 | naming an element on any surface that draws | [docs/13-elements.md](../../docs/13-elements.md)         |

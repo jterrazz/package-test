@@ -1,4 +1,4 @@
-description: rejects specification.app - only api, jobs and cli exist
+description: rejects specification.app - only api, job and cli exist
 fixture: ./fixtures/violation/
 runs:
     - command: .

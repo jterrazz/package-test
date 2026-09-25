@@ -5,7 +5,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { servicesSetup } from './facet-project.js';
 import nestedApp from './fixtures/nested-app/vitest.config.js';
-import { api, cli, component, integration, jobs, mobile, unit, website } from './projects.js';
+import { api, cli, component, integration, job, mobile, unit, website } from './projects.js';
 
 /** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
@@ -268,8 +268,8 @@ describe('the node facet helpers — one canonical project per kind', () => {
         // Given - the canonical projects, stated by nobody
         // Then - `--project api` means the same tree in every repository
         expect(
-            [api(), jobs(), integration(), mobile()].map((project) => testOf(project).name),
-        ).toStrictEqual(['api', 'jobs', 'integration', 'mobile']);
+            [api(), job(), integration(), mobile()].map((project) => testOf(project).name),
+        ).toStrictEqual(['api', 'job', 'integration', 'mobile']);
         // The suffix is the fork: a facet collects the ASSEMBLED product, and
         // The word for that is `.spec.ts`.
         expect(testOf(api()).include).toStrictEqual(['specs/api/**/*.spec.ts']);
@@ -278,7 +278,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
 
     test('the facets that declare services carry the setup that starts them once per project', () => {
         // Given - the global setups of the three facets whose specs declare containers
-        const setups = [api(), jobs(), integration()].map((project) => testOf(project).globalSetup);
+        const setups = [api(), job(), integration()].map((project) => testOf(project).globalSetup);
 
         // Then - each serves the project's containers, which a file without it starts per specification
         for (const carried of setups) {
@@ -289,7 +289,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
 
     test('node facets run first, and the simulator runs alone at the end', () => {
         // Given - the group order each helper states
-        const orders = [api(), jobs(), integration(), cli(), mobile()].map(
+        const orders = [api(), job(), integration(), cli(), mobile()].map(
             (project) => testOf(project).sequence?.groupOrder,
         );
 
@@ -335,7 +335,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
 
     test('every helper takes it, not only the ones 15.2 shipped it on', () => {
         // Given - the four other helpers this release adds
-        const serial = [api, jobs, mobile].map((helper) => testOf(helper({ serial: true })));
+        const serial = [api, job, mobile].map((helper) => testOf(helper({ serial: true })));
 
         // Then - `serial` is what chapter 02 says it is: every helper's
         expect(serial.map((project) => project.fileParallelism)).toStrictEqual([

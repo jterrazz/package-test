@@ -2,7 +2,7 @@
 
 `specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world.
 
-Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](11-jobs.md); for binaries use [cli](12-cli.md).
+Use it when the subject under test is an HTTP surface. For background pipelines use [job](11-job.md); for binaries use [cli](12-cli.md).
 
 ## What it specifies
 
@@ -181,7 +181,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 
 `expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
 
-Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.jobs()` has no `docker` member — jobs never spawn containers.)
+Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.job()` has no `docker` member — jobs never spawn containers.)
 
 ## Unique here
 
@@ -323,4 +323,4 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Related
 
-[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md)
+[11 — Job specs](11-job.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md)

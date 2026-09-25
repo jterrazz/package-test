@@ -1,6 +1,6 @@
 /**
  * The ONE stub queue — pure, engine-agnostic (no MSW, no node:http).
- * Both engines consume it: the MSW integration on api/jobs chains, and the
+ * Both engines consume it: the MSW integration on api/job chains, and the
  * declared stub backend on website/mobile chains.
  *
  * Selection: the FIRST stub in declaration order that matches the observed

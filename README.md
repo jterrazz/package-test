@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Six constructors — `specification.api()`, `specification.jobs()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none, and the module test, which needs neither.
+Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Six constructors — `specification.api()`, `specification.job()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none, and the module test, which needs neither.
 
 A spec reads as a sentence: given → action → assertions. The vitest test name is its only description, every assertion goes through `expect()` with subject-typed matchers, and the infrastructure a spec declares — Postgres, Redis, SQLite, a child process, a real Chromium, an iOS simulator — is started, isolated per worker and cleaned up for you.
 
@@ -134,12 +134,12 @@ test('creates a user and answers with it', async () => {
 });
 ```
 
-**A job** — what a name triggers, in-process ([docs/11](docs/11-jobs.md)):
+**A job** — what a name triggers, in-process ([docs/11](docs/11-job.md)):
 
 ```typescript
 test('writes one digest row per active subscriber', async () => {
     // Given - two subscribers, from the seed beside the test
-    const result = await jobs.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
+    const result = await job.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
 
     // Then - the whole table
     await expect(result.table('digests')).toMatch([

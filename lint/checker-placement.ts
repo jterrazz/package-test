@@ -41,7 +41,7 @@ import type { TokenViolation } from './checker.js';
  */
 
 /** The six facet folders — a first-level name under `specs/` that IS a constructor. */
-const FACETS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
+const FACETS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
 
 /** Directories no placement walk enters. */
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);

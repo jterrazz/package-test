@@ -5,7 +5,7 @@
  * terminal action, and the stub resets between chains the way databases do.
  *
  * Selection is the shared {@link StubQueue} — the same first-matching,
- * `times`-aware queue the MSW engine runs on api/jobs chains. A stub
+ * `times`-aware queue the MSW engine runs on api/job chains. A stub
  * without `times` keeps replying (re-render, retry); `times: n` is spent after
  * n serves.
  *

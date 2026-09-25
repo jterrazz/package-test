@@ -58,7 +58,7 @@ The capability matrix (`docs/03-testing.md`, generated) is green because each of
 these carries a written reason, and the reason is `owed`. Each is one spec, and
 the list is the matrix's **Exemptions** section read as work.
 
-- **`.clock()` on jobs** — the setup is on the facet; no `specs/jobs/` spec pins
+- **`.clock()` on job** — the setup is on the facet; no `specs/job/` spec pins
   a calendar. The api and integration clock specs cover the same chain setup,
   which is exactly why nobody noticed.
 - **`.intercept()` on website** — the website facet gained it in 15.3 and the

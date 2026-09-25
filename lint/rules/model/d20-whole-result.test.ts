@@ -36,7 +36,7 @@ ruleTester.run('d20-whole-result', d20WholeResult as unknown as OxlintRule, {
         },
         // Two tables, one compared whole: the other is reported by its name.
         {
-            code: "test('t', async () => { const result = await jobs.trigger('x'); await expect(result.table('a')).toBeEmpty(); expect(await result.table('b').query(['id'])).toHaveLength(1); });",
+            code: "test('t', async () => { const result = await job.trigger('x'); await expect(result.table('a')).toBeEmpty(); expect(await result.table('b').query(['id'])).toHaveLength(1); });",
             errors: [{ message: /reads result\.table\('b'\)/u }],
             filename: SPEC,
         },

@@ -60,7 +60,7 @@ export const specification: Specification = {
     api: () => refuse('specification.api()'),
     cli: () => refuse('specification.cli()'),
     integration: () => refuse('specification.integration()'),
-    jobs: () => refuse('specification.jobs()'),
+    job: () => refuse('specification.job()'),
     mobile: () => refuse('specification.mobile()'),
     website: () => refuse('specification.website()'),
 };

@@ -32,7 +32,7 @@ import { testSettingsAt } from './test-settings.js';
  * files, and `--fix` splits it — each test to the file of the subject it
  * reaches, keeping the imports and the file-level constants it uses, what
  * two of the new files read moved once into their folder's fixtures module. A file
- * about one subject whose name the tree derives (api, jobs, cli) lives in that
+ * about one subject whose name the tree derives (api, job, cli) lives in that
  * folder, and `--fix` moves it there. Either move keeps every path the code
  * names pointing where it pointed, and sends the ground the old leaf holds for
  * another leaf up to the specs root's shared ground, where C28's own fix moves

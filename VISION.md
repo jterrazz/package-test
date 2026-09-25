@@ -3829,3 +3829,5 @@ Open, **for the owner or maintainer**:
 The three worktrees and branches are removed.
 
 package-typescript refreshed on 5e18e724 (vision/17 at a5b4018): npm ci, make fix and make check exit 0 with no diff, 161 files and 478 tests passed.
+
+Facet `jobs` renamed `job` — every facet name is singular.

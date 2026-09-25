@@ -1,7 +1,7 @@
 import { startApi } from './api/api.handle.js';
 import { startCli } from './cli/cli.handle.js';
 import { startIntegration } from './integration/integration.handle.js';
-import { startJobs } from './jobs/jobs.handle.js';
+import { startJob } from './job/job.handle.js';
 import { startMobile } from './mobile/mobile.handle.js';
 import { startWebsite } from './website/website.handle.js';
 
@@ -18,8 +18,8 @@ import { startWebsite } from './website/website.handle.js';
  *   });
  *   afterAll(cleanup);
  *
- *   // specs/jobs/jobs.specification.ts
- *   export const { jobs, cleanup } = await specification.jobs({
+ *   // specs/job/job.specification.ts
+ *   export const { job, cleanup } = await specification.job({
  *       services: { db: postgres() },
  *       jobs: ({ db }) => [nightlyReport(db)],
  *   });
@@ -34,7 +34,7 @@ export type Specification = {
     api: typeof startApi;
     cli: typeof startCli;
     integration: typeof startIntegration;
-    jobs: typeof startJobs;
+    job: typeof startJob;
     mobile: typeof startMobile;
     website: typeof startWebsite;
 };
@@ -64,7 +64,7 @@ export const specification: Specification = {
      * Test background jobs. Jobs run in-process by definition — no HTTP
      * server, no mode. `.trigger(name)` is the terminal action.
      */
-    jobs: startJobs,
+    job: startJob,
     /**
      * Test a native app on the iOS simulator. `device` names the simulator
      * (resolved and booted via `simctl`); `app` names the bundle under

@@ -1,4 +1,4 @@
-/* oxlint-disable jterrazz/a1-specification-file, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. It imports vitest's `expect` because the D14 rows are about the matcher augmentation. */
+/* oxlint-disable jterrazz/a1-specification-file, jterrazz/a2-known-constructors, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. The retired `specification.jobs` row is the same thing for A2: the compiler refuses it before the rule would. It imports vitest's `expect` because the D14 rows are about the matcher augmentation. */
 import { expect } from 'vitest';
 
 import { directory, file, mockOf, postgres, specification } from './index.js';
@@ -56,6 +56,11 @@ export async function typeRows(): Promise<void> {
         // @ts-expect-error A11 — `server` and `url` are mutually exclusive [`Types of property 'url' are incompatible`]
         { server: { command: 'npm start' }, url: 'https://site.test' },
     );
+
+    // A2 — a constructor is named for its facet, and every facet name is
+    // Singular: the plural 17 retired stays retired.
+    // @ts-expect-error A2 — `jobs` is retired: `specification.job()` [`Property 'jobs' does not exist on type 'Specification'`]
+    await specification.jobs({ jobs: [] });
 
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');

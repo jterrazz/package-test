@@ -14,7 +14,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | [08 — Website specs](08-website.md)         | `specification.website()`: `.fetch()` / `.visit()`, visit scenarios, declared backends, the `head` golden                                                        |
 | [09 — Mobile specs](09-mobile.md)           | `specification.mobile()`: `.open()`, simulator resolution, open scenarios, the `screen` golden                                                                   |
 | [10 — API specs](10-api.md)                 | `specification.api()`: options, the in-process app, `.http` request files, inline actions, seeds, intercepts, a case written whole, route coverage               |
-| [11 — Jobs specs](11-jobs.md)               | `specification.jobs()`: in-process pipelines, `.trigger()`, provider error cases                                                                                 |
+| [11 — Job specs](11-job.md)                 | `specification.job()`: in-process pipelines, `.trigger()`, provider error cases                                                                                  |
 | [12 — CLI specs](12-cli.md)                 | `specification.cli()`: `.exec()`, `.env()`, fixtures and projects, the words a document is registered by, services, Docker-aware mode                            |
 | [13 — Elements](13-elements.md)             | The one element vocabulary: descriptors, modifiers, verbs, `see()` semantics, W3 and its evidence, `within()`, exact names, `testId`                             |
 | [14 — Assertions](14-assertions.md)         | The reference: every matcher, grouped by subject, sync/async rules, goldens named by path, diffs                                                                 |

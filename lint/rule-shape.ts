@@ -90,7 +90,7 @@ export type RuleDoc = {
      * module because they share one walk of the tree, so the field alone says
      * which facet a pass speaks for.
      */
-    facet: 'api' | 'cli' | 'component' | 'integration' | 'jobs' | 'mobile' | 'model' | 'website';
+    facet: 'api' | 'cli' | 'component' | 'integration' | 'job' | 'mobile' | 'model' | 'website';
     /** Convention family letter, e.g. `'A'`. */
     family: string;
     /** Convention code, e.g. `'A1'`. */

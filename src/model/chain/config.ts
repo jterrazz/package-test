@@ -24,8 +24,8 @@ export type LiterateServeRegistration = {
     url: (port: number) => string;
 };
 
-/** A named job that can be triggered via jobs.trigger(). */
-export type JobHandle = {
+/** A named job that can be triggered via job.trigger(). */
+export type Job = {
     name: string;
     execute: () => Promise<void>;
 };
@@ -105,7 +105,7 @@ export type SpecificationConfig = {
      * (`env: frozen`). Declared once per app in `specification.cli()`.
      */
     envSets?: Record<string, CliEnv> | undefined;
-    jobs?: JobHandle[] | undefined;
+    jobs?: Job[] | undefined;
     /** The project root — the working directory a document's `serve:` command runs from. */
     root?: string | undefined;
     server?: ServerPort | undefined;

@@ -1,9 +1,9 @@
 import { defineAction } from '../../model/chain/action.js';
-import type { JobHandle } from '../../model/chain/config.js';
+import type { Job } from '../../model/chain/config.js';
 import { BaseResult } from '../../results/result.js';
 
-/** The jobs a chain may trigger — the `jobs` option of `specification.jobs()`, as started. */
-export type JobsPort = readonly JobHandle[];
+/** The jobs a chain may trigger — the `jobs` option of `specification.job()`, as started. */
+export type JobsPort = readonly Job[];
 
 /**
  * `.trigger(name)`: run the named job in this process and resolve with what
@@ -17,7 +17,7 @@ export const trigger = defineAction<'trigger', [name: string], BaseResult, { job
     perform: async ([name], _read, { jobs }, { config, testDir }) => {
         if (jobs.length === 0) {
             throw new Error(
-                'Job actions require jobs registered via the jobs option of specification.jobs()',
+                'Job actions require jobs registered via the jobs option of specification.job()',
             );
         }
         const job = jobs.find((candidate) => candidate.name === name);

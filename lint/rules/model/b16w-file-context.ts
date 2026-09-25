@@ -22,7 +22,7 @@ const SETTINGS: Record<string, readonly string[]> = {
     api: ['clock', 'headers'],
     cli: ['env'],
     integration: ['clock'],
-    jobs: ['clock'],
+    job: ['clock'],
     website: ['clock', 'headers'],
 };
 
@@ -138,7 +138,7 @@ function camelOf(word: string): string {
  * command's first word — `undefined` for a subject with no standard name.
  */
 function subjectWord(subject: Subject): string | undefined {
-    if (subject.facet === 'jobs') {
+    if (subject.facet === 'job') {
         return subject.job;
     }
     if (subject.facet === 'cli') {

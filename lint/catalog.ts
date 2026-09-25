@@ -99,16 +99,7 @@ function families(rows: CatalogEntry[]): string[] {
  * kind of convention, not an audience, and `C — Files & folders` mixes a rule
  * every facet obeys with one only the literate door can break.
  */
-const FACET_ORDER = [
-    'model',
-    'api',
-    'cli',
-    'component',
-    'integration',
-    'jobs',
-    'mobile',
-    'website',
-];
+const FACET_ORDER = ['model', 'api', 'cli', 'component', 'integration', 'job', 'mobile', 'website'];
 
 /** The facet sections present in the catalogue, model first. */
 function facets(): string[] {
@@ -122,7 +113,7 @@ const FACET_TITLES: Record<string, string> = {
     cli: 'the command binary and its literate documents',
     component: 'a rendered unit, in a page',
     integration: 'a module against the real thing',
-    jobs: 'what a name triggers in-process',
+    job: 'what a name triggers in-process',
     mobile: 'a native screen on a simulator',
     model: 'every facet, whichever constructor you reach for',
     website: 'the served site, driven in a browser',

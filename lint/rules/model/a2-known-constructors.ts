@@ -6,10 +6,10 @@ import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 /** The six constructors, and only six. */
-const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
+const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
 
 /**
- * CONVENTIONS A2 — `specification.api()`, `specification.jobs()`,
+ * CONVENTIONS A2 — `specification.api()`, `specification.job()`,
  * `specification.cli()`, `specification.integration()`,
  * `specification.website()` and `specification.mobile()` are the only
  * members. Any other access (`specification.app`, `.http`, `.stack`, …) is
@@ -36,7 +36,7 @@ export const a2KnownConstructors: LintRule = {
         messages: lessons('a2-known-constructors', {
             unknownConstructor: {
                 found: '`specification.{{member}}` is no constructor',
-                fix: 'call `specification.api()`, `.jobs()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
+                fix: 'call `specification.api()`, `.job()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
             },
         }),
         type: 'problem',

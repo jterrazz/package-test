@@ -22,7 +22,7 @@ ruleTester.run('a2-known-constructors', a2KnownConstructors as unknown as Oxlint
     ],
     valid: [
         { code: 'await specification.api({ server });' },
-        { code: 'await specification.jobs({ jobs });' },
+        { code: 'await specification.job({ jobs });' },
         { code: 'await specification.cli("./bin");' },
         { code: 'await specification.mobile({ app, device });' },
         // Other objects are untouched.

@@ -37,7 +37,7 @@ export type LiterateOptions = {
     include?: string[];
     /**
      * Path to the `*.specification.ts` whose export named for each document's
-     * `kind:` — `cli`, `api` or `jobs` — runs the files, relative to the vite
+     * `kind:` — `cli`, `api` or `job` — runs the files, relative to the vite
      * root, or absolute.
      *
      * It is stated, never guessed: a repository may declare several cli

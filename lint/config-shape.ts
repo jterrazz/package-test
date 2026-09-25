@@ -24,7 +24,7 @@ import type { AstNode } from './rule-shape.js';
  */
 
 /** The six facet folders — a first-level name under `specs/` that IS a constructor. */
-export const FACETS = new Set(['api', 'cli', 'integration', 'jobs', 'mobile', 'website']);
+export const FACETS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
 
 /** A string literal and the node that carries it, for the diagnostic. */
 export type LiteralString = { node: AstNode; value: string };

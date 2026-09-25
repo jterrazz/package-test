@@ -56,10 +56,10 @@ export const FORK: ForkRow[] = [
         question: 'Does it answer HTTP?',
     },
     {
-        constructor: '`specification.jobs()`',
-        kind: 'jobs',
-        livesAt: '`specs/jobs/<job>/<aspect>.spec.ts`',
-        project: '`jobs`',
+        constructor: '`specification.job()`',
+        kind: 'job',
+        livesAt: '`specs/job/<job>/<aspect>.spec.ts`',
+        project: '`job`',
         question: 'Is it triggered by name, in-process?',
     },
     {

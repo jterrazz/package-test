@@ -254,7 +254,7 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 | Facets              | Engine                                            | Notes                                                                               |
 | ------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `api`, `jobs`       | **MSW**, in-process                               | The app runs here, so its outgoing requests pass through this process               |
+| `api`, `job`        | **MSW**, in-process                               | The app runs here, so its outgoing requests pass through this process               |
 | `website`, `mobile` | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
 
 Both consume the **same** selection queue, so a stub behaves identically on either side: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub backend — is gone; "sticky" is now just the default (`times` omitted), written down.
@@ -434,4 +434,4 @@ Two scoping notes:
 
 ## Related
 
-[10 — API specs](10-api.md) · [11 — Jobs specs](11-jobs.md) · [08 — Website specs](08-website.md) · [09 — Mobile specs](09-mobile.md) · [18 — Conventions](18-conventions.md)
+[10 — API specs](10-api.md) · [11 — Job specs](11-job.md) · [08 — Website specs](08-website.md) · [09 — Mobile specs](09-mobile.md) · [18 — Conventions](18-conventions.md)

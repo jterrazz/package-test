@@ -59,7 +59,7 @@ const GROUND_SUBDIRS = new Set<string>(GROUND_DIRS);
 const NON_RUNNER_BINDINGS = new Set(['cleanup', 'docker', 'orchestrator']);
 
 /** The specification constructors whose records/options the passes read. */
-const CONSTRUCTORS = 'api|cli|jobs';
+const CONSTRUCTORS = 'api|cli|job';
 
 /** Is this the shared folder of a specs root — `<specs>/shared/`? */
 function isSharedFolder(dir: string): boolean {

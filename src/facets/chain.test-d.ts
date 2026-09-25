@@ -3,7 +3,7 @@ import type { SeedMethod } from '../capabilities/seed/seed.capability.js';
 import type { ChainContext } from '../capabilities/with/with.capability.js';
 import type { Action } from '../model/chain/action.js';
 import type { Capability, Sharing } from '../model/chain/capability.js';
-import type { JobsResult } from '../results/jobs.result.js';
+import type { JobResult } from '../results/job.result.js';
 import type { ChainOf } from './chain.js';
 
 /**
@@ -42,7 +42,7 @@ interface Unshared extends ChainOf<
 type Expected<Key extends string> = {
     clock: (iso: string) => Listed<Key>;
     seed: SeedMethod<Listed<Key>, Key>;
-    trigger: (name: string) => Promise<JobsResult>;
+    trigger: (name: string) => Promise<JobResult>;
     with: (context: Pick<ChainContext, 'clock'>) => Listed<Key>;
 };
 

@@ -97,7 +97,7 @@ A **specification file** (`*.specification.ts`, under `specs/`) creates a runner
 
 ```
 specification.api(…)         → { api, cleanup, docker }
-specification.jobs(…)        → { jobs, cleanup }                       // no docker — jobs never spawn containers
+specification.job(…)        → { job, cleanup }                        // no docker — jobs never spawn containers
 specification.cli(…)         → { cli, cleanup, docker }
 specification.integration(…) → { integration, cleanup }                // a module, against real services or a golden
 specification.website(…)     → { website, cleanup, url }               // no docker — a browser, not a container
@@ -359,7 +359,7 @@ specs/
 
 ## Pitfalls
 
-- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `jobs`, `cli`, `website`, `mobile` are enforced (rule A3).
+- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `job`, `cli`, `website`, `mobile` are enforced (rule A3).
 - **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
 - **Importing from a subpath the `exports` map does not publish** (`@jterrazz/test/services`). Everything a spec needs comes from `@jterrazz/test` (rule F1).
 - **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule B4); `// When` only when the action is not obvious — the chain _is_ the when.
