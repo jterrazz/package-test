@@ -3,6 +3,7 @@ import { join, resolve } from 'node:path';
 import type { ProvidedContext } from 'vitest';
 import type { TestProject } from 'vitest/node';
 
+import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { serveAppium } from '../server/appium-server.js';
 import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
 
@@ -10,6 +11,11 @@ import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
 type SessionProject = Pick<TestProject, 'provide'> & {
     config: { provide?: Partial<ProvidedContext>; root: string };
 };
+
+/** Where the mobile project finds this setup: this module, or `mobile-session.js` in the built package. */
+export function mobileSessionSetup(): string {
+    return setupEntry(import.meta.dirname, 'mobile-session.ts', 'mobile-session.js');
+}
 
 /**
  * The mobile project's global setup: one driver session per run.

@@ -2,6 +2,7 @@ import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
+import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from './ledger.js';
 import type { Shard } from './ledger.js';
 import { judgeRoutes } from './route-judge.js';
@@ -77,6 +78,11 @@ async function scopeOf(project: RouteProject): Promise<RunScope> {
     );
     const { testFiles } = await project.globTestFiles();
     return testFiles.every((file) => ran.has(file)) ? 'whole' : 'partial';
+}
+
+/** Where the api project finds this setup: this module, or `route-coverage.js` in the built package. */
+export function routeCoverageSetup(): string {
+    return setupEntry(import.meta.dirname, 'route-coverage.ts', 'route-coverage.js');
 }
 
 /** The setup over what it reads of the project: the ledger folder handed out, and the teardown that judges. */

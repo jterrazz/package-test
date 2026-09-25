@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
-import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
 import { VITEST_ARTIFACTS_DIR } from '../../kernel/files/artifacts.js';
+import { setupEntry } from '../../kernel/files/setup-entry.js';
 import { writePendingRewrites } from './in-place.js';
 
 /**
@@ -22,8 +22,7 @@ import { writePendingRewrites } from './in-place.js';
  * share one folder.
  */
 export function inPlaceSetup(): string {
-    const source = join(import.meta.dirname, 'in-place-setup.ts');
-    return existsSync(source) ? source : join(import.meta.dirname, 'in-place-setup.js');
+    return setupEntry(import.meta.dirname, 'in-place-setup.ts', 'in-place-setup.js');
 }
 
 /** Where the pending folders of a run sit, below the project root. */

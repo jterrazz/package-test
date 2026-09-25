@@ -1,6 +1,8 @@
-import { existsSync, mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
+import { mkdirSync, mkdtempSync, readdirSync, rmSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { basename, dirname, join } from 'node:path';
+
+import { setupEntry } from './setup-entry.js';
 
 /**
  * The global setup every preset project carries: the run's own temp root.
@@ -67,8 +69,7 @@ function setVariables(values: Record<string, string | undefined>): void {
  * one folder.
  */
 export function tempRootSetup(): string {
-    const source = join(import.meta.dirname, 'temp-root.ts');
-    return existsSync(source) ? source : join(import.meta.dirname, 'temp-root.js');
+    return setupEntry(import.meta.dirname, 'temp-root.ts', 'temp-root.js');
 }
 
 /**

@@ -2,9 +2,10 @@ import { describe, expect, test } from 'vitest';
 
 import { inPlaceSetup } from '../../expectations/in-place/in-place-setup.js';
 import { tempRootSetup } from '../../kernel/files/temp-root.js';
-import { mobile, mobileSessionSetup } from './mobile.project.js';
+import { mobile } from './mobile.project.js';
+import { mobileSessionSetup } from './session/mobile-session.js';
 
-describe('mobile.project', () => {
+describe('mobile', () => {
     test("mobile() — one driver session per run — carries the setup that holds the run's session, beside the preset's", () => {
         // Given - the canonical mobile project, stated by nobody
         const setups = mobile().test?.globalSetup;
