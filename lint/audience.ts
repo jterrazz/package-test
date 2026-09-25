@@ -113,6 +113,33 @@ export function strandedBundles(root: string, packed: Set<string>): string[] {
         .toSorted();
 }
 
+/**
+ * A relative module as the bundler writes its import — a statement opening a
+ * line, `import(…)` or `require(…)`, double-quoted — and never a path an
+ * example in a comment or a message spells.
+ */
+const BUNDLER_IMPORT =
+    /(?:^(?:import|export)\b[^\n]*?\bfrom\s*|^import\s*|\bimport\(|\brequire\()"(?<target>\.{1,2}\/[^"]+)"/gmu;
+
+/**
+ * The relative modules a packed bundle imports and the tarball does not
+ * hold, each as `<bundle> → <module>`: an entry that cannot load where it is
+ * installed, which no run of it can judge.
+ */
+export function danglingImports(dir: string, packed: Set<string>): string[] {
+    const dangling: string[] = [];
+    for (const bundle of [...packed].filter((path) => /\.c?js$/u.test(path))) {
+        const text = readFileSync(join(dir, bundle), 'utf8');
+        for (const found of text.matchAll(BUNDLER_IMPORT)) {
+            const target = normalize(join(dirname(bundle), found.groups?.target ?? ''));
+            if (!packed.has(target)) {
+                dangling.push(`${bundle} → ${target}`);
+            }
+        }
+    }
+    return dangling.toSorted();
+}
+
 /** A value a walk descends into: what can hold an export's nested values. */
 function isContainer(value: unknown): value is object {
     return (typeof value === 'object' && value !== null) || typeof value === 'function';

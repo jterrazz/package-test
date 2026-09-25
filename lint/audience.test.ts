@@ -7,6 +7,7 @@ import { describe, expect, test } from 'vitest';
 
 import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
 import {
+    danglingImports,
     extractTarball,
     filesUnder,
     selfExposures,
@@ -109,10 +110,11 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         expect(selfMentions('K12 holds', [{ id: 'K1', name: 'k1-x' }])).toStrictEqual([]);
     });
 
-    test('no packed chunk is one only an unpacked bundle loads', () => {
+    test('no packed chunk is one only an unpacked bundle loads, nor imports one the tarball lacks', () => {
         // Given - the bundles the build writes, and the paths the tarball holds
-        // Then - what the bundler split out of the unshipped entries stays home with them
+        // Then - what the bundler split out of the unshipped entries stays home with them, and every packed bundle loads from the tarball alone
         expect(strandedBundles(ROOT, packed)).toStrictEqual([]);
+        expect(danglingImports(installed, packed)).toStrictEqual([]);
     });
 
     test('the walk finds a self rule wherever an export nests it', () => {
