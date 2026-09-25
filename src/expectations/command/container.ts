@@ -1,13 +1,13 @@
-import { execSync } from 'node:child_process';
-
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { CliResult } from './cli.result.js';
-import type { CliOutput } from './cli.result.js';
-import { inspectContainer } from './docker-lookup.js';
-
-const EXEC_TIMEOUT = 10_000;
+import {
+    containerLogs,
+    execInContainer,
+    inspectContainer,
+    readContainerFile,
+} from './docker-cli.js';
 
 function readInspectState(inspect: any): { running: boolean; status: string } {
     const state = inspect?.State ?? inspect?.state;
@@ -106,16 +106,13 @@ export class ContainerAccessor {
     file(path: string): FileAccessor {
         this.requireExists('file');
         const id = this.containerId!;
-        const exists = this.containerExec(id, ['test', '-e', path]).exitCode === 0;
+        const exists = execInContainer(id, ['test', '-e', path]).exitCode === 0;
         const { testDir } = this;
         const readContent = (): string => {
             if (!exists) {
                 throw new Error(`File not found in container: ${path}`);
             }
-            return execSync(`docker exec ${id} cat ${JSON.stringify(path)}`, {
-                encoding: 'utf8',
-                timeout: EXEC_TIMEOUT,
-            });
+            return readContainerFile(id, path);
         };
         return {
             get content(): string {
@@ -134,7 +131,7 @@ export class ContainerAccessor {
      */
     async exec(cmd: string): Promise<CliResult> {
         this.requireExists('exec');
-        const commandOutput = this.containerExec(this.containerId!, ['sh', '-c', cmd]);
+        const commandOutput = execInContainer(this.containerId!, ['sh', '-c', cmd]);
         return new CliResult({
             commandOutput,
             config: {},
@@ -153,43 +150,8 @@ export class ContainerAccessor {
     }
 
     private loadLogs(): string {
-        if (this.cachedLogs !== null) {
-            return this.cachedLogs;
-        }
-        try {
-            const out = execSync(`docker logs ${this.containerId}`, {
-                encoding: 'utf8',
-                stdio: ['ignore', 'pipe', 'pipe'],
-                timeout: EXEC_TIMEOUT,
-            });
-            this.cachedLogs = out;
-        } catch (error: any) {
-            // Fall back to whatever the CLI managed to write before exiting
-            // (docker logs may fail if the container disappeared mid-run).
-            this.cachedLogs =
-                typeof error?.stdout === 'string' ? error.stdout : String(error?.stderr ?? '');
-        }
-        return this.cachedLogs ?? '';
-    }
-
-    private containerExec(id: string, argv: string[]): CliOutput {
-        // Piping stdio keeps a non-zero exit inside a CliOutput instead of throwing out.
-        try {
-            const quoted = argv.map((a) => JSON.stringify(a)).join(' ');
-            const stdout = execSync(`docker exec ${id} ${quoted}`, {
-                encoding: 'utf8',
-                stdio: ['ignore', 'pipe', 'pipe'],
-                timeout: EXEC_TIMEOUT,
-            });
-            return { exitCode: 0, stderr: '', stdout };
-        } catch (error: any) {
-            return {
-                exitCode: typeof error?.status === 'number' ? error.status : 1,
-                stderr:
-                    typeof error?.stderr === 'string' ? error.stderr : String(error?.message ?? ''),
-                stdout: typeof error?.stdout === 'string' ? error.stdout : '',
-            };
-        }
+        this.cachedLogs ??= containerLogs(this.containerId!);
+        return this.cachedLogs;
     }
 }
 

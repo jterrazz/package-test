@@ -5,7 +5,7 @@ import type { ResultConfig } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
-import { findContainersByLabel, inspectContainer, removeContainers } from './docker-lookup.js';
+import { findContainersByLabel, inspectContainer, removeContainers } from './docker-cli.js';
 
 /**
  * Raw output from a command execution, including exit code and captured output streams.
