@@ -1,5 +1,7 @@
 import { existsSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { resolve } from 'node:path';
+
+import { findRoot } from '../../kernel/files/resolve.js';
 
 /**
  * Loading an OPTIONAL peer, and saying the right thing when it is not there.
@@ -74,21 +76,6 @@ function isUnbuilt(error: unknown): boolean {
 /** The peers whose install script has to run for the package to load at all. */
 const NATIVE_PEERS = new Set(['better-sqlite3']);
 
-/** The nearest ancestor of `from` carrying a `package.json`, or undefined. */
-function projectRoot(from: string): string | undefined {
-    let directory = from;
-    for (;;) {
-        if (existsSync(resolve(directory, 'package.json'))) {
-            return directory;
-        }
-        const parent = dirname(directory);
-        if (parent === directory) {
-            return undefined;
-        }
-        directory = parent;
-    }
-}
-
 /**
  * The package manager a project is installed by, read from its lockfile.
  *
@@ -98,7 +85,7 @@ function projectRoot(from: string): string | undefined {
  * @internal
  */
 export function installerAt(from: string): { command: string; name: string } {
-    const root = projectRoot(from);
+    const root = findRoot(from, existsSync);
     if (root === undefined) {
         return DEFAULT_INSTALLER;
     }
