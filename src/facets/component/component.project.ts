@@ -9,6 +9,7 @@ import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../kernel/files/artifa
 import { callerFrames } from '../../kernel/files/caller.js';
 import type { FacetProjectOptions } from '../../vitest/project-kit.js';
 import { onProjectDefaults } from '../../vitest/project-kit.js';
+import { mswWorkerScript } from '../../world/stubs/network/worker-script.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
 
 /**
@@ -154,19 +155,14 @@ function resolves(specifier: string): boolean {
 }
 
 /**
- * Serve msw's worker script from the package's OWN install, at the path the
- * worker asks for, with the scope header a worker registered at `/` needs.
- *
- * `@vitest/browser` resolves `/mockServiceWorker.js` too, but from ITS own
- * directory — and it does not depend on `msw`, so that resolution only lands
- * where the installer hoists. The package that OWNS the dependency is the one
- * that can always find it, and it is this one. Without either, a consumer runs
- * `msw init` and declares `msw`, which F8 forbids.
+ * Serve the page's service worker script — where it is installed is the
+ * stubs area's ({@link mswWorkerScript}) — at the path the worker asks for,
+ * with the scope header a worker registered at `/` needs.
  */
 function mswWorkerPlugin(): Plugin {
     return {
         configureServer(server) {
-            const script = requireFrom.resolve('msw/mockServiceWorker.js');
+            const script = mswWorkerScript();
             server.middlewares.use('/mockServiceWorker.js', (_request, response) => {
                 response.setHeader('content-type', 'text/javascript');
                 response.setHeader('service-worker-allowed', '/');
