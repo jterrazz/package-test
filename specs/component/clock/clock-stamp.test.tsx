@@ -24,3 +24,13 @@ test('refuses a clock that is not an instant, in the words a node chain uses', a
         `clock.at(): "soon" is not an instant — pass an ISO-8601 string (e.g. '2026-03-04T09:30:00Z').`,
     );
 });
+
+test("reads the project's instant when the chain pins none", async () => {
+    // Given - a render with no .clock() of its own
+    const result = await component.render(<ClockStamp />, async (visitor) => {
+        await visitor.see(content('Rendered at 2026-01-02T03:04:05.000Z'));
+    });
+
+    // Then - the page's Date is on the project's clock
+    expect(result.content.text).toContain('Rendered at 2026-01-02T03:04:05.000Z');
+});

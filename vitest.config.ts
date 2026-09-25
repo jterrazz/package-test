@@ -84,7 +84,8 @@ const config = defineSpecConfig({
             ),
             component({
                 // Every render's context, stated away from every default so the
-                // Component app proves each one reaches the page (locale-note).
+                // Component app proves each one reaches the page: `clock/`,
+                // `locale/`, `timezone/` and `viewport/` each read theirs.
                 clock: '2026-01-02T03:04:05.000Z',
                 // The package's own component app is the subject its component
                 // Specs stand on, and A2's law holds for it too: the test of a

@@ -23,4 +23,5 @@ test('is restored to the project size for the next test', async () => {
 
     // Then - the project's 1024×640 is what this render got
     expect(result.content.text).toContain('Wide layout');
+    expect(result.content.text).toContain('1024×640');
 });

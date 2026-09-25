@@ -22,6 +22,7 @@ export function ViewportNote() {
     return (
         <section aria-label="Layout">
             <p>{wide ? 'Wide layout' : 'Narrow layout'}</p>
+            <p>{`${globalThis.innerWidth}×${globalThis.innerHeight}`}</p>
         </section>
     );
 }

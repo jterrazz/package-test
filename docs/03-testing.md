@@ -87,7 +87,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 107   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 159   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 160   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
 | Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 53    |
 
@@ -281,7 +281,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.visit()`   | —   | —    | —   | —           | 21      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 7      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 28        | —      |
+| `.render()`  | —   | —    | —   | —           | —       | —      | 29        | —      |
 
 ### Route option
 
@@ -293,7 +293,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 6      | 26        | —      |
+| `see`      | —   | —    | —   | —           | 11      | 6      | 27        | —      |
 | `fill`     | —   | —    | —   | —           | 4       | 1      | 3         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 8         | —      |
@@ -312,7 +312,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `button`        | —   | —    | —   | —           | 4       | 3      | 8         | —      |
 | `field`         | —   | —    | —   | —           | 6       | 1      | 7         | —      |
-| `content`       | —   | —    | —   | —           | 7       | 6      | 16        | —      |
+| `content`       | —   | —    | —   | —           | 7       | 6      | 17        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 1      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 3         | —      |
 | `link`          | —   | —    | —   | —           | 3       | —      | 3         | —      |
@@ -356,7 +356,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.value`        | —   | —    | —   | 8           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
 | `.tree`         | —   | —    | —   | —           | 5       | —      | 6         | —      |
-| `.content`      | —   | —    | —   | —           | 10      | 5      | 17        | —      |
+| `.content`      | —   | —    | —   | —           | 10      | 5      | 18        | —      |
 | `.console`      | —   | —    | —   | —           | 4       | —      | 4         | —      |
 | `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
 | `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |
