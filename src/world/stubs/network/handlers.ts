@@ -1,3 +1,4 @@
+import { pause } from '../../../kernel/pause.js';
 import { isStreamBody } from '../exchange/exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange/exchange.js';
 import { StubQueue } from '../exchange/queue.js';
@@ -126,7 +127,7 @@ export function buildStubHandlers(
                             ? stub.response(observed)
                             : stub.response;
                     if (response.delay) {
-                        await new Promise((resolve) => setTimeout(resolve, response.delay));
+                        await pause(response.delay);
                     }
                     return toMswResponse(msw, response);
                 }),

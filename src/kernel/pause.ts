@@ -1,10 +1,12 @@
 /**
- * One answer to "wait" — the only `setTimeout` the kernel owns.
+ * One answer to "wait" — the framework's one timed pause.
  *
- * Two things in the framework genuinely have to wait: the spacing between the
- * pieces of a declared stream, and the poll behind `waitUntil`. Everything
- * else that waits is a spec doing it by hand, which is what J2 refuses. Stated
- * once so there is one place to look when time stops behaving.
+ * The framework waits for four reasons, each through here: the spacing
+ * between the pieces of a declared stream, a stub's declared reply delay, a
+ * poll for something to become ready (a served process answering, a template
+ * lock freed), and the poll behind `waitUntil`. A spec that waits by hand is
+ * what J2 refuses. Stated once so there is one place to look when time stops
+ * behaving.
  */
 export async function pause(ms: number): Promise<void> {
     await new Promise<void>((resolve) => {

@@ -3,6 +3,7 @@ import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
+import { pause } from '../../../kernel/pause.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 /** Grace period between SIGTERM and the SIGKILL escalation. */
@@ -19,10 +20,6 @@ const READY_POLL_INTERVAL_MS = 250;
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
-
-const delay = async (ms: number): Promise<void> => {
-    await new Promise((resolve) => setTimeout(resolve, ms));
-};
 
 /** Ask the OS for a free TCP port. */
 async function findFreePort(): Promise<number> {
@@ -143,7 +140,7 @@ export class ServedProcess {
                         `specification.${this.facet}(): server did not print ${String(banner)} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                     );
                 }
-                await delay(READY_POLL_INTERVAL_MS);
+                await pause(READY_POLL_INTERVAL_MS);
             }
         }
 
@@ -164,7 +161,7 @@ export class ServedProcess {
                         `specification.${this.facet}(): server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
                     );
                 }
-                await delay(READY_POLL_INTERVAL_MS);
+                await pause(READY_POLL_INTERVAL_MS);
             }
         }
     }

@@ -19,6 +19,7 @@ import { join, resolve } from 'node:path';
 
 import { SQLITE_TEMPLATE_DIR } from '../../../kernel/files/artifacts.js';
 import { discoverRoot } from '../../../kernel/files/resolve.js';
+import { pause } from '../../../kernel/pause.js';
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';
@@ -350,7 +351,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                 if (isStaleTemplateLock(lockPath)) {
                     releaseTemplateLock(lockPath);
                 } else {
-                    await new Promise((wake) => setTimeout(wake, LOCK_POLL_MS));
+                    await pause(LOCK_POLL_MS);
                 }
                 continue;
             }

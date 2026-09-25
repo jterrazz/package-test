@@ -25,6 +25,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
 import type { ChainConfig } from '../../../kernel/chain/config.js';
+import { pause } from '../../../kernel/pause.js';
 import { isStreamBody } from '../exchange/exchange.js';
 import type { MatchableRequest } from '../exchange/exchange.js';
 import { StubQueue } from '../exchange/queue.js';
@@ -222,7 +223,7 @@ export class StubBackend {
         const reply = typeof stub.response === 'function' ? stub.response(observed) : stub.response;
 
         if (reply.delay) {
-            await new Promise((resolve) => setTimeout(resolve, reply.delay));
+            await pause(reply.delay);
         }
 
         const status = reply.status ?? 200;
