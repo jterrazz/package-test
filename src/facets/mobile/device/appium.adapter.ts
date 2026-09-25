@@ -5,7 +5,7 @@ import { AmbiguousElementError, formatElement } from '../../../elements/ambiguit
 import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 import { openSession } from '../session/driver-session.js';
-import type { AdapterDevice, AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
+import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
 import { describeMobileAmbiguity } from './ambiguity.js';
 import type {
@@ -13,6 +13,7 @@ import type {
     DevicePort,
     DeviceScreen,
     DeviceTimeouts,
+    MobileDevice,
     MobileElementMatch,
     MobileElementRef,
     MobileVisitor,
@@ -166,7 +167,7 @@ export class AppiumAdapter implements DevicePort {
     private readonly launchTimeoutMs: number;
     /** The run's session ledger — absent when the run shares no session. */
     private readonly ledger?: SessionLedger | undefined;
-    private readonly options: { device: AdapterDevice; serverUrl: string };
+    private readonly options: { device: MobileDevice; serverUrl: string };
     /**
      * The session factory. Absent in production — webdriverio is then loaded
      * lazily on the first `open()`. Injected by this module's own unit test,
@@ -179,7 +180,7 @@ export class AppiumAdapter implements DevicePort {
 
     constructor(options: {
         attach?: AttachFn | undefined;
-        device: AdapterDevice;
+        device: MobileDevice;
         ledger?: SessionLedger | undefined;
         remote?: RemoteFn | undefined;
         serverUrl: string;

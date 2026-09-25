@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
+import type { MobileDevice } from '../device/device.port.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
@@ -12,16 +13,6 @@ const APPIUM_READY_TIMEOUT_MS = 60_000;
  */
 export const APPIUM_INSTALL_HINT =
     'specification.mobile() requires appium and webdriverio (optional peer dependencies): npm install -D appium webdriverio && npx appium driver install xcuitest';
-
-/** The simulator a runner drives: by name (and OS), or by its UDID. */
-export type MobileDevice = {
-    /** Simulator name, matched exactly (`iPhone 17`). */
-    name: string;
-    /** OS narrowing when the name exists on several runtimes — `'26.5'` or `'iOS 26.5'`. */
-    os?: string;
-    /** Explicit UDID — skips name/os resolution entirely. */
-    udid?: string;
-};
 
 /** The run's Appium server as a worker reads it: where it answers, the device the project declared, and the simulator booted for it. */
 export type RunServer = { device: MobileDevice; udid: string; url: string };

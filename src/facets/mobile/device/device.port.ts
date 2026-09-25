@@ -1,5 +1,15 @@
 import type { ElementRef } from '../../../elements/element.port.js';
 
+/** The simulator a runner drives: by name (and OS), or by its UDID. */
+export type MobileDevice = {
+    /** Simulator name, matched exactly (`iPhone 17`). */
+    name: string;
+    /** OS narrowing when the name exists on several runtimes — `'26.5'` or `'iOS 26.5'`. */
+    os?: string;
+    /** Explicit UDID — skips name/os resolution entirely. */
+    udid?: string;
+};
+
 /**
  * The element kinds a mobile screen can designate — the structural subset of
  * {@link ElementRef} kinds that map onto the XCUITest accessibility tree.
