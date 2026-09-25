@@ -4,13 +4,13 @@ import { grep as grepBlocks } from './grep.js';
 
 /** The captured text accessor: `.text` is what a golden compares (ANSI stripped, `transform` applied), `.raw` the capture. */
 export class TextAccessor {
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** The stream as it was captured: never transformed, ANSI preserved. */
     readonly raw: string;
-    /** @internal Stream label used in failure messages ("stdout" / "stderr"). */
+    /** @internal */
     readonly streamName: string;
-    /** @internal Test-file directory — fixture resolution root for matchers. */
+    /** @internal */
     readonly testDir: string;
     /** @internal Normaliser applied before comparisons, never to fixtures. */
     readonly transform?: ((text: string) => string) | undefined;

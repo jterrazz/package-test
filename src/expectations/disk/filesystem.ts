@@ -3,11 +3,11 @@ import { walkDirectory } from './directory.js';
 
 /** Read-only accessor for the working directory of a command spec. */
 export class FilesystemAccessor {
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** The absolute path of the temporary working directory. */
     readonly cwd: string;
-    /** @internal Test-file directory — fixture resolution root for matchers. */
+    /** @internal */
     readonly testDir: string;
 
     constructor(cwd: string, testDir: string, captures?: CaptureScope) {

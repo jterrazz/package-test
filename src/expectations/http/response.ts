@@ -13,12 +13,12 @@ export type ServerResponse = {
 export class ResponseAccessor {
     /** The JSON value the body holds, or its text when it is not JSON; null when the body is empty. */
     readonly body: unknown;
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** Response headers as a flat, lower-cased key-value map. */
     readonly headers: Record<string, string>;
     readonly status: number;
-    /** @internal Test-file directory — fixture resolution root for matchers. */
+    /** @internal */
     readonly testDir: string;
 
     constructor(response: ServerResponse, testDir: string, captures?: CaptureScope) {

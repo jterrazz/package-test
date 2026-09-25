@@ -119,19 +119,15 @@ export type MatchFactories = Record<TokenKind, TypedMatcher> & {
 };
 
 export const match: MatchFactories = {
-    /** Matches anything. */
     any: typed('any'),
-    /** Matches a base64 string. */
     base64: typed('base64'),
     /** Matches a calendar date (`YYYY-MM-DD`). */
     date: typed('date'),
     /** Matches a human duration (`12ms`, `1.5s`, `2m`, `3h`). */
     duration: typed('duration'),
-    /** Matches an email address. */
     email: typed('email'),
     /** Matches a float: any finite number in JSON; in text the decimal part is required. */
     float: typed('float'),
-    /** Matches a hexadecimal string. */
     hex: typed('hex'),
     /** Matches a string containing the substring; code-only, like `match.regex`. */
     includes: (substring: string): Matcher => new Matcher('includes', { includes: substring }),
@@ -139,7 +135,6 @@ export const match: MatchFactories = {
     int: typed('int'),
     /** Matches an IPv4 address. */
     ip: typed('ip'),
-    /** Matches an ISO-8601 timestamp string. */
     iso8601: typed('iso8601'),
     /** Matches a number (or a numeric string in text contexts). */
     number: typed('number'),
@@ -150,21 +145,17 @@ export const match: MatchFactories = {
     /** Capture-and-compare: the first `ref(name)` captures, every later one must equal it; `{ not }` asserts inequality. */
     ref: (name: string, options?: { not?: string }): Matcher =>
         new Matcher('ref', { notRef: options?.not, refName: name }),
-    /** Matches a string against the given regular expression. */
     regex: (regex: RegExp): Matcher => new Matcher('regex', { regex }),
     /** Matches a semantic version (`1.2.3`, `2.0.0-rc.1`). */
     semver: typed('semver'),
     /** Matches a git SHA (7-64 hex chars). */
     sha: typed('sha'),
-    /** Matches any string. */
     string: typed('string'),
     /** Matches a wall-clock time (`HH:MM` or `HH:MM:SS`). */
     time: typed('time'),
-    /** Matches a ULID. */
     ulid: typed('ulid'),
     /** Matches an http(s) URL. */
     url: typed('url'),
-    /** Matches a UUID string. */
     uuid: typed('uuid'),
     /** Matches the exact working directory of the current spec. */
     workdir: typed('workdir'),

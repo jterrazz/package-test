@@ -34,7 +34,7 @@ export type BaseResultOptions = {
 
 /** Accessors available after any action; each result carries a fresh `CaptureScope`. */
 export class BaseResult {
-    /** @internal Ref-capture scope shared by every assertion on this result. */
+    /** @internal */
     readonly captures: CaptureScope;
     protected config: ResultConfig;
     protected testDir: string;

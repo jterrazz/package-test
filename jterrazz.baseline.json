@@ -19,7 +19,7 @@
         "eslint/no-use-before-define": 1,
         "eslint/prefer-destructuring": 3,
         "import/no-cycle": 2,
-        "jsdoc/empty-tags": 16,
+        "jsdoc/empty-tags": 2,
         "promise/avoid-new": 8,
         "promise/param-names": 1,
         "promise/prefer-await-to-callbacks": 1,

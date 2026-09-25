@@ -78,11 +78,11 @@ export async function diffDirectories(
 
 /** Read-only accessor for a directory a spec action produced. */
 export class DirectoryAccessor {
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** @internal Absolute path of the directory under assertion. */
     readonly root: string;
-    /** @internal Test-file directory — fixture resolution root for matchers. */
+    /** @internal */
     readonly testDir: string;
 
     constructor(absPath: string, testDir: string, captures?: CaptureScope) {

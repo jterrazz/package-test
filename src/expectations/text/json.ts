@@ -3,13 +3,13 @@ import { stripAnsiCodes } from './ansi.js';
 
 /** Read-only accessor for a JSON payload; parsed lazily, so the raw text stays readable when it is not JSON. */
 export class JsonAccessor<Value = unknown> {
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** @internal */
     private readonly rawText: string;
     /** The stream the text was read from, as a refusal names it ("stdout", "body"). */
     private readonly streamName: string;
-    /** @internal Test-file directory — fixture resolution root for matchers. */
+    /** @internal */
     readonly testDir: string;
     /** @internal */
     private readonly transform?: ((text: string) => string) | undefined;

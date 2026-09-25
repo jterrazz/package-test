@@ -13,7 +13,7 @@ export type TableSource = {
 
 /** Read-only accessor for a database table, compared whole: every column, every row. */
 export class TableAccessor {
-    /** @internal Ref-capture scope shared by the current spec execution. */
+    /** @internal */
     readonly captures: CaptureScope;
     /** @internal */
     private readonly db: TableSource;
@@ -26,7 +26,7 @@ export class TableAccessor {
         this.captures = captures ?? new CaptureScope();
     }
 
-    /** @internal Query the table — used by the toBeEmpty matcher. */
+    /** @internal */
     async query(columns: string[]): Promise<unknown[][]> {
         return await this.db.query(this.name, columns);
     }
