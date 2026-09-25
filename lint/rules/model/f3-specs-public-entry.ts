@@ -4,59 +4,33 @@ import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
-import { declaredSubpaths } from '../../package-exports.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
-
-const PACKAGE = '@jterrazz/test';
 
 /**
  * The framework's own top-level `src/` layers. Deep-importing any of these from
  * a spec couples the spec to internals the public entry exists to hide. These
- * segment names are only meaningful inside the framework repo itself — a
- * consumer app that happens to have `src/app.ts` never reaches one, so its own
- * spec-to-app imports stay allowed (that IS the documented pattern:
- * `server: () => createApp()` importing `../../src/app.js`).
+ * segment names are the framework's layers in this repository alone — a
+ * spec's import of its own app (`server: () => createApp()` importing
+ * `../../src/app.js`) names none of them, and stays allowed.
  */
 const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams']);
 
 /**
- * CONVENTIONS F3 — from `specs/`, deep-importing the FRAMEWORK's internals is
- * forbidden: a relative path resolving inside the framework repo's
- * `src/{model,facets,seams,runner,lint}/`, or a `@jterrazz/test/<subpath>`
- * the package does not publish. A consumer's imports of its OWN app source are
- * always allowed — that is the pattern.
+ * CONVENTIONS F3 — from `specs/`, a relative import resolving inside the
+ * framework repo's `src/{model,facets,seams,runner,lint}/` is forbidden: a
+ * spec of the framework reaches it through the public entry, as a consumer
+ * does. A consumer's imports of its OWN app source are always allowed — that
+ * is the pattern.
  *
- * The exempt subpaths are not listed here: they are read from the package's own
- * `exports` map, the same source F1 uses. A published subpath IS the public
- * surface — reaching `@jterrazz/test/vitest` from a specs-tree `vitest.config.ts`
- * is the prescribed gesture, not a leak — so what a spec must not reach is what
- * the manifest never published. The root entry (`.`) is not a subpath and never
- * concerned this branch: `@jterrazz/test` is the public entry F3 points at.
- *
- * Distinct from F1 (which judges the same specifiers from any file): F3 is the
- * specs-specific guard that also reaches relative framework-internal paths.
- * There is no folder exception: a probe that cannot reach its subject through
- * the public entry is a module test beside its module, not a spec.
+ * A `self` rule: those five folder names mean the framework's layers only in
+ * this repository, so the rule ships in the self plugin alone. A
+ * `@jterrazz/test/<subpath>` import is F1's, from any file.
  */
 export const f3SpecsPublicEntry: LintRule = {
     createOnce(context: Context): Visitor {
-        const published = new Set(declaredSubpaths());
-        const exempt = published.size === 0 ? 'none' : [...published].join(', ');
         return {
             before: () => specsAnchorOf(context) !== undefined,
             ...importSourceVisitor(({ node, source }) => {
-                // Framework subpath imports (overlaps F1, kept specs-specific).
-                if (source.startsWith(`${PACKAGE}/`)) {
-                    if (published.has(source)) {
-                        return; // A subpath the package's `exports` map publishes.
-                    }
-                    context.report({
-                        data: { published: exempt, source },
-                        messageId: 'deepImport',
-                        node,
-                    });
-                    return;
-                }
                 // Relative imports that resolve inside a `src/` tree.
                 const marker = source.indexOf('/src/');
                 if (marker === -1 && !source.startsWith('src/')) {
@@ -68,7 +42,7 @@ export const f3SpecsPublicEntry: LintRule = {
                     return; // Consumer's own app source (e.g. src/app.js) — the pattern.
                 }
                 context.report({
-                    data: { published: exempt, source },
+                    data: { source },
                     messageId: 'deepImport',
                     node,
                 });
@@ -80,7 +54,7 @@ export const f3SpecsPublicEntry: LintRule = {
         messages: lessons('f3-specs-public-entry', {
             deepImport: {
                 found: 'a spec deep-imports "{{source}}", a framework internal',
-                fix: 'import it from `@jterrazz/test` (`src/index.js` in this repository); the published subpaths {{published}} are exempt, and a probe of what the entry does not publish is a module test beside its module',
+                fix: 'import it from `@jterrazz/test` (`src/index.js` in this repository); a probe of what the entry does not publish is a module test beside its module',
             },
         }),
         type: 'problem',

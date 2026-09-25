@@ -23,6 +23,7 @@ import {
 import plugin, { recommendedRules, testing } from './plugin.js';
 import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
 import { SELF_PASS_IDS } from './self-checker.js';
+import selfPlugin, { selfRules } from './self-plugin.js';
 
 /**
  * Catalogue meta-test — the docs-as-code contract.
@@ -44,7 +45,23 @@ import { SELF_PASS_IDS } from './self-checker.js';
 const ROOT = resolve(import.meta.dirname, '..');
 const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
 
-const pluginRules = new Set(Object.keys(plugin.rules));
+/** Every oxlint rule this repository runs, by id — the published plugin's and the self plugin's. */
+const allRules = { ...plugin.rules, ...selfPlugin.rules };
+
+const pluginRules = new Set(Object.keys(allRules));
+
+/** The plugin a rule reports under: `jterrazz-self` for a self rule, `jterrazz` for the rest. */
+function namespaceOf(id: string): string {
+    return id in selfPlugin.rules ? 'jterrazz-self' : 'jterrazz';
+}
+
+/** The statique rows of one audience, by rule id. */
+function statiqueRowsOf(audience: string): string[] {
+    return Object.entries(RULE_DOCS)
+        .filter(([, doc]) => doc.audience === audience)
+        .map(([id]) => id)
+        .toSorted();
+}
 
 /**
  * The runtime rows a spec of this package states it proves.
@@ -273,9 +290,9 @@ function carries(text: string, token: string): boolean {
 
 describe('conventions catalogue — completeness (meta-test)', () => {
     test('every shipped plugin rule carries a statique meta.docs entry', () => {
-        // Given - each shipped jterrazz/* rule, and the manifest read by rule id
+        // Given - each rule of either plugin, and the manifest read by rule id
         const docsById: Record<string, unknown> = RULE_DOCS;
-        for (const [id, rule] of Object.entries(plugin.rules)) {
+        for (const [id, rule] of Object.entries(allRules)) {
             // Then - it attaches its manifest doc as meta.docs (channel statique)
             expect(rule.meta?.docs, `rule ${id} is missing meta.docs`).toBeDefined();
             expect(rule.meta?.docs).toBe(docsById[id]);
@@ -283,10 +300,11 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         }
     });
 
-    test('the statique docs cover exactly the shipped plugin rules', () => {
-        // Given - the statique docs and the plugin map
-        // Then - the two sets are identical (no orphan doc, no undocumented rule)
-        expect(Object.keys(RULE_DOCS).sort()).toStrictEqual([...pluginRules].sort());
+    test('the statique docs cover exactly the rules of the plugin their audience loads', () => {
+        // Given - the statique docs, split by audience, and the two plugin maps
+        // Then - a consumer row is a rule of the published plugin, a self row one of the self plugin, and neither plugin registers a rule of the other audience
+        expect(statiqueRowsOf('consumer')).toStrictEqual(Object.keys(plugin.rules).toSorted());
+        expect(statiqueRowsOf('self')).toStrictEqual(Object.keys(selfPlugin.rules).toSorted());
     });
 
     test('every checker-channel manifest entry maps to a pass of the checker its audience runs', () => {
@@ -347,8 +365,8 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     });
 
     test('k3 — every diagnostic reads at its own row, on a heading that exists', () => {
-        // Given - the plugin's rules, whose messages carry a generated `read:` part, and the chapter each audience's rows live in
-        for (const [name, rule] of Object.entries(plugin.rules)) {
+        // Given - the rules of both plugins, whose messages carry a generated `read:` part, and the chapter each audience's rows live in
+        for (const [name, rule] of Object.entries(allRules)) {
             const chapter = rule.meta.docs.audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
             for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
                 // Then - it routes to its own row's heading, in its audience's chapter, and the heading EXISTS there
@@ -515,8 +533,9 @@ const citingSources = (): string[] => {
 /** What a name may resolve to: a rule, a pass, a row — and the cases named after one. */
 const knownNames = (): Set<string> =>
     new Set([
-        ...Object.keys(plugin.rules),
+        ...pluginRules,
         ...CHECKER_PASS_IDS,
+        ...SELF_PASSES,
         ...catalog.map((entry) => entry.name),
         // A fixture tree is named after the rule it stands for, with a tail
         // Saying which case it holds — the inventory meta-test already pairs
@@ -606,7 +625,7 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         for (const file of [...citingFiles(), ...citingSources()]) {
             collect(read(file), file);
         }
-        for (const [name, rule] of Object.entries(plugin.rules)) {
+        for (const [name, rule] of Object.entries(allRules)) {
             for (const message of Object.values(rule.meta?.messages ?? {})) {
                 collect(message, name);
             }
@@ -775,7 +794,10 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     test('every plugin rule has a document proving the line and column it fires on', () => {
         // Given - each shipped rule, and the report lines its documents golden
         for (const id of pluginRules) {
-            const position = new RegExp(String.raw`^\s+\S+:\d+:\d+  jterrazz\(${id}\)$`, 'mu');
+            const position = new RegExp(
+                String.raw`^\s+\S+:\d+:\d+  ${namespaceOf(id)}\(${id}\)$`,
+                'mu',
+            );
             const proven = readdirSync(resolve(ROOT, 'specs/lint', id))
                 .filter((entry) => entry.endsWith('.spec.yaml'))
                 .some((entry) => position.test(read(`specs/lint/${id}/${entry}`)));
@@ -828,9 +850,9 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
             rules: Record<string, unknown>;
         };
 
-        // Then - its rule keys match recommendedRules exactly: no rule ships without an E2E lint pass, and no stale rule lingers in the fixture config
-        expect(Object.keys(config.rules).sort()).toStrictEqual(
-            Object.keys(recommendedRules).sort(),
+        // Then - its rule keys match recommendedRules and the self rules exactly: no rule runs without an E2E lint pass, and no stale rule lingers in the fixture config
+        expect(Object.keys(config.rules).toSorted()).toStrictEqual(
+            Object.keys({ ...recommendedRules, ...selfRules }).toSorted(),
         );
     });
 

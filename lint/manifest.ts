@@ -67,7 +67,9 @@ export const FAMILIES: Record<string, string> = {
 };
 
 /**
- * The **statique** channel — one entry per shipped `jterrazz/*` rule. Each rule
+ * The **statique** channel — one entry per oxlint rule: a `consumer` one ships
+ * in the `jterrazz` plugin (`plugin.ts`), a `self` one in the `jterrazz-self`
+ * plugin this repository alone loads (`self-plugin.ts`). Each rule
  * file attaches its entry as `meta.docs`, so a rule and its normative text can
  * never drift (the completeness meta-test asserts every rule carries one).
  *
@@ -740,13 +742,13 @@ export const RULE_DOCS = {
         audience: 'self',
         channel: 'statique',
         convention:
-            "From `specs/`, only a deep import of the framework's INTERNALS is forbidden: a relative path resolving into the framework repository's `src/{model,facets,seams,runner,lint}/`, or any `@jterrazz/test/<subpath>` the package's `exports` map does not publish — the published subpaths are exempt, READ from the manifest as in F1, which holds the list. A consumer importing ITS OWN app's source is always allowed (that is the documented pattern). No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
+            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{model,facets,seams,runner,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
         facet: 'model',
         family: 'F',
-        fix: 'Reach the framework through `@jterrazz/test`, or move the probe beside the module it covers.',
+        fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',
         id: 'F3',
         rationale:
-            "Testing through the public surface keeps specs decoupled from the framework's internal paths, without getting in the way of a consumer importing its own app.",
+            'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; the five folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
         reach: 'specs',
     },
     'f4-no-test-to-test-import': {

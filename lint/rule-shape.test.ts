@@ -7,6 +7,7 @@ import { describe, expect, test } from 'vitest';
 import { child, childList, identifierName, isNode, walk } from './ast.js';
 import plugin from './plugin.js';
 import type { AstNode, LintRule, Visitor } from './rule-shape.js';
+import selfPlugin from './self-plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -203,7 +204,7 @@ describe('rule-shape — a rule built once judges each file as if it were the on
         // Given - each rule's E2E fixture corpus, linted file by file with a visitor of their own, then twice through ONE visitor
         const drifted: string[] = [];
         let verdicts = 0;
-        for (const [id, rule] of Object.entries(plugin.rules)) {
+        for (const [id, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
             const files = corpusOf(id);
             const alone = files.map((file) => session(rule, id)(file));
             const lint = session(rule, id);

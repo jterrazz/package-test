@@ -3,7 +3,8 @@
         "correctness": "off"
     },
     "jsPlugins": [
-        "../../../../dist/oxlint.js"
+        "../../../../dist/oxlint.js",
+        "../../../../dist/self-oxlint.js"
     ],
     "rules": {
         "jterrazz/a1-specification-file": "error",
@@ -61,7 +62,6 @@
         "jterrazz/e9w-env-assignment-in-test": "warn",
         "jterrazz/f1-no-subpath-import": "error",
         "jterrazz/f2-no-test-imports-in-prod": "error",
-        "jterrazz/f3-specs-public-entry": "error",
         "jterrazz/f4-no-test-to-test-import": "error",
         "jterrazz/f5-fixtures-only-from-tests": "error",
         "jterrazz/f6-no-foreign-test-runtime": "error",
@@ -94,6 +94,7 @@
         "jterrazz/j6w-given-in-the-test": "warn",
         "jterrazz/w1-scenario-pure": "error",
         "jterrazz/w2-testid-states-what-is-missing": "error",
-        "jterrazz/w5w-scenario-settles": "warn"
+        "jterrazz/w5w-scenario-settles": "warn",
+        "jterrazz-self/f3-specs-public-entry": "error"
     }
 }

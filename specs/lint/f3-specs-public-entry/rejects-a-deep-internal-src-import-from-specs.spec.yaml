@@ -4,5 +4,5 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/app/widget/widget.test.ts:3:23  jterrazz(f3-specs-public-entry)
+          specs/app/widget/widget.test.ts:3:23  jterrazz-self(f3-specs-public-entry)
           specs/app/widget/widget.test.ts:5:1  jterrazz(d18w-existence-only-oracle)

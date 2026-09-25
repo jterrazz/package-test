@@ -54,7 +54,7 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 - `materialAt(path, directory?)` and `testPackageOf(specifier)` (typed, with `MaterialKind`) are the reader F2 judges by, published for a build guard: the first names what a module id is — `'a test file'`, `'ground'`, `'the specs tree'`, `'a contract'` — or answers `undefined`; the second names the test package a bare specifier belongs to (`vitest/config` → `vitest`), this tool entry aside. They are published so a build guard — the toolchain's Publish pass — reads what test material is from its one owner, never a copy.
 - Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. If you don't compose `testing`, no `jterrazz/*` rule runs. When and how `typescript check` decides to RUN the checker is the toolchain's, not this chapter's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 - Rules are individually addressable as `jterrazz/<rule-id>` if you want to deviate — prefer scoped `overrides` with a comment over global downgrades.
-- `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. F1 and F3 exempt every subpath the package's `exports` map publishes, this one among them.
+- `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule F2 — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. F1 exempts every subpath the package's `exports` map publishes, this one among them.
 - **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `lint/oxlint-pin.test.ts` fails the day the two diverge.
 
 ### Standalone — without `@jterrazz/typescript`
@@ -545,7 +545,7 @@ expect(() => api.seed(file('./seeds/one-user.sql'))).toThrow(/* … */);
 
 ## Build-before-lint
 
-The plugin is loaded from the **built bundle**. In this repo `jsPlugins: ['./dist/oxlint.js']` means `npm run build` must precede `npm run lint` (Node's TS type-stripping cannot resolve `.js` specifiers to `.ts` sources). Consumers load `@jterrazz/test/oxlint` from `node_modules` — no ordering constraint.
+The plugin is loaded from the **built bundle**. In this repo `jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js']` — the published plugin and the self plugin ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)) — means `npm run build` must precede `npm run lint` (Node's TS type-stripping cannot resolve `.js` specifiers to `.ts` sources). Consumers load `@jterrazz/test/oxlint` from `node_modules` — no ordering constraint.
 
 ## Stability
 

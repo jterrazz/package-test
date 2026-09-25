@@ -59,7 +59,6 @@ import { e7wIncludePrefixExists } from './rules/model/e7w-include-prefix-exists.
 import { e9wEnvAssignmentInTest } from './rules/model/e9w-env-assignment-in-test.js';
 import { f1NoSubpathImport } from './rules/model/f1-no-subpath-import.js';
 import { f2NoTestImportsInProd } from './rules/model/f2-no-test-imports-in-prod.js';
-import { f3SpecsPublicEntry } from './rules/model/f3-specs-public-entry.js';
 import { f4NoTestToTestImport } from './rules/model/f4-no-test-to-test-import.js';
 import { f5FixturesOnlyFromTests } from './rules/model/f5-fixtures-only-from-tests.js';
 import { f6NoForeignTestRuntime } from './rules/model/f6-no-foreign-test-runtime.js';
@@ -85,7 +84,8 @@ export type { MaterialKind } from './production.js';
 
 /**
  * The `@jterrazz/test` oxlint plugin — the tool-facing lint layer that enforces
- * the statically-checkable CONVENTIONS rules (the `Lint(statique)` catalogue).
+ * the statically-checkable CONVENTIONS rules (the `Lint(statique)` catalogue)
+ * whose audience is `consumer`. A `self` rule is `self-plugin.ts`'s.
  *
  * Registered in a consumer's (or this repo's own) `oxlint.config.ts` via
  * `jsPlugins: ['@jterrazz/test/oxlint']` and referenced as `jterrazz/<rule>` in
@@ -150,7 +150,6 @@ const plugin: LintPlugin = {
         'e9w-env-assignment-in-test': e9wEnvAssignmentInTest,
         'f1-no-subpath-import': f1NoSubpathImport,
         'f2-no-test-imports-in-prod': f2NoTestImportsInProd,
-        'f3-specs-public-entry': f3SpecsPublicEntry,
         'f4-no-test-to-test-import': f4NoTestToTestImport,
         'f5-fixtures-only-from-tests': f5FixturesOnlyFromTests,
         'f6-no-foreign-test-runtime': f6NoForeignTestRuntime,

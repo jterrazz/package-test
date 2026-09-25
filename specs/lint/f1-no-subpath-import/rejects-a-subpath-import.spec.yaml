@@ -5,5 +5,4 @@ runs:
       exit: 1
       stdout: |
           specs/app/widget/widget.test.ts:3:24  jterrazz(f1-no-subpath-import)
-          specs/app/widget/widget.test.ts:3:24  jterrazz(f3-specs-public-entry)
           specs/app/widget/widget.test.ts:5:1  jterrazz(d18w-existence-only-oracle)

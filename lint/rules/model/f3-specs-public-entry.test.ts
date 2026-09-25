@@ -39,18 +39,6 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
-        // An UNPUBLISHED framework subpath (overlaps F1, kept specs-specific).
-        {
-            code: 'import { match } from "@jterrazz/test/core";',
-            errors: 1,
-            filename: '/repo/specs/cli/tokens/tokens.test.ts',
-        },
-        // A subpath the exports map does not publish, even when it names a layer.
-        {
-            code: 'import { registerMatchers } from "@jterrazz/test/specification";',
-            errors: 1,
-            filename: '/repo/specs/cli/tokens/tokens.test.ts',
-        },
     ],
     valid: [
         // The public entry (composition root).
@@ -74,6 +62,11 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
         {
             code: 'import { redis } from "../../index.js";',
             filename: '/repo/specs/integration/redis/redis.test.ts',
+        },
+        // An unpublished subpath is F1's, from any file: F3 does not report it twice.
+        {
+            code: 'import { match } from "@jterrazz/test/core";',
+            filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
         // Every subpath the package's own `exports` map publishes is exempt.
         {

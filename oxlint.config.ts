@@ -5,6 +5,7 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 // Loaded from the built bundle. Node's TS type-stripping does not resolve
 // `.js` specifiers to `.ts` sources, so `npm run build` must precede lint.
 import { testing } from './dist/oxlint.js';
+import { selfRules } from './dist/self-oxlint.js';
 
 /**
  * The five trees of this package and their sanctioned edges (CONVENTIONS I1).
@@ -183,9 +184,15 @@ const FRAMEWORK_LAYERS = {
 
 /**
  * The published `testing` fragment wires the plugin by its package name; this
- * repository is that package, and lints itself from the bundle it just built.
+ * repository is that package, and lints itself from the bundle it just built —
+ * plus the self plugin, the rules only this package is held to, which no
+ * published fragment carries (docs/03 § The package's own rules).
  */
-const selfTesting = { ...testing, jsPlugins: ['./dist/oxlint.js'] };
+const selfTesting = {
+    ...testing,
+    jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js'],
+    rules: { ...testing.rules, ...selfRules },
+};
 
 const config: OxlintConfig = defineConfig(
     compose(node, selfTesting, {

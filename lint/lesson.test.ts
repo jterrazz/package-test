@@ -10,6 +10,7 @@ import { lessonOf, lessons, readOf, whyOf } from './lesson.js';
 import { CHECKER_PASSES, RUNTIME_RULES } from './manifest.js';
 import plugin from './plugin.js';
 import { SELF_PASS_IDS } from './self-checker.js';
+import selfPlugin from './self-plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -69,7 +70,7 @@ describe('whyOf — the convention in one sentence', () => {
 describe('k11 — every message teaches: found, why, fix, read (meta-test)', () => {
     test('k11 — every message of a static rule states the four parts, its why and read its row’s', () => {
         // Given - every message the shipped plugin can print, before oxlint fills its data
-        for (const [name, rule] of Object.entries(plugin.rules)) {
+        for (const [name, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
             const convention = rule.meta?.docs?.convention ?? '';
             for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
                 // Then - no part is missing, and the row's own sentence and heading are the ones it states

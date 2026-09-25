@@ -4,6 +4,7 @@
         "src/index.ts",
         "src/runner/index.ts",
         "lint/plugin.ts",
+        "lint/self-plugin.ts",
         "lint/checker-cli.ts",
         "lint/self-checker-cli.ts",
         "lint/catalog-cli.ts",

@@ -33,17 +33,17 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 
 ### Which file a change opens
 
-| Changing…                                         | Opens                                                                              |
-| ------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `model/chain/builder.ts`                               |
-| What a result exposes                             | `src/model/result/` — accessors stay READ-ONLY                                     |
-| A matcher, or update-mode behaviour               | `src/model/goldens/` and `src/runner/` — the two sides of the runner coupling      |
-| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `model/` and no more                |
-| A `{{token}}` or the structural comparison        | `src/model/matching/`                                                              |
-| The `<case>.spec.yaml` grammar                    | `src/model/literate/` — read by BOTH the runner and the checker                    |
-| How a cli document runs                           | `src/facets/cli/literate.ts`                                                       |
-| A mechanized rule                                 | `lint/manifest.ts` **and** its implementation under `lint/rules/<facet-or-model>/` |
-| A principle, or a criterion no machine can settle | [18 — Conventions](18-conventions.md), the constitution                            |
+| Changing…                                         | Opens                                                                                                                                                                             |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `model/chain/builder.ts`                                                                                                                              |
+| What a result exposes                             | `src/model/result/` — accessors stay READ-ONLY                                                                                                                                    |
+| A matcher, or update-mode behaviour               | `src/model/goldens/` and `src/runner/` — the two sides of the runner coupling                                                                                                     |
+| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `model/` and no more                                                                                                               |
+| A `{{token}}` or the structural comparison        | `src/model/matching/`                                                                                                                                                             |
+| The `<case>.spec.yaml` grammar                    | `src/model/literate/` — read by BOTH the runner and the checker                                                                                                                   |
+| How a cli document runs                           | `src/facets/cli/literate.ts`                                                                                                                                                      |
+| A mechanized rule                                 | `lint/manifest.ts`, its audience stated, **and** its implementation under `lint/rules/<facet-or-model>/` — wired in `lint/plugin.ts`, or in `lint/self-plugin.ts` for a self rule |
+| A principle, or a criterion no machine can settle | [18 — Conventions](18-conventions.md), the constitution                                                                                                                           |
 
 ### What a change owes
 
@@ -78,7 +78,7 @@ Peer dependencies:
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch(file(…))` types on one subject and not on another.
 
-Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 and F3 read that map, so a specifier it does not publish is refused:
+Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 reads that map, so a specifier it does not publish is refused:
 
 ```typescript
 // the runners, the services, and what a chain stands on
