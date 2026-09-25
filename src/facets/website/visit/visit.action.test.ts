@@ -1,13 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import type {
-    BrowserOpenOptions,
-    BrowserPage,
-    BrowserPort,
-} from '../../../elements/browser.port.js';
 import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { sharing } from '../../../kernel/context/with.capability.js';
+import type { BrowserOpenOptions, BrowserPage, BrowserPort } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { visit } from './visit.action.js';
 

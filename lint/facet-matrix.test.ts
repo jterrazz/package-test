@@ -1,18 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Visitor } from '../src/elements/browser.port.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
 import * as elements from '../src/elements/elements.js';
 import type { CliResult } from '../src/expectations/command/cli.result.js';
-import type { HttpResult } from '../src/facets/api/request/http.result.js';
+import type { HttpResult } from '../src/facets/api/index.js';
 import type { RouteOptionsAny } from '../src/facets/api/request/route.js';
-import type { RenderResult } from '../src/facets/component/render/render.result.js';
-import type { ComponentVisitor } from '../src/facets/component/render/scenario.js';
-import type { CallResult } from '../src/facets/integration/call.result.js';
-import type { MobileElementKind, MobileVisitor } from '../src/facets/mobile/device/device.port.js';
-import type { ScreenResult } from '../src/facets/mobile/screen/screen.result.js';
-import type { FetchResult } from '../src/facets/website/fetch/fetch.result.js';
-import type { PageResult } from '../src/facets/website/visit/page.result.js';
+import type { ComponentVisitor, RenderResult } from '../src/facets/component/index.js';
+import type { CallResult } from '../src/facets/integration/index.js';
+import type { MobileElementKind, MobileVisitor, ScreenResult } from '../src/facets/mobile/index.js';
+import type { FetchResult, PageResult, Visitor } from '../src/facets/website/index.js';
 import type { JobResult } from '../src/index.js';
 import { CAPABILITIES, COLUMNS, memberOf } from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
@@ -259,7 +255,7 @@ describe('facet capability declaration (K1 guard)', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('the vocabulary is exactly what `model/elements/` exports', () => {
+    test('the vocabulary is exactly what `elements/` exports', () => {
         // Given - the element module, which is the vocabulary's one home
         const exported = Object.keys(elements).toSorted();
 

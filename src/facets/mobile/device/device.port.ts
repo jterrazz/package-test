@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../../elements/browser.port.js';
+import type { ElementRef } from '../../../elements/element.port.js';
 
 /**
  * The element kinds a mobile screen can designate — the structural subset of
@@ -138,7 +138,7 @@ export type SessionLedger = {
 
 /**
  * Abstract device interface for the mobile specification runner.
- * One implementation lives in `seams/appium/` — a single driver session per
+ * One implementation, `appium.adapter.ts` beside this port — a single driver session per
  * runner, or per run under a {@link SessionLedger}, opened on the first
  * `open()` and reused; each open terminates and relaunches the app for a
  * deterministic fresh state.

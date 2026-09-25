@@ -9,6 +9,8 @@ import {
     formatElement,
     LANDMARK_SELECTOR,
 } from '../../../elements/ambiguity.js';
+import type { ElementMatch, ElementRef } from '../../../elements/element.port.js';
+import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -16,11 +18,8 @@ import type {
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
-    ElementMatch,
-    ElementRef,
     Visitor,
-} from '../../../elements/browser.port.js';
-import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
+} from './browser.port.js';
 
 /**
  * Anything a locator can be built from — the page root, or another locator

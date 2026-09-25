@@ -1,13 +1,13 @@
-import type {
-    BrowserLinkElement,
-    BrowserMetaElement,
-    BrowserPage,
-} from '../../../elements/browser.port.js';
 import { BaseResult } from '../../../expectations/result.js';
 import type { ResultConfig } from '../../../expectations/result.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
+import type {
+    BrowserLinkElement,
+    BrowserMetaElement,
+    BrowserPage,
+} from '../browser/browser.port.js';
 
 /**
  * The head summary snapshotted by `expect(result.head).toMatch('home.head.json')`

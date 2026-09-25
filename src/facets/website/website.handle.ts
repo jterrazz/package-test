@@ -1,6 +1,5 @@
 import { randomUUID } from 'node:crypto';
 
-import type { BrowserPort } from '../../elements/browser.port.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
@@ -14,6 +13,7 @@ import { releaseIsolation, startServices } from '../../world/services/services.j
 import type { AppInfo } from '../../world/services/startup/startup-report.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
 import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
+import type { BrowserPort } from './browser/browser.port.js';
 import type { WebsiteSpecification } from './website.facet.js';
 import { websiteFacet } from './website.facet.js';
 

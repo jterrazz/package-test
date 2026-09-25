@@ -1,4 +1,3 @@
-import type { BrowserPort, VisitScenario } from '../../../elements/browser.port.js';
 import {
     BROWSER_DESCRIPTORS,
     BROWSER_STATES,
@@ -12,6 +11,7 @@ import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
+import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';
 

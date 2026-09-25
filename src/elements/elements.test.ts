@@ -27,7 +27,7 @@ describe('element vocabulary', () => {
         // Given - a link named by its accessible name
         const element = link('Articles');
 
-        // Then - descriptors stay serializable; no locator leaks into the model
+        // Then - descriptors stay serializable; no locator leaks into the descriptor
         expect(element).toStrictEqual({ kind: 'link', name: 'Articles' });
     });
 

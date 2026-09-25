@@ -1,4 +1,4 @@
-import type { ElementRef } from './browser.port.js';
+import type { ElementRef } from './element.port.js';
 
 /**
  * The element vocabulary — user-facing descriptors for visit scenarios.

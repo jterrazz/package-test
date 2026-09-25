@@ -117,19 +117,11 @@ export {
     within,
 } from './elements/elements.js';
 export type {
-    BrowserConsoleMessage,
-    BrowserLinkElement,
-    BrowserMetaElement,
-    BrowserOpenOptions,
-    BrowserPage,
-    BrowserPort,
     ElementKind,
     ElementMatch,
     ElementRef,
     LandmarkKind,
-    Visitor,
-    VisitScenario,
-} from './elements/browser.port.js';
+} from './elements/element.port.js';
 
 // ── The expectations: tokens, accessors, conditions, goldens ──
 export {

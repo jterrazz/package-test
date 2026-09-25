@@ -53,14 +53,14 @@
         "unicorn/no-lonely-if": 1,
         "unicorn/prefer-single-call": 2,
         "vitest/max-expects": 50,
-        "vitest/prefer-strict-boolean-matchers": 267,
+        "vitest/prefer-strict-boolean-matchers": 266,
         "vitest/require-to-throw-message": 2
     },
     "test": {
         "jterrazz/c34-test-body-size": 2,
         "jterrazz/d15w-status-only-probe": 2,
         "jterrazz/d16w-ambient-value": 7,
-        "jterrazz/d18w-existence-only-oracle": 12,
+        "jterrazz/d18w-existence-only-oracle": 11,
         "jterrazz/e9w-env-assignment-in-test": 10,
         "jterrazz/i1-layer-boundaries": 1,
         "jterrazz/j6w-given-in-the-test": 34,

@@ -1,10 +1,10 @@
 /**
  * What a component test hands to `.render()`.
  *
- * The React types live on THIS side of the seam, with the adapter that mounts
- * them: `react` is an optional peer, and the model
- * (`specification/facets/component/`) states what a render IS without knowing
- * which library draws it. A project that specifies no component installs
+ * The React types live here, with the adapter that mounts them: `react` is an
+ * optional peer, and the component facet's `render/` folder (`render.action.ts`,
+ * `page.port.ts`) states what a render IS without knowing which library draws
+ * it. A project that specifies no component installs
  * neither react nor the browser adapter, and `skipLibCheck` — which every
  * `@jterrazz/typescript` profile sets — keeps the unresolved type off its build.
  */
@@ -18,8 +18,8 @@ export type { ReactNode as ComponentUi } from 'react';
 export type DomMount = (container: HTMLElement) => (() => void) | void;
 
 /**
- * The `server.commands` this seam registers, declared in the module every part
- * of the seam already imports.
+ * The `server.commands` the component project registers, declared in the module
+ * every part of the page already imports.
  *
  * A `declare module` merges only as an interface, and only from a file that is
  * itself a module and part of the program — a lone `.d.ts` would have to be
