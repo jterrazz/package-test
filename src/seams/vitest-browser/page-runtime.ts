@@ -1,5 +1,4 @@
 import { inject, onTestFinished, vi } from 'vitest';
-import { page } from 'vitest/browser';
 
 /**
  * The runner, as the page reaches it.
@@ -38,8 +37,9 @@ export function providedViewport(): { height: number; width: number } {
     return inject('componentViewport');
 }
 
-/** Resize the page the test renders into. */
+/** Resize the page the test renders into. `vitest/browser` loads in a page alone, so it is reached when a size is set. */
 export async function setViewport(size: { height: number; width: number }): Promise<void> {
+    const { page } = await import('vitest/browser');
     await page.viewport(size.width, size.height);
 }
 

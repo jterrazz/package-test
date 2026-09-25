@@ -7,7 +7,7 @@ import type { PagePort } from './page.port.js';
 import type { ComponentScenario, RenderSubject } from './scenario.js';
 
 /** What a mounted subject offers the render, React or vanilla DOM alike. */
-type MountedSurface = ReturnType<PagePort['mountDom']>;
+type MountedSurface = Awaited<ReturnType<PagePort['mountDom']>>;
 
 /** A React tree's wrapper, as the chain states it. */
 type Wrapper = NonNullable<ReturnType<PagePort['projectWrapper']>>;
@@ -54,7 +54,7 @@ async function mount(
     subject: RenderSubject,
 ): Promise<MountedSurface> {
     if (isDomMount(subject)) {
-        return page.mountDom(subject);
+        return await page.mountDom(subject);
     }
     const outer = page.projectWrapper();
     const dress = (ui: Ui): Ui => {
@@ -105,7 +105,7 @@ export const render = defineAction<
 
         try {
             if (scenario) {
-                await scenario(page.visitor(surface));
+                await scenario(await page.visitor(surface));
             }
         } finally {
             recorder.stop();

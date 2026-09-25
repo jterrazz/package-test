@@ -9,11 +9,11 @@ export type PagePort = {
     /** The ARIA snapshot of the rendered body. */
     readonly ariaTree: () => Promise<string>;
     /** Mount a vanilla DOM subject into a fresh container. */
-    readonly mountDom: (mount: DomMount) => MountedSurface;
+    readonly mountDom: (mount: DomMount) => Promise<MountedSurface>;
     /** Mount a React tree, through the optional adapter loaded on first use. */
     readonly mountReact: (ui: ComponentUi) => Promise<MountedSurface>;
     /** The frame the project dresses every render in, when it states one. */
     readonly projectWrapper: () => ((ui: ComponentUi) => ComponentUi) | undefined;
     /** The verbs a scenario drives the mounted surface with. */
-    readonly visitor: (surface: MountedSurface) => ComponentVisitor;
+    readonly visitor: (surface: MountedSurface) => Promise<ComponentVisitor>;
 };
