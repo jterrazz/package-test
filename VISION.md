@@ -3879,9 +3879,9 @@ It landed in seven commits on `vision/17`, and every one was green:
   takes its types via `export type *`.
 - **The locks.**
 
-Every PENDING seam is gone. `make check` is green: 626 test files, 2745
-tests, coverage 94.95/85.78/96.54/94.92 (statements, branches,
-functions, lines). `package.json` did not change, and neither did the
+Every PENDING seam is gone. `make check` is green: 648 test files, 2780
+tests, coverage 95.28/85.80/96.91/95.31 (statements, branches,
+functions, lines), after the review pass below. `package.json` did not change, and neither did the
 dist entry names.
 
 Where the work deviated from the inventory:
@@ -3912,6 +3912,30 @@ Carried from the architecture wave, read against the new tree:
   `seams→results/text` is now `facets/component/golden/` into
   `expectations/goldens/` and `expectations/in-place/`, both declared by
   the map.
+
+The review pass that followed applied 30 of 33 findings, and the final
+judge's five points:
+
+- **Node builtins are not engines** (I11's row, ADR-009, still
+  Proposed): each program is spawned by the one module that owns it.
+  The `docker` CLI stays in `expectations/command/docker-cli.ts`, now its
+  only spawning site: it reads the containers the SUBJECT started to
+  judge a result, and `expectations/` may not import `world/`.
+- **Lock 2 has its spec**: `lint/self-layers.test.ts` runs I1 with the
+  real `FRAMEWORK_LAYERS` on the reverse edges it forbids.
+- **Suffixes**: only `testcontainers.adapter.ts` and
+  `process.adapter.ts` implement a port and took `.adapter`; the
+  spawner is `serve.ts`. The other engine wrappers keep concept names.
+- **vitest/** holds the hooks: each global setup is resolved by its
+  owner, the literate plugin is reached through the cli project, and
+  the project defaults moved to `vitest/project-kit.ts`, which broke the
+  `preset ↔ cli.project` cycle.
+- **Rejected**: the kit's move to `kernel/project/` (its defaults name
+  update mode's setup, which the kernel may not import); counting only
+  modules toward I12's two-entry floor (it would fold seven folders the
+  plan itself names, such as `world/services/redis/` and
+  `world/stubs/http/`); and renaming the component's `golden/` (the ARIA
+  tree it serves is the outline a golden pins).
 
 Open, **for the owner**:
 
