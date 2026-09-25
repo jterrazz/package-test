@@ -1,4 +1,4 @@
-import { refusal } from '../refusals/refusal.js';
+import { refusal } from './refusals/refusal.js';
 
 /**
  * Enforce CONVENTIONS A7: with two or more databases in the services record

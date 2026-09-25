@@ -1,6 +1,6 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { validateDatabaseOption } from '../../../kernel/chain/database-option.js';
+import { validateDatabaseOption } from '../../../kernel/database-option.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
 import type { ServicesConfig } from '../services.js';
