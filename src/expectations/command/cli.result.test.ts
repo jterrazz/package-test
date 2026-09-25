@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import type { CliOutput } from '../../facets/cli/process/cli.port.js';
 import { structuralEquals, textEquals } from '../tokens/structural.js';
+import type { CliOutput } from './cli.result.js';
 import { CliResult } from './cli.result.js';
 
 const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';

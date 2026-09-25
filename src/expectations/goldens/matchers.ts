@@ -16,11 +16,6 @@ import { dirname, resolve } from 'node:path';
 import { resolveSpecPath } from '../../kernel/files/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../../kernel/files/spec-path.js';
 import { refusal } from '../../kernel/refusals/refusal.js';
-import {
-    formatDirectoryDiff,
-    formatResponseDiff,
-    formatTableDiff,
-} from '../../world/services/startup/startup-report.js';
 import { ContainerAccessor } from '../command/container.js';
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../disk/directory.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
@@ -50,6 +45,7 @@ import {
     renderExpected,
     structuralEquals,
 } from '../tokens/structural.js';
+import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from './diff.js';
 import type { MatchFixtureOptions, TableMatchOptions } from './match-options.js';
 import {
     compareStreamInPlace,

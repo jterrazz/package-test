@@ -1,5 +1,17 @@
-import type { ServerResponse } from '../../facets/api/server/server.port.js';
 import { CaptureScope } from '../tokens/match.js';
+
+/**
+ * HTTP response returned by a server port, its body read as a response `.http`
+ * reads one.
+ */
+export type ServerResponse = {
+    /** HTTP status code. */
+    status: number;
+    /** The JSON value the body holds, or its text when it is not JSON (HTML, an event stream, plain text); null when the body is empty. */
+    body: unknown;
+    /** Response headers as a flat key-value map. */
+    headers: Record<string, string>;
+};
 
 /**
  * Read-only accessor for an HTTP response.

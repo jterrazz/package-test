@@ -1,14 +1,7 @@
-/**
- * Raw output from a command execution, including exit code and captured output streams.
- */
-export type CliOutput = {
-    /** Process exit code (0 = success). */
-    exitCode: number;
-    /** Captured standard output. */
-    stdout: string;
-    /** Captured standard error. */
-    stderr: string;
-};
+import type { CliOutput } from '../../../expectations/command/cli.result.js';
+import type { EnvRecord } from '../../../kernel/context/with.capability.js';
+
+export type { CliOutput } from '../../../expectations/command/cli.result.js';
 
 /**
  * Options for the long-running form of `.exec()` (CONVENTIONS B2). When
@@ -23,11 +16,8 @@ export type ExecOptions = {
     timeout?: number | undefined;
 };
 
-/**
- * Extra environment variables to set for the child process.
- * Values are merged on top of process.env. A `null` value unsets the variable.
- */
-export type CliEnv = Record<string, null | string>;
+/** Extra environment variables to set for the child process — the record `.env()` and `with({ env })` state. */
+export type CliEnv = EnvRecord;
 
 /**
  * Abstract command interface for specification runners.

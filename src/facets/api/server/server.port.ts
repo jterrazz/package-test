@@ -1,15 +1,6 @@
-/**
- * HTTP response returned by a server port, its body read as a response `.http`
- * reads one.
- */
-export type ServerResponse = {
-    /** HTTP status code. */
-    status: number;
-    /** The JSON value the body holds, or its text when it is not JSON (HTML, an event stream, plain text); null when the body is empty. */
-    body: unknown;
-    /** Response headers as a flat key-value map. */
-    headers: Record<string, string>;
-};
+import type { ServerResponse } from '../../../expectations/http/response.js';
+
+export type { ServerResponse } from '../../../expectations/http/response.js';
 
 /** What a request carries beside its method, path and body. */
 export type ServerRequestOptions = {

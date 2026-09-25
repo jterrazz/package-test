@@ -1,10 +1,10 @@
 import { execSync } from 'node:child_process';
 
-import type { CliOutput } from '../../facets/cli/process/cli.port.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { CliResult } from './cli.result.js';
+import type { CliOutput } from './cli.result.js';
 import { inspectContainer } from './docker-lookup.js';
 
 const EXEC_TIMEOUT = 10_000;

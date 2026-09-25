@@ -1,10 +1,10 @@
 import { isDiskTarget } from '../../kernel/files/spec-path.js';
 import { refusal } from '../../kernel/refusals/refusal.js';
-import { formatStdoutDiff } from '../../world/services/startup/startup-report.js';
 import { dedent } from '../text/dedent.js';
 import { TextAccessor } from '../text/text.js';
 import { CaptureScope } from '../tokens/match.js';
 import { textEquals } from '../tokens/structural.js';
+import { formatStdoutDiff } from './diff.js';
 import type { TableMatchOptions } from './match-options.js';
 
 /**

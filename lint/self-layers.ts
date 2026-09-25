@@ -56,7 +56,6 @@ export const FRAMEWORK_LAYERS = {
             'kernel/chain/action-signatures.ts': ['facets/', 'elements/', 'expectations/'],
             'kernel/chain/config.ts': ['world/', 'elements/', 'facets/'],
             'kernel/chain/setup-signatures.ts': ['world/', 'facets/'],
-            'kernel/context/with.capability.ts': ['facets/cli/process/cli.port'],
         },
     },
     // What surrounds the subject, controlled by the test: the kernel only, each
@@ -81,21 +80,7 @@ export const FRAMEWORK_LAYERS = {
     // How a screen is designated and touched — shared by website, component, mobile.
     elements: { imports: ['kernel/', 'elements/'] },
     // How a result is judged.
-    expectations: {
-        imports: ['kernel/', 'expectations/'],
-        packages: ['vitest'],
-        // PENDING the restructure's follow-ups: each edge below leaves with
-        // The commit that moves its type to its owner.
-        seams: {
-            'expectations/command/cli.result.ts': ['facets/cli/process/cli.port'],
-            'expectations/command/container.ts': ['facets/cli/process/cli.port'],
-            'expectations/goldens/matchers.ts': ['world/services/startup/startup-report'],
-            'expectations/goldens/text-assertions.ts': ['world/services/startup/startup-report'],
-            'expectations/http/response.ts': ['facets/api/server/server.port'],
-            'expectations/result.ts': ['world/services/database.port'],
-            'expectations/table/table.ts': ['world/services/database.port'],
-        },
-    },
+    expectations: { imports: ['kernel/', 'expectations/'], packages: ['vitest'] },
     // What is tested: one slice per constructor. A folder owns its files, and
     // No facet lists another (`facets/` is absent from `imports`).
     facets: {

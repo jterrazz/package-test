@@ -1,4 +1,3 @@
-import type { CliOutput } from '../../facets/cli/process/cli.port.js';
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { DockerSpecConfig, SpecificationConfig } from '../../kernel/chain/config.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
@@ -7,6 +6,18 @@ import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
 import { findContainersByLabel, inspectContainer, removeContainers } from './docker-lookup.js';
+
+/**
+ * Raw output from a command execution, including exit code and captured output streams.
+ */
+export type CliOutput = {
+    /** Process exit code (0 = success). */
+    exitCode: number;
+    /** Captured standard output. */
+    stdout: string;
+    /** Captured standard error. */
+    stderr: string;
+};
 
 /** What a command's result publishes, as the capability matrix rows it states — `.exec()`'s and `.run()`'s alike. */
 export const CLI_RESULT_ROWS: readonly MatrixRow[] = [

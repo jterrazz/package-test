@@ -1,4 +1,3 @@
-import type { DatabasePort } from '../../world/services/database.port.js';
 import { CaptureScope } from '../tokens/match.js';
 
 /** A table as a whole-table comparison reads it: every column, in the table's order, and every row. */
@@ -8,6 +7,17 @@ export type TableContent = { columns: string[]; rows: unknown[][] };
 function comparableCell(cell: unknown): unknown {
     return cell instanceof Date ? cell.toISOString() : cell;
 }
+
+/**
+ * The query side of a database, as a table accessor reads it — what every
+ * database a chain declares offers.
+ */
+export type TableSource = {
+    /** The table's columns, in the order the table declares them. */
+    columns: (table: string) => Promise<string[]>;
+    /** The table's rows, as arrays of the named columns' values. */
+    query: (table: string, columns: string[]) => Promise<unknown[][]>;
+};
 
 /**
  * Read-only accessor for a database table after a specification run.
@@ -24,11 +34,11 @@ export class TableAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
     /** @internal */
-    private readonly db: DatabasePort;
+    private readonly db: TableSource;
     /** The table name this accessor reads. */
     readonly name: string;
 
-    constructor(name: string, db: DatabasePort, captures?: CaptureScope) {
+    constructor(name: string, db: TableSource, captures?: CaptureScope) {
         this.name = name;
         this.db = db;
         this.captures = captures ?? new CaptureScope();

@@ -2,6 +2,7 @@ import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import { CliResult } from '../../../expectations/command/cli.result.js';
+import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { stripAnsiCodes } from '../../../expectations/text/text.js';
 import { CaptureScope } from '../../../expectations/tokens/match.js';
@@ -13,7 +14,6 @@ import {
 import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import { safeRealpath } from '../../../kernel/files/resolve.js';
 import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
-import { formatStdoutDiff } from '../../../world/services/startup/startup-report.js';
 import { fsFixtures } from '../fixture/fixtures.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';

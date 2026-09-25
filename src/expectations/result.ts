@@ -4,9 +4,9 @@ import { resolve } from 'node:path';
 import type { SpecificationConfig } from '../kernel/chain/config.js';
 import { validateDatabaseOption } from '../kernel/chain/database-option.js';
 import { safeRealpath } from '../kernel/files/resolve.js';
-import type { DatabasePort } from '../world/services/database.port.js';
 import { DirectoryAccessor } from './disk/directory.js';
 import { TableAccessor } from './table/table.js';
+import type { TableSource } from './table/table.js';
 import { TextAccessor } from './text/text.js';
 import { CaptureScope } from './tokens/match.js';
 
@@ -97,7 +97,7 @@ export class BaseResult {
         return new TableAccessor(tableName, db, this.captures);
     }
 
-    private resolveDatabase(databaseKey?: string): DatabasePort | undefined {
+    private resolveDatabase(databaseKey?: string): TableSource | undefined {
         if (databaseKey && this.config.databases) {
             return this.config.databases.get(databaseKey);
         }
