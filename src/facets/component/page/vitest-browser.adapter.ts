@@ -10,8 +10,7 @@ import {
 } from '../../../elements/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
 import type { MountedSurface } from '../render/page.port.js';
-import type { ComponentVisitor } from '../render/scenario.js';
-import type { ComponentUi, DomMount } from '../render/scenario.js';
+import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
 /**
  * The browser-mode adapter — the component facet's half of the one element

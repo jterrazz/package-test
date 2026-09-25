@@ -109,6 +109,6 @@ type PageCommands = {
  * declaration that SHADOWS the module it meant to extend.
  */
 declare module 'vitest/browser' {
-    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-interface, typescript/no-empty-object-type -- `BrowserCommands` is vitest's own interface: only an interface merges into it, and it extends the computed list rather than restating it
+    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-object-type -- `BrowserCommands` is vitest's own interface: only an interface merges into it, and it extends the computed list rather than restating it
     interface BrowserCommands extends PageCommands {}
 }
