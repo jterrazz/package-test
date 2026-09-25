@@ -1,1 +1,1 @@
-export { open } from './facets/cli/cli.handle.js';
+export { open } from './facets/cli/index.js';

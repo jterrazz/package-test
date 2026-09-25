@@ -15,16 +15,35 @@ import type { AstNode } from './rule-shape.js';
  */
 
 /**
- * The modules reached inside a facet from outside it, each for its reason: the
- * one vite plugin a facet owns (the cli's literate door, which the preset
- * wires), and the two modules the checker reads with the runner (the route
- * ratchet's key, the `.spec.yaml` grammar).
+ * The modules reached inside a facet from outside it, each by the one tree
+ * that reaches it for its reason: the one vite plugin a facet owns (the cli's
+ * literate door, which the preset wires), and the two modules the checker
+ * reads with the runner (the route ratchet's key, the `.spec.yaml` grammar).
  */
-const REACHED_INSIDE_A_FACET = new Set([
-    'src/facets/api/routes/baseline.ts',
-    'src/facets/cli/documents/literate-plugin.ts',
-    'src/facets/cli/documents/spec-document.ts',
-]);
+const REACHED_INSIDE_A_FACET: Readonly<Record<string, string>> = {
+    'src/facets/api/routes/baseline.ts': 'lint/',
+    'src/facets/cli/documents/literate-plugin.ts': 'src/vitest/',
+    'src/facets/cli/documents/spec-document.ts': 'lint/',
+};
+
+/**
+ * May `from`, outside the facet `facet`, import the facet's root file `name`?
+ * The face (`index.ts`, `index.browser.ts`) serves anyone; each other root
+ * file has the one reader it exists for: the project the runner's config
+ * assembles, the handle the constructors record gathers, the composition the
+ * self checker proves.
+ */
+function entersByTheFace(from: string, facet: string, name: string): boolean {
+    if (name === 'index.ts' || name === 'index.browser.ts') {
+        return true;
+    }
+    const readers: Record<string, (path: string) => boolean> = {
+        [`${facet}.facet.ts`]: (path) => path === 'lint/self/compositions.ts',
+        [`${facet}.handle.ts`]: (path) => path === 'src/facets/specification.ts',
+        [`${facet}.project.ts`]: (path) => path.startsWith('src/vitest/'),
+    };
+    return readers[name]?.(from) ?? false;
+}
 
 /**
  * The one slice each third-party engine is imported from, by the specifier's
@@ -109,8 +128,8 @@ function productionReferences(root: string): { from: string; reference: Referenc
 /**
  * I10 — every import of a production module that crosses into a facet it is
  * not in, at the import: a facet importing another, or anything outside a
- * facet reaching below the facet's root files, but for the modules reached
- * for their reason.
+ * facet entering it other than by its face — a root file its one reader
+ * aside, a concept folder the one tree that reaches it for its reason aside.
  */
 export function checkFacetIsolation(root: string): TokenViolation[] {
     return productionReferences(root)
@@ -135,20 +154,32 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
                     ),
                 ];
             }
-            const rootFile = target.split('/').length === 4;
-            return rootFile || REACHED_INSIDE_A_FACET.has(target)
-                ? []
-                : [
-                      finding(
-                          'i10-facet-isolation',
-                          from,
-                          {
+            const segments = target.split('/');
+            const name = segments.at(-1);
+            const rootFile = segments.length === 4;
+            if (rootFile && name !== undefined && entersByTheFace(from, into, name)) {
+                return [];
+            }
+            const reader = REACHED_INSIDE_A_FACET[target];
+            if (!rootFile && reader !== undefined && from.startsWith(reader)) {
+                return [];
+            }
+            return [
+                finding(
+                    'i10-facet-isolation',
+                    from,
+                    rootFile
+                        ? {
+                              fix: `import it from the facet's face — export it from \`src/facets/${into}/index.ts\``,
+                              found: `\`${target}\` is reached from outside the facet \`${into}\` by a module its face does not serve`,
+                          }
+                        : {
                               fix: `import it from the facet's face — export it from \`src/facets/${into}/index.ts\` — or move it below the facets`,
                               found: `\`${target}\` is reached inside the facet \`${into}\`, below its root files`,
                           },
-                          reference,
-                      ),
-                  ];
+                    reference,
+                ),
+            ];
         })
         .toSorted(byPosition);
 }

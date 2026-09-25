@@ -1,4 +1,4 @@
-description: a facet reaching its own concept folder, entered from outside by its handle, passes
+description: a facet reaching its own concept folder, entered from outside by its face, passes
 fixture: ./fixtures/isolated/
 runs:
     - command: self-checker .

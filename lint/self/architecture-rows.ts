@@ -81,7 +81,7 @@ export const ARCHITECTURE_PASSES: CatalogEntry[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module — an entry, `facets/specification.ts`, `vitest/`, `lint/` — reaches only the facet\u2019s root files (its face, handle, composition and project), never a concept folder, but for the modules reached for their reason: the cli\u2019s literate plugin, which the preset wires, and the route ledgers and the `.spec.yaml` grammar the checker reads with the runner. An error at the import.',
+            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module enters it by its face (`index.ts`, `index.browser.ts`); each other root file has its one reader — the project `vitest/`, the handle `facets/specification.ts`, the composition `lint/self/compositions.ts` — and a concept folder is never reached, but for the modules reached by one tree for their reason: the cli\u2019s literate plugin, which `vitest/` wires, and the route ratchet and the `.spec.yaml` grammar `lint/` reads with the runner. An error at the import.',
         facet: 'model',
         family: 'I',
         fix: 'Move what two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and export what the entries publish from the facet\u2019s `index.ts`.',
