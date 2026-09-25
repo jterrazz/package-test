@@ -139,6 +139,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/mobile/screen/screen.result.ts',
             'src/expectations/table/table.ts',
             'src/expectations/text/text.ts',
+            'src/expectations/text/text-subject.browser.ts',
         ),
         name: 'a result accessor',
         why: 'an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base',

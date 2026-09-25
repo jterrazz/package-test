@@ -5,16 +5,14 @@
  * The split is the RUNTIME's, never the facets': a page has no `pg`, no
  * `better-sqlite3`, no `node:fs`, so the node entry's module graph cannot load
  * in one. This entry publishes the node entry's types whole, re-exports every
- * value a page can run from its owner, and answers for every node-only name
+ * value a page can run from its owner — logic of its own it has none — and answers for every node-only name
  * with a stub that throws where it was called ({@link refuse}). The published
  * `types` entry is the node build's, so the two runtimes are ONE type surface
  * and a name can never exist on one side only — `package-exports.test.ts`
  * compares the two builds' names on every run.
  */
 
-import { TextAccessor } from './expectations/text/text.js';
-import { componentFacet, registerBrowserMatchers } from './facets/component/index.browser.js';
-import type { ComponentChain } from './facets/component/index.js';
+import { registerBrowserMatchers } from './facets/component/index.browser.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';
@@ -34,12 +32,7 @@ export type * from './index.js';
 registerBrowserMatchers();
 
 // ── The component facet — real here, and only here ──
-/**
- * The component chain, opened once for the page. It carries no
- * configuration: what every render shares is the project's (`component()` in
- * `vitest.config.ts`), read by the engines where the page provides it.
- */
-export const component: ComponentChain = componentFacet.open({});
+export { component } from './facets/component/index.browser.js';
 
 // The module-scope network double, on msw's WORKER — the page's one engine.
 export { intercept } from './world/stubs/intercept/page-intercept.js';
@@ -65,15 +58,8 @@ export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 
-/**
- * `text()` is real here: only its anchor differs. Under node the accessor
- * remembers the caller's directory so a golden resolves against it; in a page
- * the golden commands read the test's own path server-side, so there is
- * nothing for the accessor to carry.
- */
-export function text(value: string): TextAccessor {
-    return new TextAccessor(value, 'text', '');
-}
+// `text()` is real here: only its anchor differs from the node twin's.
+export { text } from './expectations/text/text-subject.browser.js';
 
 // ── Every other value, real in a page: the same owners the node entry names ──
 export { directory, file } from './kernel/files/spec-path.js';
