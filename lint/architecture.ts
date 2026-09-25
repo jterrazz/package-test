@@ -29,15 +29,14 @@ export function modulesOf(root: string, tree: string, suffix: string): string[] 
     );
 }
 
-/** Is the declaration a type only — erased, so it loads nothing? */
+/**
+ * Is the declaration a type only — erased, so it loads nothing? Only an
+ * `import type`/`export type` is: under `verbatimModuleSyntax` a declaration
+ * whose every specifier is inline-typed compiles to `import {} from '…'`,
+ * which still loads its module.
+ */
 function typeOnly(declaration: AstNode): boolean {
-    const specifiers = childList(declaration, 'specifiers');
-    return (
-        declaration.importKind === 'type' ||
-        declaration.exportKind === 'type' ||
-        (specifiers.length > 0 &&
-            specifiers.every((one) => one.importKind === 'type' || one.exportKind === 'type'))
-    );
+    return declaration.importKind === 'type' || declaration.exportKind === 'type';
 }
 
 /** The specifiers a module loads: its value imports and the modules it re-exports from. */

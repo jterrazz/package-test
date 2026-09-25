@@ -30,7 +30,7 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'The chain kernel and every setup load in a page: no module the facet definer (`src/facets/define-facet.ts`) or a module of a capability folder (`src/capabilities/<name>/`) reaches — through its value imports and re-exports, at any depth — imports a node builtin. A type import is erased and loads nothing.',
+            'The chain kernel and every setup load in a page: no module the facet definer (`src/facets/define-facet.ts`) or a module of a capability folder (`src/capabilities/<name>/`) reaches — through its value imports and re-exports, at any depth — imports a node builtin. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.',
         facet: 'model',
         family: 'I',
         fix: 'Put what needs the builtin behind the port of the engine that owns it — an adapter under `src/seams/`, handed in by the facet — or import only its type.',

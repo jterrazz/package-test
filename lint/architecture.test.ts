@@ -71,8 +71,8 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         expect(builtinsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('a builtin is reached through a value import at any depth, never through a type', () => {
-        // Given - a module importing a type from a builtin, and a value from a sibling that loads one
+    test('a builtin is reached through a value import at any depth, never through an `import type`', () => {
+        // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads one
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));
         writeFileSync(
@@ -84,10 +84,11 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
             "import { cwd } from 'node:process';\nexport { join } from 'path';\nexport const here = cwd;\n",
         );
 
-        // Then - the sibling's two builtins, and none of the erased ones
+        // Then - the sibling's two builtins, and the inline-typed import, which still loads its module
         expect(builtinsReached(root, ['src/start.ts'])).toStrictEqual([
             'src/next.ts imports node:process',
             'src/next.ts imports path',
+            'src/start.ts imports node:fs',
         ]);
     });
 
