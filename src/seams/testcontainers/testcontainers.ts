@@ -1,3 +1,5 @@
+import { hostname } from 'node:os';
+
 import type { ContainerPort, ContainerRequest } from '../../model/ports/container.port.js';
 import { loadPeer } from '../peer.js';
 
@@ -6,6 +8,18 @@ export const CONTAINER_LABEL = 'com.jterrazz.test';
 
 /** The label a reused container carries besides: it outlives the run by design. */
 export const REUSED_LABEL = 'com.jterrazz.test.reuse';
+
+/**
+ * The label naming the process that started a container, `<host>:<pid>`: a
+ * sweep removes the container once that process is dead, whatever reaper
+ * session still holds it.
+ */
+export const OWNER_LABEL = 'com.jterrazz.test.owner';
+
+/** This process, as an owner label names it. */
+export function processOwner(): string {
+    return `${hostname()}:${process.pid}`;
+}
 
 /**
  * Whether a container is reused across runs: asked for with
@@ -17,11 +31,15 @@ export function reuseEnabled(env: NodeJS.ProcessEnv): boolean {
     return env.TESTCONTAINERS_REUSE_ENABLE === 'true' && !onCi;
 }
 
-/** The labels a container is started with. */
-export function containerLabels(reuse: boolean): Record<string, string> {
+/**
+ * The labels a container is started with. A reused one names no owner: it
+ * outlives its process by design, and its definition hash must not change
+ * with the process that asks for it.
+ */
+export function containerLabels(reuse: boolean, owner: string): Record<string, string> {
     return reuse
         ? { [CONTAINER_LABEL]: 'true', [REUSED_LABEL]: 'true' }
-        : { [CONTAINER_LABEL]: 'true' };
+        : { [CONTAINER_LABEL]: 'true', [OWNER_LABEL]: owner };
 }
 
 /**
@@ -55,7 +73,7 @@ export class TestcontainersAdapter implements ContainerPort {
 
         let builder = new GenericContainer(this.image)
             .withExposedPorts(this.containerPort)
-            .withLabels(containerLabels(this.reuse));
+            .withLabels(containerLabels(this.reuse, processOwner()));
 
         for (const [key, value] of Object.entries(this.env)) {
             builder = builder.withEnvironment({ [key]: value });

@@ -149,7 +149,31 @@ The setup reaches Docker in the background and pulls each pinned default image t
 
 Every container the package starts carries the label `com.jterrazz.test=true`, and a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it.
 
-The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper (Ryuk), which removes a session's containers once its last client is gone — a run killed mid-way is reaped within its window. The reaper removes nothing once it is gone itself, and it runs with auto-remove: a runtime that stops every container, or a `docker stop` of them all, takes the reaper away and leaves the session's containers stopped behind it. So every services setup sweeps first: a container that carries a testcontainers session, has ended, and whose session no running reaper holds is removed as the project starts, beside the image pulls — whichever package or version started it.
+The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper (Ryuk), and every run on a machine shares one reaper session while any of them holds it: the session's containers are removed only once its LAST client is gone. A run killed mid-way is therefore reaped only when every run sharing the reaper has ended — and with runs in parallel, that can be hours.
+
+The owner sweep covers the time in between. Every container the package starts that is not reused carries `com.jterrazz.test.owner=<host>:<pid>`, the process that started it; every services setup sweeps first, beside the image pulls, and removes a container whose owner names this host and a pid no process answers — running or not, whatever reaper still holds its session.
+
+The same sweep covers a reaper that is gone. It runs with auto-remove, so a runtime that stops every container, or a `docker stop` of them all, takes it away and leaves the session's containers stopped behind it. A container that carries a testcontainers session, has ended, and whose session no running reaper holds is removed too — whichever package or version started it.
+
+The probe, from a built tree: a run that holds the reaper, a run killed with its redis running, and an ended container of a session nobody holds — the next setup's sweep leaves none of them.
+
+```bash
+image=redis:7-alpine
+node --input-type=module -e "const { GenericContainer } = await import('testcontainers'); await new GenericContainer('$image').start(); setInterval(() => {}, 1000)" &
+holder=$!
+sleep 10   # until the holder's container runs
+node --input-type=module -e "
+const { default: setup } = await import('./dist/services-setup.js');
+let url; await setup({ provide: (_, served) => { url = served; } }, async () => {});
+await fetch(url + '/containers', { method: 'POST', body: JSON.stringify({ image: '$image', port: 6379 }) });
+process.kill(process.pid, 'SIGKILL');"
+docker run -d --label org.testcontainers.session-id=probe-gone "$image" true
+docker ps -a --filter label=com.jterrazz.test.owner   # the killed run's redis, running
+node --input-type=module -e "await (await import('./dist/services-setup.js')).prepareDocker()"
+docker ps -a --filter label=com.jterrazz.test.owner   # empty
+docker ps -a --filter label=org.testcontainers.session-id=probe-gone   # empty
+kill $holder
+```
 
 The label lists every container the package started, and the reused ones, which carry no session and no sweep touches, are removed by hand:
 

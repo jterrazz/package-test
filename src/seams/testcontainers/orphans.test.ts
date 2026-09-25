@@ -1,17 +1,19 @@
 import { describe, expect, test } from 'vitest';
 
-import { orphans, sweepOrphans } from './orphans.js';
+import { orphans, ownerAlive, sweepOrphans } from './orphans.js';
 import type { ListedContainer } from './orphans.js';
 
 /** A listed container: its id, its state, and the session and reaper labels it carries. */
 function listed(
     id: string,
     state: string,
-    labels: { reaper?: boolean; session?: string } = {},
+    labels: { owner?: string; reaper?: boolean; reused?: boolean; session?: string } = {},
 ): ListedContainer {
     return {
         Id: id,
         Labels: {
+            ...(labels.owner === undefined ? {} : { 'com.jterrazz.test.owner': labels.owner }),
+            ...(labels.reused === true ? { 'com.jterrazz.test.reuse': 'true' } : {}),
             ...(labels.session === undefined
                 ? {}
                 : { 'org.testcontainers.session-id': labels.session }),
@@ -38,7 +40,59 @@ describe('orphans — what a dead reaper session left behind', () => {
         ];
 
         // Then - only the dead session's ended containers: never a live session's, a running or starting one, a reaper, or one of no session
-        expect(orphans(containers)).toStrictEqual(['dead-exited', 'dead-dead']);
+        expect(orphans(containers, () => true)).toStrictEqual(['dead-exited', 'dead-dead']);
+    });
+
+    test('names every container whose owner is dead, whatever its state and session, and nothing else', () => {
+        // Given - one live session shared by two owners, one of them dead, and a reused container naming the dead one
+        const containers = [
+            listed('shared-reaper', 'running', { reaper: true, session: 'shared' }),
+            listed('alive-running', 'running', { owner: 'host:1', session: 'shared' }),
+            listed('killed-running', 'running', { owner: 'host:2', session: 'shared' }),
+            listed('killed-created', 'created', { owner: 'host:2', session: 'shared' }),
+            listed('killed-reused', 'running', { owner: 'host:2', reused: true }),
+            listed('unowned-running', 'running', { session: 'shared' }),
+        ];
+
+        // Then - the dead owner's containers go, the live one's, the reused one and the unowned one stay
+        expect(orphans(containers, (owner) => owner !== 'host:2')).toStrictEqual([
+            'killed-running',
+            'killed-created',
+        ]);
+    });
+});
+
+/** A probe answering the pids it is handed as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
+function probe(pid: number): void {
+    if (pid === 7) {
+        throw Object.assign(new Error('no such process'), { code: 'ESRCH' });
+    }
+    if (pid === 8) {
+        throw Object.assign(new Error('not permitted'), { code: 'EPERM' });
+    }
+}
+
+describe('ownerAlive — whether the process a container names still runs', () => {
+    test('is dead only for a pid of this host no process answers', () => {
+        // Given - owners of this host and of another, and labels that name no pid
+        const answered = {
+            gone: ownerAlive('here:7', 'here', probe),
+            malformed: ownerAlive('here', 'here', probe),
+            notANumber: ownerAlive('here:x', 'here', probe),
+            otherHost: ownerAlive('there:7', 'here', probe),
+            running: ownerAlive('here:6', 'here', probe),
+            someoneElses: ownerAlive('here:8', 'here', probe),
+        };
+
+        // Then - only the gone pid is dead; a process another user owns still runs
+        expect(answered).toStrictEqual({
+            gone: false,
+            malformed: true,
+            notANumber: true,
+            otherHost: true,
+            running: true,
+            someoneElses: true,
+        });
     });
 
     test('removes every orphan with its volumes, and answers the ones it removed', async () => {
@@ -60,19 +114,22 @@ describe('orphans — what a dead reaper session left behind', () => {
                 asked.push(options);
                 await Promise.resolve();
                 return [
-                    listed('orphan', 'exited', { session: 'gone' }),
+                    listed('orphan', 'exited', { owner: 'host:2', session: 'gone' }),
                     listed('stuck', 'exited', { session: 'gone' }),
                 ];
             },
         };
 
         // When - the sweep runs
-        const answered = await sweepOrphans(runtime);
+        const answered = await sweepOrphans(runtime, () => true);
 
-        // Then - it listed every session container, removed the orphan, and skipped the refusal
+        // Then - it listed every session container and every owned one, removed the orphan once, and skipped the refusal
         expect({ answered, asked, removed }).toStrictEqual({
             answered: ['orphan'],
-            asked: [{ all: true, filters: { label: ['org.testcontainers.session-id'] } }],
+            asked: [
+                { all: true, filters: { label: ['org.testcontainers.session-id'] } },
+                { all: true, filters: { label: ['com.jterrazz.test.owner'] } },
+            ],
             removed: ['orphan'],
         });
     });

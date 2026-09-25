@@ -1,6 +1,12 @@
+import { hostname } from 'node:os';
 import { describe, expect, test } from 'vitest';
 
-import { containerLabels, reuseEnabled, TestcontainersAdapter } from './testcontainers.js';
+import {
+    containerLabels,
+    processOwner,
+    reuseEnabled,
+    TestcontainersAdapter,
+} from './testcontainers.js';
 
 /*
  * The adapter IS the subject here, and it is not on the public entry — which
@@ -41,12 +47,23 @@ describe('container reuse', () => {
         });
     });
 
-    test('labels every container, and a reused one as outliving the run', () => {
-        // Given - the labels of a container of the run, and of a reused one
-        // Then - both carry the package's label, and only the reused one says so
-        expect({ reused: containerLabels(true), run: containerLabels(false) }).toStrictEqual({
+    test('labels every container, a reused one as outliving the run, and any other with its owner', () => {
+        // Given - the labels of a container of the run, and of a reused one, asked by one owner
+        const labels = {
+            reused: containerLabels(true, 'host:42'),
+            run: containerLabels(false, 'host:42'),
+        };
+
+        // Then - both carry the package's label; only the reused one says it outlives the run, and only the other names its owner
+        expect(labels).toStrictEqual({
             reused: { 'com.jterrazz.test': 'true', 'com.jterrazz.test.reuse': 'true' },
-            run: { 'com.jterrazz.test': 'true' },
+            run: { 'com.jterrazz.test': 'true', 'com.jterrazz.test.owner': 'host:42' },
         });
+    });
+
+    test('names this process as the owner, host and pid', () => {
+        // Given - the process this test runs in
+        // Then - the owner is where a sweep can ask whether it still runs
+        expect(processOwner()).toBe(`${hostname()}:${process.pid}`);
     });
 });
