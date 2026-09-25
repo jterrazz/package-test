@@ -87,7 +87,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 107   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 157   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 159   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
 | Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 53    |
 
@@ -281,7 +281,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.visit()`   | —   | —    | —   | —           | 21      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 7      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 26        | —      |
+| `.render()`  | —   | —    | —   | —           | —       | —      | 28        | —      |
 
 ### Route option
 
@@ -293,14 +293,14 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 6      | 24        | —      |
-| `fill`     | —   | —    | —   | —           | 4       | 1      | 2         | —      |
+| `see`      | —   | —    | —   | —           | 11      | 6      | 26        | —      |
+| `fill`     | —   | —    | —   | —           | 4       | 1      | 3         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
-| `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
+| `gone`     | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `press`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
 | `hover`    | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `check`    | —   | —    | —   | —           | 1       | —      | 2         | —      |
-| `select`   | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `select`   | —   | —    | —   | —           | 1       | —      | 3         | —      |
 | `goto`     | —   | —    | —   | —           | 1       | —      | —         | —      |
 | `tap`      | —   | —    | —   | —           | —       | 3      | —         | —      |
 | `rerender` | —   | —    | —   | —           | —       | —      | 1         | —      |
@@ -311,7 +311,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability      | api | jobs | cli | integration | website | mobile | component | module |
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `button`        | —   | —    | —   | —           | 4       | 3      | 8         | —      |
-| `field`         | —   | —    | —   | —           | 6       | 1      | 5         | —      |
+| `field`         | —   | —    | —   | —           | 6       | 1      | 7         | —      |
 | `content`       | —   | —    | —   | —           | 7       | 6      | 16        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 1      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 3         | —      |
@@ -333,7 +333,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `within`        | —   | —    | —   | —           | 4       | 1      | 6         | —      |
 | `focused`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `selected`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
-| `valued`        | —   | —    | —   | —           | 1       | —      | 2         | —      |
+| `valued`        | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `disabled`      | —   | —    | —   | —           | 1       | —      | 1         | —      |
 | `enabled`       | —   | —    | —   | —           | 1       | —      | 1         | —      |
 
@@ -355,7 +355,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.containerIds` | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `.value`        | —   | —    | —   | 8           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —    | —   | —           | 5       | —      | 5         | —      |
+| `.tree`         | —   | —    | —   | —           | 5       | —      | 6         | —      |
 | `.content`      | —   | —    | —   | —           | 10      | 5      | 17        | —      |
 | `.console`      | —   | —    | —   | —           | 4       | —      | 4         | —      |
 | `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |

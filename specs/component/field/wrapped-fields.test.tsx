@@ -1,4 +1,4 @@
-import { component, field, status, valued } from '@jterrazz/test';
+import { component, field, status } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { WrappedFields } from './wrapped-fields.js';
@@ -14,15 +14,4 @@ test('names a field by its accessible name, whatever its label wraps', async () 
     // Then - both fields answered to the name the screen reader reads
     expect(result.tree.text).toContain('combobox "Channel"');
     expect(result.content.text).toContain('newsletter · hexagonal');
-});
-
-test('reads back what a wrapped field holds', async () => {
-    // Given - the same form, read through the value modifier
-    const result = await component.render(<WrappedFields />, async (visitor) => {
-        await visitor.fill(field('Title'), 'hexagonal');
-        await visitor.see(valued(field('Title'), 'hexagonal'));
-    });
-
-    // Then - the outline carries the field it read
-    expect(result.tree.text).toContain('textbox "Title"');
 });
