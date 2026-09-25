@@ -23,11 +23,14 @@ import { cell, table } from './catalog.js';
 export type MetaTest = { file: string; holds: string[]; tests: number };
 
 /**
- * Where the channel lives. `lint/*.test.ts` is the meta LAYER (the layered
- * reading counts it); `specs/lint/meta/` is the part that has to run the real
- * binary, so it sits with the end-to-end suite instead.
+ * Where the channel lives. `lint/*.test.ts` and `lint/self/*.test.ts` are the
+ * meta LAYER (the layered reading counts them); `specs/lint/meta/` is the part
+ * that has to run the real binary, so it sits with the end-to-end suite instead.
  */
-const ROOTS = ['lint', 'specs/lint/meta'];
+export const META_LAYER_ROOTS = ['lint', 'lint/self'];
+
+/** Every tree the channel reads. */
+const ROOTS = [...META_LAYER_ROOTS, 'specs/lint/meta'];
 
 /** `*.test.ts` files directly inside `dir`, sorted, as repo-relative paths. */
 function testFilesIn(root: string, relative: string): string[] {
@@ -80,7 +83,7 @@ export function renderMetaTests(root: string): string {
     ]);
     const total = rows.length;
     return [
-        `**${total} files** are the channel — every \`*.test.ts\` directly under \`lint/\`, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
+        `**${total} files** are the channel — every \`*.test.ts\` directly under \`lint/\` or \`lint/self/\`, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
         '',
         ...table(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');

@@ -6,6 +6,7 @@ import { cell, table } from './catalog.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
+import { META_LAYER_ROOTS } from './meta-tests.js';
 import type { AstNode } from './rule-shape.js';
 import { composedRows, COMPOSITIONS, isComposed } from './self/compositions.js';
 
@@ -491,7 +492,10 @@ function filesDirectlyIn(dir: string, extensions: string[]): number {
 export function layers(root: string): Layer[] {
     const allModuleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
     const ruleTests = countUnder(root, ['lint/rules'], ['.test.ts']);
-    const metaTests = filesDirectlyIn(resolve(root, 'lint'), ['.test.ts']);
+    const metaTests = META_LAYER_ROOTS.reduce(
+        (total, tree) => total + filesDirectlyIn(resolve(root, tree), ['.test.ts']),
+        0,
+    );
     // A `*.specification.ts` builds a runner; it is not itself a spec, and
     // Counting it here would credit the layer with files that assert nothing.
     const facetSpecs = COLUMNS.filter((column) => column !== 'module').reduce(
@@ -536,7 +540,7 @@ export function layers(root: string): Layer[] {
             count: metaTests,
             judges: 'the corpus itself: the catalogue, the matrix, the skill, the floor',
             layer: 'Meta-tests',
-            where: '`lint/*.test.ts`',
+            where: '`lint/*.test.ts`, `lint/self/*.test.ts`',
         },
     ];
 }

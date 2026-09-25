@@ -15,6 +15,7 @@ import {
     spliceLayers,
     spliceMatrix,
 } from './matrix.js';
+import { metaTests } from './meta-tests.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
@@ -145,6 +146,15 @@ describe('capability matrix (meta-test K6)', () => {
         for (const layer of found) {
             expect(layer.count, `${layer.layer} is empty`).toBeGreaterThan(0);
         }
+    });
+
+    test('the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
+        // Given - the layer, and the channel's own rows outside the end-to-end suite
+        const layer = layers(ROOT).find((one) => one.layer === 'Meta-tests');
+        const listed = metaTests(ROOT).filter((row) => !row.file.startsWith('specs/'));
+
+        // Then - one count for one set of files, `lint/self/` included
+        expect(layer?.count).toBe(listed.length);
     });
 });
 

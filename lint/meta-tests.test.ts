@@ -15,8 +15,9 @@ describe('the meta-test channel, read off its own files', () => {
         // Given - the channel as it stands on disk
         const rows = metaTests(ROOT);
 
-        // Then - the two trees the channel lives in are both represented, and no row is a file with no describe and no test
+        // Then - the three trees the channel lives in are all represented, and no row is a file with no describe and no test
         expect(rows.length).toBeGreaterThan(15);
+        expect(rows.some((row) => row.file.startsWith('lint/self/'))).toBe(true);
         expect(rows.some((row) => row.file.startsWith('specs/lint/meta/'))).toBe(true);
         for (const row of rows) {
             expect(row.holds.length, `${row.file} declares no describe`).toBeGreaterThan(0);
