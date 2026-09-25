@@ -39,13 +39,18 @@ const config: OxlintConfig = defineConfig(
                     'src/facets/*/*.project.ts',
                     'src/facets/api/routes/**',
                     'src/facets/cli/documents/literate-plugin.ts',
-                    'src/facets/mobile/session/**',
-                    'src/facets/mobile/server/**',
+                    // The run's driver session, its ledger and its Appium server
+                    // Are read by the runner (global setup, provided values).
+                    'src/facets/mobile/session/mobile-session.ts',
+                    'src/facets/mobile/session/session-ledger.ts',
+                    'src/facets/mobile/server/appium-server.ts',
                     // The page a component renders into, and the goldens it
                     // Serves through the runner's commands.
                     'src/facets/component/page/**',
                     'src/facets/component/golden/**',
-                    'src/facets/website/browser/**',
+                    // The browser the website facet drives: `playwright` is a
+                    // Test package to F2, and this adapter is its one importer.
+                    'src/facets/website/browser/playwright.adapter.ts',
                     // The network double's engine, time, and the doubles.
                     'src/world/stubs/interceptor/**',
                     'src/world/clock/**',
