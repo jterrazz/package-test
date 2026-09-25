@@ -3405,3 +3405,61 @@ tests). HEAD is `aeb6d83`. The worktree `ptc-audience` and the branch
       :204, lint/_contract.js:23 and :53 and lint/catalog.js:23 link to
       docs/03-testing.md, which `files` excludes. **Owner call:** ship
       docs/03, or repoint those links to the repository URL.
+
+## Audience batch, integrated (2026-09-25): test
+
+Two units landed on package-test's `vision/17`, cut from `ad6add85`: the
+redis-index unit's 6 commits, then the audience unit's 17, each
+cherry-picked in order, with no fixup to fold and no merge commit. Every
+line either branch added is present in the result. The toolchain was
+reinstalled from package-typescript `aeb6d83` (`npm ci`). `npm run docs`
+exit 0 and `make fix` exit 0 left no generated file to regenerate;
+`make check` exit 0 (571 files, 2630 tests). HEAD before this entry is
+`a4fca462`. The worktrees `pt-redis-index` and `pt-audience` and the
+branches `vision17-test-redis-index` and `vision17-test-audience` are
+removed.
+
+- **One redis container per project, an index per (worker, service)
+  pair** (branch HEAD `86f3e9e5`). Integrated after its re-review, which
+  left no major finding. Six minor findings stay open:
+    - docs/17-services.md:142 is false: without a project server,
+      `cli()`, `website()`, `mobile()` and hand-written projects start a
+      container per handle (orchestrator.ts, service-container.ts), so
+      `cache: redis()` and `queue: redis()` there are two containers,
+      against :140's sharing sentence. Either key the orchestrator's
+      container requests by their canonical request, with a module test
+      of one `createContainer` call, or scope :140 to the project setup
+      and reword :142.
+    - docs/17-services.md:154 overstates the owner sweep: it runs only
+      when the next services setup on the machine starts. State the bound
+      (the next setup or the reaper's last client, whichever comes first),
+      or also sweep in the setup's teardown.
+    - Commit `cd07024c`'s "release gives it back even when the flush
+      fails" and "a handle that acquires again gives its pair back first"
+      are untested: three mutants survive (no `freeSlot` in `letGo`; no
+      leading `letGo()` in `acquire`; `release` without `try/finally`).
+      Add the two module tests the review names in
+      src/seams/redis/redis.test.ts.
+    - Stale wording: specs/integration/services/redis.spec.ts:39-40
+      ("isolation is per WORKER") and docs/17-services.md:195 ("the
+      worker's") now describe a (worker, service) pair's index.
+    - The owner label keys on `os.hostname()`, which on macOS follows
+      DHCP; a container labelled under an earlier network's name is never
+      swept. It fails safe. State the limit beside the two others in
+      docs/17-services.md, or label with a stable machine identity.
+    - Commit `3523a998`'s reason for not sharing containers across
+      projects ("pool-id uniqueness across projects is not established")
+      is weak: vitest 5.0.1 draws every pool id from one Pool's
+      concurrency id. The decision stands; cite that when the follow-up to
+      share across projects opens.
+- **The tarball exposes no self rule** (branch HEAD `6cfc2260`).
+  Integrated after its review; every attack on the self/consumer split
+  turned the proofs red. Two minor findings stay open:
+    - docs/01-architecture.md:87 says `docs/` ships in the tarball whole;
+      `files` excludes docs/03-testing.md and docs/decisions/
+      (docs/04-operating.md:19-21). Add the clause, keeping 04 as the
+      owner.
+    - Beyond the whole-tarball grep, the loaded-entry walk neither calls
+      exported functions nor enters Map/Set entries, and the bin test runs
+      bins only over the SELF_CHECKER_PASSES fixtures. Defense in depth,
+      not a leak; optionally run each bin over the F7 fixtures too.
