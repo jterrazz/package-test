@@ -1,16 +1,4 @@
-/**
- * The page's composition root — what `@jterrazz/test` resolves to under the
- * `browser` condition of its `exports` map.
- *
- * The split is the RUNTIME's, never the facets': a page has no `pg`, no
- * `better-sqlite3`, no `node:fs`, so the node entry's module graph cannot load
- * in one. This entry publishes the node entry's types whole, re-exports every
- * value a page can run from its owner — logic of its own it has none — and answers for every node-only name
- * with a stub that throws where it was called ({@link refuse}). The published
- * `types` entry is the node build's, so the two runtimes are ONE type surface
- * and a name can never exist on one side only — `package-exports.test.ts`
- * compares the two builds' names on every run.
- */
+/** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
 
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
@@ -22,21 +10,14 @@ import type {
 import type { redis as redisFn } from './world/services/redis/redis.adapter.js';
 import type { sqlite as sqliteFn } from './world/services/sqlite/sqlite.adapter.js';
 
-// ── The types, whole: the node entry's, which the one `types` entry publishes ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: its types are the node entry's by design, so the two runtimes cannot publish two type surfaces
 export type * from './index.js';
 
-// ── The component facet — real here, and only here ──
 export { component } from './facets/component/index.browser.js';
 
-// The module-scope network double, on msw's WORKER — the page's one engine.
 export { intercept } from './world/stubs/intercept/page-intercept.js';
 
-/**
- * The six constructors, present and refusing. A component test never reaches
- * one: what it renders is a unit, and the assembled product behind an entry is
- * specified from a node project.
- */
+/** The six constructors, present and refusing in a page. */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),
     cli: () => refuse('specification.cli()'),
@@ -46,17 +27,14 @@ export const specification: Specification = {
     website: () => refuse('specification.website()'),
 };
 
-// Services — each opens a socket or a file the page does not have.
 export const process: typeof processFn = () => refuse('process()');
 export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHandle');
 export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 
-// `text()` is real here: only its anchor differs from the node twin's.
 export { text } from './expectations/text/text-subject.browser.js';
 
-// ── Every other value, real in a page: the same owners the node entry names ──
 export { directory, file } from './kernel/files/spec-path.js';
 export { anthropic } from './world/stubs/anthropic/anthropic.js';
 export { http } from './world/stubs/http/http.js';

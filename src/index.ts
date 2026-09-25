@@ -1,12 +1,4 @@
-/**
- * `@jterrazz/test` as node loads it — the single import point (CONVENTIONS
- * F1). Re-exports only: every name is its owner's, and the page's entry
- * (`index.browser.ts`) publishes the same names, the node-only ones refusing.
- */
-
-// ── The constructors, and the facets they open ──
 export { specification, type SpecificationConfig } from './facets/specification.js';
-// Each facet's face names what it contributes, once.
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
 export type * from './facets/api/index.js';
 export type * from './facets/cli/index.js';
@@ -16,12 +8,9 @@ export type * from './facets/job/index.js';
 export type * from './facets/mobile/index.js';
 export type * from './facets/website/index.js';
 
-// ── What a file shares, and the test section of the config ──
 export type { ChainContext } from './kernel/context/with.capability.js';
 export type { TestSettings } from './kernel/config/settings.js';
 
-// ── The disk: a string is a value, and what a test stands on is named by one
-// of these two — the only argument a verb that reads the disk accepts ──
 export {
     directory,
     type DiskDirectory,
@@ -32,8 +21,6 @@ export {
     type RelativePath,
 } from './kernel/files/spec-path.js';
 
-// ── The world: stubs, services, time, doubles ──
-// The stubs — the ONE way to declare what the outside world replies.
 export { anthropic } from './world/stubs/anthropic/anthropic.js';
 export {
     http,
@@ -59,14 +46,12 @@ export type {
     StubResponse,
     StubResponseValue,
 } from './world/stubs/exchange/exchange.js';
-// The module-scope double: this process's network, on msw's node server.
 export { intercept } from './world/stubs/intercept/process-intercept.js';
 export type {
     Intercept,
     InterceptOptions,
     InterceptScope,
 } from './world/stubs/intercept/module-intercept.js';
-// The services a record declares.
 export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
 export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';
@@ -84,12 +69,9 @@ export type {
     ContainerOptions,
     ContainerPort,
 } from './world/services/containers/container.port.js';
-// Time — the one primitive, real in both runtimes — and the doubles.
 export { clock, type PinnedClock } from './world/clock/clock.js';
 export { mockOf, type MockOfOptions, type MockPort } from './world/mocks/mock-of.js';
 
-// ── The elements: ONE vocabulary for visit (website), render (component) and
-// open (mobile); landmarks are website/component-only and refuse on a mobile verb ──
 export {
     banner,
     button,
@@ -121,16 +103,12 @@ export {
 } from './elements/elements.js';
 export type { ElementKind, ElementMatch, ElementRef, LandmarkKind } from './elements/descriptor.js';
 
-// ── The expectations: tokens, accessors, conditions, goldens ──
 export {
     type CaptureScope,
     match,
     Matcher,
     type MatcherKind,
 } from './expectations/tokens/match.js';
-// Results and accessors are TYPES, not values: a spec never constructs one and
-// never asks an `instanceof` — a result is what a terminal action HANDS BACK,
-// and `text()` is the one that hands an accessor out.
 export type { BaseResult, FileAccessor } from './expectations/result.js';
 export type { CliResult, DockerSpecConfig } from './expectations/command/cli.result.js';
 export type { ContainerAccessor } from './expectations/command/container.js';
@@ -141,11 +119,7 @@ export type { TableAccessor } from './expectations/table/table.js';
 export type { JsonAccessor } from './expectations/text/json.js';
 export type { TextAccessor } from './expectations/text/text.js';
 export { text } from './expectations/text/text-subject.js';
-// A value that must be there, and a condition that has to become true.
 export { required } from './expectations/conditions/required.js';
 export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
-// A linter's report as a golden keeps it — the transform a rule's specs share.
 export { lintReport } from './facets/cli/index.js';
-// Per-call `toMatch(file(…), { frozen })` — and, beside it, the matchers
-// Vitest's `Assertion` gains, carried by the one `types` entry.
 export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';

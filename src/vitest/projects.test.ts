@@ -4,7 +4,6 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import { servicesSetup } from '../world/services/containers/run-setup.js';
 import { api, cli, integration, job, mobile, unit } from './projects.js';
 
-/** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
     project: TestProjectInlineConfiguration,
 ): NonNullable<TestProjectInlineConfiguration['test']> {
@@ -69,8 +68,6 @@ describe('projects', () => {
         expect(
             [api(), job(), integration(), mobile()].map((project) => testOf(project).name),
         ).toStrictEqual(['api', 'job', 'integration', 'mobile']);
-        // The suffix is the fork: a facet collects the ASSEMBLED product, and
-        // the word for that is `.spec.ts`.
         expect(testOf(api()).include).toStrictEqual(['specs/api/**/*.spec.ts']);
         expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
     });
@@ -108,8 +105,6 @@ describe('projects', () => {
 
         // Then - all three are the repository's, the name stays canonical
         expect(stated.include).toStrictEqual(['suites/api/**/*.test.ts']);
-        // The preset's own exclusions are never dropped — vite concatenates,
-        // so a repository ADDS to the ground exclusion rather than having to restate it.
         expect(stated.exclude).toContain('specs/api/slow/**');
         expect(stated.exclude).toContain('**/{expected,fixtures,requests,seeds}/**');
         expect(stated.testTimeout).toBe(90_000);

@@ -11,7 +11,6 @@ import { tempRootSetup } from '../kernel/files/temp-root.js';
 import { defineSpecConfig, reporterOutputFiles } from './preset.js';
 import { unit } from './projects.js';
 
-/** The exclusions of the one project a config declares. */
 function excludeOf(config: ReturnType<typeof defineSpecConfig>): string[] {
     const [project] = config.test?.projects ?? [];
     if (typeof project !== 'object' || project === null || !('test' in project)) {

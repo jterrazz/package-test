@@ -3,24 +3,6 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import type { FacetProjectOptions } from './project-kit.js';
 import { onProjectDefaults } from './project-kit.js';
 
-/**
- * The project helpers — one per kind of test, each the canonical project that
- * kind runs in.
- *
- * A project is not a matter of taste: `--project component` has to mean the
- * same thing in every repository of the ecosystem, and what a browser project
- * needs (a provider pinned to the runner, a service worker, a Vite pipeline,
- * an artefact directory that is not the repository root) is the framework's to
- * know, not the consumer's to rediscover. So the consumer names the kind and
- * states only what is theirs.
- */
-
-/*
- * Every facet's helper is the FACET's, beside its constructor and its chain —
- * one folder per facet. This module is their index: the one import
- * `@jterrazz/test/vitest` re-exports, plus the one project that is not a
- * facet's.
- */
 export { api, type ApiProjectOptions } from '../facets/api/api.project.js';
 export {
     cli,
@@ -41,31 +23,14 @@ export { website, type WebsiteProjectOptions } from '../facets/website/website.p
 export { type FacetProjectOptions } from './project-kit.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
-export type UnitProjectOptions = {
-    /**
-     * `false` runs every file of a worker in ONE module graph instead of a
-     * fresh one per file (`isolate: false`), so a worker imports each module
-     * once. For a pure project only: a test that leaves state in a module — a
-     * registry, a global matcher, a cache — reaches the next file of its
-     * worker. Absent, vitest isolates each file.
-     */
+export type UnitProjectOptions = FacetProjectOptions & {
+    /** `false` shares one module graph per worker (`isolate: false`); for pure projects only. */
     isolate?: boolean;
-    /**
-     * The trees module tests live in, when they do not live in `src/`. Each
-     * root becomes `<root>/**\/*.test.ts`; `include` states the globs outright.
-     */
+    /** Trees module tests live in, when not `src/`. */
     roots?: string[];
-} & FacetProjectOptions;
+};
 
-/**
- * A module test runs beside the module it covers: no DOM, no browser, no
- * pipeline. Its suffix is `.test.ts` and its place is OUTSIDE `specs/`, where
- * the assembled product is specified in `.spec.ts` — the two exclusions say
- * exactly that. `.test.tsx` is the third exclusion because a rendered thing is
- * a component test: a project's dependency scan reads every file its globs
- * match, and a `.tsx` collected here would be optimised for a page that never
- * opens.
- */
+/** `.test.tsx` is excluded: a rendered thing is a component test, and the dependency scan would optimise it for a page that never opens. */
 export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfiguration {
     const fromRoots = options.roots?.map((root) => `${root.replace(/\/+$/u, '')}/**/*.test.ts`);
     return onProjectDefaults({

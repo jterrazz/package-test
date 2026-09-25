@@ -3,15 +3,9 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-/** The repository root, from this module's place inside `src/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/**
- * The node entry as a consumer installs it: `src/index.ts` built, where the
- * manifest's `import` condition points. It is the LAST build that is judged —
- * `make check` builds before it tests; a bare test run after a `src/` edit
- * reads the previous bundle, and a clone never built has none to read.
- */
+/** Reads the last build: a test run after a `src/` edit without `make build` judges the previous bundle. */
 function builtEntry(): string {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: the one condition read here is the one the assertion below loads, and a wrong shape fails it
     const { exports } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
@@ -20,10 +14,6 @@ function builtEntry(): string {
     return resolve(ROOT, exports['.'].import);
 }
 
-/**
- * Loads the module named by its first argument and prints, one per line,
- * every package its graph resolved on the way.
- */
 const PACKAGES_LOADED = `
 import { registerHooks } from 'node:module';
 const urls = new Set();
@@ -46,7 +36,6 @@ for (const url of urls) {
 process.stdout.write([...names].sort().join('\\n'));
 `;
 
-/** Every package loading `entry` reaches, in a node process of its own. */
 function packagesLoadedBy(entry: string): string[] {
     return execFileSync(process.execPath, ['--input-type=module', '-e', PACKAGES_LOADED, entry], {
         encoding: 'utf8',

@@ -2,10 +2,8 @@ import { existsSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-/** The repository root, where `dist/` is built. */
 const ROOT = resolve(import.meta.dirname, '../..');
 
-/** A built project helper: it builds a project a consumer's `vitest.config.ts` lists. */
 type ProjectHelper = () => { test?: { globalSetup?: string | string[] } };
 
 describe('index', () => {

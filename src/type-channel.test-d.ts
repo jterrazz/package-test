@@ -1,4 +1,4 @@
-/* oxlint-disable jterrazz/a1-specification-file, jterrazz/a2-known-constructors, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. The retired `specification.jobs` row is the same thing for A2: the compiler refuses it before the rule would. It imports vitest's `expect` because the D14 rows are about the matcher augmentation. */
+/* oxlint-disable jterrazz/a1-specification-file, jterrazz/a2-known-constructors, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
 import { expect } from 'vitest';
 
 import type { ComponentChain, ComponentVisitor } from './facets/component/index.js';
@@ -6,44 +6,21 @@ import type { MobileVisitor } from './facets/mobile/index.js';
 import type { Visitor } from './facets/website/index.js';
 import { directory, file, mockOf, postgres, specification } from './index.js';
 
-/**
- * The TYPE channel — the conventions the compiler refuses, stated as code.
- *
- * The rows here are held by nothing else: no rule sees them, no pass walks
- * them, and the framework never gets the chance to refuse them at run time,
- * because the call they describe does not compile. Each `@ts-expect-error`
- * below IS the assertion — `typescript check` fails if the line it marks ever
- * starts compiling, which is exactly the day the convention stopped holding.
- *
- * The file is a `*.test-d.ts`: it declares no test, runs in no project, and is
- * judged by the typechecker the whole repository already runs, W6's verb rows
- * included: each visitor and chain is read through its facet's face.
- *
- * W4 (an ARIA landmark handed to a mobile verb) is deliberately NOT here: the
- * two facets share one `ElementRef` on purpose, so the refusal is the runtime
- * row's, and the catalogue says so.
- */
+/** Each `@ts-expect-error` below is the assertion: `typescript check` fails the day the line compiles. */
 
-/** A port with one method — the shape a double is asked for. */
 type Mailer = { send: (to: string) => Promise<void> };
 
-/** Resolves only for `true` — the shape a verb row is stated in. */
 type Assert<Row extends true> = Row;
 
-/** Does this visitor offer the verb? */
 type Carries<Verbs, Verb extends string> = Verb extends keyof Verbs ? true : false;
 
-// W6 — the verb set is the boundary between the facets: a page is navigated,
-// a screen is tapped, and neither vocabulary borrows the other's word. `goto`
-// is the page's alone: a component has no address to navigate to.
+// W6 — the verb set is the boundary between the facets; `goto` is the page's alone.
 export type WebsiteGoes = Assert<Carries<Visitor, 'goto'>>;
 export type MobileNeverGoes = Assert<Carries<MobileVisitor, 'goto'> extends false ? true : false>;
 export type ComponentNeverGoes = Assert<
     Carries<ComponentVisitor, 'goto'> extends false ? true : false
 >;
 
-// `rerender` and `unmount` are what a PARENT does to a component: swap its
-// props, take it off the screen. Neither is anything a visitor does to a page.
 export type ComponentRerenders = Assert<Carries<ComponentVisitor, 'rerender'>>;
 export type ComponentUnmounts = Assert<Carries<ComponentVisitor, 'unmount'>>;
 export type WebsiteNeverRerenders = Assert<
@@ -54,27 +31,18 @@ export type MobileNeverRerenders = Assert<
     Carries<MobileVisitor, 'rerender'> extends false ? true : false
 >;
 
-// `gone` is on both rendered facets — the absence primitive `see` cannot
-// state — and never on a simulator's visitor: the four states of a control are
-// modifiers of the ONE descriptor type every facet shares, so the boundary is
-// the VERB set, not the ref.
 export type WebsiteSeesAbsence = Assert<Carries<Visitor, 'gone'>>;
 export type ComponentSeesAbsence = Assert<Carries<ComponentVisitor, 'gone'>>;
 export type MobileNeverAsksAboutAbsence = Assert<
     Carries<MobileVisitor, 'gone'> extends false ? true : false
 >;
 
-// The setups a component test states per render. The page size is one of them:
-// A responsive component's Given is the viewport, and it belongs to ONE test.
 export type ComponentSetsViewport = Assert<Carries<ComponentChain, 'viewport'>>;
 export type ComponentSetsClock = Assert<Carries<ComponentChain, 'clock'>>;
 export type ComponentIntercepts = Assert<Carries<ComponentChain, 'intercept'>>;
 export type ComponentWraps = Assert<Carries<ComponentChain, 'wrap'>>;
 
-/** Every row of the channel, as one function the compiler reads. */
 export async function typeRows(): Promise<void> {
-    // A8 — the `services` record types the factory argument: a key that is not
-    // in the record is not a service, and the failure belongs at the call.
     await specification.api({
         server: (services) =>
             // @ts-expect-error A8 — `cache` is not a key of the services record [`Property 'cache' does not exist on type '{ db: PostgresHandle; }'`]
@@ -82,15 +50,11 @@ export async function typeRows(): Promise<void> {
         services: { db: postgres() },
     });
 
-    // A11 — `server` and `url` state two different subjects (a site this run
-    // starts, a site already running), so the pair is inexpressible.
     await specification.website(
         // @ts-expect-error A11 — `server` and `url` are mutually exclusive [`Types of property 'url' are incompatible`]
         { server: { command: 'npm start' }, url: 'https://site.test' },
     );
 
-    // A2 — a constructor is named for its facet, and every facet name is
-    // singular: the plural 17 retired stays retired.
     // @ts-expect-error A2 — `jobs` is retired: `specification.job()` [`Property 'jobs' does not exist on type 'Specification'`]
     await specification.jobs({ jobs: [] });
 
@@ -98,15 +62,9 @@ export async function typeRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
 
-    // B3 — a chain carries no label: the test's name is the sentence, and a
-    // second one inside the chain would be a second place to read it.
     // @ts-expect-error B3 — a chain carries no label [`Property 'label' does not exist on type 'ApiSpecification<never>'`]
     api.label('the happy path');
 
-    // B2 — a string is a value and the disk is `file()` or `directory()`: a
-    // bare string where a file is meant, a file with the wrong tail, a path that
-    // is not relative, a directory without its `/` — none of them compiles. The
-    // golden rows are D14's, below.
     // @ts-expect-error B2 — a bare string is a value, not a file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
     api.seed('./seeds/x.sql');
     // @ts-expect-error B2 — a seed's path ends in `.sql` [`Type '"./seeds/x.json"' is not assignable to type 'RelativePath<".sql">'`]
@@ -128,8 +86,6 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error B2 — a command is a value where a verb takes one [`Argument of type 'FileAt<"./fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
     await cli.exec(file('./fixtures/args.txt'));
 
-    // B2 — the verbs 17 retired stay retired: the disk is an ARGUMENT of the
-    // simple verb, never a second verb named for it.
     // @ts-expect-error B2 — `seedFile` is retired: `seed(file(…))` [`Property 'seedFile' does not exist on type 'ApiSpecification<never>'`]
     api.seedFile('./seeds/x.sql');
     // @ts-expect-error B2 — `requestFile` is retired: `request(file(…))` [`Property 'requestFile' does not exist on type 'ApiSpecification<never>'`]
@@ -141,8 +97,6 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error B2 — `runFile` is retired: `run(file(…))` [`Property 'runFile' does not exist on type`]
     await cli.runFile('./case.spec.yaml');
 
-    // D14 — the golden half of `toMatch` takes the disk its subject has: a
-    // value subject has none, a stream's is a file, a tree's is a directory.
     const out = await cli.exec();
     // @ts-expect-error D14 — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
     expect('abc').toMatch(file('./expected/abc.txt'));
@@ -154,15 +108,11 @@ export async function typeRows(): Promise<void> {
     expect(out.stdout.text).toMatch(/built/u);
     await expect(out.filesystem).toMatch(directory('./expected/tree/'));
 
-    // What the rows are written FOR — the disk where the disk is meant, a seed
-    // always among it.
     await api.seed(file('./seeds/orders.sql')).post('/orders', file('./requests/order.json'));
     await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/a.json')).exec();
 
     const result = await api.get('/orders/1');
 
-    // B12 — a route with parameters is written as its template, and the
-    // template types the params: every name it holds, and no other.
     await api.get('/orders/:id/lines/:line?full=1', { params: { id: 1, line: 'a' } });
     await api.post('/orders/:id/lines', file('./requests/line.json'), { params: { id: 1 } });
     await api.get('/orders/latest', { params: {} });
@@ -173,33 +123,21 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error B12 — a value no parameter takes is refused [`'orderId' does not exist in type 'Record<"id", string | number>'`]
     await api.delete('/orders/:id', { params: { orderId: 1 } });
 
-    // B1 — exactly one terminal action closes a chain: what a terminal action
-    // answers is a RESULT, and a result has no verbs to continue with.
     // @ts-expect-error B1 — one terminal action closes the chain [`Property 'get' does not exist on type 'HttpResult'`]
     await result.get('/orders/2');
 
-    // D1 — a result accessor is read-only: the answer a run produced is
-    // evidence, and a test that can rewrite its evidence proves nothing.
     // @ts-expect-error D1 — a result accessor is read-only [`Cannot assign to 'status' because it is a read-only property`]
     result.status = 200;
 
-    // M2 — `mockOf<Port>()` needs the port: the type argument IS the contract
-    // the double stands for, and without it the double has no surface at all.
     const anonymous = mockOf();
     // @ts-expect-error M2 — a double with no port has nothing to call [`Property 'send' does not exist on type 'object'`]
     anonymous.send('reader@site.test');
 
-    // The shape the row is written FOR, so the file also shows what passes.
     const mailer = mockOf<Mailer>();
     await mailer.send('reader@site.test');
 }
 
-/**
- * D14, the value half — a stream is not a string: a value matcher reads its
- * `.text`, and vitest's `toContain` handed the accessor would search an empty
- * list, so `.not` would pass on anything. An empty stream is an empty text:
- * `toBeEmpty` is a table's matcher.
- */
+/** D14, the value half: a stream is not a string. */
 export async function streamValueRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
@@ -215,11 +153,6 @@ export async function streamValueRows(): Promise<void> {
     expect(out.stderr.text).toBe('');
 }
 
-/**
- * D14 on a stream's `toMatch`: a stream is compared WHOLE — to the text
- * written in place, or to its `file()` — and a RegExp, which matches a part,
- * is vitest's on `.text`.
- */
 export async function streamMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
@@ -230,7 +163,7 @@ export async function streamMatcherRows(): Promise<void> {
     expect(out.stderr.text).toMatch(/warning/u);
 }
 
-/** B2 — the matchers 17 retired for the disk stay retired. */
+/** B2 — the retired disk matchers stay retired. */
 export async function retiredMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
@@ -245,11 +178,6 @@ export async function retiredMatcherRows(): Promise<void> {
     await expect(result.table('orders')).toMatchRows({ columns: ['id'], rows: [[1]] });
 }
 
-/**
- * D14 on a response and a json: each is compared WHOLE, to the value its kind
- * is written in — a response its `.http` text, a json its value — or to its
- * golden. A RegExp matches a part, and matches neither.
- */
 export async function valueSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
@@ -268,7 +196,6 @@ export async function valueSubjectMatcherRows(): Promise<void> {
     expect(out.json).toMatch({ ok: true });
 }
 
-/** D14 on a tree: its golden is a `directory()`, and a value states no tree. */
 export async function treeMatcherRows(): Promise<void> {
     const { cli } = await specification.cli('./bin.sh');
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
@@ -280,11 +207,6 @@ export async function treeMatcherRows(): Promise<void> {
     await expect(out.directory('out')).toMatch(directory('./expected/out/'));
 }
 
-/**
- * D14 on the table and the container: a table is compared whole to its rows
- * (awaited), never to a text; a container is asserted running, never matched —
- * and the subjects that have a golden take it.
- */
 export async function assertedSubjectMatcherRows(): Promise<void> {
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
