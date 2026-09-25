@@ -206,6 +206,4 @@ export class SpecificationBuilder {
             registration?.cleanup();
         }
     }
-
 }
-
