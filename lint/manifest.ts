@@ -381,14 +381,14 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A spec file holds one top-level `describe`, titled with the file's aspect — `pagination.spec.ts` → `describe('pagination', …)` — and every test inside it; a `describe.each` names its rows, so its title starts with the aspect, `'pagination — page %s'`. A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything but the aspect at the title.",
+            "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A colocated test's is its subject, read from the module beside it (`<base>.ts`, `<base>.tsx`): the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase; else the base name — `locale-note.test.tsx` beside `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`. A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
         facet: 'model',
         family: 'C',
-        fix: "Title the file's one `describe` with its aspect, and put every test inside it — `make fix` renames a title (a table's by prefixing the aspect), wraps a file that has none, and merges several groups into one, each test titled `<group> — <test>`, when every group holds tests alone; what stands between the tests stays at module scope.",
+        fix: "Title the file's one `describe` with its aspect or its subject, and put every test inside it — `make fix` renames a title (a table's by prefixing the name), wraps a file that has none, and merges several groups into one, each test titled `<group> — <test>`, when every group holds tests alone; what stands between the tests stays at module scope.",
         id: 'C31',
         rationale:
-            'The runner reports a failure under the describe it stands in, so a title that is the aspect names the file the failure came from; a second group, or a stray test, is a second question the file answers.',
-        reach: 'spec',
+            'The runner reports a failure under the describe it stands in, so a title that is the aspect or the subject names the file the failure came from; a second group, or a stray test, is a second question the file answers.',
+        reach: 'tests',
     },
     'c32-aspect-name': {
         audience: 'consumer',

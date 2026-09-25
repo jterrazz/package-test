@@ -4,7 +4,7 @@ import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
-import { aspectOf } from './c31-describe-names-file.js';
+import { aspectOf } from '../../test-title.js';
 
 /** An aspect is lowercase words joined by single hyphens. */
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
