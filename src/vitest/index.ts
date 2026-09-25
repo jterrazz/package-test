@@ -21,6 +21,7 @@ export {
     type ComponentProjectOptions,
     type FacetProjectOptions,
     integration,
+    type IntegrationProjectOptions,
     job,
     type JobProjectOptions,
     type LiterateDoor,
