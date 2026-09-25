@@ -4,17 +4,17 @@
  *
  * The split is the RUNTIME's, never the facets': a page has no `pg`, no
  * `better-sqlite3`, no `node:fs`, so the node entry's module graph cannot load
- * in one. This entry re-exports the shared surface verbatim and answers for
- * every node-only name with a stub that throws where it was called
- * ({@link nodeOnlyFunction}). The published `types` entry is the node build's,
- * so the two surfaces are ONE type surface and a name can never exist on one
- * side only.
+ * in one. This entry publishes the node entry's types whole, re-exports every
+ * value a page can run from its owner, and answers for every node-only name
+ * with a stub that throws where it was called ({@link refuse}). The published
+ * `types` entry is the node build's, so the two runtimes are ONE type surface
+ * and a name can never exist on one side only — `package-exports.test.ts`
+ * compares the two builds' names on every run.
  */
 
 import { TextAccessor } from './expectations/text/text.js';
-import { componentFacet } from './facets/component/component.facet.js';
-import type { ComponentChain } from './facets/component/component.facet.js';
-import { registerBrowserMatchers } from './facets/component/page/golden.js';
+import { componentFacet, registerBrowserMatchers } from './facets/component/index.browser.js';
+import type { ComponentChain } from './facets/component/index.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';
@@ -24,9 +24,10 @@ import type {
 } from './world/services/process/process.js';
 import type { redis as redisFn } from './world/services/redis/redis.adapter.js';
 import type { sqlite as sqliteFn } from './world/services/sqlite/sqlite.adapter.js';
-import { interceptThrough } from './world/stubs/intercept/intercept.scope.js';
-import type { Intercept } from './world/stubs/intercept/intercept.scope.js';
-import { registerWorkerStubs } from './world/stubs/interceptor/worker.js';
+
+// ── The types, whole: the node entry's, which the one `types` entry publishes ──
+// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: its types are the node entry's by design, so the two runtimes cannot publish two type surfaces
+export type * from './index.js';
 
 // The page's own matchers, armed by the import that brought `component` in: a
 // Component test writes no setup file and no hook for them.
@@ -40,16 +41,8 @@ registerBrowserMatchers();
  */
 export const component: ComponentChain = componentFacet.open({});
 
-/**
- * The module-scope network double, on msw's WORKER — the same stubs and
- * the same strictness the node entry publishes, served by the one engine a
- * page has. Everything new in this release that a page can use is real here.
- */
-export const intercept: Intercept = interceptThrough(registerWorkerStubs);
-
-// ── The surface both runtimes share ──
-// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
-export * from './surface.js';
+// The module-scope network double, on msw's WORKER — the page's one engine.
+export { intercept } from './world/stubs/intercept/page-intercept.js';
 
 /**
  * The six constructors, present and refusing. A component test never reaches
@@ -72,10 +65,6 @@ export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 
-// The results and the accessors are TYPES on both sides now, published by the
-// One `types` entry — so there is nothing for this runtime to stub: a name that
-// Never exists at runtime cannot be called in a page either.
-
 /**
  * `text()` is real here: only its anchor differs. Under node the accessor
  * remembers the caller's directory so a golden resolves against it; in a page
@@ -85,3 +74,44 @@ export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 export function text(value: string): TextAccessor {
     return new TextAccessor(value, 'text', '');
 }
+
+// ── Every other value, real in a page: the same owners the node entry names ──
+export { directory, file } from './kernel/files/spec-path.js';
+export { anthropic } from './world/stubs/anthropic/anthropic.js';
+export { http } from './world/stubs/http/http.js';
+export { openai } from './world/stubs/openai/openai.js';
+export { defineStub, defineStubs } from './world/stubs/stub.js';
+export { clock } from './world/clock/clock.js';
+export { mockOf } from './world/mocks/mock-of.js';
+export {
+    banner,
+    button,
+    complementary,
+    content,
+    contentinfo,
+    dialog,
+    disabled,
+    enabled,
+    field,
+    focused,
+    form,
+    heading,
+    link,
+    listitem,
+    main,
+    navigation,
+    option,
+    region,
+    row,
+    search,
+    selected,
+    status,
+    table,
+    testId,
+    valued,
+    within,
+} from './elements/elements.js';
+export { match, Matcher } from './expectations/tokens/match.js';
+export { required } from './expectations/conditions/required.js';
+export { waitUntil } from './expectations/conditions/wait-until.js';
+export { lintReport } from './expectations/goldens/lint-report.js';

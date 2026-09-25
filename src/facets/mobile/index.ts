@@ -1,0 +1,20 @@
+// The mobile facet's face: the names it contributes to `@jterrazz/test`.
+export type {
+    DeviceOpenOptions,
+    DevicePort,
+    DeviceScreen,
+    DeviceTimeouts,
+    MobileElementKind,
+    MobileElementMatch,
+    MobileElementRef,
+    MobileScenario,
+    MobileVisitor,
+    ScreenNode,
+} from './device/device.port.js';
+export type { MobileSpecification } from './mobile.facet.js';
+export type {
+    MobileBackendOptions,
+    MobileHandle,
+    MobileSpecificationOptions,
+} from './mobile.handle.js';
+export type { ScreenResult } from './screen/screen.result.js';
