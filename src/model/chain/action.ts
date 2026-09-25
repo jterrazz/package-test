@@ -23,9 +23,15 @@ export type Action<
     /** The arguments it takes beside its subject, each the matrix row it states. */
     readonly options?: readonly ActionOption<string>[];
     readonly row: MatrixRow;
-    /** The refusals owed before any setup is armed, and the directory the action runs in. */
+    /**
+     * What the action owes before any setup is armed: its refusals, what an
+     * earlier action left standing taken down, and the directory it runs in.
+     */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
-    prepare?(args: Args, read: SliceReader): { readonly workDir: null | string };
+    prepare?(
+        args: Args,
+        read: SliceReader,
+    ): Promise<{ readonly workDir: null | string }> | { readonly workDir: null | string };
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     perform(args: Args, read: SliceReader, engines: Needs, run: Run): Promise<Result>;
 };

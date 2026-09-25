@@ -123,4 +123,23 @@ describe('perform — the one pipeline a terminal action runs through', () => {
         ).rejects.toBe(refused);
         expect(log).toStrictEqual(['arm intercept', 'release intercept']);
     });
+
+    test('an action takes down what it left standing before any setup is armed', async () => {
+        // Given - an action whose preparation waits on a teardown before it settles
+        const log: string[] = [];
+        const replacing: AnyAction = {
+            ...acting(log, 'done'),
+            prepare: async () => {
+                await Promise.resolve();
+                log.push('take down');
+                return { workDir: null };
+            },
+        };
+
+        // When - it closes a chain with contracts to arm
+        await perform([logged(log, 'intercept', 40)], replacing, [], WHERE);
+
+        // Then - the teardown is over before the contracts are armed
+        expect(log).toStrictEqual(['take down', 'arm intercept', 'act', 'release intercept']);
+    });
 });
