@@ -156,7 +156,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/stubs/network/handlers.ts',
             'src/world/stubs/network/msw-node.engine.ts',
             'src/world/stubs/network/server.ts',
-            'src/world/stubs/network/worker.engine.ts',
             'src/facets/website/browser/clock.engine.ts',
             'src/world/services/postgres/template.ts',
             'src/world/clock/clock.engine.ts',
