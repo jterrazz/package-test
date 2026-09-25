@@ -1,73 +1,32 @@
 import { mkdirSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-/**
- * Where a tool writes what it generates: `.artifacts/<tool>/` at the project
- * root, one folder per tool (`dist/` is the ecosystem's single exception).
- *
- * The convention is estate-wide, so the paths are stated ONCE here and read by
- * everyone who writes: the vitest preset (`cacheDir`, coverage) and the sqlite
- * adapter (its schema template). A second copy of `.artifacts/vitest` would be
- * a second answer to "where does a run's cache live", and the day one moved the
- * other would keep writing to the old place.
- *
- * Every path is RELATIVE to the project root: a preset hands it to vite, which
- * resolves it against its own root; a runtime writer resolves it against the
- * root A9 discovered.
- */
-
-/** The one artefact folder of a project. */
+/** Every path here is relative to the project root. */
 export const ARTIFACTS_DIR = '.artifacts';
 
-/** Everything a vitest run generates. */
 export const VITEST_ARTIFACTS_DIR = `${ARTIFACTS_DIR}/vitest`;
 
-/** Where the coverage provider writes its report. */
 export const COVERAGE_DIR = `${VITEST_ARTIFACTS_DIR}/coverage`;
 
-/** Where `sqlite()` caches the schema template it copies per worker. */
 export const SQLITE_TEMPLATE_DIR = `${VITEST_ARTIFACTS_DIR}/sqlite`;
 
-/**
- * Where `context.annotate()` puts what a test attaches, and where Browser Mode
- * drops a failure screenshot. Vitest 5 defaults both to `.vitest/` at the
- * repository ROOT — a second artefact folder beside the one the estate declares,
- * and one no `.gitignore` rule of ours covers.
- */
+/** Attachments and Browser Mode failure screenshots, which Vitest 5 would put in `.vitest/`. */
 export const ATTACHMENTS_DIR = `${VITEST_ARTIFACTS_DIR}/attachments`;
 
-/**
- * Where a website or mobile scenario that failed leaves its screenshot — under
- * the project, because the run's temp root is removed when the run ends and
- * the error that names the file is read after it.
- */
+/** Under the project: the run's temp root is gone by the time the error naming the file is read. */
 export const EVIDENCE_DIR = `${VITEST_ARTIFACTS_DIR}/evidence`;
 
-/** The `mkdtemp` prefix of one failure's evidence folder, its parent made. */
 export function evidenceDirectory(prefix: string): string {
     const parent = resolve(EVIDENCE_DIR);
     mkdirSync(parent, { recursive: true });
     return join(parent, prefix);
 }
 
-/** Where the browser provider drops a screenshot of a failing test. */
 export const SCREENSHOTS_DIR = `${VITEST_ARTIFACTS_DIR}/screenshots`;
 
-/**
- * Where the blob reporter writes: one file per run, or per shard of a run,
- * so the shards of one run land side by side for `--merge-reports`.
- */
 export const BLOB_DIR = `${VITEST_ARTIFACTS_DIR}/blob`;
 
-/**
- * What each file-writing reporter writes, by reporter name.
- *
- * Vitest 5 turned the json and junit reporters into FILE writers (they printed
- * to stdout before) and gave the html and blob ones a `.vitest/` home. Each one
- * is a path the tool pins and a consumer never states, so the preset moves all
- * four at once rather than leaving a repository to discover them one CI run at
- * a time.
- */
+/** Vitest 5's file-writing reporters, each pinned under the artifacts folder. */
 export const REPORTER_OUTPUT_FILES: Record<string, string> = {
     blob: `${BLOB_DIR}/blob.json`,
     html: `${VITEST_ARTIFACTS_DIR}/html/index.html`,

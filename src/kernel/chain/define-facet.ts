@@ -13,15 +13,12 @@ import { perform } from './perform.js';
 import { applied, EMPTY_STATE } from './state.js';
 import type { ChainState } from './state.js';
 
-/** What a facet is made of: the setups it offers, the actions it ends on, its constructor's options. */
 export type Composition = {
     readonly actions: readonly AnyAction[];
     readonly capabilities: readonly (AnyCapability | Sharing)[];
-    /** The options its constructor takes, each the matrix row it states. */
     readonly options: Readonly<Record<string, MatrixRow>>;
 };
 
-/** The engines one definition performs through, by port key. */
 type NeedsOf<Member> =
     Member extends Capability<
         string,
@@ -36,51 +33,38 @@ type NeedsOf<Member> =
           ? Needs
           : unknown;
 
-/** The engines a composition needs: one per port key its definitions name. */
 type EnginesOf<C extends Composition> = Intersect<
     NeedsOf<C['actions'][number] | C['capabilities'][number]>
 >;
 
-/** Every member a composition puts on its chain. */
 type MemberNames<C extends Composition> =
     | C['actions'][number]['name']
     | C['capabilities'][number]['name'];
 
-/** Nothing, when the chain type and the composition name the same members; else the difference, named. */
 type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberNames<C>]
     ? [MemberNames<C>] extends [keyof Self]
         ? unknown
         : { readonly composedButNotOnTheChain: Exclude<MemberNames<C>, keyof Self> }
     : { readonly onTheChainButNotComposed: Exclude<keyof Self, MemberNames<C>> };
 
-/** What a facet adds to its composition: the engines it arms, and where its paths start. */
 type Wiring<C extends Composition, Config extends ChainConfig> = {
-    /**
-     * The adapters the constructor's configuration starts, one per port key —
-     * its parameter typed as written: a parameter left to context makes the
-     * whole facet context-sensitive, and the composition is then not inferred.
-     */
+    /** Typed as written: a parameter left to context makes the facet context-sensitive, and the composition is then not inferred. */
     readonly engines: (config: Config) => EnginesOf<C> & object;
-    /** The directory a chain's relative paths start from — the test file's, in node. */
     readonly locate: () => string;
 };
 
-/** A facet, ready to open a chain over the configuration its constructor built. */
 type Facet<Self, Config extends ChainConfig> = {
     readonly composition: Composition;
     readonly open: (config: Config) => Self;
 };
 
-/** The definer `defineFacet<Self, Config>()` hands back. */
 type FacetDefiner<Self, Config extends ChainConfig> = <const C extends Composition>(
     facet: C & SameMembers<Self, C> & Wiring<C, Config>,
 ) => Facet<Self, Config>;
 
-/** A composition and where its paths start, as the chain reads them at run time. */
 type Wired = Composition & Pick<Wiring<Composition, ChainConfig>, 'locate'>;
 
-/** The one setup `with()` folds each contextual setup's value through. */
-function shared(
+function withSharedSettings(
     capabilities: Composition['capabilities'],
     state: ChainState,
     context: Partial<Record<ContextKey, unknown>>,
@@ -99,11 +83,7 @@ function shared(
     return next;
 }
 
-/**
- * The chain over one state. Every setup hands back a NEW chain, and `with()`
- * leaves the directory unfixed, so a context written in a helper file never
- * anchors the paths of the test that uses it.
- */
+/** `with()` leaves the directory unfixed, so a context written in a helper file never anchors the paths of the test using it. */
 function chainOf(
     facet: Wired,
     setup: SetupContext<object>,
@@ -118,7 +98,11 @@ function chainOf(
         chain[capability.name] =
             capability.kind === 'context'
                 ? (context: Partial<Record<ContextKey, unknown>>) =>
-                      chainOf(facet, setup, shared(facet.capabilities, state, context, setup))
+                      chainOf(
+                          facet,
+                          setup,
+                          withSharedSettings(facet.capabilities, state, context, setup),
+                      )
                 : (...args: unknown[]) =>
                       chainOf(facet, setup, {
                           ...applied(state, capability, args, setup),
@@ -137,13 +121,6 @@ function chainOf(
     return chain;
 }
 
-/**
- * Define a facet by what it composes. `Self` is the chain type the facet
- * publishes, computed from the same composition; the compiler refuses a
- * composition that names other members than it. `Config` is the
- * configuration it opens over — `Started<…>` the engines its constructor
- * must start, so a facet opened without one does not compile.
- */
 export function defineFacet<Self, Config extends ChainConfig = ChainConfig>(): FacetDefiner<
     Self,
     Config

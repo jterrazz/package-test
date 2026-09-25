@@ -4,33 +4,11 @@ import { basename, dirname, join } from 'node:path';
 
 import { setupEntry } from './setup-entry.js';
 
-/**
- * The global setup every preset project carries: the run's own temp root.
- *
- * Every scratch folder a run makes — a command spec's working directory, a
- * worker's database copy, what a checker a spec spawns writes — is a
- * `mkdtemp` under `os.tmpdir()`. The setup points `TMPDIR` (and `TMP`/`TEMP`,
- * its Windows spellings) at ONE folder of the run before any worker starts,
- * so every such call, in a worker or in a child it spawns, lands inside it;
- * the teardown removes that folder whole and puts the variables back.
- *
- * Every project of a run reaches the same root: the first setup makes it, the
- * others join it, and the teardown of the setup that made it removes it —
- * vitest tears the setups down once every project has run. Every root sits in
- * ONE parent folder of the system temp directory, named by its run's pid; a
- * root whose run died before its teardown is swept by the next run, which
- * reads that parent alone and never the system temp directory itself. The
- * parent is the user's own, named by their uid: a temp directory several
- * users share never holds a folder one of them cannot write or sweep.
- */
-
-/** The folder, below the system temp directory, holding every run's root of this user. */
+/** Named by uid: a temp directory users share never holds a folder one of them cannot sweep. */
 export const TEMP_ROOTS_PARENT = `jterrazz-test-runs-${process.getuid?.() ?? 'user'}`;
 
-/** The variables a runtime reads its temp directory from. */
 const TEMP_VARIABLES = ['TMPDIR', 'TMP', 'TEMP'] as const;
 
-/** Is the process of that pid still running? */
 function isAlive(pid: number): boolean {
     try {
         process.kill(pid, 0);
@@ -40,7 +18,6 @@ function isAlive(pid: number): boolean {
     }
 }
 
-/** Remove every root, in the `parent` folder of roots, whose run no longer exists. */
 export function sweepOrphanRoots(parent: string): void {
     for (const entry of readdirSync(parent)) {
         const pid = Number(entry.split('-')[0]);
@@ -50,7 +27,6 @@ export function sweepOrphanRoots(parent: string): void {
     }
 }
 
-/** Set each variable to its value, or unset it where the value is absent. */
 function setVariables(values: Record<string, string | undefined>): void {
     for (const [name, value] of Object.entries(values)) {
         if (value === undefined) {
@@ -63,19 +39,11 @@ function setVariables(values: Record<string, string | undefined>): void {
     }
 }
 
-/**
- * Where a project finds this setup: this module in a source checkout,
- * `temp-root.js` in the built package, where the bundle and its entries share
- * one folder.
- */
 export function tempRootSetup(): string {
     return setupEntry(import.meta.dirname, 'temp-root.ts', 'temp-root.js');
 }
 
-/**
- * Each project loads this module anew, so the run is recognised by the
- * variable itself: a temp directory that is a root of this process is joined.
- */
+/** Each project loads this module anew: the run is recognised by the variable itself. */
 function joinedRoot(): boolean {
     const current = tmpdir();
     return (

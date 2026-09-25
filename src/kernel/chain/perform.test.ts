@@ -7,7 +7,6 @@ import type { AnyCapability, Armed } from './capability.js';
 import { perform } from './perform.js';
 import { EMPTY_STATE } from './state.js';
 
-/** A setup that logs its arming and its release under `name`, at `phase`. */
 function logged(
     log: string[],
     name: string,
@@ -32,7 +31,6 @@ function logged(
     });
 }
 
-/** An action that logs itself, then hands back `outcome` — or throws it, when it is an error. */
 function acting(log: string[], outcome: unknown): AnyAction {
     return defineAction({
         accessors: [],
@@ -48,7 +46,6 @@ function acting(log: string[], outcome: unknown): AnyAction {
     });
 }
 
-/** What the pipeline is handed beside the action: no config, no engines, nothing told. */
 const WHERE = { config: {}, engines: {}, state: EMPTY_STATE, testDir: '/specs' };
 
 describe('perform', () => {

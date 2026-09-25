@@ -5,7 +5,6 @@ import { defineCapability } from './capability.js';
 import type { Sharing } from './capability.js';
 import { defineFacet } from './define-facet.js';
 
-/** A setup that appends what it is told. */
 const note = defineCapability({
     initial: [] as readonly string[],
     name: 'note',
@@ -14,7 +13,6 @@ const note = defineCapability({
     row: { group: 'Setup', name: '.note()', probe: '.note(' },
 });
 
-/** A setup a file may share, under the `clock` key. */
 const stamp = defineCapability({
     context: 'clock',
     initial: null as null | string,
@@ -30,7 +28,6 @@ const sharing: Sharing = {
     row: { group: 'Setup', name: '.with()', probe: '.with({' },
 };
 
-/** What the action hands back: what the chain was told, and where its paths start. */
 type Told = { notes: readonly string[]; stamp: null | string; testDir: string };
 
 const read = defineAction({
@@ -41,7 +38,6 @@ const read = defineAction({
     row: { group: 'Terminal action', name: '.read()', probe: '.read(' },
 });
 
-/** The chain the toy facet publishes. */
 type Toy = {
     note: (text: string) => Toy;
     read: () => Promise<Told>;
@@ -55,7 +51,6 @@ const composition = {
     options: {},
 } as const;
 
-/** A toy facet whose `locate` answers a new directory on every call, and counts them. */
 function toyFacet(): { located: () => number; toy: Toy } {
     let calls = 0;
     const facet = defineFacet<Toy>()({

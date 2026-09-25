@@ -1,7 +1,6 @@
 import type { ChainContext } from '../context/with.capability.js';
 import type { ChainConfig } from './config.js';
 
-/** The sections of the capability matrix a definition can state a row in. */
 type MatrixGroup =
     | 'Constructor option'
     | 'Descriptor'
@@ -11,43 +10,28 @@ type MatrixGroup =
     | 'Terminal action'
     | 'Verb';
 
-/**
- * The capability-matrix row a definition states about itself: `name` as a spec
- * writes it, and `probe`, what a test exercising it writes — a call read in
- * `lint/matrix-calls.ts`'s grammar, or a literal.
- */
+/** `probe` is a call in `lint/matrix-calls.ts`'s grammar, or a literal. */
 export type MatrixRow = {
     readonly group: MatrixGroup;
-    /** The key of the chain or result this row answers for, when `name` spells it differently. */
     readonly member?: string;
     readonly name: string;
     readonly probe: string;
 };
 
-/** The settings a file may share through `with({ … })`: `ChainContext`'s keys. */
 export type ContextKey = keyof ChainContext;
 
-/** A union of object types, as the one type that is all of them. */
 export type Intersect<Union> = (Union extends unknown ? (member: Union) => void : never) extends (
     all: infer All,
 ) => void
     ? All
     : never;
 
-/** The type parameters of a facet every signature may read. */
 export type FacetParams = {
     readonly databaseKey: string;
     readonly services: Record<string, unknown>;
 };
 
-/**
- * The methods a definition puts on a chain, as a function of the chain a
- * setup hands back (`self`) and the facet's parameters (`params`). Each
- * definition declares its own beside itself — an interface extending this one
- * whose `chain` names its methods over `this['self']` and `this['params']` —
- * and `ChainOf` fills both in, so a facet's chain type is COMPUTED from the
- * definitions it composes while the kernel names none of their methods.
- */
+/** Each definition extends this, naming its methods over `this['self']` and `this['params']`; `ChainOf` fills both in. */
 // oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name: a facet fills `self` and `params` in by intersecting it
 export interface ChainSignature {
     readonly chain: object;
@@ -55,39 +39,24 @@ export interface ChainSignature {
     readonly self: unknown;
 }
 
-/** What an armed effect leaves behind until the action settles. */
 export type Armed = {
-    /** Undo the effect. Released in reverse arm order; an engine may defer the undo to the test's end. */
+    /** Released in reverse arm order; an engine may defer it to the test's end. */
     readonly release?: () => void;
-    /** The strict failure the engine recorded — preferred over the action's own error. */
+    /** Preferred over the action's own error. */
     readonly violation?: () => Error | null;
 };
 
-/** Where one terminal action runs, over the configuration its facet's constructor built. */
 export type Run<Config extends ChainConfig = ChainConfig> = {
     readonly config: Config;
-    /** The directory the chain's relative paths start from. */
     readonly testDir: string;
-    /** The scratch directory a command runs in; `null` for an action that runs none. */
     readonly workDir: null | string;
 };
 
-/** What a setup is handed beside its arguments. */
 export type SetupContext<Needs, Config extends ChainConfig = ChainConfig> = {
     readonly config: Config;
     readonly engines: Needs;
 };
 
-/**
- * A setup a chain offers, defined once for every facet that composes it.
- *
- * `Needs` names the engines it is armed through, by port key
- * (`{ network: InterceptPort }`); the facet hands them in, so a definition knows
- * its port and never an adapter. `Signature` is the method it puts on a
- * chain. `Context` is the `with()` key a file states it by, for the three
- * settings a file may share. `Config` is the configuration it reads, declared
- * by its owner over the kernel's `ChainConfig`.
- */
 export type Capability<
     Name extends string,
     Slice,
@@ -97,7 +66,6 @@ export type Capability<
     Context extends ContextKey = never,
     Config extends ChainConfig = ChainConfig,
 > = {
-    /** The `with()` key this setup answers to. */
     readonly context?: Context;
     readonly initial: Slice;
     readonly kind: 'setup';
@@ -105,24 +73,19 @@ export type Capability<
     /** Arm order across the setups of a chain: seed 10, fixture 20, viewport 30, intercept 40, clock 50. */
     readonly phase: number;
     readonly row: MatrixRow;
-    /** The method it puts on a chain — a type alone, never set: what `ChainOf` reads. */
+    /** A type alone, never set at runtime: `ChainOf` reads it. */
     readonly signature?: Signature;
-    /**
-     * The effect before the action, through the engines alone. Absent when an
-     * action reads the slice instead.
-     */
+    /** Absent when the action reads the slice instead. */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and engines is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     arm?(
         slice: Slice,
         engines: Needs,
         run: Run<Config>,
     ): Armed | Promise<Armed | undefined> | undefined;
-    /** Validate the arguments and fold them into the slice, throwing the setup's refusal. */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and engines is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     reduce(slice: Slice, args: Args, setup: SetupContext<Needs, Config>): Slice;
 };
 
-/** Any setup, whatever it holds — what a composition lists. */
 export type AnyCapability = Capability<
     string,
     unknown,
@@ -132,17 +95,14 @@ export type AnyCapability = Capability<
     ContextKey
 >;
 
-/** An argument an action takes beside its subject rather than a setup of the chain — `{ params }`. */
 export type ActionOption<Name extends string> = {
     readonly kind: 'option';
     readonly name: Name;
     readonly row: MatrixRow;
 };
 
-/** `with()` — the one setup whose effect is the others': the contextual setups a file shares. */
 export type Sharing = { readonly kind: 'context'; readonly name: 'with'; readonly row: MatrixRow };
 
-/** Define a setup; the definition is its own runtime value. */
 export function defineCapability<
     const Name extends string,
     Slice,

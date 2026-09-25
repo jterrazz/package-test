@@ -3,19 +3,12 @@ import type { Capability } from './capability.js';
 import type { ChainConfig, Started } from './config.js';
 import { defineFacet } from './define-facet.js';
 
-/**
- * The compiler holds a facet's chain type to its composition, both ways: a
- * chain type naming a member the composition does not list, or missing one it
- * lists, does not compile — the difference named in the error.
- */
-
 declare const note: Capability<'note', readonly string[], [text: string]>;
 declare const read: Action<'read', [], readonly string[]>;
 
 const composition = { actions: [read], capabilities: [note], options: {} } as const;
 const wiring = { engines: () => ({}), locate: () => '/specs' };
 
-/** The chain the composition opens. */
 type Noted = { note: (text: string) => Noted; read: () => Promise<readonly string[]> };
 
 export const matching = defineFacet<Noted>()({ ...composition, ...wiring });
@@ -30,10 +23,8 @@ export const inventive = defineFacet<Noted & { label: () => Noted }>()(
     { ...composition, ...wiring },
 );
 
-/** A configuration that may carry a server, as a facet's owner declares one. */
 type Served = ChainConfig & { server?: undefined | { readonly url: string } };
 
-/** A facet armed through the server its constructor starts. */
 const served = defineFacet<Noted, Started<Served, 'server'>>()({
     ...composition,
     engines: (config: Started<Served, 'server'>) => ({ server: config.server }),

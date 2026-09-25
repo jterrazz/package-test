@@ -1,18 +1,11 @@
 import type { ActionOption, ChainSignature, MatrixRow, Run } from './capability.js';
 import type { ChainConfig } from './config.js';
 
-/** Read a setup's slice by its definition — the one way an action sees what the chain was told. */
 export type SliceReader = <Slice>(capability: {
     readonly initial: Slice;
     readonly name: string;
 }) => Slice;
 
-/**
- * A terminal action a chain ends on, defined once for every facet that
- * composes it. `Signature` is the method it puts on a chain; `Needs` names
- * the engines it performs through, by port key; `Config` is the configuration
- * it reads, declared by its owner over the kernel's `ChainConfig`.
- */
 export type Action<
     Name extends string,
     Args extends readonly unknown[],
@@ -21,23 +14,15 @@ export type Action<
     Needs extends object = Record<never, never>,
     Config extends ChainConfig = ChainConfig,
 > = {
-    /** The rows of the result it hands back. */
     readonly accessors: readonly MatrixRow[];
-    /** The rows of the descriptors the surface it drives resolves, for an action handing a scenario a visitor. */
     readonly descriptors?: readonly MatrixRow[];
     readonly kind: 'action';
     readonly name: Name;
-    /** The arguments it takes beside its subject, each the matrix row it states. */
     readonly options?: readonly ActionOption<string>[];
     readonly row: MatrixRow;
-    /** The method it puts on a chain — a type alone, never set: what `ChainOf` reads. */
+    /** A type alone, never set at runtime: `ChainOf` reads it. */
     readonly signature?: Signature;
-    /** The rows of the verbs its visitor hands a scenario, for an action that drives one. */
     readonly verbs?: readonly MatrixRow[];
-    /**
-     * What the action owes before any setup is armed: its refusals, what an
-     * earlier action left standing taken down, and the directory it runs in.
-     */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     prepare?(
         args: Args,
@@ -47,10 +32,8 @@ export type Action<
     perform(args: Args, read: SliceReader, engines: Needs, run: Run<Config>): Promise<Result>;
 };
 
-/** Any action, whatever it takes and hands back — what a composition lists. */
 export type AnyAction = Action<string, readonly unknown[], unknown, ChainSignature, object>;
 
-/** Define a terminal action; the definition is its own runtime value. */
 export function defineAction<
     const Name extends string,
     const Args extends readonly unknown[],

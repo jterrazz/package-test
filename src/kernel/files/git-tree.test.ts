@@ -6,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 
 import { forgetTree, moveKeepingHistory, treeKind, treeNames, treeStamp } from './git-tree.js';
 
-/** A directory on disk holding `files`, a git repository when `git` says what to add. */
 function project(files: string[], git?: { add: string[]; ignore?: string }): string {
     const root = mkdtempSync(join(tmpdir(), 'tree-'));
     for (const path of files) {

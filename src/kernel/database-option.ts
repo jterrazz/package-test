@@ -1,12 +1,6 @@
 import { refusal } from './refusals/refusal.js';
 
-/**
- * Enforce CONVENTIONS A7: with two or more databases in the services record
- * the `database` option is mandatory on `.seed()` / `.table()`; with exactly
- * one it is forbidden (redundant).
- *
- * @internal
- */
+/** Enforces CONVENTIONS A7. */
 export function validateDatabaseOption(
     method: string,
     config: { readonly databaseKeys?: readonly string[] | undefined },

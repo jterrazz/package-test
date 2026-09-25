@@ -5,14 +5,11 @@ import { afterAll, describe, expect, test } from 'vitest';
 
 import { frameworkTreesOf, getCallerDir, isFrameworkFrame, stackFrames } from './caller.js';
 
-// Real directories: the check resolves real paths, so a made-up path would
-// only ever exercise the fallback.
+// Real directories: the check resolves real paths, and a made-up one only exercises the fallback.
 const base = mkdtempSync(resolve(tmpdir(), 'caller-frames-'));
 
-/** The framework as a consumer installs it: everything under one directory. */
 const framework = join(base, 'framework', 'dist');
 
-/** A consumer app that has its OWN src/core, src/integrations, src/vitest. */
 const app = join(base, 'app');
 
 for (const dir of [

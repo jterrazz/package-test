@@ -2,26 +2,17 @@ import { describe, expect, test } from 'vitest';
 
 import { blockScalar, parseYamlSource, renderYamlSource } from './document.js';
 
-/**
- * The `yaml` wrapper, read on its own — text in, text out. What is judged here
- * is the ROUND TRIP: a document this module renders must read back as the value
- * that was put into it, whatever step the file is indented with.
- */
-
-/** A document indented by `step`, with `text` written into its one run's stdout. */
 function rewritten(step: number, text: string): string {
     const source = parseYamlSource(['runs:', `${' '.repeat(step)}- exit: 0`, ''].join('\n'));
     source.document.setIn(['runs', 0, 'stdout'], blockScalar(text));
     return renderYamlSource(source);
 }
 
-/** The stdout a rendered document gives back when it is read again. */
 function readBack(rendered: string): unknown {
     return (parseYamlSource(rendered).document.toJS() as { runs: { stdout: unknown }[] }).runs[0]
         ?.stdout;
 }
 
-/** A document spelling its flow collections the way the repository formatter does. */
 const FORMATTED = [
     '# the ground of the case',
     'description: writes what it was told to',

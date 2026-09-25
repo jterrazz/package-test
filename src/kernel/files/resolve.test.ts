@@ -6,7 +6,6 @@ import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
 import { discoverRoot, findRoot, resolveRoot, resolveSpecPath } from './resolve.js';
 
-/** A virtual filesystem: the probe the caller injects (fs, or a lint cache). */
 const probe =
     (...present: string[]) =>
     (path: string): boolean =>

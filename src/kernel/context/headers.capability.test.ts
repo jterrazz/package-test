@@ -5,7 +5,6 @@ import { defineFacet } from '../chain/define-facet.js';
 import { headers } from './headers.capability.js';
 import { sharing } from './with.capability.js';
 
-/** A chain of `.headers()` and `with()`, ending on an action that hands back the headers it would send. */
 type Chain = {
     headers: (headers: Record<string, string>) => Chain;
     send: () => Promise<unknown>;
@@ -19,7 +18,6 @@ const send = defineAction({
     row: { group: 'Terminal action', name: '.send()', probe: '.send(' },
 });
 
-/** A chain nobody has set a header on yet. */
 function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [send],

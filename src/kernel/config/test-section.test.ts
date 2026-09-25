@@ -5,7 +5,6 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { testSectionAt } from './test-section.js';
 
-/** A unit whose `jterrazz.config.ts` is `source`, or that has none; removed when the test ends. */
 function unit(source?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-section-'));
     onTestFinished(() => {

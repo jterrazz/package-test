@@ -4,19 +4,10 @@ import type { Action } from './action.js';
 import type { Capability, ChainSignature, Sharing } from './capability.js';
 import type { ChainOf } from './chain.js';
 
-/**
- * The chain type a composition computes: the members it lists, each at the
- * signature its definition declares, and `with()` over exactly the settings of the setups
- * it composes — never a member it does not list.
- */
-
-/** Resolves only for `true`. */
 type Assert<Row extends true> = Row;
 
-/** Is each type assignable to the other? */
 type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
 
-/** A seed's method: the database it names is one of the facet's. */
 type SeedMethod<Self, Key extends string> = (source: string, options?: { database?: Key }) => Self;
 
 type ClockChain<Self> = { clock: (iso: string) => Self };
@@ -58,7 +49,6 @@ interface Unshared extends ChainOf<
     Unshared
 > {}
 
-/** What `Listed` must be, member by member. */
 type Expected<Key extends string> = {
     clock: (iso: string) => Listed<Key>;
     seed: SeedMethod<Listed<Key>, Key>;

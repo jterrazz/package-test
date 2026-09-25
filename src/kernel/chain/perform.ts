@@ -4,7 +4,6 @@ import type { ChainConfig } from './config.js';
 import { readerOf } from './state.js';
 import type { ChainState } from './state.js';
 
-/** Where the action runs, and what the chain it closes was told. */
 export type Performed = {
     readonly config: ChainConfig;
     readonly engines: object;
@@ -12,14 +11,7 @@ export type Performed = {
     readonly testDir: string;
 };
 
-/**
- * The one pipeline every terminal action runs through: its preparation first
- * — its refusals, what an earlier action left standing, its directory — then
- * every setup armed through its engine in phase order, then the action. An
- * engine's recorded violation is the failure the action reports — over the
- * error the action met, and over a success — and every armed effect is
- * released, in reverse, however the action ends.
- */
+/** An engine's recorded violation wins over the action's error and over its success; every armed effect is released in reverse. */
 export async function perform(
     setups: readonly AnyCapability[],
     action: AnyAction,
