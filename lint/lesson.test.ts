@@ -2,9 +2,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { lessonParts, missingParts } from '../src/model/lesson/lesson.js';
-import { refusal, REFUSAL_WHY } from '../src/model/lesson/refusal.js';
-import type { RefusalRow } from '../src/model/lesson/refusal.js';
+import { lessonParts, missingParts } from '../src/kernel/refusals/lesson.js';
+import { refusal, REFUSAL_WHY } from '../src/kernel/refusals/refusal.js';
+import type { RefusalRow } from '../src/kernel/refusals/refusal.js';
 import { CHECKER_PASS_IDS } from './checker.js';
 import { lessonAt, lessons, readAt, whyOf } from './lesson.js';
 import { RUNTIME_RULES } from './manifest.js';

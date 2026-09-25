@@ -1,18 +1,18 @@
-/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import { trigger } from '../../actions/trigger/trigger.action.js';
-import { clock } from '../../capabilities/clock/clock.capability.js';
-import { intercept } from '../../capabilities/intercept/intercept.capability.js';
-import { seed } from '../../capabilities/seed/seed.capability.js';
-import { sharing } from '../../capabilities/with/with.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
-import { databaseSet } from '../../seams/fs/database-set.js';
-import { mswNode } from '../../seams/msw/msw-node.js';
-import { processClock } from '../../seams/vitest/clock.engine.js';
-import type { ChainOf } from '../chain.js';
-import { defineFacet } from '../define-facet.js';
+import type { MatrixRow } from '../../kernel/chain/capability.js';
+import type { ChainOf } from '../../kernel/chain/chain.js';
+import type { SpecificationConfig } from '../../kernel/chain/config.js';
+import { defineFacet } from '../../kernel/chain/define-facet.js';
+import { sharing } from '../../kernel/context/with.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { clock } from '../../world/clock/clock.capability.js';
+import { processClock } from '../../world/clock/clock.engine.js';
+import { databaseSet } from '../../world/services/seed/database-set.js';
+import { seed } from '../../world/services/seed/seed.capability.js';
+import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
+import { mswNode } from '../../world/stubs/interceptor/msw-node.js';
 import type { JobSpecificationOptions } from './job.handle.js';
+/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
+import { trigger } from './trigger.action.js';
 
 const composition = {
     actions: [trigger],

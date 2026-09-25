@@ -2,7 +2,7 @@
 import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
-import { moveKeepingHistory } from '../src/seams/git/tree.js';
+import { moveKeepingHistory } from '../src/kernel/files/git-tree.js';
 import { fixCopiedGround, fixRootGround } from './checker-crossfile.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './checker-member.js';
 import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';

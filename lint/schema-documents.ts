@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { parseSpecDocument, SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
-import { treeEntries } from '../src/seams/git/tree.js';
-import { parseYamlSource } from '../src/seams/yaml/document.js';
+import { parseSpecDocument, SPEC_EXTENSION } from '../src/facets/cli/documents/spec-document.js';
+import { treeEntries } from '../src/kernel/files/git-tree.js';
+import { parseYamlSource } from '../src/kernel/files/yaml-document.js';
 
 /**
  * The published schema, run against the documents it describes.

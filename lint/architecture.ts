@@ -1,33 +1,27 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { isBuiltin } from 'node:module';
-import { basename, dirname, relative, resolve } from 'node:path';
+import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { child, childList, isNode, stringValue, walk } from './ast.js';
+import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 
 /**
- * The architecture a facet is composed in, read off the tree: the folders a
+ * The architecture a facet is composed in, read off the tree: the modules a
  * definition lives in, the definitions each module exports, and what a module
  * loads at any depth. The meta-tests I7 and I8 hold it (`architecture.test.ts`).
  */
 
-/** The folders directly under a tree of `src/`. */
-export function foldersOf(root: string, tree: string): string[] {
-    return readdirSync(resolve(root, 'src', tree), { withFileTypes: true })
-        .filter((entry) => entry.isDirectory())
-        .map((entry) => entry.name)
-        .toSorted();
-}
-
-/** The modules of every folder of a tree whose name ends in `suffix`, as repository paths. */
+/** The modules under a tree of `src/` whose name ends in `suffix`, at any depth, as repository paths — tests left out. */
 export function modulesOf(root: string, tree: string, suffix: string): string[] {
-    return foldersOf(root, tree).flatMap((folder) =>
-        readdirSync(resolve(root, 'src', tree, folder))
-            .filter((name) => name.endsWith(suffix) && !name.endsWith('.test.ts'))
-            .map((name) => `src/${tree}/${folder}/${name}`),
-    );
+    return readdirSync(resolve(root, 'src', tree), { recursive: true, withFileTypes: true })
+        .filter(
+            (entry) =>
+                entry.isFile() && entry.name.endsWith(suffix) && !entry.name.endsWith('.test.ts'),
+        )
+        .map((entry) => relative(root, join(entry.parentPath, entry.name)))
+        .toSorted();
 }
 
 /**
@@ -125,21 +119,21 @@ export async function definitionsIn(
 
 /**
  * What is out of place about one definition, a sentence each: a setup is
- * named for its folder and an action for the folder `actionFolders` gives
- * it; a setup or an action is tested beside its module, unless a kind of
- * `siblingless-kinds.ts` claims that module; a setup names a
- * `<folder>.port.ts` exactly when it arms an engine.
+ * named for its module (`<name>.capability.ts`) and an action is one the
+ * module `actionModules` gives it; a setup or an action is tested beside its
+ * module, unless a kind of `siblingless-kinds.ts` claims that module; a setup
+ * has a `<name>.port.ts` beside it exactly when it arms an engine.
  */
 export function straysOf(
     root: string,
     { definition, path }: { definition: Definition; path: string },
-    actionFolders: Readonly<Record<string, string>>,
+    actionModules: Readonly<Record<string, string>>,
 ): string[] {
-    const folder = basename(dirname(path));
-    const owner = definition.kind === 'action' ? actionFolders[definition.name] : definition.name;
+    const module = basename(path).replace(/\.(?:capability|action)\.ts$/u, '');
+    const owner = definition.kind === 'action' ? actionModules[definition.name] : definition.name;
     const found: string[] = [];
-    if (owner !== folder) {
-        found.push(`${path}: ${definition.name} is not ${folder}'s`);
+    if (owner !== module) {
+        found.push(`${path}: ${definition.name} is not ${module}'s`);
     }
     if (
         definition.kind !== 'context' &&
@@ -148,10 +142,10 @@ export function straysOf(
     ) {
         found.push(`${path}: ${definition.name} has no test beside it`);
     }
-    const ported = existsSync(resolve(root, dirname(path), `${folder}.port.ts`));
+    const ported = existsSync(resolve(root, dirname(path), `${module}.port.ts`));
     if (definition.kind === 'setup' && ported !== (definition.arm !== undefined)) {
         found.push(
-            `${path}: ${definition.name} ${ported ? 'arms no engine, yet has' : 'arms an engine, yet has no'} ${folder}.port.ts`,
+            `${path}: ${definition.name} ${ported ? 'arms no engine, yet has' : 'arms an engine, yet has no'} ${module}.port.ts`,
         );
     }
     return found;

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { forgetTree } from '../src/seams/git/tree.js';
+import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { checkOneSubject, checkSubjectFolder, fixSubjects } from './checker-subject.js';
 
 /** A specs tree on disk, outside every work tree: the walk reads the disk. */

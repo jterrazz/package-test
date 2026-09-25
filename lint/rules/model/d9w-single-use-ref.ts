@@ -1,7 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
-import { isRelativePath } from '../../../src/model/chain/spec-path.js';
+import { isRelativePath } from '../../../src/kernel/files/spec-path.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';

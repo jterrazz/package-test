@@ -1,14 +1,14 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
 import { handleFileFindings } from './facet-handle.js';
+import { parseProgram } from './module-parser.js';
 
 /** What each finding of a constructor says, as `<messageId> <data values>`. */
 function findingsOf(body: string): string[] {
     const program = parseProgram(
         'job.handle.ts',
-        `import { seed } from '../../capabilities/seed/seed.capability.js';\nimport * as results from '../../results/result.js';\nimport { jobFacet } from './job.facet.js';\n${body}`,
+        `import { seed } from '../../world/services/seed/seed.capability.js';\nimport * as results from '../../expectations/result.js';\nimport { jobFacet } from './job.facet.js';\n${body}`,
     );
     if (!isNode(program)) {
         throw new Error('the constructor does not parse');

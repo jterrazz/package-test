@@ -1,19 +1,25 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { GROUND_FIXTURES } from '../src/model/chain/ground.js';
-import { resolveSpecPath } from '../src/model/chain/resolve.js';
 import {
     assertedStreams,
     DOCUMENT_KEYS,
     readSpecFile,
     RUN_KEYS,
     SPEC_EXTENSION,
-} from '../src/model/literate/spec-document.js';
-import type { SpecDocument, SpecFile } from '../src/model/literate/spec-document.js';
-import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
-import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../src/seams/yaml/document.js';
-import type { Node, Pair, YAMLMap } from '../src/seams/yaml/document.js';
+} from '../src/facets/cli/documents/spec-document.js';
+import type { SpecDocument, SpecFile } from '../src/facets/cli/documents/spec-document.js';
+import { treeEntries, treeKind, treeNames } from '../src/kernel/files/git-tree.js';
+import { GROUND_FIXTURES } from '../src/kernel/files/ground.js';
+import { resolveSpecPath } from '../src/kernel/files/resolve.js';
+import {
+    isMap,
+    isScalar,
+    isSeq,
+    renderYamlSource,
+    Scalar,
+} from '../src/kernel/files/yaml-document.js';
+import type { Node, Pair, YAMLMap } from '../src/kernel/files/yaml-document.js';
 import type { CheckerPassId, Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
 

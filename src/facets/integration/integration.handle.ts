@@ -1,17 +1,17 @@
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { resolveRoot } from '../../model/chain/resolve.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
+import { registerMatchers } from '../../expectations/goldens/matchers.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { resolveRoot } from '../../kernel/files/resolve.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../model/services/services.js';
+} from '../../world/services/services.js';
 import type {
     DatabaseKeys,
     ServiceRecord,
     StartedServices,
-} from '../../model/services/services.js';
+} from '../../world/services/services.js';
 import type { IntegrationSpecification } from './integration.facet.js';
 import { integrationFacet } from './integration.facet.js';
 

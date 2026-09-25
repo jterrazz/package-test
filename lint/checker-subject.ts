@@ -1,8 +1,13 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { GROUND_DIRS, SHARED_GROUND } from '../src/model/chain/ground.js';
-import { forgetTree, moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
+import {
+    forgetTree,
+    moveKeepingHistory,
+    treeEntries,
+    treeKind,
+} from '../src/kernel/files/git-tree.js';
+import { GROUND_DIRS, SHARED_GROUND } from '../src/kernel/files/ground.js';
 import { listFiles, repointModuleTests, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 import { projectRootOf } from './role.js';

@@ -1,7 +1,7 @@
-import { trigger } from '../../actions/trigger/trigger.action.js';
-import { clock } from '../../capabilities/clock/clock.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import { processClock } from '../../seams/vitest/clock.engine.js';
+import { trigger } from './trigger.action.js';
+import { clock } from '../../world/clock/clock.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { processClock } from '../../world/clock/clock.engine.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
 

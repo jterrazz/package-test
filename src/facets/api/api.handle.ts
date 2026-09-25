@@ -1,20 +1,20 @@
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { resolveRoot } from '../../model/chain/resolve.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
-import { writeLedger } from '../../model/routes/routes.js';
+import { createDockerReader } from '../../expectations/command/container.js';
+import type { ContainerAccessor } from '../../expectations/command/container.js';
+import { registerMatchers } from '../../expectations/goldens/matchers.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { resolveRoot } from '../../kernel/files/resolve.js';
+import { routesLedger } from '../../vitest/provided.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../model/services/services.js';
-import type { DatabaseKeys, ServiceRecord } from '../../model/services/services.js';
-import { createDockerReader } from '../../results/container.js';
-import type { ContainerAccessor } from '../../results/container.js';
-import { routesLedger } from '../../runner/provided.js';
-import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
+} from '../../world/services/services.js';
+import type { DatabaseKeys, ServiceRecord } from '../../world/services/services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
+import { writeLedger } from './routes/routes.js';
+import { HonoAdapter } from './server/hono.adapter.js';
 
 // ── Types ──
 

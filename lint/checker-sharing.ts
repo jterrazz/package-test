@@ -2,10 +2,10 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
-import { GROUND_EXPECTED, GROUND_REQUESTS, isGroundName } from '../src/model/chain/ground.js';
-import { isRelativePath } from '../src/model/chain/spec-path.js';
-import { dedent } from '../src/model/matching/dedent.js';
-import { forgetTree, treeKind } from '../src/seams/git/tree.js';
+import { dedent } from '../src/expectations/text/dedent.js';
+import { forgetTree, treeKind } from '../src/kernel/files/git-tree.js';
+import { GROUND_EXPECTED, GROUND_REQUESTS, isGroundName } from '../src/kernel/files/ground.js';
+import { isRelativePath } from '../src/kernel/files/spec-path.js';
 import {
     blankComments,
     checkPoolFixtureSharing,

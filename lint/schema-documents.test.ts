@@ -3,8 +3,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { PRESENCE } from '../src/model/literate/spec-document.js';
-import type { PresenceShape } from '../src/model/literate/spec-document.js';
+import { PRESENCE } from '../src/facets/cli/documents/spec-document.js';
+import type { PresenceShape } from '../src/facets/cli/documents/spec-document.js';
 import {
     documentData,
     isFixture,

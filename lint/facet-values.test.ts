@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { child, childList, isNode } from './ast.js';
 import { isAdapter, isNamedKey, isRow } from './facet-values.js';
+import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
 /** The expression `const value = <expression>;` declares. */
@@ -38,14 +38,14 @@ describe('facet values', () => {
         expect(rows.map((row) => isRow(expressionOf(row)))).toStrictEqual([true, false, false]);
     });
 
-    test("an adapter is a plain value or a seam's constructor called on plain values", () => {
-        // Given - a seam's constructor and one that is not
+    test("an adapter is a plain value or an engine's constructor called on plain values", () => {
+        // Given - an engine's constructor and a definition
         const imports = new Map([
-            ['databaseSet', '../../seams/fs/database-set.js'],
-            ['seed', '../../capabilities/seed/seed.capability.js'],
+            ['databaseSet', '../../world/services/seed/database-set.js'],
+            ['seed', '../../world/services/seed/seed.capability.js'],
         ]);
 
-        // Then - only the seam's builds an adapter, and only on plain values
+        // Then - only the engine's builds an adapter, and only on plain values
         expect(isAdapter(expressionOf('databaseSet(config)'), imports)).toBe(true);
         expect(isAdapter(expressionOf('config.jobs ?? []'), imports)).toBe(true);
         expect(isAdapter(expressionOf('seed(config)'), imports)).toBe(false);

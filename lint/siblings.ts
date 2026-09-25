@@ -1,6 +1,6 @@
 import { join, resolve } from 'node:path';
 
-import { treeEntries } from '../src/seams/git/tree.js';
+import { treeEntries } from '../src/kernel/files/git-tree.js';
 import { cell, table } from './catalog.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import type { SiblinglessKind } from './siblingless-kinds.js';

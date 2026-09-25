@@ -1,17 +1,17 @@
+import type { MatrixRow } from '../../kernel/chain/capability.js';
+import type { ChainOf } from '../../kernel/chain/chain.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { defineFacet } from '../../kernel/chain/define-facet.js';
+import { headers } from '../../kernel/context/headers.capability.js';
+import { sharing } from '../../kernel/context/with.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { clock } from '../../world/clock/clock.capability.js';
+import { stubBackend } from '../../world/stubs/backend/stub-backend.engine.js';
+import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
+import { pageClock } from './browser/page-clock.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import { rawFetch } from '../../actions/fetch/fetch.action.js';
-import { visit } from '../../actions/visit/visit.action.js';
-import { clock } from '../../capabilities/clock/clock.capability.js';
-import { headers } from '../../capabilities/headers/headers.capability.js';
-import { intercept } from '../../capabilities/intercept/intercept.capability.js';
-import { sharing } from '../../capabilities/with/with.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { MatrixRow } from '../../model/chain/capability.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { pageClock } from '../../seams/playwright/page-clock.js';
-import { stubBackend } from '../../seams/stub-backend/stub-backend.engine.js';
-import type { ChainOf } from '../chain.js';
-import { defineFacet } from '../define-facet.js';
+import { rawFetch } from './fetch/fetch.action.js';
+import { visit } from './visit/visit.action.js';
 import type { WebsiteSpecificationOptions } from './website.handle.js';
 
 const composition = {

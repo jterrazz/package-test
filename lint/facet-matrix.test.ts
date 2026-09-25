@@ -1,19 +1,19 @@
 import { describe, expect, test } from 'vitest';
 
-import type { ComponentVisitor } from '../src/actions/render/scenario.js';
-import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
-import type { JobResult } from '../src/index.js';
+import type { Visitor } from '../src/elements/browser.port.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
-import * as elements from '../src/model/elements/elements.js';
-import type { Visitor } from '../src/model/ports/browser.port.js';
-import type { MobileElementKind, MobileVisitor } from '../src/model/ports/device.port.js';
-import type { CallResult } from '../src/results/call.result.js';
-import type { CliResult } from '../src/results/cli.result.js';
-import type { FetchResult } from '../src/results/fetch.result.js';
-import type { HttpResult } from '../src/results/http.result.js';
-import type { PageResult } from '../src/results/page.result.js';
-import type { RenderResult } from '../src/results/render.result.js';
-import type { ScreenResult } from '../src/results/screen.result.js';
+import * as elements from '../src/elements/elements.js';
+import type { CliResult } from '../src/expectations/command/cli.result.js';
+import type { HttpResult } from '../src/facets/api/request/http.result.js';
+import type { RouteOptionsAny } from '../src/facets/api/request/route.js';
+import type { RenderResult } from '../src/facets/component/render/render.result.js';
+import type { ComponentVisitor } from '../src/facets/component/render/scenario.js';
+import type { CallResult } from '../src/facets/integration/call.result.js';
+import type { MobileElementKind, MobileVisitor } from '../src/facets/mobile/device/device.port.js';
+import type { ScreenResult } from '../src/facets/mobile/screen/screen.result.js';
+import type { FetchResult } from '../src/facets/website/fetch/fetch.result.js';
+import type { PageResult } from '../src/facets/website/visit/page.result.js';
+import type { JobResult } from '../src/index.js';
 import { CAPABILITIES, COLUMNS, memberOf } from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
 import { capabilities } from './matrix.js';

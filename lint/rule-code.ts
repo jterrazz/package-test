@@ -13,4 +13,4 @@ export function codeOf(passId: string): string {
  * The chapter the generated catalogue lives in — the page a message's `read:`
  * part routes to and the file `npm run docs` writes, one constant for both.
  */
-export { CATALOGUE_CHAPTER } from '../src/model/lesson/refusal.js';
+export { CATALOGUE_CHAPTER } from '../src/kernel/refusals/refusal.js';

@@ -30,7 +30,7 @@ describe('k9 — a spec server binds port 0 (meta-test)', () => {
     test('names a spec server and a module test reading a handed port, never a container nor the PORT form proof', () => {
         // Given - a fixture server and a module test reading PORT, a container app doing the same, a module, and the PORT form's own proof
         const root = tree({
-            'src/seams/process/serve.adapter.test.ts':
+            'src/world/services/process/serve.adapter.test.ts':
                 'run(\'node -e "console.log(process.env.PORT)"\');\n',
             'specs/fixtures/app/Dockerfile': 'FROM node\n',
             'specs/fixtures/app/server.ts': 'listen(process.env.PORT);\n',

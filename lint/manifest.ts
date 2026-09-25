@@ -1,4 +1,4 @@
-import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
+import { REFUSAL_WHY } from '../src/kernel/refusals/refusal.js';
 import type { RuleDoc } from './rule-shape.js';
 
 /**

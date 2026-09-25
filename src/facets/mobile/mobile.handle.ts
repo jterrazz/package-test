@@ -1,18 +1,18 @@
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { resolveRoot } from '../../model/chain/resolve.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
-import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
-import { releaseIsolation, startServices } from '../../model/services/services.js';
-import type { ServiceRecord, StartedServices } from '../../model/services/services.js';
-import { mobileServer, mobileSessions } from '../../runner/provided.js';
-import { serveAppium } from '../../seams/appium/appium-server.js';
-import type { AppiumServer, MobileDevice, RunServer } from '../../seams/appium/appium-server.js';
-import { sessionLedger } from '../../seams/appium/session-ledger.js';
-import { sameRuntime } from '../../seams/simctl/simulator.js';
-import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
+import { registerMatchers } from '../../expectations/goldens/matchers.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { resolveRoot } from '../../kernel/files/resolve.js';
+import { mobileServer, mobileSessions } from '../../vitest/provided.js';
+import { releaseIsolation, startServices } from '../../world/services/services.js';
+import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
+import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
+import type { DevicePort, DeviceTimeouts, SessionLedger } from './device/device.port.js';
 import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
+import { serveAppium } from './session/appium-server.js';
+import type { AppiumServer, MobileDevice, RunServer } from './session/appium-server.js';
+import { sessionLedger } from './session/session-ledger.js';
+import { sameRuntime } from './session/simulator.js';
 
 // ── Types ──
 
@@ -250,7 +250,7 @@ export async function startMobile<Services extends ServiceRecord>(
     let device: DevicePort | null = null;
     const getDevice = async (): Promise<DevicePort> => {
         if (!device) {
-            const { AppiumAdapter } = await import('../../seams/appium/appium.adapter.js');
+            const { AppiumAdapter } = await import('./device/appium.adapter.js');
             device = new AppiumAdapter({
                 device: driven,
                 serverUrl: appium.url,

@@ -1,13 +1,13 @@
 import { readFileSync, statSync } from 'node:fs';
 
-import { forgetTree, treeKind, treeNames, treeStamp } from '../src/seams/git/tree.js';
+import { forgetTree, treeKind, treeNames, treeStamp } from '../src/kernel/files/git-tree.js';
 
 /**
  * Filesystem probes for the plugin's fs-anchored rules — every rule that reads
  * the tree beside the file oxlint visits — and the anchors they stand on.
  *
  * A rule's evidence is read through the tree the checker walks
- * (`src/seams/git/tree.ts`): inside a git work tree a file git ignores
+ * (`src/kernel/files/git-tree.ts`): inside a git work tree a file git ignores
  * neither satisfies nor violates a rule, an untracked one it does not ignore
  * counts like a tracked one, and elsewhere the disk answers. The one
  * exception is {@link isOnDisk}, for what git never lists by construction —

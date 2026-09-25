@@ -1,8 +1,8 @@
-import { interceptThrough } from './capabilities/intercept/intercept.scope.js';
-import type { Intercept } from './capabilities/intercept/intercept.scope.js';
-import { registerContainerIntegrations } from './model/services/registry.js';
-import { serviceContainers } from './runner/provided.js';
-import { ServiceContainer } from './seams/testcontainers/service-container.js';
+import { serviceContainers } from './vitest/provided.js';
+import { ServiceContainer } from './world/services/containers/service-container.js';
+import { registerContainerIntegrations } from './world/services/startup/registry.js';
+import { interceptThrough } from './world/stubs/intercept/intercept.scope.js';
+import type { Intercept } from './world/stubs/intercept/intercept.scope.js';
 
 // ── The surface both runtimes share (browser-safe) ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
@@ -18,7 +18,7 @@ export const intercept: Intercept = interceptThrough(async (stubs) => {
     // Reached through the same lazy import the chain uses: a static one here
     // Would pull the msw engine into every node consumer's graph at load, and
     // The seam exists to be paid for only by the specs that declare a stub.
-    const { registerStubs } = await import('./seams/msw/server.js');
+    const { registerStubs } = await import('./world/stubs/interceptor/server.js');
     return await registerStubs(stubs);
 });
 export { component } from './facets/component/component.handle.js';
@@ -28,7 +28,7 @@ export {
     type HonoApp,
 } from './facets/api/api.handle.js';
 export { type CliHandle, type CliSpecificationOptions } from './facets/cli/cli.handle.js';
-export type { LiterateRunFlags } from './actions/run/literate.js';
+export type { LiterateRunFlags } from './facets/cli/documents/literate.js';
 export {
     type SpecDocument,
     type SpecEnvToken,
@@ -37,7 +37,7 @@ export {
     type SpecRun,
     type SpecServeEntry,
     type SpecStream,
-} from './model/literate/spec-document.js';
+} from './facets/cli/documents/spec-document.js';
 export {
     type IntegrationHandle,
     type IntegrationSpecificationOptions,
@@ -53,10 +53,10 @@ export {
     type WebsiteHandle,
     type WebsiteSpecificationOptions,
 } from './facets/website/website.handle.js';
-export { type ProcessOptions } from './seams/process/serve.adapter.js';
+export { type ProcessOptions } from './world/services/process/serve.adapter.js';
 export { type ServerSpec } from './facets/website/website.handle.js';
-export { processService as process, ProcessHandle } from './model/services/process.js';
-export { type DatabaseKeys, type ServiceRecord } from './model/services/services.js';
+export { processService as process, ProcessHandle } from './world/services/process/process.js';
+export { type DatabaseKeys, type ServiceRecord } from './world/services/services.js';
 
 // Facets — each chain is named in its own folder, beside the constructor that
 // Builds it.
@@ -64,17 +64,17 @@ export type { ApiSpecification } from './facets/api/api.facet.js';
 export type { CliSpecification } from './facets/cli/cli.facet.js';
 export type { IntegrationSpecification } from './facets/integration/integration.facet.js';
 export type { JobSpecification } from './facets/job/job.facet.js';
-export type { JobResult } from './results/job.result.js';
+export type { JobResult } from './facets/job/job.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.facet.js';
 export type { WebsiteSpecification } from './facets/website/website.facet.js';
-export type { ChainContext } from './capabilities/with/with.capability.js';
-export type { SeedSource } from './capabilities/seed/seed.capability.js';
+export type { ChainContext } from './kernel/context/with.capability.js';
+export type { SeedSource } from './world/services/seed/seed.capability.js';
 export type {
     DockerSpecConfig,
     Job,
     LiterateServeRegistration,
     SpecificationConfig,
-} from './model/chain/config.js';
+} from './kernel/chain/config.js';
 
 // Results that read a disk, a database or a container — node only.
 //
@@ -83,37 +83,46 @@ export type {
 // thing a consumer needs the name for is annotating a helper that takes one.
 // Publishing the classes exported a constructor nobody may call and a
 // prototype chain the package is then not free to change.
-export type { FileAccessor } from './results/result.js';
-export type { TestSettings } from './settings.js';
-export type { BaseResult } from './results/result.js';
-export type { CliResult } from './results/cli.result.js';
-export type { ContainerAccessor } from './results/container.js';
-export type { CallResult } from './results/call.result.js';
-export type { HttpResult } from './results/http.result.js';
-export type { ScreenResult } from './results/screen.result.js';
-export type { FetchResult } from './results/fetch.result.js';
-export type { PageResult } from './results/page.result.js';
-export type { DirectoryAccessor } from './results/directory.js';
-export type { FilesystemAccessor } from './results/filesystem.js';
-export type { ResponseAccessor } from './results/response.js';
-export { text } from './results/text-subject.js';
+export type { FileAccessor } from './expectations/result.js';
+export type { TestSettings } from './kernel/config/settings.js';
+export type { BaseResult } from './expectations/result.js';
+export type { CliResult } from './expectations/command/cli.result.js';
+export type { ContainerAccessor } from './expectations/command/container.js';
+export type { CallResult } from './facets/integration/call.result.js';
+export type { HttpResult } from './facets/api/request/http.result.js';
+export type { ScreenResult } from './facets/mobile/screen/screen.result.js';
+export type { FetchResult } from './facets/website/fetch/fetch.result.js';
+export type { PageResult } from './facets/website/visit/page.result.js';
+export type { DirectoryAccessor } from './expectations/disk/directory.js';
+export type { FilesystemAccessor } from './expectations/disk/filesystem.js';
+export type { ResponseAccessor } from './expectations/http/response.js';
+export { text } from './expectations/text/text-subject.js';
 
 // Ports
-export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './model/ports/cli.port.js';
-export type { DatabasePort } from './model/ports/database.port.js';
-export type { IsolationStrategy } from './model/ports/isolation.port.js';
-export type { ServiceHandle } from './model/ports/service.port.js';
+export type {
+    CliEnv,
+    CliInput,
+    CliOutput,
+    CliPort,
+    ExecOptions,
+} from './facets/cli/process/cli.port.js';
+export type { DatabasePort } from './world/services/database.port.js';
+export type { IsolationStrategy } from './world/services/isolation.port.js';
+export type { ServiceHandle } from './world/services/service.port.js';
 export type {
     ServerPort,
     ServerRequestOptions,
     ServerResponse,
-} from './model/ports/server.port.js';
-export type { ContainerOptions, ContainerPort } from './model/ports/container.port.js';
+} from './facets/api/server/server.port.js';
+export type {
+    ContainerOptions,
+    ContainerPort,
+} from './world/services/containers/container.port.js';
 
 // Services
-export { postgres, type PostgresOptions } from './seams/postgres/postgres.js';
-export { redis, type RedisOptions } from './seams/redis/redis.js';
-export { sqlite, type SqliteOptions } from './seams/sqlite/sqlite.js';
+export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
+export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
+export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';
 
 // ── Composition root (CONVENTIONS I1) ──
 // `specification/` never imports an external dependency: the orchestrator

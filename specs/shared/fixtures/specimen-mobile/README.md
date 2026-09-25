@@ -26,4 +26,4 @@ It needs, on the machine:
 | network access on the first run           | npm installs Appium and the XCUITest driver, once                               |
 | minutes on a simulator's first session    | WebDriverAgent is built then (about 75 s measured), and cached for later ones |
 
-No CI job runs it, and `make check` never calls it: CI provisions no simulator. Run it before a release, and whenever `src/seams/appium/` or the double changes.
+No CI job runs it, and `make check` never calls it: CI provisions no simulator. Run it before a release, and whenever `src/facets/mobile/` or the double changes.

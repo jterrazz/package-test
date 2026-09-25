@@ -16,49 +16,49 @@ ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as
     invalid: [
         // Deep specification-layer import from a spec.
         {
-            code: 'import { match } from "../../src/model/matching/match.js";',
+            code: 'import { match } from "../../src/expectations/tokens/match.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
-        // The integrations layer is internal — from any spec, no exception.
+        // The world layer is internal — from any spec, no exception.
         {
-            code: 'import { postgres } from "../../src/seams/postgres/postgres.js";',
+            code: 'import { postgres } from "../../src/world/services/postgres/postgres.adapter.js";',
             errors: 1,
             filename: '/repo/specs/api/seeding/seeding.test.ts',
         },
         // Not even from a spec whose subject IS the adapter: that probe is a
         // Module test beside its module.
         {
-            code: 'import { redis } from "../../src/seams/redis/redis.js";',
+            code: 'import { redis } from "../../src/world/services/redis/redis.adapter.js";',
             errors: 1,
             filename: '/repo/specs/integration/redis/redis.test.ts',
         },
-        // The vitest layer is internal too.
+        // The expectations layer is internal too.
         {
-            code: 'import { registerMatchers } from "../../src/model/goldens/matchers.js";',
+            code: 'import { registerMatchers } from "../../src/expectations/goldens/matchers.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
         // A terminal action's module is internal.
         {
-            code: 'import { runSpecDocument } from "../../src/actions/run/literate.js";',
+            code: 'import { runSpecDocument } from "../../src/facets/cli/documents/literate.js";',
             errors: 1,
             filename: '/repo/specs/cli/run/document.spec.ts',
         },
         // A capability's module and a stub builder's are internal: a spec reaches both through the entry.
         {
-            code: 'import { interceptThrough } from "../../src/capabilities/intercept/intercept.scope.js";',
+            code: 'import { interceptThrough } from "../../src/world/stubs/intercept/intercept.scope.js";',
             errors: 1,
             filename: '/repo/specs/api/intercept/exhausted.spec.ts',
         },
         {
-            code: 'import { http } from "../../src/stubs/http/http.js";',
+            code: 'import { http } from "../../src/world/stubs/http/http.js";',
             errors: 1,
             filename: '/repo/specs/api/intercept/exhausted.spec.ts',
         },
         // What a terminal action hands back is internal: a spec reads it off the result.
         {
-            code: 'import { TextAccessor } from "../../src/results/text.js";',
+            code: 'import { TextAccessor } from "../../src/expectations/text/text.js";',
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },

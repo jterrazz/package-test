@@ -1,18 +1,18 @@
-/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import { exec } from '../../actions/exec/exec.action.js';
-import { run } from '../../actions/run/run.action.js';
-import { env } from '../../capabilities/env/env.capability.js';
-import { fixture } from '../../capabilities/fixture/fixture.capability.js';
-import { seed } from '../../capabilities/seed/seed.capability.js';
-import { sharing } from '../../capabilities/with/with.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { MatrixRow } from '../../model/chain/capability.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { databaseSet } from '../../seams/fs/database-set.js';
-import { fsFixtures } from '../../seams/fs/fixtures.js';
-import type { ChainOf } from '../chain.js';
-import { defineFacet } from '../define-facet.js';
+import type { MatrixRow } from '../../kernel/chain/capability.js';
+import type { ChainOf } from '../../kernel/chain/chain.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { defineFacet } from '../../kernel/chain/define-facet.js';
+import { sharing } from '../../kernel/context/with.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { databaseSet } from '../../world/services/seed/database-set.js';
+import { seed } from '../../world/services/seed/seed.capability.js';
 import type { CliSpecificationOptions } from './cli.handle.js';
+import { run } from './documents/run.action.js';
+import { fixture } from './fixture/fixture.capability.js';
+import { fsFixtures } from './fixture/fixtures.js';
+import { env } from './process/env.capability.js';
+/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
+import { exec } from './process/exec.action.js';
 
 const composition = {
     actions: [exec, run],

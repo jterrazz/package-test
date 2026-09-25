@@ -1,4 +1,4 @@
-import { ROUTES_KEY } from '../src/model/routes/routes.js';
+import { ROUTES_KEY } from '../src/facets/api/routes/routes.js';
 
 /**
  * The section a fix records: every entry lowered to the count that fell below

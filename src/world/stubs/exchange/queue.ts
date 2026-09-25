@@ -1,0 +1,262 @@
+/**
+ * The ONE stub queue — pure, engine-agnostic (no MSW, no node:http).
+ * Both engines consume it: the MSW integration on api/job chains, and the
+ * declared stub backend on website/mobile chains.
+ *
+ * Selection: the FIRST stub in declaration order that matches the observed
+ * request and is not exhausted. A stub with no `times` is unlimited (a
+ * re-render or a retry replays it); `times: n` is spent after n serves, so an
+ * ordered sequence is written as finite stubs before an unlimited tail:
+ * `[error500 ×3, ok]`.
+ *
+ * Strictness (CONVENTIONS D7): when nothing matches — including "everything
+ * that matches is exhausted" — the engine answers 501, records the request,
+ * and the chain fails with {@link StubQueue.unmatchedError}. A chain that
+ * declared zero stubs is not guarded at all (unchanged boundary).
+ */
+
+import { CaptureScope } from '../../../expectations/tokens/match.js';
+import {
+    hasPlaceholders,
+    placeholderPatternSource,
+    textEquals,
+} from '../../../expectations/tokens/structural.js';
+import { refusal } from '../../../kernel/refusals/refusal.js';
+import { describeRoute } from '../stub.js';
+import type { Stub } from '../stub.js';
+import type { MatchableRequest } from './exchange.js';
+
+/** Base used to parse origin-relative observed URLs (`/events?x=1`). */
+const RELATIVE_BASE = 'http://stub.invalid';
+
+/** Split a declared url into its base (origin+path, or path) and query halves.
+ * Never through `new URL()`, which would percent-encode `{{token}}` braces. */
+function splitDeclared(url: string): { base: string; query: URLSearchParams } {
+    const separator = url.indexOf('?');
+    if (separator === -1) {
+        return { base: url, query: new URLSearchParams() };
+    }
+    return { base: url.slice(0, separator), query: new URLSearchParams(url.slice(separator + 1)) };
+}
+
+/** Decode percent-escapes, falling back to the raw text on malformed input. */
+function safeDecode(text: string): string {
+    try {
+        return decodeURIComponent(text);
+    } catch {
+        return text;
+    }
+}
+
+/** Token-aware comparison of one declared value against an observed one. */
+function valueMatches(declared: string, observed: string): boolean {
+    return textEquals(declared, observed, new CaptureScope());
+}
+
+/**
+ * Does an observed URL satisfy a declared one? A RegExp tests the full URL; a
+ * PATH FORM (`/articles/{{uuid}}`) ignores the origin; an absolute string
+ * compares origin+pathname. In both string forms `{{token}}` segments compare
+ * structurally and declared query params are a SUBSET of the observed ones.
+ */
+export function urlMatches(declared: RegExp | string, observed: string): boolean {
+    if (declared instanceof RegExp) {
+        return declared.test(observed);
+    }
+
+    let url: URL;
+    try {
+        url = new URL(observed, RELATIVE_BASE);
+    } catch {
+        return false;
+    }
+
+    const { base, query } = splitDeclared(declared);
+    const observedBase = base.startsWith('/') ? url.pathname : `${url.origin}${url.pathname}`;
+    const decodedBase = base.startsWith('/')
+        ? safeDecode(url.pathname)
+        : `${url.origin}${safeDecode(url.pathname)}`;
+    if (!valueMatches(base, observedBase) && !valueMatches(base, decodedBase)) {
+        return false;
+    }
+
+    for (const key of new Set(query.keys())) {
+        const observedValues = url.searchParams.getAll(key);
+        const everyDeclaredFound = query
+            .getAll(key)
+            .every((value) => observedValues.some((actual) => valueMatches(value, actual)));
+        if (!everyDeclaredFound) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+/**
+ * Does an observed request satisfy a stub? Method (`*` matches any), URL,
+ * then the stub's own `match` predicate (headers/query/body filters).
+ */
+export function stubMatches(stub: Stub, request: MatchableRequest): boolean {
+    const { match, method, url } = stub.request;
+    if (method !== '*' && method.toUpperCase() !== request.method.toUpperCase()) {
+        return false;
+    }
+    if (!urlMatches(url, request.url)) {
+        return false;
+    }
+    return match ? match(request) : true;
+}
+
+/**
+ * The URL pattern an out-of-process router (MSW) must register so the request
+ * REACHES the queue. Deliberately no narrower than {@link stubMatches} —
+ * the predicate above stays the authority on what actually matches.
+ */
+export function routePatternOf(declared: RegExp | string): RegExp | string {
+    if (declared instanceof RegExp) {
+        return declared;
+    }
+    const { base } = splitDeclared(declared);
+    if (base.startsWith('/')) {
+        return new RegExp(
+            String.raw`^https?:\/\/[^/?#]+${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`,
+            'u',
+        );
+    }
+    if (hasPlaceholders(base)) {
+        return new RegExp(String.raw`^${placeholderPatternSource(base)}(?:\?[^#]*)?(?:#.*)?$`, 'u');
+    }
+    return base;
+}
+
+/** One route to register with an out-of-process router. */
+export type StubRoute = {
+    methods: string[];
+    url: RegExp | string;
+};
+
+/** One declared stub and how often the chain has served it. */
+type StubEntry = {
+    stub: Stub;
+    served: number;
+};
+
+/** How a declared stub reads in a failure message: spent, served, or silent. */
+function stateOf({ stub, served }: StubEntry): string {
+    const { times } = stub;
+    if (times !== undefined && served >= times) {
+        return ` (exhausted after ${times})`;
+    }
+    return served === 0 ? '' : ` (served ${served} time(s))`;
+}
+
+export class StubQueue {
+    private readonly entries: StubEntry[];
+
+    constructor(stubs: readonly Stub[]) {
+        this.entries = stubs.map((stub) => ({ stub, served: 0 }));
+    }
+
+    /** How many stubs the chain declared. */
+    get size(): number {
+        return this.entries.length;
+    }
+
+    /**
+     * Routes to register with an out-of-process router, deduped by pattern —
+     * two stubs on the same URL share one handler and one queue.
+     */
+    get routes(): StubRoute[] {
+        const routes = new Map<string, StubRoute>();
+        for (const { stub } of this.entries) {
+            const url = routePatternOf(stub.request.url);
+            const key = String(url);
+            const route = routes.get(key) ?? { methods: [], url };
+            if (!route.methods.includes(stub.request.method)) {
+                route.methods.push(stub.request.method);
+            }
+            routes.set(key, route);
+        }
+        return [...routes.values()];
+    }
+
+    /** The declared routes, in order — the enumeration a 501 body carries. */
+    declaredRoutes(): string[] {
+        return this.entries.map(({ stub }) => describeRoute(stub));
+    }
+
+    /**
+     * Serve the first stub in declaration order that matches and is not
+     * exhausted, or null when nothing matches (including "everything that
+     * matches is spent") — the strict-violation signal.
+     */
+    take(request: MatchableRequest): null | Stub {
+        for (const entry of this.entries) {
+            const { times } = entry.stub;
+            if (times !== undefined && entry.served >= times) {
+                continue;
+            }
+            if (!stubMatches(entry.stub, request)) {
+                continue;
+            }
+            entry.served += 1;
+            return entry.stub;
+        }
+        return null;
+    }
+
+    /**
+     * The chain-end failure for stubs declared `required: true` that were
+     * never requested (or not exactly `times` times), or null when every
+     * requirement held.
+     */
+    requiredError(): Error | null {
+        const unmet: string[] = [];
+        for (const { stub, served } of this.entries) {
+            if (!stub.required) {
+                continue;
+            }
+            const { times } = stub;
+            if (times === undefined) {
+                if (served === 0) {
+                    unmet.push(
+                        `  - ${describeRoute(stub)} — declared and required but never requested`,
+                    );
+                }
+            } else if (served !== times) {
+                unmet.push(
+                    `  - ${describeRoute(stub)} — declared required with times: ${times} but was requested ${served} time(s)`,
+                );
+            }
+        }
+        if (unmet.length === 0) {
+            return null;
+        }
+        return new Error(
+            `Required stub(s) never satisfied during the chain:\n${unmet.join('\n')}\n` +
+                `A required stub states the call MUST happen — either the code no longer makes it, ` +
+                `or the stub no longer describes it.`,
+        );
+    }
+
+    /**
+     * The strict failure for a request that matched no stub (CONVENTIONS
+     * D7): method + URL of the offending request, plus every declared stub
+     * and how often it was served.
+     */
+    unmatchedError(method: string, url: string): Error {
+        const declared =
+            this.entries.length === 0
+                ? '  (no stubs declared)'
+                : this.entries
+                      .map((entry) => `  - ${describeRoute(entry.stub)}${stateOf(entry)}`)
+                      .join('\n');
+        return new Error(
+            refusal('d7-strict-intercepts', {
+                fix: `declare a stub for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
+                found: `an unmatched outgoing request, ${method} ${url}; declared:\n${declared}`,
+            }),
+        );
+    }
+}

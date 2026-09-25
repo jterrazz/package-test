@@ -2,9 +2,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
-import { GROUND_SEEDS } from '../src/model/chain/ground.js';
-import { dedent } from '../src/model/matching/dedent.js';
-import { forgetTree } from '../src/seams/git/tree.js';
+import { dedent } from '../src/expectations/text/dedent.js';
+import { forgetTree } from '../src/kernel/files/git-tree.js';
+import { GROUND_SEEDS } from '../src/kernel/files/ground.js';
 import { findSpecsRoots, listFiles, suppressedLines } from './checker-crossfile.js';
 import { importsFromEntry, withEntryImport, withoutEntryImport } from './checker-migration.js';
 import type { TokenViolation } from './checker.js';

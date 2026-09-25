@@ -1,6 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { toKebabCase } from '../../../src/model/services/binding.js';
+import { toKebabCase } from '../../../src/world/services/startup/binding.js';
 import { memberPropertyName, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';

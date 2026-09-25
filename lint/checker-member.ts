@@ -2,8 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries, treeKind, treeNames } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind, treeNames } from '../src/kernel/files/git-tree.js';
+import { isGroundName } from '../src/kernel/files/ground.js';
 import { diskTargetFindings } from './checker-crossfile.js';
 import { checkSpecOutsideSpecs } from './checker-placement.js';
 import type { TokenViolation } from './checker.js';

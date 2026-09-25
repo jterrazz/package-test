@@ -3,7 +3,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { GROUND_DIRS } from '../src/model/chain/ground.js';
+import { GROUND_DIRS } from '../src/kernel/files/ground.js';
 import { oxlintOf } from './ratchet.js';
 
 /**

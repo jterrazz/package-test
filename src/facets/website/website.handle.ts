@@ -1,17 +1,17 @@
 import { randomUUID } from 'node:crypto';
 
-import { getCallerDir } from '../../model/chain/caller.js';
-import type { StartedWith } from '../../model/chain/config.js';
-import { resolveRoot } from '../../model/chain/resolve.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
-import type { BrowserPort } from '../../model/ports/browser.port.js';
-import { ProcessHandle } from '../../model/services/process.js';
-import type { AppInfo } from '../../model/services/reporter.js';
-import type { ServiceRecord, StartedServices } from '../../model/services/services.js';
-import { releaseIsolation, startServices } from '../../model/services/services.js';
-import { ServeAdapter } from '../../seams/process/serve.adapter.js';
-import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
-import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
+import type { BrowserPort } from '../../elements/browser.port.js';
+import { registerMatchers } from '../../expectations/goldens/matchers.js';
+import type { StartedWith } from '../../kernel/chain/config.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { resolveRoot } from '../../kernel/files/resolve.js';
+import { ProcessHandle } from '../../world/services/process/process.js';
+import { ServeAdapter } from '../../world/services/process/serve.adapter.js';
+import type { ProcessOptions } from '../../world/services/process/serve.adapter.js';
+import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
+import { releaseIsolation, startServices } from '../../world/services/services.js';
+import type { AppInfo } from '../../world/services/startup/startup-report.js';
+import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
 import type { WebsiteSpecification } from './website.facet.js';
 import { websiteFacet } from './website.facet.js';
 
@@ -269,8 +269,7 @@ export async function startWebsite<Services extends ServiceRecord>(
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {
-            const { PlaywrightAdapter } =
-                await import('../../seams/playwright/playwright.adapter.js');
+            const { PlaywrightAdapter } = await import('./browser/playwright.adapter.js');
             browser = new PlaywrightAdapter();
         }
         return browser;

@@ -6,7 +6,7 @@ import {
     GROUND_REQUESTS,
     GROUND_SEEDS,
     isGroundName,
-} from '../../../src/model/chain/ground.js';
+} from '../../../src/kernel/files/ground.js';
 import { child, childList, diskCallOf, identifierName, memberPropertyName } from '../../ast.js';
 import type { DiskCall } from '../../ast.js';
 import { lessons } from '../../lesson.js';

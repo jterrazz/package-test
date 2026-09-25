@@ -30,23 +30,30 @@ const config: OxlintConfig = defineConfig(
                 rules: { 'jterrazz/a1-specification-file': 'off' },
             },
             {
-                // The vitest layer and the browser-mode seam ARE the sanctioned
-                // Runner coupling (I1) — their `vitest` imports are the
-                // Framework's own seam, not prod leakage.
+                // The vitest layer and the modules whose engine IS a test
+                // Package are the sanctioned runner coupling (I1) — their
+                // Imports are the framework's own seam, not prod leakage.
                 files: [
-                    'src/runner/**',
-                    'src/seams/vitest/**',
-                    'src/seams/vitest-browser/**',
-                    // The two seams whose dependency IS a test package: the
-                    // Network double's engine and the browser the website
-                    // Facet drives.
-                    'src/seams/msw/**',
-                    'src/seams/playwright/**',
-                    'src/model/clock/**',
+                    'src/vitest/**',
+                    // Each facet's project, and the run lifecycle it owns.
+                    'src/facets/*/*.project.ts',
+                    'src/facets/api/routes/**',
+                    'src/facets/cli/documents/literate-plugin.ts',
+                    'src/facets/mobile/session/**',
+                    // The page a component renders into, and the browser the
+                    // Website facet drives.
+                    'src/facets/component/**',
+                    'src/facets/website/browser/**',
+                    // The network double's engine, time, and the doubles.
+                    'src/world/stubs/interceptor/**',
+                    'src/world/clock/**',
+                    'src/world/mocks/**',
+                    // The container server's address is a provided value.
+                    'src/world/services/containers/service-container.ts',
                     // A scratch directory ends with the test that asked for it.
-                    'src/model/chain/scratch.ts',
-                    'src/model/doubles/**',
-                    'src/model/goldens/**',
+                    'src/kernel/files/scratch.ts',
+                    'src/expectations/goldens/**',
+                    'src/expectations/in-place/**',
                 ],
                 rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
             },

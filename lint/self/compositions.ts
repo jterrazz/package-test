@@ -1,11 +1,11 @@
 import { apiFacet } from '../../src/facets/api/api.facet.js';
 import { cliFacet } from '../../src/facets/cli/cli.facet.js';
 import { componentFacet } from '../../src/facets/component/component.facet.js';
-import type { Composition } from '../../src/facets/define-facet.js';
 import { integrationFacet } from '../../src/facets/integration/integration.facet.js';
 import { jobFacet } from '../../src/facets/job/job.facet.js';
 import { mobileFacet } from '../../src/facets/mobile/mobile.facet.js';
 import { websiteFacet } from '../../src/facets/website/website.facet.js';
+import type { Composition } from '../../src/kernel/chain/define-facet.js';
 import type { Column } from '../facet-matrix.js';
 
 /** A row a definition states about itself. */

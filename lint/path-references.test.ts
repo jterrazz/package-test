@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
+import { parseProgram } from './module-parser.js';
 import {
     literalPathVisitor,
     mergeVisitors,

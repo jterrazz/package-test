@@ -6,269 +6,195 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * A self module: bundled into `dist/self-oxlint.js` beside the self rules, and
  * never into what a consumer installs.
  *
- * - `model/` — the chain, the elements (the descriptors, and the ambiguity
- *   and substring readings every surface shares), the goldens, the clock and
- *   the doubles: what every facet is made of. It reaches the seams that
- *   carry no engine of their own (git, process, yaml) and — to compare a
- *   golden through its accessor — `results/`. A constructor's configuration
- *   names the stub backend a website or mobile constructor started.
- * - `capabilities/<name>/` — a setup a chain offers, one folder each, owning
- *   only itself (`signatures.ts` indexes them all); among them the
- *   module-scope `intercept()`, which names its engine's registration, and
- *   the route a request names with its `params`.
- * - `actions/<name>/` — a terminal action, one folder each (`signatures.ts`
- *   indexes them all); among them `run/`, the document engine, which starts
- *   servers and lays fixtures through the process and filesystem seams.
- * - `stubs/` — the stub, its exchange, the queue that serves it, and the
- *   user-facing builders, one folder per kind (`http/`, `openai/`,
- *   `anthropic/`), listed once in `kinds.ts`.
- * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
- *   per result, and the accessors they compose.
- * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`) and the
- *   composition (`<facet>.facet.ts`) its chain is computed from, plus what
- *   is unique to the facet. It reaches `model/`,
- *   `stubs/`, `results/`, `capabilities/` and `actions/` freely; each
- *   constructor opens the seams its runtime needs, and each composition the
- *   adapters its engines are.
- * - `seams/<dep>/` — one folder = one external dependency (or one node
- *   builtin, as `process/` is), plus `model/` and the text accessor a page's
- *   golden answers through. The Appium server a runner spawns boots its
- *   simulator through `simctl/` and runs as a `process/`.
- * - `runner/` — the config surface: the preset, the project index and each
- *   facet's project (`projects/<facet>.project.ts`), update mode, the
- *   literate plugin. It couples to `vite`/`vitest` by design; the run's
- *   mobile session may reach the Appium seam.
- * - `lint/` — no external package of its own but oxlint's plugin types
- *   (`@oxlint/plugins`, erased from the bundle) and the toolchain's list of
- *   oxlint config names (inlined into the bundle): from `model/` only the pure
- *   helpers (the token list, the case conversions, fixture markers, the root
- *   walk a rule must share with the runner, the spec-document parser, the
- *   indentation a value written in place shares with the test around it),
- *   and a dependency only through the seam that owns it (the yaml document,
- *   the git tree, the module parser) — and the facets, from the one self
- *   module the capability matrix reads their compositions through.
+ * The root reads the sentence of a test, and the edges point one way:
+ * `kernel ← world · elements · expectations ← facets ← vitest · the entries`.
  *
- * `src/index.ts`, `src/surface.ts` and `src/browser/` are composition roots and
- * name no layer, so they are out of scope; module tests and `*.fixtures.ts`
- * files are governed by F2/I4.
+ * - `kernel/` — the machinery that builds a facet and knows none: the chain
+ *   (`defineFacet`, the setup and action contracts, the computed chain type),
+ *   what a file shares (`context/`), the disk a spec names (`files/`), the
+ *   four-part refusal (`refusals/`) and the `test` section of the config
+ *   (`config/`). It imports nothing else from `src/`.
+ * - `world/` — what surrounds the subject, controlled by the test: the network
+ *   outside (`stubs/`), the real databases and their containers (`services/`),
+ *   time (`clock/`) and the in-memory collaborators of a module test
+ *   (`mocks/`). Each area owns its engine.
+ * - `elements/` — how a screen is designated and touched, shared by website,
+ *   mobile and component.
+ * - `expectations/` — how a result is judged: `toMatch`, goldens, tokens,
+ *   update mode, the accessors.
+ * - `facets/<facet>/` — what is tested, one slice per constructor: its
+ *   composition, its handle, its Vitest project, and its concept folders. A
+ *   facet never imports another.
+ * - `vitest/` — `@jterrazz/test/vitest`: the preset, the projects index and
+ *   the run lifecycle, assembling each facet's project.
+ * - `lint/` — the rules the package ships, at the root: from `src/` only the
+ *   pure helpers a rule must share with the runtime.
+ *
+ * `src/index.ts` and `src/index.browser.ts` are composition roots and name no
+ * layer, so they are out of scope; module tests and `*.fixtures.ts` files are
+ * governed by F2/I4. What this map cannot express — a facet reaching another,
+ * a concept folder reached from outside its facet, an engine outside its one
+ * owner — is held by the self rules of `lint/self/`.
  */
 export const FRAMEWORK_LAYERS = {
-    // A terminal action a chain ends on, one folder per action. The index of
-    // Their signatures names every one of them. A document run starts the
-    // Servers it names and lays its fixtures through the process and
-    // Filesystem seams; the types a render scenario is handed, and the
-    // Surface the page port mounts, are the page seam's.
-    actions: {
+    // The machinery that builds a facet and knows none: imports nothing else from src/.
+    kernel: {
         folders: {
-            call: [],
-            exec: [],
-            fetch: [],
-            open: [],
-            render: [],
-            request: [],
-            run: [],
-            trigger: [],
-            visit: [],
+            chain: [],
+            // The config file's own types are the toolchain's.
+            config: ['@jterrazz/typescript/config'],
+            context: [],
+            // A scratch folder ends with the test that asked for it (vitest's
+            // `onTestFinished`); the yaml document is the one yaml engine.
+            files: ['vitest', 'yaml'],
+            refusals: [],
         },
-        imports: ['model/', 'results/', 'capabilities/', 'stubs/', 'runner/update'],
+        imports: ['kernel/'],
+        // PENDING the restructure's follow-ups: each edge below leaves with
+        // The commit that moves its type to its owner.
         seams: {
-            'actions/render/page.port.ts': ['seams/vitest-browser/'],
-            'actions/render/scenario.ts': ['seams/vitest-browser/'],
-            'actions/run/literate.ts': ['seams/fs/', 'seams/process/'],
-            'actions/signatures.ts': ['actions/'],
+            'kernel/chain/action-signatures.ts': ['facets/', 'elements/', 'expectations/'],
+            'kernel/chain/config.ts': ['world/', 'elements/', 'facets/'],
+            'kernel/chain/setup-signatures.ts': ['world/', 'facets/'],
+            'kernel/context/with.capability.ts': ['facets/cli/process/cli.port'],
         },
     },
-    // A setup a chain offers, one folder per capability, each owning only
-    // Itself; the index of their signatures names every one of them. The
-    // Module-scope `intercept()` names the msw registration it hands its
-    // Engine, a type the seam declares, and `.wrap()` the page seam's UI type.
-    capabilities: {
+    // What surrounds the subject, controlled by the test: the kernel only, each
+    // Area its engine.
+    world: {
         folders: {
-            clock: [],
-            env: [],
-            fixture: [],
-            headers: [],
-            intercept: [],
-            params: [],
-            seed: [],
-            viewport: [],
-            with: [],
-            wrap: [],
+            clock: ['vitest'],
+            mocks: ['vitest', 'vitest-mock-extended'],
+            // The container server's reader is a provided value (`vitest`).
+            services: ['better-sqlite3', 'pg', 'redis', 'testcontainers', 'vitest'],
+            stubs: ['msw'],
         },
-        imports: ['model/', 'stubs/'],
+        imports: ['kernel/'],
         seams: {
-            'capabilities/intercept/intercept.scope.ts': ['seams/msw/'],
-            'capabilities/signatures.ts': ['capabilities/'],
-            'capabilities/wrap/wrap.capability.ts': ['seams/vitest-browser/ui'],
+            // A stub's request filter IS an expectation on the outgoing
+            // Request: one `match.*` / `{{token}}` grammar, never a second.
+            'world/stubs/exchange/queue.ts': ['expectations/tokens/'],
+            'world/stubs/filters.ts': ['expectations/tokens/'],
+            'world/stubs/http/http.ts': ['expectations/tokens/'],
         },
     },
-    // A constructor and the composition its chain is computed from. The api
-    // And cli constructors hand back `docker(id)`, whose answer is a
-    // Container accessor: `results/`, a value edge by design.
+    // How a screen is designated and touched — shared by website, component, mobile.
+    elements: { imports: ['kernel/', 'elements/'] },
+    // How a result is judged.
+    expectations: {
+        imports: ['kernel/', 'expectations/'],
+        packages: ['vitest'],
+        // PENDING the restructure's follow-ups: each edge below leaves with
+        // The commit that moves its type to its owner.
+        seams: {
+            'expectations/command/cli.result.ts': ['facets/cli/process/cli.port'],
+            'expectations/command/container.ts': ['facets/cli/process/cli.port'],
+            'expectations/goldens/matchers.ts': ['world/services/startup/startup-report'],
+            'expectations/goldens/text-assertions.ts': ['world/services/startup/startup-report'],
+            'expectations/http/response.ts': ['facets/api/server/server.port'],
+            'expectations/result.ts': ['world/services/database.port'],
+            'expectations/table/table.ts': ['world/services/database.port'],
+        },
+    },
+    // What is tested: one slice per constructor. A folder owns its files, and
+    // No facet lists another (`facets/` is absent from `imports`).
     facets: {
-        imports: [
-            'actions/',
-            'capabilities/',
-            'facets/',
-            'model/',
-            'results/',
-            'stubs/',
-            'runner/facet-project',
-            'runner/provided',
-        ],
-        seams: {
-            // A facet's composition names the adapters its engines are.
-            'facets/api/api.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
-            'facets/cli/cli.facet.ts': ['seams/fs/', 'seams/process/'],
-            // The component's constructor is its project: the composition
-            // States a matrix row per option the project takes.
-            'facets/component/component.facet.ts': [
-                'runner/projects/component.project',
-                'seams/msw/',
-                'seams/vitest-browser/',
-            ],
-            'facets/integration/integration.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
-            'facets/job/job.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
-            'facets/mobile/mobile.facet.ts': ['seams/stub-backend/', 'seams/appium/'],
-            'facets/website/website.facet.ts': ['seams/stub-backend/', 'seams/playwright/'],
-            'facets/api/api.handle.ts': ['seams/hono/'],
-            'facets/cli/cli.handle.ts': ['seams/process/'],
-            'facets/mobile/mobile.handle.ts': [
-                'seams/appium/',
-                'seams/simctl/',
-                'seams/stub-backend/',
-            ],
-            'facets/website/website.handle.ts': [
-                'seams/playwright/',
-                'seams/process/',
-                'seams/stub-backend/',
-            ],
+        folders: {
+            api: ['hono', '@hono/node-server'],
+            cli: [],
+            component: ['@vitest/browser-playwright', 'react', 'vite', 'vitest-browser-react'],
+            integration: [],
+            job: [],
+            mobile: ['webdriverio'],
+            website: ['playwright'],
         },
+        imports: ['kernel/', 'world/', 'elements/', 'expectations/'],
+        // Projects (`vitest/config`), the provided readers and the global
+        // Setups (`vitest`, `vitest/node`).
+        packages: ['vitest'],
+        seams: {
+            // The facets layer's one composition: the six constructors as one record.
+            'facets/specification.ts': [
+                'facets/api/api.handle',
+                'facets/cli/cli.handle',
+                'facets/integration/integration.handle',
+                'facets/job/job.handle',
+                'facets/mobile/mobile.handle',
+                'facets/website/website.handle',
+            ],
+            // A facet's project is built on the preset's project kit; both run in
+            // The Vitest main process only, never in test code.
+            'facets/api/api.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/cli/cli.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/component/component.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/integration/integration.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/job/job.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/mobile/mobile.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            'facets/website/website.project.ts': ['vitest/facet-project', 'vitest/preset'],
+            // PENDING the restructure's follow-ups: the provided readers move
+            // Beside their providers, the component's options beside its project.
+            'facets/api/api.handle.ts': ['vitest/provided'],
+            'facets/mobile/mobile.handle.ts': ['vitest/provided'],
+            'facets/component/component.facet.ts': ['vitest/facet-project'],
+        },
+    },
+    // @jterrazz/test/vitest — preset, projects, run lifecycle: assembles the facets' projects.
+    vitest: {
+        imports: [
+            'vitest/',
+            'kernel/',
+            'expectations/',
+            'world/',
+            'facets/api/api.project',
+            'facets/cli/cli.project',
+            'facets/component/component.project',
+            'facets/integration/integration.project',
+            'facets/job/job.project',
+            'facets/mobile/mobile.project',
+            'facets/website/website.project',
+            // The literate door: the one vite plugin a facet owns.
+            'facets/cli/documents/literate-plugin',
+        ],
+        packages: ['@vitest/browser-playwright', 'vite', 'vitest'],
+        // PENDING the restructure's follow-ups: the provided readers move beside their providers.
+        seams: { 'vitest/provided.ts': ['facets/mobile/session/appium-server'] },
     },
     lint: {
         imports: [
             'lint/',
             // The coverage ratchet reads the report the preset asked for, and
             // There is ONE answer to where a tool writes what it generates.
-            'model/artifacts/artifacts',
-            // The .spec.yaml grammar is read by the runner AND by the checker —
-            // One parser, so the file lint accepts is the one the runner runs.
-            'model/literate/spec-document',
-            'seams/yaml/document',
-            'model/matching/match',
-            // C28's fixer writes a value in place; the runtime's own
-            // dedent is what reads it back, so the fixer proves its guess
-            // against it rather than reimplementing the indentation rule.
-            'model/matching/dedent',
-            'model/services/binding',
-            // The path law the runner refuses by is the one the rules read by.
-            'model/chain/spec-path',
+            'kernel/files/artifacts',
             // The four ground names have ONE home; a rule that probed for its
             // Own copy of them could drift from what the runner resolves.
-            'model/chain/ground',
+            'kernel/files/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
-            'model/chain/resolve',
-            // A module a rule walks past is parsed into the tree oxlint hands the rule.
-            'seams/oxc-parser/parse',
+            'kernel/files/resolve',
+            // The path law the runner refuses by is the one the rules read by.
+            'kernel/files/spec-path',
             // Every gate judges the tree the runtime reads: what git does not ignore.
-            'seams/git/tree',
+            'kernel/files/git-tree',
+            'kernel/files/yaml-document',
             // A finding and a refusal teach in one form: the four parts, and how they read.
-            'model/lesson/lesson',
+            'kernel/refusals/lesson',
             // The runtime's refusals open on the sentence their catalogue row does.
-            'model/lesson/refusal',
-            // The run owns one key of the ratchet the checker writes: route coverage.
-            'model/routes/routes',
+            'kernel/refusals/refusal',
+            'expectations/tokens/match',
+            // C28's fixer writes a value in place; the runtime's own dedent is
+            // What reads it back, so the fixer proves its guess against it.
+            'expectations/text/dedent',
+            'world/services/startup/binding',
             // The folders a stub may sit in are the builders the package exports, listed once.
-            'stubs/kinds',
+            'world/stubs/kinds',
+            // The run owns one key of the ratchet the checker writes (route
+            // Coverage), and the .spec.yaml grammar is read by the runner AND
+            // The checker: one owner each, reached where it lives.
+            'facets/api/routes/routes',
+            'facets/cli/documents/spec-document',
         ],
-        // oxlint's plugin types (erased) and the toolchain's config names
-        // (inlined), so the checker and `check` find the same config.
-        packages: ['@oxlint/plugins', '@jterrazz/typescript/oxlint-config-names'],
-        seams: { 'lint/self/compositions.ts': ['facets/'] },
-    },
-    model: {
-        imports: [
-            'model/',
-            // A golden is compared through the accessor it is handed: the
-            // Matchers reach `results/`, a value edge by design.
-            'results/',
-            // The three seams that carry no engine of their own: the tree git
-            // Does not ignore is one `git ls-files`, a yaml document is a
-            // Parse, a process is `node:child_process`.
-            'seams/git/',
-            'seams/process/',
-            'seams/yaml/document',
-            // Update-mode detection is a pure env read the literate runner
-            // Shares with the matchers — one answer to "are we rewriting?".
-            'runner/update',
-        ],
-        packages: ['vitest', 'vitest-mock-extended'],
-        seams: {
-            // What a constructor hands its chain names the stub backend a
-            // Website or mobile constructor started.
-            'model/chain/config.ts': ['seams/stub-backend/'],
-        },
-    },
-    // What a terminal action hands back: the result classes and the accessors
-    // they compose, over the model's bricks. A container's accessor and the
-    // cli result read `docker` through the seam that carries no engine.
-    results: {
-        imports: ['model/', 'results/'],
-        seams: {
-            'results/cli.result.ts': ['seams/docker/'],
-            'results/container.ts': ['seams/docker/'],
-        },
-    },
-    // The user-facing stub builders — `http`, `openai`, `anthropic`, one folder
-    // per kind — over the stub, its exchange and the queue that serves it.
-    stubs: { imports: ['model/', 'stubs/'] },
-    runner: {
-        imports: ['runner/', 'model/'],
-        packages: ['vite', 'vitest', '@vitest/browser-playwright'],
-        // The component project serves the page's golden commands; the run's
-        // Mobile session, what it provides and the device a mobile project
-        // Declares reach the Appium seam.
-        seams: {
-            'runner/mobile-session.ts': ['seams/appium/'],
-            'runner/projects/component.project.ts': ['seams/vitest-browser/commands'],
-            'runner/projects/mobile.project.ts': ['seams/appium/'],
-            'runner/provided.ts': ['seams/appium/'],
-        },
-    },
-    seams: {
-        folders: {
-            appium: ['webdriverio'],
-            docker: [],
-            fs: [],
-            git: [],
-            hono: ['hono', '@hono/node-server'],
-            msw: ['msw'],
-            'oxc-parser': ['oxc-parser'],
-            playwright: ['playwright'],
-            postgres: ['pg'],
-            process: [],
-            redis: ['redis'],
-            simctl: [],
-            sqlite: ['better-sqlite3'],
-            'stub-backend': [],
-            testcontainers: ['testcontainers'],
-            vitest: ['vitest'],
-            'vitest-browser': ['react', 'vitest', 'vitest-browser-react'],
-            yaml: ['yaml'],
-        },
-        imports: [
-            'model/',
-            // The one module every seam folder reaches for: it owns the
-            // Message a MISSING optional peer produces, and a copy of that
-            // Message per folder is how the four of them would have drifted.
-            'seams/peer',
-            // The engines serve the stubs a chain declares.
-            'stubs/',
-            // The page's golden commands answer through the text accessor
-            // every stream is compared by, one `TextAccessor` for both builds.
-            'results/text',
-        ],
-        // The Appium server a runner spawns boots its simulator and runs as a process.
-        seams: { 'seams/appium/appium-server.ts': ['seams/process/', 'seams/simctl/'] },
+        // oxlint's plugin types (erased), the toolchain's config names
+        // (inlined), and the module parser a rule walks past a module with.
+        packages: ['@oxlint/plugins', '@jterrazz/typescript/oxlint-config-names', 'oxc-parser'],
+        seams: { 'lint/self/compositions.ts': ['facets/', 'kernel/chain/define-facet'] },
     },
 } satisfies Record<string, LayerOptions>;

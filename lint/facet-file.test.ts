@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
 import { facetFileFindings, importsOf } from './facet-file.js';
+import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
 /** The program a facet file's source parses to. */
@@ -24,9 +24,9 @@ function findingsOf(source: string): string[] {
 /** A facet whose adapters are written with `engines`. */
 function facetWiring(engines: string): string {
     return `
-import { seed } from '../../capabilities/seed/seed.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import { databaseSet } from '../../seams/fs/database-set.js';
+import { seed } from '../../world/services/seed/seed.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { databaseSet } from '../../world/services/seed/database-set.js';
 import { defineFacet } from '../define-facet.js';
 
 const composition = {
@@ -40,7 +40,7 @@ export const jobFacet = defineFacet()({ ...composition, engines: ${engines}, loc
 }
 
 describe('facetFileFindings', () => {
-    test('an adapter is a name, a read of the config, or a seam built on them', () => {
+    test('an adapter is a name, a read of the config, or an engine built on them', () => {
         // Given - the three forms an adapter takes
         const source = facetWiring(
             '(config) => ({ databases: databaseSet(config), jobs: config.jobs ?? [], seed })',

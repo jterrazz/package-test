@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
-import { SHARED_GROUND } from '../src/model/chain/ground.js';
+import { SHARED_GROUND } from '../src/kernel/files/ground.js';
 import { listFiles, suppressedLines } from './checker-crossfile.js';
 import type { TokenViolation } from './checker.js';
 import { COLUMNS } from './facet-matrix.js';

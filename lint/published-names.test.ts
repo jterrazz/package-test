@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../src/model/chain/spec-path.js';
-import { registerMatchers } from '../src/model/goldens/matchers.js';
-import { text } from '../src/results/text-subject.js';
+import { registerMatchers } from '../src/expectations/goldens/matchers.js';
+import { text } from '../src/expectations/text/text-subject.js';
+import { file } from '../src/kernel/files/spec-path.js';
 import { exportedNames, renderPublishedNames } from './published-names.js';
 
 /** The repository root, from this module's place inside `lint/`. */

@@ -1,28 +1,28 @@
-import { getCallerDir } from '../../model/chain/caller.js';
+import { createDockerReader } from '../../expectations/command/container.js';
+import type { ContainerAccessor } from '../../expectations/command/container.js';
+import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type {
     DockerSpecConfig,
     LiterateServeRegistration,
     StartedWith,
-} from '../../model/chain/config.js';
-import { resolveCommand, resolveRoot } from '../../model/chain/resolve.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
-import type { CliEnv } from '../../model/ports/cli.port.js';
-import type { Orchestrator } from '../../model/services/orchestrator.js';
+} from '../../kernel/chain/config.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { resolveCommand, resolveRoot } from '../../kernel/files/resolve.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../model/services/services.js';
+} from '../../world/services/services.js';
 import type {
     DatabaseKeys,
     ServiceRecord,
     StartedServices,
-} from '../../model/services/services.js';
-import { createDockerReader } from '../../results/container.js';
-import type { ContainerAccessor } from '../../results/container.js';
-import { ExecAdapter } from '../../seams/process/exec.adapter.js';
+} from '../../world/services/services.js';
+import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
 import type { CliSpecification } from './cli.facet.js';
 import { cliFacet } from './cli.facet.js';
+import type { CliEnv } from './process/cli.port.js';
+import { ExecAdapter } from './process/exec.adapter.js';
 
 // ── Types ──
 

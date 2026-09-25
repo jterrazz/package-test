@@ -29,7 +29,7 @@ export const SELF_RULE_DOCS = {
         audience: 'self',
         channel: 'statique',
         convention:
-            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{model,capabilities,actions,stubs,results,facets,seams,runner,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
+            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{kernel,world,elements,expectations,facets,vitest,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
         facet: 'model',
         family: 'F',
         fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',
@@ -201,7 +201,7 @@ export const META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/seams/process/serve.adapter.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
+            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/world/services/process/serve.adapter.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
         facet: 'model',
         family: 'K',
         fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`.',

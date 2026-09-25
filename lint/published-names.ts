@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode } from './ast.js';
+import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
 /**

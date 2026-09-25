@@ -1,7 +1,6 @@
 import { basename, dirname, join, resolve } from 'node:path';
 
-import { isGroundName } from '../src/model/chain/ground.js';
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
+import { isGroundName } from '../src/kernel/files/ground.js';
 import {
     child,
     childList,
@@ -13,6 +12,7 @@ import {
 } from './ast.js';
 import type { ImportSource } from './ast.js';
 import { folderChanged, isFile, listDirectory, readFileCached } from './fs-cache.js';
+import { parseProgram } from './module-parser.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
 import type { AstNode } from './rule-shape.js';

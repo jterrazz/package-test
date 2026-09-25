@@ -5,7 +5,7 @@
  * The package has one specifier and two runtimes. `src/index.ts` is the node
  * composition root: it wires the container seams and adds the facets, services
  * and results that read a disk, spawn a process or open a socket.
- * `src/browser/index.ts` is the page's, and it re-exports this module verbatim,
+ * `src/index.browser.ts` is the page's, and it re-exports this module verbatim,
  * replacing each of those node-only names with a stub that says where it runs.
  * What both entries agree on lives HERE, once, so the two surfaces can only
  * differ where a runtime genuinely forces them to.
@@ -14,21 +14,21 @@
  * too: one `declare module` for one published `types` entry.
  */
 
-import type {
-    DiskDirectory as DiskDirectoryType,
-    DiskFile as DiskFileType,
-} from './model/chain/spec-path.js';
+import type { ContainerAccessor as ContainerAccessorType } from './expectations/command/container.js';
+import type { DirectoryAccessor as DirectoryAccessorType } from './expectations/disk/directory.js';
+import type { FilesystemAccessor as FilesystemAccessorType } from './expectations/disk/filesystem.js';
 import type {
     MatchFixtureOptions as MatchFixtureOptionsType,
     TableMatchOptions as TableMatchOptionsType,
-} from './model/goldens/match-options.js';
-import type { ContainerAccessor as ContainerAccessorType } from './results/container.js';
-import type { DirectoryAccessor as DirectoryAccessorType } from './results/directory.js';
-import type { FilesystemAccessor as FilesystemAccessorType } from './results/filesystem.js';
-import type { JsonAccessor as JsonAccessorType } from './results/json.js';
-import type { ResponseAccessor as ResponseAccessorType } from './results/response.js';
-import type { TableAccessor as TableAccessorType } from './results/table.js';
-import type { TextAccessor as TextAccessorType } from './results/text.js';
+} from './expectations/goldens/match-options.js';
+import type { ResponseAccessor as ResponseAccessorType } from './expectations/http/response.js';
+import type { TableAccessor as TableAccessorType } from './expectations/table/table.js';
+import type { JsonAccessor as JsonAccessorType } from './expectations/text/json.js';
+import type { TextAccessor as TextAccessorType } from './expectations/text/text.js';
+import type {
+    DiskDirectory as DiskDirectoryType,
+    DiskFile as DiskFileType,
+} from './kernel/files/spec-path.js';
 
 // The component facet — the chain lives in whichever build can run it (the
 // Page's), and the SHAPE is stated once so both entries publish the same one.
@@ -36,20 +36,25 @@ export type {
     ComponentScenario,
     ComponentVisitor,
     RenderSubject,
-} from './actions/render/scenario.js';
+} from './facets/component/render/scenario.js';
 export type { ComponentChain } from './facets/component/component.facet.js';
-export type { RenderResult } from './results/render.result.js';
-export type { RenderedText } from './results/rendered-text.js';
-export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';
+export type { RenderResult } from './facets/component/render/render.result.js';
+export type { RenderedText } from './facets/component/render/rendered-text.js';
+export type { ComponentUi, DomMount } from './facets/component/page/ui.js';
 
 // Match — dynamic values in assertions and fixtures
-export { type CaptureScope, match, Matcher, type MatcherKind } from './model/matching/match.js';
+export {
+    type CaptureScope,
+    match,
+    Matcher,
+    type MatcherKind,
+} from './expectations/tokens/match.js';
 
 // Accessors a page can build: pure projections over a captured value. TYPES,
 // Like every other accessor — `text()` is the one that HANDS one out.
-export type { JsonAccessor } from './results/json.js';
-export type { TableAccessor } from './results/table.js';
-export type { TextAccessor } from './results/text.js';
+export type { JsonAccessor } from './expectations/text/json.js';
+export type { TableAccessor } from './expectations/table/table.js';
+export type { TextAccessor } from './expectations/text/text.js';
 
 // Ports — the shapes the element vocabulary and the visitors speak
 export type {
@@ -65,7 +70,7 @@ export type {
     LandmarkKind,
     Visitor,
     VisitScenario,
-} from './model/ports/browser.port.js';
+} from './elements/browser.port.js';
 export type {
     DeviceOpenOptions,
     DevicePort,
@@ -77,7 +82,7 @@ export type {
     MobileScenario,
     MobileVisitor,
     ScreenNode,
-} from './model/ports/device.port.js';
+} from './facets/mobile/device/device.port.js';
 
 // The element vocabulary — user-facing descriptors, shared by visit (website),
 // Render (component) and open (mobile) scenarios: ONE vocabulary, three facets.
@@ -110,20 +115,26 @@ export {
     testId,
     valued,
     within,
-} from './model/elements/elements.js';
+} from './elements/elements.js';
 
 // Stubs — the ONE way to declare what the outside world replies
-export { anthropic } from './stubs/anthropic/anthropic.js';
+export { anthropic } from './world/stubs/anthropic/anthropic.js';
 export {
     http,
     type HttpResponseInit,
     type HttpStreamInit,
     type HttpStubFilter,
     type SseEvent,
-} from './stubs/http/http.js';
-export { type TextFilter } from './stubs/filters.js';
-export { openai } from './stubs/openai/openai.js';
-export { defineStub, defineStubs, type Stub, type StubInput, type Stubs } from './stubs/stub.js';
+} from './world/stubs/http/http.js';
+export { type TextFilter } from './world/stubs/filters.js';
+export { openai } from './world/stubs/openai/openai.js';
+export {
+    defineStub,
+    defineStubs,
+    type Stub,
+    type StubInput,
+    type Stubs,
+} from './world/stubs/stub.js';
 export type {
     MatchableRequest,
     StreamBody,
@@ -131,25 +142,25 @@ export type {
     StubResponder,
     StubResponse,
     StubResponseValue,
-} from './stubs/exchange.js';
+} from './world/stubs/exchange/exchange.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.
 export type {
     Intercept,
     InterceptOptions,
     InterceptScope,
-} from './capabilities/intercept/intercept.scope.js';
+} from './world/stubs/intercept/intercept.scope.js';
 
 // Mock
-export { mockOf, type MockOfOptions, type MockPort } from './model/doubles/mock-of.js';
+export { mockOf, type MockOfOptions, type MockPort } from './world/mocks/mock-of.js';
 
 // Time — the one primitive, real in both runtimes
-export { clock, type PinnedClock } from './model/clock/clock.js';
+export { clock, type PinnedClock } from './world/clock/clock.js';
 
 // Assertions that are not matchers: a value that must be there, and a
 // Condition that has to become true.
-export { required } from './model/assertions/required.js';
-export { waitUntil, type WaitUntilOptions } from './model/assertions/wait-until.js';
+export { required } from './expectations/conditions/required.js';
+export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
 
 // The disk: a string is a value, and what a test stands on is named by one of
 // These two — the only argument a verb that reads the disk accepts
@@ -161,13 +172,13 @@ export {
     file,
     type FileAt,
     type RelativePath,
-} from './model/chain/spec-path.js';
+} from './kernel/files/spec-path.js';
 
 // A linter's report as a golden keeps it — the transform a rule's specs share
-export { lintReport } from './model/goldens/lint-report.js';
+export { lintReport } from './expectations/goldens/lint-report.js';
 
 // Matcher options (per-call `toMatch(file(…), { frozen })`)
-export type { MatchFixtureOptions } from './model/goldens/match-options.js';
+export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';
 
 /** A table's rows as a test writes them in place: one array of cells per row, every column — or `''`, nothing recorded yet. */
 type TableRows = readonly (readonly unknown[])[];

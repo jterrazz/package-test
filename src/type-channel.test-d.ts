@@ -1,9 +1,9 @@
 /* oxlint-disable jterrazz/a1-specification-file, jterrazz/a2-known-constructors, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. The retired `specification.jobs` row is the same thing for A2: the compiler refuses it before the rule would. It imports vitest's `expect` because the D14 rows are about the matcher augmentation. */
 import { expect } from 'vitest';
 
+import type { Visitor } from './elements/browser.port.js';
+import type { MobileVisitor } from './facets/mobile/device/device.port.js';
 import { directory, file, mockOf, postgres, specification } from './index.js';
-import type { Visitor } from './model/ports/browser.port.js';
-import type { MobileVisitor } from './model/ports/device.port.js';
 
 /**
  * The TYPE channel — the conventions the compiler refuses, stated as code.

@@ -1,7 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { STUB_KINDS } from '../../../src/stubs/kinds.js';
+import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
 import { listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';

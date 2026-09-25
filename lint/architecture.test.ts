@@ -3,48 +3,29 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { ActionSignatures } from '../src/actions/signatures.js';
-import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
-import type { SetupSignatures } from '../src/capabilities/signatures.js';
-import type { FacetParams } from '../src/model/chain/capability.js';
-import {
-    definitionsIn,
-    foldersOf,
-    modulesOf,
-    outsideLoadsReached,
-    straysOf,
-} from './architecture.js';
-import { FRAMEWORK_LAYERS } from './self-layers.js';
+import { definitionsIn, modulesOf, outsideLoadsReached, straysOf } from './architecture.js';
 
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** Every key of a union type, branch by branch. */
-type KeysOf<T> = T extends unknown ? keyof T : never;
-
 /**
- * The capability folders, each with what it holds: a setup of the chain, the
- * setup `with()` shares the others through, or an option a route action takes.
- * Pinned to the signatures' `keyof` in both directions.
+ * The setups a chain can offer, each defined in its own `<name>.capability.ts`
+ * (`with` is the sharing every contextual setup answers through).
  */
-const CAPABILITY_FOLDERS = {
-    clock: 'setup',
-    env: 'setup',
-    fixture: 'setup',
-    headers: 'setup',
-    intercept: 'setup',
-    params: 'route option',
-    seed: 'setup',
-    viewport: 'setup',
-    with: 'sharing',
-    wrap: 'setup',
-} satisfies Record<
-    'with' | keyof SetupSignatures<unknown, FacetParams> | KeysOf<NonNullable<RouteOptionsAny>>,
-    string
->;
+const SETUPS = [
+    'clock',
+    'env',
+    'fixture',
+    'headers',
+    'intercept',
+    'seed',
+    'viewport',
+    'with',
+    'wrap',
+];
 
-/** The folder each terminal action is defined in — the request family shares one. */
-const ACTION_FOLDERS = {
+/** The module each terminal action is defined in — the request family shares one. */
+const ACTION_MODULES = {
     call: 'call',
     delete: 'request',
     exec: 'exec',
@@ -58,7 +39,7 @@ const ACTION_FOLDERS = {
     run: 'run',
     trigger: 'trigger',
     visit: 'visit',
-} satisfies Record<keyof ActionSignatures<FacetParams>, string>;
+};
 
 /**
  * Meta-tests I7 (`i7-kernel-loads-in-a-page`) and I8
@@ -70,8 +51,13 @@ const ACTION_FOLDERS = {
  */
 describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
     test('i7 — the kernel and every setup load no node builtin and no package, at any depth', () => {
-        // Given - the facet definer, which reaches the kernel, and every module of every capability folder
-        const starts = ['src/facets/define-facet.ts', ...modulesOf(ROOT, 'capabilities', '.ts')];
+        // Given - every module of the chain kernel, and every setup module
+        const starts = [
+            ...modulesOf(ROOT, 'kernel/chain', '.ts').filter(
+                (path) => !path.endsWith('.test-d.ts'),
+            ),
+            ...modulesOf(ROOT, '', '.capability.ts'),
+        ];
 
         // Then - a page can load each of them: a builtin a setup reaches is a component chain that no longer bundles
         expect(outsideLoadsReached(ROOT, starts)).toStrictEqual([]);
@@ -100,38 +86,32 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         ]);
     });
 
-    test('i8 — the capability folders are exactly the setups the signatures name, and the layer map', () => {
-        // Given - the folders on disk, the signatures' own names, and the folders the layer map declares
-        const declared = Object.keys(CAPABILITY_FOLDERS).toSorted();
-
-        // Then - one folder per setup, per sharing and per route option, and the map names the same ones
-        expect(foldersOf(ROOT, 'capabilities')).toStrictEqual(declared);
-        expect(Object.keys(FRAMEWORK_LAYERS.capabilities.folders).toSorted()).toStrictEqual(
-            declared,
-        );
-    });
-
-    test('i8 — every action folder is one an action signature names, and the layer map', () => {
-        // Given - the folders the signatures place their actions in
-        const declared = [...new Set(Object.values(ACTION_FOLDERS))].toSorted();
-
-        // Then - the map declares exactly them, and no folder on disk is another
-        expect(Object.keys(FRAMEWORK_LAYERS.actions.folders).toSorted()).toStrictEqual(declared);
-        expect(
-            foldersOf(ROOT, 'actions').filter((folder) => !declared.includes(folder)),
-        ).toStrictEqual([]);
-    });
-
-    test('i8 — a definition is named for its folder, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
-        // Given - every definition a capability or an action module exports
+    test('i8 — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
+        // Given - every definition a setup or an action module exports
         const definitions = await definitionsIn(ROOT, [
-            ...modulesOf(ROOT, 'capabilities', '.capability.ts'),
-            ...modulesOf(ROOT, 'actions', '.action.ts'),
+            ...modulesOf(ROOT, '', '.capability.ts'),
+            ...modulesOf(ROOT, '', '.action.ts'),
+        ]);
+        const named = (kind: string): string[] =>
+            definitions
+                .filter(({ definition }) => kind.includes(definition.kind))
+                .map(({ definition }) => definition.name)
+                .toSorted();
+
+        // Then - one module per setup, and every action is one the list places
+        expect(named('setup context')).toStrictEqual(SETUPS);
+        expect(named('action')).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
+    });
+
+    test('i8 — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
+        // Given - every definition a setup or an action module exports
+        const definitions = await definitionsIn(ROOT, [
+            ...modulesOf(ROOT, '', '.capability.ts'),
+            ...modulesOf(ROOT, '', '.action.ts'),
         ]);
 
-        // Then - each answers to its folder, has its test, and names a port exactly when it arms an engine
-        expect(definitions.map(({ definition }) => definition.name).toSorted()).toContain('seed');
-        expect(definitions.flatMap((found) => straysOf(ROOT, found, ACTION_FOLDERS))).toStrictEqual(
+        // Then - each answers to its module, has its test, and names a port exactly when it arms an engine
+        expect(definitions.flatMap((found) => straysOf(ROOT, found, ACTION_MODULES))).toStrictEqual(
             [],
         );
     });

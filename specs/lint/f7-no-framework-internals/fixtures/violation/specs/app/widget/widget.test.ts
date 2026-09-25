@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-import { match } from '../../../src/model/matching/match.js';
+import { match } from '../../../src/expectations/tokens/match.js';
 
 test('matches a uuid', () => {
     // Given - a uuid matcher

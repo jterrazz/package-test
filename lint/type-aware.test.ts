@@ -42,7 +42,7 @@ describe('the type-aware rules D2 hands its promise matchers to (meta-test)', ()
             "import { expect } from 'vitest';",
             '',
             `import type { ContainerAccessor } from '${ROOT}/src/index.js';`,
-            `import type { TableAccessor } from '${ROOT}/src/results/table.js';`,
+            `import type { TableAccessor } from '${ROOT}/src/expectations/table/table.js';`,
             '',
             'declare const table: TableAccessor;',
             'declare const container: ContainerAccessor;',

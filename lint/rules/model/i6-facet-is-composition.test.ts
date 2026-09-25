@@ -3,11 +3,11 @@ import { i6FacetIsComposition } from './i6-facet-is-composition.js';
 
 /** A facet file as the architecture writes it: imports, the composition, the chain, the definition. */
 const COMPOSED = `
-import { trigger } from '../../actions/trigger/trigger.action.js';
-import { clock } from '../../capabilities/clock/clock.capability.js';
-import { getCallerDir } from '../../model/chain/caller.js';
-import { databaseSet } from '../../seams/fs/database-set.js';
-import { processClock } from '../../seams/vitest/clock.engine.js';
+import { trigger } from './trigger.action.js';
+import { clock } from '../../world/clock/clock.capability.js';
+import { getCallerDir } from '../../kernel/files/caller.js';
+import { databaseSet } from '../../world/services/seed/database-set.js';
+import { processClock } from '../../world/clock/clock.engine.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
 
@@ -29,8 +29,8 @@ export const jobFacet = defineFacet<JobSpecification>()({
 
 /** A constructor that opens its facet. */
 const OPENS = `
-import { BaseResult } from '../../results/result.js';
-import { seed } from '../../capabilities/seed/seed.capability.js';
+import { BaseResult } from '../../expectations/result.js';
+import { seed } from '../../world/services/seed/seed.capability.js';
 import { jobFacet } from './job.facet.js';
 
 export async function startJob(options) {
@@ -149,7 +149,7 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
         },
         // A step reached through a namespace import, a destructured step, and one reached through the facet.
         {
-            code: `${OPENS}\nimport * as defs from '../../capabilities/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
+            code: `${OPENS}\nimport * as defs from '../../world/services/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
             errors: [
                 { messageId: 'runsStep' },
                 { messageId: 'runsStep' },
@@ -170,7 +170,7 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
         },
         // A step called through `call`, read by a string key or off a cast, and a result built through a namespace import.
         {
-            code: `${OPENS}\nimport * as results from '../../results/result.js';\nexport function reached(state, context) {\n    seed.reduce.call(undefined, [], state, context);\n    seed['reduce']([], state, context);\n    (seed as any).reduce([], state, context);\n    return new results.BaseResult({ config: {}, testDir: '' });\n}\n`,
+            code: `${OPENS}\nimport * as results from '../../expectations/result.js';\nexport function reached(state, context) {\n    seed.reduce.call(undefined, [], state, context);\n    seed['reduce']([], state, context);\n    (seed as any).reduce([], state, context);\n    return new results.BaseResult({ config: {}, testDir: '' });\n}\n`,
             errors: [
                 { messageId: 'runsStep' },
                 { messageId: 'runsStep' },

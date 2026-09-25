@@ -2,18 +2,18 @@ import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
-import { GROUND_DIRS, isGroundName, SHARED_GROUND } from '../src/model/chain/ground.js';
-import { isRelativePath } from '../src/model/chain/spec-path.js';
 import {
     documentPaths,
     parseSpecDocument,
     SPEC_EXTENSION,
-} from '../src/model/literate/spec-document.js';
-import { moveKeepingHistory, treeEntries, treeKind } from '../src/seams/git/tree.js';
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
+} from '../src/facets/cli/documents/spec-document.js';
+import { moveKeepingHistory, treeEntries, treeKind } from '../src/kernel/files/git-tree.js';
+import { GROUND_DIRS, isGroundName, SHARED_GROUND } from '../src/kernel/files/ground.js';
+import { isRelativePath } from '../src/kernel/files/spec-path.js';
 import { isNode, nodeStart, specsAnchor } from './ast.js';
 import type { Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
+import { parseProgram } from './module-parser.js';
 import { moduleTestsOf } from './module-tests.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';

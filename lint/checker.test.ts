@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { moveKeepingHistory } from '../src/seams/git/tree.js';
+import { moveKeepingHistory } from '../src/kernel/files/git-tree.js';
 import { fixPoolFixtures } from './checker-crossfile.js';
 import { readManifest } from './checker-member.js';
 import { migrateTo17 } from './checker-migration.js';

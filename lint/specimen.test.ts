@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { forgetTree } from '../src/seams/git/tree.js';
+import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { specimenOf } from './specimen.js';
 
 /** A specs tree on disk, from its files. Returns the specs root. */

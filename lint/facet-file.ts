@@ -31,15 +31,21 @@ export type FacetFinding = {
     readonly node: AstNode;
 };
 
-/** The layer an import source names inside `src/`, when it is one a definition, a facet or a result lives in. */
+/**
+ * What an import source names inside `src/`, by the role its file carries: a
+ * definition (`*.capability.js`, `*.action.js`), a facet (`*.facet.js`) or a
+ * result (`*.result.js`, or an accessor of `expectations/`).
+ */
 export function layerOf(source: string): 'definition' | 'facet' | 'result' | undefined {
-    if (/(?:^|\/)(?:capabilities|actions)\//u.test(source)) {
+    if (/\.(?:capability|action)\.js$/u.test(source)) {
         return 'definition';
     }
     if (source.endsWith('.facet.js')) {
         return 'facet';
     }
-    return /(?:^|\/)results\//u.test(source) ? 'result' : undefined;
+    return source.endsWith('.result.js') || /(?:^|\/)expectations\//u.test(source)
+        ? 'result'
+        : undefined;
 }
 
 /** The one declarator of a `const` statement, or `undefined` for any other statement. */

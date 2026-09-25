@@ -1,6 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { STUB_KINDS } from '../../../src/stubs/kinds.js';
+import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
 import { importSourceVisitor } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';

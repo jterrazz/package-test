@@ -1,5 +1,5 @@
-import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { isNode, walk } from './ast.js';
+import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
 /**

@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { GROUND_FIXTURES, SHARED_GROUND } from '../src/model/chain/ground.js';
-import { treeKind } from '../src/seams/git/tree.js';
+import { treeKind } from '../src/kernel/files/git-tree.js';
+import { GROUND_FIXTURES, SHARED_GROUND } from '../src/kernel/files/ground.js';
 import { closingOf, literalEnd, withoutComments } from './subject.js';
 
 /**

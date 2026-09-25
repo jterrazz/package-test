@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
-import { isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries, treeKind } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind } from '../src/kernel/files/git-tree.js';
+import { isGroundName } from '../src/kernel/files/ground.js';
 import { isTestFileName } from './role.js';
 
 /** Directories a member walk never enters. */

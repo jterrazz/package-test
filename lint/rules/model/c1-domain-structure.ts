@@ -1,6 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { isGroundName, SHARED_GROUND } from '../../../src/model/chain/ground.js';
+import { isGroundName, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import { declaresTests, isStrayFolder } from '../../first-level.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';

@@ -1,4 +1,4 @@
-import { isGroundName, SHARED_GROUND } from '../src/model/chain/ground.js';
+import { isGroundName, SHARED_GROUND } from '../src/kernel/files/ground.js';
 import { FACETS } from './config-shape.js';
 import { isDirectory, listDirectory } from './fs-cache.js';
 

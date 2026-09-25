@@ -1,21 +1,21 @@
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
+import { TOKEN_KINDS } from '../src/expectations/tokens/match.js';
+import {
+    assertedStreams,
+    readSpecFile,
+    SPEC_EXTENSION,
+    SpecSyntaxError,
+} from '../src/facets/cli/documents/spec-document.js';
+import { treeEntries } from '../src/kernel/files/git-tree.js';
 import {
     GROUND_DIRS,
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-} from '../src/model/chain/ground.js';
-import {
-    assertedStreams,
-    readSpecFile,
-    SPEC_EXTENSION,
-    SpecSyntaxError,
-} from '../src/model/literate/spec-document.js';
-import { TOKEN_KINDS } from '../src/model/matching/match.js';
-import { treeEntries } from '../src/seams/git/tree.js';
+} from '../src/kernel/files/ground.js';
 import {
     checkCopiedGround,
     checkDatabaseProperty,

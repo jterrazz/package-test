@@ -51,7 +51,18 @@ function isPlainValue(node: AstNode | undefined): boolean {
     );
 }
 
-/** An adapter: a plain value, or a seam's constructor called (or `new`ed) on plain values. */
+/** An engine's module: under `world/`, or in a concept folder of the facet itself — never a definition. */
+function isEngineSource(source: string): boolean {
+    return (
+        (/(?:^|\/)world\//u.test(source) || /^\.\/[^/]+\/[^/]+\.js$/u.test(source)) &&
+        !/\.(?:capability|action|facet|result)\.js$/u.test(source)
+    );
+}
+
+/**
+ * An adapter: a plain value, or an engine's constructor called (or `new`ed) on
+ * plain values — one a world area exports, or the facet's own concept folder.
+ */
 export function isAdapter(
     node: AstNode | undefined,
     imports: ReadonlyMap<string, string>,
@@ -63,7 +74,7 @@ export function isAdapter(
     const built = identifierName(child(value, 'callee'));
     return (
         built !== undefined &&
-        /(?:^|\/)seams\//u.test(imports.get(built) ?? '') &&
+        isEngineSource(imports.get(built) ?? '') &&
         childList(value, 'arguments').every(isPlainValue)
     );
 }

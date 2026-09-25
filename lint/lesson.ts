@@ -1,5 +1,5 @@
-import { lessonLine } from '../src/model/lesson/lesson.js';
-import type { Lesson } from '../src/model/lesson/lesson.js';
+import { lessonLine } from '../src/kernel/refusals/lesson.js';
+import type { Lesson } from '../src/kernel/refusals/lesson.js';
 import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry, RULE_DOCS } from './manifest.js';
 import { CATALOGUE_CHAPTER } from './rule-code.js';

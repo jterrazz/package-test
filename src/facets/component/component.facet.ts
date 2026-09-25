@@ -1,20 +1,20 @@
+import type { FacetParams, MatrixRow } from '../../kernel/chain/capability.js';
+import type { ChainOf } from '../../kernel/chain/chain.js';
+import type { SpecificationConfig } from '../../kernel/chain/config.js';
+import { defineFacet } from '../../kernel/chain/define-facet.js';
+import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { clock } from '../../world/clock/clock.capability.js';
+import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
+import { mswWorker } from '../../world/stubs/interceptor/worker.js';
+import type { ComponentProjectOptions } from './component.project.js';
+import { pageClock } from './page/clock.engine.js';
+import { afterThisTest, pageDirectory } from './page/page-runtime.js';
+import { vitestBrowserPage } from './page/page.engine.js';
+import { wrap } from './page/wrap.capability.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import { render } from '../../actions/render/render.action.js';
-import { clock } from '../../capabilities/clock/clock.capability.js';
-import { intercept } from '../../capabilities/intercept/intercept.capability.js';
-import { viewport } from '../../capabilities/viewport/viewport.capability.js';
-import { wrap } from '../../capabilities/wrap/wrap.capability.js';
-import type { FacetParams, MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
-import type { FacetProjectOptions } from '../../runner/facet-project.js';
-import type { ComponentProjectOptions } from '../../runner/projects/component.project.js';
-import { mswWorker } from '../../seams/msw/worker.js';
-import { pageClock } from '../../seams/vitest-browser/clock.engine.js';
-import { afterThisTest, pageDirectory } from '../../seams/vitest-browser/page-runtime.js';
-import { vitestBrowserPage } from '../../seams/vitest-browser/page.engine.js';
-import { pageViewport } from '../../seams/vitest-browser/viewport.engine.js';
-import type { ChainOf } from '../chain.js';
-import { defineFacet } from '../define-facet.js';
+import { render } from './render/render.action.js';
+import { viewport } from './viewport/viewport.capability.js';
+import { pageViewport } from './viewport/viewport.engine.js';
 
 const composition = {
     actions: [render],

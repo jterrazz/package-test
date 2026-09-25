@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries } from '../src/seams/git/tree.js';
-import type { TreeEntry } from '../src/seams/git/tree.js';
+import { treeEntries } from '../src/kernel/files/git-tree.js';
+import type { TreeEntry } from '../src/kernel/files/git-tree.js';
+import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/kernel/files/ground.js';
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 

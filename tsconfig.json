@@ -3,7 +3,7 @@
     "compilerOptions": {
         "jsx": "react-jsx",
         "paths": {
-            "@jterrazz/test": ["./src/browser/index.ts"]
+            "@jterrazz/test": ["./src/index.browser.ts"]
         }
     },
     "include": ["${configDir}/**/*.ts", "${configDir}/**/*.tsx", "${configDir}/**/*.js"]

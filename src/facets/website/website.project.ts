@@ -1,0 +1,26 @@
+import type { TestProjectInlineConfiguration } from 'vitest/config';
+
+import type { FacetProjectOptions } from '../../vitest/facet-project.js';
+import { onProjectDefaults } from '../../vitest/preset.js';
+
+/** `website()` — the assembled product, met through a served page. */
+export type WebsiteProjectOptions = FacetProjectOptions;
+
+/**
+ * A website spec meets the assembled product through a served page, in the
+ * Chromium playwright drives. It opens a browser, so it is scheduled before the
+ * component project and never beside it: two Chromiums must not share a slot on
+ * a 2-vCPU runner.
+ */
+export function website(options: WebsiteProjectOptions = {}): TestProjectInlineConfiguration {
+    return onProjectDefaults({
+        test: {
+            ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
+            ...(options.serial === true ? { fileParallelism: false } : {}),
+            include: options.include ?? ['specs/website/**/*.spec.ts'],
+            name: 'website',
+            sequence: { groupOrder: 1 },
+            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
+        },
+    });
+}

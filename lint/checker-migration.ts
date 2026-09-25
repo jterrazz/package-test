@@ -1,14 +1,14 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
+import { SPEC_EXTENSION } from '../src/facets/cli/documents/spec-document.js';
+import { treeEntries, treeKind } from '../src/kernel/files/git-tree.js';
 import {
     GROUND_FIXTURES,
     isGroundName,
     RENAMED_GROUND_DIRS,
     SHARED_GROUND,
-} from '../src/model/chain/ground.js';
-import { SPEC_EXTENSION } from '../src/model/literate/spec-document.js';
-import { treeEntries, treeKind } from '../src/seams/git/tree.js';
+} from '../src/kernel/files/ground.js';
 import { repointModuleTests } from './checker-crossfile.js';
 import { migrateStubs } from './checker-migration-stubs.js';
 import { isTestFileName } from './role.js';

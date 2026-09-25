@@ -1,6 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { TOKEN_KINDS } from '../../../src/model/matching/match.js';
+import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
 import { findProperty, memberPropertyName, specificationMember, stringValue } from '../../ast.js';
 import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';

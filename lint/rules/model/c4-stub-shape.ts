@@ -1,7 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { isStubKind, STUB_KINDS } from '../../../src/stubs/kinds.js';
+import { isStubKind, STUB_KINDS } from '../../../src/world/stubs/kinds.js';
 import {
     child,
     childList,

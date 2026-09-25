@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
+import { REFUSAL_WHY } from '../src/kernel/refusals/refusal.js';
 import {
     danglingImports,
     extractTarball,

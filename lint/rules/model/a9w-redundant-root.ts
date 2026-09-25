@@ -1,7 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { findRoot } from '../../../src/model/chain/resolve.js';
+import { findRoot } from '../../../src/kernel/files/resolve.js';
 import { findProperty, specificationMember, stringValue } from '../../ast.js';
 import { isFile } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';

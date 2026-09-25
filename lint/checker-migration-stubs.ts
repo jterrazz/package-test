@@ -1,8 +1,8 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { isGroundName } from '../src/model/chain/ground.js';
-import { treeEntries, treeKind } from '../src/seams/git/tree.js';
+import { treeEntries, treeKind } from '../src/kernel/files/git-tree.js';
+import { isGroundName } from '../src/kernel/files/ground.js';
 import { repointSource } from './checker-crossfile.js';
 
 /**

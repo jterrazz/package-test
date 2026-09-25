@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-import { treeEntries } from '../src/seams/git/tree.js';
+import { treeEntries } from '../src/kernel/files/git-tree.js';
 
 /**
  * The files of this package that read a port they were handed — meta-test K9.
@@ -18,7 +18,7 @@ import { treeEntries } from '../src/seams/git/tree.js';
  */
 
 /** The module test that proves the PORT form, relative to the root. */
-const PORT_FORM_PROOF = 'src/seams/process/serve.adapter.test.ts';
+const PORT_FORM_PROOF = 'src/world/services/process/serve.adapter.test.ts';
 
 /** Where a port is read from what the process was handed. */
 const HANDED_PORT = /process\.env\.PORT\b|\$PORT\b|\$\{PORT\}/u;

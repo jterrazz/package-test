@@ -2,7 +2,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { ROUTES_KEY } from '../src/model/routes/routes.js';
+import { ROUTES_KEY } from '../src/facets/api/routes/routes.js';
 
 /**
  * The ratchet this package owns: a count per rule that may fall and never rise.

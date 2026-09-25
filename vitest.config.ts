@@ -12,7 +12,7 @@ import {
     mobile,
     unit,
     website,
-} from './src/runner/index.js';
+} from './src/vitest/index.js';
 
 /**
  * The package eats its own preset: `defineSpecConfig()` sets the artefact
@@ -107,7 +107,7 @@ const config = defineSpecConfig({
                         // `browser` condition publishes. `tsconfig`'s `paths`
                         // Mirrors it so the compiler agrees with the bundler.
                         alias: {
-                            '@jterrazz/test': resolve(import.meta.dirname, 'src/browser/index.ts'),
+                            '@jterrazz/test': resolve(import.meta.dirname, 'src/index.browser.ts'),
                         },
                     },
                 },

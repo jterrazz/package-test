@@ -1,7 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
-import { GROUND_REQUESTS } from '../../../src/model/chain/ground.js';
+import { GROUND_REQUESTS } from '../../../src/kernel/files/ground.js';
 import { isDirectory, listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';

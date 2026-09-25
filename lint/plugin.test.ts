@@ -5,8 +5,8 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { lessonParts } from '../src/model/lesson/lesson.js';
-import { TOKEN_KINDS } from '../src/model/matching/match.js';
+import { TOKEN_KINDS } from '../src/expectations/tokens/match.js';
+import { lessonParts } from '../src/kernel/refusals/lesson.js';
 import { anchor, spliceCatalog, spliceSelfRules } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import {

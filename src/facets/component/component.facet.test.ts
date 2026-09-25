@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import type { ComponentVisitor } from '../../actions/render/scenario.js';
-import { disabled, focused, option, selected, valued } from '../../model/elements/elements.js';
-import type { ElementRef, Visitor } from '../../model/ports/browser.port.js';
-import type { MobileVisitor } from '../../model/ports/device.port.js';
+import type { ElementRef, Visitor } from '../../elements/browser.port.js';
+import { disabled, focused, option, selected, valued } from '../../elements/elements.js';
+import type { MobileVisitor } from '../mobile/device/device.port.js';
 import type { ComponentChain } from './component.facet.js';
+import type { ComponentVisitor } from './render/scenario.js';
 
 /**
  * The verb rows of CONVENTIONS W6, held by the COMPILER.
