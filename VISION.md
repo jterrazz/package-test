@@ -2962,7 +2962,7 @@ The units:
       `TEST_UPDATE=1 vitest run --project api <one file>` recorded 12
       unreached. **Owner call:** refuse to record over a filtered run, and
       say so at docs/10-api.md:297.
-    - `specs/component/quote-status.test.tsx` proves how the browser
+    - `specs/component/intercept/quote-status.test.tsx` proves how the browser
       behaves, and guards no package code. docs/16's "the proof" could say
       so.
     - `hono.adapter.test.ts:84` is titled "neither text nor binary", but
