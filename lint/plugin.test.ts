@@ -723,8 +723,8 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
         // Then - the seventh subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
         expect(trees.has('component'), 'component has no fixture app tree').toBe(true);
         expect(
-            readdirSync(resolve(ROOT, 'specs/component')).some((entry) =>
-                entry.endsWith('.test.tsx'),
+            readdirSync(resolve(ROOT, 'specs/component'), { recursive: true }).some((entry) =>
+                String(entry).endsWith('.test.tsx'),
             ),
             'specs/component holds no rendered unit',
         ).toBe(true);

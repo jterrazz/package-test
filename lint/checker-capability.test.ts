@@ -123,4 +123,48 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
             'integration/timekeeping/imported.spec.ts',
         ]);
     });
+
+    test('a file of the component tree outside a component capability folder is refused', () => {
+        // Given - a pair at the tree's root, one under a folder the matrix never names, one under a capability of another column, one a folder too deep, and the project's frame at the root
+        const root = specsTree({
+            'component/post-table.test.tsx': "import { PostTable } from './post-table.js';\n",
+            'component/post-table.tsx': 'export function PostTable() {}\n',
+            'component/hooks/use-modal.ts': 'export function useModal() {}\n',
+            'component/exec/runner.tsx': 'export function Runner() {}\n',
+            'component/intercept/nominal/feed.tsx': 'export function Feed() {}\n',
+            'component/providers.tsx':
+                '/** The frame. */\nexport default function Providers() {}\n',
+        });
+
+        // Then - each, at its first line of code, named with the column's own capabilities
+        expect(
+            checkCapabilityFolder(root).map(({ file, found, line }) => `${file}:${line} ${found}`),
+        ).toStrictEqual([
+            'component/exec/runner.tsx:1 a file of the component tree, filed under `component/exec/`',
+            'component/hooks/use-modal.ts:1 a file of the component tree, filed under `component/hooks/`',
+            'component/intercept/nominal/feed.tsx:1 a file of the component tree, filed under `component/intercept/nominal/`',
+            'component/post-table.test.tsx:1 a file of the component tree, filed under `component/`',
+            'component/post-table.tsx:1 a file of the component tree, filed under `component/`',
+            'component/providers.tsx:2 a file of the component tree, filed under `component/`',
+        ]);
+        expect(checkCapabilityFolder(root)[0]?.fix).toBe(
+            'file it under the capability it specifies, one folder below its facet — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/03-testing.md § The capability matrix)',
+        );
+    });
+
+    test('a component capability folder passes, and a reasoned suppression keeps a file where it is', () => {
+        // Given - a pair under intercept/, a hook and its test under render/, and a silenced file at the root
+        const root = specsTree({
+            'component/intercept/post-table.test.tsx':
+                "import { PostTable } from './post-table.js';\n",
+            'component/intercept/post-table.tsx': 'export function PostTable() {}\n',
+            'component/render/use-modal.test.tsx': "import { useModal } from './use-modal.js';\n",
+            'component/render/use-modal.ts': 'export function useModal() {}\n',
+            'component/legacy.tsx':
+                '// checker-disable-next-line c35 -- moved with its consumer next release\nexport function Legacy() {}\n',
+        });
+
+        // Then - no finding
+        expect(checkCapabilityFolder(root)).toStrictEqual([]);
+    });
 });

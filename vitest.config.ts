@@ -110,7 +110,7 @@ const config = defineSpecConfig({
                         },
                     },
                 },
-                wrap: './providers.tsx',
+                wrap: './wrap/providers.tsx',
             }),
         ],
     },
