@@ -283,6 +283,9 @@ export const testing: OxlintConfig = {
                 'vitest/max-nested-describe': ['error', { max: 1 }],
                 'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
                 'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
+                // C31 — the file's one describe is titled with its subject, the
+                // Symbol a colocated test is about: `LocaleNote` keeps its case.
+                'vitest/prefer-lowercase-title': ['error', { ignoreTopLevelDescribe: true }],
             },
         },
     ],

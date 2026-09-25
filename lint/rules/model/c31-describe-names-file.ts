@@ -1,159 +1,22 @@
-import type { Context, Fix, Fixer, FixFn } from '@oxlint/plugins';
+import type { Context, FixFn } from '@oxlint/plugins';
 
+import { childList, nodeEnd, nodeStart, stringValue } from '../../ast.js';
 import {
-    child,
-    childList,
-    identifierName,
-    isTestCallee,
-    nodeEnd,
-    nodeStart,
-    stringValue,
-} from '../../ast.js';
+    calleeOf,
+    escapedFor,
+    firstArgumentOf,
+    flattenedGroup,
+    groupBodyOf,
+    isGroup,
+    isTest,
+    mergeFix,
+} from '../../describe-merge.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { testTitle } from '../../test-title.js';
-
-/** Is this callee `describe`, or one of its modifiers (`describe.skip`, `describe.each(…)`)? */
-function isDescribeCallee(callee: AstNode | undefined): boolean {
-    if (callee?.type === 'Identifier') {
-        return identifierName(callee) === 'describe';
-    }
-    if (callee?.type === 'MemberExpression') {
-        return isDescribeCallee(child(callee, 'object'));
-    }
-    return callee?.type === 'CallExpression' && isDescribeCallee(child(callee, 'callee'));
-}
-
-/** The callee of the call a top-level statement makes, when it is one. */
-function calleeOf(statement: AstNode): AstNode | undefined {
-    const expression = child(statement, 'expression');
-    return expression?.type === 'CallExpression' ? child(expression, 'callee') : undefined;
-}
-
-/** The first argument of the call a top-level statement makes. */
-function firstArgumentOf(statement: AstNode): AstNode | undefined {
-    return childList(child(statement, 'expression'), 'arguments')[0];
-}
-
-/** The statements of the block a group's function runs, when it is a plain `describe` with one. */
-function groupBodyOf(group: AstNode): AstNode | undefined {
-    if (identifierName(calleeOf(group)) !== 'describe') {
-        return undefined;
-    }
-    const run = childList(child(group, 'expression'), 'arguments')[1];
-    const body = child(run, 'body');
-    return body?.type === 'BlockStatement' ? body : undefined;
-}
-
-/** A title written in quotes or backticks, escaped for its own delimiter. */
-function escapedFor(title: AstNode, text: string): string {
-    const raw = typeof title.raw === 'string' ? title.raw : "'";
-    const delimiter = title.type === 'TemplateLiteral' ? '`' : raw.charAt(0);
-    const escaped = text.replaceAll('\\', String.raw`\\`).replaceAll(delimiter, `\\${delimiter}`);
-    return delimiter === '`' ? escaped.replaceAll('${', '\\${') : escaped;
-}
-
-/** A group's tests, each title prefixed with the group's (C33's grouping), or `undefined` when it holds anything else. */
-function flattenedGroup(source: string, group: AstNode, named: string): string | undefined {
-    const body = groupBodyOf(group);
-    const title = stringValue(firstArgumentOf(group));
-    const statements = childList(body, 'body');
-    if (body === undefined || title === undefined) {
-        return undefined;
-    }
-    let text = '';
-    let from = nodeStart(body) + 1;
-    for (const statement of statements) {
-        const its = firstArgumentOf(statement);
-        const written = its?.type === 'Literal' || its?.type === 'TemplateLiteral';
-        if (!isTestCallee(calleeOf(statement)) || its === undefined || !written) {
-            return undefined;
-        }
-        if (title !== named) {
-            const at = nodeStart(its) + 1;
-            text += `${source.slice(from, at)}${escapedFor(its, `${title} — `)}`;
-            from = at;
-        }
-    }
-    return text + source.slice(from, nodeEnd(body) - 1);
-}
-
-/**
- * The text replacing the run from the first member (a group or a test) to the
- * last: the statements between them kept at module scope above, then one
- * `describe` titled `named` holding every test. `undefined` when a group cannot flatten.
- */
-function mergedText(
-    source: string,
-    statements: AstNode[],
-    members: Set<AstNode>,
-    named: string,
-): string | undefined {
-    const inRun = statements.filter(
-        (statement) =>
-            nodeStart(statement) >= nodeStart([...members][0]) &&
-            nodeEnd(statement) <= nodeEnd([...members].at(-1)),
-    );
-    let hoisted = '';
-    let grouped = '';
-    let previous: number | undefined;
-    for (const statement of inRun) {
-        const lead = previous === undefined ? '' : source.slice(previous, nodeStart(statement));
-        previous = nodeEnd(statement);
-        const own = source.slice(nodeStart(statement), nodeEnd(statement));
-        if (!members.has(statement)) {
-            hoisted += `${lead.trimStart()}${own}\n`;
-        } else if (isDescribeCallee(calleeOf(statement))) {
-            const flattened = flattenedGroup(source, statement, named);
-            if (flattened === undefined) {
-                return undefined;
-            }
-            grouped += `${lead}${flattened.trim()}`;
-        } else {
-            grouped += `${lead}${own}`;
-        }
-    }
-    return `${hoisted}describe('${named}', () => {\n${grouped.trim()}\n});`;
-}
-
-/** The edit that brings `describe` into its `vitest` import, else a line of its own on top. */
-function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
-    const vitest = statements.find(
-        (statement) =>
-            statement.type === 'ImportDeclaration' &&
-            stringValue(child(statement, 'source')) === 'vitest',
-    );
-    const specifiers = childList(vitest, 'specifiers');
-    if (
-        specifiers.some((specifier) => identifierName(child(specifier, 'imported')) === 'describe')
-    ) {
-        return undefined;
-    }
-    const [first] = specifiers;
-    if (first?.type === 'ImportSpecifier') {
-        return fixer.insertTextBeforeRange([nodeStart(first), nodeStart(first)], 'describe, ');
-    }
-    const [top] = statements;
-    return top === undefined
-        ? undefined
-        : fixer.insertTextBeforeRange(
-              [nodeStart(top), nodeStart(top)],
-              "import { describe } from 'vitest';\n",
-          );
-}
-
-/** Is this top-level statement a group — `describe(…)` or one of its forms? */
-function isGroup(statement: AstNode): boolean {
-    return isDescribeCallee(calleeOf(statement));
-}
-
-/** Is this top-level statement a test? */
-function isTest(statement: AstNode): boolean {
-    return isTestCallee(calleeOf(statement));
-}
 
 /** How a file's top level falls short of one group holding every test, and where it shows. */
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
@@ -170,10 +33,12 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
 
 /**
  * The finding on the one group's title when it is not the file's name, with
- * its fix: a plain group's renamed; a table's — `describe.each(…)(…)`, run
+ * its fix: a plain group's renamed, the title it said kept on each of its
+ * tests when it holds tests alone; a table's — `describe.each(…)(…)`, run
  * once per row — prefixed so what names its rows stays, unless it is computed.
  */
 function titleFinding(
+    source: string,
     group: AstNode,
     named: string,
 ): undefined | { fix?: FixFn; messageId: string; node: AstNode } {
@@ -189,8 +54,14 @@ function titleFinding(
     }
     const messageId = parametrised ? 'tableTitle' : 'wrongTitle';
     if (!parametrised) {
-        const fix: FixFn = (fixer) =>
-            fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${named}'`);
+        const body = groupBodyOf(group);
+        const kept = flattenedGroup(source, group, named);
+        const fix: FixFn = (fixer) => [
+            fixer.replaceTextRange([nodeStart(title), nodeEnd(title)], `'${named}'`),
+            ...(body === undefined || kept === undefined
+                ? []
+                : [fixer.replaceTextRange([nodeStart(body) + 1, nodeEnd(body) - 1], kept)]),
+        ];
         return { fix, messageId, node: title };
     }
     if (title.type !== 'Literal' && title.type !== 'TemplateLiteral') {
@@ -200,27 +71,6 @@ function titleFinding(
     const fix: FixFn = (fixer) =>
         fixer.insertTextBeforeRange([at, at], escapedFor(title, `${named} — `));
     return { fix, messageId, node: title };
-}
-
-/** The fix that merges `members` into one describe, when the merge is mechanical. */
-function mergeFix(
-    source: string,
-    statements: AstNode[],
-    members: AstNode[],
-    named: string,
-): FixFn | undefined {
-    const text = mergedText(source, statements, new Set(members), named);
-    const [first] = members;
-    const last = members.at(-1);
-    if (text === undefined || first === undefined || last === undefined) {
-        return undefined;
-    }
-    const described = members.some((statement) => isGroup(statement));
-    return (fixer) =>
-        [
-            described ? undefined : importDescribe(fixer, statements),
-            fixer.replaceTextRange([nodeStart(first), nodeEnd(last)], text),
-        ].filter((edit) => edit !== undefined);
 }
 
 /**
@@ -257,7 +107,10 @@ export const c31DescribeNamesFile: LintRule = {
                     return;
                 }
                 const [only] = members;
-                const title = only === undefined ? undefined : titleFinding(only, named);
+                const title =
+                    only === undefined
+                        ? undefined
+                        : titleFinding(context.sourceCode.text, only, named);
                 if (title !== undefined) {
                     const said = stringValue(firstArgumentOf(only ?? program));
                     context.report({
@@ -290,7 +143,7 @@ export const c31DescribeNamesFile: LintRule = {
             },
             wrongTitle: {
                 found: 'the file’s `describe` is titled "{{title}}"',
-                fix: "title it '{{named}}', the file's {{what}} — `make fix` renames it",
+                fix: "title it '{{named}}', the file's {{what}} — `make fix` renames it, keeping the title it said on each of its tests when it holds tests alone",
             },
         }),
         type: 'suggestion',

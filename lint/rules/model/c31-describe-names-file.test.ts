@@ -34,7 +34,14 @@ ruleTester().run('c31-describe-names-file', asOxlintRule(c31DescribeNamesFile), 
             code: "describe('events listing', () => {\n    test('a', () => {});\n});",
             errors: [{ column: 9, line: 1, messageId: 'wrongTitle' }],
             filename: SPEC,
-            output: "describe('pagination', () => {\n    test('a', () => {});\n});",
+            output: "describe('pagination', () => {\n    test('events listing — a', () => {});\n});",
+        },
+        // A group with a hook is only renamed: its title stays the author's to place.
+        {
+            code: "describe('events listing', () => {\n    beforeAll(seed);\n    test('a', () => {});\n});",
+            errors: [{ column: 9, line: 1, messageId: 'wrongTitle' }],
+            filename: SPEC,
+            output: "describe('pagination', () => {\n    beforeAll(seed);\n    test('a', () => {});\n});",
         },
         // What stands between the tests stays at module scope, above the describe.
         {
@@ -101,7 +108,7 @@ ruleTester().run('c31-describe-names-file', asOxlintRule(c31DescribeNamesFile), 
             code: "describe('route judge', () => {\n    test('a', () => {});\n});",
             errors: [{ column: 9, line: 1, messageId: 'wrongTitle' }],
             filename: MODULE_TEST,
-            output: "describe('judgeLedgers', () => {\n    test('a', () => {});\n});",
+            output: "describe('judgeLedgers', () => {\n    test('route judge — a', () => {});\n});",
         },
         // A component test's subject is the export spelling its base name.
         {
