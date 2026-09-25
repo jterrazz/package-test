@@ -205,6 +205,17 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         expect(selfOnPublished).toStrictEqual([]);
     });
 
+    test('a meta row is a self row: it holds this package’s own suite, which no consumer runs', () => {
+        // Given - every row of the meta-test channel
+        const consumerMeta = catalog
+            .filter((row) => row.channel === 'meta' && row.audience !== 'self')
+            .map((row) => row.name);
+
+        // Then - none is consumer: a meta row labelled consumer would ship in the catalogue a consumer reads
+        expect(catalog.some((row) => row.channel === 'meta')).toBe(true);
+        expect(consumerMeta).toStrictEqual([]);
+    });
+
     test('the runtime refuses only for a consumer row, read at a heading the catalogue carries', () => {
         // Given - every row the published runtime refuses for, and the catalogue chapter its refusals read at
         const consumerRuntime = new Set(
