@@ -36,8 +36,8 @@ describe('redis', () => {
         expect(result.error.text).toBe('');
     });
 
-    // RUNTIME G2 — isolation is per WORKER: the runner's handle holds this
-    // Worker's database index, and the default index is the container's own.
+    // RUNTIME G2 — isolation is per (worker, service) pair: the runner's handle
+    // Holds this pair's database index, and the default index is the container's own.
     test('flushes every key on reset', async () => {
         // Given - a key written to the container, then a reset
         const result = await integration.call(async ({ cache }) => {

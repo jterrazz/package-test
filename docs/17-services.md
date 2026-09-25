@@ -139,7 +139,7 @@ This is the same boundary rule B1 already states from the other side — one cha
 
 A container-backed service is started once per PROJECT of a run, not once per file. The `api()`, `jobs()` and `integration()` projects each carry a global setup that serves the project's containers on a loopback port and provides its address to its workers. The first file that declares a service starts its container; every later file of the project, in any worker, is handed the same one; the run stops every project's containers when it closes. Vitest runs a global setup once per project, so a run of `api()` and `integration()` that both declare `postgres()` starts two postgres containers, one per project. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)). Every `redis()` is the same request too, so `cache: redis()` and `queue: redis()` share one container, started with `--databases 256`, and each takes an index of its own — one's reset flushes that index alone and never reaches the other's keys.
 
-A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), starts a container per specification and stops it with the file.
+A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), has no project container to hand out. There, every service a specification declares starts a container of its own and stops it with the file: `cache: redis()` and `queue: redis()` are two containers, each still on an index of its own, and two alike `postgres()` are two servers. The sharing above is the project setup's.
 
 The setup reaches Docker in the background and pulls each pinned default image the daemon lacks, so the first file waits on a pull at most once. When no Docker daemon answers, every file that declares a service fails with one sentence that names Docker, and a project whose specs declare no service never needs Docker at all.
 
@@ -152,6 +152,10 @@ Every container the package starts carries the label `com.jterrazz.test=true`, a
 The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper (Ryuk), and every run on a machine shares one reaper session while any of them holds it: the session's containers are removed only once its LAST client is gone. A run killed mid-way is therefore reaped only when every run sharing the reaper has ended — and with runs in parallel, that can be hours.
 
 The owner sweep covers the time in between. Every container the package starts that is not reused carries `com.jterrazz.test.owner=<host>:<pid>`, the process that started it; every services setup sweeps first, beside the image pulls, and removes a container whose owner names this host and a pid no process answers — running or not, whatever reaper still holds its session.
+
+The sweep runs only when a services setup starts, so it bounds a killed run's leftovers without removing them at once. They stay until the next services setup on the machine starts or the reaper's last client is gone, whichever comes first. Nothing sweeps when the setup tears down.
+
+The host in the label is `os.hostname()`, which on macOS follows the network the machine is on. A container labelled under an earlier network's name names no host the sweep recognises, so it is never swept and is left to the reaper, or to `docker rm` by the label below. The sweep fails safe: it removes only what it can prove is dead.
 
 The same sweep covers a reaper that is gone. It runs with auto-remove, so a runtime that stops every container, or a `docker stop` of them all, takes it away and leaves the session's containers stopped behind it. A container that carries a testcontainers session, has ended, and whose session no running reaper holds is removed too — whichever package or version started it.
 
@@ -192,7 +196,7 @@ Vitest runs test files in parallel workers; the framework isolates them automati
 | `redis()`    | A database index per (worker, service) pair — pool id `w`'s services take `4w − 3` to `4w` — acquired empty, the connection string's path |
 | `sqlite()`   | Template file copied per worker                                                                                                           |
 
-The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
+The handle's `connectionString` is its own isolation's — a postgres worker's database, a redis (worker, service) pair's index: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
 
 A redis container's 256 indexes are its own `0` and four per worker, so it serves pool ids 1 to 63 holding four redis services each; a process outside a vitest pool is worker `0` and shares pool id 1's band, since it never runs beside a pool against one project's container. A fifth service in one worker, or a pool id past 63, is refused before it connects, with the way out in the sentence. Two handles of one (worker, service) pair share its index, and the index stays theirs until the last of them releases it.
 
