@@ -1,6 +1,6 @@
 import { inject, onTestFinished, vi } from 'vitest';
 
-import { instantOf } from '../../model/clock/clock.js';
+import { instantOf } from '../../model/clock/instant.js';
 
 /**
  * The runner, as the page reaches it.

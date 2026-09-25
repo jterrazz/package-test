@@ -5,6 +5,7 @@ import { defineAction } from '../../model/chain/action.js';
 import { processClock } from '../../seams/vitest/clock.engine.js';
 import { clock } from './clock.capability.js';
 import type { ClockMethod } from './clock.capability.js';
+import type { ClockPort } from './clock.port.js';
 
 /** A chain composed of `.clock()` alone, ending on an action that reads `Date`. */
 type Chain = { clock: ClockMethod<Chain>; now: () => Promise<string> };
@@ -16,12 +17,12 @@ const now = defineAction({
     row: { group: 'Terminal action', name: '.now()', probe: '.now(' },
 });
 
-/** A chain whose calendar is this process's. */
-function chain(): Chain {
+/** A chain whose calendar is `engine` — this process's unless another is handed. */
+function chain(engine: ClockPort = processClock): Chain {
     return defineFacet<Chain>()({
         actions: [now],
         capabilities: [clock],
-        engines: () => ({ clock: processClock }),
+        engines: () => ({ clock: engine }),
         locate: () => '/specs',
         options: {},
     }).open({});
@@ -39,9 +40,9 @@ describe('.clock() — the calendar a chain pins', () => {
         });
     });
 
-    test('judges the instant when the chain is armed, not when it is stated', async () => {
-        // Given - a chain stated with something that is not an instant
-        const stated = chain().clock('soon');
+    test('judges the instant when the chain is armed, whatever the engine pins', async () => {
+        // Given - a chain stated with something that is not an instant, on an engine that pins nothing
+        const stated = chain({ pin: () => ({}) }).clock('soon');
 
         // Then - stating it passed; running it is refused in the calendar's own words
         await expect(stated.now()).rejects.toThrow('"soon" is not an instant');

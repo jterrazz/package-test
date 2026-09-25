@@ -1,5 +1,7 @@
 import { vi } from 'vitest';
 
+import { instantOf } from './instant.js';
+
 /**
  * The one time primitive.
  *
@@ -21,22 +23,6 @@ import { vi } from 'vitest';
 
 /** A pinned clock — released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
-
-/**
- * The instant `iso` names, or a refusal that says what an instant looks like —
- * the one check every engine that pins a calendar applies, in this process or
- * in a page.
- */
-export function instantOf(method: string, iso: string): Date {
-    const at = new Date(iso);
-    if (Number.isNaN(at.getTime())) {
-        throw new TypeError(
-            `clock.${method}(): "${iso}" is not an instant — pass an ISO-8601 string ` +
-                `(e.g. '2026-03-04T09:30:00Z').`,
-        );
-    }
-    return at;
-}
 
 /**
  * One clock per test — a second one taken inside the first is refused rather
