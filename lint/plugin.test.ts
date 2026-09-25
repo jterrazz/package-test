@@ -925,8 +925,8 @@ function anchorsOf(text: string): Set<string> {
             found.add(slugOf(heading));
         }
         // A catalogue row carries its own anchor, the rule id — a link may land on it.
-        for (const anchor of line.matchAll(/<a id="(?<id>[^"]+)"><\/a>/gu)) {
-            found.add(anchor.groups?.id ?? '');
+        for (const rowAnchor of line.matchAll(/<a id="(?<id>[^"]+)"><\/a>/gu)) {
+            found.add(rowAnchor.groups?.id ?? '');
         }
     }
     return found;
