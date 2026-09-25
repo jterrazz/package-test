@@ -1,0 +1,14 @@
+description: a chained fixture lies under the document's own fixture
+fixture: ./fixtures/document-ground/
+runs:
+    - command: echo-line
+      exit: 0
+      stdout: |
+          one line
+      files:
+          a.txt:
+              equals: |
+                  chain-a
+          b.txt:
+              equals: |
+                  doc-b
