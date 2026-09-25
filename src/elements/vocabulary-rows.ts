@@ -1,19 +1,10 @@
 import type { MatrixRow } from '../kernel/chain/capability.js';
 
-/*
- * The capability-matrix rows of the vocabulary a scenario is written in —
- * chapter 13's words. An action that hands a scenario a visitor states the
- * rows of its visitor's verbs and of the descriptors its surface resolves;
- * a verb one visitor alone hands out is stated by that visitor's action.
- */
-
-/** What every drawing surface's visitor hands out. */
 export const DRAWN_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'see', probe: '.see(' },
     { group: 'Verb', name: 'fill', probe: '.fill(' },
 ];
 
-/** What a browser's visitor hands out beyond the drawn verbs — website and component alike. */
 export const BROWSER_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'click', probe: '.click(' },
     { group: 'Verb', name: 'gone', probe: '.gone(' },
@@ -23,7 +14,6 @@ export const BROWSER_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'select', probe: '.select(' },
 ];
 
-/** What every drawing surface resolves: the four kinds a device has. */
 export const DRAWN_DESCRIPTORS: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'button', probe: 'button(' },
     { group: 'Descriptor', name: 'field', probe: 'field(' },
@@ -31,7 +21,6 @@ export const DRAWN_DESCRIPTORS: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'testId', probe: 'testId(' },
 ];
 
-/** What a browser resolves beyond the drawn kinds: its roles and landmarks. */
 export const BROWSER_DESCRIPTORS: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'heading', probe: 'heading(' },
     { group: 'Descriptor', name: 'link', probe: 'link(' },
@@ -51,10 +40,8 @@ export const BROWSER_DESCRIPTORS: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'search', probe: 'search(' },
 ];
 
-/** The scope every drawing surface resolves a descriptor within. */
 export const WITHIN: MatrixRow = { group: 'Descriptor', name: 'within', probe: 'within(' };
 
-/** The states a browser reads off an element. */
 export const BROWSER_STATES: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'focused', probe: 'focused(' },
     { group: 'Descriptor', name: 'selected', probe: 'selected(' },

@@ -3,26 +3,7 @@ import type { ElementMatch, ElementRef } from './descriptor.js';
 import { CONTEXT_LANDMARKS } from './landmarks.js';
 import { CONSTRUCTORS, formatBare, formatElement } from './spelling.js';
 
-/**
- * The ambiguity refusal — CONVENTIONS W3.
- *
- * A visit descriptor must designate exactly one element. Acting on "the
- * first match" is the failure mode this module exists to prevent: the spec
- * keeps passing while the visitor clicks something else, and nothing ever
- * reports it. So when a descriptor matches several elements the framework
- * refuses, and the refusal has to carry everything needed to fix it without
- * opening a browser — the descriptor in the caller's own vocabulary, every
- * candidate, and the concrete rewrites that would resolve it.
- *
- * Pure string building: it takes captured data and returns a message, so the
- * wording is unit-testable and the browser integration stays a thin adapter.
- */
-
-/**
- * The copy-pasteable scope a candidate's landmark offers, or none. A region
- * is a landmark only when it is named — an unnamed `<section>` has no role to
- * locate — and a page holds several, so it is offered by its name alone.
- */
+/** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
 function landmarkOf(match: ElementMatch): string | undefined {
     const kind = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
     if (kind !== 'region') {
@@ -33,11 +14,9 @@ function landmarkOf(match: ElementMatch): string | undefined {
         : `${CONSTRUCTORS.region}(${JSON.stringify(match.contextName)})`;
 }
 
-/** `1. <a href="/articles">Articles</a>  in <nav>` — one evidence line per candidate. */
 function formatMatch(match: ElementMatch, index: number): string {
     const attribute = match.detail ? ` ${quoteDetail(match)}` : '';
-    // The accessible name is what a role descriptor MATCHED on. When it is not
-    // the text — an `aria-label` — the text alone names the wrong thing.
+    // The accessible name is what a role descriptor matched on: when it is an `aria-label`, the text alone names the wrong thing.
     const named = match.accessibleName ? `  named ${JSON.stringify(match.accessibleName)}` : '';
     const context = match.context ? `  in <${match.context}>` : '';
     return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${named}${context}`;
@@ -48,7 +27,6 @@ function quoteDetail(match: ElementMatch): string {
     return `${attribute}=${JSON.stringify(match.detail)}`;
 }
 
-/** Each landmark the candidates sit in, and how many of them it holds. */
 function landmarkCounts(matches: ElementMatch[]): [string, number][] {
     const counts = new Map<string, number>();
     for (const match of matches) {
@@ -60,18 +38,10 @@ function landmarkCounts(matches: ElementMatch[]): [string, number][] {
     return [...counts].toSorted(([, a], [, b]) => a - b);
 }
 
-/**
- * The rewrites worth offering, in the order they should be tried. Scoping is
- * always available; `exact` only when it would actually narrow the set, and
- * the count it would leave is stated so a still-ambiguous suggestion never
- * reads as a fix.
- */
 function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
-    // A landmark holding EVERY candidate narrows nothing, and offering it reads
-    // as a fix while leaving the spec exactly as ambiguous. Only the ones that
-    // cut the set are offered, each with what it leaves.
+    // A landmark holding every candidate narrows nothing: only the ones that cut the set are offered.
     const narrowing = landmarkCounts(matches).filter(([, count]) => count < matches.length);
     if (!element.scope) {
         const [first, ...rest] = narrowing;
@@ -84,9 +54,7 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
         );
     }
 
-    // Only worth offering to a descriptor that opted OUT: exact is the default,
-    // so telling an ordinary descriptor to "match the name whole" would be
-    // telling it to do what it is already doing.
+    // Only for a descriptor that opted out: exact is the default.
     if (element.exact === false && element.name !== undefined) {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
@@ -103,22 +71,11 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     return fixes;
 }
 
-/**
- * The W3 refusal. A distinct class so the visit wrapper can recognize an
- * already-complete message and let it through instead of nesting it inside
- * `visit scenario failed: …`, which would print the whole thing twice.
- */
+/** A distinct class so the visit wrapper lets the complete message through instead of nesting it. */
 export class AmbiguousElementError extends Error {
     override readonly name = 'AmbiguousElementError';
 }
 
-/**
- * Build the refusal thrown when a descriptor matches more than one element.
- *
- * @param options.element The descriptor as the caller wrote it.
- * @param options.matches Every candidate, in DOM order (already truncated).
- * @param options.url The page the visitor was on when it happened.
- */
 export function describeAmbiguity(options: {
     element: ElementRef;
     matches: ElementMatch[];
