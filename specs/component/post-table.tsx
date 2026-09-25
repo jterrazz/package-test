@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 
 type Post = { id: number; title: string };
 
-/** A table that asks the network for its rows — the contract-shaped component. */
+/** A table that asks the network for its rows — the stub-shaped component. */
 export function PostTable() {
     const [posts, setPosts] = useState<null | Post[]>(null);
     const [total, setTotal] = useState(0);
@@ -15,7 +15,7 @@ export function PostTable() {
             if (!response.ok) {
                 throw new Error(`the collection answered ${response.status}`);
             }
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a JSON body is `any` by construction, and naming its shape here IS what the contract beside this file declares
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a JSON body is `any` by construction, and naming its shape here IS what the stub beside this file declares
             const body = (await response.json()) as { posts: Post[]; total: number };
             if (alive) {
                 setPosts(body.posts);

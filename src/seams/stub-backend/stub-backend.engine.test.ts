@@ -1,17 +1,17 @@
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import type { Contract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
+import type { Stub } from '../../stubs/stub.js';
 import { stubBackend } from './stub-backend.engine.js';
 import { StubBackend } from './stub-backend.js';
 
-/** A GET contract replying `{ n }`. */
-function get(path: string, n: number): Contract {
+/** A GET stub replying `{ n }`. */
+function get(path: string, n: number): Stub {
     return { request: http.get(path), response: http.json({ n }) };
 }
 
 describe('stubBackend — the network a chain is armed through', () => {
-    test('a runner with no declared backend refuses a contract, naming the option on its own constructor', () => {
+    test('a runner with no declared backend refuses a stub, naming the option on its own constructor', () => {
         // Given - a mobile runner that declared no backend
         const network = stubBackend(undefined, 'mobile');
 
@@ -19,12 +19,12 @@ describe('stubBackend — the network a chain is armed through', () => {
         expect(() => {
             network.accepts();
         }).toThrow(
-            ".intercept(): this runner has no declared backend — add `backend` to the specification options (specification.mobile({ …, backend: { … } })) so the chain's contracts have a stub to serve them.",
+            ".intercept(): this runner has no declared backend — add `backend` to the specification options (specification.mobile({ …, backend: { … } })) so the chain's stubs have a backend to serve them.",
         );
     });
 
-    test('a chain declaring no contract is not failed by the chain before it', async () => {
-        // Given - a chain that declared a contract, then met a request no contract answers
+    test('a chain declaring no stub is not failed by the chain before it', async () => {
+        // Given - a chain that declared a stub, then met a request no stub answers
         const backend = new StubBackend();
         const url = await backend.start();
         onTestFinished(async () => {
@@ -40,12 +40,12 @@ describe('stubBackend — the network a chain is armed through', () => {
         // When - the next chain, declaring nothing, is armed
         const next = await network.arm([]);
 
-        // Then - the previous chain's contracts and its miss left with it
+        // Then - the previous chain's stubs and its miss left with it
         expect(next.violation?.()).toBeNull();
         await expect(fetch(`${url}/events`)).resolves.toHaveProperty('status', 501);
     });
 
-    test("arming a chain replaces the previous chain's contracts, and the stub's miss is the chain's failure", async () => {
+    test("arming a chain replaces the previous chain's stubs, and the stub's miss is the chain's failure", async () => {
         // Given - a started stub, armed by a first chain, then by a second declaring another route
         const backend = new StubBackend();
         onTestFinished(async () => {
@@ -59,7 +59,7 @@ describe('stubBackend — the network a chain is armed through', () => {
         // When - the site asks for the first chain's route
         const response = await fetch(`${url}/events`);
 
-        // Then - it is no contract of the second chain, whose failure names the miss
+        // Then - it is no stub of the second chain, whose failure names the miss
         expect(response.status).toBe(501);
         expect(second.violation?.()?.message).toContain('  - GET /events\n');
     });

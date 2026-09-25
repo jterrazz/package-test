@@ -59,7 +59,7 @@ specs/
 │   ├── intercepts.specification.ts
 │   └── intercept/                    # the capability, named as the matrix names it
 │       ├── exhausted.spec.ts         # one aspect asked of it
-│       └── contracts/                # the contracts its specs declare
+│       └── stubs/                # the stubs its specs declare
 ├── website/
 │   └── visit/
 └── shared/                           # the ground several leaves share, and nothing else:
@@ -73,7 +73,7 @@ A test at a facet root is forbidden and a `*.specification.ts` inside a domain i
 
 The fixture apps the specs drive live in the pool, `specs/shared/fixtures/`, each a SPECIMEN named for the facet that drives it: `specimen-api` (which carries the jobs too), `specimen-api-outbound`, `specimen-jobs`, `specimen-website` and its `specimen-website-backend`, `specimen-cli` and its `-docker`, `-vitest` and `-literate` variants, and `specimen-mobile`, the mobile facet's; beside them, `checker-cli` and `lint-cli` for the lint suite, and the `broken-*` trees for the infrastructure failure paths. A lint rule's trees are not in the pool: a rule specified by documents keeps them in its own `specs/lint/<rule-id>/fixtures/`, and the checker's twins sit in `specs/lint/checker/fixtures/`.
 
-**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours — a table with a contract, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input, a panel that cancels a reply unread and a pair of links whose names overlap. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
+**The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours — a table with a stub, a form carrying every verb, a modal hook with its Host in the test, a routed link, a vanilla-DOM list, a clock stamp, a noisy panel, a responsive note, a control that refuses input, a panel that cancels a reply unread and a pair of links whose names overlap. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
 ## The layered reading
 
@@ -491,7 +491,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 One proof of the channel declares no test: `src/type-channel.test-d.ts` states what the COMPILER refuses — A8, A11, B1, B2, B3, D1, D14, M2, W6 — as an `@ts-expect-error` per row, and `typescript check` fails the day the line it marks starts compiling. An `@ts-expect-error` is satisfied by ANY error, so each marker ends on the words of the one it is written for, in brackets, and `lint/type-channel.test.ts` compiles the file with the markers taken out and fails a row the compiler refuses for another reason. It runs under the typechecker the whole repository already runs, never under a vitest project.
 
-`lint/plugin.test.ts` also holds the seven-channel contract: every row of
+`lint/plugin.test.ts` also holds the seven-channel stub: every row of
 every channel carries the proof that channel can give — a rule file and a
 fixture pair, an assertion on a resolved upstream option, a bundled checker
 pass, a `// RUNTIME <ID>` marker above the spec that drives the refusal, a line

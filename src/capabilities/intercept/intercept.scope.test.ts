@@ -1,20 +1,20 @@
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { registerContracts, stopContractServer } from '../../seams/msw/server.js';
-import { defineContract } from '../../stubs/contract.js';
+import { registerStubs, stopStubServer } from '../../seams/msw/server.js';
 import { http } from '../../stubs/http/http.js';
+import { defineStub } from '../../stubs/stub.js';
 import { interceptThrough } from './intercept.scope.js';
 
 /** The module-scope double as the node entry publishes it. */
-const intercept = interceptThrough(registerContracts);
+const intercept = interceptThrough(registerStubs);
 
 afterAll(async () => {
-    await stopContractServer();
+    await stopStubServer();
 });
 
 describe('intercept — the network double in module scope', () => {
     test('answers the declared call and never reaches the wire', async () => {
-        // Given - one contract declared for the block
+        // Given - one stub declared for the block
         await using _ = await intercept(
             http.get('https://weather.test/today'),
             http.json({ celsius: 21 }),
@@ -26,8 +26,8 @@ describe('intercept — the network double in module scope', () => {
     });
 
     test('takes a composite the same way a chain does', async () => {
-        // Given - a contract built the declarative way
-        const forecast = defineContract({
+        // Given - a stub built the declarative way
+        const forecast = defineStub({
             request: http.get('https://weather.test/tomorrow'),
             response: http.json({ celsius: 19 }),
         });
@@ -44,7 +44,7 @@ describe('intercept — the network double in module scope', () => {
             origin: 'http://console.test',
         });
 
-        // Then - the contract answers it: under node a relative URL has no base until the scope gives it one
+        // Then - the stub answers it: under node a relative URL has no base until the scope gives it one
         const response = await fetch('/api/posts');
         await expect(response.json()).resolves.toStrictEqual({ posts: [] });
     });
@@ -65,19 +65,19 @@ describe('intercept — the network double in module scope', () => {
 
     test('resolves a relative request when the scope is what starts the engine', async () => {
         // Given - nothing listening yet, the state the FIRST intercept of a file finds
-        await stopContractServer();
+        await stopStubServer();
         await using _ = await intercept(http.get('/api/posts'), http.json({ posts: ['first'] }), {
             origin: 'http://console.test',
         });
 
-        // Then - the contract answers: the wrapper went on TOP of the fetch the engine installed while registering
+        // Then - the stub answers: the wrapper went on TOP of the fetch the engine installed while registering
         const response = await fetch('/api/posts');
         await expect(response.json()).resolves.toStrictEqual({ posts: ['first'] });
     });
 
     test('leaves the engine in charge of the scopes that follow it', async () => {
         // Given - an origin scope that was the engine's first registration, and ended
-        await stopContractServer();
+        await stopStubServer();
         {
             await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
                 origin: 'http://console.test',
@@ -149,13 +149,13 @@ describe('intercept — the network double in module scope', () => {
             await fetch('https://weather.test/today');
         };
 
-        // Then - the first block's contract answers nothing any more
+        // Then - the first block's stub answers nothing any more
         await expect(stale()).rejects.toThrow('/today');
     });
 
     test('refuses an empty declaration', async () => {
         // Given - nothing declared
         // Then - the refusal says an empty list guards nothing
-        await expect(intercept([])).rejects.toThrow('at least one contract');
+        await expect(intercept([])).rejects.toThrow('at least one stub');
     });
 });

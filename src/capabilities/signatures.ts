@@ -26,7 +26,7 @@ export type SetupSignatures<Self, P extends FacetParams> = {
     fixture: FixtureMethod<Self>;
     /** Set HTTP headers for the exchange. Multiple calls merge. */
     headers: HeadersMethod<Self>;
-    /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
+    /** Declare outgoing calls — a stub, a list, a composite, or an inline request + response pair. */
     intercept: InterceptMethod<Self>;
     /** Queue a SQL seed — `file('./seeds/<name>.sql')` — to run before the action. */
     seed: SeedMethod<Self, P['databaseKey']>;

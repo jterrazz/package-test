@@ -36,7 +36,7 @@ const composition = {
 /**
  * `component` — the chain a rendered unit is specified through. Every setup
  * returns a new chain, so the handle a spec imports never carries the
- * previous test's contracts, wrapper or clock.
+ * previous test's stubs, wrapper or clock.
  *
  * It is the one facet with no constructor. A component is a UNIT, like a
  * module: there is no server to start, no database to isolate, no binary to

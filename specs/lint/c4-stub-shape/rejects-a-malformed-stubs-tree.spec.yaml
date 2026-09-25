@@ -1,0 +1,11 @@
+description: rejects a malformed stubs/ tree
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/stubs/http/Bad_Name.ts:1:1  jterrazz(c4-stub-shape)
+          specs/app/widget/stubs/latest.ts:1:1  jterrazz(c4-stub-shape)
+          specs/app/widget/stubs/openai/classify.ts:4:16  jterrazz(c4-stub-shape)
+          specs/app/widget/widget.test.ts:1:1  jterrazz(c4-stub-shape)
+          specs/app/widget/widget.test.ts:1:1  jterrazz(c4-stub-shape)

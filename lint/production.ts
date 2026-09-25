@@ -35,7 +35,7 @@ import { testSettingsAt } from './test-settings.js';
  *   its suffix;
  * - anything under a ground folder (`fixtures/`, `expected/`, `requests/`,
  *   `seeds/`) or under `specs/`;
- * - a contract: a `*.contracts.ts` facade, or anything under a `contracts/`
+ * - a stub: a `*.stubs.ts` facade, or anything under a `stubs/`
  *   folder that holds one;
  * - a test package: `@jterrazz/test` (its `/oxlint` tool entry aside),
  *   `vitest`, `@vitest/*`, `msw`, `@testing-library/*`, playwright.
@@ -57,8 +57,8 @@ const SOURCE = /\.[cm]?[jt]sx?$/u;
 /** The suffixes that make a module part of a test. */
 const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?[jt]sx?$/u;
 
-/** A contract facade — the file that makes its folder a contracts folder. */
-const CONTRACTS_FACADE = /\.contracts\.[cm]?[jt]sx?$/u;
+/** A stub facade — the file that makes its folder a stubs folder. */
+const STUBS_FACADE = /\.stubs\.[cm]?[jt]sx?$/u;
 
 /** A tool's config — `vitest.config.ts`, `oxlint.config.ts`: the toolchain's, never shipped. */
 const TOOL_CONFIG = /\.config\.[cm]?[jt]sx?$/u;
@@ -82,7 +82,7 @@ const TOOL_ENTRY = '@jterrazz/test/oxlint';
 
 /** What a piece of test material is, as a message names it. */
 export type MaterialKind =
-    | 'a contract'
+    | 'a stub'
     | 'a test file'
     | 'a test package'
     | 'ground'
@@ -97,9 +97,9 @@ export type Reach = {
     what: string;
 };
 
-/** Does this folder hold a contract facade? */
+/** Does this folder hold a stub facade? */
 function holdsFacade(directory: string): boolean {
-    return (listDirectory(directory) ?? []).some((name) => CONTRACTS_FACADE.test(name));
+    return (listDirectory(directory) ?? []).some((name) => STUBS_FACADE.test(name));
 }
 
 /**
@@ -120,20 +120,20 @@ export function materialAt(path: string, directory = false): MaterialKind | unde
     if (folders.some((folder) => isGroundName(folder))) {
         return 'ground';
     }
-    if (CONTRACTS_FACADE.test(base)) {
-        return 'a contract';
+    if (STUBS_FACADE.test(base)) {
+        return 'a stub';
     }
-    return inContractsFolder(directory ? path : dirname(path), folders);
+    return inStubsFolder(directory ? path : dirname(path), folders);
 }
 
-/** Is a folder on this path a contracts folder — one holding a facade? */
-function inContractsFolder(directory: string, folders: string[]): MaterialKind | undefined {
-    const depth = folders.indexOf('contracts');
+/** Is a folder on this path a stubs folder — one holding a facade? */
+function inStubsFolder(directory: string, folders: string[]): MaterialKind | undefined {
+    const depth = folders.indexOf('stubs');
     if (depth === -1) {
         return undefined;
     }
     const root = projectRootOf(directory) ?? '/';
-    return holdsFacade(join(root, ...folders.slice(0, depth + 1))) ? 'a contract' : undefined;
+    return holdsFacade(join(root, ...folders.slice(0, depth + 1))) ? 'a stub' : undefined;
 }
 
 /** What test material a path a module builds names, read as a file or as a folder. */

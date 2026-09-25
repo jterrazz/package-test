@@ -24,13 +24,13 @@ ruleTester().run('d29-no-foreign-expectation', asOxlintRule(d29NoForeignExpectat
             code: "import { page } from '../shared/pages.js';\ntest('a', () => { expect(result.json).toMatch(page(1)); });",
             filename: SPEC,
         },
-        // The runner and the contracts are imported by design.
+        // The runner and the stubs are imported by design.
         {
             code: "import { api } from '../../api.specification.js';\ntest('a', () => { expect(a).toBe(api); });",
             filename: SPEC,
         },
         {
-            code: "import { quote } from '../contracts/quotes.contracts.js';\ntest('a', () => { expect(a).toBe(quote); });",
+            code: "import { quote } from '../stubs/quotes.stubs.js';\ntest('a', () => { expect(a).toBe(quote); });",
             filename: SPEC,
         },
         // The product's own data, outside the specs tree, is the subject's.

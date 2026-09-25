@@ -124,7 +124,7 @@ function scopeOf(context: Context): Scope | undefined {
     if (!isTestRole(role) && banned === undefined) {
         return undefined;
     }
-    // The data-asset clause is the MODULE role's alone: a contract unit
+    // The data-asset clause is the MODULE role's alone: a stub unit
     // Legitimately imports the `.response.json` it stands for.
     return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
 }
@@ -147,7 +147,7 @@ function scopeOf(context: Context): Scope | undefined {
  * - files living in a `__mocks__/` or `__fixtures__/` directory;
  * - in a `module`-role test only, an import of a known data asset (`.json`,
  *   `.txt`, `.sql`, …) — a test needing a real file is a specification and
- *   belongs under `specs/`. A contract unit legitimately imports its payload.
+ *   belongs under `specs/`. A stub unit legitimately imports its payload.
  *
  * `vi.stubGlobal` is not here: an upstream rule carries it as an option (M3),
  * and one owner per convention is ADR-005's law.

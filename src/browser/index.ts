@@ -21,7 +21,7 @@ import type {
     ProcessHandle as ProcessHandleClass,
 } from '../model/services/process.js';
 import { TextAccessor } from '../results/text.js';
-import { registerWorkerContracts } from '../seams/msw/worker.js';
+import { registerWorkerStubs } from '../seams/msw/worker.js';
 import type { postgres as postgresFn } from '../seams/postgres/postgres.js';
 import type { redis as redisFn } from '../seams/redis/redis.js';
 import type { sqlite as sqliteFn } from '../seams/sqlite/sqlite.js';
@@ -41,11 +41,11 @@ registerBrowserMatchers();
 export const component: ComponentChain = componentFacet.open({});
 
 /**
- * The module-scope network double, on msw's WORKER — the same contracts and
+ * The module-scope network double, on msw's WORKER — the same stubs and
  * the same strictness the node entry publishes, served by the one engine a
  * page has. Everything new in this release that a page can use is real here.
  */
-export const intercept: Intercept = interceptThrough(registerWorkerContracts);
+export const intercept: Intercept = interceptThrough(registerWorkerStubs);
 
 // ── The surface both runtimes share ──
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's

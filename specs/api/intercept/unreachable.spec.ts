@@ -4,7 +4,7 @@ import { http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 
 describe('unreachable', () => {
-    test('an unreachable contract fails the transport instead of answering', async () => {
+    test('an unreachable stub fails the transport instead of answering', async () => {
         // Given - the provider declared unreachable: no status, no body, no reply
         const result = await api
             .intercept(http.get(QUOTES_URL), http.unreachable())

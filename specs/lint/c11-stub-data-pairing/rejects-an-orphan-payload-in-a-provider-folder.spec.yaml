@@ -1,0 +1,8 @@
+description: rejects an orphan payload in a provider folder
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:1:1  jterrazz(c11-stub-data-pairing)
+          specs/app/widget/widget.test.ts:6:1  jterrazz(d15w-status-only-probe)

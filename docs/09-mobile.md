@@ -215,7 +215,7 @@ The tree describes the **whole mounted hierarchy**, including rows below the fol
 
 ### Declared backend
 
-A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [contracts](16-contracts.md) — the feature's `contracts/` facade, exactly the form `api`/`jobs` use:
+A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](16-stubs.md) — the feature's `stubs/` facade, exactly the form `api`/`jobs` use:
 
 ```typescript
 // specs/mobile/mobile.specification.ts
@@ -230,10 +230,10 @@ afterAll(cleanup);
 
 ```typescript
 // specs/mobile/events/feed.spec.ts
-import newsroom from './contracts/newsroom.contracts.js';
+import newsroom from './stubs/newsroom.stubs.js';
 
 test('renders the events feed from the declared backend', async () => {
-    // Given - the backend under contract for this chain
+    // Given - the backend under stub for this chain
     const result = await mobile.intercept(newsroom).open('news://events');
 
     // Then - the screen rendered what the stub declared
@@ -247,7 +247,7 @@ test('renders the events feed from the declared backend', async () => {
 
 **The ownership boundary.** The framework owns the simulator and the appium server it started — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
 
-The stub behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared contract is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero contracts leaves the stub unguarded.
+The stub backend behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared stub is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero stubs leaves the stub unguarded.
 
 ### Evidence on failure
 
@@ -275,8 +275,8 @@ specs/mobile/
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
-    └── contracts/               # what the declared backend serves — with the `backend` option
-        ├── newsroom.contracts.ts
+    └── stubs/               # what the declared backend serves — with the `backend` option
+        ├── newsroom.stubs.ts
         └── http/…
 ```
 

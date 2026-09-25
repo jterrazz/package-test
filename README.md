@@ -178,7 +178,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
 | Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
 | The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                     |
-| Contracts, selection, provider builders, `intercept()`           | [docs/16](docs/16-contracts.md)                                  |
+| Stubs, selection, provider builders, `intercept()`               | [docs/16](docs/16-stubs.md)                                      |
 | Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                   |
 | The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md) |
 

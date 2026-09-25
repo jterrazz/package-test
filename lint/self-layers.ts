@@ -19,7 +19,7 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * - `actions/<name>/` — a terminal action, one folder each (`signatures.ts`
  *   indexes them all); among them `run/`, the document engine, which starts
  *   servers and lays fixtures through the process and filesystem seams.
- * - `stubs/` — the contract, its exchange, the queue that serves it, and the
+ * - `stubs/` — the stub, its exchange, the queue that serves it, and the
  *   user-facing builders, one folder per kind (`http/`, `openai/`,
  *   `anthropic/`).
  * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
@@ -215,7 +215,7 @@ export const FRAMEWORK_LAYERS = {
         },
     },
     // The user-facing stub builders — `http`, `openai`, `anthropic`, one folder
-    // per kind — over the contract, its exchange and the queue that serves it.
+    // per kind — over the stub, its exchange and the queue that serves it.
     stubs: { imports: ['model/', 'stubs/'] },
     runner: {
         imports: ['runner/', 'model/'],
@@ -257,7 +257,7 @@ export const FRAMEWORK_LAYERS = {
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
             'seams/peer',
-            // The engines serve the contracts a chain declares.
+            // The engines serve the stubs a chain declares.
             'stubs/',
             // The page's golden commands answer through the text accessor
             // every stream is compared by, one `TextAccessor` for both builds.

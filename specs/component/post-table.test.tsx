@@ -1,7 +1,7 @@
 import {
     component,
     content,
-    defineContract,
+    defineStub,
     heading,
     http,
     main,
@@ -14,7 +14,7 @@ import { expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
 
-const listing = defineContract({
+const listing = defineStub({
     request: http.get('/api/posts'),
     response: http.json({
         posts: [
@@ -62,9 +62,9 @@ test('renders inside the frame the project wraps every render in', async () => {
     expect(result.content.text).toContain('Showing 2 of 200 posts');
 });
 
-test('fails the render when the component asks for what no contract declared', async () => {
-    // Given - a contract for another path, so the table's own fetch is undeclared
-    const elsewhere = defineContract({
+test('fails the render when the component asks for what no stub declared', async () => {
+    // Given - a stub for another path, so the table's own fetch is undeclared
+    const elsewhere = defineStub({
         request: http.get('/api/articles'),
         response: http.json({ posts: [], total: 0 }),
     });
@@ -76,30 +76,30 @@ test('fails the render when the component asks for what no contract declared', a
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
 
-test('fails the render when a component with no contract at all reaches the network', async () => {
+test('fails the render when a component with no stub at all reaches the network', async () => {
     // Given - no `.intercept()` at all, and a table that asks for its rows
     const render = component.render(<PostTable />, async (visitor) => {
         await visitor.see(content('Could not load posts'));
     });
 
-    // Then - D7 is TOTAL here: no contract means no network, not an open door
+    // Then - D7 is TOTAL here: no stub means no network, not an open door
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
 
 test('reports the undeclared request, not the scenario it made fail', async () => {
-    // Given - no contract, and a scenario that gives up once the table could not load
+    // Given - no stub, and a scenario that gives up once the table could not load
     const render = component.render(<PostTable />, async (visitor) => {
         await visitor.see(content('Could not load posts'));
         throw new Error('the scenario expected rows');
     });
 
-    // Then - the cause is what the render reports: the request no contract declared
+    // Then - the cause is what the render reports: the request no stub declared
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
 
 test('serves a transport failure the way a server that is not running does', async () => {
     // Given - the collection declared unreachable rather than answering a status
-    const offline = defineContract({
+    const offline = defineStub({
         request: http.get('/api/posts'),
         response: http.unreachable(),
     });

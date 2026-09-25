@@ -129,11 +129,11 @@ docker/
 - A project with one database needs no folder of its own: a postgres handle falls back to `docker/postgres/init.sql` when nothing sits under its own name.
 - Testcontainers starts each declared service from the handle's image and environment. There is no second definition of the stack to keep in step.
 
-## A contract's `required` is verified per `.call()`
+## A stub's `required` is verified per `.call()`
 
-A chain's scope is ONE terminal action, and a contract's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a contract and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` contract unmet by the action it belongs to fails that action's chain.
+A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
 
-This is the same boundary rule B1 already states from the other side — one chain, one action — read from the contract's end. A test that wants a contract to hold across two actions writes two chains, each declaring what it expects to see.
+This is the same boundary rule B1 already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
 
 ## One container per project
 

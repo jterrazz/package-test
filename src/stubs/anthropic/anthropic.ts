@@ -1,4 +1,4 @@
-import type { ContractRequest, ContractResponse } from '../exchange.js';
+import type { StubRequest, StubResponse } from '../exchange.js';
 import { matchesText } from '../filters.js';
 import type { TextFilter } from '../filters.js';
 
@@ -33,7 +33,7 @@ function matchesFilter(body: any, filter: AnthropicMessagesFilter): boolean {
     return true;
 }
 
-function buildReply(data: unknown): ContractResponse {
+function buildReply(data: unknown): StubResponse {
     const content = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -65,7 +65,7 @@ export const anthropic = {
      *   anthropic.messages({ user: buildPrompt() })   // string = EXACT equality
      *   anthropic.messages({ user: /classify/ }, GATEWAY)
      */
-    messages(filter?: AnthropicMessagesFilter, url?: string): ContractRequest {
+    messages(filter?: AnthropicMessagesFilter, url?: string): StubRequest {
         return {
             adapter: 'anthropic',
             method: 'POST',
@@ -73,7 +73,7 @@ export const anthropic = {
             match: filter ? ({ body }) => matchesFilter(body, filter) : undefined,
             // Fixture files are already in the messages.create response shape;
             // Pass them through verbatim. Falls back to wrapping for strings.
-            wrap(data: unknown): ContractResponse {
+            wrap(data: unknown): StubResponse {
                 if (data && typeof data === 'object' && !Array.isArray(data)) {
                     return { status: 200, body: data };
                 }
@@ -83,12 +83,12 @@ export const anthropic = {
     },
 
     /** Response: wrap data in Anthropic messages format. */
-    reply(data: unknown): ContractResponse {
+    reply(data: unknown): StubResponse {
         return buildReply(data);
     },
 
     /** Response: return an Anthropic error. */
-    error(status: number, message?: string): ContractResponse {
+    error(status: number, message?: string): StubResponse {
         return {
             status,
             body: {
@@ -102,7 +102,7 @@ export const anthropic = {
     },
 
     /** Response: simulate a timeout. */
-    timeout(): ContractResponse {
+    timeout(): StubResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
 };

@@ -189,7 +189,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → warning at the first chain. A file of one chain is not judged; a seed and a contract are a test’s Given, never a setting.",
+            "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → warning at the first chain. A file of one chain is not judged; a seed and a stub are a test’s Given, never a setting.",
         facet: 'model',
         family: 'B',
         fix: 'Declare the view once after the imports, `const <view> = <handle>.with({ … })`, and start every chain from it — `make fix` writes it, named for the file’s subject so every file of one folder names it alike (`events/list/` → `events`, a job → its name, a command → its first word; `<subject>View` when the file already holds the name, `<handle>InFile` for no named subject), and drops the setting from each chain.',
@@ -262,31 +262,31 @@ export const RULE_DOCS = {
         rationale: "A fixed depth makes every file's place predictable and statically checkable.",
         reach: 'specs',
     },
-    'c10-contracts-boundary': {
+    'c10-stubs-boundary': {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Outside `specs/**/contracts/`, an import resolving into a provider folder (`contracts/{http,openai,anthropic}/…`) is an error: a test imports only the `*.contracts.ts` facades.',
+            'Outside `specs/**/stubs/`, an import resolving into a provider folder (`stubs/{http,openai,anthropic}/…`) is an error: a test imports only the `*.stubs.ts` facades.',
         facet: 'model',
         family: 'C',
         fix: 'Add a named scenario export to the facade and import that instead.',
         id: 'C10',
         rationale:
-            'Unit contracts are composition details; going through the facade keeps each scenario named in the same place as the world it derives from.',
+            'Unit stubs are composition details; going through the facade keeps each scenario named in the same place as the world it derives from.',
         reach: 'tests',
     },
-    'c11-contract-data-pairing': {
+    'c11-stub-data-pairing': {
         audience: 'consumer',
         channel: 'statique',
         convention:
             'Inside a provider folder, every `*.response.json` and every `*.request.ts` has a `<stem>.ts` sibling — the stem is the name up to the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.',
         facet: 'model',
         family: 'C',
-        fix: 'Write the contract that serves the payload, or delete the payload.',
+        fix: 'Write the stub that serves the payload, or delete the payload.',
         id: 'C11',
         rationale:
-            'Data exists only as served by a contract — a file with no owner is dead weight no test ever loads.',
-        reach: 'contract',
+            'Data exists only as served by a stub — a file with no owner is dead weight no test ever loads.',
+        reach: 'stub',
     },
     'c13-bare-ground': {
         audience: 'consumer',
@@ -314,18 +314,18 @@ export const RULE_DOCS = {
             'The extension is how the file is sent — a `.http` whole, a `.json` parsed, anything else verbatim — so a file without one says nothing about what the app will receive.',
         reach: 'ground',
     },
-    'c4-contract-shape': {
+    'c4-stub-shape': {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Under `specs/**/contracts/`: the ROOT carries only `*.contracts.ts` facades and the provider folders `http` | `openai` | `anthropic`. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineContracts(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.contracts` module, or a call to it — or a call to a builder of the file declared to return `Contracts` (no type is read, so a builder is judged by where it comes from or what it declares). A unit contract is `<provider>/<kebab-name>.ts` with an `export default defineContract(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
+            'Under `specs/**/stubs/`: the ROOT carries only `*.stubs.ts` facades and the provider folders `http` | `openai` | `anthropic`. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<provider>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
         facet: 'model',
         family: 'C',
         fix: 'Move the file to the half it belongs to: a facade at the root, a unit under its provider.',
         id: 'C4',
         rationale:
-            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the contract that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
-        reach: 'contract',
+            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the stub that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
+        reach: 'stub',
     },
     'c6-tomatch-extension': {
         audience: 'consumer',
@@ -368,7 +368,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "`file()` and `directory()` are called in a test or spec file — a `.test.ts(x)`, a `.spec.ts`, a type test — and nowhere else: a shared helper module, a specification file or a contract takes a `file()` as a parameter and never builds one. The call is recognised by its import from the framework's entry, an alias included.",
+            "`file()` and `directory()` are called in a test or spec file — a `.test.ts(x)`, a `.spec.ts`, a type test — and nowhere else: a shared helper module, a specification file or a stub takes a `file()` as a parameter and never builds one. The call is recognised by its import from the framework's entry, an alias included.",
         facet: 'model',
         family: 'C',
         fix: 'Take the `file()`/`directory()` as a parameter of the helper, and build it in the test that calls it.',
@@ -524,7 +524,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A spec imports no expectation: a name imported from another module of its specs tree — neither its `*.specification` runner nor a module under `contracts/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; a module outside the specs tree is the product’s, and a spec may compare against its data (`package.json`’s version, a constant the product exports); F4 already refuses importing a test file at all.',
+            'A spec imports no expectation: a name imported from another module of its specs tree — neither its `*.specification` runner nor a module under `stubs/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; a module outside the specs tree is the product’s, and a spec may compare against its data (`package.json`’s version, a constant the product exports); F4 already refuses importing a test file at all.',
         facet: 'model',
         family: 'D',
         fix: 'Write the expected value in the test — in place, or `file(…)` when several tests of the leaf share it — and drop the import.',
@@ -731,7 +731,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a retired test root (`__tests__/`, a root `test/` or `tests/`, I2's); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder or under `specs/`, and a contract — a `*.contracts.ts` facade and the `contracts/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
+            "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a retired test root (`__tests__/`, a root `test/` or `tests/`, I2's); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
         facet: 'model',
         family: 'F',
         fix: 'Move the code that needs the reference into a test, move what production needs out of the test material, or inject it as a port.',
@@ -1560,7 +1560,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
         audience: 'consumer',
         channel: 'upstream',
         convention:
-            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(contracts, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
+            '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(stubs, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express.',
         facet: 'model',
         family: 'M',
         fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',
@@ -1720,7 +1720,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
         convention: `${REFUSAL_WHY['d7-strict-intercepts']} As soon as an \`api\`/\`jobs\` chain declares an intercept, any unmatched outgoing request (an exhausted queue included) fails the spec with an explicit error.`,
         facet: 'model',
         family: 'D',
-        fix: 'Declare the contract the request needs, or stop making the request.',
+        fix: 'Declare the stub the request needs, or stop making the request.',
         id: 'D7',
         name: 'd7-strict-intercepts',
         rationale: 'A guarded network makes external interactions exhaustive and intentional.',

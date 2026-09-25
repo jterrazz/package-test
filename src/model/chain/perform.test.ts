@@ -82,7 +82,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
     test("an engine's violation is the failure reported, over the error the action met", async () => {
         // Given - an engine that recorded an unmatched request, and an action that failed on the reply it got
         const log: string[] = [];
-        const unmatched = new Error('no contract accepted GET https://api.test/rates');
+        const unmatched = new Error('no stub accepted GET https://api.test/rates');
         const setups = [logged(log, 'intercept', 40, { violation: () => unmatched })];
 
         const failing = acting(log, new Error('rates were undefined'));
@@ -95,7 +95,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
     test("an engine's violation fails an action that succeeded", async () => {
         // Given - an engine that recorded an unmatched request the subject swallowed
         const log: string[] = [];
-        const unmatched = new Error('no contract accepted GET https://api.test/rates');
+        const unmatched = new Error('no stub accepted GET https://api.test/rates');
         const setups = [logged(log, 'intercept', 40, { violation: () => unmatched })];
 
         // Then - the action's success does not hide it
@@ -103,7 +103,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
     });
 
     test('a setup that refuses when armed still releases what was armed before it', async () => {
-        // Given - contracts armed, then a clock whose instant is refused when it is pinned
+        // Given - stubs armed, then a clock whose instant is refused when it is pinned
         const log: string[] = [];
         const refused = new TypeError('"soon" is not an instant');
         const clock = defineCapability({
@@ -117,7 +117,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
             row: { group: 'Setup', name: '.clock()', probe: '.clock(' },
         });
 
-        // Then - the refusal is reported, the action never runs, and the contracts are taken down
+        // Then - the refusal is reported, the action never runs, and the stubs are taken down
         await expect(
             perform([logged(log, 'intercept', 40), clock], acting(log, 'ok'), [], WHERE),
         ).rejects.toBe(refused);
@@ -136,10 +136,10 @@ describe('perform — the one pipeline a terminal action runs through', () => {
             },
         };
 
-        // When - it closes a chain with contracts to arm
+        // When - it closes a chain with stubs to arm
         await perform([logged(log, 'intercept', 40)], replacing, [], WHERE);
 
-        // Then - the teardown is over before the contracts are armed
+        // Then - the teardown is over before the stubs are armed
         expect(log).toStrictEqual(['take down', 'arm intercept', 'act', 'release intercept']);
     });
 });

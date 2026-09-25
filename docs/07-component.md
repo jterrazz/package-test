@@ -49,12 +49,12 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 
 Every other facet starts something — a server, a database, a binary, a simulator — so every other facet has a `*.specification.ts` holding what was started. A component has nothing to start. What a specification file WOULD have held splits by owner:
 
-| What                                                   | Whose      | Where                                                           |
-| ------------------------------------------------------ | ---------- | --------------------------------------------------------------- |
-| The providers every render is dressed in               | the app's  | `component({ wrap })` in `vitest.config.ts`                     |
-| The Vite pipeline the app builds with                  | the app's  | `component({ vite })`                                           |
-| The viewport, the timezone, the locale                 | the app's  | `component({ viewport, timezone, locale })`                     |
-| The contracts, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
+| What                                               | Whose      | Where                                                           |
+| -------------------------------------------------- | ---------- | --------------------------------------------------------------- |
+| The providers every render is dressed in           | the app's  | `component({ wrap })` in `vitest.config.ts`                     |
+| The Vite pipeline the app builds with              | the app's  | `component({ vite })`                                           |
+| The viewport, the timezone, the locale             | the app's  | `component({ viewport, timezone, locale })`                     |
+| The stubs, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
 // apps/console/vitest.config.ts
@@ -95,12 +95,12 @@ export default defineSpecConfig({
 ## The chain
 
 ```tsx
-import { button, component, content, defineContract, http, status } from '@jterrazz/test';
+import { button, component, content, defineStub, http, status } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
 
-const listing = defineContract({
+const listing = defineStub({
     request: http.get('/api/posts'),
     response: http.json({ posts: [{ id: 1, title: 'A first post' }], total: 200 }),
 });
@@ -121,7 +121,7 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 
 | Setup             | Does                                                                                                                                                      |
 | ----------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.intercept(…)`   | Declares what the network replies — the same contracts and the same queue as every other facet                                                            |
+| `.intercept(…)`   | Declares what the network replies — the same stubs and the same queue as every other facet                                                                |
 | `.wrap(fn)`       | Wraps every render of this chain: a router stub, a `<StrictMode>`, a provider one test needs                                                              |
 | `.clock(iso)`     | Pins the page's `Date` for this render                                                                                                                    |
 | `.viewport(size)` | The page size THIS render gets — the Given of a component that reads `matchMedia` or a container query. The project's size is restored when the test ends |
@@ -226,7 +226,7 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no contract declared fails the render, naming the request — including a component given NO contract at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-contracts.md#intercept--the-same-double-with-no-chain)).
+- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-stubs.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
@@ -243,4 +243,4 @@ const result = await component.render((container) => {
 
 ## Related
 
-[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [18 — Conventions](18-conventions.md) · [08 — Website specs](08-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)
+[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [18 — Conventions](18-conventions.md) · [08 — Website specs](08-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)

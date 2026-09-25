@@ -25,7 +25,7 @@ import type { SurfacePort } from './page-surface.js';
  */
 
 test('the module-scope double answers the page, from its own worker', async () => {
-    // Given - contracts declared with no chain to hang them on
+    // Given - stubs declared with no chain to hang them on
     await using _ = await intercept(http.get('/api/surface'), http.text('from the worker'));
 
     // Then - the page's own fetch is served by msw/browser

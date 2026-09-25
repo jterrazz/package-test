@@ -4,8 +4,8 @@ import { http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 
 describe('exhausted', () => {
-    test('a contract with no times keeps serving every call', async () => {
-        // Given - ONE contract for a route the app calls twice
+    test('a stub with no times keeps serving every call', async () => {
+        // Given - ONE stub for a route the app calls twice
         const result = await api
             .intercept(http.get(QUOTES_URL), http.json({ quote: 'sticky' }))
             .get('/quote-twice');
@@ -22,10 +22,10 @@ describe('exhausted', () => {
         `);
     });
 
-    // RUNTIME D7 — from the first contract the network is STRICT: an unmatched
+    // RUNTIME D7 — from the first stub the network is STRICT: an unmatched
     // Request, an exhausted queue included, fails the spec by name.
-    test('an exhausted contract rejects the action with method, URL, and the declared list', async () => {
-        // Given - a contract allowed exactly once while the app calls twice
+    test('an exhausted stub rejects the action with method, URL, and the declared list', async () => {
+        // Given - a stub allowed exactly once while the app calls twice
         const chain = api
             .intercept([
                 {

@@ -9,8 +9,8 @@
  * one of them.
  *
  * Four names, and only four: `fixtures/` (file state), `expected/` (everything
- * asserted), `requests/` (inputs), `seeds/` (database state). `contracts/` is
- * NOT ground — a contract is TypeScript a spec imports, behaviour composed with
+ * asserted), `requests/` (inputs), `seeds/` (database state). `stubs/` is
+ * NOT ground — a stub is TypeScript a spec imports, behaviour composed with
  * the spec's own, so it stays a member. `docker/` is not ground either: it sits
  * at the PROJECT root beside `package.json`, outside any row of specs.
  *

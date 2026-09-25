@@ -56,7 +56,7 @@ function resolveServer<Services extends ServiceRecord>(
 /**
  * The declared stub backend behind the site under test — started before the
  * server command, torn down with the runner. Its URL is injected into the
- * server child's environment under `env`; the contracts each chain declares
+ * server child's environment under `env`; the stubs each chain declares
  * via `.intercept(...)` are what it serves.
  */
 export type WebsiteBackendOptions = {
@@ -107,7 +107,7 @@ export type WebsiteSpecificationOptions<Services extends ServiceRecord = Service
           /**
            * Declared stub backend: started BEFORE the server command, its
            * URL injected into the child env under `backend.env`. Serves the
-           * contracts each chain declares via `.intercept(...)`.
+           * stubs each chain declares via `.intercept(...)`.
            */
           backend?: WebsiteBackendOptions;
           /**

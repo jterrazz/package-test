@@ -19,20 +19,20 @@ import { folderChanged, isFile } from './fs-cache.js';
  *
  * A folder the path names is read BELOW the project root that holds the file
  * ({@link projectSegments}): a checkout under a folder named `fixtures/`,
- * `contracts/` or `__tests__/` is the machine's business, never the project's.
+ * `stubs/` or `__tests__/` is the machine's business, never the project's.
  */
 
 /** The kinds the catalogue tells apart. */
 export type FileRole =
     | 'component'
     | 'config'
-    | 'contract'
     | 'document'
     | 'ground'
     | 'module'
     | 'other'
     | 'spec'
-    | 'specification';
+    | 'specification'
+    | 'stub';
 
 /** A test root the conventions retired — `roleOf` names it so I2 can refuse it. */
 export type LegacyDir = '__tests__' | 'test' | 'tests' | null;
@@ -112,8 +112,8 @@ export function roleOf(filename: string): FileIdentity {
     if (parts.slice(0, -1).some((segment) => GROUND.has(segment))) {
         return { ...identity, role: 'ground' };
     }
-    if (parts.slice(0, -1).includes('contracts')) {
-        return { ...identity, role: 'contract' };
+    if (parts.slice(0, -1).includes('stubs')) {
+        return { ...identity, role: 'stub' };
     }
     return { ...identity, role: 'other' };
 }

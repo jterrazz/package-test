@@ -1,56 +1,56 @@
+import { isStreamBody } from '../../stubs/exchange.js';
+import type { MatchableRequest, StubResponse } from '../../stubs/exchange.js';
+import { StubQueue } from '../../stubs/queue.js';
+import { toReadableStream } from '../../stubs/stream.js';
 /**
- * One contract engine, two runtimes.
+ * One stub engine, two runtimes.
  *
  * msw runs the same handler shape in node (`setupServer`) and in a page
- * (`setupWorker`), so what a contract BECOMES — the route, the body kind, the
+ * (`setupWorker`), so what a stub BECOMES — the route, the body kind, the
  * strict catch-all, the queue's selection — is stated once here and handed to
  * whichever side is starting. A second copy of this would be a second answer
- * to "which contract answers this request", and the facets would drift.
+ * to "which stub answers this request", and the facets would drift.
  *
  * Typed loosely on purpose: `msw` is reached through a lazy import by both
  * sides (it is a dependency, never a peer), and the namespace it returns is
  * the seam's to describe, not the model's.
  */
-import type { Contract } from '../../stubs/contract.js';
-import { isStreamBody } from '../../stubs/exchange.js';
-import type { ContractResponse, MatchableRequest } from '../../stubs/exchange.js';
-import { ContractQueue } from '../../stubs/queue.js';
-import { toReadableStream } from '../../stubs/stream.js';
+import type { Stub } from '../../stubs/stub.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
 /** What a started engine hands back for the lifetime of one chain. */
-export type ContractRegistration = {
+export type StubRegistration = {
     /** Remove the chain's handlers from the shared engine. */
     cleanup: () => void;
-    /** The strict-contract violation observed during the chain, if any. */
+    /** The strict-stub violation observed during the chain, if any. */
     violation: () => Error | null;
 };
 
 /**
- * What a chain with zero contracts gets where the facet's scope is KNOWN but
+ * What a chain with zero stubs gets where the facet's scope is KNOWN but
  * not total — the node engine, which shares a process with everything else the
  * test does. Nothing was declared, so nothing is guarded and nothing has to be
  * torn down (CONVENTIONS D7, known scope).
  */
-export const NO_CONTRACTS: ContractRegistration = {
+export const NO_STUBS: StubRegistration = {
     cleanup: () => {},
     violation: () => null,
 };
 
 /**
- * A contract answers the request that was made, never a copy of an earlier one.
+ * A stub answers the request that was made, never a copy of an earlier one.
  *
  * In a page the reply travels through a real service worker and a real HTTP
  * cache, so a second render of the same component can be served the FIRST
- * test's answer and never reach the queue at all — a contract that was
+ * test's answer and never reach the queue at all — a stub that was
  * exhausted, or replaced, silently keeps answering. Stated as a default, so a
  * spec whose subject IS caching can still say otherwise.
  */
 const NEVER_CACHED = { 'cache-control': 'no-store' };
 
-/** Turn a contract response into the msw reply, body kind by body kind. */
-export function toMswResponse(msw: any, response: ContractResponse): unknown {
+/** Turn a stub response into the msw reply, body kind by body kind. */
+export function toMswResponse(msw: any, response: StubResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
         // Not a reply: msw makes the request itself fail, which is what the
@@ -79,27 +79,27 @@ export function toMswResponse(msw: any, response: ContractResponse): unknown {
 }
 
 /**
- * The handlers one chain's contracts become, plus the trailing catch-all that
- * records any request no contract accepted (CONVENTIONS D7). The caller decides
+ * The handlers one chain's stubs become, plus the trailing catch-all that
+ * records any request no stub accepted (CONVENTIONS D7). The caller decides
  * what to do with the recorded violation — the api chain rethrows it, the
- * component chain fails the render. An EMPTY contract list is still a guard:
+ * component chain fails the render. An EMPTY stub list is still a guard:
  * the catch-all alone says "this subject has no network".
  *
  * `bypass` names the traffic that is not the subject's: under node there is
  * none, in a page it is everything the runner fetches to BE a page.
  */
-export function buildContractHandlers(
+export function buildStubHandlers(
     msw: any,
-    contracts: readonly Contract[],
+    stubs: readonly Stub[],
     bypass?: (url: string) => boolean,
 ): { handlers: unknown[]; violation: () => Error | null } {
-    const queue = new ContractQueue(contracts);
+    const queue = new StubQueue(stubs);
     let violation: Error | null = null;
 
     const recordViolation = (method: string, url: string): unknown => {
         violation ??= queue.unmatchedError(method, url);
         return msw.HttpResponse.json(
-            { error: `@jterrazz/test strict contracts: unmatched request ${method} ${url}` },
+            { error: `@jterrazz/test strict stubs: unmatched request ${method} ${url}` },
             { headers: NEVER_CACHED, status: 501 },
         );
     };
@@ -114,17 +114,17 @@ export function buildContractHandlers(
             handlers.push(
                 handlerFn(route.url, async ({ request }: { request: Request }) => {
                     const observed = await observe(request);
-                    const contract = queue.take(observed);
-                    if (!contract) {
+                    const stub = queue.take(observed);
+                    if (!stub) {
                         // Nothing matches, or everything that matches is spent (D7).
                         return recordViolation(request.method, request.url);
                     }
                     // A dynamic response is a function evaluated against the
                     // Observed request at serve time; a fixed one is used as-is.
                     const response =
-                        typeof contract.response === 'function'
-                            ? contract.response(observed)
-                            : contract.response;
+                        typeof stub.response === 'function'
+                            ? stub.response(observed)
+                            : stub.response;
                     if (response.delay) {
                         await new Promise((resolve) => setTimeout(resolve, response.delay));
                     }

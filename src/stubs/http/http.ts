@@ -1,14 +1,9 @@
 import { CaptureScope } from '../../model/matching/match.js';
 import { structuralSubset } from '../../model/matching/structural.js';
 import { STREAM_BODY } from '../exchange.js';
-import type {
-    ContractRequest,
-    ContractResponse,
-    MatchableRequest,
-    StreamBody,
-} from '../exchange.js';
+import type { MatchableRequest, StreamBody, StubRequest, StubResponse } from '../exchange.js';
 
-function wrapJson(data: unknown): ContractResponse {
+function wrapJson(data: unknown): StubResponse {
     return { status: 200, body: data };
 }
 
@@ -20,7 +15,7 @@ const SSE_CONTENT_TYPE = 'text/event-stream';
  * Request filters for the generic HTTP provider. Every field is a subset
  * constraint — a request matches when all provided fields match.
  */
-export type HttpContractFilter = {
+export type HttpStubFilter = {
     /**
      * Body constraint. An object is a deep SUBSET match (toMatchObject-style)
      * whose leaf values may be `match.*` matchers; a string is a containment
@@ -88,7 +83,7 @@ export type HttpResponseInit = {
     status?: number;
 };
 
-function matchesBody(body: unknown, expected: NonNullable<HttpContractFilter['body']>): boolean {
+function matchesBody(body: unknown, expected: NonNullable<HttpStubFilter['body']>): boolean {
     if (typeof expected === 'string') {
         const text = typeof body === 'string' ? body : JSON.stringify(body ?? '');
         return text.includes(expected);
@@ -117,7 +112,7 @@ function matchesEntries(
  * Build the `match` predicate for an HTTP request filter, or `undefined` when
  * no filter is supplied (fires on any URL/method match).
  */
-function buildMatch(filter?: HttpContractFilter): ContractRequest['match'] {
+function buildMatch(filter?: HttpStubFilter): StubRequest['match'] {
     if (!filter) {
         return undefined;
     }
@@ -134,7 +129,7 @@ function buildMatch(filter?: HttpContractFilter): ContractRequest['match'] {
         if (filter.query) {
             let params: URLSearchParams;
             try {
-                params = new URL(request.url, 'http://contract.invalid').searchParams;
+                params = new URL(request.url, 'http://stub.invalid').searchParams;
             } catch {
                 return false;
             }
@@ -146,63 +141,59 @@ function buildMatch(filter?: HttpContractFilter): ContractRequest['match'] {
     };
 }
 
-function declare(
-    method: string,
-    url: RegExp | string,
-    filter?: HttpContractFilter,
-): ContractRequest {
+function declare(method: string, url: RegExp | string, filter?: HttpStubFilter): StubRequest {
     return { adapter: 'http', match: buildMatch(filter), method, url, wrap: wrapJson };
 }
 
 /**
- * Generic HTTP contract helpers for any URL. The url is absolute (string or
+ * Generic HTTP stub helpers for any URL. The url is absolute (string or
  * RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')`
  * matches that path on ANY origin, which is what an app calling its own
- * backend needs. An optional {@link HttpContractFilter} narrows matching by
+ * backend needs. An optional {@link HttpStubFilter} narrows matching by
  * body, headers, or query — a request that hits the URL/method but fails the
- * filter counts as unmatched (strict contracts, CONVENTIONS D7).
+ * filter counts as unmatched (strict stubs, CONVENTIONS D7).
  *
  * @example
- *   defineContract({ request: http.get('/articles/{{uuid}}'), response: http.json(article) })
- *   defineContract({ request: http.post(URL, { body: { user: 'alice' } }), response: http.empty() })
+ *   defineStub({ request: http.get('/articles/{{uuid}}'), response: http.json(article) })
+ *   defineStub({ request: http.post(URL, { body: { user: 'alice' } }), response: http.empty() })
  */
 export const http = {
-    any(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    any(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('*', url, filter);
     },
 
-    delete(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    delete(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('DELETE', url, filter);
     },
 
-    get(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    get(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('GET', url, filter);
     },
 
-    patch(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    patch(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('PATCH', url, filter);
     },
 
-    post(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    post(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('POST', url, filter);
     },
 
-    put(url: RegExp | string, filter?: HttpContractFilter): ContractRequest {
+    put(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('PUT', url, filter);
     },
 
     /** Response: a body-less reply (204 by default). */
-    empty(status = 204): ContractResponse {
+    empty(status = 204): StubResponse {
         return { status, body: null };
     },
 
     /** Response: an error status. Without a body, `{ error: 'HTTP <status>' }`. */
-    error(status: number, body?: unknown): ContractResponse {
+    error(status: number, body?: unknown): StubResponse {
         return { status, body: body === undefined ? { error: `HTTP ${status}` } : body };
     },
 
     /** Response: a JSON body (200 by default). */
-    json(body: unknown, init?: HttpResponseInit): ContractResponse {
+    json(body: unknown, init?: HttpResponseInit): StubResponse {
         return {
             status: init?.status ?? 200,
             body,
@@ -215,7 +206,7 @@ export const http = {
      * Response: no response at all — the request fails in transport, the way a
      * server that is not running fails it. `fetch` rejects; no status is served.
      */
-    unreachable(): ContractResponse {
+    unreachable(): StubResponse {
         return { body: null, transport: 'network-error' };
     },
 
@@ -231,7 +222,7 @@ export const http = {
      * @example
      *   http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 })
      */
-    stream(chunks: readonly string[], init?: HttpStreamInit): ContractResponse {
+    stream(chunks: readonly string[], init?: HttpStreamInit): StubResponse {
         return {
             status: init?.status ?? 200,
             body: {
@@ -251,7 +242,7 @@ export const http = {
      * @example
      *   http.sse([{ data: { token: 'Hel' } }, { data: { token: 'lo' } }, { event: 'done', data: '' }])
      */
-    sse(events: readonly SseEvent[], init?: Omit<HttpStreamInit, 'contentType'>): ContractResponse {
+    sse(events: readonly SseEvent[], init?: Omit<HttpStreamInit, 'contentType'>): StubResponse {
         return {
             status: init?.status ?? 200,
             body: {
@@ -265,7 +256,7 @@ export const http = {
     },
 
     /** Response: a text body, served as `text/plain` (200 by default). */
-    text(body: string, init?: HttpResponseInit): ContractResponse {
+    text(body: string, init?: HttpResponseInit): StubResponse {
         return {
             status: init?.status ?? 200,
             body,

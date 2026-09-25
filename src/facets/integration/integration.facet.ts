@@ -27,7 +27,7 @@ const composition = {
  * The `integration` facet — the chain `specification.integration()` hands
  * out. The subject is a MODULE, not an entry: no HTTP, no binary, no page.
  * What makes it a spec rather than a module test is what it stands on — real
- * services, declared contracts, a golden — so it takes the same setups as
+ * services, declared stubs, a golden — so it takes the same setups as
  * every other facet and ends on the one action a module has: being called.
  * It runs in this process: the clock pinned is this process's, the network
  * intercepted is this process's.

@@ -27,13 +27,6 @@ dist/index.d.ts:
     ContainerAccessor
     ContainerOptions
     ContainerPort
-    Contract
-    ContractInput
-    ContractRequest
-    ContractResponder
-    ContractResponse
-    ContractResponseValue
-    Contracts
     DatabaseKeys
     DatabasePort
     DeviceOpenOptions
@@ -56,10 +49,10 @@ dist/index.d.ts:
     FileAt
     FilesystemAccessor
     HonoApp
-    HttpContractFilter
     HttpResponseInit
     HttpResult
     HttpStreamInit
+    HttpStubFilter
     IntegrationHandle
     IntegrationSpecification
     IntegrationSpecificationOptions
@@ -122,6 +115,13 @@ dist/index.d.ts:
     SqliteOptions
     SseEvent
     StreamBody
+    Stub
+    StubInput
+    StubRequest
+    StubResponder
+    StubResponse
+    StubResponseValue
+    Stubs
     TableAccessor
     TestSettings
     TextAccessor
@@ -141,8 +141,8 @@ dist/index.d.ts:
     component
     content
     contentinfo
-    defineContract
-    defineContracts
+    defineStub
+    defineStubs
     dialog
     directory
     disabled
@@ -192,8 +192,8 @@ dist/browser/index.js:
     component
     content
     contentinfo
-    defineContract
-    defineContracts
+    defineStub
+    defineStubs
     dialog
     directory
     disabled

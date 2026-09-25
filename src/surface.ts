@@ -112,31 +112,25 @@ export {
     within,
 } from './model/elements/elements.js';
 
-// Contracts — the ONE way to declare what the outside world replies
+// Stubs — the ONE way to declare what the outside world replies
 export { anthropic } from './stubs/anthropic/anthropic.js';
 export {
     http,
-    type HttpContractFilter,
     type HttpResponseInit,
     type HttpStreamInit,
+    type HttpStubFilter,
     type SseEvent,
 } from './stubs/http/http.js';
 export { type TextFilter } from './stubs/filters.js';
 export { openai } from './stubs/openai/openai.js';
-export {
-    type Contract,
-    type ContractInput,
-    type Contracts,
-    defineContract,
-    defineContracts,
-} from './stubs/contract.js';
+export { defineStub, defineStubs, type Stub, type StubInput, type Stubs } from './stubs/stub.js';
 export type {
-    ContractRequest,
-    ContractResponder,
-    ContractResponse,
-    ContractResponseValue,
     MatchableRequest,
     StreamBody,
+    StubRequest,
+    StubResponder,
+    StubResponse,
+    StubResponseValue,
 } from './stubs/exchange.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.

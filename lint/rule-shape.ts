@@ -121,7 +121,6 @@ export type RuleDoc = {
         | 'all'
         | 'component'
         | 'config'
-        | 'contract'
         | 'document'
         | 'ground'
         | 'member'
@@ -129,6 +128,7 @@ export type RuleDoc = {
         | 'spec'
         | 'specification'
         | 'specs'
+        | 'stub'
         | 'tests';
 };
 

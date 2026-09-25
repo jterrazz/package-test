@@ -7,7 +7,7 @@ import { integration } from '../pure.specification.js';
 const PRICING = 'https://pricing.spec.test';
 
 describe('declared', () => {
-    test('answers the module with what the contract declared', async () => {
+    test('answers the module with what the stub declared', async () => {
         // Given - the one call this module makes, declared for the chain
         const result = await integration
             .intercept(http.get(`${PRICING}/quotes/ORD-1`), http.json({ total: 42 }))
@@ -27,8 +27,8 @@ describe('declared', () => {
         expect(result.error).toMatch(`the pricing service answered 503`);
     });
 
-    test('fails the chain on a call no contract accepted', async () => {
-        // Given - a contract for one reference, and a module asked for another
+    test('fails the chain on a call no stub accepted', async () => {
+        // Given - a stub for one reference, and a module asked for another
         const chain = integration
             .intercept(http.get(`${PRICING}/quotes/ORD-1`), http.json({ total: 42 }))
             .call(async () => await quoteOrder(PRICING, 'ORD-9'));

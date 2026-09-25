@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import type { ContractRequest } from '../exchange.js';
+import type { StubRequest } from '../exchange.js';
 import { openai } from './openai.js';
 
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
 /** Does the trigger's filter let this request body through? */
-function lets(trigger: ContractRequest, body: unknown, url = CHAT_URL): boolean | undefined {
+function lets(trigger: StubRequest, body: unknown, url = CHAT_URL): boolean | undefined {
     return trigger.match?.({ body, headers: {}, method: 'POST', url });
 }
 

@@ -7,7 +7,7 @@ import { jobs } from '../jobs.specification.js';
 // Has no mode: the same runner works regardless of TEST_MODE.
 
 describe('strict', () => {
-    test("the job's outgoing call is answered by the contract the chain declares", async () => {
+    test("the job's outgoing call is answered by the stub the chain declares", async () => {
         // Given - the one call the job makes out, answered in place
         const result = await jobs
             .intercept(
@@ -16,7 +16,7 @@ describe('strict', () => {
             )
             .trigger('enrich-from-api');
 
-        // Then - the job stored what the contract answered
+        // Then - the job stored what the stub answered
         await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
             [1, 'enriched', '{}', '{{iso8601}}'],
         ]);

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { asOxlintRule, packageWith, ruleTester } from '../../rule-tester.fixtures.js';
 import { f2NoTestImportsInProd } from './f2-no-test-imports-in-prod.js';
 
-// One package on disk: the aliases, the contracts folders and the modules a
+// One package on disk: the aliases, the stubs folders and the modules a
 // Reference passes through are read from the tree beside the linted file.
 const ROOT = packageWith({
     'package.json': JSON.stringify({
@@ -12,9 +12,9 @@ const ROOT = packageWith({
     }),
     'specs/fixtures/users.ts': 'export const users = [];\n',
     'src/domain/helpers.ts': "import { user } from './user.fixtures.js';\nexport { user };\n",
-    'src/features/contracts/http/events.ts': 'export default {};\n',
-    'src/features/contracts/news.contracts.ts': 'export const news = {};\n',
-    'src/model/contracts/engine.ts': 'export const engine = {};\n',
+    'src/features/stubs/http/events.ts': 'export default {};\n',
+    'src/features/stubs/news.stubs.ts': 'export const news = {};\n',
+    'src/model/stubs/engine.ts': 'export const engine = {};\n',
     'tests/data.ts': "export * from '../specs/fixtures/users.js';\n",
     'tests/render.ts': "export { render } from '@testing-library/react';\n",
     'tests/format.ts': 'export const format = String;\n',
@@ -80,10 +80,10 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         refused('import rows from "./seeds/rows.js";', 'reach'),
         refused('import { users } from "../../specs/fixtures/users.js";', 'reach'),
         refused('import { seed } from "../../specs/setup/seed.js";', 'reach'),
-        // Contracts: the facade, and a unit of the folder it makes a contracts folder.
-        refused('import { news } from "./news.contracts.js";', 'reach'),
-        refused('import { news } from "../features/contracts/news.contracts.js";', 'reach'),
-        refused('import events from "../features/contracts/http/events.js";', 'reach'),
+        // Stubs: the facade, and a unit of the folder it makes a stubs folder.
+        refused('import { news } from "./news.stubs.js";', 'reach'),
+        refused('import { news } from "../features/stubs/news.stubs.js";', 'reach'),
+        refused('import events from "../features/stubs/http/events.js";', 'reach'),
         // Every form a module names another in.
         refused('import type { User } from "./user.fixtures.js";', 'reach'),
         refused('export { user } from "./user.fixtures.js";', 'reach'),
@@ -142,8 +142,8 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         // An alias that resolves to production.
         { code: 'import { other } from "@app/domain/other";', filename: PROD },
         { code: 'import { other } from "#domain/other.js";', filename: PROD },
-        // A folder named `contracts/` with no facade is not a contracts folder.
-        { code: 'import { engine } from "../model/contracts/engine.js";', filename: PROD },
+        // A folder named `stubs/` with no facade is not a stubs folder.
+        { code: 'import { engine } from "../model/stubs/engine.js";', filename: PROD },
         // A production module on the way is judged for itself: the barrel is
         // Clean, the helper that imports the fixtures is where the finding is.
         { code: 'export * from "./domain/helpers.js";', filename: BARREL },

@@ -33,7 +33,7 @@ export async function perform(
         armed.map((effect) => effect.violation?.() ?? null).find((error) => error !== null) ?? null;
     try {
         for (const setup of setups.toSorted((one, other) => one.phase - other.phase)) {
-            // oxlint-disable-next-line eslint/no-await-in-loop -- the order IS the contract: a seed lands before the contracts that serve it, the clock last
+            // oxlint-disable-next-line eslint/no-await-in-loop -- the order IS the contract: a seed lands before the stubs that serve it, the clock last
             const effect = await setup.arm?.(read(setup), engines, run);
             armed.push(effect ?? {});
         }

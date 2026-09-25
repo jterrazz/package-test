@@ -1,4 +1,4 @@
-import type { ContractRequest, ContractResponse } from '../exchange.js';
+import type { StubRequest, StubResponse } from '../exchange.js';
 import { matchesText } from '../filters.js';
 import type { TextFilter } from '../filters.js';
 
@@ -83,7 +83,7 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
 
 // ── Response builders ──
 
-function buildChatReply(data: unknown): ContractResponse {
+function buildChatReply(data: unknown): StubResponse {
     const content = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -98,7 +98,7 @@ function buildChatReply(data: unknown): ContractResponse {
     };
 }
 
-function buildResponsesReply(data: unknown): ContractResponse {
+function buildResponsesReply(data: unknown): StubResponse {
     const text = typeof data === 'string' ? data : JSON.stringify(data);
     return {
         status: 200,
@@ -137,7 +137,7 @@ export const openai = {
      *   openai.chat({ system: buildPrompt() })   // exact system prompt
      *   openai.chat({ system: /classify/ })      // pattern
      */
-    chat(filter?: OpenAIChatFilter): ContractRequest {
+    chat(filter?: OpenAIChatFilter): StubRequest {
         return {
             adapter: 'openai',
             method: 'POST',
@@ -159,7 +159,7 @@ export const openai = {
      * @example
      *   openai.responses({ user: /Report Ingestion/ }, GATEWAY)
      */
-    responses(filter?: OpenAIResponsesFilter, url?: string): ContractRequest {
+    responses(filter?: OpenAIResponsesFilter, url?: string): StubRequest {
         return {
             adapter: 'openai',
             method: 'POST',
@@ -175,12 +175,12 @@ export const openai = {
      * @example
      *   openai.reply({ categories: ['TECH'] })
      */
-    reply(data: unknown): ContractResponse {
+    reply(data: unknown): StubResponse {
         return buildChatReply(data);
     },
 
     /** Response: return an OpenAI error. */
-    error(status: number, message?: string): ContractResponse {
+    error(status: number, message?: string): StubResponse {
         return {
             status,
             body: {
@@ -194,12 +194,12 @@ export const openai = {
     },
 
     /** Response: return malformed content. */
-    malformed(content: string): ContractResponse {
+    malformed(content: string): StubResponse {
         return buildChatReply(content);
     },
 
     /** Response: simulate a timeout. */
-    timeout(): ContractResponse {
+    timeout(): StubResponse {
         return { status: 200, body: {}, delay: 30_000 };
     },
 };

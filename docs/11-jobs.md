@@ -1,6 +1,6 @@
 # 11 — Jobs specs (`specification.jobs`)
 
-`specification.jobs()` tests background pipelines — cron jobs, queue consumers, nightly reports — by triggering them in-process against real databases and contracted external providers. No HTTP server is involved: the subject under test is _what a job writes_, not what an endpoint returns.
+`specification.jobs()` tests background pipelines — cron jobs, queue consumers, nightly reports — by triggering them in-process against real databases and stubbed external providers. No HTTP server is involved: the subject under test is _what a job writes_, not what an endpoint returns.
 
 Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](10-api.md).
 
@@ -50,7 +50,7 @@ Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `jo
 import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 import { jobs } from '../jobs.specification.js';
-import pipeline from './contracts/pipeline.contracts.js';
+import pipeline from './stubs/pipeline.stubs.js';
 
 describe('pipeline', () => {
     test('nightly report classifies, prices and drafts', async () => {
@@ -68,13 +68,13 @@ describe('pipeline', () => {
 });
 ```
 
-Everything a pipeline reads from the outside world is declared: seeds set the database state, contracts pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [contracts](16-contracts.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
+Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](16-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one contract, any outgoing request that matches nothing — including one whose matching contracts are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). A chain with no contracts is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one stub, any outgoing request that matches nothing — including one whose matching stubs are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [stubs](16-stubs.md#strict-by-construction-rule-d7)). A chain with no stubs is not network-guarded.
 
 ### Seeding and sequences for pipelines
 
-Selection is **first non-exhausted match wins**, so a multi-call scenario is a finite contract in front of an unlimited tail — `times` says how many calls the first one answers:
+Selection is **first non-exhausted match wins**, so a multi-call scenario is a finite stub in front of an unlimited tail — `times` says how many calls the first one answers:
 
 ```typescript
 test('retries then recovers from provider rate-limit', async () => {
@@ -94,7 +94,7 @@ test('retries then recovers from provider rate-limit', async () => {
 });
 ```
 
-The number in `times` IS the assertion: it says the job retries exactly once. A contract with no `times` is unlimited, which is what you want for a route the pipeline may hit any number of times.
+The number in `times` IS the assertion: it says the job retries exactly once. A stub with no `times` is unlimited, which is what you want for a route the pipeline may hit any number of times.
 
 ## The result
 
@@ -142,7 +142,7 @@ The three failure families:
 | `openai.timeout()` / `anthropic.timeout()`                             | A provider that never answers within the job's timeout |
 | `openai.malformed('…')`                                                | A 200 whose body violates the provider schema          |
 
-The full builder catalogue lives in [contracts](16-contracts.md).
+The full builder catalogue lives in [stubs](16-stubs.md).
 
 ### A crash is read by its rejection
 
@@ -163,11 +163,11 @@ test('a crashed job leaves what it wrote first', async () => {
 
 - **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition (rule A2); what a job reads from the outside is its `services` record (rule A8).
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
-- **Forgetting `times` on the leading contract of a sequence.** With no `times` the first contract is unlimited, so it answers every call and the recovery contract behind it is never reached.
+- **Forgetting `times` on the leading stub of a sequence.** With no `times` the first stub is unlimited, so it answers every call and the recovery stub behind it is never reached.
 - **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).
 - **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule D2 for `toMatch(<rows>)`, the type-aware `typescript/no-floating-promises` for `toBeEmpty`).
-- **Bounding the tail of a sequence.** The last contract of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule D7).
+- **Bounding the tail of a sequence.** The last stub of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule D7).
 
 ## Related
 
-[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)
+[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md)

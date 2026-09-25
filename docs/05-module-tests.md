@@ -63,12 +63,12 @@ The table is the rule set, and every row names the rule that holds it ([19 — L
 | `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list with the reason written beside it                   | I4           |
 | `await using _ = await intercept(http.get(url), http.json(…))`                                                                 | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                           | M3, F6       |
 | `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                               | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`  | D16/D16w, M3 |
-| `vi.stubEnv('X', 'y')` for a module whose contract IS an env read — it restores itself                                         | `process.env.X = …`, a raw assignment nothing gives back                                                                               | E9w          |
+| `vi.stubEnv('X', 'y')` for a module whose stub IS an env read — it restores itself                                             | `process.env.X = …`, a raw assignment nothing gives back                                                                               | E9w          |
 | flat `test()`; one level of `describe` for grouping; a `test.each` table (B4 judges the table once, not once per row)          | a nested `describe`; a `beforeEach` / `beforeAll` that builds the Given                                                                | J10, J6w     |
 | `expect(text(value).text).toContain(…)`; `toStrictEqual` against a literal                                                     | a golden (`toMatch(file(…))`) — a module with a golden is an integration spec ([06](06-integration.md)); any `toMatchSnapshot` matcher | D20          |
 | —                                                                                                                              | `document` / `window` / `navigator`; `@vitest-environment happy-dom`; `react-dom/server`                                               | G4, E5, F6   |
 
-A module that fetches a RELATIVE url is browser code and cannot run under node as it stands: either state where it resolves (`intercept(contracts, { origin })`, below) or specify it where it renders — a component spec.
+A module that fetches a RELATIVE url is browser code and cannot run under node as it stands: either state where it resolves (`intercept(stubs, { origin })`, below) or specify it where it renders — a component spec.
 
 ### Doubles
 
@@ -84,7 +84,7 @@ Everything else the ladder refuses is refused here by name: `vi.mock` doubles a 
 
 ### `intercept()` — the network, declared, with no chain
 
-A module that reaches the network states what it expects to find there, in the same contract vocabulary every facet uses — the same double, with no chain to hang it on.
+A module that reaches the network states what it expects to find there, in the same stub vocabulary every facet uses — the same double, with no chain to hang it on.
 
 ```typescript
 test('reads the feed the gateway publishes', async () => {
@@ -99,7 +99,7 @@ test('reads the feed the gateway publishes', async () => {
 });
 ```
 
-The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusal of an empty contract list, and everything about the contracts themselves — selection, `times`, `required`, the facades, the streams — are [16 — Contracts § `intercept()`](16-contracts.md#intercept--the-same-double-with-no-chain)'s.
+The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusal of an empty stub list, and everything about the stubs themselves — selection, `times`, `required`, the facades, the streams — are [16 — Stubs § `intercept()`](16-stubs.md#intercept--the-same-double-with-no-chain)'s.
 
 ### Time
 
@@ -134,7 +134,7 @@ There is no result object here, because there is no chain to hand one back. The 
 ## Unique here
 
 - **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is C18's error in one direction and C12's in the other.
-- **It is the only kind that may build its own double.** Below this chapter a double is DECLARED — a contract, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
+- **It is the only kind that may build its own double.** Below this chapter a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
 - **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([06](06-integration.md#the-golden-half--a-pure-module-no-services-at-all)).
 - **It is the kind the budget is written for.** The `unit` project is the fast one, and this package gates its own at twelve seconds so the loop stays a loop.
 
@@ -149,4 +149,4 @@ There is no result object here, because there is no chain to hand one back. The 
 
 ## Related
 
-[02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [06 — Integration specs](06-integration.md) · [07 — Component specs](07-component.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [18 — Conventions](18-conventions.md) · [19 — Linting](19-linting.md)
+[02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [06 — Integration specs](06-integration.md) · [07 — Component specs](07-component.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Stubs](16-stubs.md) · [18 — Conventions](18-conventions.md) · [19 — Linting](19-linting.md)

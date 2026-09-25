@@ -27,11 +27,11 @@ import { b10WhenBetweenMarkers } from './rules/model/b10-when-between-markers.js
 import { b11MarkerOneLine } from './rules/model/b11-marker-one-line.js';
 import { b16wFileContext } from './rules/model/b16w-file-context.js';
 import { c1DomainStructure } from './rules/model/c1-domain-structure.js';
-import { c4ContractShape } from './rules/model/c4-contract-shape.js';
+import { c4StubShape } from './rules/model/c4-stub-shape.js';
 import { c6ToMatchExtension } from './rules/model/c6-tomatch-extension.js';
 import { c7SeedsSqlOnly } from './rules/model/c7-seeds-sql-only.js';
-import { c10ContractsBoundary } from './rules/model/c10-contracts-boundary.js';
-import { c11ContractDataPairing } from './rules/model/c11-contract-data-pairing.js';
+import { c10StubsBoundary } from './rules/model/c10-stubs-boundary.js';
+import { c11StubDataPairing } from './rules/model/c11-stub-data-pairing.js';
 import { c13BareGround } from './rules/model/c13-bare-ground.js';
 import { c24GroundRole } from './rules/model/c24-ground-role.js';
 import { c26DiskNamedInTheTest } from './rules/model/c26-disk-named-in-the-test.js';
@@ -74,7 +74,7 @@ import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
 /**
  * What test material is, published for a build guard: `materialAt(path)`
  * names what a local module id is (a test file, ground, the specs tree, a
- * contract) or answers `undefined`, and `testPackageOf(specifier)` names the
+ * stub) or answers `undefined`, and `testPackageOf(specifier)` names the
  * test package a bare specifier belongs to (`vitest/config` → `vitest`),
  * `@jterrazz/test/oxlint` aside. This package is the one owner of the
  * answer, for every guard that asks it.
@@ -113,8 +113,8 @@ const plugin: LintPlugin = {
         'b8-kebab-trigger': b8KebabTrigger,
         'b9w-product-command': b9wProductCommand,
         'c1-domain-structure': c1DomainStructure,
-        'c10-contracts-boundary': c10ContractsBoundary,
-        'c11-contract-data-pairing': c11ContractDataPairing,
+        'c10-stubs-boundary': c10StubsBoundary,
+        'c11-stub-data-pairing': c11StubDataPairing,
         'c13-bare-ground': c13BareGround,
         'c24-ground-role': c24GroundRole,
         'c26-disk-named-in-the-test': c26DiskNamedInTheTest,
@@ -123,7 +123,7 @@ const plugin: LintPlugin = {
         'c32-aspect-name': c32AspectName,
         'c33-file-size': c33FileSize,
         'c34-test-body-size': c34TestBodySize,
-        'c4-contract-shape': c4ContractShape,
+        'c4-stub-shape': c4StubShape,
         'c6-tomatch-extension': c6ToMatchExtension,
         'c7-seeds-sql-only': c7SeedsSqlOnly,
         'd16-sampled-oracle': d16SampledOracle,
@@ -258,7 +258,7 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
 const RESTRICTED_VI_METHODS: Record<string, string> = {
     setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
     stubGlobal:
-        "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineContracts(…))`; a subject that fetches a PATH states where it resolves: `intercept(contracts, { origin: 'http://<host>.test' })`.",
+        "`vi.stubGlobal('fetch')` → `await using _ = await intercept(defineStubs(…))`; a subject that fetches a PATH states where it resolves: `intercept(stubs, { origin: 'http://<host>.test' })`.",
     useFakeTimers: '`vi.useFakeTimers` → `clock.at(iso)` and `clock.advance(ms)`.',
     useRealTimers: '`vi.useRealTimers` → nothing: `using` gives the clock back at the scope end.',
 };

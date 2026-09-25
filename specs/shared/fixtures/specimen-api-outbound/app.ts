@@ -2,7 +2,7 @@
  * A specimen of the api facet whose only job is to make outgoing HTTP calls —
  * the surface the intercepts guard. Its app is Hono-compatible and in-process,
  * since intercepts are (MSW), and each of its routes is one shape of outgoing
- * traffic a contract has to answer.
+ * traffic a stub has to answer.
  */
 
 export const NEWS_URL = 'https://news.spec.test/api/latest';
@@ -20,7 +20,7 @@ async function readChunks(response: Response, decoder: TextDecoder): Promise<str
 }
 
 /**
- * The routes, one per shape of outgoing traffic a contract has to answer.
+ * The routes, one per shape of outgoing traffic a stub has to answer.
  *
  * A record rather than a switch: each entry is read on its own, and adding the
  * next shape of call costs one key instead of one more branch of a function
@@ -86,7 +86,7 @@ const routes: Record<string, () => Promise<Response>> = {
     },
     '/tokens': async () => {
         // A provider that answers in PIECES: the app reads them as they land,
-        // Which is the whole of what a stream contract states — the chunks and
+        // Which is the whole of what a stream stub states — the chunks and
         // Their order.
         const response = await fetch(STREAM_URL);
         const decoder = new TextDecoder();

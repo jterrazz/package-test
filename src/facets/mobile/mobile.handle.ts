@@ -52,7 +52,7 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
         url: string;
     };
     /**
-     * Declared stub backend: started with the runner, serving the contracts
+     * Declared stub backend: started with the runner, serving the stubs
      * each chain declares via `.intercept(...)`. The handle gains
      * `backendUrl` — inject it into your bundler env yourself.
      */

@@ -1,6 +1,6 @@
 # 10 — API specs (`specification.api`)
 
-`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a contract, a clock and a golden all mean something because the app shares this process's world.
+`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world.
 
 Use it when the subject under test is an HTTP surface. For background pipelines use [jobs](11-jobs.md); for binaries use [cli](12-cli.md).
 
@@ -68,12 +68,12 @@ Without `root`, the framework finds the package being tested by walking up from 
 | `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file — beside the test that reads it, or at the level of the tests that share it (rule C28) |
 | `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                                                 |
 | `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                                          |
-| `.intercept(contract)`                          | Mock an outgoing HTTP call with a declared [contract](16-contracts.md)                                                                             |
+| `.intercept(stub)`                              | Mock an outgoing HTTP call with a declared [stub](16-stubs.md)                                                                                     |
 | `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                                                 |
 | `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths))                    |
 | `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))                          |
 
-Contracts are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted contract or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [contracts](16-contracts.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
+Stubs are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted stub or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [stubs](16-stubs.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {
@@ -323,4 +323,4 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Related
 
-[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md)
+[11 — Jobs specs](11-jobs.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md)

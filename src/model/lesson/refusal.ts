@@ -19,7 +19,7 @@ export const REFUSAL_WHY = {
     'd14-one-verb-per-meaning':
         '`toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.',
     'd7-strict-intercepts':
-        'From its first contract, a chain’s network is strict: every outgoing request matches a declared contract.',
+        'From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
     'w3-unambiguous-element':
         'A verb acts on exactly ONE element: a descriptor that matches several is refused, never settled by the first.',
     'w4-no-landmarks-on-mobile':

@@ -408,7 +408,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         const ROLE_REACH = new Set([
             'component',
             'config',
-            'contract',
+            'stub',
             'document',
             'ground',
             'module',

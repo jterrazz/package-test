@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineContract, http } from '../../../src/index.js';
+import { defineStub, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 
 describe('filters', () => {
@@ -43,11 +43,11 @@ describe('filters', () => {
         );
     });
 
-    test('a contract computes its response body from the request body', async () => {
-        // Given - a contract whose response derives from the observed request: the /submit route POSTs { action, user: { role: 'admin' } }
+    test('a stub computes its response body from the request body', async () => {
+        // Given - a stub whose response derives from the observed request: the /submit route POSTs { action, user: { role: 'admin' } }
         const result = await api
             .intercept(
-                defineContract({
+                defineStub({
                     request: http.post(QUOTES_URL),
                     response: (request) => {
                         const body = request.body as { action: string; user: { role: string } };

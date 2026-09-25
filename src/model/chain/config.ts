@@ -46,7 +46,7 @@ export type DockerSpecConfig = {
 export type SpecificationConfig = {
     /**
      * The declared stub backend (website/mobile facets) — armed with the
-     * chain's contracts before every terminal action.
+     * chain's stubs before every terminal action.
      */
     backend?: StubBackend | undefined;
     /**

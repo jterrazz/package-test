@@ -112,7 +112,7 @@ describe('the subject a spec reaches, read statically', () => {
     });
 
     test('reads the terminal action of every chain off an imported handle, and nothing else', () => {
-        // Given - a spec with two chains, a contract builder's own `.get`, and a chain in a comment
+        // Given - a spec with two chains, a stub builder's own `.get`, and a chain in a comment
         const source = [
             "import { api } from '../api.specification.js';",
             "const events = api.with({ clock: '2026-01-01T00:00:00Z' });",

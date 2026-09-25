@@ -1,6 +1,7 @@
-import type { ContractRegistration } from '../../seams/msw/handlers.js';
+import type { StubRegistration } from '../../seams/msw/handlers.js';
+import type { StubRequest, StubResponder, StubResponse } from '../../stubs/exchange.js';
 /**
- * The network double in MODULE scope — the same contracts, the same queue and
+ * The network double in MODULE scope — the same stubs, the same queue and
  * the same strictness as a chain's `.intercept()`, for the one kind of test
  * that has no chain to hang them on.
  *
@@ -12,11 +13,10 @@ import type { ContractRegistration } from '../../seams/msw/handlers.js';
  *
  * The scope is an `AsyncDisposable`, so the handlers come off at the end of
  * the block however the block ends — and the strict violation (an outgoing
- * request no contract accepted) is raised THERE, which is what makes the
+ * request no stub accepted) is raised THERE, which is what makes the
  * double a guard rather than a convenience.
  */
-import type { Contract, ContractInput } from '../../stubs/contract.js';
-import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
+import type { Stub, StubInput } from '../../stubs/stub.js';
 import { declared } from './declared.js';
 
 /**
@@ -31,10 +31,10 @@ export type InterceptOptions = {
      * The base a RELATIVE request resolves against, for the life of the scope.
      *
      * A module that calls `fetch('/api/posts')` is browser code: under node the
-     * URL cannot be parsed at all, so the request fails before any contract can
+     * URL cannot be parsed at all, so the request fails before any stub can
      * answer it and the test's only way out was to replace `fetch` itself. With
      * an origin stated, the relative call resolves here and the declared
-     * contracts — path form or absolute — match it as they would any other.
+     * stubs — path form or absolute — match it as they would any other.
      */
     origin?: string;
 };
@@ -52,12 +52,12 @@ export type InterceptOptions = {
  * is not an `AsyncDisposable`, and the compiler says so.
  */
 export type Intercept = ((
-    contracts: ContractInput,
+    stubs: StubInput,
     options?: InterceptOptions,
 ) => Promise<InterceptScope>) &
     ((
-        request: ContractRequest,
-        response: ContractResponder | ContractResponse,
+        request: StubRequest,
+        response: StubResponder | StubResponse,
         options?: InterceptOptions,
     ) => Promise<InterceptScope>);
 
@@ -113,20 +113,17 @@ function resolveRelativeAgainst(origin: string): () => () => void {
  * @internal
  */
 export function interceptThrough(
-    register: (contracts: readonly Contract[]) => Promise<ContractRegistration>,
+    register: (stubs: readonly Stub[]) => Promise<StubRegistration>,
 ): Intercept {
+    async function intercept(stubs: StubInput, options?: InterceptOptions): Promise<InterceptScope>;
     async function intercept(
-        contracts: ContractInput,
+        request: StubRequest,
+        response: StubResponder | StubResponse,
         options?: InterceptOptions,
     ): Promise<InterceptScope>;
     async function intercept(
-        request: ContractRequest,
-        response: ContractResponder | ContractResponse,
-        options?: InterceptOptions,
-    ): Promise<InterceptScope>;
-    async function intercept(
-        requestOrContracts: ContractInput | ContractRequest,
-        maybeResponseOrOptions?: ContractResponder | ContractResponse | InterceptOptions,
+        requestOrStubs: StubInput | StubRequest,
+        maybeResponseOrOptions?: InterceptOptions | StubResponder | StubResponse,
         maybeOptions?: InterceptOptions,
     ): Promise<InterceptScope> {
         const options = isOptions(maybeOptions)
@@ -134,22 +131,22 @@ export function interceptThrough(
             : isOptions(maybeResponseOrOptions)
               ? maybeResponseOrOptions
               : undefined;
-        const contracts = declared(
+        const stubs = declared(
             'intercept',
-            requestOrContracts,
+            requestOrStubs,
             options === maybeResponseOrOptions
                 ? undefined
-                : (maybeResponseOrOptions as ContractResponder | ContractResponse | undefined),
+                : (maybeResponseOrOptions as StubResponder | StubResponse | undefined),
         );
-        if (contracts.length === 0) {
+        if (stubs.length === 0) {
             throw new Error(
-                'intercept(): declare at least one contract — an empty list guards nothing, ' +
+                'intercept(): declare at least one stub — an empty list guards nothing, ' +
                     'and a subject with no network needs no intercept at all.',
             );
         }
         const installOrigin =
             options?.origin === undefined ? undefined : resolveRelativeAgainst(options.origin);
-        const registration = await register(contracts);
+        const registration = await register(stubs);
         const restoreOrigin = installOrigin?.();
         return {
             [Symbol.asyncDispose]: async () => {

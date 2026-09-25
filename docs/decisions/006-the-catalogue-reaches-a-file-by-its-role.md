@@ -224,7 +224,7 @@ reading.
 - **`response.body.cancel()`.** A seam defect, not a catalogue one, left out
   of the cut. It is fixed since: the node engine hands the body of every reply
   to `fetch` back as a stream the package owns, so the repro runs and M3
-  sanctions no suppression ([16 — Contracts](../16-contracts.md)).
+  sanctions no suppression ([16 — Contracts](../16-stubs.md)).
 - **W4 stays a runtime row** rather than a type one, for the reason written in
   `src/type-channel.test-d.ts`.
 - **The three statuses.** ADR-006, 007 and 008 are `Proposed`; only the owner

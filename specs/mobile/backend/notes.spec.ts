@@ -5,7 +5,7 @@ import { backendUrl, mobile } from '../mobile.specification.js';
 
 describe('notes', () => {
     test('lists the notes the declared backend answers', async () => {
-        // Given - the backend under contract for this chain, handed to the app by its deep link
+        // Given - the backend stubbed for this chain, handed to the app by its deep link
         const result = await mobile
             .intercept(http.get('/notes'), http.json([{ title: 'Water the plants' }]))
             .open(`specimen://notes?api=${String(backendUrl)}`, async (visitor) => {
@@ -35,7 +35,7 @@ describe('notes', () => {
         });
     });
 
-    test('a request no contract declares fails the open', async () => {
+    test('a request no stub declares fails the open', async () => {
         // Given - a chain declaring nothing the notes screen reads
         const opened = mobile
             .intercept(http.get('/drafts'), http.json([]))

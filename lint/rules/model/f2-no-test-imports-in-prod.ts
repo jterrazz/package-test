@@ -19,7 +19,7 @@ import type { LintRule, Visitor } from '../../rule-shape.js';
  * module (`production.ts` defines it, for every guard), a reference in any
  * form — import, `import type`, re-export, `import()`, `require()` — that
  * reaches a test package, a test/spec/specification/fixtures module, ground,
- * the `specs/` tree or a contract, directly, through a `paths` alias or a
+ * the `specs/` tree or a stub, directly, through a `paths` alias or a
  * `#…` import, or through a module that is not production, is an error; so is
  * a path the module builds from where it sits (`new URL(…, import.meta.url)`,
  * `join(import.meta.dirname, …)`) or reads (`readFileSync('./…')`) into test

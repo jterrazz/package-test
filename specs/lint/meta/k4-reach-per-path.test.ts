@@ -80,15 +80,15 @@ describe('lint — k4-reach-per-path (meta-test)', () => {
         expect(suite).not.toContain('g4-no-dom-in-module-test');
     });
 
-    test('a config inside the tree, the ground beside a spec and a contract are each judged where they sit', async () => {
+    test('a config inside the tree, the ground beside a spec and a stub are each judged where they sit', async () => {
         // Given - the same run, read at the three paths the role-gated rows name
         const output = await reachRun();
 
-        // Then - the config INSIDE `specs/` is still a config (spwn's shape), the contract answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
+        // Then - the config INSIDE `specs/` is still a config (spwn's shape), the stub answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
         expect(about(output, 'specs/vitest.config.ts')).toContain('e4w-project-binding');
-        expect(about(output, 'specs/api/orders/contracts/rates.ts')).toContain('c4-contract-shape');
+        expect(about(output, 'specs/api/orders/stubs/rates.ts')).toContain('c4-stub-shape');
         expect(about(output, 'specs/api/orders/total.spec.ts')).toContain('c2-request-extension');
-        expect(about(output, 'specs/api/orders/contracts/rates.ts')).not.toContain('j2-no-sleep');
+        expect(about(output, 'specs/api/orders/stubs/rates.ts')).not.toContain('j2-no-sleep');
     });
 
     test('the specification and the config are judged by their own rules alone', async () => {

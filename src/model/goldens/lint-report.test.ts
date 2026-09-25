@@ -21,19 +21,19 @@ describe('lintReport — a report as a golden keeps it', () => {
     test('orders the lines by file, line and column, whatever order the linter printed them in', () => {
         // Given - the order oxlint's threads finished in: a later file first, line 10 before line 2
         const report = [
-            'specs/b.ts:1:1: x [Error/jterrazz(c4-contract-shape)]',
-            'specs/a.ts:10:3: x [Error/jterrazz(c4-contract-shape)]',
-            'specs/a.ts:2:9: x [Error/jterrazz(c4-contract-shape)]',
-            'specs/a.ts:2:4: x [Error/jterrazz(c4-contract-shape)]',
+            'specs/b.ts:1:1: x [Error/jterrazz(c4-stub-shape)]',
+            'specs/a.ts:10:3: x [Error/jterrazz(c4-stub-shape)]',
+            'specs/a.ts:2:9: x [Error/jterrazz(c4-stub-shape)]',
+            'specs/a.ts:2:4: x [Error/jterrazz(c4-stub-shape)]',
         ].join('\n');
 
         // Then - the order a reader walks the tree in, numbers read as numbers
         expect(lintReport(report)).toBe(
             [
-                'specs/a.ts:2:4  jterrazz(c4-contract-shape)',
-                'specs/a.ts:2:9  jterrazz(c4-contract-shape)',
-                'specs/a.ts:10:3  jterrazz(c4-contract-shape)',
-                'specs/b.ts:1:1  jterrazz(c4-contract-shape)',
+                'specs/a.ts:2:4  jterrazz(c4-stub-shape)',
+                'specs/a.ts:2:9  jterrazz(c4-stub-shape)',
+                'specs/a.ts:10:3  jterrazz(c4-stub-shape)',
+                'specs/b.ts:1:1  jterrazz(c4-stub-shape)',
                 '',
             ].join('\n'),
         );

@@ -48,7 +48,7 @@ export type IntegrationHandle<
 
 /**
  * Specify a module the way the assembled product is specified: against real
- * services and declared contracts, with the golden mechanism on what it
+ * services and declared stubs, with the golden mechanism on what it
  * produces.
  *
  * The fork is the SUBJECT. A module alone is a module test, beside its code,

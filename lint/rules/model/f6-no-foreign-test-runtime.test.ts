@@ -33,7 +33,7 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
             errors: [{ messageId: 'foreignRuntime' }],
             filename: COMPONENT_TEST,
         },
-        // The network answers through contracts, whichever transport is reached for.
+        // The network answers through stubs, whichever transport is reached for.
         {
             code: 'import { setupServer } from "msw/node";',
             errors: [{ messageId: 'foreignRuntime' }],

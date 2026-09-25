@@ -1,0 +1,7 @@
+description: accepts payloads paired with their stub
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/app/widget/widget.test.ts:6:1  jterrazz(d15w-status-only-probe)

@@ -86,9 +86,9 @@ What a test stands on is named by one of two calls, with the path relative to th
 - **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./expected/help.txt'))`. A part of a result is no comparison of it either: `expect(result.response).toMatch(/200/)` does not compile — a response takes its whole `.http` text or its `file()`, a json its value, a table its rows, a tree its `directory()`.
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (D2).
-- **A double before the real thing** — the ladder is: the real thing → a declared service → a contract (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.
+- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.
 - **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
-- **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a contract stays on its test's chain.
+- **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a stub stays on its test's chain.
 - **A 16.x tree** — `npx jterrazz-test-check --fix` renames the ground folders and rewrites every literal call and document, module tests included.
 
 ## Read next
@@ -107,7 +107,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 | naming an element on any surface that draws | [docs/13-elements.md](../../docs/13-elements.md)         |
 | a matcher, sync or awaited                  | [docs/14-assertions.md](../../docs/14-assertions.md)     |
 | a `{{token}}`, or update mode               | [docs/15-tokens.md](../../docs/15-tokens.md)             |
-| what the network replies                    | [docs/16-contracts.md](../../docs/16-contracts.md)       |
+| what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |
 | a database, a cache, a process              | [docs/17-services.md](../../docs/17-services.md)         |
 | a rule id a diagnostic printed              | [docs/19-linting.md](../../docs/19-linting.md)           |
 

@@ -5,7 +5,7 @@ import { website } from '../backend.specification.js';
 
 describe('backend', () => {
     test('renders what the declared backend answered the server', async () => {
-        // Given - the backend under contract for this chain
+        // Given - the backend stubbed for this chain
         const result = await website
             .intercept(http.get('/greeting'), http.json({ message: 'Hello from the stub' }))
             .visit('/greeting', async (visitor) => {

@@ -1,8 +1,8 @@
 /**
- * The observed outgoing request, reduced to what contract matchers inspect.
+ * The observed outgoing request, reduced to what stub matchers inspect.
  * Built once per request by the engine (MSW on api/jobs, the stub backend on
- * website/mobile) and handed to {@link ContractRequest.match} and to a
- * {@link ContractResponder}.
+ * website/mobile) and handed to {@link StubRequest.match} and to a
+ * {@link StubResponder}.
  */
 export type MatchableRequest = {
     /** Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` when absent. */
@@ -16,30 +16,30 @@ export type MatchableRequest = {
 };
 
 /**
- * The request half of a contract: which outgoing call it speaks for.
+ * The request half of a stub: which outgoing call it speaks for.
  *
  * `url` is either an absolute URL (string or RegExp), or a PATH FORM starting
  * with `/` (`/articles/{{uuid}}`) which matches any origin — the shape a
  * website/mobile app's own backend calls take. `{{token}}` segments compare
  * structurally, declared query params are a subset of the observed ones.
  */
-export type ContractRequest = {
+export type StubRequest = {
     /** Adapter name — `http` | `openai` | `anthropic`. */
     adapter: string;
     /** HTTP method to match. `*` matches any method. */
     method: string;
     /** Absolute URL (string | RegExp) or an any-origin path form (`/articles/{{uuid}}`). */
     url: RegExp | string;
-    /** Optional request matcher — the contract only fires if this returns true. */
+    /** Optional request matcher — the stub only fires if this returns true. */
     match?: ((request: MatchableRequest) => boolean) | undefined;
     /** Transform raw data into a provider-specific response envelope. */
-    wrap: (data: unknown) => ContractResponse;
+    wrap: (data: unknown) => StubResponse;
 };
 
 /**
- * The response half of a contract: what to reply when the request matches.
+ * The response half of a stub: what to reply when the request matches.
  */
-export type ContractResponse = {
+export type StubResponse = {
     /** HTTP status code (default: 200). */
     status?: number;
     /**
@@ -98,14 +98,14 @@ export function isStreamBody(body: unknown): body is StreamBody {
 
 /**
  * A dynamic response: computed from the observed request at the moment the
- * contract is served, rather than fixed ahead of time. Handed the same
+ * stub is served, rather than fixed ahead of time. Handed the same
  * {@link MatchableRequest} the request half matched on, so the reply can echo
  * or derive from the body/headers/url.
  */
-export type ContractResponder = (request: MatchableRequest) => ContractResponse;
+export type StubResponder = (request: MatchableRequest) => StubResponse;
 
 /**
- * What a contract replies with: either a fixed {@link ContractResponse} or a
- * {@link ContractResponder} evaluated per served request.
+ * What a stub replies with: either a fixed {@link StubResponse} or a
+ * {@link StubResponder} evaluated per served request.
  */
-export type ContractResponseValue = ContractResponder | ContractResponse;
+export type StubResponseValue = StubResponder | StubResponse;

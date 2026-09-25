@@ -33,7 +33,7 @@ const composition = {
  * `specification.website()`. Setup methods chain; action methods are
  * terminal. `.visit()` renders the page in the shared browser; `.fetch()`
  * performs one raw HTTP exchange and never follows redirects. The site runs
- * in its own process: the clock pinned is the PAGE's, and the contracts are
+ * in its own process: the clock pinned is the PAGE's, and the stubs are
  * served by the declared stub backend.
  */
 export interface WebsiteSpecification extends ChainOf<

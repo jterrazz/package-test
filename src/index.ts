@@ -12,14 +12,14 @@ export * from './surface.js';
 export { specification } from './facets/specification.js';
 /**
  * The module-scope network double, on msw's node server — what a test with no
- * chain to hang contracts on reaches for (chapter 16).
+ * chain to hang stubs on reaches for (chapter 16).
  */
-export const intercept: Intercept = interceptThrough(async (contracts) => {
+export const intercept: Intercept = interceptThrough(async (stubs) => {
     // Reached through the same lazy import the chain uses: a static one here
     // Would pull the msw engine into every node consumer's graph at load, and
-    // The seam exists to be paid for only by the specs that declare a contract.
-    const { registerContracts } = await import('./seams/msw/server.js');
-    return await registerContracts(contracts);
+    // The seam exists to be paid for only by the specs that declare a stub.
+    const { registerStubs } = await import('./seams/msw/server.js');
+    return await registerStubs(stubs);
 });
 export { component } from './facets/component/component.handle.js';
 export {

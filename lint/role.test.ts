@@ -59,11 +59,11 @@ describe('roleOf — the kind a path states', () => {
         expect(roleOf('/repo/specs/fixtures/app/server.test.ts').role).toBe('module');
     });
 
-    test('a contracts/ unit is its own role — the half C10 keeps internal', () => {
-        // Given - a file under a feature's contracts/ folder
-        // Then - `contract`: the boundary rule asks the identity, not the path
-        expect(roleOf('/repo/specs/api/news/contracts/http/latest.ts').role).toBe('contract');
-        expect(roleOf('/repo/specs/api/news/contracts/latest.contracts.ts').role).toBe('contract');
+    test('a stubs/ unit is its own role — the half C10 keeps internal', () => {
+        // Given - a file under a feature's stubs/ folder
+        // Then - `stub`: the boundary rule asks the identity, not the path
+        expect(roleOf('/repo/specs/api/news/stubs/http/latest.ts').role).toBe('stub');
+        expect(roleOf('/repo/specs/api/news/stubs/latest.stubs.ts').role).toBe('stub');
     });
 
     test('says whether the path sits under a specs tree, whatever its kind', () => {
@@ -95,9 +95,9 @@ describe('roleOf — the kind a path states', () => {
 });
 
 describe('roleOf — read below the project root', () => {
-    test('a checkout under a folder named like ground, a contract or a retired root is none of them', () => {
-        // Given - three packages checked out under `fixtures/`, `contracts/` and `__tests__/`
-        const under = ['fixtures', 'contracts', '__tests__'].map((folder) => checkoutUnder(folder));
+    test('a checkout under a folder named like ground, a stub or a retired root is none of them', () => {
+        // Given - three packages checked out under `fixtures/`, `stubs/` and `__tests__/`
+        const under = ['fixtures', 'stubs', '__tests__'].map((folder) => checkoutUnder(folder));
 
         // Then - a module of each is the project's own code, and its test sits under no retired root
         expect(under.map((root) => roleOf(join(root, 'src/widget.ts')).role)).toStrictEqual([
@@ -113,14 +113,12 @@ describe('roleOf — read below the project root', () => {
     });
 
     test('the folders inside the project still say what they are', () => {
-        // Given - the same checkout under `fixtures/`, with its own ground, contracts and retired root
+        // Given - the same checkout under `fixtures/`, with its own ground, stubs and retired root
         const root = checkoutUnder('fixtures');
 
-        // Then - ground, contract and `__tests__` are read where the project names them
+        // Then - ground, stub and `__tests__` are read where the project names them
         expect(roleOf(join(root, 'specs/api/orders/fixtures/app.ts')).role).toBe('ground');
-        expect(roleOf(join(root, 'specs/api/orders/contracts/http/latest.ts')).role).toBe(
-            'contract',
-        );
+        expect(roleOf(join(root, 'specs/api/orders/stubs/http/latest.ts')).role).toBe('stub');
         expect(legacyOf(join(root, 'src/__tests__/widget.test.ts'))).toBe('__tests__');
         expect(legacyOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
     });
@@ -171,14 +169,7 @@ describe('isTestRole — the three kinds that DECLARE tests', () => {
     test('covers the module, the rendered unit and the spec, and nothing else', () => {
         // Given - the role vocabulary, split into the kinds that declare tests and the rest
         const declaring: FileRole[] = ['component', 'module', 'spec'];
-        const rest: FileRole[] = [
-            'config',
-            'contract',
-            'document',
-            'ground',
-            'other',
-            'specification',
-        ];
+        const rest: FileRole[] = ['config', 'stub', 'document', 'ground', 'other', 'specification'];
 
         // Then - a rule reaching "every test file" means exactly the first three
         expect(declaring.every(isTestRole)).toBe(true);
@@ -194,7 +185,7 @@ describe('isTestFile — what the test conventions reach', () => {
             '/repo/src/matching/match.test.ts',
             '/repo/specs/api/users/creation.spec.ts',
             '/repo/specs/api/api.specification.ts',
-            '/repo/specs/api/users/contracts/newsroom.contracts.ts',
+            '/repo/specs/api/users/stubs/newsroom.stubs.ts',
         ];
 
         // Then - the conventions bind every test file of a repository

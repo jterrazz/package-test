@@ -564,7 +564,7 @@ type PathRole = {
  * A path a key names, judged by the same law as the chain's `file()` and
  * `directory()`: relative to this document, one file — a directory only where
  * the key spreads one — in the folder its key reads, the first ground folder
- * the path passes through (C24); a contract module under `contracts/`, which
+ * the path passes through (C24); a stub module under `stubs/`, which
  * is no ground.
  */
 function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {

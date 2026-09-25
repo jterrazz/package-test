@@ -38,7 +38,7 @@ describe('passthrough-cancel', () => {
                 .call(async () => await quoteOrder(PRICING, 'ORD-1'));
             const port = await heldReply();
 
-            // When - a module fetches it with no contract declared, and cancels the body unread
+            // When - a module fetches it with no stub declared, and cancels the body unread
             const result = await integration.call(async () => {
                 const reply = await fetch(`http://127.0.0.1:${port}/quote`);
                 await reply.body?.cancel();

@@ -1,19 +1,19 @@
 /**
  * The declared stub backend — a small `node:http` server the website and
  * mobile runners start when their `backend` option is present. It serves the
- * contracts the CURRENT chain declared via `.intercept(...)`: one chain = one
+ * stubs the CURRENT chain declared via `.intercept(...)`: one chain = one
  * terminal action, and the stub resets between chains the way databases do.
  *
- * Selection is the shared {@link ContractQueue} — the same first-matching,
- * `times`-aware queue the MSW engine runs on api/jobs chains. A contract
+ * Selection is the shared {@link StubQueue} — the same first-matching,
+ * `times`-aware queue the MSW engine runs on api/jobs chains. A stub
  * without `times` keeps replying (re-render, retry); `times: n` is spent after
  * n serves.
  *
  * Strictness is the `external: 'block'` analog (CONVENTIONS D7 in spirit): a
- * request matching no contract is answered 501 and RECORDED; once the chain
- * declared at least one contract, the terminal action throws an error
- * enumerating every unmatched request — and every `required` contract that was
- * never requested. Chains with zero contracts leave the stub unguarded —
+ * request matching no stub is answered 501 and RECORDED; once the chain
+ * declared at least one stub, the terminal action throws an error
+ * enumerating every unmatched request — and every `required` stub that was
+ * never requested. Chains with zero stubs leave the backend unguarded —
  * mirroring how MSW stays off without them.
  *
  * Every response (including the 501 and the OPTIONS preflight) carries
@@ -24,11 +24,11 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
-import type { Contract } from '../../stubs/contract.js';
 import { isStreamBody } from '../../stubs/exchange.js';
 import type { MatchableRequest } from '../../stubs/exchange.js';
-import { ContractQueue } from '../../stubs/queue.js';
+import { StubQueue } from '../../stubs/queue.js';
 import { toReadableStream } from '../../stubs/stream.js';
+import type { Stub } from '../../stubs/stub.js';
 
 /** Options for the stub backend server. */
 type StubBackendOptions = {
@@ -50,10 +50,10 @@ const CORS_METHODS = 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS';
 const PREFLIGHT_MAX_AGE = '600';
 
 export class StubBackend {
-    /** Guarded once the current chain declared at least one contract. */
+    /** Guarded once the current chain declared at least one stub. */
     private guarded = false;
     private readonly options: StubBackendOptions;
-    private queue = new ContractQueue([]);
+    private queue = new StubQueue([]);
     private server: null | Server = null;
     private readonly unmatchedRequests = new Map<string, UnmatchedStubRequest>();
     private url = '';
@@ -100,22 +100,22 @@ export class StubBackend {
     }
 
     /**
-     * Arm the stub for one chain: the declared contracts replace the previous
+     * Arm the stub for one chain: the declared stubs replace the previous
      * chain's wholesale, the queue restarts, and the unmatched log clears —
      * the reset-between-chains databases already follow.
      */
-    beginChain(contracts: readonly Contract[]): void {
-        this.guarded = contracts.length > 0;
-        this.queue = new ContractQueue(contracts);
+    beginChain(stubs: readonly Stub[]): void {
+        this.guarded = stubs.length > 0;
+        this.queue = new StubQueue(stubs);
         this.unmatchedRequests.clear();
     }
 
     /**
      * The strict failure for the chain, or null. Non-null when the chain
-     * declared at least one contract AND either an unmatched request was
-     * recorded, or a `required` contract was never satisfied. Enumerates every
+     * declared at least one stub AND either an unmatched request was
+     * recorded, or a `required` stub was never satisfied. Enumerates every
      * unmatched request (method, path, count) plus the declared routes, so the
-     * missing contract writes itself.
+     * missing stub writes itself.
      */
     violation(): Error | null {
         if (!this.guarded) {
@@ -132,9 +132,9 @@ export class StubBackend {
             .join('\n');
         return new Error(
             `Unmatched request(s) hit the declared backend during the chain:\n${unmatched}\n` +
-                `Declared contracts:\n${this.describeRoutes()}\n` +
-                `Every backend request of a chain that declares contracts must match one — ` +
-                `add a contract for it to the chain's composite.`,
+                `Declared stubs:\n${this.describeRoutes()}\n` +
+                `Every backend request of a chain that declares stubs must match one — ` +
+                `add a stub for it to the chain's composite.`,
         );
     }
 
@@ -153,7 +153,7 @@ export class StubBackend {
     private describeRoutes(): string {
         const routes = this.queue.declaredRoutes();
         if (routes.length === 0) {
-            return '  (no contracts declared)';
+            return '  (no stubs declared)';
         }
         return routes.map((route) => `  - ${route}`).join('\n');
     }
@@ -184,24 +184,21 @@ export class StubBackend {
             method,
             url,
         };
-        const contract = this.queue.take(observed);
+        const stub = this.queue.take(observed);
 
-        if (!contract) {
+        if (!stub) {
             this.record(method, url);
             response.writeHead(501, { ...cors, 'content-type': 'application/json' });
             response.end(
                 JSON.stringify({
                     declared: this.queue.declaredRoutes(),
-                    error: `@jterrazz/test declared backend: no contract matches ${method} ${url}`,
+                    error: `@jterrazz/test declared backend: no stub matches ${method} ${url}`,
                 }),
             );
             return;
         }
 
-        const reply =
-            typeof contract.response === 'function'
-                ? contract.response(observed)
-                : contract.response;
+        const reply = typeof stub.response === 'function' ? stub.response(observed) : stub.response;
 
         if (reply.delay) {
             await new Promise((resolve) => setTimeout(resolve, reply.delay));

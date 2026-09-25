@@ -14,10 +14,10 @@ import { packageWith } from './rule-tester.fixtures.js';
 
 const ROOT = packageWith({
     'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/fixtures/*' } } }),
-    'src/contracts/engine.ts': 'export const engine = 1;\n',
+    'src/stubs/engine.ts': 'export const engine = 1;\n',
     'src/domain/order.ts': 'export const order = 1;\n',
-    'src/news/contracts/http/events.ts': 'export default {};\n',
-    'src/news/contracts/news.contracts.ts': 'export const news = {};\n',
+    'src/news/stubs/http/events.ts': 'export default {};\n',
+    'src/news/stubs/news.stubs.ts': 'export const news = {};\n',
     'tests/anchored.ts':
         "export const rows = new URL('../specs/fixtures/rows.json', import.meta.url);\n",
     'tests/named.ts': [
@@ -41,7 +41,7 @@ describe('isProductionModule', () => {
         { path: 'src/domain/order.test.ts', production: false },
         { path: 'src/domain/order.fixtures.ts', production: false },
         { path: 'src/domain/fixtures/app.ts', production: false },
-        { path: 'src/news/contracts/http/events.ts', production: false },
+        { path: 'src/news/stubs/http/events.ts', production: false },
         { path: 'scripts/seed.ts', production: true },
         { path: 'bin/cli.js', production: true },
         { path: 'index.ts', production: true },
@@ -65,8 +65,8 @@ describe('materialAt', () => {
         { kind: 'a test file', path: 'specs/api/api.specification.ts' },
         { kind: 'the specs tree', path: 'specs/setup/seed.ts' },
         { kind: 'ground', path: 'src/requests/create.http' },
-        { kind: 'a contract', path: 'src/news/contracts/http/events.ts' },
-        { kind: undefined, path: 'src/contracts/engine.ts' },
+        { kind: 'a stub', path: 'src/news/stubs/http/events.ts' },
+        { kind: undefined, path: 'src/stubs/engine.ts' },
     ])('`$path` is $kind', ({ kind, path }) => {
         // Given - a path of one kind
         // Then - the kind a message names it by

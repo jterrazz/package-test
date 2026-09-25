@@ -86,7 +86,7 @@ async function mount(
  * that named exactly one element starts refusing, and the teardown only ever
  * sees the last surface. The first surface is taken down before the second
  * render arms anything, so what it does as it leaves meets the page it lived
- * on, not the next render's viewport, contracts or clock.
+ * on, not the next render's viewport, stubs or clock.
  */
 export const render = defineAction<
     'render',

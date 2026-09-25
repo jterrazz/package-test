@@ -2,9 +2,9 @@ import { describe, expect, test } from 'vitest';
 
 import { defineFacet } from '../../facets/define-facet.js';
 import { defineAction } from '../../model/chain/action.js';
-import { defineContracts } from '../../stubs/contract.js';
-import type { Contract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
+import { defineStubs } from '../../stubs/stub.js';
+import type { Stub } from '../../stubs/stub.js';
 import { intercept } from './intercept.capability.js';
 import type { InterceptMethod } from './intercept.capability.js';
 import type { InterceptPort } from './intercept.port.js';
@@ -20,16 +20,16 @@ const settle = defineAction({
 });
 
 /** A chain over an engine that records what it was armed with — or refuses to serve anything. */
-function chainOver(refusal?: Error): { armed: (readonly Contract[])[]; chain: Chain } {
-    const armed: (readonly Contract[])[] = [];
+function chainOver(refusal?: Error): { armed: (readonly Stub[])[]; chain: Chain } {
+    const armed: (readonly Stub[])[] = [];
     const network: InterceptPort = {
         accepts: () => {
             if (refusal !== undefined) {
                 throw refusal;
             }
         },
-        arm: async (contracts) => {
-            armed.push(contracts);
+        arm: async (stubs) => {
+            armed.push(stubs);
             return await Promise.resolve({});
         },
     };
@@ -43,18 +43,16 @@ function chainOver(refusal?: Error): { armed: (readonly Contract[])[]; chain: Ch
     return { armed, chain: facet.open({}) };
 }
 
-/** The body each armed contract replies, in queue order. */
-function replies(armed: (readonly Contract[])[]): unknown[] {
+/** The body each armed stub replies, in queue order. */
+function replies(armed: (readonly Stub[])[]): unknown[] {
     return armed
         .flat()
-        .map((contract) =>
-            typeof contract.response === 'function' ? null : contract.response.body,
-        );
+        .map((stub) => (typeof stub.response === 'function' ? null : stub.response.body));
 }
 
 describe('.intercept() — the calls a chain declares', () => {
     test('arms a list, then a later call, in the order they were written', async () => {
-        // Given - two contracts on one route as one list, and a third call after them
+        // Given - two stubs on one route as one list, and a third call after them
         const { armed, chain } = chainOver();
         const request = http.get('https://x.test/');
 
@@ -75,7 +73,7 @@ describe('.intercept() — the calls a chain declares', () => {
         // Given - a composite and a scenario derived from it
         const { armed, chain } = chainOver();
         const request = http.get('https://x.test/');
-        const base = defineContracts(
+        const base = defineStubs(
             { request, response: http.json({ n: 1 }) },
             { request: http.get('https://y.test/'), response: http.json({ n: 2 }) },
         );
@@ -88,7 +86,7 @@ describe('.intercept() — the calls a chain declares', () => {
     });
 
     test('is refused when stated, before anything is parsed, by an engine that serves nothing', () => {
-        // Given - an engine that cannot serve a contract at all
+        // Given - an engine that cannot serve a stub at all
         const { chain } = chainOver(new Error('this runner has no declared backend'));
 
         // Then - the engine's refusal is the one raised, even for a call that would itself be refused

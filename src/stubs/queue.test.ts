@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import type { Contract } from './contract.js';
 import type { MatchableRequest } from './exchange.js';
 import { http } from './http/http.js';
-import { ContractQueue } from './queue.js';
+import { StubQueue } from './queue.js';
+import type { Stub } from './stub.js';
 
 const URL_A = 'https://api.example.com/a';
 const URL_B = 'https://api.example.com/b';
@@ -13,16 +13,12 @@ function req(overrides: Partial<MatchableRequest> = {}): MatchableRequest {
     return { body: null, headers: {}, method: 'GET', url: URL_A, ...overrides };
 }
 
-function contract(
-    request: Contract['request'],
-    tag: string,
-    extra: Partial<Contract> = {},
-): Contract {
+function stub(request: Stub['request'], tag: string, extra: Partial<Stub> = {}): Stub {
     return { request, response: http.json({ tag }), ...extra };
 }
 
-/** Serve one observed request and report which contract answered (or null). */
-function serve(queue: ContractQueue, overrides: Partial<MatchableRequest> = {}): null | string {
+/** Serve one observed request and report which stub answered (or null). */
+function serve(queue: StubQueue, overrides: Partial<MatchableRequest> = {}): null | string {
     const served = queue.take(req(overrides));
     if (!served) {
         return null;
@@ -30,12 +26,12 @@ function serve(queue: ContractQueue, overrides: Partial<MatchableRequest> = {}):
     return (served.response as { body: { tag: string } }).body.tag;
 }
 
-describe('contract queue — selection', () => {
-    test('the first matching contract wins and, without times, keeps serving', () => {
-        // Given - two contracts on the same route
-        const queue = new ContractQueue([
-            contract(http.get(URL_A), 'first'),
-            contract(http.get(URL_A), 'second'),
+describe('stub queue — selection', () => {
+    test('the first matching stub wins and, without times, keeps serving', () => {
+        // Given - two stubs on the same route
+        const queue = new StubQueue([
+            stub(http.get(URL_A), 'first'),
+            stub(http.get(URL_A), 'second'),
         ]);
 
         // Then - the first one answers every request (no times = unlimited: A re-render or a retry replays it instead of falling through)
@@ -43,11 +39,11 @@ describe('contract queue — selection', () => {
         expect(serve(queue)).toBe('first');
     });
 
-    test('times exhausts a contract, and the next matching one takes over', () => {
+    test('times exhausts a stub, and the next matching one takes over', () => {
         // Given - a finite error sequence before an unlimited success tail
-        const queue = new ContractQueue([
-            contract(http.get(URL_A), 'error', { times: 2 }),
-            contract(http.get(URL_A), 'ok'),
+        const queue = new StubQueue([
+            stub(http.get(URL_A), 'error', { times: 2 }),
+            stub(http.get(URL_A), 'ok'),
         ]);
 
         // Then - the sequence plays out, then the tail stays
@@ -58,8 +54,8 @@ describe('contract queue — selection', () => {
     });
 
     test('an exhausted queue yields null — the strict violation signal', () => {
-        // Given - one contract allowed exactly once
-        const queue = new ContractQueue([contract(http.get(URL_A), 'once', { times: 1 })]);
+        // Given - one stub allowed exactly once
+        const queue = new StubQueue([stub(http.get(URL_A), 'once', { times: 1 })]);
 
         // Then - the second request matches nothing left
         expect(serve(queue)).toBe('once');
@@ -68,9 +64,9 @@ describe('contract queue — selection', () => {
 
     test('method and url both gate the match; * matches any method', () => {
         // Given - a GET on A and a wildcard on B
-        const queue = new ContractQueue([
-            contract(http.get(URL_A), 'get-a'),
-            contract(http.any(URL_B), 'any-b'),
+        const queue = new StubQueue([
+            stub(http.get(URL_A), 'get-a'),
+            stub(http.any(URL_B), 'any-b'),
         ]);
 
         // Then - a mismatched method or url selects nothing
@@ -79,26 +75,24 @@ describe('contract queue — selection', () => {
         expect(serve(queue)).toBe('get-a');
     });
 
-    test('a body filter routes two contracts sharing one url', () => {
-        // Given - two contracts on one url routed by body content
-        const queue = new ContractQueue([
-            contract(http.post(URL_A, { body: { user: 'alice' } }), 'alice'),
-            contract(http.post(URL_A, { body: { user: 'bob' } }), 'bob'),
+    test('a body filter routes two stubs sharing one url', () => {
+        // Given - two stubs on one url routed by body content
+        const queue = new StubQueue([
+            stub(http.post(URL_A, { body: { user: 'alice' } }), 'alice'),
+            stub(http.post(URL_A, { body: { user: 'bob' } }), 'bob'),
         ]);
 
-        // Then - the body picks the contract, whatever the declaration order
+        // Then - the body picks the stub, whatever the declaration order
         expect(serve(queue, { body: { user: 'bob' }, method: 'POST' })).toBe('bob');
         expect(serve(queue, { body: { user: 'alice' }, method: 'POST' })).toBe('alice');
         expect(serve(queue, { body: { user: 'carol' }, method: 'POST' })).toBeNull();
     });
 });
 
-describe('contract queue — url forms', () => {
+describe('stub queue — url forms', () => {
     test('a path-form url matches any origin, tokens structural, query a subset', () => {
-        // Given - a path-form contract with a token segment and a query param
-        const queue = new ContractQueue([
-            contract(http.get('/articles/{{uuid}}?locale=fr'), 'article'),
-        ]);
+        // Given - a path-form stub with a token segment and a query param
+        const queue = new StubQueue([stub(http.get('/articles/{{uuid}}?locale=fr'), 'article')]);
 
         const article = 'https://app.test/articles/3f2504e0-4f89-41d3-9a0c-0305e82c3301';
 
@@ -110,17 +104,17 @@ describe('contract queue — url forms', () => {
         expect(serve(queue, { url: article })).toBeNull();
     });
 
-    test('a relative observed url (the stub backend) matches a path-form contract', () => {
+    test('a relative observed url (the stub backend) matches a path-form stub', () => {
         // Given - the stub backend sees `/events?x=1`, not a full URL
-        const queue = new ContractQueue([contract(http.get('/events'), 'events')]);
+        const queue = new StubQueue([stub(http.get('/events'), 'events')]);
 
         // Then - it matches, and the declared query stays a subset constraint
         expect(serve(queue, { url: '/events?x=1' })).toBe('events');
     });
 
     test('an absolute url matches on origin+pathname, ignoring extra query', () => {
-        // Given - an absolute contract url with no query of its own
-        const queue = new ContractQueue([contract(http.get(URL_A), 'a')]);
+        // Given - an absolute stub url with no query of its own
+        const queue = new StubQueue([stub(http.get(URL_A), 'a')]);
 
         // Then - the app may append its own params
         expect(serve(queue, { url: `${URL_A}?lang=en` })).toBe('a');
@@ -128,8 +122,8 @@ describe('contract queue — url forms', () => {
     });
 
     test('a RegExp url tests the full observed url', () => {
-        // Given - a pattern contract
-        const queue = new ContractQueue([contract(http.get(/example\.com\/a/u), 're')]);
+        // Given - a pattern stub
+        const queue = new StubQueue([stub(http.get(/example\.com\/a/u), 're')]);
 
         // Then - it matches by pattern, and shares one route with its twin
         expect(serve(queue)).toBe('re');
@@ -138,10 +132,10 @@ describe('contract queue — url forms', () => {
 
     test('routes dedupe by pattern and collect their methods', () => {
         // Given - two methods on one path-form url plus another route
-        const queue = new ContractQueue([
-            contract(http.get('/events'), 'get'),
-            contract(http.post('/events'), 'post'),
-            contract(http.get(URL_A), 'a'),
+        const queue = new StubQueue([
+            stub(http.get('/events'), 'get'),
+            stub(http.post('/events'), 'post'),
+            stub(http.get(URL_A), 'a'),
         ]);
 
         // Then - one route per pattern, carrying every declared method
@@ -151,19 +145,19 @@ describe('contract queue — url forms', () => {
     });
 });
 
-describe('contract queue — strict failure message (CONVENTIONS D7)', () => {
-    test('names the offending request and lists contracts with their state', () => {
-        // Given - a queue with one exhausted and one untouched contract
-        const queue = new ContractQueue([
-            contract(http.get(URL_A), 'a', { times: 1 }),
-            contract(http.post(URL_B), 'b'),
+describe('stub queue — strict failure message (CONVENTIONS D7)', () => {
+    test('names the offending request and lists stubs with their state', () => {
+        // Given - a queue with one exhausted and one untouched stub
+        const queue = new StubQueue([
+            stub(http.get(URL_A), 'a', { times: 1 }),
+            stub(http.post(URL_B), 'b'),
         ]);
         serve(queue);
 
         // When - an unmatched request is reported
         const error = queue.unmatchedError('GET', 'https://unregistered.test/x');
 
-        // Then - method + url + every declared contract with its state
+        // Then - method + url + every declared stub with its state
         expect(error.message).toContain(
             'found: an unmatched outgoing request, GET https://unregistered.test/x; declared:',
         );
@@ -171,19 +165,19 @@ describe('contract queue — strict failure message (CONVENTIONS D7)', () => {
         expect(error.message).toContain(`- POST ${URL_B}`);
     });
 
-    test('falls back to "no contracts declared" on an empty queue', () => {
+    test('falls back to "no stubs declared" on an empty queue', () => {
         // Given - an empty queue
-        const queue = new ContractQueue([]);
+        const queue = new StubQueue([]);
 
         // Then - the fallback wording is used
-        expect(queue.unmatchedError('GET', URL_A).message).toContain('no contracts declared');
+        expect(queue.unmatchedError('GET', URL_A).message).toContain('no stubs declared');
     });
 });
 
-describe('contract queue — required verification', () => {
-    test('a required contract never requested fails the chain', () => {
-        // Given - a contract the spec claims MUST be called
-        const queue = new ContractQueue([contract(http.get(URL_A), 'a', { required: true })]);
+describe('stub queue — required verification', () => {
+    test('a required stub never requested fails the chain', () => {
+        // Given - a stub the spec claims MUST be called
+        const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true })]);
 
         // Then - the chain-end check names the route and the omission
         const error = queue.requiredError();
@@ -192,9 +186,9 @@ describe('contract queue — required verification', () => {
         );
     });
 
-    test('a required contract that was requested passes', () => {
-        // Given - the same contract, actually requested
-        const queue = new ContractQueue([contract(http.get(URL_A), 'a', { required: true })]);
+    test('a required stub that was requested passes', () => {
+        // Given - the same stub, actually requested
+        const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true })]);
         serve(queue);
 
         // Then - nothing to report
@@ -202,10 +196,8 @@ describe('contract queue — required verification', () => {
     });
 
     test('required with times demands exactly that many requests', () => {
-        // Given - a contract required exactly twice, requested once
-        const queue = new ContractQueue([
-            contract(http.get(URL_A), 'a', { required: true, times: 2 }),
-        ]);
+        // Given - a stub required exactly twice, requested once
+        const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true, times: 2 })]);
         serve(queue);
 
         // Then - the count mismatch is the failure

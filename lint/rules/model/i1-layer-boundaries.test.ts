@@ -80,7 +80,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         },
         // A seam is open for ONE module, not for the layer.
         {
-            code: 'import { registerContracts } from "../../seams/msw/server.js";',
+            code: 'import { registerStubs } from "../../seams/msw/server.js";',
             errors: [{ messageId: 'crossLayer' }],
             filename: '/repo/src/model/chain/orchestrator.ts',
             options: framework,
@@ -140,7 +140,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         },
         // The seam, from the module that owns it.
         {
-            code: 'import type { ContractRegistration } from "../../seams/msw/server.js";',
+            code: 'import type { StubRegistration } from "../../seams/msw/server.js";',
             filename: '/repo/src/model/chain/builder.ts',
             options: framework,
         },
@@ -194,7 +194,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
         // A file under no declared layer is out of scope — here, the
         // Composition root, which lives above the layers.
         {
-            code: 'import { registerContracts } from "./seams/msw/server.js";',
+            code: 'import { registerStubs } from "./seams/msw/server.js";',
             filename: '/repo/src/index.ts',
             options: framework,
         },

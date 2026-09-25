@@ -86,8 +86,8 @@ import { postgres, process, redis, specification, sqlite } from '@jterrazz/test'
 ```
 
 ```typescript
-// what a test says: contracts, dynamic values, doubles, time, assertions
-import { anthropic, clock, defineContract, http, intercept } from '@jterrazz/test';
+// what a test says: stubs, dynamic values, doubles, time, assertions
+import { anthropic, clock, defineStub, http, intercept } from '@jterrazz/test';
 import { match, mockOf, openai, required, waitUntil } from '@jterrazz/test';
 ```
 
@@ -349,7 +349,7 @@ specs/
 │       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules C31, C32)
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
-│       ├── contracts/             # <name>.contracts.ts facade + <provider>/<name>.ts units + their data
+│       ├── stubs/             # <name>.stubs.ts facade + <provider>/<name>.ts units + their data
 │       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)

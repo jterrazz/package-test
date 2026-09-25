@@ -1,6 +1,6 @@
 # 06 — Integration specs: a module against the real thing
 
-`specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared contract, a golden — and that is exactly the fork this facet closes.
+`specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared stub, a golden — and that is exactly the fork this facet closes.
 
 ```typescript
 // specs/integration/integration.specification.ts
@@ -62,7 +62,7 @@ Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })`
 | Setup                             | Means                                                                                                  |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `.seed(file('./seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
-| `.intercept(contracts)`           | declare what the outside world replies ([16](16-contracts.md))                                         |
+| `.intercept(stubs)`               | declare what the outside world replies ([16](16-stubs.md))                                             |
 | `.clock('2026-03-04T09:30:00Z')`  | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
@@ -113,7 +113,7 @@ const result = await integration.call(async () => Object.fromEntries(await loadI
 
 Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([15](15-tokens.md), [14](14-assertions.md)).
 
-A call that a declared contract never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
+A call that a declared stub never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule D7).
 
 ## Unique here
 
@@ -170,7 +170,7 @@ specs/integration/
     └── expected/                  # ground: a golden several tests share — one test's is written in place (C28)
 ```
 
-**`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the contracts it declared are checked when that call ends, and a contract declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.
+**`required` is verified per `.call()`.** A chain's scope is ONE terminal action: the stubs it declared are checked when that call ends, and a stub declared `required` that was never requested fails there. A second `.call()` is a second chain with a second verification — it does not inherit the first's obligations.
 
 ## Pitfalls
 
@@ -181,4 +181,4 @@ specs/integration/
 
 ## Related
 
-[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Contracts](16-contracts.md) · [17 — Services](17-services.md) · [18 — Conventions](18-conventions.md)
+[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md) · [18 — Conventions](18-conventions.md)

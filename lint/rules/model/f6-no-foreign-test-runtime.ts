@@ -37,7 +37,7 @@ const GROUPS: Group[] = [
             source.startsWith('@vitest/browser'),
     },
     {
-        fix: 'the network answers through contracts — `await using _ = await intercept(defineContracts(…))` in module scope, `.intercept()` on a chain',
+        fix: 'the network answers through stubs — `await using _ = await intercept(defineStubs(…))` in module scope, `.intercept()` on a chain',
         matches: (source) => source === 'msw' || source.startsWith('msw/') || source === 'nock',
     },
     {

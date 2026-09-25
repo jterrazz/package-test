@@ -1,12 +1,12 @@
 import { afterEach, describe, expect, test } from 'vitest';
 
-import type { Contract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
+import type { Stub } from '../../stubs/stub.js';
 import { StubBackend } from './stub-backend.js';
 
-// ── Fakes — contracts built inline (mocks are code, CONVENTIONS I4) ──
+// ── Fakes — stubs built inline (mocks are code, CONVENTIONS I4) ──
 
-function get(path: string, body: unknown, extra: Partial<Contract> = {}): Contract {
+function get(path: string, body: unknown, extra: Partial<Stub> = {}): Stub {
     return { request: http.get(path), response: http.json(body), ...extra };
 }
 
@@ -17,10 +17,10 @@ afterEach(async () => {
     backend = null;
 });
 
-async function started(contracts: Contract[]): Promise<string> {
+async function started(stubs: Stub[]): Promise<string> {
     backend = new StubBackend();
     const url = await backend.start();
-    backend.beginChain(contracts);
+    backend.beginChain(stubs);
     return url;
 }
 
@@ -69,8 +69,8 @@ describe('stub backend — streamed replies', () => {
     });
 });
 
-describe('stub backend — serving declared contracts', () => {
-    test('serves a declared contract with its status, body, and cors headers', async () => {
+describe('stub backend — serving declared stubs', () => {
+    test('serves a declared stub with its status, body, and cors headers', async () => {
         // Given - one declared route
         const url = await started([get('/events', { items: [] })]);
 
@@ -84,7 +84,7 @@ describe('stub backend — serving declared contracts', () => {
         await expect(response.json()).resolves.toStrictEqual({ items: [] });
     });
 
-    test('a contract without times keeps replying; times plays a sequence', async () => {
+    test('a stub without times keeps replying; times plays a sequence', async () => {
         // Given - a finite failure before an unlimited success on the same route
         const url = await started([
             { request: http.get('/events'), response: http.json({ n: 1 }), times: 1 },
@@ -121,7 +121,7 @@ describe('stub backend — serving declared contracts', () => {
     });
 
     test('the request body reaches match predicates and body filters', async () => {
-        // Given - two contracts on one route, routed by the posted body
+        // Given - two stubs on one route, routed by the posted body
         const url = await started([
             {
                 request: http.post('/search', { body: { term: 'bitcoin' } }),
@@ -142,13 +142,13 @@ describe('stub backend — serving declared contracts', () => {
             method: 'POST',
         });
 
-        // Then - the body-filtered contract answered the first, the bare one the second
+        // Then - the body-filtered stub answered the first, the bare one the second
         await expect(matched.json()).resolves.toStrictEqual({ hits: 1 });
         await expect(fallback.json()).resolves.toStrictEqual({ hits: 0 });
     });
 
     test('a responder computes the reply from the observed request', async () => {
-        // Given - a contract whose response echoes the posted body
+        // Given - a stub whose response echoes the posted body
         const url = await started([
             {
                 request: http.post('/echo'),
@@ -168,7 +168,7 @@ describe('stub backend — serving declared contracts', () => {
     });
 
     test('answers the cors preflight for any route', async () => {
-        // Given - a stub with one declared route
+        // Given - a stub backend with one declared route
         const url = await started([get('/events', {})]);
 
         // When - the browser preflights a cross-origin fetch
@@ -212,7 +212,7 @@ describe('stub backend — strictness (the external-block analog)', () => {
         // Then - 501, and the body says what exists
         expect(response.status).toBe(501);
         const body = await response.json();
-        expect(body.error).toContain('no contract matches GET /articles?x=1');
+        expect(body.error).toContain('no stub matches GET /articles?x=1');
         expect(body.declared).toStrictEqual(['GET /events']);
     });
 
@@ -231,7 +231,7 @@ describe('stub backend — strictness (the external-block analog)', () => {
         expect(violation!.message).toContain('- GET /events');
     });
 
-    test('violation() also reports a required contract that was never requested', async () => {
+    test('violation() also reports a required stub that was never requested', async () => {
         // Given - a chain declaring a route it claims MUST be called
         const url = await started([
             get('/events', {}),
@@ -246,7 +246,7 @@ describe('stub backend — strictness (the external-block analog)', () => {
         );
     });
 
-    test('a chain with zero contracts leaves the stub unguarded', async () => {
+    test('a chain with zero stubs leaves the backend unguarded', async () => {
         // Given - a chain that declared nothing (the MSW boundary, mirrored)
         const url = await started([]);
 
@@ -259,7 +259,7 @@ describe('stub backend — strictness (the external-block analog)', () => {
     });
 
     test('beginChain resets the queue and the unmatched log', async () => {
-        // Given - a first chain that served its contract and recorded a miss
+        // Given - a first chain that served its stub and recorded a miss
         const url = await started([get('/events', { n: 1 })]);
         await fetch(`${url}/events`);
         await fetch(`${url}/miss`);

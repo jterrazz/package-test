@@ -8,7 +8,7 @@ import { structuralEquals } from '../model/matching/structural.js';
  *
  * A **string is EXACT**. That is deliberate: a substring filter silently
  * cross-matches — two prompts sharing a preamble both satisfy the first
- * contract, and the spec goes green on the wrong reply. Looser matching is
+ * stub, and the spec goes green on the wrong reply. Looser matching is
  * explicit, and says which looseness it means:
  *
  * - a `RegExp` — pattern matching;

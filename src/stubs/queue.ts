@@ -1,18 +1,18 @@
 /**
- * The ONE contract queue — pure, engine-agnostic (no MSW, no node:http).
+ * The ONE stub queue — pure, engine-agnostic (no MSW, no node:http).
  * Both engines consume it: the MSW integration on api/jobs chains, and the
  * declared stub backend on website/mobile chains.
  *
- * Selection: the FIRST contract in declaration order that matches the observed
- * request and is not exhausted. A contract with no `times` is unlimited (a
+ * Selection: the FIRST stub in declaration order that matches the observed
+ * request and is not exhausted. A stub with no `times` is unlimited (a
  * re-render or a retry replays it); `times: n` is spent after n serves, so an
- * ordered sequence is written as finite contracts before an unlimited tail:
+ * ordered sequence is written as finite stubs before an unlimited tail:
  * `[error500 ×3, ok]`.
  *
  * Strictness (CONVENTIONS D7): when nothing matches — including "everything
  * that matches is exhausted" — the engine answers 501, records the request,
- * and the chain fails with {@link ContractQueue.unmatchedError}. A chain that
- * declared zero contracts is not guarded at all (unchanged boundary).
+ * and the chain fails with {@link StubQueue.unmatchedError}. A chain that
+ * declared zero stubs is not guarded at all (unchanged boundary).
  */
 
 import { refusal } from '../model/lesson/refusal.js';
@@ -22,12 +22,12 @@ import {
     placeholderPatternSource,
     textEquals,
 } from '../model/matching/structural.js';
-import { describeRoute } from './contract.js';
-import type { Contract } from './contract.js';
 import type { MatchableRequest } from './exchange.js';
+import { describeRoute } from './stub.js';
+import type { Stub } from './stub.js';
 
 /** Base used to parse origin-relative observed URLs (`/events?x=1`). */
-const RELATIVE_BASE = 'http://contract.invalid';
+const RELATIVE_BASE = 'http://stub.invalid';
 
 /** Split a declared url into its base (origin+path, or path) and query halves.
  * Never through `new URL()`, which would percent-encode `{{token}}` braces. */
@@ -94,11 +94,11 @@ export function urlMatches(declared: RegExp | string, observed: string): boolean
 }
 
 /**
- * Does an observed request satisfy a contract? Method (`*` matches any), URL,
- * then the contract's own `match` predicate (headers/query/body filters).
+ * Does an observed request satisfy a stub? Method (`*` matches any), URL,
+ * then the stub's own `match` predicate (headers/query/body filters).
  */
-export function contractMatches(contract: Contract, request: MatchableRequest): boolean {
-    const { match, method, url } = contract.request;
+export function stubMatches(stub: Stub, request: MatchableRequest): boolean {
+    const { match, method, url } = stub.request;
     if (method !== '*' && method.toUpperCase() !== request.method.toUpperCase()) {
         return false;
     }
@@ -110,7 +110,7 @@ export function contractMatches(contract: Contract, request: MatchableRequest): 
 
 /**
  * The URL pattern an out-of-process router (MSW) must register so the request
- * REACHES the queue. Deliberately no narrower than {@link contractMatches} —
+ * REACHES the queue. Deliberately no narrower than {@link stubMatches} —
  * the predicate above stays the authority on what actually matches.
  */
 export function routePatternOf(declared: RegExp | string): RegExp | string {
@@ -131,50 +131,50 @@ export function routePatternOf(declared: RegExp | string): RegExp | string {
 }
 
 /** One route to register with an out-of-process router. */
-export type ContractRoute = {
+export type StubRoute = {
     methods: string[];
     url: RegExp | string;
 };
 
-/** One declared contract and how often the chain has served it. */
-type ContractEntry = {
-    contract: Contract;
+/** One declared stub and how often the chain has served it. */
+type StubEntry = {
+    stub: Stub;
     served: number;
 };
 
-/** How a declared contract reads in a failure message: spent, served, or silent. */
-function stateOf({ contract, served }: ContractEntry): string {
-    const { times } = contract;
+/** How a declared stub reads in a failure message: spent, served, or silent. */
+function stateOf({ stub, served }: StubEntry): string {
+    const { times } = stub;
     if (times !== undefined && served >= times) {
         return ` (exhausted after ${times})`;
     }
     return served === 0 ? '' : ` (served ${served} time(s))`;
 }
 
-export class ContractQueue {
-    private readonly entries: ContractEntry[];
+export class StubQueue {
+    private readonly entries: StubEntry[];
 
-    constructor(contracts: readonly Contract[]) {
-        this.entries = contracts.map((contract) => ({ contract, served: 0 }));
+    constructor(stubs: readonly Stub[]) {
+        this.entries = stubs.map((stub) => ({ stub, served: 0 }));
     }
 
-    /** How many contracts the chain declared. */
+    /** How many stubs the chain declared. */
     get size(): number {
         return this.entries.length;
     }
 
     /**
      * Routes to register with an out-of-process router, deduped by pattern —
-     * two contracts on the same URL share one handler and one queue.
+     * two stubs on the same URL share one handler and one queue.
      */
-    get routes(): ContractRoute[] {
-        const routes = new Map<string, ContractRoute>();
-        for (const { contract } of this.entries) {
-            const url = routePatternOf(contract.request.url);
+    get routes(): StubRoute[] {
+        const routes = new Map<string, StubRoute>();
+        for (const { stub } of this.entries) {
+            const url = routePatternOf(stub.request.url);
             const key = String(url);
             const route = routes.get(key) ?? { methods: [], url };
-            if (!route.methods.includes(contract.request.method)) {
-                route.methods.push(contract.request.method);
+            if (!route.methods.includes(stub.request.method)) {
+                route.methods.push(stub.request.method);
             }
             routes.set(key, route);
         }
@@ -183,50 +183,50 @@ export class ContractQueue {
 
     /** The declared routes, in order — the enumeration a 501 body carries. */
     declaredRoutes(): string[] {
-        return this.entries.map(({ contract }) => describeRoute(contract));
+        return this.entries.map(({ stub }) => describeRoute(stub));
     }
 
     /**
-     * Serve the first contract in declaration order that matches and is not
+     * Serve the first stub in declaration order that matches and is not
      * exhausted, or null when nothing matches (including "everything that
      * matches is spent") — the strict-violation signal.
      */
-    take(request: MatchableRequest): Contract | null {
+    take(request: MatchableRequest): null | Stub {
         for (const entry of this.entries) {
-            const { times } = entry.contract;
+            const { times } = entry.stub;
             if (times !== undefined && entry.served >= times) {
                 continue;
             }
-            if (!contractMatches(entry.contract, request)) {
+            if (!stubMatches(entry.stub, request)) {
                 continue;
             }
             entry.served += 1;
-            return entry.contract;
+            return entry.stub;
         }
         return null;
     }
 
     /**
-     * The chain-end failure for contracts declared `required: true` that were
+     * The chain-end failure for stubs declared `required: true` that were
      * never requested (or not exactly `times` times), or null when every
      * requirement held.
      */
     requiredError(): Error | null {
         const unmet: string[] = [];
-        for (const { contract, served } of this.entries) {
-            if (!contract.required) {
+        for (const { stub, served } of this.entries) {
+            if (!stub.required) {
                 continue;
             }
-            const { times } = contract;
+            const { times } = stub;
             if (times === undefined) {
                 if (served === 0) {
                     unmet.push(
-                        `  - ${describeRoute(contract)} — declared and required but never requested`,
+                        `  - ${describeRoute(stub)} — declared and required but never requested`,
                     );
                 }
             } else if (served !== times) {
                 unmet.push(
-                    `  - ${describeRoute(contract)} — declared required with times: ${times} but was requested ${served} time(s)`,
+                    `  - ${describeRoute(stub)} — declared required with times: ${times} but was requested ${served} time(s)`,
                 );
             }
         }
@@ -234,27 +234,27 @@ export class ContractQueue {
             return null;
         }
         return new Error(
-            `Required contract(s) never satisfied during the chain:\n${unmet.join('\n')}\n` +
-                `A required contract states the call MUST happen — either the code no longer makes it, ` +
-                `or the contract no longer describes it.`,
+            `Required stub(s) never satisfied during the chain:\n${unmet.join('\n')}\n` +
+                `A required stub states the call MUST happen — either the code no longer makes it, ` +
+                `or the stub no longer describes it.`,
         );
     }
 
     /**
-     * The strict failure for a request that matched no contract (CONVENTIONS
-     * D7): method + URL of the offending request, plus every declared contract
+     * The strict failure for a request that matched no stub (CONVENTIONS
+     * D7): method + URL of the offending request, plus every declared stub
      * and how often it was served.
      */
     unmatchedError(method: string, url: string): Error {
         const declared =
             this.entries.length === 0
-                ? '  (no contracts declared)'
+                ? '  (no stubs declared)'
                 : this.entries
-                      .map((entry) => `  - ${describeRoute(entry.contract)}${stateOf(entry)}`)
+                      .map((entry) => `  - ${describeRoute(entry.stub)}${stateOf(entry)}`)
                       .join('\n');
         return new Error(
             refusal('d7-strict-intercepts', {
-                fix: `declare a contract for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
+                fix: `declare a stub for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
                 found: `an unmatched outgoing request, ${method} ${url}; declared:\n${declared}`,
             }),
         );

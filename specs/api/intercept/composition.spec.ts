@@ -1,12 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineContracts, http } from '../../../src/index.js';
+import { defineStubs, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
-import latestNews from './contracts/latest-news.contracts.js';
+import latestNews from './stubs/latest-news.stubs.js';
 
 describe('composition', () => {
-    test('a contract and an inline pair mix in one chain', async () => {
-        // Given - a declared contract plus a one-off inline pair
+    test('a stub and an inline pair mix in one chain', async () => {
+        // Given - a declared stub plus a one-off inline pair
         const result = await api
             .intercept(latestNews)
             .intercept(http.get(QUOTES_URL), http.json({ quote: 'inline' }))
@@ -19,7 +19,7 @@ describe('composition', () => {
 
             {
                 "news": {
-                    "headline": "Contract headline"
+                    "headline": "Stub headline"
                 },
                 "quote": {
                     "quote": "inline"
@@ -30,7 +30,7 @@ describe('composition', () => {
 
     test('a composite scenario overrides one route of the declared world', async () => {
         // Given - a two-route composite, with the quotes route overridden
-        const world = defineContracts(latestNews, {
+        const world = defineStubs(latestNews, {
             request: http.get(QUOTES_URL),
             response: http.json({ quote: 'nominal' }),
         });
@@ -47,7 +47,7 @@ describe('composition', () => {
 
             {
                 "news": {
-                    "headline": "Contract headline"
+                    "headline": "Stub headline"
                 },
                 "quote": {
                     "quote": "x"

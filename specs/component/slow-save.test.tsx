@@ -1,10 +1,10 @@
-import { button, component, content, defineContract, http } from '@jterrazz/test';
+import { button, component, content, defineStub, http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { SlowSave } from './slow-save.js';
 
 /** A write the server takes two seconds to acknowledge. */
-const slowWrite = defineContract({
+const slowWrite = defineStub({
     request: http.post('/api/save'),
     response: http.json({ ok: true }, { delay: 2000 }),
 });
