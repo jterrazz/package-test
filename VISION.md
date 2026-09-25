@@ -3620,3 +3620,53 @@ Minors carried from the review:
 
 The S6 worktree and branch are removed. The U1–U5 worktrees are kept, as
 the previous entry decided.
+
+## Architecture migration, integrated (2026-09-25): test, U-post-1..3 and iteration 38 — gates RED on I8
+
+Two steps were cherry-picked onto `vision/17` in order, with no merge
+commit and no fixup to fold. HEAD before this entry is `b7e193d6`.
+
+- **arch-post** (U-post-1..3, branch HEAD `02963f30`): the component page
+  clock refuses what is not an instant, a website page's content stream is
+  named `content`, and a JSON reading names the stream it parsed. It
+  applied cleanly.
+- **stubs-rename** (iteration 38, branch HEAD `779a4c3e`): contract
+  becomes stub in every name, folder and rule. A stub's folder is its
+  kind, and C4 holds it to that kind's builder. The 16 → 17 mover moves
+  `contracts/` to `stubs/`. One conflict came up, in the GENERATED layer
+  counts of `docs/03-testing.md`. It held no prose. The step's side was
+  taken, and `npm run docs` was rerun and committed as a chore.
+
+`make fix` exits 0. **`make check` exits 2**: 1 test fails out of 2717,
+and 609 of 610 files pass. The failure is the same I8 as in the S6 entry,
+and it is still **for the owner**. One `make check` run also crashed on
+a Playwright `JSON.parse` error inside `playwright-core`. `make test` did
+not reproduce it.
+
+Open from the reviews, **for the owner or orchestrator**:
+
+- U-post-4: the website clock engine does not refuse a non-instant.
+  `website.clock('soon').visit()` fails with Playwright's
+  `Invalid date`, not with the clock's own refusal. The fix is either
+  `instantOf` in `pageClock.pin`, or the check moves to the clock
+  capability's `arm`. Pin it with a website spec.
+- A streamed LLM stub has no legal folder under the kind-strict C4.
+  Either add `openai.stream` and `anthropic.stream` builders, or have
+  docs/16 state that a streamed provider reply is an http stub.
+- C4 now tracks only named imports of builders. A namespace import
+  (`t.http.get`) is not kind-checked. Resolve it, or record the limit in
+  docs/16's C4 row.
+- No static guard catches a leftover `contracts/` tree. Should C13 name
+  it? ADR-006 line 42 still reads the role from a "contracts/ ancestor".
+- `src/stubs/kinds.test.ts` hand-lists the exported builders. Derive the
+  list from the entry's namespace instead.
+- The mover's usage rename can collide with a local `Stub`, and it does
+  not rewrite `export { Contract }` re-exports. Both fail loudly at
+  compile time.
+
+Release notes: the declared type of `JsonAccessor`'s constructor is now
+`(rawText, streamName, testDir, options?)`, the same shape as
+`TextAccessor`'s. It is exported as a type only. 17.0 also removes the
+`Contract` names in favour of `Stub`.
+
+The arch-post and stubs-rename worktrees and branches are removed.
