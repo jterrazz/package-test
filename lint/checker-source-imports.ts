@@ -6,6 +6,9 @@ import { byPosition, facetOf, finding, inGround, listed } from './checker-source
 import type { TokenViolation } from './checker.js';
 import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
+import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
+import { ENGINE_OWNERS } from './self-engines.js';
+import { FRAMEWORK_LAYERS } from './self-layers.js';
 
 /**
  * What the modules of this package's `src/` and `lint/` import — the self
@@ -14,61 +17,62 @@ import type { AstNode } from './rule-shape.js';
  * import that names it.
  */
 
-/**
- * The modules reached inside a facet from outside it, each by the one tree
- * that reaches it for its reason: the one vite plugin a facet owns (the cli's
- * literate door, which the preset wires), and the two modules the checker
- * reads with the runner (the route ratchet's key, the `.spec.yaml` grammar).
- */
-const REACHED_INSIDE_A_FACET: Readonly<Record<string, string>> = {
-    'src/facets/api/routes/baseline.ts': 'lint/',
-    'src/facets/cli/documents/spec-document.ts': 'lint/',
-};
+/** Where a layer of the map sits in the repository: `lint/` at its root, every other under `src/`. */
+function treeOf(layer: string): string {
+    return layer === 'lint' ? 'lint/' : `src/${layer}/`;
+}
+
+/** A path of the layer map (`facets/api/api.project`, `lint/self/compositions.ts`) as the repository file it names. */
+function fileOf(path: string): string {
+    const file = path.endsWith('.ts') ? path : `${path}.ts`;
+    return file.startsWith('lint/') ? file : `src/${file}`;
+}
+
+/** Every edge the layer map grants into `facets/`: the module or tree reaching, and the path it may reach. */
+function facetEdges(): { path: string; reader: string }[] {
+    const edges: { path: string; reader: string }[] = [];
+    for (const [layer, options] of Object.entries<LayerOptions>(FRAMEWORK_LAYERS)) {
+        for (const path of options.imports ?? []) {
+            edges.push({ path, reader: treeOf(layer) });
+        }
+        for (const [module, paths] of Object.entries(options.seams ?? {})) {
+            edges.push(...paths.map((path) => ({ path, reader: fileOf(module) })));
+        }
+    }
+    return edges.filter(({ path }) => path.startsWith('facets/'));
+}
 
 /**
  * May `from`, outside the facet `facet`, import the facet's root file `name`?
  * The face (`index.ts`, `index.browser.ts`) serves anyone; each other root
- * file has the one reader it exists for: the project the runner's config
- * assembles, the handle the constructors record gathers, the composition the
- * self checker proves.
+ * file has the one reader the layer map grants it: the project the runner's
+ * config assembles, the handle the constructors record gathers, the
+ * composition the self checker proves, which reads every `.facet.ts` through
+ * its seam onto `facets/`.
  */
 function entersByTheFace(from: string, facet: string, name: string): boolean {
     if (name === 'index.ts' || name === 'index.browser.ts') {
         return true;
     }
-    const readers: Record<string, (path: string) => boolean> = {
-        [`${facet}.facet.ts`]: (path) => path === 'lint/self/compositions.ts',
-        [`${facet}.handle.ts`]: (path) => path === 'src/facets/specification.ts',
-        [`${facet}.project.ts`]: (path) => path.startsWith('src/vitest/'),
-    };
-    return readers[name]?.(from) ?? false;
+    const target = `facets/${facet}/${name.replace(/\.ts$/u, '')}`;
+    return facetEdges().some(
+        ({ path, reader }) =>
+            from.startsWith(reader) &&
+            (path === target || (path === 'facets/' && name === `${facet}.facet.ts`)),
+    );
 }
 
 /**
- * The one slice each third-party engine is imported from, by the specifier's
- * prefix: a path prefix, or one exact module. `world/services/peer.ts` loads
- * the optional peers by name for their owners, and carries none of its own.
+ * May `from` reach `target`, a module inside a facet's concept folder? Only
+ * where the layer map names that one module for the tree `from` sits in: the
+ * two modules the checker reads with the runner (the route ratchet's key, the
+ * `.spec.yaml` grammar).
  */
-export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
-    '@hono/node-server': ['src/facets/api/'],
-    '@vitest/browser-playwright': ['src/facets/component/'],
-    'better-sqlite3': ['src/world/services/sqlite/'],
-    hono: ['src/facets/api/'],
-    msw: ['src/world/stubs/network/'],
-    'oxc-parser': ['lint/module-parser.ts'],
-    pg: ['src/world/services/postgres/'],
-    playwright: ['src/facets/website/'],
-    react: ['src/facets/component/'],
-    'react-dom': ['src/facets/component/'],
-    redis: ['src/world/services/redis/'],
-    testcontainers: ['src/world/services/containers/'],
-    vite: ['src/facets/component/'],
-    'vitest-browser-react': ['src/facets/component/'],
-    'vitest-mock-extended': ['src/world/mocks/'],
-    'vitest/browser': ['src/facets/component/'],
-    webdriverio: ['src/facets/mobile/'],
-    yaml: ['src/kernel/yaml/document.ts'],
-};
+function reachedInside(from: string, target: string): boolean {
+    return facetEdges().some(
+        ({ path, reader }) => fileOf(path) === target && from.startsWith(reader),
+    );
+}
 
 /** Is the path a module the code runs — no test, no type test, no fixture module, no ground? */
 function isProduction(path: string): boolean {
@@ -159,8 +163,7 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
             if (rootFile && name !== undefined && entersByTheFace(from, into, name)) {
                 return [];
             }
-            const reader = REACHED_INSIDE_A_FACET[target];
-            if (!rootFile && reader !== undefined && from.startsWith(reader)) {
+            if (!rootFile && reachedInside(from, target)) {
                 return [];
             }
             return [

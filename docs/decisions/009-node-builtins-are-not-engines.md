@@ -8,7 +8,7 @@
 The source trees hold each third-party engine to exactly one slice, and a
 truly shared engine (git, yaml, oxc-parser, process spawning) lives behind a
 port in `kernel/` or in the ONE slice that needs it ([01 — Architecture § The
-source trees](../01-architecture.md#the-source-trees)). I11 (`lint/checker-source-imports.ts`, `ENGINE_OWNERS`) holds the
+source trees](../01-architecture.md#the-source-trees)). I11 (`lint/checker-source-imports.ts`, over `ENGINE_OWNERS` in `lint/self-engines.ts`) holds the
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
 `facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun

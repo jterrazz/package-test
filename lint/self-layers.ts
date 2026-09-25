@@ -1,4 +1,5 @@
 import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
+import { enginesOwnedIn } from './self-engines.js';
 
 /**
  * The trees of this package and their sanctioned edges (CONVENTIONS I1) — the
@@ -38,6 +39,9 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * a concept folder reached from outside its facet, an engine outside its one
  * owner, a folder named for a role — is held by the self checker passes I9
  * to I12 (`lint/checker-source-tree.ts`, `lint/checker-source-imports.ts`).
+ * Which engine a folder may import is not stated here but read off
+ * `ENGINE_OWNERS` (`lint/self-engines.ts`), and I10 reads which modules may
+ * reach into a facet off this map's `facets/` edges: each fact, one owner.
  */
 export const FRAMEWORK_LAYERS = {
     // The machinery that builds a facet and knows none: imports nothing else from src/.
@@ -52,7 +56,7 @@ export const FRAMEWORK_LAYERS = {
             files: ['vitest'],
             refusals: [],
             // The yaml document is the one yaml engine.
-            yaml: ['yaml'],
+            yaml: enginesOwnedIn('src/kernel/yaml/'),
         },
         imports: ['kernel/'],
     },
@@ -61,10 +65,10 @@ export const FRAMEWORK_LAYERS = {
     world: {
         folders: {
             clock: ['vitest'],
-            mocks: ['vitest', 'vitest-mock-extended'],
+            mocks: ['vitest', ...enginesOwnedIn('src/world/mocks/')],
             // The container server's reader is a provided value (`vitest`).
-            services: ['better-sqlite3', 'pg', 'redis', 'testcontainers', 'vitest'],
-            stubs: ['msw'],
+            services: [...enginesOwnedIn('src/world/services/'), 'vitest'],
+            stubs: enginesOwnedIn('src/world/stubs/'),
         },
         imports: ['kernel/'],
         seams: {
@@ -83,13 +87,13 @@ export const FRAMEWORK_LAYERS = {
     // No facet lists another (`facets/` is absent from `imports`).
     facets: {
         folders: {
-            api: ['hono', '@hono/node-server'],
-            cli: [],
-            component: ['@vitest/browser-playwright', 'react', 'vite', 'vitest-browser-react'],
-            integration: [],
-            job: [],
-            mobile: ['webdriverio'],
-            website: ['playwright'],
+            api: enginesOwnedIn('src/facets/api/'),
+            cli: enginesOwnedIn('src/facets/cli/'),
+            component: enginesOwnedIn('src/facets/component/'),
+            integration: enginesOwnedIn('src/facets/integration/'),
+            job: enginesOwnedIn('src/facets/job/'),
+            mobile: enginesOwnedIn('src/facets/mobile/'),
+            website: enginesOwnedIn('src/facets/website/'),
         },
         imports: ['kernel/', 'world/', 'elements/', 'expectations/'],
         // Projects (`vitest/config`), the provided readers and the global
@@ -173,7 +177,11 @@ export const FRAMEWORK_LAYERS = {
         ],
         // oxlint's plugin types (erased), the toolchain's config names
         // (inlined), and the module parser a rule walks past a module with.
-        packages: ['@oxlint/plugins', '@jterrazz/typescript/oxlint-config-names', 'oxc-parser'],
+        packages: [
+            '@oxlint/plugins',
+            '@jterrazz/typescript/oxlint-config-names',
+            ...enginesOwnedIn('lint/'),
+        ],
         seams: { 'lint/self/compositions.ts': ['facets/', 'kernel/chain/define-facet'] },
     },
 } satisfies Record<string, LayerOptions>;
