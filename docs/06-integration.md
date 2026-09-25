@@ -44,7 +44,7 @@ Three questions decide, in order ([18 — Conventions](18-conventions.md)):
 2. Does it need a real service — a database, a cache, a process — or is its oracle a GOLDEN file? Then it is an integration spec.
 3. Otherwise it is a module test, `<file>.test.ts` beside `<file>.ts`, with no runner at all.
 
-The second question has two halves and both land here. A module against real infrastructure was, before this facet, a `specs/` folder running plain vitest with a hand-built sqlite template and a `beforeAll` starting a container. A module whose oracle is a golden was a `toMatchSnapshot` — a second golden mechanism beside the one the package owns. Neither needed a new idea; both needed a constructor.
+The second question has two halves and both land here: a module on a real service, and a module whose oracle is a golden. Why a facet, and what was weighed: [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
 
 ## The constructor
 
