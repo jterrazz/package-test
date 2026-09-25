@@ -5,7 +5,7 @@ import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';
 import { SERVICE_IMAGES } from './service-images.js';
-import { TestcontainersAdapter } from './testcontainers.js';
+import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 /**
  * The global setup of a project whose specs declare services: the project's

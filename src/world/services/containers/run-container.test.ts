@@ -1,7 +1,12 @@
 import { describe, expect, test } from 'vitest';
 
 import { RunContainer } from './run-container.js';
-import { fakeRuntime, POSTGRES, servedRun, unreachable } from './testcontainers.fixtures.js';
+import {
+    fakeRuntime,
+    POSTGRES,
+    servedRun,
+    unreachable,
+} from './testcontainers.adapter.fixtures.js';
 
 describe('a container of the project, as a worker holds it', () => {
     test('is reached where the run started it, and reads the run container logs', async () => {

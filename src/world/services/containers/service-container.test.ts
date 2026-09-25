@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { ServiceContainer } from './service-container.js';
-import { fakeRuntime, POSTGRES, servedRun } from './testcontainers.fixtures.js';
+import { fakeRuntime, POSTGRES, servedRun } from './testcontainers.adapter.fixtures.js';
 
 describe('the container a declared service gets', () => {
     test('is the run container when the run serves one', async () => {

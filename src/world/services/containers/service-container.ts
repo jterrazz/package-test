@@ -1,6 +1,6 @@
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { RunContainer } from './run-container.js';
-import { TestcontainersAdapter } from './testcontainers.js';
+import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 /**
  * The container a declared service gets: the project's, when its global

@@ -6,7 +6,7 @@ import {
     processOwner,
     reuseEnabled,
     TestcontainersAdapter,
-} from './testcontainers.js';
+} from './testcontainers.adapter.js';
 
 /*
  * The adapter IS the subject here, and it is not on the public entry — which

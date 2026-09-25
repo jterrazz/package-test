@@ -7,7 +7,7 @@ import {
     POSTGRES_REORDERED,
     REDIS,
     unreachable,
-} from './testcontainers.fixtures.js';
+} from './testcontainers.adapter.fixtures.js';
 
 describe('the run containers', () => {
     test('answer two requests alike with one container, started once', async () => {

@@ -1,6 +1,6 @@
 import { hostname } from 'node:os';
 
-import { OWNER_LABEL, REUSED_LABEL } from './testcontainers.js';
+import { OWNER_LABEL, REUSED_LABEL } from './testcontainers.adapter.js';
 
 /**
  * The containers nothing will ever remove but a sweep: the ones a dead
