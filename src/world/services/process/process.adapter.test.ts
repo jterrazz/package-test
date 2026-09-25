@@ -14,8 +14,8 @@ afterEach(async () => {
     started = null;
 });
 
-describe('process — the one shape an external process takes', () => {
-    test('comes up on the port it bound, and answers', async () => {
+describe('process.adapter', () => {
+    test('process — the one shape an external process takes — comes up on the port it bound, and answers', async () => {
         // Given - a process declared with its command and the line that announces its port
         started = processService({ command: SERVER, ready: READY });
         await started.spawnWith(process.cwd(), {}, 'run-1');
@@ -25,7 +25,7 @@ describe('process — the one shape an external process takes', () => {
         await expect(response.text()).resolves.toBe('ok');
     });
 
-    test('carries the environment it was declared with', async () => {
+    test('process — the one shape an external process takes — carries the environment it was declared with', async () => {
         // Given - a process handed one variable
         started = processService({ command: SERVER, env: { GREETING: 'bonjour' }, ready: READY });
         await started.spawnWith(process.cwd(), {}, 'run-2');
@@ -35,7 +35,7 @@ describe('process — the one shape an external process takes', () => {
         await expect(response.text()).resolves.toBe('bonjour');
     });
 
-    test('reads the environment off the services it was started beside', async () => {
+    test('process — the one shape an external process takes — reads the environment off the services it was started beside', async () => {
         // Given - a process whose env is a function of a sibling's connection
         const siblings = { db: { connectionString: 'postgres://db.test:5432/app' } };
         started = processService({
@@ -50,7 +50,7 @@ describe('process — the one shape an external process takes', () => {
         await expect(response.text()).resolves.toBe('postgres://db.test:5432/app');
     });
 
-    test('runs the one-shot command first, and refuses when it fails', async () => {
+    test('process — the one shape an external process takes — runs the one-shot command first, and refuses when it fails', async () => {
         // Given - a `before` that exits non-zero
         const handle = processService({
             before: `node -e "console.error('the build failed'); process.exit(2)"`,
@@ -64,7 +64,7 @@ describe('process — the one shape an external process takes', () => {
         );
     });
 
-    test('refuses to name a url before it is up', () => {
+    test('process — the one shape an external process takes — refuses to name a url before it is up', () => {
         // Given - a declared but unstarted process
         const handle = processService({ command: SERVER, ready: READY });
 

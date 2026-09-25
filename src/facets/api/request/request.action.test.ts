@@ -43,8 +43,8 @@ function chainOver(log: string[]): Chain {
     }).open({});
 }
 
-describe('.get() — the request a chain sends', () => {
-    test('sends the filled path, the template route coverage reads, and the chain’s headers', async () => {
+describe('request.action', () => {
+    test('.get() — the request a chain sends — sends the filled path, the template route coverage reads, and the chain’s headers', async () => {
         // Given - a chain with a header, sending a route template and its parameter
         const log: string[] = [];
         await chainOver(log)
@@ -63,7 +63,7 @@ describe('.get() — the request a chain sends', () => {
         ]);
     });
 
-    test('refuses a template handed no values before any setup of the chain is armed', async () => {
+    test('.get() — the request a chain sends — refuses a template handed no values before any setup of the chain is armed', async () => {
         // Given - a chain with a setup, sending a template with no params
         const log: string[] = [];
         const sent = chainOver(log).armed().get('/users/:id');

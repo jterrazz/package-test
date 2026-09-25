@@ -6,8 +6,8 @@ import { FORK, spliceFork } from './fork.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
-describe('the fork — generation freshness (meta-test)', () => {
-    test('the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
+describe('fork', () => {
+    test('the fork — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
         // Given - the committed constitution
         const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
 
@@ -15,7 +15,7 @@ describe('the fork — generation freshness (meta-test)', () => {
         expect(spliceFork(committed)).toBe(committed);
     });
 
-    test('asks nine questions, one per kind, the module alone second to last', () => {
+    test('the fork — generation freshness (meta-test) — asks nine questions, one per kind, the module alone second to last', () => {
         // Given - the rows of the fork, in the order they are asked
         const kinds = FORK.map((row) => row.kind);
 

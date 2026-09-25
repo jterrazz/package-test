@@ -44,8 +44,34 @@ function responsesBody(tool: unknown): unknown {
     };
 }
 
-describe('intercept — openai chat completions', () => {
-    test('openai.chat() targets the Chat Completions endpoint and matches every call', () => {
+/** Each frame of a streamed reply, read the way an SSE client reads it: its event name and its data, parsed. */
+function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
+    if (!isStreamBody(body)) {
+        throw new Error('the reply is not a stream');
+    }
+    return body.chunks.map((chunk) => {
+        const lines = chunk.trimEnd().split('\n');
+        const field = (name: string): string =>
+            lines.find((line) => line.startsWith(`${name}: `))?.slice(name.length + 2) ?? '';
+        return { data: JSON.parse(field('data')) as unknown, event: field('event') };
+    });
+}
+/** One unnamed Chat Completions chunk, framed, created at the pinned instant. */
+function chatChunk(delta: object, finish: null | string): string {
+    return `data: ${JSON.stringify({
+        id: 'chatcmpl-test',
+        object: 'chat.completion.chunk',
+        created: 1_772_616_600,
+        model: 'gpt-4o-test',
+        choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
+    })}\n\n`;
+}
+/** A Responses event that carries no text, as a client reads it: named for its type, numbered. */
+function opened(type: string, sequence: number): object {
+    return { data: { sequence_number: sequence, type }, event: type };
+}
+describe('openai', () => {
+    test('intercept — openai chat completions — openai.chat() targets the Chat Completions endpoint and matches every call', () => {
         // Given - a bare trigger
         const trigger = openai.chat();
 
@@ -56,7 +82,7 @@ describe('intercept — openai chat completions', () => {
         expect(trigger.match).toBeUndefined();
     });
 
-    test('string filters match by exact equality on the model and the first system and user messages', () => {
+    test('intercept — openai chat completions — string filters match by exact equality on the model and the first system and user messages', () => {
         // Given - exact model, system and user filters
         const trigger = openai.chat({ model: 'gpt-4o', system: 'Classify.', user: 'an article' });
 
@@ -67,7 +93,7 @@ describe('intercept — openai chat completions', () => {
         expect(lets(trigger, chatBody('gpt-4o', 'Classify.', 'an article about cats'))).toBe(false);
     });
 
-    test('the tools filter reads function names, and the temperature filter is exact', () => {
+    test('intercept — openai chat completions — the tools filter reads function names, and the temperature filter is exact', () => {
         // Given - a filter on one tool and a temperature
         const trigger = openai.chat({ temperature: 0, tools: ['get_weather'] });
 
@@ -77,7 +103,7 @@ describe('intercept — openai chat completions', () => {
         expect(lets(trigger, toolsBody(['get_weather'], 0.7))).toBe(false);
     });
 
-    test('the wrap and openai.reply() build one chat completion around the data', () => {
+    test('intercept — openai chat completions — the wrap and openai.reply() build one chat completion around the data', () => {
         // Given - an object fixture, wrapped by the trigger and by reply()
         const wrapped = openai.chat().wrap({ categories: ['TECH'] });
         const replied = openai.reply('plain text');
@@ -99,10 +125,8 @@ describe('intercept — openai chat completions', () => {
             choices: [{ message: { content: 'plain text', role: 'assistant' } }],
         });
     });
-});
 
-describe('intercept — openai responses', () => {
-    test('openai.responses() targets the Responses endpoint, or the gateway it is given', () => {
+    test('intercept — openai responses — openai.responses() targets the Responses endpoint, or the gateway it is given', () => {
         // Given - a bare trigger, and one sent to a gateway
         const bare = openai.responses();
         const gateway = openai.responses({}, 'https://gateway.example/v1/responses');
@@ -113,7 +137,7 @@ describe('intercept — openai responses', () => {
         expect(gateway.url).toBe('https://gateway.example/v1/responses');
     });
 
-    test('the system filter reads the instructions, or a system input when there are none', () => {
+    test('intercept — openai responses — the system filter reads the instructions, or a system input when there are none', () => {
         // Given - an exact system filter
         const trigger = openai.responses({ system: 'Summarise.' });
 
@@ -125,7 +149,7 @@ describe('intercept — openai responses', () => {
         expect(lets(trigger, { input: [], instructions: 'Translate.' }, RESPONSES_URL)).toBe(false);
     });
 
-    test('the user filter reads every user input joined, and the tools filter either name form', () => {
+    test('intercept — openai responses — the user filter reads every user input joined, and the tools filter either name form', () => {
         // Given - a pattern on the user text and a required tool
         const trigger = openai.responses({ tools: ['search'], user: /the Report Ingestion/u });
 
@@ -137,7 +161,7 @@ describe('intercept — openai responses', () => {
         expect(lets(trigger, responsesBody({ name: 'fetch' }), RESPONSES_URL)).toBe(false);
     });
 
-    test('the wrap builds a Responses envelope with the data as its output text', () => {
+    test('intercept — openai responses — the wrap builds a Responses envelope with the data as its output text', () => {
         // Given - an object fixture
         const response = openai.responses().wrap({ ok: true });
 
@@ -156,39 +180,8 @@ describe('intercept — openai responses', () => {
             status: 200,
         });
     });
-});
 
-/** Each frame of a streamed reply, read the way an SSE client reads it: its event name and its data, parsed. */
-function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
-    if (!isStreamBody(body)) {
-        throw new Error('the reply is not a stream');
-    }
-    return body.chunks.map((chunk) => {
-        const lines = chunk.trimEnd().split('\n');
-        const field = (name: string): string =>
-            lines.find((line) => line.startsWith(`${name}: `))?.slice(name.length + 2) ?? '';
-        return { data: JSON.parse(field('data')) as unknown, event: field('event') };
-    });
-}
-
-/** One unnamed Chat Completions chunk, framed, created at the pinned instant. */
-function chatChunk(delta: object, finish: null | string): string {
-    return `data: ${JSON.stringify({
-        id: 'chatcmpl-test',
-        object: 'chat.completion.chunk',
-        created: 1_772_616_600,
-        model: 'gpt-4o-test',
-        choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
-    })}\n\n`;
-}
-
-/** A Responses event that carries no text, as a client reads it: named for its type, numbered. */
-function opened(type: string, sequence: number): object {
-    return { data: { sequence_number: sequence, type }, event: type };
-}
-
-describe('intercept — openai streamed replies', () => {
-    test('stream() serves Chat Completions chunks — the role, one delta per piece, the finish — closed by [DONE]', () => {
+    test('intercept — openai streamed replies — stream() serves Chat Completions chunks — the role, one delta per piece, the finish — closed by [DONE]', () => {
         // Given - two pieces, at a pinned instant
         using _ = clock.at('2026-03-04T09:30:00Z');
         const response = openai.stream(['Hel', 'lo']);
@@ -212,7 +205,7 @@ describe('intercept — openai streamed replies', () => {
         });
     });
 
-    test('stream() on the Responses API serves named, numbered events, one text delta per piece, completed last', () => {
+    test('intercept — openai streamed replies — stream() on the Responses API serves named, numbered events, one text delta per piece, completed last', () => {
         // Given - two pieces on the Responses wire, spaced 5 ms apart
         const response = openai.stream(['Hel', 'lo'], { api: 'responses', delay: 5 });
 
@@ -239,10 +232,8 @@ describe('intercept — openai streamed replies', () => {
         ]);
         expect(isStreamBody(response.body) && response.body.delayBetweenChunks).toBe(5);
     });
-});
 
-describe('intercept — openai failures', () => {
-    test('openai.error() is a rate limit on 429 and an api error otherwise', () => {
+    test('intercept — openai failures — openai.error() is a rate limit on 429 and an api error otherwise', () => {
         // Given - a 429 and a 500
         const rateLimited = openai.error(429);
         const failed = openai.error(500, 'overloaded');
@@ -264,7 +255,7 @@ describe('intercept — openai failures', () => {
         });
     });
 
-    test('openai.malformed() wraps the broken content, and openai.timeout() answers after 30 s', () => {
+    test('intercept — openai failures — openai.malformed() wraps the broken content, and openai.timeout() answers after 30 s', () => {
         // Given - a malformed reply and a timeout
         const malformed = openai.malformed('{not json');
         const timeout = openai.timeout();

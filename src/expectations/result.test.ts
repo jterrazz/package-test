@@ -12,8 +12,8 @@ const { cleanup, cli } = await specification.cli(CLI_BIN, {
 
 afterAll(cleanup);
 
-describe('database option rule (CONVENTIONS A7)', () => {
-    test('with a single database, passing database is redundant and throws', () => {
+describe('BaseResult', () => {
+    test('database option rule (CONVENTIONS A7) — with a single database, passing database is redundant and throws', () => {
         // Given - one declared database ("db")
         // Then - the explicit option is rejected as redundant, synchronously
         // checker-disable-next-line c8 -- the A7 refusal fires before the seed is read: the path names nothing on purpose
@@ -22,7 +22,7 @@ describe('database option rule (CONVENTIONS A7)', () => {
         );
     });
 
-    test('with a single database, table() rejects the option too', async () => {
+    test('database option rule (CONVENTIONS A7) — with a single database, table() rejects the option too', async () => {
         // Given - any executed spec
         const result = await cli.exec('help');
 
@@ -32,7 +32,7 @@ describe('database option rule (CONVENTIONS A7)', () => {
         );
     });
 
-    test('with a single database, omitting the option is valid', async () => {
+    test('database option rule (CONVENTIONS A7) — with a single database, omitting the option is valid', async () => {
         // Given - any executed spec
         const result = await cli.exec('help');
 

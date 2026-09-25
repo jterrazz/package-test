@@ -53,8 +53,8 @@ function packagesLoadedBy(entry: string): string[] {
     }).split('\n');
 }
 
-describe('the node entry', () => {
-    test('loads no engine a spec pays for only when it declares one', () => {
+describe('index', () => {
+    test('the node entry — loads no engine a spec pays for only when it declares one', () => {
         // Given - the entry loaded in a fresh module graph
         const loaded = packagesLoadedBy(builtEntry());
 

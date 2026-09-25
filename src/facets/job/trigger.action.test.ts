@@ -8,8 +8,8 @@ const RUN = { config: {}, testDir: '/specs/job', workDir: null };
 /** A reader no setup of these runs is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
-describe('.trigger() — the job a chain runs', () => {
-    test('a runner that registered no job says where jobs are registered', async () => {
+describe('trigger', () => {
+    test('.trigger() — the job a chain runs — a runner that registered no job says where jobs are registered', async () => {
         // Given - a job runner handed an empty list
 
         // Then - the refusal names the option, rather than listing no job as "available"

@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { http } from '../http/http.js';
 import { declared } from './declared.js';
 
-describe('declared — the stubs one intercept call names', () => {
-    test('refuses a bare request in the words of the call that wrote it', () => {
+describe('declared', () => {
+    test('declared — the stubs one intercept call names — refuses a bare request in the words of the call that wrote it', () => {
         // Given - a request half handed over alone, as only an untyped caller can hand it (the overloads refuse the shape at every typed site)
         const request = http.get('https://weather.test/today');
 

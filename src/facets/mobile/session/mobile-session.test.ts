@@ -6,8 +6,8 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 import setup from './mobile-session.js';
 import { MOBILE_SESSIONS_DIR, sessionLedger } from './session-ledger.js';
 
-describe('the mobile session setup — one driver session per run', () => {
-    test('hands the project a ledger of its own, and clears it at teardown', async () => {
+describe('setup', () => {
+    test('the mobile session setup — one driver session per run — hands the project a ledger of its own, and clears it at teardown', async () => {
         // Given - a project root, and the setup run for it
         const root = mkdtempSync(join(tmpdir(), 'mobile-session-'));
         onTestFinished(() => {

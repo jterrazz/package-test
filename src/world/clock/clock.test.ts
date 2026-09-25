@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import { clock } from './clock.js';
 
-describe('clock — the one time primitive', () => {
-    test('pins the calendar at the stated instant', () => {
+describe('clock', () => {
+    test('clock — the one time primitive — pins the calendar at the stated instant', () => {
         // Given - the clock taken at a named instant
         using _ = clock.at('2026-03-04T09:30:00Z');
 
@@ -14,7 +14,7 @@ describe('clock — the one time primitive', () => {
         expect(Date.now()).toBe(Date.parse('2026-03-04T09:30:00Z'));
     });
 
-    test('gives the calendar back when the scope ends', () => {
+    test('clock — the one time primitive — gives the calendar back when the scope ends', () => {
         // Given - a scope that took the clock and ended
         {
             using _ = clock.at('2026-03-04T09:30:00Z');
@@ -24,7 +24,7 @@ describe('clock — the one time primitive', () => {
         expect(new Date().toISOString()).not.toBe('2026-03-04T09:30:00.000Z');
     });
 
-    test('leaves the scheduler alone so a subject keeps running', async () => {
+    test('clock — the one time primitive — leaves the scheduler alone so a subject keeps running', async () => {
         // Given - a pinned calendar and a promise the real scheduler resolves
         using _ = clock.at('2026-03-04T09:30:00Z');
         const settled = await afterRealMs(1, 'ran');
@@ -34,7 +34,7 @@ describe('clock — the one time primitive', () => {
         expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
     });
 
-    test('moves the pinned calendar forward on advance', async () => {
+    test('clock — the one time primitive — moves the pinned calendar forward on advance', async () => {
         // Given - a pinned clock moved on by a minute
         using _ = clock.at('2026-03-04T09:30:00Z');
         await clock.advance(60_000);
@@ -43,7 +43,7 @@ describe('clock — the one time primitive', () => {
         expect(new Date().toISOString()).toBe('2026-03-04T09:31:00.000Z');
     });
 
-    test('fires what came due when the scheduler belongs to the test', async () => {
+    test('clock — the one time primitive — fires what came due when the scheduler belongs to the test', async () => {
         // Given - the scheduler taken, and work scheduled five seconds out
         using _ = clock.run('2026-03-04T09:30:00Z');
         let fired = 'not yet';
@@ -58,19 +58,19 @@ describe('clock — the one time primitive', () => {
         expect(fired).toBe('2026-03-04T09:30:05.000Z');
     });
 
-    test('refuses to advance a clock nobody took', async () => {
+    test('clock — the one time primitive — refuses to advance a clock nobody took', async () => {
         // Given - no pinned clock
         // Then - advancing says which primitive to take first
         await expect(clock.advance(1000)).rejects.toThrow('no clock is pinned');
     });
 
-    test('refuses an instant that is not one', () => {
+    test('clock — the one time primitive — refuses an instant that is not one', () => {
         // Given - a string that names no instant
         // Then - the refusal shows the shape it wanted
         expect(() => clock.at('yesterday')).toThrow('is not an instant');
     });
 
-    test('a second clock taken inside the first is refused, not nested', () => {
+    test('clock — the one time primitive — a second clock taken inside the first is refused, not nested', () => {
         // Given - a scope that already holds the scheduler
         using _ = clock.run('2026-03-04T09:30:00Z');
 

@@ -55,7 +55,7 @@ function stubOxlint(root: string, status: number, script = ''): void {
     chmodSync(bin, 0o755);
 }
 
-describe('the checker’s own fix pass — the plugin’s fixers, and no one else’s', () => {
+describe('ratchet-own-fixes', () => {
     test("the wrapper arms the plugin's rules alone, in the base and in every override", async () => {
         // Given - a base config arming the plugin beside another rulebook, in its rules and an override
         const root = projectWith({

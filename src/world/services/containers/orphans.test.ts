@@ -23,8 +23,17 @@ function listed(
     };
 }
 
-describe('orphans — what a dead reaper session left behind', () => {
-    test('names the ended containers of a session no running reaper holds, and nothing else', () => {
+/** A probe answering the pids it is handed as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
+function probe(pid: number): void {
+    if (pid === 7) {
+        throw Object.assign(new Error('no such process'), { code: 'ESRCH' });
+    }
+    if (pid === 8) {
+        throw Object.assign(new Error('not permitted'), { code: 'EPERM' });
+    }
+}
+describe('orphans', () => {
+    test('orphans — what a dead reaper session left behind — names the ended containers of a session no running reaper holds, and nothing else', () => {
         // Given - a live session (its reaper running) and a dead one, each with ended and running containers
         const containers = [
             listed('live-reaper', 'running', { reaper: true, session: 'live' }),
@@ -43,7 +52,7 @@ describe('orphans — what a dead reaper session left behind', () => {
         expect(orphans(containers, () => true)).toStrictEqual(['dead-exited', 'dead-dead']);
     });
 
-    test('names every container whose owner is dead, whatever its state and session, and nothing else', () => {
+    test('orphans — what a dead reaper session left behind — names every container whose owner is dead, whatever its state and session, and nothing else', () => {
         // Given - one live session shared by two owners, one of them dead, and a reused container naming the dead one
         const containers = [
             listed('shared-reaper', 'running', { reaper: true, session: 'shared' }),
@@ -60,20 +69,8 @@ describe('orphans — what a dead reaper session left behind', () => {
             'killed-created',
         ]);
     });
-});
 
-/** A probe answering the pids it is handed as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
-function probe(pid: number): void {
-    if (pid === 7) {
-        throw Object.assign(new Error('no such process'), { code: 'ESRCH' });
-    }
-    if (pid === 8) {
-        throw Object.assign(new Error('not permitted'), { code: 'EPERM' });
-    }
-}
-
-describe('ownerAlive — whether the process a container names still runs', () => {
-    test('is dead only for a pid of this host no process answers', () => {
+    test('ownerAlive — whether the process a container names still runs — is dead only for a pid of this host no process answers', () => {
         // Given - owners of this host and of another, and labels that name no pid
         const answered = {
             gone: ownerAlive('here:7', 'here', probe),
@@ -95,7 +92,7 @@ describe('ownerAlive — whether the process a container names still runs', () =
         });
     });
 
-    test('removes every orphan with its volumes, and answers the ones it removed', async () => {
+    test('ownerAlive — whether the process a container names still runs — removes every orphan with its volumes, and answers the ones it removed', async () => {
         // Given - a runtime listing two orphans, one of which refuses removal
         const asked: unknown[] = [];
         const removed: string[] = [];

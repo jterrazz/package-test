@@ -9,36 +9,7 @@ import type { ServiceHandle } from '../service.port.js';
 import { Orchestrator } from './orchestrator.js';
 import { registerContainerIntegrations } from './registry.js';
 
-describe('the orchestrator measures from the root it is given', () => {
-    const elsewhere = mkdtempSync(resolve(tmpdir(), 'orchestrator-root-'));
-
-    afterAll(() => {
-        rmSync(elsewhere, { force: true, recursive: true });
-    });
-
-    test('requires a root — the caller resolved it, there is no second opinion', () => {
-        // Given - a construction that omits the root (the shape where a fallback to `process.cwd()` would silently disagree with the runner's own A9 walk from the calling specification file)
-        // @ts-expect-error - `root` is required; this line is the guard
-        const orchestrator = new Orchestrator({ services: {} });
-
-        // Then - the type refuses it, and the guard fails the typecheck if the option ever becomes optional again
-        expect(orchestrator).toBeInstanceOf(Orchestrator);
-    });
-
-    test('starts nothing when a record declares nothing', async () => {
-        // Given - a stack with an empty services record
-        const orchestrator = new Orchestrator({ root: elsewhere, services: {} });
-        await orchestrator.start();
-
-        try {
-            // Then - there is no default database to hand back
-            expect(orchestrator.getDatabase()).toBeNull();
-            expect(orchestrator.getDatabases().size).toBe(0);
-        } finally {
-            await orchestrator.stop();
-        }
-    });
-});
+const elsewhere = mkdtempSync(resolve(tmpdir(), 'orchestrator-root-'));
 
 /** A container that takes ten seconds to start, recording the moment each logs request reads from. */
 function slowContainer(asked: (Date | undefined)[]): ContainerPort {
@@ -85,8 +56,35 @@ function unhealthyService(): ServiceHandle {
     };
 }
 
-describe('a failed start reports the logs its own container wrote', () => {
-    test('reads them from before the container started, so a fresh one keeps its boot lines', async () => {
+describe('Orchestrator', () => {
+    afterAll(() => {
+        rmSync(elsewhere, { force: true, recursive: true });
+    });
+
+    test('the orchestrator measures from the root it is given — requires a root — the caller resolved it, there is no second opinion', () => {
+        // Given - a construction that omits the root (the shape where a fallback to `process.cwd()` would silently disagree with the runner's own A9 walk from the calling specification file)
+        // @ts-expect-error - `root` is required; this line is the guard
+        const orchestrator = new Orchestrator({ services: {} });
+
+        // Then - the type refuses it, and the guard fails the typecheck if the option ever becomes optional again
+        expect(orchestrator).toBeInstanceOf(Orchestrator);
+    });
+
+    test('the orchestrator measures from the root it is given — starts nothing when a record declares nothing', async () => {
+        // Given - a stack with an empty services record
+        const orchestrator = new Orchestrator({ root: elsewhere, services: {} });
+        await orchestrator.start();
+
+        try {
+            // Then - there is no default database to hand back
+            expect(orchestrator.getDatabase()).toBeNull();
+            expect(orchestrator.getDatabases().size).toBe(0);
+        } finally {
+            await orchestrator.stop();
+        }
+    });
+
+    test('a failed start reports the logs its own container wrote — reads them from before the container started, so a fresh one keeps its boot lines', async () => {
         // Given - a container whose start takes ten seconds, then a healthcheck that fails
         using _ = clock.at('2026-09-25T10:00:00.000Z');
         const asked: (Date | undefined)[] = [];

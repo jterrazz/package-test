@@ -7,8 +7,8 @@ import { startProcessServices } from './start-services.js';
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end('ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
 const READY = /listening on port (?<port>\d+)/u;
 
-describe('startProcessServices', () => {
-    test('stops the processes already started when a later one never comes up', async () => {
+describe('startServices', () => {
+    test('startProcessServices — stops the processes already started when a later one never comes up', async () => {
         // Given - a record whose second process fails its build step
         const first = processService({ command: SERVER, ready: READY });
         const broken = processService({

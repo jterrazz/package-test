@@ -13,7 +13,7 @@ import { FRAMEWORK_LAYERS } from './self-layers.js';
 /** The package's own map, as `oxlint.config.ts` hands it to the rule. */
 const own = [{ layers: FRAMEWORK_LAYERS }];
 
-describe('the layer map — lock 2, the direction the source trees import in', () => {
+describe('FRAMEWORK_LAYERS', () => {
     test('names every tree of the source root, and lint beside it', () => {
         // Given - the map this package hands its own lint
         const trees = Object.keys(FRAMEWORK_LAYERS).toSorted();

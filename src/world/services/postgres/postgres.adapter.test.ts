@@ -8,8 +8,8 @@ import { postgres } from './postgres.adapter.js';
  * Everything that needs a live postgres is a spec — `specs/integration/postgres/`.
  */
 
-describe('postgres handle', () => {
-    test('builds a postgresql connection string from a host and a port', () => {
+describe('postgres.adapter', () => {
+    test('postgres handle — builds a postgresql connection string from a host and a port', () => {
         // Given - the default credentials and database name
         const connectionString = postgres().buildConnectionString('127.0.0.1', 54_321);
 
@@ -17,7 +17,7 @@ describe('postgres handle', () => {
         expect(connectionString).toBe('postgresql://test:test@127.0.0.1:54321/test');
     });
 
-    test('reads its credentials off the env override', () => {
+    test('postgres handle — reads its credentials off the env override', () => {
         // Given - a handle told which user, password and database to use
         const handle = postgres({
             env: { POSTGRES_DB: 'analytics', POSTGRES_PASSWORD: 'secret', POSTGRES_USER: 'app' },
@@ -29,14 +29,14 @@ describe('postgres handle', () => {
         );
     });
 
-    test('defaults to the slim postgres:17 image pinned by digest, and takes an override', () => {
+    test('postgres handle — defaults to the slim postgres:17 image pinned by digest, and takes an override', () => {
         // Given - one handle with no image option and one with an explicit image
         // Then - the default is the pinned slim image, and the override wins
         expect(postgres().defaultImage).toMatch(/^postgres:17-alpine@sha256:[0-9a-f]{64}$/u);
         expect(postgres({ image: 'postgres:17' }).defaultImage).toBe('postgres:17');
     });
 
-    test('is its own database adapter', () => {
+    test('postgres handle — is its own database adapter', () => {
         // Given - a postgres handle
         const handle = postgres();
 
@@ -44,7 +44,7 @@ describe('postgres handle', () => {
         expect(handle.createDatabaseAdapter()).toBe(handle);
     });
 
-    test('refuses a healthcheck with no connection string, naming what is missing', async () => {
+    test('postgres handle — refuses a healthcheck with no connection string, naming what is missing', async () => {
         // Given - a fresh handle nothing ever wired
         // Then - the refusal says which half is absent
         await expect(postgres().healthcheck()).rejects.toThrow(
@@ -52,7 +52,7 @@ describe('postgres handle', () => {
         );
     });
 
-    test('carries the driver reason when a healthcheck cannot connect', async () => {
+    test('postgres handle — carries the driver reason when a healthcheck cannot connect', async () => {
         // Given - a handle pointed at a port nothing listens on
         const unreachable = postgres();
         unreachable.connectionString = 'postgresql://test:test@localhost:1/test';

@@ -5,8 +5,8 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import setup, { sweepOrphanRoots, TEMP_ROOTS_PARENT } from './temp-root.js';
 
-describe("the temp-root setup — a run's scratch lives and dies in one folder", () => {
-    test('points the temp directory at a root of the run, in the one parent of roots', () => {
+describe('setup', () => {
+    test("the temp-root setup — a run's scratch lives and dies in one folder — points the temp directory at a root of the run, in the one parent of roots", () => {
         // Given - the run's temp directory
         const system = tmpdir();
         const prefix = join(system, TEMP_ROOTS_PARENT, `${process.pid}-`);
@@ -21,7 +21,7 @@ describe("the temp-root setup — a run's scratch lives and dies in one folder",
         expect(root.startsWith(prefix)).toBe(true);
     });
 
-    test("names the parent of roots for the user, so a shared temp directory holds each user's apart", () => {
+    test("the temp-root setup — a run's scratch lives and dies in one folder — names the parent of roots for the user, so a shared temp directory holds each user's apart", () => {
         // Given - the user the run is
         const uid = process.getuid?.();
 
@@ -30,7 +30,7 @@ describe("the temp-root setup — a run's scratch lives and dies in one folder",
         expect(uid).toBeDefined();
     });
 
-    test('every project joins the one root, and the teardown of the setup that made it removes it', () => {
+    test("the temp-root setup — a run's scratch lives and dies in one folder — every project joins the one root, and the teardown of the setup that made it removes it", () => {
         // Given - the run's temp directory, and two projects' setups
         const system = process.env.TMPDIR;
         const first = setup();
@@ -50,7 +50,7 @@ describe("the temp-root setup — a run's scratch lives and dies in one folder",
         expect(process.env.TMPDIR).toBe(system);
     });
 
-    test('sweeps a root whose run died, and leaves a living run its own', () => {
+    test("the temp-root setup — a run's scratch lives and dies in one folder — sweeps a root whose run died, and leaves a living run its own", () => {
         // Given - a parent of roots holding the root of a dead run and the root of this one
         const parent = mkdtempSync(join(tmpdir(), 'temp-roots-'));
         onTestFinished(() => {

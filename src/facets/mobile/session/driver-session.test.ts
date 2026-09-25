@@ -49,8 +49,8 @@ function request(
     };
 }
 
-describe("openSession — the run's one session", () => {
-    test('the first runner of a run creates the session and records it, a later one attaches to it', async () => {
+describe('openSession', () => {
+    test("openSession — the run's one session — the first runner of a run creates the session and records it, a later one attaches to it", async () => {
         // Given - the run's ledger, and two runners asking one server for the same device
         const scratch = mkdtempSync(join(tmpdir(), 'appium-session-'));
         const ledger = sessionLedger(join(scratch, 'run'));
@@ -65,7 +65,7 @@ describe("openSession — the run's one session", () => {
         expect([first.shared, second.shared]).toStrictEqual([true, true]);
     });
 
-    test('a runner outside a run that shares one creates a session of its own', async () => {
+    test("openSession — the run's one session — a runner outside a run that shares one creates a session of its own", async () => {
         // Given - no ledger
         const factories = stubFactories();
 

@@ -51,8 +51,8 @@ function acting(log: string[], outcome: unknown): AnyAction {
 /** What the pipeline is handed beside the action: no config, no engines, nothing told. */
 const WHERE = { config: {}, engines: {}, state: EMPTY_STATE, testDir: '/specs' };
 
-describe('perform — the one pipeline a terminal action runs through', () => {
-    test('arms every setup in phase order, runs the action, and releases in reverse', async () => {
+describe('perform', () => {
+    test('perform — the one pipeline a terminal action runs through — arms every setup in phase order, runs the action, and releases in reverse', async () => {
         // Given - three setups listed out of phase order
         const log: string[] = [];
         const setups = [
@@ -79,7 +79,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
         });
     });
 
-    test("an engine's violation is the failure reported, over the error the action met", async () => {
+    test("perform — the one pipeline a terminal action runs through — an engine's violation is the failure reported, over the error the action met", async () => {
         // Given - an engine that recorded an unmatched request, and an action that failed on the reply it got
         const log: string[] = [];
         const unmatched = new Error('no stub accepted GET https://api.test/rates');
@@ -92,7 +92,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
         expect(log).toStrictEqual(['arm intercept', 'act', 'release intercept']);
     });
 
-    test("an engine's violation fails an action that succeeded", async () => {
+    test("perform — the one pipeline a terminal action runs through — an engine's violation fails an action that succeeded", async () => {
         // Given - an engine that recorded an unmatched request the subject swallowed
         const log: string[] = [];
         const unmatched = new Error('no stub accepted GET https://api.test/rates');
@@ -102,7 +102,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
         await expect(perform(setups, acting(log, 'ok'), [], WHERE)).rejects.toBe(unmatched);
     });
 
-    test('a setup that refuses when armed still releases what was armed before it', async () => {
+    test('perform — the one pipeline a terminal action runs through — a setup that refuses when armed still releases what was armed before it', async () => {
         // Given - stubs armed, then a clock whose instant is refused when it is pinned
         const log: string[] = [];
         const refused = new TypeError('"soon" is not an instant');
@@ -124,7 +124,7 @@ describe('perform — the one pipeline a terminal action runs through', () => {
         expect(log).toStrictEqual(['arm intercept', 'release intercept']);
     });
 
-    test('an action takes down what it left standing before any setup is armed', async () => {
+    test('perform — the one pipeline a terminal action runs through — an action takes down what it left standing before any setup is armed', async () => {
         // Given - an action whose preparation waits on a teardown before it settles
         const log: string[] = [];
         const replacing: AnyAction = {

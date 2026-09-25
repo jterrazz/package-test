@@ -13,8 +13,8 @@ const SOURCE = [
     '',
 ].join('\n');
 
-describe('literate() — the vite plugin door', () => {
-    test('the description becomes the test title and the document runs itself', () => {
+describe('literate-plugin', () => {
+    test('literate() — the vite plugin door — the description becomes the test title and the document runs itself', () => {
         // Given - a spec document and the runner it is bound to
         const module = literateModule(
             SOURCE,
@@ -30,7 +30,7 @@ describe('literate() — the vite plugin door', () => {
         );
     });
 
-    test('the plugin adds the .spec.yaml glob to the project test include', () => {
+    test('literate() — the vite plugin door — the plugin adds the .spec.yaml glob to the project test include', () => {
         // Given - a plugin with the default include
         const plugin = literate({ specification: './specs/cli/cli.specification.ts' });
 
@@ -39,7 +39,7 @@ describe('literate() — the vite plugin door', () => {
         expect(plugin.enforce).toBe('pre');
     });
 
-    test('a narrowed include is passed through untouched', () => {
+    test('literate() — the vite plugin door — a narrowed include is passed through untouched', () => {
         // Given - a tree where only one folder holds runnable scenarios
         const plugin = literate({
             include: ['specs/cli/literate/*.spec.yaml'],
@@ -52,7 +52,7 @@ describe('literate() — the vite plugin door', () => {
         });
     });
 
-    test('only .spec.yaml ids are loaded; the specification path resolves against the vite root', () => {
+    test('literate() — the vite plugin door — only .spec.yaml ids are loaded; the specification path resolves against the vite root', () => {
         // Given - a real document on disk and a resolved vite root
         const dir = mkdtempSync(resolve(tmpdir(), 'literate-plugin-'));
         const filePath = resolve(dir, 'case.spec.yaml');

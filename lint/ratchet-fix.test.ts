@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { tightened } from './ratchet-fix.js';
 
-describe('the test ratchet under --fix — what fell is recorded, what rose is not', () => {
-    test('a fix records what fell and never what rose, and leaves the run its key', () => {
+describe('tightened', () => {
+    test('the test ratchet under --fix — what fell is recorded, what rose is not — a fix records what fell and never what rose, and leaves the run its key', () => {
         // Given - one count fell, one reached zero, one rose, one is new, and the run's key
         const next = tightened(
             { 'jterrazz-check/c9': 1, 'jterrazz/d16w': 5, 'jterrazz/new': 2 },
@@ -23,7 +23,7 @@ describe('the test ratchet under --fix — what fell is recorded, what rose is n
         });
     });
 
-    test('a fix records nothing when nothing fell', () => {
+    test('the test ratchet under --fix — what fell is recorded, what rose is not — a fix records nothing when nothing fell', () => {
         // Given - every count at or above its entry
         // Then - no section to write
         expect(

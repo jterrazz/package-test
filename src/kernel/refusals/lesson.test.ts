@@ -9,8 +9,8 @@ const LESSON = {
     why: 'A test waits on a condition, never on time.',
 };
 
-describe('a lesson — found, why, fix, read', () => {
-    test('one line joins the four parts in order', () => {
+describe('lesson', () => {
+    test('a lesson — found, why, fix, read — one line joins the four parts in order', () => {
         // Given - a lesson rendered for a diagnostic
         const line = lessonLine(LESSON);
 
@@ -20,7 +20,7 @@ describe('a lesson — found, why, fix, read', () => {
         );
     });
 
-    test('a block puts each part on its own line, and a found may span several', () => {
+    test('a lesson — found, why, fix, read — a block puts each part on its own line, and a found may span several', () => {
         // Given - a refusal whose finding lists candidates
         const block = lessonBlock({
             ...LESSON,
@@ -35,7 +35,7 @@ describe('a lesson — found, why, fix, read', () => {
         });
     });
 
-    test('both forms read back to the lesson they render', () => {
+    test('a lesson — found, why, fix, read — both forms read back to the lesson they render', () => {
         // Given - the same lesson in the two forms
         // Then - each parses to the four parts it was built from
         expect(lessonParts(lessonLine(LESSON))).toStrictEqual(LESSON);
@@ -66,7 +66,7 @@ describe('a lesson — found, why, fix, read', () => {
             'Error — found: x · why: y · fix: z · read: r',
             ['found', 'why', 'fix', 'read'],
         ],
-    ])('%s is no whole lesson', (_, message, missing) => {
+    ])('a lesson — found, why, fix, read — %s is no whole lesson', (_, message, missing) => {
         // Given - a message that lacks a part, or garbles the order
         // Then - the parts it lacks are named
         expect(missingParts(message)).toStrictEqual(missing);

@@ -50,8 +50,8 @@ function replies(armed: (readonly Stub[])[]): unknown[] {
         .map((stub) => (typeof stub.response === 'function' ? null : stub.response.body));
 }
 
-describe('.intercept() — the calls a chain declares', () => {
-    test('arms a list, then a later call, in the order they were written', async () => {
+describe('intercept', () => {
+    test('.intercept() — the calls a chain declares — arms a list, then a later call, in the order they were written', async () => {
         // Given - two stubs on one route as one list, and a third call after them
         const { armed, chain } = chainOver();
         const request = http.get('https://x.test/');
@@ -69,7 +69,7 @@ describe('.intercept() — the calls a chain declares', () => {
         expect(replies(armed)).toStrictEqual([{ n: 1 }, { n: 2 }, { n: 3 }]);
     });
 
-    test('flattens a composite, its scenario override leading the queue', async () => {
+    test('.intercept() — the calls a chain declares — flattens a composite, its scenario override leading the queue', async () => {
         // Given - a composite and a scenario derived from it
         const { armed, chain } = chainOver();
         const request = http.get('https://x.test/');
@@ -85,7 +85,7 @@ describe('.intercept() — the calls a chain declares', () => {
         expect(replies(armed)).toStrictEqual([{ n: 9 }, { n: 2 }]);
     });
 
-    test('is refused when stated, before anything is parsed, by an engine that serves nothing', () => {
+    test('.intercept() — the calls a chain declares — is refused when stated, before anything is parsed, by an engine that serves nothing', () => {
         // Given - an engine that cannot serve a stub at all
         const { chain } = chainOver(new Error('this runner has no declared backend'));
 

@@ -7,8 +7,8 @@ import { located, ROOT, treeOf } from './checker-source.fixtures.js';
  * The self checker passes I9 (`i9-source-root`) and I12 (`i12-folder-shape`)
  * — what the source root holds, and what a folder of it may be named and hold.
  */
-describe('the shape of the source tree (self checker passes I9, I12)', () => {
-    test('i9 — the source root holds the two entries and the six trees, and nothing else', () => {
+describe('checker-source-tree', () => {
+    test('the shape of the source tree (self checker passes I9, I12) — i9 — the source root holds the two entries and the six trees, and nothing else', () => {
         // Given - the package's own tree, and one with a module and a folder left at its root
         const stray = treeOf({
             'src/index.ts': '',
@@ -25,7 +25,7 @@ describe('the shape of the source tree (self checker passes I9, I12)', () => {
         ]);
     });
 
-    test('i12 — a folder is named for a concept, holds two entries or more, and a facet root holds its face', () => {
+    test('the shape of the source tree (self checker passes I9, I12) — i12 — a folder is named for a concept, holds two entries or more, and a facet root holds its face', () => {
         // Given - the package's own tree, and one with role folders, a lone file and a stray file at a facet's root
         const misshapen = treeOf({
             'src/facets/api/api.facet.ts': '',

@@ -7,8 +7,8 @@ import type { TestProject } from 'vitest/node';
 import setup, { IN_PLACE_DIR } from './in-place-setup.js';
 import { writeInPlace } from './in-place.js';
 
-describe('the update-mode setup — rewrites written once the run is reported', () => {
-    test('hands the project a pending folder of its own, and writes what waits there at teardown', () => {
+describe('setup', () => {
+    test('the update-mode setup — rewrites written once the run is reported — hands the project a pending folder of its own, and writes what waits there at teardown', () => {
         // Given - a project root holding a scratch test, and the setup run for it
         const root = mkdtempSync(join(tmpdir(), 'in-place-setup-'));
         onTestFinished(() => {

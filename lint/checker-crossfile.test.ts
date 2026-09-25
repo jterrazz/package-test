@@ -9,8 +9,8 @@ import { suppressedLines } from './checker-crossfile.js';
 // Stays here is the pure, code-input logic: the checker-channel suppression
 // Mechanism, tested exhaustively on source strings.
 
-describe('checker suppression — suppressedLines (checker-disable comments)', () => {
-    test('disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
+describe('checker-crossfile', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
         // Given - a directive with a blank line before the real statement
         const text = ['// checker-disable-next-line a7 -- reason', '', 'api.seed("x.sql");'].join(
             '\n',
@@ -20,7 +20,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([3]));
     });
 
-    test("disable-next-line steps over another tool's directive to the line of code", () => {
+    test("checker suppression — suppressedLines (checker-disable comments) — disable-next-line steps over another tool's directive to the line of code", () => {
         // Given - a checker directive above an oxlint one, both claiming the next line
         const text = [
             '// checker-disable-next-line c8 -- reason',
@@ -32,7 +32,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'c8')).toStrictEqual(new Set([3]));
     });
 
-    test('disable-line suppresses its OWN line', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — disable-line suppresses its OWN line', () => {
         // Given - a same-line directive
         const text = ['const a = 1;', 'api.seed("x.sql"); // checker-disable-line a7'].join('\n');
 
@@ -40,7 +40,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
     });
 
-    test('a comma/space-separated id list suppresses each listed pass', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — a comma/space-separated id list suppresses each listed pass', () => {
         // Given - a directive naming two passes
         const text = ['// checker-disable-next-line a7, b5 -- reason', 'code();'].join('\n');
 
@@ -51,7 +51,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'c9')).toStrictEqual(new Set());
     });
 
-    test('the wildcard `*` suppresses every pass', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — the wildcard `*` suppresses every pass', () => {
         // Given - a wildcard directive
         const text = ['// checker-disable-next-line * -- blanket', 'code();'].join('\n');
 
@@ -60,7 +60,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'c9')).toStrictEqual(new Set([2]));
     });
 
-    test('a directive naming a different pass does not suppress the queried one', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — a directive naming a different pass does not suppress the queried one', () => {
         // Given - a directive naming B5 alone
         const text = ['// checker-disable-next-line b5 -- reason', 'api.seed("x.sql");'].join('\n');
 
@@ -68,7 +68,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
     });
 
-    test('the trailing `-- reason` is stripped before matching ids (reason words are not ids)', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — the trailing `-- reason` is stripped before matching ids (reason words are not ids)', () => {
         // Given - a reason that contains the queried id as a plain word
         const text = ['// checker-disable-next-line b5 -- a7 is unrelated here', 'code();'].join(
             '\n',
@@ -79,7 +79,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'b5')).toStrictEqual(new Set([2]));
     });
 
-    test('matching is case-insensitive (the formatter capitalizes comment leads)', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — matching is case-insensitive (the formatter capitalizes comment leads)', () => {
         // Given - a formatter-capitalized directive
         const text = ['// Checker-disable-next-line a7 -- reason', 'code();'].join('\n');
 
@@ -87,7 +87,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
     });
 
-    test('source with no directive suppresses nothing', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — source with no directive suppresses nothing', () => {
         // Given - plain code
         const text = ['api.seed("x.sql");', 'api.table("t");'].join('\n');
 
@@ -95,7 +95,7 @@ describe('checker suppression — suppressedLines (checker-disable comments)', (
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set());
     });
 
-    test('a trailing directive with no following non-blank line suppresses nothing', () => {
+    test('checker suppression — suppressedLines (checker-disable comments) — a trailing directive with no following non-blank line suppresses nothing', () => {
         // Given - a disable-next-line as the very last line
         const text = ['code();', '// checker-disable-next-line a7 -- dangling'].join('\n');
 

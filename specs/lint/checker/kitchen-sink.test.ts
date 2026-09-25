@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — checker kitchen-sink (CONVENTIONS D11)', () => {
+describe('kitchen-sink', () => {
     // The D11 regression net: ONE fixture project that trips every checker pass
     // At once — D4 unknown + malformed tokens, D4b http first line, D10 token
     // Leak, C9 dead fixture, B5 await-using inference and A7 database — asserted

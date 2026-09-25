@@ -49,8 +49,8 @@ const ACTION_MODULES = {
  * that offers it; the component facet composes it inside a PAGE, so what the
  * kernel and a setup load must load there too.
  */
-describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
-    test('i7 — the kernel and every setup load no node builtin and no package, at any depth', () => {
+describe('architecture', () => {
+    test('the architecture a facet is composed in (meta-tests I7, I8) — i7 — the kernel and every setup load no node builtin and no package, at any depth', () => {
         // Given - every module of the chain kernel, and every setup module
         const starts = [
             ...modulesOf(ROOT, 'kernel/chain', '.ts').filter(
@@ -63,7 +63,7 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         expect(outsideLoadsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
+    test('the architecture a facet is composed in (meta-tests I7, I8) — a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
         // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads builtins, one of them lazily, and a package
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));
@@ -86,7 +86,7 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         ]);
     });
 
-    test('i8 — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
+    test('the architecture a facet is composed in (meta-tests I7, I8) — i8 — the setups and the actions under src/ are exactly the ones the chain offers', async () => {
         // Given - every definition a setup or an action module exports
         const definitions = await definitionsIn(ROOT, [
             ...modulesOf(ROOT, '', '.capability.ts'),
@@ -103,7 +103,7 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         expect(named('action')).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });
 
-    test('i8 — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
+    test('the architecture a facet is composed in (meta-tests I7, I8) — i8 — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
         // Given - every definition a setup or an action module exports
         const definitions = await definitionsIn(ROOT, [
             ...modulesOf(ROOT, '', '.capability.ts'),

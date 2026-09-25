@@ -20,8 +20,8 @@ async function builderFolders(): Promise<string[]> {
     return builders.flat();
 }
 
-describe('stub kinds — the builders a stub folder is named for', () => {
-    test('names every builder folder of the package, each a builder its entry exports', async () => {
+describe('kinds', () => {
+    test('stub kinds — the builders a stub folder is named for — names every builder folder of the package, each a builder its entry exports', async () => {
         // Given - the folders under src/world/stubs/ exporting the builder they are named for, and the builders the entry exports
         const folders = await builderFolders();
         const exported: Record<string, unknown> = { anthropic, http, openai };

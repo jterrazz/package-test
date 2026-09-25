@@ -6,8 +6,8 @@ import { formatStartupReport } from './startup-report.js';
 // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: dropping it is the point
 const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
 
-describe('formatStartupReport — one shape of world, reported in one block', () => {
-    test('names every declared service, then the app the subject is', () => {
+describe('formatStartupReport', () => {
+    test('formatStartupReport — one shape of world, reported in one block — names every declared service, then the app the subject is', () => {
         // Given - one service that came up and one that refused, with the app running in this process
         const report = plain(
             formatStartupReport(
@@ -32,7 +32,7 @@ describe('formatStartupReport — one shape of world, reported in one block', ()
         expect(report.join('\n')).not.toContain('e2e');
     });
 
-    test('an app reached over HTTP is reported by its url', () => {
+    test('formatStartupReport — one shape of world, reported in one block — an app reached over HTTP is reported by its url', () => {
         // Given - a world with no service and an app the run did not start
         const report = formatStartupReport([], { type: 'http', url: 'http://site.test:4000' });
 
@@ -40,7 +40,7 @@ describe('formatStartupReport — one shape of world, reported in one block', ()
         expect(plain(report).join('\n')).toContain('app: http://site.test:4000');
     });
 
-    test('a site started as a child process is not called an app in this process', () => {
+    test('formatStartupReport — one shape of world, reported in one block — a site started as a child process is not called an app in this process', () => {
         // Given - a website runner whose server is a shell command
         const report = formatStartupReport([], {
             command: 'bun run src/main.ts',
@@ -52,7 +52,7 @@ describe('formatStartupReport — one shape of world, reported in one block', ()
         expect(report).not.toContain('in-process');
     });
 
-    test('a subject that is not an app gets no app line at all', () => {
+    test('formatStartupReport — one shape of world, reported in one block — a subject that is not an app gets no app line at all', () => {
         // Given - a cli, a pipeline, a module: nothing served over HTTP
         const report = formatStartupReport([], { type: 'none' });
 

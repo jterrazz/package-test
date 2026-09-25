@@ -53,8 +53,8 @@ function chainOver(pinned: (null | string)[]): Chain {
     }).open({ baseUrl: 'http://site.test' });
 }
 
-describe('.fetch() — one raw exchange with the site', () => {
-    test('sends the chain’s headers to the site’s path, and hands back the redirect unfollowed', async () => {
+describe('rawFetch', () => {
+    test('.fetch() — one raw exchange with the site — sends the chain’s headers to the site’s path, and hands back the redirect unfollowed', async () => {
         // Given - the site redirects a legacy path, but only for the crawler that names itself
         await using _ = await stubbed(
             http.get('http://site.test/old', { headers: { 'user-agent': 'GPTBot/1.0' } }),
@@ -71,7 +71,7 @@ describe('.fetch() — one raw exchange with the site', () => {
         });
     });
 
-    test('refuses a pinned clock before any setup is armed', async () => {
+    test('.fetch() — one raw exchange with the site — refuses a pinned clock before any setup is armed', async () => {
         // Given - a chain pinning a clock, over an engine logging every pin
         const pinned: (null | string)[] = [];
 

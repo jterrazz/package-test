@@ -31,8 +31,8 @@ function makeResult(): CliResult {
     });
 }
 
-describe('command result — one capture scope per spec execution', () => {
-    test('.stdout, .json, and .filesystem share the result scope', () => {
+describe('CliResult', () => {
+    test('command result — one capture scope per spec execution — .stdout, .json, and .filesystem share the result scope', () => {
         // Given - one executed result
         const result = makeResult();
 
@@ -44,7 +44,7 @@ describe('command result — one capture scope per spec execution', () => {
         expect(result.directory().captures).toBe(result.captures);
     });
 
-    test('a ref captured through one accessor constrains the others', () => {
+    test('command result — one capture scope per spec execution — a ref captured through one accessor constrains the others', () => {
         // Given - a uuid captured from the stdout text
         const result = makeResult();
         expect(
@@ -68,7 +68,7 @@ describe('command result — one capture scope per spec execution', () => {
         ).toBeFalsy();
     });
 
-    test('two results never share a scope', () => {
+    test('command result — one capture scope per spec execution — two results never share a scope', () => {
         // Given - two independent executions
         const first = makeResult();
         const second = makeResult();

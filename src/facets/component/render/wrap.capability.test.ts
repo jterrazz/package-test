@@ -29,8 +29,8 @@ function chain(): Chain {
     }).open({});
 }
 
-describe('.wrap() — the frame a chain renders in', () => {
-    test('dresses the subject in the wrapper stated last, never in both', async () => {
+describe('wrap', () => {
+    test('.wrap() — the frame a chain renders in — dresses the subject in the wrapper stated last, never in both', async () => {
         // Given - a router stub, then a strict frame stated after it
         const dressed = await chain()
             .wrap((ui) => ['router', ui])

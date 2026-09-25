@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { parseResponseFile, readBody, serializeResponseFile } from './http-file.js';
 
-describe('http-files — responses', () => {
-    test('parses status, header subset, and JSON body', () => {
+describe('http-file', () => {
+    test('http-files — responses — parses status, header subset, and JSON body', () => {
         // Given - a complete response file
         const parsed = parseResponseFile(
             'HTTP/1.1 201 Created\ncontent-type: application/json\n\n{ "id": 1 }\n',
@@ -17,7 +17,7 @@ describe('http-files — responses', () => {
         expect(parsed.body).toStrictEqual({ id: 1 });
     });
 
-    test('parses a body-less response', () => {
+    test('http-files — responses — parses a body-less response', () => {
         // Given - a status-only fixture
         const parsed = parseResponseFile('HTTP/1.1 204 No Content\n', 'responses/gone.http');
 
@@ -26,7 +26,7 @@ describe('http-files — responses', () => {
         expect(parsed.hasBody).toBeFalsy();
     });
 
-    test('rejects a first line that is not HTTP/1.1 <status>', () => {
+    test('http-files — responses — rejects a first line that is not HTTP/1.1 <status>', () => {
         // Given - a malformed response file
         // Then - the error names the file and the expected shape
         expect(() => parseResponseFile('200 OK\n', 'responses/bad.http')).toThrow(
@@ -34,7 +34,7 @@ describe('http-files — responses', () => {
         );
     });
 
-    test('rejects an empty response file', () => {
+    test('http-files — responses — rejects an empty response file', () => {
         // Given - an empty response file
         // Then - the first-line error fires (there is no status line)
         expect(() => parseResponseFile('', 'responses/empty.http')).toThrow(
@@ -42,7 +42,7 @@ describe('http-files — responses', () => {
         );
     });
 
-    test('parses a status without reason text', () => {
+    test('http-files — responses — parses a status without reason text', () => {
         // Given - a bare "HTTP/1.1 204" line
         const parsed = parseResponseFile('HTTP/1.1 204\n', 'responses/bare.http');
 
@@ -50,7 +50,7 @@ describe('http-files — responses', () => {
         expect(parsed.status).toBe('204');
     });
 
-    test('parses a {{number}} status placeholder', () => {
+    test('http-files — responses — parses a {{number}} status placeholder', () => {
         // Given - a tokenized status line (CONVENTIONS D4 applies to status too)
         const parsed = parseResponseFile('HTTP/1.1 {{number}}\n', 'responses/token.http');
 
@@ -58,7 +58,7 @@ describe('http-files — responses', () => {
         expect(parsed.status).toBe('{{number}}');
     });
 
-    test('falls back to the raw text for a non-JSON body', () => {
+    test('http-files — responses — falls back to the raw text for a non-JSON body', () => {
         // Given - a plain-text body
         const parsed = parseResponseFile(
             'HTTP/1.1 200 OK\n\nplain text, not JSON\n',
@@ -70,7 +70,7 @@ describe('http-files — responses', () => {
         expect(parsed.body).toBe('plain text, not JSON');
     });
 
-    test('serialize/parse round-trip keeps a {{number}} status placeholder', () => {
+    test('http-files — responses — serialize/parse round-trip keeps a {{number}} status placeholder', () => {
         // Given - a fixture serialized with a tokenized status
         const text = serializeResponseFile({
             body: { ok: true },
@@ -84,7 +84,7 @@ describe('http-files — responses', () => {
         expect(parseResponseFile(text, 'responses/roundtrip.http').status).toBe('{{number}}');
     });
 
-    test('serializes back to the .http format', () => {
+    test('http-files — responses — serializes back to the .http format', () => {
         // Given - a response description
         const text = serializeResponseFile({
             body: { id: '{{uuid}}' },
@@ -98,10 +98,8 @@ describe('http-files — responses', () => {
             'HTTP/1.1 200 OK\ncontent-type: application/json\n\n{\n    "id": "{{uuid}}"\n}\n',
         );
     });
-});
 
-describe('http-files — a body read by its content-type', () => {
-    test('a text type keeps its text, even one that would parse as JSON', () => {
+    test('http-files — a body read by its content-type — a text type keeps its text, even one that would parse as JSON', () => {
         // Given - bodies that parse as JSON, labelled as text
         const read = ['42', 'true', 'null'].map((text) =>
             readBody(text, 'text/plain; charset=UTF-8'),
@@ -111,7 +109,7 @@ describe('http-files — a body read by its content-type', () => {
         expect(read).toStrictEqual(['42', 'true', 'null']);
     });
 
-    test('a JSON type, or no type, is the value its text parses to, or the text when it does not parse', () => {
+    test('http-files — a body read by its content-type — a JSON type, or no type, is the value its text parses to, or the text when it does not parse', () => {
         // Given - the same bodies, labelled JSON, labelled nothing, and a JSON label on a text
         const read = [
             readBody('42', 'application/json'),
@@ -124,7 +122,7 @@ describe('http-files — a body read by its content-type', () => {
         expect(read).toStrictEqual([42, { ok: true }, 42, 'not json']);
     });
 
-    test('its surrounding whitespace is dropped, and a blank text holds no body', () => {
+    test('http-files — a body read by its content-type — its surrounding whitespace is dropped, and a blank text holds no body', () => {
         // Given - a text padded with spaces and blank lines, and a blank one
         const read = [readBody('  \n  hello \n\n', 'text/plain'), readBody(' \n ', 'text/plain')];
 
@@ -132,7 +130,7 @@ describe('http-files — a body read by its content-type', () => {
         expect(read).toStrictEqual(['hello', undefined]);
     });
 
-    test('a fixture is read by its own content-type first, then by the actual one', () => {
+    test('http-files — a body read by its content-type — a fixture is read by its own content-type first, then by the actual one', () => {
         // Given - a text fixture stating its type, one stating none, and a JSON type stated over a text actual
         const own = parseResponseFile('HTTP/1.1 200\ncontent-type: text/plain\n\n42\n', 'own.http');
         const borrowed = parseResponseFile('HTTP/1.1 200\n\n42\n', 'borrowed.http', 'text/plain');
@@ -146,7 +144,7 @@ describe('http-files — a body read by its content-type', () => {
         expect([own.body, borrowed.body, stated.body]).toStrictEqual(['42', '42', 42]);
     });
 
-    test('a text body is written as it is when its type is text, and reads back the same', () => {
+    test('http-files — a body read by its content-type — a text body is written as it is when its type is text, and reads back the same', () => {
         // Given - the text "42" recorded from a text/plain reply whose fixture states no type
         const text = serializeResponseFile(
             { body: '42', hasBody: true, headers: {}, status: '200' },

@@ -13,14 +13,14 @@ function pluginNames(project: TestProjectInlineConfiguration): string[] {
     );
 }
 
-describe('cli() — the binary, and the documents that specify it', () => {
-    test('cli() wires the literate door by default', () => {
+describe('cli.project', () => {
+    test('cli() — the binary, and the documents that specify it — cli() wires the literate door by default', () => {
         // Given - the canonical cli project
         // Then - the plugin that turns a document into a test file is there
         expect(pluginNames(cli())).toContain('jterrazz-test:literate');
     });
 
-    test('cli({ literate: false }) collects no documents', () => {
+    test('cli() — the binary, and the documents that specify it — cli({ literate: false }) collects no documents', () => {
         // Given - a repository whose cli facet has no documents
         // Then - the plugin is absent, and nothing else changed
         expect(pluginNames(cli({ literate: false }))).toStrictEqual([]);

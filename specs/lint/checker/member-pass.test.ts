@@ -7,8 +7,8 @@ import { cli } from '../checker.specification.js';
 const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
 const member = (name: string): string => `${WORKSPACE}/packages/${name}`;
 
-describe('checker CLI — the member pass', () => {
-    test('judges a member that has no specs/ root at all', async () => {
+describe('member-pass', () => {
+    test('checker CLI — the member pass — judges a member that has no specs/ root at all', async () => {
         // Given - a member with a test script, no config, and no spec tree
         const result = await cli.exec(`--member ${member('tested-no-config')} ${WORKSPACE}`);
 
@@ -17,7 +17,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.stderr.text).toContain('no vitest.config.ts');
     });
 
-    test('says nothing about a member that owes nothing', async () => {
+    test('checker CLI — the member pass — says nothing about a member that owes nothing', async () => {
         // Given - a member with a config and only optional peers declared
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE}`);
 
@@ -26,7 +26,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
     });
 
-    test('`--verbose` names the member it judged and the passes that ran', async () => {
+    test('checker CLI — the member pass — `--verbose` names the member it judged and the passes that ran', async () => {
         // Given - the same clean member, judged verbosely
         const result = await cli.exec(`--member ${member('clean')} ${WORKSPACE} --verbose`);
 
@@ -39,7 +39,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.stdout.text).not.toContain('c9-dead-fixtures');
     });
 
-    test("a root whose only tests are its members' owes no config", async () => {
+    test("checker CLI — the member pass — a root whose only tests are its members' owes no config", async () => {
         // Given - a workspace root that delegates `test` to its members
         const result = await cli.exec(`--member ${WORKSPACE} ${WORKSPACE} --verbose`);
 
@@ -48,7 +48,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.stdout.text).toContain('for member .');
     });
 
-    test('a member a nested glob claims is judged like any other', async () => {
+    test('checker CLI — the member pass — a member a nested glob claims is judged like any other', async () => {
         // Given - a member the root reaches through `apps/*/packages/*`
         const result = await cli.exec(
             `--format json --member ${WORKSPACE}/apps/site/packages/nested ${WORKSPACE}`,
@@ -59,7 +59,7 @@ describe('checker CLI — the member pass', () => {
         expect(result.stdout.text).toContain('is a seam `@jterrazz/test` replaced');
     });
 
-    test('--format json publishes the code the ratchet records under', async () => {
+    test('checker CLI — the member pass — --format json publishes the code the ratchet records under', async () => {
         // Given - a member declaring two dependencies the framework carries
         const result = await cli.exec(
             `--format json --member ${member('seam-dependency')} ${WORKSPACE}`,
@@ -87,7 +87,7 @@ describe('checker CLI — the member pass', () => {
         ]);
     });
 
-    test('reads the jest allowance the same from the member as from the root', async () => {
+    test('checker CLI — the member pass — reads the jest allowance the same from the member as from the root', async () => {
         // Given - the member whose tests an app BESIDE it runs, judged from the workspace root
         const fromRoot = await cli.exec(
             `--format json --member ${member('rn-library')} ${WORKSPACE}`,
@@ -104,7 +104,7 @@ describe('checker CLI — the member pass', () => {
         expect(fromMember.stdout.text.trim()).toBe(fromRoot.stdout.text.trim());
     });
 
-    test('a member directory that does not exist is operator error', async () => {
+    test('checker CLI — the member pass — a member directory that does not exist is operator error', async () => {
         // Given - a typo'd member path
         const result = await cli.exec(`--member ${WORKSPACE}/packages/nope ${WORKSPACE}`);
 

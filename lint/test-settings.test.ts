@@ -14,8 +14,8 @@ function unit(config?: string): string {
     return root;
 }
 
-describe('the test section of jterrazz.config.ts, as the checker reads it', () => {
-    test('the collections a unit declares are read, types stripped', () => {
+describe('testSettingsAt', () => {
+    test('the test section of jterrazz.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
         // Given - a config typed as a repository writes it
         const root = unit(
             "const collections: readonly string[] = ['data', 'people'];\nexport default { test: { collections } };\n",
@@ -25,7 +25,7 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         expect(testSettingsAt(root)).toStrictEqual({ collections: ['data', 'people'] });
     });
 
-    test('the method-less routes a unit declares are read', () => {
+    test('the test section of jterrazz.config.ts, as the checker reads it — the method-less routes a unit declares are read', () => {
         // Given - a unit whose api takes any method on /mcp
         const root = unit("export default { test: { methodless: ['/mcp'] } };\n");
 
@@ -33,7 +33,7 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         expect(testSettingsAt(root)).toStrictEqual({ methodless: ['/mcp'] });
     });
 
-    test('the test packages production runs are read with their reasons', () => {
+    test('the test section of jterrazz.config.ts, as the checker reads it — the test packages production runs are read with their reasons', () => {
         // Given - a unit whose service drives a browser
         const root = unit(
             "export default { test: { production: { allow: { playwright: 'the gate drives a browser in production' } } } };\n",
@@ -45,7 +45,7 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         });
     });
 
-    test('an allowed package with no reason leaves the whole list unread', () => {
+    test('the test section of jterrazz.config.ts, as the checker reads it — an allowed package with no reason leaves the whole list unread', () => {
         // Given - one package stated without the sentence that says why
         const root = unit(
             "export default { test: { production: { allow: { playwright: 'drives a browser', vitest: '' } } } };\n",
@@ -55,7 +55,7 @@ describe('the test section of jterrazz.config.ts, as the checker reads it', () =
         expect(testSettingsAt(root)).toStrictEqual({});
     });
 
-    test('no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
+    test('the test section of jterrazz.config.ts, as the checker reads it — no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
         // Given - four units the reading finds nothing usable in
         const roots = [
             unit(),

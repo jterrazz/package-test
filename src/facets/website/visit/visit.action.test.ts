@@ -48,8 +48,8 @@ function chainOver(sent: BrowserOpenOptions['headers'][]): Chain {
     }).open({ baseUrl: 'http://127.0.0.1:9' });
 }
 
-describe('.visit() — the page a chain renders', () => {
-    test("a view sends its headers on every visit, and a chain's own headers win for that chain alone", async () => {
+describe('visit', () => {
+    test(".visit() — the page a chain renders — a view sends its headers on every visit, and a chain's own headers win for that chain alone", async () => {
         // Given - a view sharing a header, over a browser recording the headers of each visit
         const sent: BrowserOpenOptions['headers'][] = [];
         const website = chainOver(sent).with({ headers: { 'x-chain': 'file' } });

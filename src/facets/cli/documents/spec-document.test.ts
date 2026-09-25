@@ -54,8 +54,8 @@ function refusalOf(content: string): SpecSyntaxError {
     throw new Error('expected the document to be refused, but it parsed');
 }
 
-describe('spec document — reading', () => {
-    test('a minimal document asserts empty streams', () => {
+describe('spec-document', () => {
+    test('spec document — reading — a minimal document asserts empty streams', () => {
         // Given - the smallest document the grammar accepts
         const document = parseSpecDocument(MINIMAL, 'case.spec.yaml');
 
@@ -67,7 +67,7 @@ describe('spec document — reading', () => {
         expect(document.runs[0]?.files).toStrictEqual([]);
     });
 
-    test('a block scalar keeps its final newline; `|-` drops it', () => {
+    test('spec document — reading — a block scalar keeps its final newline; `|-` drops it', () => {
         // Given - the two chomping forms, side by side
         const document = parseSpecDocument(
             [
@@ -91,7 +91,7 @@ describe('spec document — reading', () => {
         expect(document.runs[1]?.stdout?.text).toBe('dropped');
     });
 
-    test('a stream reports the line its CONTENT starts on, not the key line', () => {
+    test('spec document — reading — a stream reports the line its CONTENT starts on, not the key line', () => {
         // Given - `stdout: |` on line 5, its first content line on line 6
         const document = parseSpecDocument(
             [
@@ -112,7 +112,7 @@ describe('spec document — reading', () => {
     });
 
     test.each(['$FIXTURES/stub/', 'stub/', '/abs/stub/'])(
-        'a fixture that is not a relative path is refused on its line: %s',
+        'spec document — reading — a fixture that is not a relative path is refused on its line: %s',
         (path) => {
             // Given - the 16 spellings: a marker, a bare name, an absolute path
             const source = [
@@ -137,7 +137,7 @@ describe('spec document — reading', () => {
         ['./tree/', 'names no fixtures/ folder'],
         ['./seeds/fixtures/tree/', 'names seeds/'],
     ])(
-        'a fixture whose first ground folder is not fixtures/ is refused on its line (C24): %s',
+        'spec document — reading — a fixture whose first ground folder is not fixtures/ is refused on its line (C24): %s',
         (path, names) => {
             // Given - a path whose first ground folder is another role's, or none
             const source = [
@@ -157,7 +157,7 @@ describe('spec document — reading', () => {
     );
 
     test.each(['./fixtures/', './fixtures/tree/', '../../fixtures/seeds/one.sql'])(
-        'a fixture whose first ground folder is fixtures/ is read: %s',
+        'spec document — reading — a fixture whose first ground folder is fixtures/ is read: %s',
         (path) => {
             // Given - file state named through fixtures/, whatever it holds below
             const source = [
@@ -174,7 +174,7 @@ describe('spec document — reading', () => {
         },
     );
 
-    test('env and fixture take a bare string or a list, and serve carries extra env', () => {
+    test('spec document — reading — env and fixture take a bare string or a list, and serve carries extra env', () => {
         // Given - the three ground keys in both their forms
         const document = parseSpecDocument(
             [
@@ -208,7 +208,7 @@ describe('spec document — reading', () => {
         ]);
     });
 
-    test('files: reads all four forms of an on-disk assertion', () => {
+    test('spec document — reading — files: reads all four forms of an on-disk assertion', () => {
         // Given - contains (one and many), equals, and the two bare states
         const document = parseSpecDocument(
             [
@@ -236,10 +236,8 @@ describe('spec document — reading', () => {
             ['here', 'exists'],
         ]);
     });
-});
 
-describe('spec document — refusals', () => {
-    test('an unknown top-level key names the key and its line', () => {
+    test('spec document — refusals — an unknown top-level key names the key and its line', () => {
         // Given - a `given:` line, which this grammar does not know
         const refusal = refusalOf(
             `description: x\ngiven: something\nruns:\n  - command: a\n    exit: 0\n`,
@@ -251,7 +249,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain(DOCUMENT_KEYS.join(', '));
     });
 
-    test('an unknown run key names the run vocabulary', () => {
+    test('spec document — refusals — an unknown run key names the run vocabulary', () => {
         // Given - a run carrying `stdouts:`
         const refusal = refusalOf(
             `description: x\nruns:\n  - command: a\n    exit: 0\n    stdouts: y\n`,
@@ -263,7 +261,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain(RUN_KEYS.join(', '));
     });
 
-    test('a missing description is refused, and so is a missing exit', () => {
+    test('spec document — refusals — a missing description is refused, and so is a missing exit', () => {
         // Given - each mandatory key removed in turn
         // Then - the refusal names what the grammar demands
         expect(refusalOf('runs:\n  - command: a\n    exit: 0\n').message).toContain(
@@ -274,7 +272,7 @@ describe('spec document — refusals', () => {
         );
     });
 
-    test('exit must be a literal integer', () => {
+    test('spec document — refusals — exit must be a literal integer', () => {
         // Given - a quoted exit code
         const refusal = refusalOf(`description: x\nruns:\n  - command: a\n    exit: "0"\n`);
 
@@ -282,7 +280,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain('exit: must be a literal integer');
     });
 
-    test('waitFor is refused on any run but the last', () => {
+    test('spec document — refusals — waitFor is refused on any run but the last', () => {
         // Given - a long-running first run followed by a second
         const refusal = refusalOf(
             `description: x\nruns:\n  - command: serve\n    exit: 0\n    waitFor: listening\n  - command: b\n    exit: 0\n`,
@@ -292,7 +290,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain('waitFor: is only allowed on the LAST run');
     });
 
-    test('a kind is no key: an api or job case is a TypeScript spec', () => {
+    test('spec document — refusals — a kind is no key: an api or job case is a TypeScript spec', () => {
         // Given - a document stating the kind the grammar once read
         const refusal = refusalOf(
             `kind: api\ndescription: x\nruns:\n  - command: a\n    exit: 0\n`,
@@ -302,7 +300,7 @@ describe('spec document — refusals', () => {
         expect(refusal.message).toContain('unknown key "kind:" in a spec document');
     });
 
-    test('malformed YAML is refused with the parser’s own line', () => {
+    test('spec document — refusals — malformed YAML is refused with the parser’s own line', () => {
         // Given - a document that is not YAML at all
         const refusal = refusalOf('description: x\n  runs: [\n');
 
@@ -310,10 +308,8 @@ describe('spec document — refusals', () => {
         expect(refusal.line).toBeGreaterThan(0);
         expect(refusal.name).toBe('SpecSyntaxError');
     });
-});
 
-describe('spec document — update', () => {
-    test('rewrites exit and streams, keeping comments, key order and everything else', () => {
+    test('spec document — update — rewrites exit and streams, keeping comments, key order and everything else', () => {
         // Given - a document with a comment, a files: block and a stale golden
         const source = [
             '# the comment a rewrite must keep',
@@ -352,7 +348,7 @@ describe('spec document — update', () => {
         );
     });
 
-    test('a stream without a trailing newline is written `|-`, an empty one is removed', () => {
+    test('spec document — update — a stream without a trailing newline is written `|-`, an empty one is removed', () => {
         // Given - a document whose stderr is about to become empty
         const file = readSpecFile(
             `description: x\nruns:\n  - command: a\n    exit: 0\n    stderr: |\n      was here\n`,
@@ -367,7 +363,7 @@ describe('spec document — update', () => {
         expect(written).not.toContain('stderr');
     });
 
-    test('an inserted stream lands at its canonical position, not at the end', () => {
+    test('spec document — update — an inserted stream lands at its canonical position, not at the end', () => {
         // Given - a run with no streams and a files: block after the exit
         const file = readSpecFile(
             `description: x\nruns:\n  - command: a\n    exit: 0\n    files:\n      out.txt: exists\n`,
@@ -381,10 +377,8 @@ describe('spec document — update', () => {
         expect(written.indexOf('stdout')).toBeGreaterThan(written.indexOf('exit'));
         expect(written.indexOf('stdout')).toBeLessThan(written.indexOf('files'));
     });
-});
 
-describe('spec document — update at the document’s own indentation', () => {
-    test('a stdout opening on a space reads back byte for byte in a four-space document', () => {
+    test('spec document — update at the document’s own indentation — a stdout opening on a space reads back byte for byte in a four-space document', () => {
         // Given - a document formatted at four spaces, the step oxfmt writes YAML at
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -397,7 +391,7 @@ describe('spec document — update at the document’s own indentation', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('the same stdout reads back byte for byte in a two-space document', () => {
+    test('spec document — update at the document’s own indentation — the same stdout reads back byte for byte in a two-space document', () => {
         // Given - a two-space document, YAML's own default step
         const file = readSpecFile(TWO_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -410,7 +404,7 @@ describe('spec document — update at the document’s own indentation', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('a stdout opening on several spaces keeps every one of them', () => {
+    test('spec document — update at the document’s own indentation — a stdout opening on several spaces keeps every one of them', () => {
         // Given - a four-space document and a stream indented on its own
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
 
@@ -423,7 +417,7 @@ describe('spec document — update at the document’s own indentation', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('a stdout opening on a tab survives without an indicator', () => {
+    test('spec document — update at the document’s own indentation — a stdout opening on a tab survives without an indicator', () => {
         // Given - a four-space document and a tab-started stream, which YAML never reads as indentation
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
         const stdout = '\tTABBED\nback\n';
@@ -434,7 +428,7 @@ describe('spec document — update at the document’s own indentation', () => {
         expect(streamOf(written, 'stdout')).toBe(stdout);
     });
 
-    test('stderr states its indentation as stdout does', () => {
+    test('spec document — update at the document’s own indentation — stderr states its indentation as stdout does', () => {
         // Given - a four-space document and a warning that opens on a space
         const file = readSpecFile(FOUR_SPACE_DOCUMENT, 'case.spec.yaml');
         const stderr = ' WARN  deprecated flag\n';
@@ -445,7 +439,7 @@ describe('spec document — update at the document’s own indentation', () => {
         expect(streamOf(written, 'stderr')).toBe(stderr);
     });
 
-    test('the stdin and files: blocks an author wrote survive the rewrite unchanged', () => {
+    test('spec document — update at the document’s own indentation — the stdin and files: blocks an author wrote survive the rewrite unchanged', () => {
         // Given - a four-space document whose stdin and files.equals both open on A space, each stating the four spaces it is written at
         const source = [
             'description: keeps what it did not write',
@@ -473,10 +467,8 @@ describe('spec document — update at the document’s own indentation', () => {
             ' written out\n',
         );
     });
-});
 
-describe('spec document — the published schema', () => {
-    test('describes exactly the keys the parser reads', () => {
+    test('spec document — the published schema — describes exactly the keys the parser reads', () => {
         // Given - the schema shipped for editors
         // Then - its closed sets are the parser's own, so the two cannot drift
         expect(Object.keys(SPEC_SCHEMA.properties).sort()).toStrictEqual([...DOCUMENT_KEYS].sort());

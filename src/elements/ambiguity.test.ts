@@ -11,8 +11,8 @@ const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     ...overrides,
 });
 
-describe('formatElement', () => {
-    test('renders a descriptor as the source that would build it', () => {
+describe('ambiguity', () => {
+    test('formatElement — renders a descriptor as the source that would build it', () => {
         // Given - a plain named descriptor
         const element = link('Articles');
 
@@ -20,7 +20,7 @@ describe('formatElement', () => {
         expect(formatElement(element)).toBe('link("Articles")');
     });
 
-    test('renders the exact option', () => {
+    test('formatElement — renders the exact option', () => {
         // Given - a descriptor asking for a whole-name match
         const element = link('Articles', { exact: true });
 
@@ -28,7 +28,7 @@ describe('formatElement', () => {
         expect(formatElement(element)).toBe('link("Articles", { exact: true })');
     });
 
-    test('renders an anonymous landmark without arguments', () => {
+    test('formatElement — renders an anonymous landmark without arguments', () => {
         // Given - a landmark carrying no accessible name
         const element = main();
 
@@ -36,7 +36,7 @@ describe('formatElement', () => {
         expect(formatElement(element)).toBe('main()');
     });
 
-    test('renders a scope as the within() call that produced it', () => {
+    test('formatElement — renders a scope as the within() call that produced it', () => {
         // Given - a scoped descriptor
         const element = within(navigation(), link('Articles'));
 
@@ -44,7 +44,7 @@ describe('formatElement', () => {
         expect(formatElement(element)).toBe('within(navigation(), link("Articles"))');
     });
 
-    test('renders a nested scope outside-in', () => {
+    test('formatElement — renders a nested scope outside-in', () => {
         // Given - a target scoped twice
         const inner = within(region('Series'), link('Part 2'));
         const element = within(main(), inner);
@@ -54,10 +54,8 @@ describe('formatElement', () => {
             'within(within(main(), region("Series")), link("Part 2"))',
         );
     });
-});
 
-describe('describeAmbiguity', () => {
-    test('names the descriptor, the count and the page', () => {
+    test('describeAmbiguity — names the descriptor, the count and the page', () => {
         // Given - three candidates for one link
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -69,7 +67,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('link("Articles") matched 3 elements on http://site.test/');
     });
 
-    test('enumerates every candidate with its tag, detail and landmark', () => {
+    test('describeAmbiguity — enumerates every candidate with its tag, detail and landmark', () => {
         // Given - candidates sitting in different landmarks
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -85,7 +83,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('2. <a href="/articles">Articles</a>  in <footer>');
     });
 
-    test('suggests scoping to a landmark the candidates actually sit in', () => {
+    test('describeAmbiguity — suggests scoping to a landmark the candidates actually sit in', () => {
         // Given - candidates in a nav and a footer
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -99,7 +97,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('also here: contentinfo()');
     });
 
-    test('offers a named section as the region it is, and an unnamed one as nothing', () => {
+    test('describeAmbiguity — offers a named section as the region it is, and an unnamed one as nothing', () => {
         // Given - candidates in two named sections, one reached by its role, and one in an unnamed section
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -118,7 +116,7 @@ describe('describeAmbiguity', () => {
         expect(message).not.toContain('region()');
     });
 
-    test('does not offer a landmark that holds every candidate', () => {
+    test('describeAmbiguity — does not offer a landmark that holds every candidate', () => {
         // Given - two candidates in the same main
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -131,7 +129,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('within(<a container holding only this one>');
     });
 
-    test('names the accessible name when it is not the text that was matched', () => {
+    test('describeAmbiguity — names the accessible name when it is not the text that was matched', () => {
         // Given - a row button labelled by an aria-label, beside a dialog button
         const message = describeAmbiguity({
             element: link('Delete post'),
@@ -146,7 +144,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('named "Delete Post a"');
     });
 
-    test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
+    test('describeAmbiguity — offers exact to a descriptor that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const message = describeAmbiguity({
             element: link('Articles', { exact: false }),
@@ -159,7 +157,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('leaves 1 of 2');
     });
 
-    test('never offers exact to an ordinary descriptor — it is already exact', () => {
+    test('describeAmbiguity — never offers exact to an ordinary descriptor — it is already exact', () => {
         // Given - a descriptor stating nothing, which is the whole-name default
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -171,7 +169,7 @@ describe('describeAmbiguity', () => {
         expect(message).not.toContain('exact name');
     });
 
-    test('omits the exact suggestion when every candidate matches the name whole', () => {
+    test('describeAmbiguity — omits the exact suggestion when every candidate matches the name whole', () => {
         // Given - two identical names, where exact would change nothing
         const message = describeAmbiguity({
             element: link('Articles'),
@@ -183,7 +181,7 @@ describe('describeAmbiguity', () => {
         expect(message).not.toContain('exact: true');
     });
 
-    test('does not re-suggest scoping a descriptor that is already scoped', () => {
+    test('describeAmbiguity — does not re-suggest scoping a descriptor that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
         const message = describeAmbiguity({
             element: within(navigation(), link('Articles')),
@@ -196,7 +194,7 @@ describe('describeAmbiguity', () => {
         expect(message).toContain('other element');
     });
 
-    test('states the rule and where it is documented', () => {
+    test('describeAmbiguity — states the rule and where it is documented', () => {
         // Given - any refusal
         const message = describeAmbiguity({
             element: link('Articles'),

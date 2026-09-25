@@ -17,8 +17,8 @@ function idle(): DatabasePort {
     };
 }
 
-describe('databaseSet — the database a seed names', () => {
-    test('a key the record does not declare is refused, the declared keys listed', () => {
+describe('databaseSet', () => {
+    test('databaseSet — the database a seed names — a key the record does not declare is refused, the declared keys listed', () => {
         // Given - two named databases
         const databases = databaseSet({
             databases: new Map([
@@ -33,7 +33,7 @@ describe('databaseSet — the database a seed names', () => {
         );
     });
 
-    test('a seed on a runner that declares no database is refused', () => {
+    test('databaseSet — the database a seed names — a seed on a runner that declares no database is refused', () => {
         // Given - a runner with no database at all, and a seed that names none
         const databases = databaseSet({});
         const options: { database?: string } = {};

@@ -35,8 +35,8 @@ const SPEC = [
     '',
 ].join('\n');
 
-describe('the 16 → 17 mover (C13 --fix)', () => {
-    test('renames the ground folders and names every file by its path', () => {
+describe('checker-migration', () => {
+    test('the 16 → 17 mover (C13 --fix) — renames the ground folders and names every file by its path', () => {
         // Given - a leaf with its four ground folders and a spec on the 16 verbs
         const root = tree16({
             '_fixtures/shop/index.ts': '',
@@ -77,7 +77,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(existsSync(join(root, 'shared/fixtures/shop/index.ts'))).toBe(true);
     });
 
-    test('is idempotent on a tree already on 17', () => {
+    test('the 16 → 17 mover (C13 --fix) — is idempotent on a tree already on 17', () => {
         // Given - a tree the mover already moved
         const root = tree16({
             'api/users/expected/created.http': '',
@@ -97,7 +97,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         });
     });
 
-    test('never runs on a tree C13 finds on 17: its bare strings are values, or refusals kept on purpose', () => {
+    test('the 16 → 17 mover (C13 --fix) — never runs on a tree C13 finds on 17: its bare strings are values, or refusals kept on purpose', () => {
         // Given - a 17 tree (no 16 folder) whose negative spec hands the verbs what they must refuse
         const source = [
             "import { directory, file } from '@jterrazz/test';",
@@ -122,7 +122,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
 
-    test('moves the prototype verbs, and a path spelled in full against a 16 folder', () => {
+    test('the 16 → 17 mover (C13 --fix) — moves the prototype verbs, and a path spelled in full against a 16 folder', () => {
         // Given - the intermediate form: …File verbs, old folder names, a relative entry import
         const root = tree16({
             'api/users/_seeds/users.sql': '',
@@ -148,7 +148,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
+    test('the 16 → 17 mover (C13 --fix) — leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
         // Given - a raw SQL string, a non-http request argument, an unknown marker, and a document with a fixture list
         const root = tree16({
             '_fixtures/shop/index.ts': '',
@@ -187,7 +187,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('never enters ground: a fixture project keeps the 16 folders it is made of', () => {
+    test('the 16 → 17 mover (C13 --fix) — never enters ground: a fixture project keeps the 16 folders it is made of', () => {
         // Given - a pool entry and a leaf fixture that are 16 trees ON PURPOSE (a negative case's input)
         const root = tree16({
             'fixtures/old-tree/specs/app/_expected/out.txt': '',
@@ -202,7 +202,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(migration.renamed).toStrictEqual([]);
     });
 
-    test('a stream compared as a value reads its text, and a golden stays on the accessor', () => {
+    test('the 16 → 17 mover (C13 --fix) — a stream compared as a value reads its text, and a golden stays on the accessor', () => {
         // Given - the 16 value matchers on stream accessors, beside a golden and a text already read
         const root = tree16({
             'cli/build/_expected/build.txt': '',
@@ -242,7 +242,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('moves the module tests of a member that still stand on a 16 folder, and only those', () => {
+    test('the 16 → 17 mover (C13 --fix) — moves the module tests of a member that still stand on a 16 folder, and only those', () => {
         // Given - a member whose module test reads a 16 golden, beside a nested package and a specs tree it must not walk
         const member = tree16(
             {
@@ -286,7 +286,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('leaves the module tests of a member on 17 as they are', () => {
+    test('the 16 → 17 mover (C13 --fix) — leaves the module tests of a member on 17 as they are', () => {
         // Given - a member whose module tests stand on bare ground only
         const member = tree16(
             {
@@ -306,7 +306,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         });
     });
 
-    test('a directive naming a renamed rule names its new id, and the line it covers reads the raw capture', () => {
+    test('the 16 → 17 mover (C13 --fix) — a directive naming a renamed rule names its new id, and the line it covers reads the raw capture', () => {
         // Given - a 16 tree whose tests suppress D8w by its 16 id, on the next line and on its own
         const root = tree16({
             'cli/build/_expected/build.txt': '',
@@ -336,7 +336,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('the 16 id of C2 names its 17 id, and the line it covers keeps its reads', () => {
+    test('the 16 → 17 mover (C13 --fix) — the 16 id of C2 names its 17 id, and the line it covers keeps its reads', () => {
         // Given - a 17 tree suppressing C2 by the id it had while `requests/` held `.http` only
         const root = tree16({
             'api/orders/orders.spec.ts': [
@@ -361,7 +361,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
+    test('the 16 → 17 mover (C13 --fix) — a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
         // Given - a 17 tree (no 16 folder) an earlier, ungated mover left naming the 16 id
         const root = tree16({
             'cli/build/build.spec.ts': [
@@ -395,7 +395,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(second).toStrictEqual({ directives: [], renamed: [], rewritten: [], stubs: [] });
     });
 
-    test('renames the directive of a module test on 17 too', () => {
+    test('the 16 → 17 mover (C13 --fix) — renames the directive of a module test on 17 too', () => {
         // Given - a member whose module tests stand on bare ground, one suppressing D8w by its 16 id
         const member = tree16(
             {
@@ -418,7 +418,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('a directive is read in a comment, never in a string that spells one', () => {
+    test('the 16 → 17 mover (C13 --fix) — a directive is read in a comment, never in a string that spells one', () => {
         // Given - a 17 test whose Given is a 16 source, the directive and its read held in string literals
         const source = [
             'const given = [',
@@ -437,7 +437,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'lint/mover/mover.test.ts'), 'utf8')).toBe(source);
     });
 
-    test('the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
+    test('the 16 → 17 mover (C13 --fix) — the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
         // Given - one leaf still on 16 (its golden folder), and another leaf on 17 whose negative spec keeps the 16 spellings on purpose
         const refusal = [
             "import { file } from '@jterrazz/test';",
@@ -463,7 +463,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'cli/refusal/refusal.spec.ts'), 'utf8')).toBe(refusal);
     });
 
-    test('a 16 pool reaches only the files that name it', () => {
+    test('the 16 → 17 mover (C13 --fix) — a 16 pool reaches only the files that name it', () => {
         // Given - a 16 pool, a spec naming it by the 16 prefix, and a 17 spec that does not
         const other = "await expect(api.seed('users.sql' as never)).rejects.toThrow();\n";
         const root = tree16({
@@ -480,7 +480,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(other);
     });
 
-    test('a module test naming the 16 pool follows it, and a command naming it is left', () => {
+    test('the 16 → 17 mover (C13 --fix) — a module test naming the 16 pool follows it, and a command naming it is left', () => {
         // Given - a 16 pool, and a module test of the member resolving it and running it
         const root = tree16({ '_fixtures/workspace/main.js': '' });
         const moduleTest = join(dirname(root), 'lint/member.test.ts');
@@ -508,7 +508,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('a stream asserted empty is an empty text, and a table keeps its matcher', () => {
+    test('the 16 → 17 mover (C13 --fix) — a stream asserted empty is an empty text, and a table keeps its matcher', () => {
         // Given - 16's toBeEmpty on streams, awaited and negated, beside a table's
         const root = tree16({
             'integration/call/_expected/x.txt': '',
@@ -534,7 +534,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('every text member of a facet compared as a value reads its text, and a value stays a value', () => {
+    test('the 16 → 17 mover (C13 --fix) — every text member of a facet compared as a value reads its text, and a value stays a value', () => {
         // Given - a website, a component and an integration result, each text member compared as a value, beside a call's value
         const root = tree16({
             'website/home/_expected/x.txt': '',
@@ -568,7 +568,7 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
         );
     });
 
-    test('a range directive naming a renamed rule is renamed, and the block it covers keeps its reads', () => {
+    test('the 16 → 17 mover (C13 --fix) — a range directive naming a renamed rule is renamed, and the block it covers keeps its reads', () => {
         // Given - a 16 tree suppressing D8w by its 16 id over a block, in both comment forms
         const root = tree16({
             'cli/build/_expected/build.txt': '',
@@ -595,10 +595,8 @@ describe('the 16 → 17 mover (C13 --fix)', () => {
             ].join('\n'),
         );
     });
-});
 
-describe('the 16 → 17 mover — the oxlint config', () => {
-    test('an override of a retired rule leaves with its comment, and one of a renamed rule names its 17 id', () => {
+    test('the 16 → 17 mover — the oxlint config — an override of a retired rule leaves with its comment, and one of a renamed rule names its 17 id', () => {
         // Given - a member whose config overrides D12w, retired into D20, and D8w under its 16 id
         const member = tree16(
             {
@@ -648,7 +646,7 @@ describe('the 16 → 17 mover — the oxlint config', () => {
         ]);
     });
 
-    test('the last override of a JSON config leaves no trailing comma, and a second run changes nothing', () => {
+    test('the 16 → 17 mover — the oxlint config — the last override of a JSON config leaves no trailing comma, and a second run changes nothing', () => {
         // Given - a JSON config whose last rule is retired
         const member = tree16(
             {
@@ -669,7 +667,7 @@ describe('the 16 → 17 mover — the oxlint config', () => {
         expect(again).toStrictEqual([]);
     });
 
-    test('an override of F3, a rule 17 retired, leaves too', () => {
+    test('the 16 → 17 mover — the oxlint config — an override of F3, a rule 17 retired, leaves too', () => {
         // Given - a member that turned 16's F3 off for its specs
         const member = tree16(
             {

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — c20-facet-folder (CONVENTIONS C20)', () => {
+describe('c20-facet-folder', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stream is asserted, tokens covering the run cwd.

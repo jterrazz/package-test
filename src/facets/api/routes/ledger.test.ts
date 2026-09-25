@@ -14,8 +14,8 @@ function scratch(): string {
     return directory;
 }
 
-describe('route coverage — the ledgers', () => {
-    test('every ledger the run wrote is read back, and measured together', () => {
+describe('ledger', () => {
+    test('route coverage — the ledgers — every ledger the run wrote is read back, and measured together', () => {
         // Given - two specifications' ledgers
         const directory = join(scratch(), 'routes');
         writeLedger(directory, { declared: [{ method: 'GET', path: '/a' }], reached: [] });
@@ -27,10 +27,8 @@ describe('route coverage — the ledgers', () => {
             reached: [{ method: 'GET', path: '/a' }],
         });
     });
-});
 
-describe('route coverage — where a worker writes its ledger', () => {
-    test('a run whose global setup provides no ledger measures no route coverage', async () => {
+    test('route coverage — where a worker writes its ledger — a run whose global setup provides no ledger measures no route coverage', async () => {
         // Given - the unit project, which declares no route-coverage setup
         const ledger = await routesLedger();
 

@@ -35,8 +35,8 @@ function chainOver(): { chain: Chain; resized: { height: number; width: number }
     return { chain: facet.open({}), resized };
 }
 
-describe('.viewport() — the page size one render gets', () => {
-    test('resizes the page to the size stated last, once', async () => {
+describe('viewport', () => {
+    test('.viewport() — the page size one render gets — resizes the page to the size stated last, once', async () => {
         // Given - a chain that narrowed the page, then stated another size
         const { chain, resized } = chainOver();
         await chain
@@ -48,7 +48,7 @@ describe('.viewport() — the page size one render gets', () => {
         expect(resized).toStrictEqual([{ height: 800, width: 360 }]);
     });
 
-    test('leaves the page alone when the chain states no size', async () => {
+    test('.viewport() — the page size one render gets — leaves the page alone when the chain states no size', async () => {
         // Given - a chain with no viewport of its own
         const { chain, resized } = chainOver();
         await chain.settle();

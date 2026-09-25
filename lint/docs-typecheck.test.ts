@@ -42,8 +42,19 @@ function frameworkBlocks(): DocBlock[] {
     );
 }
 
-describe('docs-typecheck — block selection', () => {
-    test('keeps a framework block, drops an app-code block', () => {
+/**
+ * The result accessors the compiler types as SYNCHRONOUS, whatever facet they
+ * came from. `tsc` alone does not catch an `await` on one — awaiting a
+ * non-promise is legal TypeScript — but the toolchain's `await-thenable` pass
+ * refuses it in every consumer, so a chapter that prescribes the awaited form
+ * hands the reader a file their own gate rejects.
+ *
+ * A component's accessors are deliberately absent: their capture crosses the
+ * browser seam, so `await` is right there and chapter 14 says so.
+ */
+const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value'];
+describe('docs-typecheck', () => {
+    test('docs-typecheck — block selection — keeps a framework block, drops an app-code block', () => {
         // Given - one block importing only the framework, one importing app code
         const framework = { code: "import { specification } from '@jterrazz/test';\n", jsx: false };
         const appCode = { code: "import { createApp } from '../src/app.js';\n", jsx: false };
@@ -53,7 +64,7 @@ describe('docs-typecheck — block selection', () => {
         expect(isFrameworkBlock(appCode)).toBeFalsy();
     });
 
-    test('rewrites the framework specifier to the repo entry', () => {
+    test('docs-typecheck — block selection — rewrites the framework specifier to the repo entry', () => {
         // Given - a framework import
         const rewritten = rewriteFrameworkImports(
             "import { specification } from '@jterrazz/test';",
@@ -64,10 +75,8 @@ describe('docs-typecheck — block selection', () => {
         expect(rewritten).toContain("'/abs/src/index.js'");
         expect(rewritten).not.toContain('@jterrazz/test');
     });
-});
 
-describe('docs-typecheck — the published samples typecheck', () => {
-    test('every framework code block in docs/ compiles against src/', () => {
+    test('docs-typecheck — the published samples typecheck — every framework code block in docs/ compiles against src/', () => {
         // Given - the framework-only ```typescript and ```tsx blocks across docs/
         const blocks = frameworkBlocks();
         expect(blocks.length).toBeGreaterThan(0);
@@ -90,7 +99,7 @@ describe('docs-typecheck — the published samples typecheck', () => {
         expect(result.ok).toBeTruthy();
     }, 60_000);
 
-    test('a framework block that drifts from the API is rejected', () => {
+    test('docs-typecheck — the published samples typecheck — a framework block that drifts from the API is rejected', () => {
         // Given - a framework block with a type error (the drift this guard exists to catch)
         const drifted: DocBlock = {
             code: "import { specification } from '@jterrazz/test';\nconst count: number = 'not a number';\nvoid specification;\nvoid count;\n",
@@ -108,24 +117,10 @@ describe('docs-typecheck — the published samples typecheck', () => {
         expect(result.ok).toBeFalsy();
         expect(result.output).not.toBe('');
     }, 60_000);
-});
 
-/**
- * The result accessors the compiler types as SYNCHRONOUS, whatever facet they
- * came from. `tsc` alone does not catch an `await` on one — awaiting a
- * non-promise is legal TypeScript — but the toolchain's `await-thenable` pass
- * refuses it in every consumer, so a chapter that prescribes the awaited form
- * hands the reader a file their own gate rejects.
- *
- * A component's accessors are deliberately absent: their capture crosses the
- * browser seam, so `await` is right there and chapter 14 says so.
- */
-const SYNC_SUBJECTS = ['error', 'json', 'response', 'stderr', 'stdout', 'value'];
+    /** `toBeEmpty()` is not in the sweep: it is a table's matcher, and a table's is async. */
 
-/** `toBeEmpty()` is not in the sweep: it is a table's matcher, and a table's is async. */
-
-describe('docs-typecheck — the corpus does not await a sync matcher', () => {
-    test('no page writes `await expect(result.<sync>).toMatch(file(`', () => {
+    test('docs-typecheck — the corpus does not await a sync matcher — no page writes `await expect(result.<sync>).toMatch(file(`', () => {
         // Given - every page a consumer is routed to
         const pages = [
             { name: 'README.md', text: readFileSync(README, 'utf8') },
@@ -143,11 +138,9 @@ describe('docs-typecheck — the corpus does not await a sync matcher', () => {
         );
         expect(offenders, 'the toolchain refuses this as await-thenable').toStrictEqual([]);
     });
-});
 
-// Sanity: the harness paths the test depends on exist (guards silent skips).
-describe('docs-typecheck — harness', () => {
-    test('the tsc binary and docs directory are present', () => {
+    // Sanity: the harness paths the test depends on exist (guards silent skips).
+    test('docs-typecheck — harness — the tsc binary and docs directory are present', () => {
         // Given - the repo layout
         // Then - the meta-test can actually run over every published surface
         expect(existsSync(TSC_BIN)).toBeTruthy();

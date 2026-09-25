@@ -69,8 +69,8 @@ function toyFacet(): { located: () => number; toy: Toy } {
     return { located: () => calls, toy: facet.open({}) };
 }
 
-describe('defineFacet — the chain a composition opens', () => {
-    test('every setup hands back a new chain, and the chain it came from keeps what it was told', async () => {
+describe('defineFacet', () => {
+    test('defineFacet — the chain a composition opens — every setup hands back a new chain, and the chain it came from keeps what it was told', async () => {
         // Given - a chain told one thing, and a branch of it told another
         const { toy } = toyFacet();
         const base = toy.note('seeded');
@@ -90,7 +90,7 @@ describe('defineFacet — the chain a composition opens', () => {
         }).toStrictEqual({ base: ['seeded'], branch: ['seeded', 'stamped'], fresh: [] });
     });
 
-    test('the first call that is not with() fixes where the chain’s paths start', async () => {
+    test('defineFacet — the chain a composition opens — the first call that is not with() fixes where the chain’s paths start', async () => {
         // Given - a file-wide view, then a chain of it told two things
         const { located, toy } = toyFacet();
         const shared = toy.with({ clock: '2026-03-04T09:30:00Z' });
@@ -105,7 +105,7 @@ describe('defineFacet — the chain a composition opens', () => {
         });
     });
 
-    test('with() folds each setting through the setup that states it, and ignores the rest', async () => {
+    test('defineFacet — the chain a composition opens — with() folds each setting through the setup that states it, and ignores the rest', async () => {
         // Given - a context naming the shared setup, and a key this facet composes no setup for
         const { toy } = toyFacet();
         const shared = toy.with({ clock: '2026-03-04T09:30:00Z', headers: { 'x-a': '1' } });

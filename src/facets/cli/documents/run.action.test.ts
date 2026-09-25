@@ -6,8 +6,8 @@ import { run } from './run.action.js';
 /** A reader no setup of these runs is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
-describe('.run() — the document a chain runs', () => {
-    test('refuses a file that is not a .spec.yaml document', async () => {
+describe('run', () => {
+    test('.run() — the document a chain runs — refuses a file that is not a .spec.yaml document', async () => {
         // Given - a caller the compiler does not see, handing a file of another kind
 
         // Then - it is refused, naming the extension a document has

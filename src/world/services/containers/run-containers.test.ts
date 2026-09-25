@@ -9,8 +9,8 @@ import {
     unreachable,
 } from './testcontainers.adapter.fixtures.js';
 
-describe('the run containers', () => {
-    test('answer two requests alike with one container, started once', async () => {
+describe('RunContainers', () => {
+    test('the run containers — answer two requests alike with one container, started once', async () => {
         // Given - two requests for the same container, asked at the same time
         const runtime = fakeRuntime();
         const run = new RunContainers(runtime.create);
@@ -25,7 +25,7 @@ describe('the run containers', () => {
         expect(first.port).toBe(40_001);
     });
 
-    test('start a container of its own for each request that differs', async () => {
+    test('the run containers — start a container of its own for each request that differs', async () => {
         // Given - a postgres and a redis
         const runtime = fakeRuntime();
         const run = new RunContainers(runtime.create);
@@ -36,7 +36,7 @@ describe('the run containers', () => {
         expect([postgres.port, redis.port]).toStrictEqual([40_001, 40_002]);
     });
 
-    test('answer every request with the runtime refusal, and create nothing', async () => {
+    test('the run containers — answer every request with the runtime refusal, and create nothing', async () => {
         // Given - a runtime that never became reachable
         const runtime = fakeRuntime();
         const run = new RunContainers(runtime.create, unreachable);
@@ -46,7 +46,7 @@ describe('the run containers', () => {
         expect(runtime.created).toHaveLength(0);
     });
 
-    test('keep no container whose start failed — the next request starts one again', async () => {
+    test('the run containers — keep no container whose start failed — the next request starts one again', async () => {
         // Given - a runtime whose first start fails
         const runtime = fakeRuntime({ failFirstStart: true });
         const run = new RunContainers(runtime.create);
@@ -60,7 +60,7 @@ describe('the run containers', () => {
         expect(address.port).toBe(40_002);
     });
 
-    test('stop every container the run started', async () => {
+    test('the run containers — stop every container the run started', async () => {
         // Given - two containers of the project
         const runtime = fakeRuntime();
         const run = new RunContainers(runtime.create);

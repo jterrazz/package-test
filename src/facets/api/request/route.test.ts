@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { routeRequest } from './route.js';
 
-describe('routeRequest', () => {
-    test('fills the template with its params, each value encoded, the query kept', () => {
+describe('route', () => {
+    test('routeRequest — fills the template with its params, each value encoded, the query kept', () => {
         // Given - a template with two parameters and a query
         const request = routeRequest('GET', '/indicators/:symbol/points/:at?range=1D', {
             params: { at: 3, symbol: 'btc/usd' },
@@ -16,7 +16,7 @@ describe('routeRequest', () => {
         });
     });
 
-    test('sends a path with no parameter as written, and `{ params: {} }` makes it the template', () => {
+    test('routeRequest — sends a path with no parameter as written, and `{ params: {} }` makes it the template', () => {
         // Given - the same literal path, bare and stated as the route
         // Then - bare, no template is read; stated, the path is its own template
         expect(routeRequest('GET', '/users/me')).toStrictEqual({ path: '/users/me' });
@@ -26,7 +26,7 @@ describe('routeRequest', () => {
         });
     });
 
-    test('refuses a template handed no params, naming the call to write', () => {
+    test('routeRequest — refuses a template handed no params, naming the call to write', () => {
         // Given - a template whose parameter has no value
         // Then - the four parts, the call written with the parameter
         expect(() => routeRequest('GET', '/events/:id')).toThrow(
@@ -37,7 +37,7 @@ describe('routeRequest', () => {
         );
     });
 
-    test('refuses a parameter with no value and a value no parameter takes', () => {
+    test('routeRequest — refuses a parameter with no value and a value no parameter takes', () => {
         // Given - params that miss one name and add another
         // Then - both named, in one refusal
         expect(() => routeRequest('DELETE', '/events/:id', { params: { eventId: 7 } })).toThrow(

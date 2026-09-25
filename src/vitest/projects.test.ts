@@ -11,8 +11,8 @@ function testOf(
     return project.test ?? {};
 }
 
-describe('unit() — module tests, and only module tests', () => {
-    test('collects .test.ts outside specs/ and leaves .test.tsx to the browser', () => {
+describe('projects', () => {
+    test('unit() — module tests, and only module tests — collects .test.ts outside specs/ and leaves .test.tsx to the browser', () => {
         // Given - the canonical project, stated by nobody
         const project = testOf(unit());
 
@@ -23,7 +23,7 @@ describe('unit() — module tests, and only module tests', () => {
         expect(project.name).toBe('unit');
     });
 
-    test('carries the preset budget, and the one a project states instead', () => {
+    test('unit() — module tests, and only module tests — carries the preset budget, and the one a project states instead', () => {
         // Given - a project that needs longer than the shared 30s
         const stated = testOf(unit({ timeout: 60_000 }));
 
@@ -32,7 +32,7 @@ describe('unit() — module tests, and only module tests', () => {
         expect(testOf(unit()).testTimeout).toBe(30_000);
     });
 
-    test('takes the globs a project states over the canonical ones', () => {
+    test('unit() — module tests, and only module tests — takes the globs a project states over the canonical ones', () => {
         // Given - a repository whose modules do not sit at the root
         const project = testOf(unit({ exclude: [], include: ['packages/**/*.test.ts'] }));
 
@@ -40,7 +40,7 @@ describe('unit() — module tests, and only module tests', () => {
         expect(project.include).toStrictEqual(['packages/**/*.test.ts']);
     });
 
-    test('turns the trees a repository names into the globs that collect them', () => {
+    test('unit() — module tests, and only module tests — turns the trees a repository names into the globs that collect them', () => {
         // Given - a repository whose modules live under two roots
         const project = testOf(unit({ roots: ['packages', 'apps/'] }));
 
@@ -48,7 +48,7 @@ describe('unit() — module tests, and only module tests', () => {
         expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/**/*.test.ts']);
     });
 
-    test('shares one module graph per worker when a pure project says so, and isolates otherwise', () => {
+    test('unit() — module tests, and only module tests — shares one module graph per worker when a pure project says so, and isolates otherwise', () => {
         // Given - a project whose tests leave no state behind, and one stated by nobody
         const shared = testOf(unit({ isolate: false }));
 
@@ -57,15 +57,13 @@ describe('unit() — module tests, and only module tests', () => {
         expect(testOf(unit())).not.toHaveProperty('isolate');
     });
 
-    test('runs before either browser project', () => {
+    test('unit() — module tests, and only module tests — runs before either browser project', () => {
         // Given - the canonical project
         // Then - node first (0), the page facets after
         expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
     });
-});
 
-describe('the node facet helpers — one canonical project per kind', () => {
-    test('each collects its own facet tree, under its own name', () => {
+    test('the node facet helpers — one canonical project per kind — each collects its own facet tree, under its own name', () => {
         // Given - the canonical projects, stated by nobody
         // Then - `--project api` means the same tree in every repository
         expect(
@@ -77,7 +75,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
     });
 
-    test('the facets that declare services carry the setup that starts them once per project', () => {
+    test('the node facet helpers — one canonical project per kind — the facets that declare services carry the setup that starts them once per project', () => {
         // Given - the global setups of the three facets whose specs declare containers
         const setups = [api(), job(), integration()].map((project) => testOf(project).globalSetup);
 
@@ -88,7 +86,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(servicesSetup()).toMatch(/run-setup\.ts$/u);
     });
 
-    test('node facets run first, and the simulator runs alone at the end', () => {
+    test('the node facet helpers — one canonical project per kind — node facets run first, and the simulator runs alone at the end', () => {
         // Given - the group order each helper states
         const orders = [api(), job(), integration(), cli(), mobile()].map(
             (project) => testOf(project).sequence?.groupOrder,
@@ -98,7 +96,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(orders).toStrictEqual([0, 0, 0, 0, 3]);
     });
 
-    test('takes the tree and the budget a repository states instead', () => {
+    test('the node facet helpers — one canonical project per kind — takes the tree and the budget a repository states instead', () => {
         // Given - a facet whose tree and budget are not the convention's
         const stated = testOf(
             api({
@@ -118,7 +116,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(stated.name).toBe('api');
     });
 
-    test('a node facet states its own serial run, the way website() does', () => {
+    test('the node facet helpers — one canonical project per kind — a node facet states its own serial run, the way website() does', () => {
         // Given - an integration suite whose files share one database file
         const shared = testOf(integration({ serial: true }));
 
@@ -127,7 +125,7 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(testOf(integration()).fileParallelism).toBeUndefined();
     });
 
-    test('every helper takes it, not only the ones 15.2 shipped it on', () => {
+    test('the node facet helpers — one canonical project per kind — every helper takes it, not only the ones 15.2 shipped it on', () => {
         // Given - the four other helpers this release adds
         const serial = [api, job, mobile].map((helper) => testOf(helper({ serial: true })));
 

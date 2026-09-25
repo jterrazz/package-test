@@ -11,8 +11,8 @@ function request(overrides: Partial<MatchableRequest> = {}): MatchableRequest {
     return { body: null, headers: {}, method: 'POST', url: URL, ...overrides };
 }
 
-describe('http — request builders', () => {
-    test('every verb builds an http request half, and any() wildcards the method', () => {
+describe('http', () => {
+    test('http — request builders — every verb builds an http request half, and any() wildcards the method', () => {
         // Given - the six request builders
         // Then - each carries its method, the adapter, and the declared url
         expect(http.get(URL).method).toBe('GET');
@@ -25,17 +25,15 @@ describe('http — request builders', () => {
         expect(http.get('/articles/{{uuid}}').url).toBe('/articles/{{uuid}}');
     });
 
-    test('leaves match undefined so any url/method request fires', () => {
+    test('http — request builders — leaves match undefined so any url/method request fires', () => {
         // Given - a bare request half
         const declared = http.post(URL);
 
         // Then - there is no request-level matcher
         expect(declared.match).toBeUndefined();
     });
-});
 
-describe('http — response builders', () => {
-    test('json defaults to 200 and takes status, headers, and delay from init', () => {
+    test('http — response builders — json defaults to 200 and takes status, headers, and delay from init', () => {
         // Given - a bare and a configured json response
         // Then - the init options land on the response envelope
         expect(http.json({ ok: true })).toStrictEqual({
@@ -49,7 +47,7 @@ describe('http — response builders', () => {
         ).toStrictEqual({ status: 201, body: { ok: true }, delay: 50, headers: { etag: 'w/1' } });
     });
 
-    test('text serves a plain-text body', () => {
+    test('http — response builders — text serves a plain-text body', () => {
         // Given - a text response
         const response = http.text('hello');
 
@@ -58,7 +56,7 @@ describe('http — response builders', () => {
         expect(response.headers?.['content-type']).toBe('text/plain; charset=utf-8');
     });
 
-    test('error defaults its body and accepts an explicit one', () => {
+    test('http — response builders — error defaults its body and accepts an explicit one', () => {
         // Given - an error with and without a body
         // Then - the default body names the status; an explicit body is served as-is
         expect(http.error(500)).toStrictEqual({ status: 500, body: { error: 'HTTP 500' } });
@@ -68,16 +66,14 @@ describe('http — response builders', () => {
         });
     });
 
-    test('empty is a body-less 204 by default', () => {
+    test('http — response builders — empty is a body-less 204 by default', () => {
         // Given - the empty response builder
         // Then - no body, and the status is overridable
         expect(http.empty()).toStrictEqual({ status: 204, body: null });
         expect(http.empty(202).status).toBe(202);
     });
-});
 
-describe('http — body filter', () => {
-    test('object body is a deep SUBSET match; extra keys are ignored', () => {
+    test('http — body filter — object body is a deep SUBSET match; extra keys are ignored', () => {
         // Given - a filter on a nested subset of the body
         const declared = http.post(URL, { body: { user: { role: 'admin' } } });
 
@@ -88,7 +84,7 @@ describe('http — body filter', () => {
         expect(declared.match!(request({ body: { user: { role: 'guest' } } }))).toBeFalsy();
     });
 
-    test('object body accepts match.* matchers as leaf values', () => {
+    test('http — body filter — object body accepts match.* matchers as leaf values', () => {
         // Given - a subset filter whose leaf is a dynamic matcher
         const declared = http.post(URL, { body: { id: match.uuid() } });
 
@@ -99,7 +95,7 @@ describe('http — body filter', () => {
         expect(declared.match!(request({ body: { id: 'not-a-uuid' } }))).toBeFalsy();
     });
 
-    test('string body is a containment test over the raw text body', () => {
+    test('http — body filter — string body is a containment test over the raw text body', () => {
         // Given - a substring filter
         const declared = http.post(URL, { body: 'needle' });
 
@@ -108,7 +104,7 @@ describe('http — body filter', () => {
         expect(declared.match!(request({ body: 'nothing here' }))).toBeFalsy();
     });
 
-    test('string body containment also spans a stringified JSON body', () => {
+    test('http — body filter — string body containment also spans a stringified JSON body', () => {
         // Given - a filter that looks for a value serialized in the body
         const declared = http.post(URL, { body: 'alice' });
 
@@ -116,7 +112,7 @@ describe('http — body filter', () => {
         expect(declared.match!(request({ body: { user: 'alice' } }))).toBeTruthy();
     });
 
-    test('a RegExp body tests the raw text body', () => {
+    test('http — body filter — a RegExp body tests the raw text body', () => {
         // Given - a pattern filter
         const declared = http.post(URL, { body: /order-\d+/u });
 
@@ -124,10 +120,8 @@ describe('http — body filter', () => {
         expect(declared.match!(request({ body: 'order-42 placed' }))).toBeTruthy();
         expect(declared.match!(request({ body: 'order-none' }))).toBeFalsy();
     });
-});
 
-describe('http — header filter', () => {
-    test('header names are case-insensitive; string is exact, RegExp tests', () => {
+    test('http — header filter — header names are case-insensitive; string is exact, RegExp tests', () => {
         // Given - a header subset filter mixing string and RegExp
         const declared = http.get(URL, {
             headers: { Authorization: /^Bearer /u, 'X-Env': 'prod' },
@@ -148,10 +142,8 @@ describe('http — header filter', () => {
         ).toBeFalsy();
         expect(declared.match!(request({ headers: { 'x-env': 'prod' } }))).toBeFalsy();
     });
-});
 
-describe('http — query filter', () => {
-    test('matches a subset of URL search params; string exact, RegExp tests', () => {
+    test('http — query filter — matches a subset of URL search params; string exact, RegExp tests', () => {
         // Given - a query subset filter
         const declared = http.get(URL, { query: { page: /^\d+$/u, tag: 'news' } });
 
@@ -163,7 +155,7 @@ describe('http — query filter', () => {
         expect(declared.match!(request({ url: `${URL}?page=3` }))).toBeFalsy();
     });
 
-    test('a relative observed url still exposes its query params', () => {
+    test('http — query filter — a relative observed url still exposes its query params', () => {
         // Given - the stub backend's origin-relative url
         const declared = http.get('/articles', { query: { locale: 'fr' } });
 
@@ -171,10 +163,8 @@ describe('http — query filter', () => {
         expect(declared.match!(request({ url: '/articles?locale=fr' }))).toBeTruthy();
         expect(declared.match!(request({ url: '/articles?locale=en' }))).toBeFalsy();
     });
-});
 
-describe('http — combined filter', () => {
-    test('every provided facet must match', () => {
+    test('http — combined filter — every provided facet must match', () => {
         // Given - a filter across body, headers, and query
         const declared = http.post(URL, {
             body: { action: 'create' },
@@ -204,10 +194,8 @@ describe('http — combined filter', () => {
             ),
         ).toBeFalsy();
     });
-});
 
-describe('http — responses', () => {
-    test('unreachable() is a transport failure, not a status', () => {
+    test('http — responses — unreachable() is a transport failure, not a status', () => {
         // Given - the collection declared unreachable
         const response = http.unreachable();
 
@@ -215,16 +203,14 @@ describe('http — responses', () => {
         expect(response).toStrictEqual({ body: null, transport: 'network-error' });
     });
 
-    test('error() still answers with a status, which unreachable() never does', () => {
+    test('http — responses — error() still answers with a status, which unreachable() never does', () => {
         // Given - the two ways a call can go wrong
         // Then - one has a reply and the other has none
         expect(http.error(503).status).toBe(503);
         expect(http.unreachable().status).toBeUndefined();
     });
-});
 
-describe('http — streamed responses', () => {
-    test('stream() keeps the pieces and their order, never a serialised value', () => {
+    test('http — streamed responses — stream() keeps the pieces and their order, never a serialised value', () => {
         // Given - a reply declared as three pieces
         const response = http.stream(['Hel', 'lo, ', 'world'], {
             contentType: 'text/plain',
@@ -241,7 +227,7 @@ describe('http — streamed responses', () => {
         });
     });
 
-    test('sse() frames one chunk per event, as an EventSource reads them', () => {
+    test('http — streamed responses — sse() frames one chunk per event, as an EventSource reads them', () => {
         // Given - a named event, a JSON payload and a plain one
         const response = http.sse([
             { data: { token: 'Hel' } },
@@ -260,7 +246,7 @@ describe('http — streamed responses', () => {
         });
     });
 
-    test('sse() splits a multi-line payload into one data line each', () => {
+    test('http — streamed responses — sse() splits a multi-line payload into one data line each', () => {
         // Given - an event whose payload carries a newline
         const response = http.sse([{ data: 'first\nsecond' }]);
 

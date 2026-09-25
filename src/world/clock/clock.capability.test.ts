@@ -28,8 +28,8 @@ function chain(engine: ClockPort = processClock): Chain {
     }).open({});
 }
 
-describe('.clock() — the calendar a chain pins', () => {
-    test('pins the instant for the action alone', async () => {
+describe('clock', () => {
+    test('.clock() — the calendar a chain pins — pins the instant for the action alone', async () => {
         // Given - a chain pinned at an instant
         const pinned = await chain().clock('2026-03-04T09:30:00.000Z').now();
 
@@ -40,7 +40,7 @@ describe('.clock() — the calendar a chain pins', () => {
         });
     });
 
-    test('judges the instant when the chain is armed, whatever the engine pins', async () => {
+    test('.clock() — the calendar a chain pins — judges the instant when the chain is armed, whatever the engine pins', async () => {
         // Given - a chain stated with something that is not an instant, on an engine that pins nothing
         const stated = chain({ pin: () => ({}) }).clock('soon');
 

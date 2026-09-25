@@ -49,8 +49,20 @@ class FakeChild implements ObservableProcess {
     }
 }
 
-describe('exec adapter — buildEnv', () => {
-    test('merges overrides on top of process.env; null unsets; INIT_CWD is cleared', () => {
+let child: FakeChild;
+
+describe('ExecAdapter', () => {
+    beforeEach(() => {
+        // Given - fake timers and a scripted child
+        vi.useFakeTimers();
+        child = new FakeChild();
+    });
+
+    afterEach(() => {
+        vi.useRealTimers();
+    });
+
+    test('exec adapter — buildEnv — merges overrides on top of process.env; null unsets; INIT_CWD is cleared', () => {
         // Given - a known parent variable and a set of overrides
         process.env.EXEC_ADAPTER_TEST_VAR = 'parent';
 
@@ -65,22 +77,8 @@ describe('exec adapter — buildEnv', () => {
             delete process.env.EXEC_ADAPTER_TEST_VAR;
         }
     });
-});
 
-describe('exec adapter — observeProcess', () => {
-    let child: FakeChild;
-
-    beforeEach(() => {
-        // Given - fake timers and a scripted child
-        vi.useFakeTimers();
-        child = new FakeChild();
-    });
-
-    afterEach(() => {
-        vi.useRealTimers();
-    });
-
-    test('resolves 0 when the waitFor pattern appears, then terminates the child', async () => {
+    test('exec adapter — observeProcess — resolves 0 when the waitFor pattern appears, then terminates the child', async () => {
         // Given - a long-running observation
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
 
@@ -97,7 +95,7 @@ describe('exec adapter — observeProcess', () => {
         expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
-    test('escalates SIGTERM to SIGKILL after the 2s grace period', async () => {
+    test('exec adapter — observeProcess — escalates SIGTERM to SIGKILL after the 2s grace period', async () => {
         // Given - a child that matches the pattern but ignores SIGTERM
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
         child.emitStderr('ready\n');
@@ -110,7 +108,7 @@ describe('exec adapter — observeProcess', () => {
         expect(child.killed).toStrictEqual(['SIGTERM', 'SIGKILL']);
     });
 
-    test('does not SIGKILL a child that exits within the grace period', async () => {
+    test('exec adapter — observeProcess — does not SIGKILL a child that exits within the grace period', async () => {
         // Given - a resolved observation with the child dying on SIGTERM
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'ready' });
         child.emitStdout('ready\n');
@@ -124,7 +122,7 @@ describe('exec adapter — observeProcess', () => {
         expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
-    test('resolves 124 at the timeout when the pattern never appears', async () => {
+    test('exec adapter — observeProcess — resolves 124 at the timeout when the pattern never appears', async () => {
         // Given - a silent child
         const promise = observeProcess(child, { timeout: 3000, waitFor: 'never' });
 
@@ -136,7 +134,7 @@ describe('exec adapter — observeProcess', () => {
         expect(child.killed).toStrictEqual(['SIGTERM']);
     });
 
-    test('an exit before the pattern is a failure even with code 0', async () => {
+    test('exec adapter — observeProcess — an exit before the pattern is a failure even with code 0', async () => {
         // Given - a waitFor observation whose child exits cleanly first
         const promise = observeProcess(child, { timeout: 5000, waitFor: 'never' });
 
@@ -147,7 +145,7 @@ describe('exec adapter — observeProcess', () => {
         await expect(promise).resolves.toMatchObject({ exitCode: 1 });
     });
 
-    test('without waitFor, a clean exit within the timeout keeps its code', async () => {
+    test('exec adapter — observeProcess — without waitFor, a clean exit within the timeout keeps its code', async () => {
         // Given - no pattern, just a bounded run
         const promise = observeProcess(child, { timeout: 5000 });
 
@@ -159,7 +157,7 @@ describe('exec adapter — observeProcess', () => {
         await expect(promise).resolves.toStrictEqual({ exitCode: 7, stderr: 'done\n', stdout: '' });
     });
 
-    test('the timeout never fires after an early resolution', async () => {
+    test('exec adapter — observeProcess — the timeout never fires after an early resolution', async () => {
         // Given - a resolved observation
         const promise = observeProcess(child, { timeout: 3000, waitFor: 'ready' });
         child.emitStdout('ready\n');

@@ -20,8 +20,8 @@ function tagsOf(stubs: readonly Stub[]): string[] {
     });
 }
 
-describe('stubs — defineStub', () => {
-    test('accepts a dynamic response function of the request', () => {
+describe('stub', () => {
+    test('stubs — defineStub — accepts a dynamic response function of the request', () => {
         // Given - a stub whose response derives from the observed request
         const stub = defineStub({
             request: anthropic.messages(),
@@ -45,10 +45,8 @@ describe('stubs — defineStub', () => {
         const { content } = produced.body as { content: { text: string }[] };
         expect(content[0]?.text).toBe('echo:hi');
     });
-});
 
-describe('stubs — defineStubs composition', () => {
-    test('flattens stubs, lists, and other composites, order preserved', () => {
+    test('stubs — defineStubs composition — flattens stubs, lists, and other composites, order preserved', () => {
         // Given - a composite built from a stub, a list, and a composite
         const base = defineStubs(route('GET', '/a', 'a'));
         const composite = defineStubs(
@@ -61,7 +59,7 @@ describe('stubs — defineStubs composition', () => {
         expect(tagsOf(composite.stubs)).toStrictEqual(['a', 'b', 'c', 'd']);
     });
 
-    test('.with() replaces same-route stubs and prepends the overrides', () => {
+    test('stubs — defineStubs composition — .with() replaces same-route stubs and prepends the overrides', () => {
         // Given - a two-route world and an override on one of them
         const base = defineStubs(route('GET', '/events', 'events'), route('GET', '/a', 'a'));
 
@@ -72,7 +70,7 @@ describe('stubs — defineStubs composition', () => {
         expect(tagsOf(scenario.stubs)).toStrictEqual(['events-empty', 'a']);
     });
 
-    test('.with() keeps a generic route but the more specific override wins first-match', () => {
+    test('stubs — defineStubs composition — .with() keeps a generic route but the more specific override wins first-match', () => {
         // Given - a generic token route, overridden by a concrete path
         const base = defineStubs(route('GET', '/articles/{{uuid}}', 'generic'));
 
@@ -83,7 +81,7 @@ describe('stubs — defineStubs composition', () => {
         expect(tagsOf(scenario.stubs)).toStrictEqual(['gone', 'generic']);
     });
 
-    test('same-route is method + declared url source, RegExp compared by source', () => {
+    test('stubs — defineStubs composition — same-route is method + declared url source, RegExp compared by source', () => {
         // Given - one route declared as a RegExp, plus a same-url POST
         const base = defineStubs(
             route('GET', /articles\/\d+/u, 'get-re'),
@@ -97,7 +95,7 @@ describe('stubs — defineStubs composition', () => {
         expect(tagsOf(scenario.stubs)).toStrictEqual(['override', 'post-re']);
     });
 
-    test('.with() is immutable — the base composite is untouched', () => {
+    test('stubs — defineStubs composition — .with() is immutable — the base composite is untouched', () => {
         // Given - a base composite
         const base = defineStubs(route('GET', '/events', 'events'));
 

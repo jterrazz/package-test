@@ -25,8 +25,8 @@ function spec(depth: number): string {
     return `import { api } from '${'../'.repeat(depth)}api.specification.js';\n`;
 }
 
-describe('c35 — a spec of a specimen is filed by its capability', () => {
-    test('a spec of a specimen filed by its route, or under no capability, is refused', () => {
+describe('checkCapabilityFolder', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a spec of a specimen filed by its route, or under no capability, is refused', () => {
         // Given - three specs of a specimen: by route, under a grab-bag, one folder too deep
         const root = specsTree({
             'api/api.specification.ts': SPECIMEN,
@@ -45,7 +45,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]);
     });
 
-    test('a capability another column declares is no folder of this facet', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a capability another column declares is no folder of this facet', () => {
         // Given - a cli spec of a specimen filed under `appium/`, a capability of the mobile column
         const root = specsTree({
             'cli/cli.specification.ts':
@@ -59,7 +59,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]);
     });
 
-    test('a capability folder passes, and a spec of the project’s own app is C30’s', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a capability folder passes, and a spec of the project’s own app is C30’s', () => {
         // Given - a specimen spec under seed/, and a project whose runner starts its own app
         const specimen = specsTree({
             'api/api.specification.ts': SPECIMEN,
@@ -77,7 +77,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]).toStrictEqual([]);
     });
 
-    test('a reasoned suppression above the first line of code keeps a spec where it is', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a reasoned suppression above the first line of code keeps a spec where it is', () => {
         // Given - a spec of a specimen by its route, silenced above its first import
         const root = specsTree({
             'api/api.specification.ts': SPECIMEN,
@@ -91,7 +91,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ).toStrictEqual(['api/users/get/reading.spec.ts:2']);
     });
 
-    test('a repository suite, which has no column, files a specimen’s spec under a capability of any', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a repository suite, which has no column, files a specimen’s spec under a capability of any', () => {
         // Given - a suite's specs of a specimen under an api capability, a mobile one, and neither
         const suite = "import { surface } from '../surface.specification.js';\n";
         const root = specsTree({
@@ -108,7 +108,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]);
     });
 
-    test('an integration spec is filed by capability when its module is the shared fixtures’, and its author’s when inline', () => {
+    test('c35 — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is the shared fixtures’, and its author’s when inline', () => {
         // Given - two specs on a module-only runner under a folder the matrix never names
         const runner = "import { integration } from '../pure.specification.js';\n";
         const root = specsTree({
@@ -124,7 +124,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         ]);
     });
 
-    test('a file of the component tree outside a component capability folder is refused', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a file of the component tree outside a component capability folder is refused', () => {
         // Given - a pair at the tree's root, one under a folder the matrix never names, one under a capability of another column, one a folder too deep, and the project's frame at the root
         const root = specsTree({
             'component/post-table.test.tsx': "import { PostTable } from './post-table.js';\n",
@@ -152,7 +152,7 @@ describe('c35 — a spec of a specimen is filed by its capability', () => {
         );
     });
 
-    test('a component capability folder passes, and a reasoned suppression keeps a file where it is', () => {
+    test('c35 — a spec of a specimen is filed by its capability — a component capability folder passes, and a reasoned suppression keeps a file where it is', () => {
         // Given - a pair under intercept/, a hook and its test under render/, and a silenced file at the root
         const root = specsTree({
             'component/intercept/post-table.test.tsx':

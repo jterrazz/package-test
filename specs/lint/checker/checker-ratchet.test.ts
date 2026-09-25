@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — checker CLI, the ratchet is exact', () => {
-    test('a count below its entry breaks the ratchet: the debt fell, and the entry says so', async () => {
+describe('checker-ratchet', () => {
+    test('lint — checker CLI, the ratchet is exact — a count below its entry breaks the ratchet: the debt fell, and the entry says so', async () => {
         // Given - one dead fixture, held by an entry of three, and an entry whose rule is at zero
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -21,7 +21,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         `);
     });
 
-    test('`--fix` re-records what fell, and the run it records is held', async () => {
+    test('lint — checker CLI, the ratchet is exact — `--fix` re-records what fell, and the run it records is held', async () => {
         // Given - the same fallen ratchet, fixed
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -43,7 +43,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         );
     });
 
-    test('`--fix` never records debt that grew: a new key stays a breach', async () => {
+    test('lint — checker CLI, the ratchet is exact — `--fix` never records debt that grew: a new key stays a breach', async () => {
         // Given - a paid entry and an unrecorded finding, fixed
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -64,7 +64,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         );
     });
 
-    test("`--fix` applies the plugin's own fixes before it counts: one run settles what they write", async () => {
+    test("lint — checker CLI, the ratchet is exact — `--fix` applies the plugin's own fixes before it counts: one run settles what they write", async () => {
         // Given - every chain of a spec states one clock, and another rulebook's fixer is armed
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
@@ -107,7 +107,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.file('oxlint.test-fix.config.mjs').exists).toBe(false);
     });
 
-    test("`--fix` applies the plugin's own fixes when the root arms it through `extends`", async () => {
+    test("lint — checker CLI, the ratchet is exact — `--fix` applies the plugin's own fixes when the root arms it through `extends`", async () => {
         // Given - the same project, its plugin and the other fixer armed only by a config the root extends
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
@@ -125,7 +125,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.file('src/nothing.ts').content).toContain('nothing(undefined)');
     });
 
-    test('`--fix` settles a JSON root that extends a commented JSON, and a `.jsonc` subtree, in one run', async () => {
+    test('lint — checker CLI, the ratchet is exact — `--fix` settles a JSON root that extends a commented JSON, and a `.jsonc` subtree, in one run', async () => {
         // Given - recorded debt in two trees: the root's `.oxlintrc.json` extends a commented JSON, and a commented `.oxlintrc.jsonc` governs web/
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-own-fixes-json/'))
@@ -147,7 +147,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         }
     });
 
-    test("`--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
+    test("lint — checker CLI, the ratchet is exact — `--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
         // Given - a spec still named `.test.ts`, whose chains all state one clock, fixed on the root member
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
@@ -188,7 +188,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         );
     });
 
-    test('`--fix` refuses a report written before its fixes', async () => {
+    test('lint — checker CLI, the ratchet is exact — `--fix` refuses a report written before its fixes', async () => {
         // Given - the fixable project, and a report handed in beside the fixer
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-own-fixes/'))
@@ -201,7 +201,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         `);
     });
 
-    test('a green run over a section that holds nothing prints `nothing held`', async () => {
+    test('lint — checker CLI, the ratchet is exact — a green run over a section that holds nothing prints `nothing held`', async () => {
         // Given - a clean project, recorded — an emptied section — then judged
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures-ok/'))
@@ -213,7 +213,7 @@ describe('lint — checker CLI, the ratchet is exact', () => {
         expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
     });
 
-    test("a green run over a section holding only the run's `routes/unreached` counts it held", async () => {
+    test("lint — checker CLI, the ratchet is exact — a green run over a section holding only the run's `routes/unreached` counts it held", async () => {
         // Given - a clean project whose section holds the api run's key alone
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures-ok/'))

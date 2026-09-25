@@ -191,8 +191,8 @@ function unresetState(source: string): string[] {
     return unreset.map((name) => `${source.slice(ROOT.length + 1)}: ${name}`);
 }
 
-describe('rule-shape — a rule built once judges each file as if it were the only one', () => {
-    test('what a rule keeps for one file is reset when the next one opens', () => {
+describe('rule-shape', () => {
+    test('rule-shape — a rule built once judges each file as if it were the only one — what a rule keeps for one file is reset when the next one opens', () => {
         // Given - every rule module, and the state its `createOnce` keeps between hooks
         const unreset = ruleSources().flatMap((source) => unresetState(source));
 
@@ -200,7 +200,7 @@ describe('rule-shape — a rule built once judges each file as if it were the on
         expect(unreset).toStrictEqual([]);
     });
 
-    test('every rule draws the same verdicts from a file, alone or after its whole corpus', () => {
+    test('rule-shape — a rule built once judges each file as if it were the only one — every rule draws the same verdicts from a file, alone or after its whole corpus', () => {
         // Given - each rule's E2E fixture corpus, linted file by file with a visitor of their own, then twice through ONE visitor
         const drifted: string[] = [];
         let verdicts = 0;

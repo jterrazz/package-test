@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import { HonoAdapter } from './hono.adapter.js';
 
-describe('the hono adapter — the routes an app declares', () => {
-    test('an app.all() route is declared, a middleware is not, and a sub-app keeps its routes behind an error handler', () => {
+describe('HonoAdapter', () => {
+    test('the hono adapter — the routes an app declares — an app.all() route is declared, a middleware is not, and a sub-app keeps its routes behind an error handler', () => {
         // Given - middleware at the root and under a prefix, a route for every method, a get, and a sub-app with its own error handler
         const app = new Hono();
         app.use('*', cors());
@@ -25,17 +25,15 @@ describe('the hono adapter — the routes an app declares', () => {
         ]);
     });
 
-    test('an app with no table declares nothing known', () => {
+    test('the hono adapter — the routes an app declares — an app with no table declares nothing known', () => {
         // Given - a request function alone
         const adapter = new HonoAdapter({ request: () => Response.json({}) });
 
         // Then - the table is unknown, not empty
         expect(adapter.declared()).toBeUndefined();
     });
-});
 
-describe('the hono adapter — the requests it sent', () => {
-    test('records each request by its path, and by the template it was written as', async () => {
+    test('the hono adapter — the requests it sent — records each request by its path, and by the template it was written as', async () => {
         // Given - an item route, reached once written as a template and once as a path
         const app = new Hono();
         app.get('/users/:id', (context) => context.json({ id: context.req.param('id') }));
@@ -49,10 +47,8 @@ describe('the hono adapter — the requests it sent', () => {
             { method: 'GET', path: '/users/8' },
         ]);
     });
-});
 
-describe('the hono adapter — the body it read', () => {
-    test('a JSON body is its value, any other body its text, an empty body nothing', async () => {
+    test('the hono adapter — the body it read — a JSON body is its value, any other body its text, an empty body nothing', async () => {
         // Given - a route per kind of body an app answers with
         const app = new Hono();
         app.get('/json', (context) => context.json({ ok: true }));
@@ -81,7 +77,7 @@ describe('the hono adapter — the body it read', () => {
         ]);
     });
 
-    test('a type named neither text nor binary is read, and only a binary type drops its body', async () => {
+    test('the hono adapter — the body it read — a type named neither text nor binary is read, and only a binary type drops its body', async () => {
         // Given - a YAML document, a GraphQL query, and an archive
         const app = new Hono();
         app.get('/schema', (context) =>
@@ -112,7 +108,7 @@ describe('the hono adapter — the body it read', () => {
         ]);
     });
 
-    test('a text type is its text though it parses as JSON, and a binary type is not read', async () => {
+    test('the hono adapter — the body it read — a text type is its text though it parses as JSON, and a binary type is not read', async () => {
         // Given - a text reply that reads as a number, and an image
         const app = new Hono();
         app.get('/count', (context) => context.text('42'));

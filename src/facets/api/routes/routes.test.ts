@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { openApiRoutes, reachesRoute, unreachedRoutes } from './routes.js';
 
-describe('route coverage — what a request reaches', () => {
-    test('a parameter takes one segment, a wildcard the rest, and a query is no segment', () => {
+describe('routes', () => {
+    test('route coverage — what a request reaches — a parameter takes one segment, a wildcard the rest, and a query is no segment', () => {
         // Given - routes of both parameter spellings and a wildcard
         const byId = { method: 'GET', path: '/users/:id' };
         const braced = { method: 'PUT', path: '/users/{id}' };
@@ -17,7 +17,7 @@ describe('route coverage — what a request reaches', () => {
         expect(reachesRoute(assets, { method: 'GET', path: '/assets/css/site.css' })).toBe(true);
     });
 
-    test('a request written as a template is matched by its template, not by the path it filled', () => {
+    test('route coverage — what a request reaches — a request written as a template is matched by its template, not by the path it filled', () => {
         // Given - an item route, a literal route its path would also fill, and one OpenAPI spelling
         const byId = { method: 'GET', path: '/users/:id' };
         const me = { method: 'GET', path: '/users/me' };
@@ -30,7 +30,7 @@ describe('route coverage — what a request reaches', () => {
         expect(reachesRoute(me, templated)).toBe(false);
     });
 
-    test('a literal path stated as its template reaches the literal route alone; unstated, every route it fits', () => {
+    test('route coverage — what a request reaches — a literal path stated as its template reaches the literal route alone; unstated, every route it fits', () => {
         // Given - an item route and the literal route its path also fills
         const byId = { method: 'GET', path: '/users/:id' };
         const me = { method: 'GET', path: '/users/me' };
@@ -43,7 +43,7 @@ describe('route coverage — what a request reaches', () => {
         expect(reachesRoute(byId, { method: 'GET', path: '/users/me' })).toBe(true);
     });
 
-    test('names each declared route no request reached, once, in the order declared', () => {
+    test('route coverage — what a request reaches — names each declared route no request reached, once, in the order declared', () => {
         // Given - a table declaring GET /users twice, and one request
         const declared = [
             { method: 'GET', path: '/users' },
@@ -59,7 +59,7 @@ describe('route coverage — what a request reaches', () => {
         ]);
     });
 
-    test('an OpenAPI document declares every method of every path, YAML or JSON', () => {
+    test('route coverage — what a request reaches — an OpenAPI document declares every method of every path, YAML or JSON', () => {
         // Given - one path with two methods and a non-method key
         const yaml =
             'paths:\n    /users:\n        get: {}\n        post: {}\n        parameters: []\n';

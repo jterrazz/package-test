@@ -18,8 +18,8 @@ const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge'];
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-describe('the Makefile — the six targets a repository answers', () => {
-    test('this repository declares the six, and the three beside them, each phony', () => {
+describe('makefile', () => {
+    test('the Makefile — the six targets a repository answers — this repository declares the six, and the three beside them, each phony', () => {
         // Given - this repository's Makefile
         const targets = makefileAt(ROOT);
         const verbs = [...MAKE_TARGETS, ...BESIDE_TARGETS].toSorted();
@@ -33,7 +33,7 @@ describe('the Makefile — the six targets a repository answers', () => {
         ).toStrictEqual(verbs);
     });
 
-    test('`check` never reaches a target beside the six', () => {
+    test('the Makefile — the six targets a repository answers — `check` never reaches a target beside the six', () => {
         // Given - the targets `check` runs, and what they run in turn
         const targets = makefileAt(ROOT);
         const reached = new Set<string>();
@@ -59,7 +59,7 @@ describe('the Makefile — the six targets a repository answers', () => {
         expect(reached.has('test')).toBe(true);
     });
 
-    test("`fix` builds first, for the checker it runs is this build's", () => {
+    test("the Makefile — the six targets a repository answers — `fix` builds first, for the checker it runs is this build's", () => {
         // Given - the fix target
         const fix = makefileAt(ROOT).get('fix');
 
@@ -72,7 +72,7 @@ describe('the Makefile — the six targets a repository answers', () => {
         { checker: 1, toolchain: 0 },
         { checker: 0, toolchain: 0 },
     ])(
-        '`fix` runs both fixers whatever each says, and fails when either did ($toolchain, $checker)',
+        'the Makefile — the six targets a repository answers — `fix` runs both fixers whatever each says, and fails when either did ($toolchain, $checker)',
         ({ checker, toolchain }) => {
             // Given - the two fixers stood in for by stubs that log their call and exit as told
             const bin = mkdtempSync(join(tmpdir(), 'makefile-fix-'));
@@ -107,7 +107,7 @@ describe('the Makefile — the six targets a repository answers', () => {
         },
     );
 
-    test('reads a rule, its recipe and its prerequisites, never an assignment', () => {
+    test('the Makefile — the six targets a repository answers — reads a rule, its recipe and its prerequisites, never an assignment', () => {
         // Given - a rule over a file target, a comment inside the recipe, and a variable
         const targets = makeTargets(
             [

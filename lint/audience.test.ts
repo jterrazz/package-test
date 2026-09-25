@@ -77,7 +77,7 @@ function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
 /** The channels whose every row is something the published surface does to a consumer. */
 const PUBLISHED_CHANNELS = new Set(['runtime', 'type', 'upstream']);
 
-describe('k12 — the tarball exposes no self rule (meta-test)', () => {
+describe('audience', () => {
     // Under the run's temp root, which the run removes whole
     const scratch = mkdtempSync(join(tmpdir(), 'k12-tarball-'));
     const installed = extractTarball(ROOT, scratch);

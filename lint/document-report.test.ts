@@ -18,8 +18,8 @@ function tree(files: Record<string, string>): string {
     return root;
 }
 
-describe('k10 — a lint-rule document goldens its report (meta-test)', () => {
-    test('no lint-rule document of this package asserts a failing exit with no report', () => {
+describe('silentLintFailures', () => {
+    test('k10 — a lint-rule document goldens its report (meta-test) — no lint-rule document of this package asserts a failing exit with no report', () => {
         // Given - every lint-rule document of this package's own suite
         const silent = silentLintFailures(ROOT);
 
@@ -27,7 +27,7 @@ describe('k10 — a lint-rule document goldens its report (meta-test)', () => {
         expect(silent).toStrictEqual([]);
     });
 
-    test('names a document that pins a failing exit with neither stdout nor stderr golden', () => {
+    test('k10 — a lint-rule document goldens its report (meta-test) — names a document that pins a failing exit with neither stdout nor stderr golden', () => {
         // Given - one document that goldens nothing, one that goldens stderr, one that stays silent on a passing run, and one under a fixture tree a violation is fed through
         const root = tree({
             'specs/lint/c1-domain-structure/fixtures/violation/rejects.spec.yaml':

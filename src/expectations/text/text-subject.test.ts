@@ -5,7 +5,7 @@ import { registerMatchers } from '../goldens/matchers.js';
 import { text } from './text-subject.js';
 import { TextAccessor } from './text.js';
 
-describe('text() — ad-hoc string as a golden subject', () => {
+describe('text', () => {
     beforeAll(async () => {
         await registerMatchers();
     });

@@ -38,120 +38,7 @@ function schemaValidator(): (data: unknown) => string[] {
  */
 const BEYOND_A_SCHEMA = new Map<string, string>();
 
-describe('the published schema validates every document of the tree (meta-test)', () => {
-    test('every document the parser reads, the schema validates', () => {
-        // Given - every `.spec.yaml` of the repository, the ones the parser reads
-        const read = schemaVerdicts(ROOT, schemaValidator()).filter(
-            ({ parser }) => parser === null,
-        );
-
-        // Then - none carries a schema error: an editor never flags what the runner runs
-        expect(read.length).toBeGreaterThan(150);
-        expect(read.filter(({ schema }) => schema.length > 0)).toStrictEqual([]);
-    });
-
-    test('a document the parser refuses is an input, kept under fixtures/', () => {
-        // Given - every document the parser refuses
-        const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
-            ({ parser }) => parser !== null,
-        );
-
-        // Then - each is deliberately invalid: no live document is one
-        expect(refused.length).toBeGreaterThan(0);
-        expect(refused.filter(({ file }) => !isFixture(file))).toStrictEqual([]);
-    });
-
-    test('a document the parser refuses, the schema refuses — but for what no schema can state', () => {
-        // Given - every document the parser refuses, less the refusals no JSON Schema keyword can express
-        const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
-            ({ file, parser }) => parser !== null && !BEYOND_A_SCHEMA.has(file),
-        );
-
-        // Then - the schema refuses each of them too: an editor flags what the runner refuses
-        expect(refused.filter(({ schema }) => schema.length === 0)).toStrictEqual([]);
-    });
-
-    test('the walk reads the documents git keeps, and nothing it ignores', () => {
-        // Given - the documents the walk found
-        const documents = specDocuments(ROOT);
-
-        // Then - the cli's and the lint rules' documents are there, and no dependency's is
-        expect(documents.some((file) => file.startsWith('specs/cli/'))).toBe(true);
-        expect(documents.some((file) => file.startsWith('specs/lint/'))).toBe(true);
-        expect(documents.some((file) => file.includes('node_modules/'))).toBe(false);
-    });
-});
-
-describe('what no keyword states, the parser alone refuses', () => {
-    const validate = schemaValidator();
-
-    test('a waitFor on a run before the last: no keyword addresses the last item of a list', () => {
-        // Given - one run that waits, followed by another; the schema holds only that at most one run waits
-        const text =
-            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: ping\n      exit: 0\n';
-
-        // Then - the parser refuses it, and the schema cannot
-        expect(parserRefusal(text, 'case.spec.yaml')).toContain(
-            'waitFor: is only allowed on the LAST run',
-        );
-        expect(validate(documentData(text))).toStrictEqual([]);
-    });
-});
-
-describe('the published schema refuses a wrong document', () => {
-    const validate = schemaValidator();
-
-    test.each([
-        ['cli', 'a document with no runs', 'description: x\nfixture: ./fixtures/shop/\n'],
-        [
-            'cli',
-            'a fixture whose first ground folder is seeds/',
-            'description: x\nfixture: ./seeds/fixtures/shop/\nruns:\n    - command: build\n      exit: 0\n',
-        ],
-        [
-            'cli',
-            'a key no document reads',
-            'description: x\nseed: ./seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
-        ],
-        [
-            'cli',
-            'a kind, which no document states',
-            'kind: api\ndescription: x\nruns:\n    - command: build\n      exit: 0\n',
-        ],
-        [
-            'cli',
-            'two runs that wait',
-            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: serve\n      waitFor: ready\n      exit: 0\n',
-        ],
-        [
-            'cli',
-            'a run that waits and writes stdin',
-            'description: x\nruns:\n    - command: serve\n      stdin: x\n      waitFor: ready\n      exit: 0\n',
-        ],
-    ])('%s: %s', (_kind, _case, text) => {
-        // Given - the document's data
-        const data = documentData(text);
-
-        // Then - the parser refuses it, and the schema names at least one error
-        expect(parserRefusal(text, 'case.spec.yaml')).not.toBeNull();
-        expect(validate(data).length).toBeGreaterThan(0);
-    });
-
-    test.each([
-        ['cli', 'description: x\nruns:\n    - command: build\n      exit: 0\n'],
-        [
-            'cli',
-            'description: x\nfixture: [./fixtures/, ../../fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
-        ],
-    ])('%s: the well-formed twin validates', (_kind, text) => {
-        // Given - the document's data
-        const data = documentData(text);
-
-        // Then - the parser reads it and the schema finds no error: each refusal above is the case, not the kind
-        expect(parserRefusal(text, 'twin.spec.yaml')).toBeNull();
-        expect(validate(data)).toStrictEqual([]);
-    });
-});
+const validate = schemaValidator();
 
 /** A mapping of the grammar, as data. */
 type Mapping = Record<string, unknown>;
@@ -239,11 +126,117 @@ const LAWS = (Object.keys(PRESENCE) as PresenceShape[]).flatMap((shape) =>
     PRESENCE[shape].map((law, index) => [shape, law.law, index] as const),
 );
 
-describe('the schema holds every presence law the parser holds (meta-test)', () => {
-    const validate = schemaValidator();
+describe('schema-documents', () => {
+    test('the published schema validates every document of the tree (meta-test) — every document the parser reads, the schema validates', () => {
+        // Given - every `.spec.yaml` of the repository, the ones the parser reads
+        const read = schemaVerdicts(ROOT, schemaValidator()).filter(
+            ({ parser }) => parser === null,
+        );
+
+        // Then - none carries a schema error: an editor never flags what the runner runs
+        expect(read.length).toBeGreaterThan(150);
+        expect(read.filter(({ schema }) => schema.length > 0)).toStrictEqual([]);
+    });
+
+    test('the published schema validates every document of the tree (meta-test) — a document the parser refuses is an input, kept under fixtures/', () => {
+        // Given - every document the parser refuses
+        const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
+            ({ parser }) => parser !== null,
+        );
+
+        // Then - each is deliberately invalid: no live document is one
+        expect(refused.length).toBeGreaterThan(0);
+        expect(refused.filter(({ file }) => !isFixture(file))).toStrictEqual([]);
+    });
+
+    test('the published schema validates every document of the tree (meta-test) — a document the parser refuses, the schema refuses — but for what no schema can state', () => {
+        // Given - every document the parser refuses, less the refusals no JSON Schema keyword can express
+        const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
+            ({ file, parser }) => parser !== null && !BEYOND_A_SCHEMA.has(file),
+        );
+
+        // Then - the schema refuses each of them too: an editor flags what the runner refuses
+        expect(refused.filter(({ schema }) => schema.length === 0)).toStrictEqual([]);
+    });
+
+    test('the published schema validates every document of the tree (meta-test) — the walk reads the documents git keeps, and nothing it ignores', () => {
+        // Given - the documents the walk found
+        const documents = specDocuments(ROOT);
+
+        // Then - the cli's and the lint rules' documents are there, and no dependency's is
+        expect(documents.some((file) => file.startsWith('specs/cli/'))).toBe(true);
+        expect(documents.some((file) => file.startsWith('specs/lint/'))).toBe(true);
+        expect(documents.some((file) => file.includes('node_modules/'))).toBe(false);
+    });
+
+    test('what no keyword states, the parser alone refuses — a waitFor on a run before the last: no keyword addresses the last item of a list', () => {
+        // Given - one run that waits, followed by another; the schema holds only that at most one run waits
+        const text =
+            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: ping\n      exit: 0\n';
+
+        // Then - the parser refuses it, and the schema cannot
+        expect(parserRefusal(text, 'case.spec.yaml')).toContain(
+            'waitFor: is only allowed on the LAST run',
+        );
+        expect(validate(documentData(text))).toStrictEqual([]);
+    });
+
+    test.each([
+        ['cli', 'a document with no runs', 'description: x\nfixture: ./fixtures/shop/\n'],
+        [
+            'cli',
+            'a fixture whose first ground folder is seeds/',
+            'description: x\nfixture: ./seeds/fixtures/shop/\nruns:\n    - command: build\n      exit: 0\n',
+        ],
+        [
+            'cli',
+            'a key no document reads',
+            'description: x\nseed: ./seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
+        ],
+        [
+            'cli',
+            'a kind, which no document states',
+            'kind: api\ndescription: x\nruns:\n    - command: build\n      exit: 0\n',
+        ],
+        [
+            'cli',
+            'two runs that wait',
+            'description: x\nruns:\n    - command: serve\n      waitFor: ready\n      exit: 0\n    - command: serve\n      waitFor: ready\n      exit: 0\n',
+        ],
+        [
+            'cli',
+            'a run that waits and writes stdin',
+            'description: x\nruns:\n    - command: serve\n      stdin: x\n      waitFor: ready\n      exit: 0\n',
+        ],
+    ])('the published schema refuses a wrong document — %s: %s', (_kind, _case, text) => {
+        // Given - the document's data
+        const data = documentData(text);
+
+        // Then - the parser refuses it, and the schema names at least one error
+        expect(parserRefusal(text, 'case.spec.yaml')).not.toBeNull();
+        expect(validate(data).length).toBeGreaterThan(0);
+    });
+
+    test.each([
+        ['cli', 'description: x\nruns:\n    - command: build\n      exit: 0\n'],
+        [
+            'cli',
+            'description: x\nfixture: [./fixtures/, ../../fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
+        ],
+    ])(
+        'the published schema refuses a wrong document — %s: the well-formed twin validates',
+        (_kind, text) => {
+            // Given - the document's data
+            const data = documentData(text);
+
+            // Then - the parser reads it and the schema finds no error: each refusal above is the case, not the kind
+            expect(parserRefusal(text, 'twin.spec.yaml')).toBeNull();
+            expect(validate(data)).toStrictEqual([]);
+        },
+    );
 
     test.each(Object.keys(SHAPES) as PresenceShape[])(
-        '%s: every well-formed instance, the parser reads and the schema validates',
+        'the schema holds every presence law the parser holds (meta-test) — %s: every well-formed instance, the parser reads and the schema validates',
         (shape) => {
             // Given - each instance of the shape, set in its document
             const { embed, instances } = SHAPES[shape];
@@ -258,7 +251,7 @@ describe('the schema holds every presence law the parser holds (meta-test)', () 
     );
 
     test.each(LAWS)(
-        '%s: the %s law #%i is broken the same for both readers',
+        'the schema holds every presence law the parser holds (meta-test) — %s: the %s law #%i is broken the same for both readers',
         (shape, _law, index) => {
             // Given - every way the shape's instances break the law
             const breaches = breachesOf(shape, index);

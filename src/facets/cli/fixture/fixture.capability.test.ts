@@ -32,8 +32,8 @@ function chain(): Chain {
     }).open({});
 }
 
-describe('.fixture() — the file state a chain stands on', () => {
-    test('refuses a bare string where the disk is read, naming the wrapper', () => {
+describe('fixture', () => {
+    test('.fixture() — the file state a chain stands on — refuses a bare string where the disk is read, naming the wrapper', () => {
         // Given - a caller the compiler does not see, handing a path as a value
 
         // Then - the setup is refused as it is stated, and names file() and directory()
@@ -42,7 +42,7 @@ describe('.fixture() — the file state a chain stands on', () => {
         );
     });
 
-    test("spreads a directory's contents and copies a file under its own name, in order", async () => {
+    test(".fixture() — the file state a chain stands on — spreads a directory's contents and copies a file under its own name, in order", async () => {
         // Given - a directory and a file this test stands on
         const laid = await chain()
             .fixture(directory('./fixtures/shop/'))
@@ -53,7 +53,7 @@ describe('.fixture() — the file state a chain stands on', () => {
         expect(laid).toStrictEqual(['config.json', 'index.txt']);
     });
 
-    test('refuses a path naming the other kind on disk than it says', async () => {
+    test('.fixture() — the file state a chain stands on — refuses a path naming the other kind on disk than it says', async () => {
         // Given - a file named as a directory, and a directory named as a file
 
         // Then - each is refused when the chain is armed, with the kind on disk

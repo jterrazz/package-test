@@ -30,8 +30,8 @@ function chain(): Chain {
     }).open({});
 }
 
-describe('.headers() — what the chain’s exchange carries', () => {
-    test('merges the view’s headers and every call, the value stated last winning its name', async () => {
+describe('headers', () => {
+    test('.headers() — what the chain’s exchange carries — merges the view’s headers and every call, the value stated last winning its name', async () => {
         // Given - a view sharing two headers, then two calls of the chain, each replacing one name the step before stated
         const sent = await chain()
             .with({ headers: { accept: 'text/html', 'x-tenant': 'file' } })

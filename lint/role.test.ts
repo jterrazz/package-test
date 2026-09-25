@@ -12,68 +12,68 @@ const REPO_ROOT = resolve(import.meta.dirname, '..');
 /** The retired root a path sits under, as the field a rule reads. */
 const legacyOf = (path: string): LegacyDir => roleOf(path).legacyDir;
 
-describe('roleOf — the kind a path states', () => {
-    test('tells a rendered unit from a plain one by the suffix alone', () => {
+describe('role', () => {
+    test('roleOf — the kind a path states — tells a rendered unit from a plain one by the suffix alone', () => {
         // Given - the two test suffixes, beside the code each covers
         // Then - `.tsx` is the component role: the project that collects it opens a browser
         expect(roleOf('/repo/src/ui/post-table.test.tsx').role).toBe('component');
         expect(roleOf('/repo/src/matching/match.test.ts').role).toBe('module');
     });
 
-    test('`.spec.ts` is the assembled product, `.test.ts` the unit', () => {
+    test('roleOf — the kind a path states — `.spec.ts` is the assembled product, `.test.ts` the unit', () => {
         // Given - the two suffixes the fork spends
         // Then - the suffix says the kind, and the folder only says whether it is where it belongs
         expect(roleOf('/repo/specs/api/users/creation.spec.ts').role).toBe('spec');
         expect(roleOf('/repo/src/matching/match.test.ts').role).toBe('module');
     });
 
-    test('a literate document is its own role', () => {
+    test('roleOf — the kind a path states — a literate document is its own role', () => {
         // Given - a `.spec.yaml` case
         // Then - `document`, never a spec: the grammar runs it, no runner file imports it
         expect(roleOf('/repo/specs/cli/help/help.spec.yaml').role).toBe('document');
     });
 
-    test('a specification file is one wherever it sits', () => {
+    test('roleOf — the kind a path states — a specification file is one wherever it sits', () => {
         // Given - the runner file at a facet root
         // Then - the suffix decides, not the folder
         expect(roleOf('/repo/specs/api/api.specification.ts').role).toBe('specification');
     });
 
-    test('names the config a project helper is called from', () => {
+    test('roleOf — the kind a path states — names the config a project helper is called from', () => {
         // Given - the file vitest reads
         // Then - the config role is what the E-family rules reach
         expect(roleOf('/repo/vitest.config.ts').role).toBe('config');
         expect(roleOf('/repo/vitest.config.mts').role).toBe('config');
     });
 
-    test('ground is what a spec stands on, and it swallows what sits inside it', () => {
+    test('roleOf — the kind a path states — ground is what a spec stands on, and it swallows what sits inside it', () => {
         // Given - a fixture project's own source file
         // Then - it is ground, never a member of the row
         expect(roleOf('/repo/specs/fixtures/app/server.ts').role).toBe('ground');
         expect(roleOf('/repo/specs/api/users/expected/user.http').role).toBe('ground');
     });
 
-    test("a ground module's own test keeps its kind — I2's one pairing", () => {
+    test("roleOf — the kind a path states — a ground module's own test keeps its kind — I2's one pairing", () => {
         // Given - a `<module>.test.ts` inside ground
         // Then - the suffix wins: it is a module test, not inert material
         expect(roleOf('/repo/specs/fixtures/app/server.test.ts').role).toBe('module');
     });
 
-    test('a stubs/ unit is its own role — the half C10 keeps internal', () => {
+    test('roleOf — the kind a path states — a stubs/ unit is its own role — the half C10 keeps internal', () => {
         // Given - a file under a feature's stubs/ folder
         // Then - `stub`: the boundary rule asks the identity, not the path
         expect(roleOf('/repo/specs/api/news/stubs/http/latest.ts').role).toBe('stub');
         expect(roleOf('/repo/specs/api/news/stubs/latest.stubs.ts').role).toBe('stub');
     });
 
-    test('says whether the path sits under a specs tree, whatever its kind', () => {
+    test('roleOf — the kind a path states — says whether the path sits under a specs tree, whatever its kind', () => {
         // Given - the same suffix inside and outside `specs/`
         // Then - `inSpecs` is the second field a rule reads, never the first
         expect(roleOf('/repo/specs/api/users/create.test.ts').inSpecs).toBeTruthy();
         expect(roleOf('/repo/src/matching/match.test.ts').inSpecs).toBeFalsy();
     });
 
-    test('names the retired test roots, in both of their spellings', () => {
+    test('roleOf — the kind a path states — names the retired test roots, in both of their spellings', () => {
         // Given - the three shapes I2 refuses, each anchored on a real package root
         // Then - `legacyDir` is the third field a rule reads
         expect([
@@ -83,7 +83,7 @@ describe('roleOf — the kind a path states', () => {
         ]).toStrictEqual(['__tests__', 'tests', 'test']);
     });
 
-    test('names nothing that merely spells one', () => {
+    test('roleOf — the kind a path states — names nothing that merely spells one', () => {
         // Given - a `tests` or `test` segment with no package above it, and a specs tree
         // Then - the clause is anchored on a package root, so a checkout under `~/tests/` is nobody's business
         expect([
@@ -92,10 +92,8 @@ describe('roleOf — the kind a path states', () => {
             legacyOf('/repo/specs/api/users/create.test.ts'),
         ]).toStrictEqual([null, null, null]);
     });
-});
 
-describe('roleOf — read below the project root', () => {
-    test('a checkout under a folder named like ground, a stub or a retired root is none of them', () => {
+    test('roleOf — read below the project root — a checkout under a folder named like ground, a stub or a retired root is none of them', () => {
         // Given - three packages checked out under `fixtures/`, `stubs/` and `__tests__/`
         const under = ['fixtures', 'stubs', '__tests__'].map((folder) => checkoutUnder(folder));
 
@@ -112,7 +110,7 @@ describe('roleOf — read below the project root', () => {
         ]);
     });
 
-    test('the folders inside the project still say what they are', () => {
+    test('roleOf — read below the project root — the folders inside the project still say what they are', () => {
         // Given - the same checkout under `fixtures/`, with its own ground, stubs and retired root
         const root = checkoutUnder('fixtures');
 
@@ -123,7 +121,7 @@ describe('roleOf — read below the project root', () => {
         expect(legacyOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
     });
 
-    test('a file outside every package is read below its repository root', () => {
+    test('roleOf — read below the project root — a file outside every package is read below its repository root', () => {
         // Given - two repositories holding no package.json, checked out under `fixtures/` and `specs/`, one a worktree
         const underGround = repositoryUnder('fixtures');
         const underSpecs = repositoryUnder('specs', [], 'file');
@@ -138,7 +136,7 @@ describe('roleOf — read below the project root', () => {
         expect(legacyOf(join(underGround, 'tests/widget.test.ts'))).toBe('tests');
     });
 
-    test('a path no package and no repository holds is read whole', () => {
+    test('roleOf — read below the project root — a path no package and no repository holds is read whole', () => {
         // Given - a rule case written against a root that is not on disk, under no repository
         // Then - every segment answers, as the case spells it
         expect(projectSegments('/no-such-root-xyz/specs/api/x.spec.ts')).toStrictEqual([
@@ -148,10 +146,8 @@ describe('roleOf — read below the project root', () => {
             'x.spec.ts',
         ]);
     });
-});
 
-describe('projectRootOf — remembered per folder', () => {
-    test('a package.json written at a folder already answered is seen the next time it is asked', () => {
+    test('projectRootOf — remembered per folder — a package.json written at a folder already answered is seen the next time it is asked', () => {
         // Given - a repository with no package below its app folder, answered once
         const root = repositoryUnder('memo', ['src/app']);
         const before = projectRootOf(join(root, 'src/app'));
@@ -163,10 +159,8 @@ describe('projectRootOf — remembered per folder', () => {
         expect(before).toBe(root);
         expect(projectRootOf(join(root, 'src/app'))).toBe(join(root, 'src/app'));
     });
-});
 
-describe('isTestRole — the three kinds that DECLARE tests', () => {
-    test('covers the module, the rendered unit and the spec, and nothing else', () => {
+    test('isTestRole — the three kinds that DECLARE tests — covers the module, the rendered unit and the spec, and nothing else', () => {
         // Given - the role vocabulary, split into the kinds that declare tests and the rest
         const declaring: FileRole[] = ['component', 'module', 'spec'];
         const rest: FileRole[] = ['config', 'stub', 'document', 'ground', 'other', 'specification'];
@@ -175,10 +169,8 @@ describe('isTestRole — the three kinds that DECLARE tests', () => {
         expect(declaring.every(isTestRole)).toBe(true);
         expect(rest.some(isTestRole)).toBe(false);
     });
-});
 
-describe('isTestFile — what the test conventions reach', () => {
-    test('covers every test suffix, the specification file, and the specs tree', () => {
+    test('isTestFile — what the test conventions reach — covers every test suffix, the specification file, and the specs tree', () => {
         // Given - one of each
         const covered = [
             '/repo/src/ui/post-table.test.tsx',
@@ -192,7 +184,7 @@ describe('isTestFile — what the test conventions reach', () => {
         expect(covered.every((file) => isTestFile(file))).toBeTruthy();
     });
 
-    test('leaves production source alone', () => {
+    test('isTestFile — what the test conventions reach — leaves production source alone', () => {
         // Given - a module of the app
         // Then - nothing about it is a test
         expect(isTestFile('/repo/src/matching/match.ts')).toBeFalsy();

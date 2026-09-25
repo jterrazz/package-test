@@ -4,8 +4,8 @@ import { inPlaceSetup } from '../../expectations/in-place/in-place-setup.js';
 import { tempRootSetup } from '../../kernel/files/temp-root.js';
 import { mobile, mobileSessionSetup } from './mobile.project.js';
 
-describe('mobile() — one driver session per run', () => {
-    test("carries the setup that holds the run's session, beside the preset's", () => {
+describe('mobile.project', () => {
+    test("mobile() — one driver session per run — carries the setup that holds the run's session, beside the preset's", () => {
         // Given - the canonical mobile project, stated by nobody
         const setups = mobile().test?.globalSetup;
 
@@ -14,7 +14,7 @@ describe('mobile() — one driver session per run', () => {
         expect(mobileSessionSetup()).toMatch(/mobile-session\.ts$/u);
     });
 
-    test('hands its setup the device and the appium root it declares, and nothing when it declares none', () => {
+    test('mobile() — one driver session per run — hands its setup the device and the appium root it declares, and nothing when it declares none', () => {
         // Given - one project declaring its simulator and appium root, one bare
         const declared = mobile({ device: { name: 'iPhone 17', os: '26.0' }, root: 'app' });
 
@@ -28,7 +28,7 @@ describe('mobile() — one driver session per run', () => {
         expect(mobile().test?.provide).toBeUndefined();
     });
 
-    test('mobile() runs serial by default — one simulator, no `serial` to pass', () => {
+    test('mobile() — one driver session per run — mobile() runs serial by default — one simulator, no `serial` to pass', () => {
         // Given - the canonical mobile project, stated by nobody
         // Then - files run one at a time, whether or not the caller says so
         expect(mobile().test?.fileParallelism).toBe(false);

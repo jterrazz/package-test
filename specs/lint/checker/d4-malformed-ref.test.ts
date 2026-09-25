@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — d4 malformed ref (CONVENTIONS D4)', () => {
+describe('d4-malformed-ref', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
     test('rejects a malformed capture ref on a known kind', async () => {

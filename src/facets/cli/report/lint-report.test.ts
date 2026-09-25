@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { lintReport } from './lint-report.js';
 
-describe('lintReport — a report as a golden keeps it', () => {
-    test("keeps oxlint's position and rule, and drops its message and tally", () => {
+describe('lintReport', () => {
+    test("lintReport — a report as a golden keeps it — keeps oxlint's position and rule, and drops its message and tally", () => {
         // Given - the unix rendering the family pins, with its tally
         const report = [
             'src/util.test.ts:1:1: a module test has a sibling module [Error/jterrazz(i2-sibling-test-naming)]',
@@ -18,7 +18,7 @@ describe('lintReport — a report as a golden keeps it', () => {
         );
     });
 
-    test('orders the lines by file, line and column, whatever order the linter printed them in', () => {
+    test('lintReport — a report as a golden keeps it — orders the lines by file, line and column, whatever order the linter printed them in', () => {
         // Given - the order oxlint's threads finished in: a later file first, line 10 before line 2
         const report = [
             'specs/b.ts:1:1: x [Error/jterrazz(c4-stub-shape)]',
@@ -39,7 +39,7 @@ describe('lintReport — a report as a golden keeps it', () => {
         );
     });
 
-    test("keeps the checker's report line the same way, and drops its summary", () => {
+    test("lintReport — a report as a golden keeps it — keeps the checker's report line the same way, and drops its summary", () => {
         // Given - two checker findings, an error and a warning, and the summary line
         const report = [
             'specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): a path may leave its leaf only into specs/fixtures/',
@@ -54,13 +54,13 @@ describe('lintReport — a report as a golden keeps it', () => {
         );
     });
 
-    test('a clean run normalises to nothing', () => {
+    test('lintReport — a report as a golden keeps it — a clean run normalises to nothing', () => {
         // Given - a run that printed only its summary
         // Then - the empty text a document omits
         expect(lintReport('Found 0 warnings and 0 errors.\n')).toBe('');
     });
 
-    test("keeps oxlint's agent line, which is the checker's", () => {
+    test("lintReport — a report as a golden keeps it — keeps oxlint's agent line, which is the checker's", () => {
         // Given - the rendering oxlint picks in a shell that advertises an agent
         const report =
             'src/util.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module\n';
@@ -69,7 +69,7 @@ describe('lintReport — a report as a golden keeps it', () => {
         expect(lintReport(report)).toBe('src/util.test.ts:1:1  jterrazz(i2-sibling-test-naming)\n');
     });
 
-    test("refuses oxlint's graphical rendering instead of reading it as a clean run", () => {
+    test("lintReport — a report as a golden keeps it — refuses oxlint's graphical rendering instead of reading it as a clean run", () => {
         // Given - the frames oxlint prints when no format is stated and no agent is advertised
         const report = [
             '  ! jterrazz(d19w-probe-cluster): 3 probes in one test',

@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { RunContainer } from './run-container.js';
 import setup, { DOCKER_ABSENT } from './run-setup.js';
 
-describe('the services setup — the run containers, served', () => {
-    test('provides a loopback address, and answers a request with one clear refusal when Docker is absent', async () => {
+describe('setup', () => {
+    test('the services setup — the run containers, served — provides a loopback address, and answers a request with one clear refusal when Docker is absent', async () => {
         // Given - the setup run with a runtime that no daemon answers
         const provided = new Map<string, unknown>();
         const teardown = await setup(

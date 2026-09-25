@@ -97,8 +97,56 @@ function manifestAt(dir: string, manifest: unknown): void {
     writeFileSync(resolve(dir, 'package.json'), JSON.stringify(manifest));
 }
 
-describe('package-exports — F1 reads the published contract', () => {
-    test('lists every subpath of the exports map, never the root', () => {
+/** The package a module specifier belongs to: `@scope/name` or `name`, its subpath dropped. */
+function packageOf(specifier: string): string {
+    const parts = specifier.split('/');
+    return (specifier.startsWith('@') ? parts.slice(0, 2) : parts.slice(0, 1)).join('/');
+}
+/** Every package a published declaration file augments with `declare module`. */
+function augmentedPackages(): string[] {
+    const augmented = new Set<string>();
+    for (const name of readdirSync(resolve(ROOT, 'dist'))) {
+        if (/\.d\.c?ts$/u.test(name)) {
+            const text = readFileSync(resolve(ROOT, 'dist', name), 'utf8');
+            for (const found of text.matchAll(/^declare module ['"](?<specifier>[^'"]+)['"]/gmu)) {
+                augmented.add(packageOf(found.groups?.specifier ?? ''));
+            }
+        }
+    }
+    return [...augmented].toSorted();
+}
+/** What an install of this package makes a consumer have: its dependencies and its required peers. */
+function requiredOfAConsumer(): Set<string> {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the three blocks this reads
+    const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
+        dependencies?: Record<string, string>;
+        peerDependencies?: Record<string, string>;
+        peerDependenciesMeta?: Record<string, { optional?: boolean }>;
+    };
+    const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
+        (name) => manifest.peerDependenciesMeta?.[name]?.optional !== true,
+    );
+    return new Set([...Object.keys(manifest.dependencies ?? {}), ...peers]);
+}
+/** Every source module a build's maps say it was compiled from, by its path in the repository. */
+function compiledSources(): string[] {
+    const sources = new Set<string>();
+    for (const entry of readdirSync(resolve(ROOT, 'dist'), { recursive: true })) {
+        const map = resolve(ROOT, 'dist', String(entry));
+        if (map.endsWith('.map')) {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `sources` is the one field this reads
+            const { sources: listed } = JSON.parse(readFileSync(map, 'utf8')) as {
+                sources: string[];
+            };
+            for (const source of listed) {
+                sources.add(resolve(dirname(map), source));
+            }
+        }
+    }
+    return [...sources].filter((source) => !source.includes('/node_modules/'));
+}
+describe('declaredSubpaths', () => {
+    test('package-exports — F1 reads the published contract — lists every subpath of the exports map, never the root', () => {
         // Given - an install whose manifest publishes two subpaths
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, {
@@ -115,7 +163,7 @@ describe('package-exports — F1 reads the published contract', () => {
         ]);
     });
 
-    test('reads an install in a gitignored node_modules — a dependency is read from the disk', () => {
+    test('package-exports — F1 reads the published contract — reads an install in a gitignored node_modules — a dependency is read from the disk', () => {
         // Given - a consumer checkout that ignores node_modules, with the package installed as a copy under it
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, { name: 'some-consumer' });
@@ -136,7 +184,7 @@ describe('package-exports — F1 reads the published contract', () => {
         ]);
     });
 
-    test('the walk stops at the first manifest — a host project vouches for nothing', () => {
+    test('package-exports — F1 reads the published contract — the walk stops at the first manifest — a host project vouches for nothing', () => {
         // Given - a consumer manifest sitting above, with subpaths of its own
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, { exports: { './anything': {} }, name: 'some-consumer' });
@@ -147,7 +195,7 @@ describe('package-exports — F1 reads the published contract', () => {
         expect(declaredSubpaths(nested)).toStrictEqual([]);
     });
 
-    test('no manifest at all yields no exemption — F1 applies plainly', () => {
+    test('package-exports — F1 reads the published contract — no manifest at all yields no exemption — F1 applies plainly', () => {
         // Given - a directory with nothing above it to read
         const orphan = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
 
@@ -155,7 +203,7 @@ describe('package-exports — F1 reads the published contract', () => {
         expect(declaredSubpaths(orphan)).toStrictEqual([]);
     });
 
-    test("this package's own manifest is what the rule actually reads", () => {
+    test("package-exports — F1 reads the published contract — this package's own manifest is what the rule actually reads", () => {
         // Given - the framework linting itself, resolved from this module
         const subpaths = declaredSubpaths();
 
@@ -166,10 +214,8 @@ describe('package-exports — F1 reads the published contract', () => {
             '@jterrazz/test/vitest',
         ]);
     });
-});
 
-describe('package-exports — the root has two runtimes and one type surface', () => {
-    test('the root export answers a page under the browser condition', () => {
+    test('package-exports — the root has two runtimes and one type surface — the root export answers a page under the browser condition', () => {
         // Given - the published map of the root export
         const root = ownManifest().exports['.'];
 
@@ -181,7 +227,7 @@ describe('package-exports — the root has two runtimes and one type surface', (
         });
     });
 
-    test('the browser build carries every name the node build exports', async () => {
+    test('package-exports — the root has two runtimes and one type surface — the browser build carries every name the node build exports', async () => {
         // Given - the node entry, and the page's bundle read as text: it opens browser Mode's own context module, which refuses to load under node — which is the very reason the second build exists (`npm run build` first)
         const node = await builtEntry('dist/index.js');
         const browser = exportedNames(readFileSync(resolve(ROOT, 'dist/browser/index.js'), 'utf8'));
@@ -189,44 +235,8 @@ describe('package-exports — the root has two runtimes and one type surface', (
         // Then - one surface: neither side has a name the other lacks
         expect(browser.toSorted()).toStrictEqual(Object.keys(node).toSorted());
     });
-});
 
-/** The package a module specifier belongs to: `@scope/name` or `name`, its subpath dropped. */
-function packageOf(specifier: string): string {
-    const parts = specifier.split('/');
-    return (specifier.startsWith('@') ? parts.slice(0, 2) : parts.slice(0, 1)).join('/');
-}
-
-/** Every package a published declaration file augments with `declare module`. */
-function augmentedPackages(): string[] {
-    const augmented = new Set<string>();
-    for (const name of readdirSync(resolve(ROOT, 'dist'))) {
-        if (/\.d\.c?ts$/u.test(name)) {
-            const text = readFileSync(resolve(ROOT, 'dist', name), 'utf8');
-            for (const found of text.matchAll(/^declare module ['"](?<specifier>[^'"]+)['"]/gmu)) {
-                augmented.add(packageOf(found.groups?.specifier ?? ''));
-            }
-        }
-    }
-    return [...augmented].toSorted();
-}
-
-/** What an install of this package makes a consumer have: its dependencies and its required peers. */
-function requiredOfAConsumer(): Set<string> {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the three blocks this reads
-    const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
-        dependencies?: Record<string, string>;
-        peerDependencies?: Record<string, string>;
-        peerDependenciesMeta?: Record<string, { optional?: boolean }>;
-    };
-    const peers = Object.keys(manifest.peerDependencies ?? {}).filter(
-        (name) => manifest.peerDependenciesMeta?.[name]?.optional !== true,
-    );
-    return new Set([...Object.keys(manifest.dependencies ?? {}), ...peers]);
-}
-
-describe('package-exports — the published types name what a consumer has', () => {
-    test('every package a declaration augments is a dependency or a required peer', () => {
+    test('package-exports — the published types name what a consumer has — every package a declaration augments is a dependency or a required peer', () => {
         // Given - the packages the built declarations merge into (`npm run build` first)
         const augmented = augmentedPackages();
 
@@ -235,10 +245,8 @@ describe('package-exports — the published types name what a consumer has', () 
         const required = requiredOfAConsumer();
         expect(augmented.filter((name) => !required.has(name))).toStrictEqual([]);
     });
-});
 
-describe('package-exports — the tarball carries what a message points at', () => {
-    test('every chapter the README links is a file the install holds', () => {
+    test('package-exports — the tarball carries what a message points at — every chapter the README links is a file the install holds', () => {
         // Given - the vitrine, whose links are relative and therefore resolved inside the install
         const cited = citedDocPaths(readFileSync(resolve(ROOT, 'README.md'), 'utf8'));
 
@@ -247,7 +255,7 @@ describe('package-exports — the tarball carries what a message points at', () 
         expect(unpublished(cited)).toStrictEqual([]);
     });
 
-    test('every chapter a diagnostic cites is a file the install holds', () => {
+    test('package-exports — the tarball carries what a message points at — every chapter a diagnostic cites is a file the install holds', () => {
         // Given - the `(… — see docs/19-linting.md#…)` a rule message ends on: a consumer follows it inside node_modules
         const cited = sourceCitations();
 
@@ -255,28 +263,8 @@ describe('package-exports — the tarball carries what a message points at', () 
         expect(cited.length).toBeGreaterThan(0);
         expect(unpublished(cited)).toStrictEqual([]);
     });
-});
 
-/** Every source module a build's maps say it was compiled from, by its path in the repository. */
-function compiledSources(): string[] {
-    const sources = new Set<string>();
-    for (const entry of readdirSync(resolve(ROOT, 'dist'), { recursive: true })) {
-        const map = resolve(ROOT, 'dist', String(entry));
-        if (map.endsWith('.map')) {
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `sources` is the one field this reads
-            const { sources: listed } = JSON.parse(readFileSync(map, 'utf8')) as {
-                sources: string[];
-            };
-            for (const source of listed) {
-                sources.add(resolve(dirname(map), source));
-            }
-        }
-    }
-    return [...sources].filter((source) => !source.includes('/node_modules/'));
-}
-
-describe('package-exports — the build is compiled from production alone', () => {
-    test('no module a bundle is built from is test material', () => {
+    test('package-exports — the build is compiled from production alone — no module a bundle is built from is test material', () => {
         // Given - the source modules every bundle's map lists (`npm run build` first)
         const sources = compiledSources();
 

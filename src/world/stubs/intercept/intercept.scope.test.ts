@@ -9,8 +9,8 @@ afterAll(async () => {
     await stopStubServer();
 });
 
-describe('intercept — the network double in module scope', () => {
-    test('answers the declared call and never reaches the wire', async () => {
+describe('interceptThrough', () => {
+    test('intercept — the network double in module scope — answers the declared call and never reaches the wire', async () => {
         // Given - one stub declared for the block
         await using _ = await intercept(
             http.get('https://weather.test/today'),
@@ -22,7 +22,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 21 });
     });
 
-    test('takes a composite the same way a chain does', async () => {
+    test('intercept — the network double in module scope — takes a composite the same way a chain does', async () => {
         // Given - a stub built the declarative way
         const forecast = defineStub({
             request: http.get('https://weather.test/tomorrow'),
@@ -35,7 +35,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 19 });
     });
 
-    test('resolves a relative request against the origin the scope states', async () => {
+    test('intercept — the network double in module scope — resolves a relative request against the origin the scope states', async () => {
         // Given - a subject that fetches a path, the way browser code does, and a scope that says where that path lives
         await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
             origin: 'http://console.test',
@@ -46,7 +46,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ posts: [] });
     });
 
-    test('gives `fetch` back when the scope ends', async () => {
+    test('intercept — the network double in module scope — gives `fetch` back when the scope ends', async () => {
         // Given - a scope that stated an origin, and ended
         const original = globalThis.fetch;
         {
@@ -60,7 +60,7 @@ describe('intercept — the network double in module scope', () => {
         expect(globalThis.fetch).toBe(original);
     });
 
-    test('resolves a relative request when the scope is what starts the engine', async () => {
+    test('intercept — the network double in module scope — resolves a relative request when the scope is what starts the engine', async () => {
         // Given - nothing listening yet, the state the FIRST intercept of a file finds
         await stopStubServer();
         await using _ = await intercept(http.get('/api/posts'), http.json({ posts: ['first'] }), {
@@ -72,7 +72,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ posts: ['first'] });
     });
 
-    test('leaves the engine in charge of the scopes that follow it', async () => {
+    test('intercept — the network double in module scope — leaves the engine in charge of the scopes that follow it', async () => {
         // Given - an origin scope that was the engine's first registration, and ended
         await stopStubServer();
         {
@@ -91,7 +91,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(response.json()).resolves.toStrictEqual({ celsius: 21 });
     });
 
-    test('settles a cancel of the body the subject was served', async () => {
+    test('intercept — the network double in module scope — settles a cancel of the body the subject was served', async () => {
         // Given - an error reply with a body, which the subject drops unread
         await using _ = await intercept(
             http.get('https://weather.test/today'),
@@ -104,7 +104,7 @@ describe('intercept — the network double in module scope', () => {
         expect(response.status).toBe(503);
     });
 
-    test('refuses an origin that is not one', async () => {
+    test('intercept — the network double in module scope — refuses an origin that is not one', async () => {
         // Given - a scope stating a bare host
         const scope = async (): Promise<void> => {
             await using _ = await intercept(http.get('/api/posts'), http.json({}), {
@@ -116,7 +116,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(scope()).rejects.toThrow('is not an absolute URL');
     });
 
-    test('raises the undeclared call when the scope ends', async () => {
+    test('intercept — the network double in module scope — raises the undeclared call when the scope ends', async () => {
         // Given - a block that reaches a second host nothing declared
         const escape = async (): Promise<void> => {
             await using _ = await intercept(
@@ -130,7 +130,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(escape()).rejects.toThrow('analytics.test');
     });
 
-    test('lets the handlers of a block go when the block ends', async () => {
+    test('intercept — the network double in module scope — lets the handlers of a block go when the block ends', async () => {
         // Given - a block that declared one call and ended, then a second block declaring a different one
         {
             await using _ = await intercept(
@@ -150,7 +150,7 @@ describe('intercept — the network double in module scope', () => {
         await expect(stale()).rejects.toThrow('/today');
     });
 
-    test('refuses an empty declaration', async () => {
+    test('intercept — the network double in module scope — refuses an empty declaration', async () => {
         // Given - nothing declared
         // Then - the refusal says an empty list guards nothing
         await expect(intercept([])).rejects.toThrow('at least one stub');

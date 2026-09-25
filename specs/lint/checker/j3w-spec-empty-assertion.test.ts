@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — j3w spec empty assertion (CONVENTIONS J3)', () => {
+describe('j3w-spec-empty-assertion', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stderr is asserted, tokens covering the run cwd.

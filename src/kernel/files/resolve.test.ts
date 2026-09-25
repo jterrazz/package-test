@@ -12,31 +12,10 @@ const probe =
     (path: string): boolean =>
         present.includes(path);
 
-describe('findRoot — the one walk both the runner and A9 use', () => {
-    test('the NEAREST ancestor that declares itself a project wins', () => {
-        // Given - a manifest at the monorepo root and one in the package
-        const exists = probe('/mono/package.json', '/mono/apps/cli/package.json');
+let base: string;
+let binRoot: string;
 
-        // Then - the walk stops at the package, not at the repository
-        expect(findRoot('/mono/apps/cli/specs/logs', exists)).toBe('/mono/apps/cli');
-    });
-
-    test('returns undefined when no ancestor carries a marker', () => {
-        // Given - a probe that finds nothing
-        // Then - there is no root to derive, and the caller decides the fallback
-        expect(findRoot('/nowhere/at/all', probe())).toBeUndefined();
-    });
-
-    test('a directory carrying a marker is its own root', () => {
-        // Given - the starting directory itself declares the package
-        // Then - the walk does not climb past it
-        expect(findRoot('/pkg', probe('/pkg/package.json'))).toBe('/pkg');
-    });
-});
-
-describe('root discovery (CONVENTIONS A9)', () => {
-    let base: string;
-
+describe('resolve', () => {
     beforeAll(() => {
         // Given - <base>/project with a manifest and a nested tests dir, and <base>/plain with only a package.json
         base = mkdtempSync(resolve(tmpdir(), 'root-discovery-'));
@@ -44,13 +23,38 @@ describe('root discovery (CONVENTIONS A9)', () => {
         writeFileSync(resolve(base, 'project/package.json'), '{"name":"project"}\n');
         mkdirSync(resolve(base, 'plain/tests/deep'), { recursive: true });
         writeFileSync(resolve(base, 'plain/package.json'), '{"name":"plain"}\n');
+        // And a root whose node_modules/.bin contains a tool
+        binRoot = mkdtempSync(resolve(tmpdir(), 'command-resolution-'));
+        mkdirSync(resolve(binRoot, 'node_modules/.bin'), { recursive: true });
+        writeFileSync(resolve(binRoot, 'node_modules/.bin/mytool'), '#!/bin/sh\n');
     });
 
     afterAll(() => {
         rmSync(base, { force: true, recursive: true });
+        rmSync(binRoot, { force: true, recursive: true });
     });
 
-    test('walks up to the nearest directory carrying a root marker', () => {
+    test('findRoot — the one walk both the runner and A9 use — the NEAREST ancestor that declares itself a project wins', () => {
+        // Given - a manifest at the monorepo root and one in the package
+        const exists = probe('/mono/package.json', '/mono/apps/cli/package.json');
+
+        // Then - the walk stops at the package, not at the repository
+        expect(findRoot('/mono/apps/cli/specs/logs', exists)).toBe('/mono/apps/cli');
+    });
+
+    test('findRoot — the one walk both the runner and A9 use — returns undefined when no ancestor carries a marker', () => {
+        // Given - a probe that finds nothing
+        // Then - there is no root to derive, and the caller decides the fallback
+        expect(findRoot('/nowhere/at/all', probe())).toBeUndefined();
+    });
+
+    test('findRoot — the one walk both the runner and A9 use — a directory carrying a marker is its own root', () => {
+        // Given - the starting directory itself declares the package
+        // Then - the walk does not climb past it
+        expect(findRoot('/pkg', probe('/pkg/package.json'))).toBe('/pkg');
+    });
+
+    test('root discovery (CONVENTIONS A9) — walks up to the nearest directory carrying a root marker', () => {
         // Given - a specification file nested under the project
         const found = discoverRoot(resolve(base, 'project/tests/feature'));
 
@@ -58,7 +62,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('a directory carrying a package.json is a root', () => {
+    test('root discovery (CONVENTIONS A9) — a directory carrying a package.json is a root', () => {
         // Given - a plain project
         const found = discoverRoot(resolve(base, 'plain/tests/deep'));
 
@@ -66,7 +70,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(found).toBe(resolve(base, 'plain'));
     });
 
-    test('resolveRoot treats an explicit root as an override', () => {
+    test('root discovery (CONVENTIONS A9) — resolveRoot treats an explicit root as an override', () => {
         // Given - an explicit relative root
         const found = resolveRoot('../..', resolve(base, 'project/tests/feature'));
 
@@ -74,7 +78,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('resolveRoot without a root auto-discovers from the caller directory', () => {
+    test('root discovery (CONVENTIONS A9) — resolveRoot without a root auto-discovers from the caller directory', () => {
         // Given - no explicit root
         const found = resolveRoot(undefined, resolve(base, 'project/tests/feature'));
 
@@ -82,7 +86,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('falls back to the starting directory when no marker exists anywhere up', () => {
+    test('root discovery (CONVENTIONS A9) — falls back to the starting directory when no marker exists anywhere up', () => {
         // Given - a bare temp tree with no package.json above it
         const bare = mkdtempSync(resolve(tmpdir(), 'no-marker-'));
         try {
@@ -93,7 +97,7 @@ describe('root discovery (CONVENTIONS A9)', () => {
         }
     });
 
-    test('a workspace package wins over the repository above it (monorepo)', () => {
+    test('root discovery (CONVENTIONS A9) — a workspace package wins over the repository above it (monorepo)', () => {
         // Given - a manifest at the monorepo root and one in a nested package (the shape where walking past the first marker measures every path the runner resolves from the wrong unit)
         mkdirSync(resolve(base, 'mono'), { recursive: true });
         writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
@@ -106,13 +110,13 @@ describe('root discovery (CONVENTIONS A9)', () => {
         );
     });
 
-    test('the marker in a directory resolves to that directory', () => {
+    test('root discovery (CONVENTIONS A9) — the marker in a directory resolves to that directory', () => {
         // Given - the ordinary single-package repo
         // Then - the nearest ancestor carrying the manifest is the root
         expect(discoverRoot(resolve(base, 'project/tests/feature'))).toBe(resolve(base, 'project'));
     });
 
-    test('in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
+    test('root discovery (CONVENTIONS A9) — in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
         // Given - a repository whose `pkg/package.json` is ignored, and a `fresh/` package nobody added
         const repository = resolve(base, 'repository');
         mkdirSync(resolve(repository, 'pkg/src'), { recursive: true });
@@ -128,52 +132,37 @@ describe('root discovery (CONVENTIONS A9)', () => {
         expect(discoverRoot(resolve(repository, 'fresh/src'))).toBe(resolve(repository, 'fresh'));
     });
 
-    test('an absolute root override is used verbatim', () => {
+    test('root discovery (CONVENTIONS A9) — an absolute root override is used verbatim', () => {
         // Given - an absolute root and an unrelated caller directory
         const found = resolveRoot(resolve(base, 'project'), resolve(base, 'plain/tests/deep'));
 
         // Then - the override wins with no resolution against the caller
         expect(found).toBe(resolve(base, 'project'));
     });
-});
 
-describe('command resolution', () => {
-    let base: string;
-
-    beforeAll(() => {
-        // Given - a root whose node_modules/.bin contains a tool
-        base = mkdtempSync(resolve(tmpdir(), 'command-resolution-'));
-        mkdirSync(resolve(base, 'node_modules/.bin'), { recursive: true });
-        writeFileSync(resolve(base, 'node_modules/.bin/mytool'), '#!/bin/sh\n');
-    });
-
-    afterAll(() => {
-        rmSync(base, { force: true, recursive: true });
-    });
-
-    test('absolute commands pass through untouched', () => {
+    test('command resolution — absolute commands pass through untouched', () => {
         // Given - an absolute binary path
         // Then - it is returned as-is
-        expect(resolveCommand('/usr/bin/env', base)).toBe('/usr/bin/env');
+        expect(resolveCommand('/usr/bin/env', binRoot)).toBe('/usr/bin/env');
     });
 
-    test('prefers the root node_modules/.bin when the command exists there', () => {
+    test('command resolution — prefers the root node_modules/.bin when the command exists there', () => {
         // Given - mytool present under <root>/node_modules/.bin
         // Then - the local bin path wins over bare PATH resolution
-        expect(resolveCommand('mytool', base)).toBe(resolve(base, 'node_modules/.bin/mytool'));
+        expect(resolveCommand('mytool', binRoot)).toBe(
+            resolve(binRoot, 'node_modules/.bin/mytool'),
+        );
     });
 
-    test('falls back to the bare command for PATH resolution', () => {
+    test('command resolution — falls back to the bare command for PATH resolution', () => {
         // Given - a command absent from every node_modules/.bin
         // Then - the bare name is returned for the shell to resolve
-        expect(resolveCommand('definitely-not-installed-xyz', base)).toBe(
+        expect(resolveCommand('definitely-not-installed-xyz', binRoot)).toBe(
             'definitely-not-installed-xyz',
         );
     });
-});
 
-describe('spec path resolution', () => {
-    test('a relative path resolves from the spec directory, climbing included', () => {
+    test('spec path resolution — a relative path resolves from the spec directory, climbing included', () => {
         // Given - a spec two levels under specs/, naming its own ground and the pool
         const specDir = '/repo/specs/cli/build';
 
@@ -186,7 +175,7 @@ describe('spec path resolution', () => {
         );
     });
 
-    test('a bare name is refused before anything is read', () => {
+    test('spec path resolution — a bare name is refused before anything is read', () => {
         // Given - the 16 form, a name resolved against a hidden folder
         // Then - refused with the verb
         expect(() => resolveSpecPath('request', 'create.http', '/repo/specs')).toThrow(

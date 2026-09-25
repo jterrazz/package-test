@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { lessonParts } from './lesson.js';
 import { refusal, REFUSAL_WHY } from './refusal.js';
 
-describe('a refusal — the lesson the runtime throws', () => {
-    test('states the case, the row’s sentence and the row’s heading, a part per line', () => {
+describe('refusal', () => {
+    test('a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
         // Given - a refusal of the disk law, for one call
         const message = refusal('b2-relative-path-runtime', {
             fix: "start it with ./ or ../: file('./out.txt')",

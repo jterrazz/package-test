@@ -26,8 +26,8 @@ export type DeepIsTheDefault = Assert<
         : false
 >;
 
-describe('mockOf — the typed port double', () => {
-    test('answers for a nested member without being told to, by default', () => {
+describe('mockOf', () => {
+    test('mockOf — the typed port double — answers for a nested member without being told to, by default', () => {
         // Given - a double of a port whose members nest
         const gateway = mockOf<Gateway>();
 
@@ -35,7 +35,7 @@ describe('mockOf — the typed port double', () => {
         expect(vi.isMockFunction(gateway.refunds.issue)).toBe(true);
     });
 
-    test('stops at the first level when the port is mocked flat', () => {
+    test('mockOf — the typed port double — stops at the first level when the port is mocked flat', () => {
         // Given - the same port, asked for without depth
         const gateway = mockOf<Gateway>({ deep: false });
 
@@ -44,7 +44,7 @@ describe('mockOf — the typed port double', () => {
         expect(vi.isMockFunction(gateway.refunds.issue)).toBe(false);
     });
 
-    test('takes the stubbed answer of a flat double', async () => {
+    test('mockOf — the typed port double — takes the stubbed answer of a flat double', async () => {
         // Given - a flat double whose one member is told what to reply
         const gateway = mockOf<Gateway>({ deep: false });
         gateway.charge.mockResolvedValue('charged');

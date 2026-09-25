@@ -21,8 +21,8 @@ const ROOT = resolve(import.meta.dirname, '..');
  * fails here — which is the moment to write the test, not six months later when
  * a coverage number moved.
  */
-describe('modules with no sibling test (meta-test K7)', () => {
-    test('reads the tree git does not ignore: a new module counts, an ignored one does not', () => {
+describe('siblings', () => {
+    test('modules with no sibling test (meta-test K7) — reads the tree git does not ignore: a new module counts, an ignored one does not', () => {
         // Given - a checkout holding a new module and an ignored one, neither with a test
         const root = mkdtempSync(join(tmpdir(), 'siblings-'));
         mkdirSync(join(root, 'src'));
@@ -38,7 +38,7 @@ describe('modules with no sibling test (meta-test K7)', () => {
         expect(siblingless(root)).toStrictEqual(['src/fresh.ts']);
     });
 
-    test('every one of them falls into a declared kind', () => {
+    test('modules with no sibling test (meta-test K7) — every one of them falls into a declared kind', () => {
         // Given - the modules with no `<file>.test.ts` beside them
         const unclaimed = classified(ROOT)
             .filter((row) => row.kind === undefined)
@@ -48,7 +48,7 @@ describe('modules with no sibling test (meta-test K7)', () => {
         expect(unclaimed, 'a module with no sibling test and no declared reason').toStrictEqual([]);
     });
 
-    test('no declared kind is dead', () => {
+    test('modules with no sibling test (meta-test K7) — no declared kind is dead', () => {
         // Given - the same modules, and the kinds that claim them
         const rows = classified(ROOT);
 
@@ -61,7 +61,7 @@ describe('modules with no sibling test (meta-test K7)', () => {
         }
     });
 
-    test('a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
+    test('modules with no sibling test (meta-test K7) — a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
         // Given - a new module in each of the trees a prefix kind used to swallow
         const newcomers = [
             'src/kernel/chain/lens.ts',
@@ -80,7 +80,7 @@ describe('modules with no sibling test (meta-test K7)', () => {
         }
     });
 
-    test('the table chapter 03 publishes is byte-identical to a fresh generation', () => {
+    test('modules with no sibling test (meta-test K7) — the table chapter 03 publishes is byte-identical to a fresh generation', () => {
         // Given - the kind table, which carries today's count per kind
         const chapter = readFileSync(resolve(ROOT, 'docs/03-testing.md'), 'utf8');
 

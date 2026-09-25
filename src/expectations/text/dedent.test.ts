@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { dedent } from './dedent.js';
 
-describe('dedent — a value written in place, read as the text it states', () => {
-    test('a text opening on a line break loses it, the closing line, and the shared indentation', () => {
+describe('dedent', () => {
+    test('dedent — a value written in place, read as the text it states — a text opening on a line break loses it, the closing line, and the shared indentation', () => {
         // Given - a block indented with the code around it
         const written = `
             HTTP/1.1 200 OK
@@ -15,7 +15,7 @@ describe('dedent — a value written in place, read as the text it states', () =
         expect(dedent(written)).toBe('HTTP/1.1 200 OK\n\n  {"ok": true}\n');
     });
 
-    test('a block whose closing backtick follows its last line states no final line break', () => {
+    test('dedent — a value written in place, read as the text it states — a block whose closing backtick follows its last line states no final line break', () => {
         // Given - the closing backtick on the last line
         const written = `
             first
@@ -25,14 +25,14 @@ describe('dedent — a value written in place, read as the text it states', () =
         expect(dedent(written)).toBe('first\nlast');
     });
 
-    test('a text that does not open on a line break is the value exactly as written', () => {
+    test('dedent — a value written in place, read as the text it states — a text that does not open on a line break is the value exactly as written', () => {
         // Given - a one-line text, and one whose lines are indented on purpose
         // Then - untouched
         expect(dedent('  kept as written  ')).toBe('  kept as written  ');
         expect(dedent('a\n    b\n')).toBe('a\n    b\n');
     });
 
-    test('a whitespace-only line inside the block keeps what lies past the indentation', () => {
+    test('dedent — a value written in place, read as the text it states — a whitespace-only line inside the block keeps what lies past the indentation', () => {
         // Given - an interior line of spaces deeper than the block's indentation
         const written = '\n    a\n      \n    b\n';
 

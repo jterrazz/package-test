@@ -10,8 +10,8 @@ const ROOT = resolve(import.meta.dirname, '..');
 /** Chapter 03, which carries the generated table. */
 const CHAPTER = 'docs/03-testing.md';
 
-describe('the meta-test channel, read off its own files', () => {
-    test('every file of the channel is a row, and every row states what it holds', () => {
+describe('metaTests', () => {
+    test('the meta-test channel, read off its own files — every file of the channel is a row, and every row states what it holds', () => {
         // Given - the channel as it stands on disk
         const rows = metaTests(ROOT);
 
@@ -25,15 +25,15 @@ describe('the meta-test channel, read off its own files', () => {
         }
     });
 
-    test('this file is one of the rows, under the title it declares', () => {
+    test('the meta-test channel, read off its own files — this file is one of the rows, under the title it declares', () => {
         // Given - the channel's own reading of the file you are looking at
         const own = metaTests(ROOT).find((row) => row.file === 'lint/meta-tests.test.ts');
 
-        // Then - the row carries this describe's sentence, so a reader of the table reads what the author wrote
-        expect(own?.holds).toStrictEqual(['the meta-test channel, read off its own files']);
+        // Then - the row carries this file's describe, the subject C31 titles it with
+        expect(own?.holds).toStrictEqual(['metaTests']);
     });
 
-    test('the table in chapter 03 is byte-identical to a fresh generation', () => {
+    test('the meta-test channel, read off its own files — the table in chapter 03 is byte-identical to a fresh generation', () => {
         // Given - the committed chapter
         const chapter = readFileSync(resolve(ROOT, CHAPTER), 'utf8');
 

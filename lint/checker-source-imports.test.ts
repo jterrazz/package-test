@@ -8,8 +8,8 @@ import { located, ROOT, treeOf } from './checker-source.fixtures.js';
  * (`i11-engine-owner`) — what the modules of the source tree may import,
  * beyond the direction I1 holds between its layers.
  */
-describe('the imports of the source tree (self checker passes I10, I11)', () => {
-    test('i10 — a facet never imports another, and is entered from outside by its face', () => {
+describe('checker-source-imports', () => {
+    test('the imports of the source tree (self checker passes I10, I11) — i10 — a facet never imports another, and is entered from outside by its face', () => {
         // Given - the package's own tree, and one where a facet reaches another, and an entry skips the face for a root file and for a concept folder
         const crossing = treeOf({
             'src/facets/api/api.handle.ts': "\nimport type { X } from '../cli/cli.handle.js';\n",
@@ -28,7 +28,7 @@ describe('the imports of the source tree (self checker passes I10, I11)', () => 
         ]);
     });
 
-    test('i11 — each third-party engine is imported by the one slice that owns it', () => {
+    test('the imports of the source tree (self checker passes I10, I11) — i11 — each third-party engine is imported by the one slice that owns it', () => {
         // Given - the package's own tree, and one where the kernel reaches for pg and the api facet for playwright
         const misplaced = treeOf({
             'src/facets/api/api.handle.ts':

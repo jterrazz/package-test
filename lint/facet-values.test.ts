@@ -17,8 +17,8 @@ function propertiesOf(expression: string): AstNode[] {
     return childList(expressionOf(expression), 'properties');
 }
 
-describe('facet values', () => {
-    test('a key is named when it is written as it is, never when it is computed', () => {
+describe('facet-values', () => {
+    test('facet values — a key is named when it is written as it is, never when it is computed', () => {
         // Given - a bare key, a string key and a computed one
         const keys = propertiesOf("{ root: 1, 'as-written': 2, [String(3)]: 3 }");
 
@@ -26,7 +26,7 @@ describe('facet values', () => {
         expect(keys.map(isNamedKey)).toStrictEqual([true, true, false]);
     });
 
-    test('a matrix row is string literals under keys written as they are', () => {
+    test('facet values — a matrix row is string literals under keys written as they are', () => {
         // Given - a row of literals, one with a computed value, one with a computed key
         const rows = [
             "{ group: 'a', name: 'b' } as const",
@@ -38,7 +38,7 @@ describe('facet values', () => {
         expect(rows.map((row) => isRow(expressionOf(row)))).toStrictEqual([true, false, false]);
     });
 
-    test("an adapter is a plain value or an engine's constructor called on plain values", () => {
+    test("facet values — an adapter is a plain value or an engine's constructor called on plain values", () => {
         // Given - an engine's constructor and a definition
         const imports = new Map([
             ['databaseSet', '../../world/services/seed/database-set.engine.js'],

@@ -16,18 +16,16 @@ import {
  * api's initiation-errors specs, on the run's own container.
  */
 
-describe('testcontainers adapter', () => {
-    test('degrades to an empty string when the container was never started', async () => {
+describe('TestcontainersAdapter', () => {
+    test('testcontainers adapter — degrades to an empty string when the container was never started', async () => {
         // Given - an adapter nothing ever started
         const never = new TestcontainersAdapter({ image: 'postgres:17', port: 5432 });
 
         // Then - log capture answers empty rather than throwing
         await expect(never.getLogs()).resolves.toBe('');
     });
-});
 
-describe('container reuse', () => {
-    test('is asked for by TESTCONTAINERS_REUSE_ENABLE=true, and never on CI', () => {
+    test('container reuse — is asked for by TESTCONTAINERS_REUSE_ENABLE=true, and never on CI', () => {
         // Given - the environments a run starts in
         const decided = {
             asked: reuseEnabled({ TESTCONTAINERS_REUSE_ENABLE: 'true' }),
@@ -47,7 +45,7 @@ describe('container reuse', () => {
         });
     });
 
-    test('labels every container, a reused one as outliving the run, and any other with its owner', () => {
+    test('container reuse — labels every container, a reused one as outliving the run, and any other with its owner', () => {
         // Given - the labels of a container of the run, and of a reused one, asked by one owner
         const labels = {
             reused: containerLabels(true, 'host:42'),
@@ -61,7 +59,7 @@ describe('container reuse', () => {
         });
     });
 
-    test('names this process as the owner, host and pid', () => {
+    test('container reuse — names this process as the owner, host and pid', () => {
         // Given - the process this test runs in
         // Then - the owner is where a sweep can ask whether it still runs
         expect(processOwner()).toBe(`${hostname()}:${process.pid}`);

@@ -33,8 +33,8 @@ function actionStating(accessors: MatrixRow[]): Composition['actions'][number] {
     };
 }
 
-describe('the facet compositions the capability matrix reads', () => {
-    test('every facet written as a composition is listed', () => {
+describe('compositions', () => {
+    test('the facet compositions the capability matrix reads — every facet written as a composition is listed', () => {
         // Given - the `<facet>.facet.ts` files on disk, and the columns listed
         const written = readdirSync(resolve(ROOT, 'src/facets'), { withFileTypes: true })
             .filter(
@@ -49,7 +49,7 @@ describe('the facet compositions the capability matrix reads', () => {
         expect(Object.keys(COMPOSITIONS).toSorted()).toStrictEqual(written);
     });
 
-    test('every definition states the row of its own member', () => {
+    test('the facet compositions the capability matrix reads — every definition states the row of its own member', () => {
         // Given - each option, setup and action of every composition, with the row it states
         const strays = Object.entries(COMPOSITIONS).flatMap(([column, composition]) =>
             [
@@ -65,7 +65,7 @@ describe('the facet compositions the capability matrix reads', () => {
         expect(strays).toStrictEqual([]);
     });
 
-    test('a row two definitions state is one row', () => {
+    test('the facet compositions the capability matrix reads — a row two definitions state is one row', () => {
         // Given - two actions whose results both answer `.table()`
         const table: MatrixRow = {
             group: 'Result accessor',
@@ -86,7 +86,7 @@ describe('the facet compositions the capability matrix reads', () => {
         ]);
     });
 
-    test('a row stated with two probes is refused', () => {
+    test('the facet compositions the capability matrix reads — a row stated with two probes is refused', () => {
         // Given - two actions answering `.table()`, each read by its own probe
         const composition: Composition = {
             actions: [

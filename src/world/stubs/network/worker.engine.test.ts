@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { isRunnerRequest } from './worker.engine.js';
 
-describe('the page network — what passes without a stub', () => {
-    test("the runner's own traffic passes by its path, the subject's never by its extension", () => {
+describe('worker.engine', () => {
+    test("the page network — what passes without a stub — the runner's own traffic passes by its path, the subject's never by its extension", () => {
         // Given - what Vite and the runner fetch, and what a component fetches that merely looks like an asset
         const runner = [
             'http://localhost:63315/@vite/client',

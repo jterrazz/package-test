@@ -14,8 +14,8 @@ function resultOf<Returned>(value: unknown): CallResult<Returned> {
     });
 }
 
-describe('callResult — the accessor the value is read through', () => {
-    test('reads a string as a stream', () => {
+describe('CallResult', () => {
+    test('callResult — the accessor the value is read through — reads a string as a stream', () => {
         // Given - a call that returned text
         const result = resultOf<string>('hello');
 
@@ -24,7 +24,7 @@ describe('callResult — the accessor the value is read through', () => {
         expect(result.value.text).toBe('hello');
     });
 
-    test('reads anything else as JSON', () => {
+    test('callResult — the accessor the value is read through — reads anything else as JSON', () => {
         // Given - a call that returned an object
         const result = resultOf<{ ok: boolean }>({ ok: true });
 
@@ -33,7 +33,7 @@ describe('callResult — the accessor the value is read through', () => {
         expect(result.value.value).toStrictEqual({ ok: true });
     });
 
-    test('reads a subject that MAY be a string on the value in hand', () => {
+    test('callResult — the accessor the value is read through — reads a subject that MAY be a string on the value in hand', () => {
         // Given - one subject typed `string | undefined`, answering each way in turn
         const text = resultOf<string | undefined>('hello');
         const absent = resultOf<string | undefined>(null);
@@ -46,14 +46,14 @@ describe('callResult — the accessor the value is read through', () => {
         >();
     });
 
-    test('types exactly-string as the stream and never-string as JSON', () => {
+    test('callResult — the accessor the value is read through — types exactly-string as the stream and never-string as JSON', () => {
         // Given - the two unambiguous shapes
         // Then - neither is a union: there is nothing for the test to narrow
         expectTypeOf<CallValue<string>>().toEqualTypeOf<TextAccessor>();
         expectTypeOf<CallValue<number>>().toEqualTypeOf<JsonAccessor<number>>();
     });
 
-    test('a value crosses as the JSON it serialises to, whatever the type claims', () => {
+    test('callResult — the accessor the value is read through — a value crosses as the JSON it serialises to, whatever the type claims', () => {
         // Given - a call that returned a Map, which JSON has no shape for
         const result = resultOf<Map<string, number>>(new Map([['a', 1]]));
 
@@ -61,7 +61,7 @@ describe('callResult — the accessor the value is read through', () => {
         expect(result.value.value).toStrictEqual({});
     });
 
-    test('reads a call that threw as the empty value, on `error`', () => {
+    test('callResult — the accessor the value is read through — reads a call that threw as the empty value, on `error`', () => {
         // Given - a call that refused
         const result = new CallResult<string>({
             config: {},

@@ -10,8 +10,8 @@ function get(path: string, n: number): Stub {
     return { request: http.get(path), response: http.json({ n }) };
 }
 
-describe('stubBackend — the network a chain is armed through', () => {
-    test('a runner with no declared backend refuses a stub, naming the option on its own constructor', () => {
+describe('stubBackend', () => {
+    test('stubBackend — the network a chain is armed through — a runner with no declared backend refuses a stub, naming the option on its own constructor', () => {
         // Given - a mobile runner that declared no backend
         const network = stubBackend(undefined, 'mobile');
 
@@ -23,7 +23,7 @@ describe('stubBackend — the network a chain is armed through', () => {
         );
     });
 
-    test('a chain declaring no stub is not failed by the chain before it', async () => {
+    test('stubBackend — the network a chain is armed through — a chain declaring no stub is not failed by the chain before it', async () => {
         // Given - a chain that declared a stub, then met a request no stub answers
         const backend = new StubBackend();
         const url = await backend.start();
@@ -45,7 +45,7 @@ describe('stubBackend — the network a chain is armed through', () => {
         await expect(fetch(`${url}/events`)).resolves.toHaveProperty('status', 501);
     });
 
-    test("arming a chain replaces the previous chain's stubs, and the stub's miss is the chain's failure", async () => {
+    test("stubBackend — the network a chain is armed through — arming a chain replaces the previous chain's stubs, and the stub's miss is the chain's failure", async () => {
         // Given - a started stub, armed by a first chain, then by a second declaring another route
         const backend = new StubBackend();
         onTestFinished(async () => {

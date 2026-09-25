@@ -32,8 +32,8 @@ async function recordingServer(): Promise<{ requests: string[]; url: string }> {
 
 const IPHONE = { 'appium:deviceName': 'iPhone 17', platformName: 'iOS' };
 
-describe('the session ledger — one driver session per run', () => {
-    test('a later runner finds the session an earlier one recorded, whatever order it spells the capabilities in', () => {
+describe('sessionLedger', () => {
+    test('the session ledger — one driver session per run — a later runner finds the session an earlier one recorded, whatever order it spells the capabilities in', () => {
         // Given - a run's ledger holding the session a first runner created
         const ledger = sessionLedger(ledgerFolder());
         const session = {
@@ -49,7 +49,7 @@ describe('the session ledger — one driver session per run', () => {
         ).toStrictEqual(session);
     });
 
-    test('another server, or another device, finds nothing', () => {
+    test('the session ledger — one driver session per run — another server, or another device, finds nothing', () => {
         // Given - a run's ledger holding one session
         const ledger = sessionLedger(ledgerFolder());
         ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' });
@@ -61,13 +61,13 @@ describe('the session ledger — one driver session per run', () => {
         ).toBeUndefined();
     });
 
-    test('a run that opened nothing has nothing to find', () => {
+    test('the session ledger — one driver session per run — a run that opened nothing has nothing to find', () => {
         // Given - the folder the setup handed out, never written to
         // Then - no session
         expect(sessionLedger(ledgerFolder()).lookup('http://a', IPHONE)).toBeUndefined();
     });
 
-    test('the run ends every session it recorded, then clears the ledger', async () => {
+    test('the session ledger — one driver session per run — the run ends every session it recorded, then clears the ledger', async () => {
         // Given - two sessions recorded on one server
         const server = await recordingServer();
         const folder = ledgerFolder();
@@ -86,7 +86,7 @@ describe('the session ledger — one driver session per run', () => {
         expect(existsSync(folder)).toBe(false);
     });
 
-    test('a server gone before the end of the run does not fail it', async () => {
+    test('the session ledger — one driver session per run — a server gone before the end of the run does not fail it', async () => {
         // Given - a session recorded on a server nothing answers on
         const folder = ledgerFolder();
         sessionLedger(folder).record(IPHONE, {

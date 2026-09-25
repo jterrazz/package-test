@@ -21,8 +21,55 @@ import { codeOf } from './rule-code.js';
 // The fs-anchored cases run against the shared E2E fixture trees.
 const FIXTURES = resolve(import.meta.dirname, '../specs/lint/checker/fixtures/lint-violations');
 
-describe('conventions checker — findUnknownTokens (D4)', () => {
-    test('flags an identifier-shaped token outside the vocabulary', () => {
+/** A document whose name only repeats its directory — a C12 finding wherever it is read. */
+const REPEATED_NAME = [
+    'description: names its directory again instead of naming the case',
+    'runs:',
+    '    - command: widget rm',
+    '      exit: 0',
+    '      stdout: |',
+    '          Removed.',
+    '',
+].join('\n');
+/** A repository holding `files`, of which it adds `add` and ignores what `ignore` names. */
+function repository(files: string[], add: string[], ignore = ''): string {
+    const root = mkdtempSync(join(tmpdir(), 'checker-tree-'));
+    for (const path of files) {
+        mkdirSync(dirname(join(root, path)), { recursive: true });
+        writeFileSync(join(root, path), path.endsWith('.spec.yaml') ? REPEATED_NAME : `${path}\n`);
+    }
+    writeFileSync(join(root, '.gitignore'), ignore);
+    execFileSync('git', ['init', '--quiet'], { cwd: root });
+    if (add.length > 0) {
+        execFileSync('git', ['add', ...add], { cwd: root });
+    }
+    return root;
+}
+/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: found`. */
+function findings(root: string, rule: string): string[] {
+    return runAllChecks(join(root, 'specs'))
+        .filter((violation) => violation.rule === rule || codeOf(violation.rule) === rule)
+        .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
+        .toSorted();
+}
+/** A tree whose pool holds `app/`, reached from the one leaf `specs/api/`. */
+function singleReaderPool(git: boolean): string {
+    const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
+    mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });
+    mkdirSync(join(root, 'specs', 'api'), { recursive: true });
+    writeFileSync(join(root, 'specs', 'shared', 'fixtures', 'app', 'index.txt'), 'app\n');
+    writeFileSync(
+        join(root, 'specs', 'api', 'boot.spec.ts'),
+        "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
+    );
+    if (git) {
+        execFileSync('git', ['init', '--quiet'], { cwd: root });
+        execFileSync('git', ['add', '.'], { cwd: root });
+    }
+    return root;
+}
+describe('checker', () => {
+    test('conventions checker — findUnknownTokens (D4) — flags an identifier-shaped token outside the vocabulary', () => {
         // Given - a fixture line with one unknown and one known token
         const violations = findUnknownTokens('user {{userid}} created at {{iso8601}}');
 
@@ -30,7 +77,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         expect(violations).toStrictEqual([{ line: 1, token: '{{userid}}' }]);
     });
 
-    test('accepts every known token, with and without capture refs', () => {
+    test('conventions checker — findUnknownTokens (D4) — accepts every known token, with and without capture refs', () => {
         // Given - a sample of the frozen vocabulary
         const text = '{{uuid}} {{uuid#id}} {{iso8601}} {{workdir}} {{any}} {{int#count}}';
 
@@ -38,7 +85,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
-    test('flags a malformed ref on a known kind (empty ref, spaced)', () => {
+    test('conventions checker — findUnknownTokens (D4) — flags a malformed ref on a known kind (empty ref, spaced)', () => {
         // Given - two malformed captures of otherwise-known kinds
         // Then - both are reported (they are not well-formed tokens)
         expect(findUnknownTokens('{{iso8601#}}')).toStrictEqual([
@@ -49,7 +96,7 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         ]);
     });
 
-    test('reports the 1-based line of each finding', () => {
+    test('conventions checker — findUnknownTokens (D4) — reports the 1-based line of each finding', () => {
         // Given - an unknown token on the third line
         const violations = findUnknownTokens('ok\nok {{sha}}\nbad {{sha256}}');
 
@@ -57,27 +104,23 @@ describe('conventions checker — findUnknownTokens (D4)', () => {
         expect(violations).toStrictEqual([{ line: 3, token: '{{sha256}}' }]);
     });
 
-    test('ignores structural template noise like Go templates', () => {
+    test('conventions checker — findUnknownTokens (D4) — ignores structural template noise like Go templates', () => {
         // Given - braces that are not identifier-shaped tokens
         const text = 'docker {{.Server.Version}} and {{ spaced }} and {{123}}';
 
         // Then - out of the grammar, not flagged
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
-});
 
-describe('conventions checker — findKnownTokens (D10)', () => {
-    test('reports known tokens (the requests/ leak signal)', () => {
+    test('conventions checker — findKnownTokens (D10) — reports known tokens (the requests/ leak signal)', () => {
         // Given - a request body carrying a token
         // Then - the known token is surfaced (an unknown one is not this signal)
         expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toStrictEqual([
             { line: 1, token: '{{uuid}}' },
         ]);
     });
-});
 
-describe('conventions checker — checkConventionFiles (D4)', () => {
-    test('walks a specs tree and reports unknown tokens in fixture files', () => {
+    test('conventions checker — checkConventionFiles (D4) — walks a specs tree and reports unknown tokens in fixture files', () => {
         // Given - the violation fixture tree ({{userid}} in expected/out.txt)
         const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token'));
 
@@ -98,51 +141,15 @@ describe('conventions checker — checkConventionFiles (D4)', () => {
         expect(rendered).toContain('uuid');
     });
 
-    test('passes the compliant twin', () => {
+    test('conventions checker — checkConventionFiles (D4) — passes the compliant twin', () => {
         // Given - the -ok tree (only known tokens)
         const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token-ok'));
 
         // Then - clean
         expect(violations).toStrictEqual([]);
     });
-});
 
-/** A document whose name only repeats its directory — a C12 finding wherever it is read. */
-const REPEATED_NAME = [
-    'description: names its directory again instead of naming the case',
-    'runs:',
-    '    - command: widget rm',
-    '      exit: 0',
-    '      stdout: |',
-    '          Removed.',
-    '',
-].join('\n');
-
-/** A repository holding `files`, of which it adds `add` and ignores what `ignore` names. */
-function repository(files: string[], add: string[], ignore = ''): string {
-    const root = mkdtempSync(join(tmpdir(), 'checker-tree-'));
-    for (const path of files) {
-        mkdirSync(dirname(join(root, path)), { recursive: true });
-        writeFileSync(join(root, path), path.endsWith('.spec.yaml') ? REPEATED_NAME : `${path}\n`);
-    }
-    writeFileSync(join(root, '.gitignore'), ignore);
-    execFileSync('git', ['init', '--quiet'], { cwd: root });
-    if (add.length > 0) {
-        execFileSync('git', ['add', ...add], { cwd: root });
-    }
-    return root;
-}
-
-/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: found`. */
-function findings(root: string, rule: string): string[] {
-    return runAllChecks(join(root, 'specs'))
-        .filter((violation) => violation.rule === rule || codeOf(violation.rule) === rule)
-        .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
-        .toSorted();
-}
-
-describe('the tree the checker judges — what git does not ignore', () => {
-    test('judges an untracked document, and never an ignored one', () => {
+    test('the tree the checker judges — what git does not ignore — judges an untracked document, and never an ignored one', () => {
         // Given - three documents repeating their directory: tracked, new, and ignored
         const root = repository(
             ['specs/rm/rm.spec.yaml', 'specs/cp/cp.spec.yaml', 'specs/mv/mv.spec.yaml'],
@@ -157,7 +164,7 @@ describe('the tree the checker judges — what git does not ignore', () => {
         ]);
     });
 
-    test('reads a `file()` whose target is new as existing, and an ignored one as not (C8)', () => {
+    test('the tree the checker judges — what git does not ignore — reads a `file()` whose target is new as existing, and an ignored one as not (C8)', () => {
         // Given - a spec naming three goldens on disk: tracked, new, and ignored
         const root = repository(
             [
@@ -183,27 +190,8 @@ describe('the tree the checker judges — what git does not ignore', () => {
             "api/boot.spec.ts:3: file('./expected/local.txt') names nothing — api/expected/local.txt is ignored by git",
         ]);
     });
-});
 
-/** A tree whose pool holds `app/`, reached from the one leaf `specs/api/`. */
-function singleReaderPool(git: boolean): string {
-    const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
-    mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });
-    mkdirSync(join(root, 'specs', 'api'), { recursive: true });
-    writeFileSync(join(root, 'specs', 'shared', 'fixtures', 'app', 'index.txt'), 'app\n');
-    writeFileSync(
-        join(root, 'specs', 'api', 'boot.spec.ts'),
-        "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
-    );
-    if (git) {
-        execFileSync('git', ['init', '--quiet'], { cwd: root });
-        execFileSync('git', ['add', '.'], { cwd: root });
-    }
-    return root;
-}
-
-describe('the moves the fixers make', () => {
-    test('keeps the history of a fixture C14 moves in a git checkout', () => {
+    test('the moves the fixers make — keeps the history of a fixture C14 moves in a git checkout', () => {
         // Given - a tracked single-reader pool fixture
         const root = singleReaderPool(true);
 
@@ -218,7 +206,7 @@ describe('the moves the fixers make', () => {
         ]);
     });
 
-    test('moves a C14 fixture by plain rename where git places the tree in no work tree', () => {
+    test('the moves the fixers make — moves a C14 fixture by plain rename where git places the tree in no work tree', () => {
         // Given - the same tree, and no repository
         const root = singleReaderPool(false);
 
@@ -229,10 +217,8 @@ describe('the moves the fixers make', () => {
         expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);
         expect(existsSync(join(root, 'specs', 'shared'))).toBe(false);
     });
-});
 
-describe('the single paths the checker probes — through the same tree', () => {
-    test('an ignored pool directory is no fixture to move (C14)', () => {
+    test('the single paths the checker probes — through the same tree — an ignored pool directory is no fixture to move (C14)', () => {
         // Given - a pool directory `.gitignore` names, reached from one leaf
         const root = repository(
             ['specs/shared/fixtures/app/index.txt', 'specs/shared/fixtures/kept.txt'],
@@ -250,7 +236,7 @@ describe('the single paths the checker probes — through the same tree', () => 
         expect(findings(root, 'c8-disk-target-exists')).toHaveLength(1);
     });
 
-    test('a manifest `.gitignore` names is no package (the member pass)', () => {
+    test('the single paths the checker probes — through the same tree — a manifest `.gitignore` names is no package (the member pass)', () => {
         // Given - one new manifest and one ignored one
         const root = repository(['fresh/package.json', 'local/package.json'], [], 'local/\n');
         writeFileSync(join(root, 'fresh', 'package.json'), '{}\n');
@@ -261,7 +247,7 @@ describe('the single paths the checker probes — through the same tree', () => 
         expect(readManifest(join(root, 'local'))).toBeNull();
     });
 
-    test('a nested manifest `.gitignore` names bounds no walk (the member pass)', () => {
+    test('the single paths the checker probes — through the same tree — a nested manifest `.gitignore` names bounds no walk (the member pass)', () => {
         // Given - a spec outside `specs/` under a folder whose own manifest is ignored
         const root = repository(
             ['tools/package.json', 'tools/boot.spec.ts'],
@@ -276,7 +262,7 @@ describe('the single paths the checker probes — through the same tree', () => 
         ]);
     });
 
-    test('a golden `.gitignore` names is not one the mover points at (C13)', () => {
+    test('the single paths the checker probes — through the same tree — a golden `.gitignore` names is not one the mover points at (C13)', () => {
         // Given - a 16 leaf whose `_expected/` holds a new golden and an ignored one
         const root = repository(
             [
@@ -301,7 +287,7 @@ describe('the single paths the checker probes — through the same tree', () => 
         );
     });
 
-    test('an ignored fixture fixes no value for the document beside it (D5)', () => {
+    test('the single paths the checker probes — through the same tree — an ignored fixture fixes no value for the document beside it (D5)', () => {
         // Given - two documents asserting a temp path their `fixture:` holds, one of the two fixtures ignored
         const document = [
             'description: prints where it wrote',

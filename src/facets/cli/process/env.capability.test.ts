@@ -69,8 +69,21 @@ const postgres = (connectionString: string): ServiceHandle =>
 const redis = (connectionString: string): ServiceHandle =>
     fakeService({ connectionString, isDatabase: false, type: 'redis' });
 
-describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', () => {
-    test('injects <KEY>_URL per service plus unambiguous DATABASE_URL / REDIS_URL', () => {
+/** A chain composed of `.env()` and `with()`, ending on what a child would be handed. */
+type Chain = {
+    env: EnvMethod<Chain>;
+    handed: () => Promise<CliEnv | undefined>;
+    with: (context: { env?: CliEnv }) => Chain;
+};
+const handed = defineAction({
+    accessors: [],
+    name: 'handed',
+    perform: async (_args: [], read, _engines, { config }) =>
+        await Promise.resolve(childEnv(config, read(env), WORKDIR)),
+    row: { group: 'Terminal action', name: '.handed()', probe: '.handed(' },
+});
+describe('env.capability', () => {
+    test('childEnv — what a child of the chain starts with (CONVENTIONS B6) — injects <KEY>_URL per service plus unambiguous DATABASE_URL / REDIS_URL', () => {
         // Given - one SQL database and one redis declared
         const services = {
             cache: redis('redis://cache:6379/0'),
@@ -86,7 +99,7 @@ describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', 
         });
     });
 
-    test('.env() overrides the injection and null unsets', () => {
+    test('childEnv — what a child of the chain starts with (CONVENTIONS B6) — .env() overrides the injection and null unsets', () => {
         // Given - a chain overriding one injected URL and unsetting another
         const services = { db: postgres('postgres://db:5432/app') };
         const chained: CliEnv = { DATABASE_URL: 'postgres://elsewhere/app', DB_URL: null };
@@ -98,7 +111,7 @@ describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', 
         });
     });
 
-    test('omits DATABASE_URL with two SQL databases', () => {
+    test('childEnv — what a child of the chain starts with (CONVENTIONS B6) — omits DATABASE_URL with two SQL databases', () => {
         // Given - two SQL databases declared
         const services = {
             analytics: postgres('postgresql://analytics'),
@@ -112,7 +125,7 @@ describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', 
         });
     });
 
-    test('omits REDIS_URL with two redis services', () => {
+    test('childEnv — what a child of the chain starts with (CONVENTIONS B6) — omits REDIS_URL with two redis services', () => {
         // Given - two redis services declared
         const services = { cache: redis('redis://cache'), queue: redis('redis://queue') };
 
@@ -123,7 +136,7 @@ describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', 
         });
     });
 
-    test('spells a key in constant case, a dash as an underscore', () => {
+    test('childEnv — what a child of the chain starts with (CONVENTIONS B6) — spells a key in constant case, a dash as an underscore', () => {
         // Given - a service key containing a dash
         const services = {
             'db-main': fakeService({
@@ -139,25 +152,8 @@ describe('childEnv — what a child of the chain starts with (CONVENTIONS B6)', 
             DB_MAIN_URL: 'file:main.sqlite',
         });
     });
-});
 
-/** A chain composed of `.env()` and `with()`, ending on what a child would be handed. */
-type Chain = {
-    env: EnvMethod<Chain>;
-    handed: () => Promise<CliEnv | undefined>;
-    with: (context: { env?: CliEnv }) => Chain;
-};
-
-const handed = defineAction({
-    accessors: [],
-    name: 'handed',
-    perform: async (_args: [], read, _engines, { config }) =>
-        await Promise.resolve(childEnv(config, read(env), WORKDIR)),
-    row: { group: 'Terminal action', name: '.handed()', probe: '.handed(' },
-});
-
-describe('.env() — the environment a chain states', () => {
-    test('every chain of a with() view starts from the context, and its own .env() merges over it', async () => {
+    test('.env() — the environment a chain states — every chain of a with() view starts from the context, and its own .env() merges over it', async () => {
         // Given - a file's environment, and one chain adding to it
         const chain = defineFacet<Chain>()({
             actions: [handed],

@@ -89,80 +89,6 @@ function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise
     return outcome;
 }
 
-describe('appium adapter — the declared timeouts', () => {
-    test('waits the declared action timeout, not the framework default', async () => {
-        // Given - a runner declaring 45s, because its dev-mode cold boot outlasts the 30s default
-        const { adapter } = await openedAdapter({ action: 45_000 });
-        vi.useFakeTimers();
-        try {
-            const outcome = tapTheAbsent(adapter);
-
-            // Then - the default deadline passes without a refusal
-            await vi.advanceTimersByTimeAsync(31_000);
-            expect(outcome.error).toBeUndefined();
-
-            // Then - the DECLARED deadline is the one that ends the wait
-            await vi.advanceTimersByTimeAsync(15_000);
-            await outcome.settled;
-            expect(outcome.error?.message).toContain('timed out after 45000ms');
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    test('falls back to the 30s action default when none is declared', async () => {
-        // Given - a runner that declares no timeouts at all
-        const { adapter } = await openedAdapter();
-        vi.useFakeTimers();
-        try {
-            const outcome = tapTheAbsent(adapter);
-
-            // Then - the framework's own default is what the verb waits
-            await vi.advanceTimersByTimeAsync(29_000);
-            expect(outcome.error).toBeUndefined();
-            await vi.advanceTimersByTimeAsync(2000);
-            await outcome.settled;
-            expect(outcome.error?.message).toContain('timed out after 30000ms');
-        } finally {
-            vi.useRealTimers();
-        }
-    });
-
-    test('hands the declared launch timeout to the session capabilities', async () => {
-        // Given - a runner shortening the WebDriverAgent launch budget
-        const { sessions } = await openedAdapter({ launch: 90_000 });
-
-        // Then - the session was created with that budget
-        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(90_000);
-    });
-
-    test('asks the server for the device by name and platform version', async () => {
-        // Given - an adapter over a device named with its OS, and no udid
-        const { remote, sessions } = stubDriver();
-        const adapter = new AppiumAdapter({
-            device: { name: 'iPhone 17', os: 'iOS 26.5' },
-            remote,
-            serverUrl: SERVER_URL,
-        });
-        await adapter.open({ bundleId: BUNDLE_ID });
-
-        // Then - the capabilities carry the name and the bare version, and no udid
-        expect(sessions[0]?.capabilities).toMatchObject({
-            'appium:deviceName': 'iPhone 17',
-            'appium:platformVersion': '26.5',
-        });
-        expect(sessions[0]?.capabilities).not.toHaveProperty('appium:udid');
-    });
-
-    test('falls back to the 240s launch default when none is declared', async () => {
-        // Given - a runner that declares no timeouts at all
-        const { sessions } = await openedAdapter();
-
-        // Then - the session carries the framework's own default
-        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(240_000);
-    });
-});
-
 /**
  * A driver whose one button is labelled "Continue to payment" — it answers a
  * `CONTAINS` predicate and refuses an `==` one: a name that only begins the
@@ -201,32 +127,6 @@ function partialLabelDriver(): { remote: never; state: { taps: number } } {
         });
     return { remote: asRemote(remote), state };
 }
-
-describe('appium adapter — names are exact', () => {
-    test('a name that only begins the label designates nothing, and nothing is tapped', async () => {
-        // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
-        const { remote, state } = partialLabelDriver();
-        const adapter = new AppiumAdapter({
-            remote,
-            serverUrl: SERVER_URL,
-            timeouts: { action: 1 },
-            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
-        });
-
-        // When - the scenario taps the partial name
-        const opened = adapter.open({
-            bundleId: BUNDLE_ID,
-            scenario: async (visitor) => {
-                await visitor.tap(button('Continue'));
-            },
-        });
-
-        // Then - the verb runs to its deadline on an exact name, and no substring is widened to
-        await expect(opened).rejects.toThrow(/timed out/u);
-        expect(state.taps).toBe(0);
-    });
-});
-
 /**
  * A screen with two "Buy" buttons, one inside the `card` container: the
  * screen answers both, the card only its own. Records which one is tapped.
@@ -262,9 +162,103 @@ function scopedDriver(): { remote: never; tapped: string[] } {
         });
     return { remote: asRemote(remote), tapped };
 }
+describe('AppiumAdapter', () => {
+    test('appium adapter — the declared timeouts — waits the declared action timeout, not the framework default', async () => {
+        // Given - a runner declaring 45s, because its dev-mode cold boot outlasts the 30s default
+        const { adapter } = await openedAdapter({ action: 45_000 });
+        vi.useFakeTimers();
+        try {
+            const outcome = tapTheAbsent(adapter);
 
-describe('appium adapter — a scope is translated on the device', () => {
-    test('within() resolves its target inside the scope, not on the whole screen', async () => {
+            // Then - the default deadline passes without a refusal
+            await vi.advanceTimersByTimeAsync(31_000);
+            expect(outcome.error).toBeUndefined();
+
+            // Then - the DECLARED deadline is the one that ends the wait
+            await vi.advanceTimersByTimeAsync(15_000);
+            await outcome.settled;
+            expect(outcome.error?.message).toContain('timed out after 45000ms');
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('appium adapter — the declared timeouts — falls back to the 30s action default when none is declared', async () => {
+        // Given - a runner that declares no timeouts at all
+        const { adapter } = await openedAdapter();
+        vi.useFakeTimers();
+        try {
+            const outcome = tapTheAbsent(adapter);
+
+            // Then - the framework's own default is what the verb waits
+            await vi.advanceTimersByTimeAsync(29_000);
+            expect(outcome.error).toBeUndefined();
+            await vi.advanceTimersByTimeAsync(2000);
+            await outcome.settled;
+            expect(outcome.error?.message).toContain('timed out after 30000ms');
+        } finally {
+            vi.useRealTimers();
+        }
+    });
+
+    test('appium adapter — the declared timeouts — hands the declared launch timeout to the session capabilities', async () => {
+        // Given - a runner shortening the WebDriverAgent launch budget
+        const { sessions } = await openedAdapter({ launch: 90_000 });
+
+        // Then - the session was created with that budget
+        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(90_000);
+    });
+
+    test('appium adapter — the declared timeouts — asks the server for the device by name and platform version', async () => {
+        // Given - an adapter over a device named with its OS, and no udid
+        const { remote, sessions } = stubDriver();
+        const adapter = new AppiumAdapter({
+            device: { name: 'iPhone 17', os: 'iOS 26.5' },
+            remote,
+            serverUrl: SERVER_URL,
+        });
+        await adapter.open({ bundleId: BUNDLE_ID });
+
+        // Then - the capabilities carry the name and the bare version, and no udid
+        expect(sessions[0]?.capabilities).toMatchObject({
+            'appium:deviceName': 'iPhone 17',
+            'appium:platformVersion': '26.5',
+        });
+        expect(sessions[0]?.capabilities).not.toHaveProperty('appium:udid');
+    });
+
+    test('appium adapter — the declared timeouts — falls back to the 240s launch default when none is declared', async () => {
+        // Given - a runner that declares no timeouts at all
+        const { sessions } = await openedAdapter();
+
+        // Then - the session carries the framework's own default
+        expect(sessions[0]?.capabilities['appium:wdaLaunchTimeout']).toBe(240_000);
+    });
+
+    test('appium adapter — names are exact — a name that only begins the label designates nothing, and nothing is tapped', async () => {
+        // Given - a screen whose only button is labelled "Continue to payment", and a scenario naming part of it
+        const { remote, state } = partialLabelDriver();
+        const adapter = new AppiumAdapter({
+            remote,
+            serverUrl: SERVER_URL,
+            timeouts: { action: 1 },
+            device: { name: 'iPhone 17', udid: 'SIM-UDID' },
+        });
+
+        // When - the scenario taps the partial name
+        const opened = adapter.open({
+            bundleId: BUNDLE_ID,
+            scenario: async (visitor) => {
+                await visitor.tap(button('Continue'));
+            },
+        });
+
+        // Then - the verb runs to its deadline on an exact name, and no substring is widened to
+        await expect(opened).rejects.toThrow(/timed out/u);
+        expect(state.taps).toBe(0);
+    });
+
+    test('appium adapter — a scope is translated on the device — within() resolves its target inside the scope, not on the whole screen', async () => {
         // Given - a screen with a Buy button outside the card and one inside it
         const { remote, tapped } = scopedDriver();
         const adapter = new AppiumAdapter({

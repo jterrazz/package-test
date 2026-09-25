@@ -8,8 +8,8 @@ const ROOT = resolve(import.meta.dirname, '../..');
 /** A built project helper: it builds a project a consumer's `vitest.config.ts` lists. */
 type ProjectHelper = () => { test?: { globalSetup?: string | string[] } };
 
-describe('@jterrazz/test/vitest — a built project names setups the bundle ships', () => {
-    test('every global setup a built project helper names is a file of dist/', async () => {
+describe('index', () => {
+    test('@jterrazz/test/vitest — a built project names setups the bundle ships — every global setup a built project helper names is a file of dist/', async () => {
         // Given - the built runner-config entry, whose helpers resolve their setups beside the bundle (`npm run build` first)
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed specifier resolves to `any`: the helpers are what this reads of it
         const built = (await import(resolve(ROOT, 'dist/vitest.js'))) as Record<string, unknown>;

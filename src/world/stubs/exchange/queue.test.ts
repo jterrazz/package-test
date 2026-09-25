@@ -26,8 +26,8 @@ function serve(queue: StubQueue, overrides: Partial<MatchableRequest> = {}): nul
     return (served.response as { body: { tag: string } }).body.tag;
 }
 
-describe('stub queue — selection', () => {
-    test('the first matching stub wins and, without times, keeps serving', () => {
+describe('queue', () => {
+    test('stub queue — selection — the first matching stub wins and, without times, keeps serving', () => {
         // Given - two stubs on the same route
         const queue = new StubQueue([
             stub(http.get(URL_A), 'first'),
@@ -39,7 +39,7 @@ describe('stub queue — selection', () => {
         expect(serve(queue)).toBe('first');
     });
 
-    test('times exhausts a stub, and the next matching one takes over', () => {
+    test('stub queue — selection — times exhausts a stub, and the next matching one takes over', () => {
         // Given - a finite error sequence before an unlimited success tail
         const queue = new StubQueue([
             stub(http.get(URL_A), 'error', { times: 2 }),
@@ -53,7 +53,7 @@ describe('stub queue — selection', () => {
         expect(serve(queue)).toBe('ok');
     });
 
-    test('an exhausted queue yields null — the strict violation signal', () => {
+    test('stub queue — selection — an exhausted queue yields null — the strict violation signal', () => {
         // Given - one stub allowed exactly once
         const queue = new StubQueue([stub(http.get(URL_A), 'once', { times: 1 })]);
 
@@ -62,7 +62,7 @@ describe('stub queue — selection', () => {
         expect(serve(queue)).toBeNull();
     });
 
-    test('method and url both gate the match; * matches any method', () => {
+    test('stub queue — selection — method and url both gate the match; * matches any method', () => {
         // Given - a GET on A and a wildcard on B
         const queue = new StubQueue([
             stub(http.get(URL_A), 'get-a'),
@@ -75,7 +75,7 @@ describe('stub queue — selection', () => {
         expect(serve(queue)).toBe('get-a');
     });
 
-    test('a body filter routes two stubs sharing one url', () => {
+    test('stub queue — selection — a body filter routes two stubs sharing one url', () => {
         // Given - two stubs on one url routed by body content
         const queue = new StubQueue([
             stub(http.post(URL_A, { body: { user: 'alice' } }), 'alice'),
@@ -87,10 +87,8 @@ describe('stub queue — selection', () => {
         expect(serve(queue, { body: { user: 'alice' }, method: 'POST' })).toBe('alice');
         expect(serve(queue, { body: { user: 'carol' }, method: 'POST' })).toBeNull();
     });
-});
 
-describe('stub queue — url forms', () => {
-    test('a path-form url matches any origin, tokens structural, query a subset', () => {
+    test('stub queue — url forms — a path-form url matches any origin, tokens structural, query a subset', () => {
         // Given - a path-form stub with a token segment and a query param
         const queue = new StubQueue([stub(http.get('/articles/{{uuid}}?locale=fr'), 'article')]);
 
@@ -104,7 +102,7 @@ describe('stub queue — url forms', () => {
         expect(serve(queue, { url: article })).toBeNull();
     });
 
-    test('a relative observed url (the stub backend) matches a path-form stub', () => {
+    test('stub queue — url forms — a relative observed url (the stub backend) matches a path-form stub', () => {
         // Given - the stub backend sees `/events?x=1`, not a full URL
         const queue = new StubQueue([stub(http.get('/events'), 'events')]);
 
@@ -112,7 +110,7 @@ describe('stub queue — url forms', () => {
         expect(serve(queue, { url: '/events?x=1' })).toBe('events');
     });
 
-    test('an absolute url matches on origin+pathname, ignoring extra query', () => {
+    test('stub queue — url forms — an absolute url matches on origin+pathname, ignoring extra query', () => {
         // Given - an absolute stub url with no query of its own
         const queue = new StubQueue([stub(http.get(URL_A), 'a')]);
 
@@ -121,7 +119,7 @@ describe('stub queue — url forms', () => {
         expect(serve(queue, { url: URL_B })).toBeNull();
     });
 
-    test('a RegExp url tests the full observed url', () => {
+    test('stub queue — url forms — a RegExp url tests the full observed url', () => {
         // Given - a pattern stub
         const queue = new StubQueue([stub(http.get(/example\.com\/a/u), 're')]);
 
@@ -130,7 +128,7 @@ describe('stub queue — url forms', () => {
         expect(queue.routes).toHaveLength(1);
     });
 
-    test('routes dedupe by pattern and collect their methods', () => {
+    test('stub queue — url forms — routes dedupe by pattern and collect their methods', () => {
         // Given - two methods on one path-form url plus another route
         const queue = new StubQueue([
             stub(http.get('/events'), 'get'),
@@ -143,10 +141,8 @@ describe('stub queue — url forms', () => {
         expect(queue.routes[0]?.methods).toStrictEqual(['GET', 'POST']);
         expect(queue.routes[1]?.url).toBe(URL_A);
     });
-});
 
-describe('stub queue — strict failure message (CONVENTIONS D7)', () => {
-    test('names the offending request and lists stubs with their state', () => {
+    test('stub queue — strict failure message (CONVENTIONS D7) — names the offending request and lists stubs with their state', () => {
         // Given - a queue with one exhausted and one untouched stub
         const queue = new StubQueue([
             stub(http.get(URL_A), 'a', { times: 1 }),
@@ -165,17 +161,15 @@ describe('stub queue — strict failure message (CONVENTIONS D7)', () => {
         expect(error.message).toContain(`- POST ${URL_B}`);
     });
 
-    test('falls back to "no stubs declared" on an empty queue', () => {
+    test('stub queue — strict failure message (CONVENTIONS D7) — falls back to "no stubs declared" on an empty queue', () => {
         // Given - an empty queue
         const queue = new StubQueue([]);
 
         // Then - the fallback wording is used
         expect(queue.unmatchedError('GET', URL_A).message).toContain('no stubs declared');
     });
-});
 
-describe('stub queue — required verification', () => {
-    test('a required stub never requested fails the chain', () => {
+    test('stub queue — required verification — a required stub never requested fails the chain', () => {
         // Given - a stub the spec claims MUST be called
         const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true })]);
 
@@ -186,7 +180,7 @@ describe('stub queue — required verification', () => {
         );
     });
 
-    test('a required stub that was requested passes', () => {
+    test('stub queue — required verification — a required stub that was requested passes', () => {
         // Given - the same stub, actually requested
         const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true })]);
         serve(queue);
@@ -195,7 +189,7 @@ describe('stub queue — required verification', () => {
         expect(queue.requiredError()).toBeNull();
     });
 
-    test('required with times demands exactly that many requests', () => {
+    test('stub queue — required verification — required with times demands exactly that many requests', () => {
         // Given - a stub required exactly twice, requested once
         const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true, times: 2 })]);
         serve(queue);

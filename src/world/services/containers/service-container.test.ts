@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { ServiceContainer } from './service-container.js';
 import { fakeRuntime, POSTGRES, servedRun } from './testcontainers.adapter.fixtures.js';
 
-describe('the container a declared service gets', () => {
-    test('is the run container when the run serves one', async () => {
+describe('ServiceContainer', () => {
+    test('the container a declared service gets — is the run container when the run serves one', async () => {
         // Given - a run serving containers, and a service container locating it, started then stopped
         const runtime = fakeRuntime();
         const url = await servedRun(runtime);
@@ -19,7 +19,7 @@ describe('the container a declared service gets', () => {
         expect(runtime.stopped).toHaveLength(0);
     });
 
-    test('refuses every read before it started, and has no logs yet', async () => {
+    test('the container a declared service gets — refuses every read before it started, and has no logs yet', async () => {
         // Given - a service container nothing started
         const container = new ServiceContainer(POSTGRES, async () => {
             await Promise.resolve();

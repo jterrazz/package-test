@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — d4 unknown token (CONVENTIONS D4)', () => {
+describe('d4-unknown-token', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stderr is asserted, tokens covering the run cwd.

@@ -6,8 +6,12 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 import { scratchDirectory } from './scratch.js';
 import { TEMP_ROOTS_PARENT } from './temp-root.js';
 
-describe('scratchDirectory() — a fresh folder that ends with its test', () => {
-    test('is empty, in the run temp root, and removed once the test has finished', () => {
+const siblingStarted = Promise.withResolvers<true>();
+const asked = Promise.withResolvers<string>();
+const siblingFinished = Promise.withResolvers<true>();
+
+describe('scratchDirectory', () => {
+    test('a fresh folder that ends with its test — is empty, in the run temp root, and removed once the test has finished', () => {
         // Given - a check that runs after the test's own teardowns
         let directory = '';
         onTestFinished(() => {
@@ -23,14 +27,8 @@ describe('scratchDirectory() — a fresh folder that ends with its test', () => 
         expect(basename(dirname(root))).toBe(TEMP_ROOTS_PARENT);
         expect(readdirSync(directory)).toStrictEqual([]);
     });
-});
 
-describe.concurrent('scratchDirectory() under concurrent tests — left to the run root', () => {
-    const siblingStarted = Promise.withResolvers<true>();
-    const asked = Promise.withResolvers<string>();
-    const siblingFinished = Promise.withResolvers<true>();
-
-    test('outlives a sibling test that finishes first', async () => {
+    test.concurrent('under concurrent tests, left to the run root — outlives a sibling test that finishes first', async () => {
         // Given - a sibling test running alongside
         await siblingStarted.promise;
 
@@ -43,7 +41,9 @@ describe.concurrent('scratchDirectory() under concurrent tests — left to the r
         expect(existsSync(directory)).toBe(true);
     });
 
-    test('a sibling that finishes first', async ({ onTestFinished: whenFinished }) => {
+    test.concurrent('under concurrent tests, left to the run root — a sibling that finishes first', async ({
+        onTestFinished: whenFinished,
+    }) => {
         // Given - a signal sent once this test's own finish hooks have run
         whenFinished(() => {
             siblingFinished.resolve(true);

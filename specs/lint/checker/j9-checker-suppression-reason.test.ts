@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
+describe('j9-checker-suppression-reason', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stream is asserted, tokens covering the run cwd.
@@ -16,7 +16,7 @@ describe('lint — j9-checker-suppression-reason (CONVENTIONS J9)', () => {
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            api/orders/orders.spec.ts:8:1: error jterrazz-check(j9): found: a checker suppression that does not say why · why: Every \`checker-disable-next-line\` / \`checker-disable-line\` directive carries \` -- <reason>\`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. · fix: end the directive with its reason: \`checker-disable-next-line a7 -- <why this line is the exception>\` · read: docs/19-linting.md#j9-checker-suppression-reason
+            api/orders/orders.spec.ts:9:1: error jterrazz-check(j9): found: a checker suppression that does not say why · why: Every \`checker-disable-next-line\` / \`checker-disable-line\` directive carries \` -- <reason>\`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. · fix: end the directive with its reason: \`checker-disable-next-line a7 -- <why this line is the exception>\` · read: docs/19-linting.md#j9-checker-suppression-reason
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
         `);

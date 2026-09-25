@@ -14,8 +14,8 @@ function scratch(): string {
     return directory;
 }
 
-describe('route coverage — the ratchet', () => {
-    test('recording keeps every other key of the file, and removes its own at zero', () => {
+describe('baseline', () => {
+    test('route coverage — the ratchet — recording keeps every other key of the file, and removes its own at zero', () => {
         // Given - a baseline holding a typescript section and a checker key
         const root = scratch();
         const path = join(root, 'jterrazz.baseline.json');

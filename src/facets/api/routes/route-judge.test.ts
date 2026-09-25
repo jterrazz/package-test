@@ -30,8 +30,8 @@ function runWithOneRouteReached(): { directory: string; root: string } {
     return { directory, root };
 }
 
-describe('route judge — the api run judged', () => {
-    test('a declared route no test reached fails the run, naming each', async () => {
+describe('route-judge', () => {
+    test('route judge — the api run judged — a declared route no test reached fails the run, naming each', async () => {
         // Given - a run reaching one route of three, and no ratchet
         const { directory, root } = runWithOneRouteReached();
 
@@ -42,7 +42,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('update mode records where the run stands, and the next run is held by it', async () => {
+    test('route judge — the api run judged — update mode records where the run stands, and the next run is held by it', async () => {
         // Given - the same run, recorded
         const { directory, root } = runWithOneRouteReached();
         await judgeRoutes(root, directory, RECORDING);
@@ -54,7 +54,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('a run that reaches more than the ratchet holds fails, until it is recorded', async () => {
+    test('route judge — the api run judged — a run that reaches more than the ratchet holds fails, until it is recorded', async () => {
         // Given - the run recorded, then one more route reached
         const { directory, root } = runWithOneRouteReached();
         await judgeRoutes(root, directory, RECORDING);
@@ -69,7 +69,7 @@ describe('route judge — the api run judged', () => {
         expect(heldUnreached(root)).toBe(1);
     });
 
-    test('update mode refuses to record a run a file of which failed, and keeps the entry', async () => {
+    test('route judge — the api run judged — update mode refuses to record a run a file of which failed, and keeps the entry', async () => {
         // Given - the run recorded, then the same run judged for recording with one failed file and one route fewer reached
         const { directory, root } = runWithOneRouteReached();
         await judgeRoutes(root, directory, RECORDING);
@@ -85,7 +85,7 @@ describe('route judge — the api run judged', () => {
         expect(heldUnreached(root)).toBe(2);
     });
 
-    test('a run a file of which failed is not judged: the routes it did not reach are no failure of theirs', async () => {
+    test('route judge — the api run judged — a run a file of which failed is not judged: the routes it did not reach are no failure of theirs', async () => {
         // Given - a run reaching one route of three, the ratchet holding none, and two files failed
         const { directory, root } = runWithOneRouteReached();
 
@@ -97,7 +97,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('a route two specifications declare counts once', async () => {
+    test('route judge — the api run judged — a route two specifications declare counts once', async () => {
         // Given - the same table in two ledgers, every route reached
         const { directory, root } = runWithOneRouteReached();
         writeLedger(directory, {
@@ -114,7 +114,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('a declared OpenAPI document is the table, when the member states one', async () => {
+    test('route judge — the api run judged — a declared OpenAPI document is the table, when the member states one', async () => {
         // Given - the member declares only the route the run reached
         const { directory, root } = runWithOneRouteReached();
         writeFileSync(join(root, 'openapi.json'), '{"paths": {"/users/{id}": {"get": {}}}}');
@@ -129,7 +129,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('a run no api specification wrote to says nothing', async () => {
+    test('route judge — the api run judged — a run no api specification wrote to says nothing', async () => {
         // Given - an empty ledger folder
         const root = mkdtempSync(join(tmpdir(), 'route-judge-'));
         onTestFinished(() => {
@@ -140,7 +140,7 @@ describe('route judge — the api run judged', () => {
         await expect(judgeRoutes(root, join(root, 'ledgers'), GREEN)).resolves.toStrictEqual({});
     });
 
-    test('an app whose table is unknown fails the run, naming how to declare it', async () => {
+    test('route judge — the api run judged — an app whose table is unknown fails the run, naming how to declare it', async () => {
         // Given - a specification whose app exposed no route table, and no OpenAPI document
         const { directory, root } = runWithOneRouteReached();
         writeLedger(directory, { reached: [{ method: 'GET', path: '/health' }] });
@@ -151,7 +151,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('an app whose table is unknown is measured against the OpenAPI document it declares', async () => {
+    test('route judge — the api run judged — an app whose table is unknown is measured against the OpenAPI document it declares', async () => {
         // Given - no table from the app, the one route declared in a document, and reached
         const root = mkdtempSync(join(tmpdir(), 'route-judge-'));
         onTestFinished(() => {
@@ -171,7 +171,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('an ALL route is reached by a request of any method', async () => {
+    test('route judge — the api run judged — an ALL route is reached by a request of any method', async () => {
         // Given - one app.all() route the member declares method-less, reached by a POST
         const { directory, root } = methodlessRun(['/mcp']);
 
@@ -181,7 +181,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('an ALL route the member does not declare method-less fails the run, in update mode too', async () => {
+    test('route judge — the api run judged — an ALL route the member does not declare method-less fails the run, in update mode too', async () => {
         // Given - the app takes /mcp on any method, and jterrazz.config.ts names no route so
         const { directory, root } = methodlessRun([]);
 
@@ -194,7 +194,7 @@ describe('route judge — the api run judged', () => {
         await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
     });
 
-    test('a method-less route the app takes on its own methods only, or not at all, fails the run', async () => {
+    test('route judge — the api run judged — a method-less route the app takes on its own methods only, or not at all, fails the run', async () => {
         // Given - /mcp, /health and /gone declared method-less, the app taking /health on GET alone and no /gone
         const { directory, root } = methodlessRun(['/mcp', '/health', '/gone']);
 
@@ -205,7 +205,7 @@ describe('route judge — the api run judged', () => {
         });
     });
 
-    test('a method-less route is the app’s whatever its parameters are named', async () => {
+    test('route judge — the api run judged — a method-less route is the app’s whatever its parameters are named', async () => {
         // Given - the app takes /mcp/:id on any method, the list naming /mcp/:session, then /mcp/:id/x
         const agreeing = methodlessRun(['/mcp/:session'], '/mcp/:id');
         const drifted = methodlessRun(['/mcp/:id/x'], '/mcp/:id');
@@ -219,10 +219,8 @@ describe('route judge — the api run judged', () => {
                 "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'\n  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
         });
     });
-});
 
-describe('route judge — a shard of a split run', () => {
-    test('a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {
+    test('route judge — a shard of a split run — a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {
         // Given - one shard's ledgers, reaching one route of three
         const { directory, root } = runWithOneRouteReached();
 
@@ -237,10 +235,8 @@ describe('route judge — a shard of a split run', () => {
         ).resolves.toStrictEqual([{ line: SHARD_UNJUDGED }, { line: SHARD_UNJUDGED }]);
         expect(heldUnreached(root)).toBe(0);
     });
-});
 
-describe('route judge — a partial run', () => {
-    test('a partial run judges nothing, and records nothing, whatever its ledgers reached', async () => {
+    test('route judge — a partial run — a partial run judges nothing, and records nothing, whatever its ledgers reached', async () => {
         // Given - the ledgers of a run of some of the project's files, reaching one route of three
         const { directory, root } = runWithOneRouteReached();
 

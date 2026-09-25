@@ -10,7 +10,7 @@ const tinyApp = {
     request: () => Response.json({ ok: true }, { status: 200 }),
 };
 
-describe('specification.api — the app runs in this process', () => {
+describe('specification', () => {
     let emptyRoot: string;
 
     beforeEach(() => {

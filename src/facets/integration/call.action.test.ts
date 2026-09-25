@@ -13,8 +13,8 @@ function refuse(): never {
 /** A reader no setup of these calls is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
-describe('.call() — the module a chain calls', () => {
-    test('hands the subject the started services, and reads what it returned', async () => {
+describe('call', () => {
+    test('.call() — the module a chain calls — hands the subject the started services, and reads what it returned', async () => {
         // Given - a services record, and a module that answers with what it was handed
         const services = { db: { url: 'postgres://db' } };
 
@@ -31,7 +31,7 @@ describe('.call() — the module a chain calls', () => {
         expect(result.error.text).toBe('');
     });
 
-    test('a module that throws resolves, its refusal the reading', async () => {
+    test('.call() — the module a chain calls — a module that throws resolves, its refusal the reading', async () => {
         // Given - a module that refuses
 
         // When - it is called

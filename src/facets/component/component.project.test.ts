@@ -23,8 +23,8 @@ function pluginNames(project: TestProjectInlineConfiguration): string[] {
     );
 }
 
-describe('component() — the browser project', () => {
-    test('runs headless chromium, and last of the groups', async () => {
+describe('component', () => {
+    test('component() — the browser project — runs headless chromium, and last of the groups', async () => {
         // Given - the canonical browser project
         const project = testOf(await component());
 
@@ -35,7 +35,7 @@ describe('component() — the browser project', () => {
         expect(project.sequence).toStrictEqual({ groupOrder: 2 });
     });
 
-    test('keeps what Browser Mode leaks under the artefact folder', async () => {
+    test('component() — the browser project — keeps what Browser Mode leaks under the artefact folder', async () => {
         // Given - the canonical browser project
         const project = testOf(await component());
 
@@ -44,7 +44,7 @@ describe('component() — the browser project', () => {
         expect(project.attachmentsDir).toBe('.artifacts/vitest/attachments');
     });
 
-    test('registers the golden pair and the ARIA producer as server commands', async () => {
+    test('component() — the browser project — registers the golden pair and the ARIA producer as server commands', async () => {
         // Given - the project's browser block
         const project = testOf(await component());
 
@@ -57,7 +57,7 @@ describe('component() — the browser project', () => {
         ]);
     });
 
-    test('pre-bundles the page runtime so a cold cache never reloads the tester mid-run', async () => {
+    test('component() — the browser project — pre-bundles the page runtime so a cold cache never reloads the tester mid-run', async () => {
         // Given - the canonical browser project on this install
         const project = await component();
 
@@ -67,7 +67,7 @@ describe('component() — the browser project', () => {
         expect(project.optimizeDeps?.include).toContain('vitest-mock-extended');
     });
 
-    test("pre-bundles what the app's own Vite config declares, beside the page's own", async () => {
+    test("component() — the browser project — pre-bundles what the app's own Vite config declares, beside the page's own", async () => {
         // Given - an app whose components import a dependency the page runtime knows nothing of
         const project = await component({ vite: { optimizeDeps: { include: ['react-router'] } } });
 
@@ -76,7 +76,7 @@ describe('component() — the browser project', () => {
         expect(project.optimizeDeps?.include).toContain('vitest-browser-react');
     });
 
-    test('leaves msw to the runner, which already excludes it', async () => {
+    test('component() — the browser project — leaves msw to the runner, which already excludes it', async () => {
         // Given - the canonical browser project
         const project = await component();
 
@@ -85,7 +85,7 @@ describe('component() — the browser project', () => {
         expect(project.optimizeDeps?.include).not.toContain('msw/browser');
     });
 
-    test('keeps the whole project out of specs/ until an include says otherwise', async () => {
+    test('component() — the browser project — keeps the whole project out of specs/ until an include says otherwise', async () => {
         // Given - the default project, and one that states where its components live
         const canonical = testOf(await component());
         const stated = testOf(await component({ include: ['specs/app/**/*.test.tsx'] }));
@@ -96,7 +96,7 @@ describe('component() — the browser project', () => {
         expect(stated.exclude).not.toContain('specs/**');
     });
 
-    test('hands the page what it cannot read for itself', async () => {
+    test('component() — the browser project — hands the page what it cannot read for itself', async () => {
         // Given - a project pinning the clock for every render
         const project = testOf(await component({ clock: '2026-03-04T09:30:00.000Z' }));
 
@@ -108,7 +108,7 @@ describe('component() — the browser project', () => {
         });
     });
 
-    test('loads the project wrap through a setup file, not a fetch under the run', async () => {
+    test('component() — the browser project — loads the project wrap through a setup file, not a fetch under the run', async () => {
         // Given - a project whose providers live in a module of its own
         const project = testOf(
             await component({ root: process.cwd(), wrap: './specs/component/wrap/providers.tsx' }),
@@ -120,7 +120,7 @@ describe('component() — the browser project', () => {
         expect(String(setup)).toContain('.artifacts/vitest/component-setup.mjs');
     });
 
-    test('reads a relative path against the config that stated it, not the cwd', () => {
+    test('component() — the browser project — reads a relative path against the config that stated it, not the cwd', () => {
         // Given - the config of an app in a subdirectory, loaded from the package root the way knip and the type-checker load every config
         const nested = resolve(import.meta.dirname, 'fixtures/nested-app');
         const project = testOf(nestedApp);
@@ -135,7 +135,7 @@ describe('component() — the browser project', () => {
         );
     });
 
-    test('keeps the pipeline of a consumer vite config and drops where its app lives', async () => {
+    test('component() — the browser project — keeps the pipeline of a consumer vite config and drops where its app lives', async () => {
         // Given - an app config that roots itself elsewhere and builds a bundle
         const project = await component({
             vite: {
@@ -152,7 +152,7 @@ describe('component() — the browser project', () => {
         expect(project).not.toHaveProperty('build');
     });
 
-    test('keeps a consumer JSX transform rather than stating its own over it', async () => {
+    test('component() — the browser project — keeps a consumer JSX transform rather than stating its own over it', async () => {
         // Given - an app compiling JSX through another library's runtime
         const stated = await component({ vite: { oxc: { jsx: { importSource: 'preact' } } } });
         const canonical = await component();
@@ -162,7 +162,7 @@ describe('component() — the browser project', () => {
         expect(canonical.oxc).toStrictEqual({ jsx: { runtime: 'automatic' } });
     });
 
-    test('states the JSX default on the key the installed vite transforms with', async () => {
+    test('component() — the browser project — states the JSX default on the key the installed vite transforms with', async () => {
         // Given - the canonical project against the vite this package installs
         const project = await component();
 
@@ -170,7 +170,7 @@ describe('component() — the browser project', () => {
         expect('esbuild' in project && 'oxc' in project).toBeFalsy();
     });
 
-    test('concatenates a consumer plugin after the worker the project serves', async () => {
+    test('component() — the browser project — concatenates a consumer plugin after the worker the project serves', async () => {
         // Given - an app config carrying a plugin of its own
         const project = await component({ vite: { plugins: [{ name: 'app:svg' }] } });
 

@@ -31,8 +31,8 @@ const read = (relative: string): string => readFileSync(resolve(ROOT, relative),
  * owns). No row excuses a hole as owed: the last of those
  * became specs.
  */
-describe('capability matrix (meta-test K6)', () => {
-    test('every declared capability is exercised, or says why it is not', () => {
+describe('matrix', () => {
+    test('capability matrix (meta-test K6) — every declared capability is exercised, or says why it is not', () => {
         // Given - the matrix derived from the declaration and the package's own trees
         const rows = matrixRows(ROOT);
 
@@ -48,7 +48,7 @@ describe('capability matrix (meta-test K6)', () => {
         );
     });
 
-    test('a call counts where it is written in code, never where a string or a comment names it', () => {
+    test('capability matrix (meta-test K6) — a call counts where it is written in code, never where a string or a comment names it', () => {
         // Given - a cli tree whose one file names `.exec(` in a string and a comment, and another that calls it
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -70,7 +70,7 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
-    test('a call counts from the syntax tree, however a formatter splits it', () => {
+    test('capability matrix (meta-test K6) — a call counts from the syntax tree, however a formatter splits it', () => {
         // Given - a cli file whose golden call the formatter broke after each paren
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -91,7 +91,7 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
-    test('a glob in a string opens no comment, and the option after it still counts', () => {
+    test('capability matrix (meta-test K6) — a glob in a string opens no comment, and the option after it still counts', () => {
         // Given - a config whose first project collects `x/*` + `/*.yaml`, and whose component project states its clock after it
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -108,7 +108,7 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
-    test('an exemption excuses an empty cell, and goes the day the cell fills', () => {
+    test('capability matrix (meta-test K6) — an exemption excuses an empty cell, and goes the day the cell fills', () => {
         // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the engine's and holds whatever a facet's goldens carry, so it is no debt to pay off
         const stale = matrixRows(ROOT)
             .filter((row) => row.capability.group !== 'Token')
@@ -123,19 +123,19 @@ describe('capability matrix (meta-test K6)', () => {
         expect(stale, 'an exemption on a cell a spec now fills').toStrictEqual([]);
     });
 
-    test('the committed projection is byte-identical to a fresh generation', () => {
+    test('capability matrix (meta-test K6) — the committed projection is byte-identical to a fresh generation', () => {
         // Given - the matrix `npm run docs` splices into chapter 03
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
         expect(spliceMatrix(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
     });
 
-    test('the layered reading is byte-identical to a fresh generation', () => {
+    test('capability matrix (meta-test K6) — the layered reading is byte-identical to a fresh generation', () => {
         // Given - the layers block chapter 03 carries
         // Then - regenerating reproduces it exactly, counts included
         expect(spliceLayers(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
     });
 
-    test('every layer of the reading carries files', () => {
+    test('capability matrix (meta-test K6) — every layer of the reading carries files', () => {
         // Given - the four layers the chapter publishes
         // Then - none of them is a claim with nothing behind it
         const found = layers(ROOT);
@@ -145,7 +145,7 @@ describe('capability matrix (meta-test K6)', () => {
         }
     });
 
-    test('the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
+    test('capability matrix (meta-test K6) — the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
         // Given - the layer, and the channel's own rows outside the end-to-end suite
         const layer = layers(ROOT).find((one) => one.layer === 'Meta-tests');
         const listed = metaTests(ROOT).filter((row) => !row.file.startsWith('specs/'));
@@ -153,9 +153,7 @@ describe('capability matrix (meta-test K6)', () => {
         // Then - one count for one set of files, `lint/self/` included
         expect(layer?.count).toBe(listed.length);
     });
-});
 
-describe('the capability folders — the vocabulary a spec of a specimen is filed by', () => {
     test.each([
         ['.seed()', 'seed'],
         ['toMatch(file())', 'to-match'],
@@ -165,15 +163,18 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
         ['{ frozen }', 'frozen'],
         ['{ params }', 'params'],
         ['testId', 'test-id'],
-    ])('the capability %s is the folder %s', (name, folder) => {
-        // Given - a capability as the matrix names it
-        const named = capabilityFolder(name);
+    ])(
+        'the capability folders — the vocabulary a spec of a specimen is filed by — the capability %s is the folder %s',
+        (name, folder) => {
+            // Given - a capability as the matrix names it
+            const named = capabilityFolder(name);
 
-        // Then - the words before the first parenthesis, kebab-cased
-        expect(named).toBe(folder);
-    });
+            // Then - the words before the first parenthesis, kebab-cased
+            expect(named).toBe(folder);
+        },
+    );
 
-    test('the vocabulary is the matrix, closed', () => {
+    test('the capability folders — the vocabulary a spec of a specimen is filed by — the vocabulary is the matrix, closed', () => {
         // Given - the folders the matrix names for the api column
         const folders = capabilityFolders('api');
 
@@ -186,7 +187,7 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
         );
     });
 
-    test("a column's vocabulary holds only the capabilities its row declares there", () => {
+    test("the capability folders — the vocabulary a spec of a specimen is filed by — a column's vocabulary holds only the capabilities its row declares there", () => {
         // Given - the folders of the cli and mobile columns
         const cli = capabilityFolders('cli');
         const mobile = capabilityFolders('mobile');

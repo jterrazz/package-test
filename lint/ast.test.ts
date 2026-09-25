@@ -33,8 +33,8 @@ afterAll(() => {
     rmSync(root, { force: true, recursive: true });
 });
 
-describe('specsAnchor', () => {
-    test('anchors a spec on its specs/ directory and lists the way down', () => {
+describe('ast', () => {
+    test('specsAnchor — anchors a spec on its specs/ directory and lists the way down', () => {
         // Given - a test at facet/domain depth
         const file = join(project, 'specs', 'api', 'requests', 'headers.test.ts');
 
@@ -44,7 +44,7 @@ describe('specsAnchor', () => {
         expect(anchor?.relative).toStrictEqual(['api', 'requests', 'headers.test.ts']);
     });
 
-    test('returns undefined for a file outside any specs tree', () => {
+    test('specsAnchor — returns undefined for a file outside any specs tree', () => {
         // Given - production code in the same package
         const file = join(project, 'src', 'core', 'match.ts');
 
@@ -53,7 +53,7 @@ describe('specsAnchor', () => {
         expect(isUnderSpecs(file)).toBeFalsy();
     });
 
-    test('takes the NEAREST specs ancestor, not the outermost', () => {
+    test('specsAnchor — takes the NEAREST specs ancestor, not the outermost', () => {
         // Given - a fixture project nested inside the repo's own specs tree — the shape where an innermost search and an outermost one read one file as two different facets
         const file = join(nested, 'integrations', 'adapter.test.ts');
 
@@ -63,7 +63,7 @@ describe('specsAnchor', () => {
         expect(anchor?.relative).toStrictEqual(['integrations', 'adapter.test.ts']);
     });
 
-    test('stops at the package root — a checkout under ~/specs/ is not a specs tree', () => {
+    test('specsAnchor — stops at the package root — a checkout under ~/specs/ is not a specs tree', () => {
         // Given - the package cloned inside a directory that happens to be named `specs` (the hazard: a bare "is `specs` a segment" test matched it, and F2 then stopped protecting this repo's production code entirely)
         const file = join(underSpecs, 'src', 'app.ts');
 
@@ -72,7 +72,7 @@ describe('specsAnchor', () => {
         expect(isUnderSpecs(file)).toBeFalsy();
     });
 
-    test('anchors a specs tree that lives under that same outer directory', () => {
+    test('specsAnchor — anchors a specs tree that lives under that same outer directory', () => {
         // Given - a real spec inside the package cloned under ~/specs/
         const file = join(underSpecs, 'specs', 'cli', 'exec', 'exec.test.ts');
 
@@ -80,7 +80,7 @@ describe('specsAnchor', () => {
         expect(specsAnchor(file)?.directory).toBe(join(underSpecs, 'specs'));
     });
 
-    test('anchors a file sitting directly in specs/', () => {
+    test('specsAnchor — anchors a file sitting directly in specs/', () => {
         // Given - a runner at the specs root
         const file = join(project, 'specs', 'api.specification.ts');
 
@@ -88,7 +88,7 @@ describe('specsAnchor', () => {
         expect(specsAnchor(file)?.relative).toStrictEqual(['api.specification.ts']);
     });
 
-    test('answers for a path with no package.json anywhere above it', () => {
+    test('specsAnchor — answers for a path with no package.json anywhere above it', () => {
         // Given - a filename that exists only as a string (how the rule testers address the rules, and how a virtual/in-memory file arrives)
         const file = '/nowhere/repo/specs/lint/hygiene/j5.test.ts';
 

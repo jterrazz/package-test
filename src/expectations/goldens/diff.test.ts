@@ -10,8 +10,8 @@ const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, 
 const tokenAware = (expected: string, actual: string): boolean =>
     textEquals(expected, actual, new CaptureScope());
 
-describe('formatStdoutDiff — only the real cause is marked', () => {
-    test('a token line that matched renders as equal, keeping its token', () => {
+describe('diff', () => {
+    test('formatStdoutDiff — only the real cause is marked — a token line that matched renders as equal, keeping its token', () => {
         // Given - a golden whose first line is a {{url}} the run satisfied, and whose second line is the genuine mismatch
         const expected = 'backend {{url}}\nstatus ready';
         const actual = 'backend http://127.0.0.1:63810/mcp\nstatus degraded';
@@ -24,7 +24,7 @@ describe('formatStdoutDiff — only the real cause is marked', () => {
         expect(lines).not.toContain('- backend {{url}}');
     });
 
-    test('without a token-aware equality every differing line is marked (pinned)', () => {
+    test('formatStdoutDiff — only the real cause is marked — without a token-aware equality every differing line is marked (pinned)', () => {
         // Given - the same pair, compared strictly (the default)
         const lines = plain(
             formatStdoutDiff('stdout', 'backend {{url}}', 'backend http://127.0.0.1:1/'),
@@ -34,7 +34,7 @@ describe('formatStdoutDiff — only the real cause is marked', () => {
         expect(lines).toContain('- backend {{url}}');
     });
 
-    test('a diff that would mark nothing falls back to strict rendering', () => {
+    test('formatStdoutDiff — only the real cause is marked — a diff that would mark nothing falls back to strict rendering', () => {
         // Given - two texts every line of which the token-aware pass accepts, which happens when the real cause is a cross-line #ref conflict
         const lines = plain(
             formatStdoutDiff('stdout', 'id {{int#a}}\nid {{int#a}}', 'id 1\nid 2', {
@@ -46,10 +46,8 @@ describe('formatStdoutDiff — only the real cause is marked', () => {
         expect(lines).toContain('- id {{int#a}}');
         expect(lines).toContain('+ id 1');
     });
-});
 
-describe('formatResponseDiff — a body read the way it was written', () => {
-    test('a text body is diffed line by line, as its own lines', () => {
+    test('formatResponseDiff — a body read the way it was written — a text body is diffed line by line, as its own lines', () => {
         // Given - an HTML page whose heading changed
         const expected = '<main>\n    <h1>Welcome</h1>\n</main>';
         const actual = '<main>\n    <h1>Goodbye</h1>\n</main>';
@@ -63,7 +61,7 @@ describe('formatResponseDiff — a body read the way it was written', () => {
         ]);
     });
 
-    test('a JSON value is diffed as its pretty-printed lines', () => {
+    test('formatResponseDiff — a body read the way it was written — a JSON value is diffed as its pretty-printed lines', () => {
         // Given - one field of an object changed
         const lines = plain(formatResponseDiff('user.http', { name: 'Alice' }, { name: 'Bob' }));
 
@@ -76,7 +74,7 @@ describe('formatResponseDiff — a body read the way it was written', () => {
         ]);
     });
 
-    test('a text against a value that is not text shows both as JSON, so the kinds differ visibly', () => {
+    test('formatResponseDiff — a body read the way it was written — a text against a value that is not text shows both as JSON, so the kinds differ visibly', () => {
         // Given - a number where the text "42" was expected
         const lines = plain(formatResponseDiff('count.http', '42', 42));
 

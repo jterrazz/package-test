@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — d4b http first line (CONVENTIONS D4b)', () => {
+describe('d4b-http-first-line', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
     test('rejects a requests/*.http without a request line', async () => {

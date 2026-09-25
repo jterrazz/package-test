@@ -5,8 +5,12 @@ import { anthropic } from './anthropic.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
-describe('intercept — anthropic', () => {
-    test('anthropic.messages() returns a trigger with the default gateway', () => {
+/** One named server-sent event, framed the way the Messages API writes it. */
+function frame(data: { [field: string]: unknown; type: string }): string {
+    return `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
+}
+describe('anthropic', () => {
+    test('intercept — anthropic — anthropic.messages() returns a trigger with the default gateway', () => {
         // Given - a bare trigger
         const trigger = anthropic.messages();
 
@@ -17,7 +21,7 @@ describe('intercept — anthropic', () => {
         expect(trigger.match).toBeUndefined();
     });
 
-    test('anthropic.messages() accepts a custom gateway URL', () => {
+    test('intercept — anthropic — anthropic.messages() accepts a custom gateway URL', () => {
         // Given - a custom gateway
         const trigger = anthropic.messages({}, 'https://gateway.example/v1/messages');
 
@@ -25,7 +29,7 @@ describe('intercept — anthropic', () => {
         expect(trigger.url).toBe('https://gateway.example/v1/messages');
     });
 
-    test('anthropic.messages() filter matches system prompt', () => {
+    test('intercept — anthropic — anthropic.messages() filter matches system prompt', () => {
         // Given - a system-prompt filter
         const trigger = anthropic.messages({ system: /journal/u });
 
@@ -58,7 +62,7 @@ describe('intercept — anthropic', () => {
         ).toBeFalsy();
     });
 
-    test('anthropic.messages() filter matches first user message', () => {
+    test('intercept — anthropic — anthropic.messages() filter matches first user message', () => {
         // Given - a user-message filter
         const trigger = anthropic.messages({ user: /classify/u });
 
@@ -82,7 +86,7 @@ describe('intercept — anthropic', () => {
         ).toBeFalsy();
     });
 
-    test('anthropic.messages() wrap passes fixture objects through verbatim', () => {
+    test('intercept — anthropic — anthropic.messages() wrap passes fixture objects through verbatim', () => {
         // Given - a full response fixture object
         const trigger = anthropic.messages();
         const fixture = {
@@ -101,7 +105,7 @@ describe('intercept — anthropic', () => {
         expect(response.body).toBe(fixture);
     });
 
-    test('anthropic.messages() wrap falls back to buildReply for string data', () => {
+    test('intercept — anthropic — anthropic.messages() wrap falls back to buildReply for string data', () => {
         // Given - a plain string fixture
         const trigger = anthropic.messages();
 
@@ -112,7 +116,7 @@ describe('intercept — anthropic', () => {
         expect((response.body as any).content[0].text).toBe('plain text reply');
     });
 
-    test('anthropic.messages() model filter matches by exact string equality', () => {
+    test('intercept — anthropic — anthropic.messages() model filter matches by exact string equality', () => {
         // Given - a string model filter (not a RegExp)
         const trigger = anthropic.messages({ model: 'claude-sonnet-4-20250514' });
         const request = (model: string): Parameters<NonNullable<typeof trigger.match>>[0] => ({
@@ -128,7 +132,7 @@ describe('intercept — anthropic', () => {
         expect(trigger.match!(request('claude-opus-4-20250514'))).toBeFalsy();
     });
 
-    test('anthropic.messages() tools filter matches a subset of declared tool names', () => {
+    test('intercept — anthropic — anthropic.messages() tools filter matches a subset of declared tool names', () => {
         // Given - a filter requiring one tool by name
         const trigger = anthropic.messages({ tools: ['get_weather'] });
         const withTools = (names: string[]): Parameters<NonNullable<typeof trigger.match>>[0] => ({
@@ -147,7 +151,7 @@ describe('intercept — anthropic', () => {
         expect(trigger.match!(withTools([]))).toBeFalsy();
     });
 
-    test('anthropic.messages() string-form system/user filters match by EXACT equality', () => {
+    test('intercept — anthropic — anthropic.messages() string-form system/user filters match by EXACT equality', () => {
         // Given - string (not RegExp) system and user filters — v11 makes them exact
         const trigger = anthropic.messages({
             system: 'You are a journal agent.',
@@ -175,7 +179,7 @@ describe('intercept — anthropic', () => {
         ).toBeFalsy();
     });
 
-    test('anthropic.error() returns rate_limit_error for 429 and api_error otherwise', () => {
+    test('intercept — anthropic — anthropic.error() returns rate_limit_error for 429 and api_error otherwise', () => {
         // Given - a 429 and a 500 error response
         const rateLimited = anthropic.error(429);
         const serverError = anthropic.error(500, 'overloaded');
@@ -191,7 +195,7 @@ describe('intercept — anthropic', () => {
         expect((serverError.body as any).error.message).toBe('overloaded');
     });
 
-    test('anthropic.timeout() returns an empty 200 body delayed past any sane client timeout', () => {
+    test('intercept — anthropic — anthropic.timeout() returns an empty 200 body delayed past any sane client timeout', () => {
         // Given - a simulated timeout response
         const response = anthropic.timeout();
 
@@ -200,15 +204,8 @@ describe('intercept — anthropic', () => {
         expect(response.body).toStrictEqual({});
         expect(response.delay).toBe(30_000);
     });
-});
 
-/** One named server-sent event, framed the way the Messages API writes it. */
-function frame(data: { [field: string]: unknown; type: string }): string {
-    return `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
-}
-
-describe('intercept — anthropic streamed replies', () => {
-    test('stream() serves the Messages events — one text_delta per piece — closed by message_stop', () => {
+    test('intercept — anthropic streamed replies — stream() serves the Messages events — one text_delta per piece — closed by message_stop', () => {
         // Given - two pieces
         const response = anthropic.stream(['Hel', 'lo'], { delay: 5 });
         if (!isStreamBody(response.body)) {

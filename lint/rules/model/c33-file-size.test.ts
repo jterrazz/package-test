@@ -31,8 +31,8 @@ ruleTester().run('c33-file-size', asOxlintRule(c33FileSize), {
     ],
 });
 
-describe('groupsOf — the cut a long file suggests', () => {
-    test('groups titles by what stands before a dash or a colon, else by their first word', () => {
+describe('c33FileSize', () => {
+    test('groupsOf — the cut a long file suggests — groups titles by what stands before a dash or a colon, else by their first word', () => {
         // Given - titles of three shapes
         const titles = [
             'pagination — the first page',

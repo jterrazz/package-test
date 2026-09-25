@@ -16,8 +16,8 @@ function refusedLines(source: string): number[] {
         .flatMap((text, index) => (text.endsWith('// refused') ? [index + 1] : []));
 }
 
-describe('the type-aware rules D2 hands its promise matchers to (meta-test)', () => {
-    test('every profile of the toolchain runs no-floating-promises type-aware, as an error', () => {
+describe('typeAwareFindings', () => {
+    test('the type-aware rules D2 hands its promise matchers to (meta-test) — every profile of the toolchain runs no-floating-promises type-aware, as an error', () => {
         // Given - the six profiles a consumer composes
         const profiles = { astro, bun, expo, next, node, react };
 
@@ -35,7 +35,7 @@ describe('the type-aware rules D2 hands its promise matchers to (meta-test)', ()
         );
     });
 
-    test('a bare toBeEmpty or toBeRunning is refused, and every form that handles the promise is not', () => {
+    test('the type-aware rules D2 hands its promise matchers to (meta-test) — a bare toBeEmpty or toBeRunning is refused, and every form that handles the promise is not', () => {
         // Given - the two matchers in each form D2 once judged, typed by this package's augmentation
         mkdirSync(CACHE, { recursive: true });
         const source = [

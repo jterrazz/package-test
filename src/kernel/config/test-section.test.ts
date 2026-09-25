@@ -17,8 +17,8 @@ function unit(source?: string): string {
     return root;
 }
 
-describe('the test section of jterrazz.config.ts, as the run reads it', () => {
-    test('the routes document and the method-less paths a member declares are read, types stripped', async () => {
+describe('test-section', () => {
+    test('the test section of jterrazz.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
         // Given - a member declaring an OpenAPI document and one method-less route
         const root = unit(
             "const routes: string = './openapi.yaml';\nexport default { test: { methodless: ['/mcp'], routes } };\n",
@@ -31,7 +31,7 @@ describe('the test section of jterrazz.config.ts, as the run reads it', () => {
         });
     });
 
-    test('no file, and a key of the wrong shape, are no settings', async () => {
+    test('the test section of jterrazz.config.ts, as the run reads it — no file, and a key of the wrong shape, are no settings', async () => {
         // Given - a unit with no config, and one whose routes is not a path
         const roots = [unit(), unit('export default { test: { routes: 42 } };\n')];
 

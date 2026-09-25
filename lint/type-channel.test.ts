@@ -24,8 +24,8 @@ function refusalsByLine(source: string): Map<number, string[]> {
     return byLine;
 }
 
-describe('the type channel — each row refused for the reason it states (meta-test)', () => {
-    test('every marker states the words of the error it is written for', () => {
+describe('type-channel', () => {
+    test('the type channel — each row refused for the reason it states (meta-test) — every marker states the words of the error it is written for', () => {
         // Given - the channel's markers
         const { rows, unstated } = typeRowsOf(readFileSync(CHANNEL, 'utf8'));
 
@@ -34,7 +34,7 @@ describe('the type channel — each row refused for the reason it states (meta-t
         expect(rows.length).toBeGreaterThan(0);
     });
 
-    test('the compiler refuses each row with the error the row names, and nothing else fails', () => {
+    test('the type channel — each row refused for the reason it states (meta-test) — the compiler refuses each row with the error the row names, and nothing else fails', () => {
         // Given - the channel compiled with its markers taken out
         const source = readFileSync(CHANNEL, 'utf8');
         const { rows } = typeRowsOf(source);
@@ -52,7 +52,7 @@ describe('the type channel — each row refused for the reason it states (meta-t
         expect([...byLine.keys()].filter((line) => !marked.has(line))).toStrictEqual([]);
     });
 
-    test('a row refused for another reason than the one it names fails', () => {
+    test('the type channel — each row refused for the reason it states (meta-test) — a row refused for another reason than the one it names fails', () => {
         // Given - a row naming the error a bare string gets, on a verb that does not exist
         const source = [
             "import { specification } from './index.js';",

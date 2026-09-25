@@ -11,8 +11,8 @@ function count(probe: string, source: string): number {
     return callsOf('a.spec.ts', source).filter((call) => isCallOf(call, shape)).length;
 }
 
-describe('the matrix reads a call probe as a shape of the syntax tree', () => {
-    test('a call counts however a formatter splits it across lines', () => {
+describe('matrix-calls', () => {
+    test('the matrix reads a call probe as a shape of the syntax tree — a call counts however a formatter splits it across lines', () => {
         // Given - the same golden call, on one line and split after each paren
         const source = [
             "expect(result.filesystem).toMatch(directory('./expected/tree/'));",
@@ -27,7 +27,7 @@ describe('the matrix reads a call probe as a shape of the syntax tree', () => {
         expect(count('.toMatch(directory(', source)).toBe(2);
     });
 
-    test('the callee is read as written: bare, a method on any object, a method on one name', () => {
+    test('the matrix reads a call probe as a shape of the syntax tree — the callee is read as written: bare, a method on any object, a method on one name', () => {
         // Given - a landmark, an accessor of the same name, and one on another subject
         const source = "table('users'); result.table('users'); other.table('users');";
 
@@ -37,7 +37,7 @@ describe('the matrix reads a call probe as a shape of the syntax tree', () => {
         expect(count('result.table(', source)).toBe(1);
     });
 
-    test('the first argument is read as written: a call, a string and its opening, an object, an array', () => {
+    test('the matrix reads a call probe as a shape of the syntax tree — the first argument is read as written: a call, a string and its opening, an object, an array', () => {
         // Given - one call of each argument, a type assertion around one
         const source = [
             "api.seed(file('./seeds/a.sql') as never);",
@@ -55,7 +55,7 @@ describe('the matrix reads a call probe as a shape of the syntax tree', () => {
         expect(count(')).toMatch([', source)).toBe(1);
     });
 
-    test('a call written in a string or a comment is no call', () => {
+    test('the matrix reads a call probe as a shape of the syntax tree — a call written in a string or a comment is no call', () => {
         // Given - the probe named in a comment and a string
         const source = "// api.seed(file('x'))\nconst sample = \"api.seed(file('x'))\";\n";
 
@@ -63,7 +63,7 @@ describe('the matrix reads a call probe as a shape of the syntax tree', () => {
         expect(count('.seed(file(', source)).toBe(0);
     });
 
-    test('a probe with no paren is no call, and one outside the grammar is refused', () => {
+    test('the matrix reads a call probe as a shape of the syntax tree — a probe with no paren is no call, and one outside the grammar is refused', () => {
         // Given - a key, and a call probe whose argument the grammar does not read
         // Then - the key is left to the literal match; the other throws where it is read
         expect(callShapeOf('services:')).toBeUndefined();

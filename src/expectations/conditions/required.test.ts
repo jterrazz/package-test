@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { required } from './required.js';
 
-describe('required — the value, or a sentence', () => {
-    test('hands the value back, narrowed', () => {
+describe('required', () => {
+    test('required — the value, or a sentence — hands the value back, narrowed', () => {
         // Given - a value that is there
         const id: number | undefined = 7;
 
@@ -11,7 +11,7 @@ describe('required — the value, or a sentence', () => {
         expect(required(id, 'the reply carries the new id')).toBe(7);
     });
 
-    test('names what was missing and why it mattered', () => {
+    test('required — the value, or a sentence — names what was missing and why it mattered', () => {
         // Given - a value that is not there
         // Then - the failure reads as a sentence, not as a TypeError
         expect(() => {
@@ -19,7 +19,7 @@ describe('required — the value, or a sentence', () => {
         }).toThrow('the reply carries the new id — got undefined');
     });
 
-    test('tells null from undefined', () => {
+    test('required — the value, or a sentence — tells null from undefined', () => {
         // Given - an explicit null
         // Then - the failure says which of the two it met
         expect(() => {
@@ -27,7 +27,7 @@ describe('required — the value, or a sentence', () => {
         }).toThrow('got null');
     });
 
-    test('lets a falsy value through', () => {
+    test('required — the value, or a sentence — lets a falsy value through', () => {
         // Given - values that are present and falsy
         // Then - only null and undefined are missing
         expect([

@@ -12,7 +12,9 @@ import {
 } from './subject.js';
 import type { Subject } from './subject.js';
 
-describe('subjectFolder — the standard name, derived from the subject', () => {
+/** A template's hole, as the reader keeps it in a literal. */
+const HOLE = '\u0000';
+describe('subject', () => {
     test.each<[string, Subject, string | undefined]>([
         [
             'GET /events — a collection is listed',
@@ -88,30 +90,28 @@ describe('subjectFolder — the standard name, derived from the subject', () => 
             { facet: 'mobile', journey: 'news://events' },
             undefined,
         ],
-    ])('%s', (_, subject, folder) => {
+    ])('subjectFolder — the standard name, derived from the subject — %s', (_, subject, folder) => {
         // Given - a subject a spec reaches
         // Then - the folder it is filed under, relative to its facet folder
         expect(subjectFolder(subject)).toBe(folder);
     });
-});
 
-/** A template's hole, as the reader keeps it in a literal. */
-const HOLE = '\u0000';
-
-describe('the subject a spec reaches, read statically', () => {
     test.each([
         ['/users/1', '/users/:id'],
         [`/users/${HOLE}/posts`, '/users/:id/posts'],
         ['/market/AAPL/chart', '/market/:id/chart'],
         ['/search?q=x', '/search'],
         ['/', '/'],
-    ])('the path %s is the route %s', (path, template) => {
-        // Given - a path as a spec writes it
-        // Then - the template a route declares
-        expect(pathTemplate(path)).toBe(template);
-    });
+    ])(
+        'the subject a spec reaches, read statically — the path %s is the route %s',
+        (path, template) => {
+            // Given - a path as a spec writes it
+            // Then - the template a route declares
+            expect(pathTemplate(path)).toBe(template);
+        },
+    );
 
-    test('reads the terminal action of every chain off an imported handle, and nothing else', () => {
+    test('the subject a spec reaches, read statically — reads the terminal action of every chain off an imported handle, and nothing else', () => {
         // Given - a spec with two chains, a stub builder's own `.get`, and a chain in a comment
         const source = [
             "import { api } from '../api.specification.js';",
@@ -128,7 +128,7 @@ describe('the subject a spec reaches, read statically', () => {
         ]);
     });
 
-    test('reads a route template as the route, the params beside it telling a literal path that it is one', () => {
+    test('the subject a spec reaches, read statically — reads a route template as the route, the params beside it telling a literal path that it is one', () => {
         // Given - the same chart route as a template, a filled path, and a literal path stated as its route
         const source = [
             "import { api } from '../api.specification.js';",
@@ -159,7 +159,7 @@ describe('the subject a spec reaches, read statically', () => {
         ['/events/42/timeline', undefined],
         ['/data/series/points', 'series'],
     ])(
-        'a word after a collection, with more path after it, reads two ways: %s → %s',
+        'the subject a spec reaches, read statically — a word after a collection, with more path after it, reads two ways: %s → %s',
         (path, segment) => {
             // Given - a literal path sent with no template, `data` a declared collection
             const subject = { facet: 'api' as const, method: 'GET' as const, path };
@@ -169,7 +169,7 @@ describe('the subject a spec reaches, read statically', () => {
         },
     );
 
-    test('reads the request line of a .http the chain sends', () => {
+    test('the subject a spec reaches, read statically — reads the request line of a .http the chain sends', () => {
         // Given - a request named by file(), and the disk that holds it
         const source = [
             "import { api } from '../api.specification.js';",
@@ -184,7 +184,7 @@ describe('the subject a spec reaches, read statically', () => {
         ).toStrictEqual(['POST /events']);
     });
 
-    test('reads a job, the words of a command, a page and a journey', () => {
+    test('the subject a spec reaches, read statically — reads a job, the words of a command, a page and a journey', () => {
         // Given - one chain of each other facet
         const source = [
             "import { cli, job, mobile, website } from '../x.specification.js';",
@@ -211,11 +211,14 @@ describe('the subject a spec reaches, read statically', () => {
         ['--help', []],
         ['.', []],
         ['check ./src', ['check']],
-    ])('with no declared list, the command line %j names the command %j', (line, words) => {
-        // Given - a command line a chain runs, its runner declaring no command list
-        // Then - the first word alone names the command: a positional argument is no subcommand
-        expect(commandWords(line)).toStrictEqual(words);
-    });
+    ])(
+        'the subject a spec reaches, read statically — with no declared list, the command line %j names the command %j',
+        (line, words) => {
+            // Given - a command line a chain runs, its runner declaring no command list
+            // Then - the first word alone names the command: a positional argument is no subcommand
+            expect(commandWords(line)).toStrictEqual(words);
+        },
+    );
 
     test.each([
         ['db migrate --dry-run', ['db', 'migrate']],
@@ -223,15 +226,18 @@ describe('the subject a spec reaches, read statically', () => {
         ['migrate db', ['migrate', 'db']],
         ['shop', []],
         ['--help', []],
-    ])('with the list db, migrate, spawn, the command line %j names %j', (line, words) => {
-        // Given - a runner declaring the words its commands are spelled with
-        const commands = ['db', 'migrate', 'spawn'];
+    ])(
+        'the subject a spec reaches, read statically — with the list db, migrate, spawn, the command line %j names %j',
+        (line, words) => {
+            // Given - a runner declaring the words its commands are spelled with
+            const commands = ['db', 'migrate', 'spawn'];
 
-        // Then - the leading words the list holds name the command, the first other word ends it
-        expect(commandWords(line, commands)).toStrictEqual(words);
-    });
+            // Then - the leading words the list holds name the command, the first other word ends it
+            expect(commandWords(line, commands)).toStrictEqual(words);
+        },
+    );
 
-    test("a spec's cli chain reads its runner's list, handed in", () => {
+    test("the subject a spec reaches, read statically — a spec's cli chain reads its runner's list, handed in", () => {
         // Given - a chain running a two-word command, and the list its runner declares
         const source = [
             "import { cli } from '../cli.specification.js';",
@@ -243,7 +249,7 @@ describe('the subject a spec reaches, read statically', () => {
         expect(at === undefined ? undefined : subjectFolder(at.subject)).toBe('db/migrate');
     });
 
-    test('each chain reads the list of the runner its handle came from', () => {
+    test('the subject a spec reaches, read statically — each chain reads the list of the runner its handle came from', () => {
         // Given - two runners in one spec, only the second declaring a list, and a view of it
         const source = [
             "import { cli } from '../cli.specification.js';",
@@ -262,10 +268,8 @@ describe('the subject a spec reaches, read statically', () => {
         // Then - the first word for the plain runner, the declared words for the other and its view
         expect(folders).toStrictEqual(['db', 'db/migrate', 'db/migrate']);
     });
-});
 
-describe('what a repository declares — its runner commands, its irregular collections', () => {
-    test('the list a specification module declares is read from its cli constructor', () => {
+    test('what a repository declares — its runner commands, its irregular collections — the list a specification module declares is read from its cli constructor', () => {
         // Given - a door declaring its commands among other options, and one declaring none
         const declaring = [
             "import { specification } from '@jterrazz/test';",
@@ -286,18 +290,21 @@ describe('what a repository declares — its runner commands, its irregular coll
     test.each([
         ['commands: COMMANDS', "const COMMANDS = ['db', 'migrate'] as const;"],
         ['commands', "const commands: readonly string[] = ['db', 'migrate'];"],
-    ])('a list bound to a const of the runner file is followed (%s)', (option, binding) => {
-        // Given - the runner naming its list by a const of its own file
-        const door = [
-            binding,
-            `export const { cleanup, cli } = await specification.cli(BIN, { ${option} });`,
-        ].join('\n');
+    ])(
+        'what a repository declares — its runner commands, its irregular collections — a list bound to a const of the runner file is followed (%s)',
+        (option, binding) => {
+            // Given - the runner naming its list by a const of its own file
+            const door = [
+                binding,
+                `export const { cleanup, cli } = await specification.cli(BIN, { ${option} });`,
+            ].join('\n');
 
-        // Then - the words the const binds
-        expect(declaredCommands(door)).toStrictEqual(['db', 'migrate']);
-    });
+            // Then - the words the const binds
+            expect(declaredCommands(door)).toStrictEqual(['db', 'migrate']);
+        },
+    );
 
-    test('the door of a handle is the specification module it is imported from', () => {
+    test('what a repository declares — its runner commands, its irregular collections — the door of a handle is the specification module it is imported from', () => {
         // Given - a spec importing an api and two clis, one under another name and viewed
         const source = [
             "import { api } from '../api.specification.js';",
@@ -322,15 +329,18 @@ describe('what a repository declares — its runner commands, its irregular coll
         ['/people', ['people'], 'people/list'],
         ['/data/:id', ['data'], 'data/get'],
         ['/events', ['data'], 'events/list'],
-    ])('a GET on %s with the collections %j is filed under %s', (path, collections, folder) => {
-        // Given - a GET on one resource, and the collections the repository declares
-        const subject: Subject = { facet: 'api', method: 'GET', path };
+    ])(
+        'what a repository declares — its runner commands, its irregular collections — a GET on %s with the collections %j is filed under %s',
+        (path, collections, folder) => {
+            // Given - a GET on one resource, and the collections the repository declares
+            const subject: Subject = { facet: 'api', method: 'GET', path };
 
-        // Then - a declared collection is listed, the plural test holding for the rest
-        expect(subjectFolder(subject, { collections })).toBe(folder);
-    });
+            // Then - a declared collection is listed, the plural test holding for the rest
+            expect(subjectFolder(subject, { collections })).toBe(folder);
+        },
+    );
 
-    test('a route the repository names method-less is reached by any verb, and filed by its segments', () => {
+    test('what a repository declares — its runner commands, its irregular collections — a route the repository names method-less is reached by any verb, and filed by its segments', () => {
         // Given - a POST and a PUT to /mcp, and a GET to /events, with /mcp declared method-less
         const source = [
             "import { api } from '../api.specification.js';",

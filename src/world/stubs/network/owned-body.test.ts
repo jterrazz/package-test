@@ -13,8 +13,8 @@ function teedReply(): Response {
     return source;
 }
 
-describe('owned body — the reply handed to the caller', () => {
-    test('settles a cancel the branch underneath never would', async () => {
+describe('owned-body', () => {
+    test('owned body — the reply handed to the caller — settles a cancel the branch underneath never would', async () => {
         // Given - a reply whose body is a tee branch, owned
         const reply = withOwnedBody(teedReply());
 
@@ -22,7 +22,7 @@ describe('owned body — the reply handed to the caller', () => {
         await expect(reply.body?.cancel()).resolves.toBeUndefined();
     });
 
-    test('reads as the reply it wraps: status, headers, body, address', async () => {
+    test('owned body — the reply handed to the caller — reads as the reply it wraps: status, headers, body, address', async () => {
         // Given - a fetch answered with a teed reply, every body owned
         const served = teedReply();
         Object.defineProperty(served, 'url', { value: 'https://weather.test/today' });
@@ -47,7 +47,7 @@ describe('owned body — the reply handed to the caller', () => {
         await expect(reply.json()).resolves.toStrictEqual({ celsius: 21 });
     });
 
-    test('hands back a reply with no body as it is', () => {
+    test('owned body — the reply handed to the caller — hands back a reply with no body as it is', () => {
         // Given - a reply with nothing to own
         const empty = new Response(null, { status: 204 });
 

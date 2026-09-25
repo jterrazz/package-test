@@ -229,14 +229,14 @@ const MOBILE_DESCRIPTORS: Record<MobileElementKind, string> = {
     text: 'content',
 };
 
-describe('facet capability declaration (K1 guard)', () => {
-    test('the api declares exactly the options a route action takes', () => {
+describe('facet-matrix', () => {
+    test('facet capability declaration (K1 guard) — the api declares exactly the options a route action takes', () => {
         // Given - the options `.get()`, `.post()`, `.put()` and `.delete()` take, pinned to their own `keyof`
         // Then - the declaration names the same options
         expect(declared('api', 'Route option')).toStrictEqual(published(routeOptions));
     });
 
-    test('each kind declares exactly the accessors its result publishes', () => {
+    test('facet capability declaration (K1 guard) — each kind declares exactly the accessors its result publishes', () => {
         // Given - every result class, pinned to its own `keyof`
         // Then - the declaration names the same accessors, per column
         for (const column of FACET_COLUMNS) {
@@ -247,7 +247,7 @@ describe('facet capability declaration (K1 guard)', () => {
         }
     });
 
-    test('each drawing surface declares exactly the verbs its visitor hands out', () => {
+    test('facet capability declaration (K1 guard) — each drawing surface declares exactly the verbs its visitor hands out', () => {
         // Given - the three visitors, pinned to their own `keyof`
         // Then - the declaration names the same verbs
         expect(declared('website', 'Verb')).toStrictEqual(published(websiteVisitor));
@@ -255,7 +255,7 @@ describe('facet capability declaration (K1 guard)', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('the vocabulary is exactly what `elements/` exports', () => {
+    test('facet capability declaration (K1 guard) — the vocabulary is exactly what `elements/` exports', () => {
         // Given - the element module, which is the vocabulary's one home
         const exported = Object.keys(elements).toSorted();
 
@@ -267,7 +267,7 @@ describe('facet capability declaration (K1 guard)', () => {
         );
     });
 
-    test('every declared column is one the matrix has', () => {
+    test('facet capability declaration (K1 guard) — every declared column is one the matrix has', () => {
         // Given - the declaration, whose columns drive every projection
         // Then - no row names a column the table cannot render
         const unknown = CAPABILITIES.flatMap((capability) =>

@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { parseRequestFile } from './request-file.js';
 
-describe('http-files — requests', () => {
-    test('parses method, path, headers, and body', () => {
+describe('parseRequestFile', () => {
+    test('http-files — requests — parses method, path, headers, and body', () => {
         // Given - a complete request file
         const parsed = parseRequestFile(
             'POST /users\ncontent-type: application/json\nx-key: abc\n\n{ "name": "Charlie" }\n',
@@ -20,7 +20,7 @@ describe('http-files — requests', () => {
         expect(parsed.body).toBe('{ "name": "Charlie" }');
     });
 
-    test('parses a body-less request', () => {
+    test('http-files — requests — parses a body-less request', () => {
         // Given - a GET with no body
         const parsed = parseRequestFile('GET /users\n', 'requests/list.http');
 
@@ -31,7 +31,7 @@ describe('http-files — requests', () => {
         expect(parsed.body).toBeUndefined();
     });
 
-    test('rejects a first line that is not METHOD /path', () => {
+    test('http-files — requests — rejects a first line that is not METHOD /path', () => {
         // Given - a malformed request file
         // Then - the error names the file and the expected shape
         expect(() => parseRequestFile('not a request line\n', 'requests/bad.http')).toThrow(
@@ -39,7 +39,7 @@ describe('http-files — requests', () => {
         );
     });
 
-    test('rejects an empty request file', () => {
+    test('http-files — requests — rejects an empty request file', () => {
         // Given - an empty request file
         // Then - the first-line error fires (there is no request line)
         expect(() => parseRequestFile('', 'requests/empty.http')).toThrow(
@@ -47,7 +47,7 @@ describe('http-files — requests', () => {
         );
     });
 
-    test('parses CRLF line endings', () => {
+    test('http-files — requests — parses CRLF line endings', () => {
         // Given - a request file written with Windows line endings
         const parsed = parseRequestFile(
             'POST /users\r\ncontent-type: application/json\r\n\r\n{ "name": "Eve" }\r\n',
@@ -60,7 +60,7 @@ describe('http-files — requests', () => {
         expect(parsed.body).toBe('{ "name": "Eve" }');
     });
 
-    test('splits headers on the first colon only', () => {
+    test('http-files — requests — splits headers on the first colon only', () => {
         // Given - a header whose value itself contains colons
         const parsed = parseRequestFile(
             'GET /now\nx-time: 10:30:00\n',
@@ -71,7 +71,7 @@ describe('http-files — requests', () => {
         expect(parsed.headers).toStrictEqual({ 'x-time': '10:30:00' });
     });
 
-    test('keeps the query string as part of the path', () => {
+    test('http-files — requests — keeps the query string as part of the path', () => {
         // Given - a request line with a query string
         const parsed = parseRequestFile('GET /users?limit=2&sort=name\n', 'requests/query.http');
 
@@ -79,7 +79,7 @@ describe('http-files — requests', () => {
         expect(parsed.path).toBe('/users?limit=2&sort=name');
     });
 
-    test('duplicate headers: the last occurrence wins (pinned)', () => {
+    test('http-files — requests — duplicate headers: the last occurrence wins (pinned)', () => {
         // Given - the same header name twice
         const parsed = parseRequestFile('GET /x\nx-a: first\nx-a: second\n', 'requests/dupes.http');
 

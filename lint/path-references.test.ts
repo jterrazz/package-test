@@ -33,8 +33,22 @@ function pathsIn(source: string): string[] {
     return paths;
 }
 
-describe('pathReferenceVisitor', () => {
-    test('names each path a module builds from where it sits, or reads by a relative literal', () => {
+/** The literal pieces of each path a module resolves from its own directory, in the order they are written. */
+function literalPathsIn(source: string): string[][] {
+    const program = parseProgram(join(ROOT, 'src/a.ts'), source);
+    const paths: string[][] = [];
+    if (isNode(program)) {
+        visitProgram(
+            program,
+            literalPathVisitor(({ pieces }) => {
+                paths.push(pieces);
+            }),
+        );
+    }
+    return paths;
+}
+describe('path-references', () => {
+    test('pathReferenceVisitor — names each path a module builds from where it sits, or reads by a relative literal', () => {
         // Given - one module using each form
         const source = [
             'const here = import.meta.dirname;',
@@ -53,7 +67,7 @@ describe('pathReferenceVisitor', () => {
         ]);
     });
 
-    test('names no path built from a root the caller hands in', () => {
+    test('pathReferenceVisitor — names no path built from a root the caller hands in', () => {
         // Given - paths that do not start where the module sits
         const source = [
             "const a = join(root, 'fixtures');",
@@ -64,25 +78,8 @@ describe('pathReferenceVisitor', () => {
         // Then - none of them is the module's own tree
         expect(pathsIn(source)).toStrictEqual([]);
     });
-});
 
-/** The literal pieces of each path a module resolves from its own directory, in the order they are written. */
-function literalPathsIn(source: string): string[][] {
-    const program = parseProgram(join(ROOT, 'src/a.ts'), source);
-    const paths: string[][] = [];
-    if (isNode(program)) {
-        visitProgram(
-            program,
-            literalPathVisitor(({ pieces }) => {
-                paths.push(pieces);
-            }),
-        );
-    }
-    return paths;
-}
-
-describe('literalPathVisitor', () => {
-    test('hands every piece of a path built from the directory with literals alone', () => {
+    test('literalPathVisitor — hands every piece of a path built from the directory with literals alone', () => {
         // Given - each anchor, each builder, one piece and several, and a URL
         const source = [
             "const a = join(import.meta.dirname, 'expected', 'x.txt');",
@@ -100,7 +97,7 @@ describe('literalPathVisitor', () => {
         ]);
     });
 
-    test('hands no path with a computed piece, nor one built from another root', () => {
+    test('literalPathVisitor — hands no path with a computed piece, nor one built from another root', () => {
         // Given - a computed piece, a binding of the directory, a file for an anchor
         const source = [
             'const here = import.meta.dirname;',
@@ -113,10 +110,8 @@ describe('literalPathVisitor', () => {
         // Then - none of them is a path named whole
         expect(literalPathsIn(source)).toStrictEqual([]);
     });
-});
 
-describe('mergeVisitors', () => {
-    test('runs every fragment that handles a node type, in order', () => {
+    test('mergeVisitors — runs every fragment that handles a node type, in order', () => {
         // Given - two fragments on the same node type, and one on another
         const seen: string[] = [];
         const visitor = mergeVisitors(

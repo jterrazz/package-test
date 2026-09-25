@@ -60,9 +60,9 @@
         "jterrazz/d15w-status-only-probe": 2,
         "jterrazz/d16w-ambient-value": 7,
         "jterrazz/d18w-existence-only-oracle": 11,
-        "jterrazz/e9w-env-assignment-in-test": 10,
+        "jterrazz/e9w-env-assignment-in-test": 7,
         "jterrazz/i1-layer-boundaries": 1,
-        "jterrazz/j6w-given-in-the-test": 34,
+        "jterrazz/j6w-given-in-the-test": 22,
         "jterrazz/w5w-scenario-settles": 4
     }
 }

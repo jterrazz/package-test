@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import plugin from './plugin.js';
 import selfPlugin, { selfRules } from './self-plugin.js';
 
-describe('the self plugin — the static rules only this package runs', () => {
-    test('every rule it registers is a self row, and none of the published plugin', () => {
+describe('selfPlugin', () => {
+    test('the self plugin — the static rules only this package runs — every rule it registers is a self row, and none of the published plugin', () => {
         // Given - the self plugin's rules
         for (const [id, rule] of Object.entries(selfPlugin.rules)) {
             // Then - each declares the self audience, and the published plugin does not carry it too
@@ -13,7 +13,7 @@ describe('the self plugin — the static rules only this package runs', () => {
         }
     });
 
-    test('its rule set names every rule under its own namespace, at its severity', () => {
+    test('the self plugin — the static rules only this package runs — its rule set names every rule under its own namespace, at its severity', () => {
         // Given - the rules this repository's config spreads
         // Then - one entry per rule, `jterrazz-self/<rule>`, an error unless the id is advisory
         expect(selfRules).toStrictEqual({

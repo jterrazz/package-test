@@ -8,8 +8,8 @@ import {
     unreachable,
 } from './testcontainers.adapter.fixtures.js';
 
-describe('a container of the project, as a worker holds it', () => {
-    test('is reached where the run started it, and reads the run container logs', async () => {
+describe('RunContainer', () => {
+    test('a container of the project, as a worker holds it — is reached where the run started it, and reads the run container logs', async () => {
         // Given - a worker's container of the project, started
         const url = await servedRun(fakeRuntime());
         const container = new RunContainer(url, POSTGRES);
@@ -22,7 +22,7 @@ describe('a container of the project, as a worker holds it', () => {
         await expect(container.getLogs()).resolves.toBe('logs of 40001');
     });
 
-    test('reads only what the run container logged since the moment it names', async () => {
+    test('a container of the project, as a worker holds it — reads only what the run container logged since the moment it names', async () => {
         // Given - a worker's container of the project, asked for its logs since one moment
         const url = await servedRun(fakeRuntime());
         const container = new RunContainer(url, POSTGRES);
@@ -34,7 +34,7 @@ describe('a container of the project, as a worker holds it', () => {
         );
     });
 
-    test('is never stopped by the worker — the run stops it', async () => {
+    test('a container of the project, as a worker holds it — is never stopped by the worker — the run stops it', async () => {
         // Given - a worker's container of the project, started then stopped by the worker
         const runtime = fakeRuntime();
         const url = await servedRun(runtime);
@@ -46,7 +46,7 @@ describe('a container of the project, as a worker holds it', () => {
         expect(runtime.stopped).toHaveLength(0);
     });
 
-    test('refuses a port it does not expose, naming the one it does', async () => {
+    test('a container of the project, as a worker holds it — refuses a port it does not expose, naming the one it does', async () => {
         // Given - a started postgres of the project
         const url = await servedRun(fakeRuntime());
         const container = new RunContainer(url, POSTGRES);
@@ -58,7 +58,7 @@ describe('a container of the project, as a worker holds it', () => {
         );
     });
 
-    test('carries the run refusal as its own start failure', async () => {
+    test('a container of the project, as a worker holds it — carries the run refusal as its own start failure', async () => {
         // Given - a run whose runtime is unreachable
         const url = await servedRun(fakeRuntime(), unreachable);
 
@@ -68,7 +68,7 @@ describe('a container of the project, as a worker holds it', () => {
         );
     });
 
-    test('refuses every read before it started, and has no logs yet', async () => {
+    test('a container of the project, as a worker holds it — refuses every read before it started, and has no logs yet', async () => {
         // Given - a container of the project nothing started
         const container = new RunContainer('http://127.0.0.1:1', POSTGRES);
 

@@ -10,8 +10,8 @@ function testOf(
     return project.test ?? {};
 }
 
-describe('website() — the served product', () => {
-    test('collects the website specs and opens its browser before the component one', () => {
+describe('website', () => {
+    test('website() — the served product — collects the website specs and opens its browser before the component one', () => {
         // Given - the canonical website project
         const project = testOf(website());
 
@@ -21,7 +21,7 @@ describe('website() — the served product', () => {
         expect(project.sequence).toStrictEqual({ groupOrder: 1 });
     });
 
-    test('runs its files one at a time when the served app is shared', () => {
+    test('website() — the served product — runs its files one at a time when the served app is shared', () => {
         // Given - three website specs sharing one server and one database file
         const shared = testOf(website({ serial: true }));
 
@@ -30,7 +30,7 @@ describe('website() — the served product', () => {
         expect(testOf(website()).fileParallelism).toBeUndefined();
     });
 
-    test('takes the globs and the budget a project states instead', () => {
+    test('website() — the served product — takes the globs and the budget a project states instead', () => {
         // Given - a repository whose pages are specified elsewhere, and slowly
         const project = testOf(website({ include: ['e2e/**/*.test.ts'], timeout: 60_000 }));
 

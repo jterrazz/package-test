@@ -52,8 +52,8 @@ afterEach(async () => {
     adapter = null;
 });
 
-describe('a served process', () => {
-    test('starts a server on the port it bound and reports its base url', async () => {
+describe('serve', () => {
+    test('a served process — starts a server on the port it bound and reports its base url', async () => {
         // Given - a server that announces the port it got
         adapter = new ServedProcess({ command: SERVER, ready: READY }, process.cwd());
 
@@ -64,7 +64,7 @@ describe('a served process', () => {
         expect(response.status).toBe(200);
     });
 
-    test('fails fast with the captured output when the command dies', async () => {
+    test('a served process — fails fast with the captured output when the command dies', async () => {
         // Given - a command that exits immediately
         adapter = new ServedProcess(
             { command: `node -e "console.error('bad config'); process.exit(1)"`, timeout: 5000 },
@@ -75,7 +75,7 @@ describe('a served process', () => {
         await expect(adapter.start()).rejects.toThrow('bad config');
     });
 
-    test('stop terminates the process group', async () => {
+    test('a served process — stop terminates the process group', async () => {
         // Given - a running server, and the pid it answers with
         adapter = new ServedProcess({ command: SERVER, ready: READY }, process.cwd());
         const baseUrl = await adapter.start();
@@ -89,7 +89,7 @@ describe('a served process', () => {
         expect(alive(pid)).toBe(false);
     });
 
-    test('the PORT form picks a port, hands it as PORT, and polls the ready path on it', async () => {
+    test('a served process — the PORT form picks a port, hands it as PORT, and polls the ready path on it', async () => {
         // Given - a child that prints the port it is handed and answers nothing
         adapter = new ServedProcess(
             { command: PRINTS_HANDED, ready: '/health', timeout: 1500 },
@@ -106,7 +106,7 @@ describe('a served process', () => {
         expect(handed?.groups?.port).toBe(polled?.groups?.port);
     });
 
-    test('the PORT form hands a stated port as PORT and is ready once the path answers', async () => {
+    test('a served process — the PORT form hands a stated port as PORT and is ready once the path answers', async () => {
         // Given - a port this test holds and serves, stated to a child that calls it
         const { paths, port, server } = await held();
         adapter = new ServedProcess(
@@ -125,10 +125,8 @@ describe('a served process', () => {
             server.close();
         }
     });
-});
 
-describe('runToCompletion — a build step a service runs before it serves', () => {
-    test('the command sees the environment it is handed, and a failure throws naming it', () => {
+    test('runToCompletion — a build step a service runs before it serves — the command sees the environment it is handed, and a failure throws naming it', () => {
         // Given - a step that succeeds only when it is handed the database it builds
         const step = `node -e "process.exit(process.env.DATABASE_URL === 'file:x.db' ? 0 : 3)"`;
 

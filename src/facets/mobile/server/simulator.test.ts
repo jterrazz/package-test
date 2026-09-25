@@ -18,8 +18,8 @@ const LISTING = JSON.stringify({
     },
 });
 
-describe('listSimulators', () => {
-    test('flattens the per-runtime record into readable os labels', () => {
+describe('simulator', () => {
+    test('listSimulators — flattens the per-runtime record into readable os labels', () => {
         // Given - the simctl listing
         const devices = listSimulators(LISTING);
 
@@ -32,17 +32,15 @@ describe('listSimulators', () => {
         });
     });
 
-    test('drops unavailable devices', () => {
+    test('listSimulators — drops unavailable devices', () => {
         // Given - a listing with a device whose runtime is gone
         const devices = listSimulators(LISTING);
 
         // Then - it never becomes a candidate
         expect(devices.map((device) => device.udid)).not.toContain('CCCC-26');
     });
-});
 
-describe('selectSimulator', () => {
-    test('picks the single device matching name and os', () => {
+    test('selectSimulator — picks the single device matching name and os', () => {
         // Given - a name carried by two runtimes, narrowed by os
         const device = selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: '26.5' });
 
@@ -50,7 +48,7 @@ describe('selectSimulator', () => {
         expect(device.udid).toBe('AAAA-26');
     });
 
-    test('accepts the full os label case-insensitively', () => {
+    test('selectSimulator — accepts the full os label case-insensitively', () => {
         // Given - the label form
         const device = selectSimulator(LISTING, { name: 'iPhone 16 Pro', os: 'ios 18.2' });
 
@@ -58,7 +56,7 @@ describe('selectSimulator', () => {
         expect(device.udid).toBe('AAAA-18');
     });
 
-    test('refuses an unknown name with the full device listing', () => {
+    test('selectSimulator — refuses an unknown name with the full device listing', () => {
         // Given - a device that does not exist
         // Then - the refusal lists what does, so the fix needs no Xcode round-trip
         expect(() => selectSimulator(LISTING, { name: 'iPhone 3G' })).toThrow(
@@ -66,7 +64,7 @@ describe('selectSimulator', () => {
         );
     });
 
-    test('refuses an ambiguous name and points at the os and udid options', () => {
+    test('selectSimulator — refuses an ambiguous name and points at the os and udid options', () => {
         // Given - a name present on two runtimes, no os given
         // Then - the framework never guesses which one a spec meant
         expect(() => selectSimulator(LISTING, { name: 'iPhone 16 Pro' })).toThrow(

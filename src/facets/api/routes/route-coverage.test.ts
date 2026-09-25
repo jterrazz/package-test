@@ -10,8 +10,8 @@ import type { RouteProject } from './route-coverage.js';
 import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
 import { judgeSplit, partialSplitUnjudged } from './route-split.js';
 
-describe('route coverage — the global setup reads the run', () => {
-    test("a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {
+describe('setup', () => {
+    test("route coverage — the global setup reads the run — a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {
         // Given - a whole run's ledger at the root of the run's folder, and the setup of shard 1/2 over every file
         const { project, provided, root } = stubProject({
             ran: ['a.spec.ts', 'b.spec.ts'],
@@ -34,7 +34,7 @@ describe('route coverage — the global setup reads the run', () => {
         expect(lines).toStrictEqual([`${SHARD_UNJUDGED}\n`]);
     });
 
-    test('a run one of whose project files did not run judges nothing', async () => {
+    test('route coverage — the global setup reads the run — a run one of whose project files did not run judges nothing', async () => {
         // Given - the setup of a run that ran one file of the project's two
         const { project, provided } = stubProject({ ran: ['a.spec.ts'] });
         const teardown = setupRoutes(project);
@@ -48,7 +48,7 @@ describe('route coverage — the global setup reads the run', () => {
         expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
     });
 
-    test('a run whose tests a name filters judges nothing', async () => {
+    test('route coverage — the global setup reads the run — a run whose tests a name filters judges nothing', async () => {
         // Given - the setup of a run of every file, filtered by -t
         const { project, provided } = stubProject({
             ran: ['a.spec.ts', 'b.spec.ts'],
@@ -65,7 +65,7 @@ describe('route coverage — the global setup reads the run', () => {
         expect(lines).toStrictEqual([`${PARTIAL_UNJUDGED}\n`]);
     });
 
-    test('a shard a test name filters leaves its merge unjudged, not judged as a whole run', async () => {
+    test('route coverage — the global setup reads the run — a shard a test name filters leaves its merge unjudged, not judged as a whole run', async () => {
         // Given - shard 1/2 of a split filtered by -t, and shard 2/2 unfiltered, each reaching one route of three
         const { project, provided, root } = stubProject({
             ran: ['a.spec.ts'],
@@ -85,7 +85,7 @@ describe('route coverage — the global setup reads the run', () => {
         expect(verdict).toStrictEqual({ line: partialSplitUnjudged(['shard-1-2']) });
     });
 
-    test('a run of every project file is judged', async () => {
+    test('route coverage — the global setup reads the run — a run of every project file is judged', async () => {
         // Given - the setup of a run that ran the project's two files
         const { project, provided } = stubProject({ ran: ['a.spec.ts', 'b.spec.ts'] });
         const teardown = setupRoutes(project);

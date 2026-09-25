@@ -111,8 +111,8 @@ function lintPass(file: string): string[] {
     return reported;
 }
 
-describe('c7-seeds-sql-only — the editor lints again in one process', () => {
-    test('a stray written after a first pass is seen by the second', () => {
+describe('c7SeedsSqlOnly', () => {
+    test('c7-seeds-sql-only — the editor lints again in one process — a stray written after a first pass is seen by the second', () => {
         // Given - a git checkout whose seeds/ holds one `.sql`, linted once
         const root = checkoutUnder('work', ['specs/app/widget/seeds']);
         writeFileSync(join(root, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');

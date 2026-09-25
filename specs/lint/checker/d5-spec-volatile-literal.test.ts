@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — d5 spec volatile literal (CONVENTIONS D5)', () => {
+describe('d5-spec-volatile-literal', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stderr is asserted, tokens covering the run cwd.

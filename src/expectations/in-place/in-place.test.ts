@@ -34,8 +34,8 @@ function readRendered(rendered: string): string {
     return rendered.slice(1, -1).replaceAll(/\\(?<escaped>[\\`$])/gu, '$<escaped>');
 }
 
-describe('callSiteOf — the frame of the test that called toMatch', () => {
-    test('skips the framework and the dependencies, and reads the first test frame', () => {
+describe('in-place', () => {
+    test('callSiteOf — the frame of the test that called toMatch — skips the framework and the dependencies, and reads the first test frame', () => {
         // Given - a stack through the framework's router, vitest, then the test
         const stack = [
             'Error: toMatch call site',
@@ -52,10 +52,8 @@ describe('callSiteOf — the frame of the test that called toMatch', () => {
         });
         expect(callSiteOf('Error: nothing')).toBeUndefined();
     });
-});
 
-describe('locateArgument — the value a toMatch call holds', () => {
-    test('finds the call the position points at, among several on the line', () => {
+    test('locateArgument — the value a toMatch call holds — finds the call the position points at, among several on the line', () => {
         // Given - two calls on one line, the frame pointing at the second name
         const source = "expect(a).toMatch('one'); expect(b).toMatch(`two`, { frozen: true });\n";
         const column = source.lastIndexOf('toMatch') + 1;
@@ -65,7 +63,7 @@ describe('locateArgument — the value a toMatch call holds', () => {
         expect(source.slice(span?.start, span?.end)).toBe('`two`');
     });
 
-    test('skips what a template, a string or a nested call holds', () => {
+    test('locateArgument — the value a toMatch call holds — skips what a template, a string or a nested call holds', () => {
         // Given - an argument holding a hole, a comma inside a string and a nested call
         const source = [
             '    expect(result.json).toMatch({',
@@ -82,7 +80,7 @@ describe('locateArgument — the value a toMatch call holds', () => {
         expect(span?.indent).toBe('    ');
     });
 
-    test('an empty call is a place to write', () => {
+    test('locateArgument — the value a toMatch call holds — an empty call is a place to write', () => {
         // Given - a call with nothing in it yet
         const source = 'expect(result.stdout).toMatch();';
 
@@ -91,9 +89,7 @@ describe('locateArgument — the value a toMatch call holds', () => {
         expect(span?.start).toBe(source.indexOf('()') + 1);
         expect(span?.end).toBe(span?.start);
     });
-});
 
-describe('the value written in place reads back as the value', () => {
     test.each([
         ['a line', 'built'],
         ['lines ending on a break', 'HTTP/1.1 200 OK\n\n{"ok": true}\n'],
@@ -101,7 +97,7 @@ describe('the value written in place reads back as the value', () => {
         ['a text opening on a break', '\nafter a blank line\n'],
         ['a backtick, a backslash and a hole', `a \`b\` \\n \${c}\n`],
         ['every line indented', '  a\n  b\n'],
-    ])('%s', (_name, text) => {
+    ])('the value written in place reads back as the value — %s', (_name, text) => {
         // Given - the text rendered at an indentation, and read as a test would
         const read = readRendered(renderText(text, '        '));
 
@@ -109,7 +105,7 @@ describe('the value written in place reads back as the value', () => {
         expect(dedent(read)).toBe(text);
     });
 
-    test('a json value and rows are written as code indented with the call', () => {
+    test('the value written in place reads back as the value — a json value and rows are written as code indented with the call', () => {
         // Given - a value and rows at an indentation
         // Then - one line per row, the closing bracket on the call's column
         expect(renderValue({ id: '{{uuid}}', tags: ['a'] }, '    ')).toBe(
@@ -118,10 +114,8 @@ describe('the value written in place reads back as the value', () => {
         expect(renderRows([[1, 'Ada', null]], '    ')).toBe('[\n        [1, "Ada", null],\n    ]');
         expect(renderRows([], '    ')).toBe('[]');
     });
-});
 
-describe('writeInPlace — the test file rewritten where its toMatch stands', () => {
-    test('two rewrites of one file land where each stack says, the first moving the lines of the second', () => {
+    test('writeInPlace — the test file rewritten where its toMatch stands — two rewrites of one file land where each stack says, the first moving the lines of the second', () => {
         // Given - a scratch test whose first value is a block, the second call three lines below it
         const source = [
             "test('records', () => {",
@@ -154,7 +148,7 @@ describe('writeInPlace — the test file rewritten where its toMatch stands', ()
         );
     });
 
-    test('a site holding no toMatch is refused, naming it', () => {
+    test('writeInPlace — the test file rewritten where its toMatch stands — a site holding no toMatch is refused, naming it', () => {
         // Given - a scratch test whose line holds no toMatch
         const file = scratchFile('const x = 1;\n');
 
@@ -165,7 +159,7 @@ describe('writeInPlace — the test file rewritten where its toMatch stands', ()
         expect(readFileSync(file, 'utf8')).toBe('const x = 1;\n');
     });
 
-    test('with a pending folder the file waits for the run to end, then is written', () => {
+    test('writeInPlace — the test file rewritten where its toMatch stands — with a pending folder the file waits for the run to end, then is written', () => {
         // Given - a scratch test, and a pending folder for the run
         const file = scratchFile('expect(one).toMatch(``);\n');
         const folder = join(file, '..', 'pending');

@@ -60,8 +60,8 @@ function toMatchOf(chai: ReturnType<typeof chaiWith>): (this: unknown, value: un
     return chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
 }
 
-describe('matchThroughGolden', () => {
-    test('hands the disk to the golden and every value to vitest, untouched', () => {
+describe('text-assertions', () => {
+    test('matchThroughGolden — hands the disk to the golden and every value to vitest, untouched', () => {
         // Given - a chai whose two answers are recorded
         const answered: string[] = [];
         const chai = chaiWith(answered);
@@ -78,7 +78,7 @@ describe('matchThroughGolden', () => {
         expect(answered).toStrictEqual(['golden', 'vitest', 'vitest']);
     });
 
-    test('refuses a value on a subject the caller names, and still hands that subject the disk', () => {
+    test('matchThroughGolden — refuses a value on a subject the caller names, and still hands that subject the disk', () => {
         // Given - a chai whose subject the caller refuses any value on
         const answered: string[] = [];
         const chai = chaiWith(answered, 'valueless');
@@ -98,7 +98,7 @@ describe('matchThroughGolden', () => {
         }).toThrow('takes toMatch(file(…))');
     });
 
-    test('hands a value the route reads whole to the whole-result comparison, with its call site', () => {
+    test('matchThroughGolden — hands a value the route reads whole to the whole-result comparison, with its call site', () => {
         // Given - the route laid with the stream route, over a stream subject
         const answered: string[] = [];
         const chai = chaiWith(answered, new TextAccessor('built\n', 'stderr', '/tmp'));
@@ -117,10 +117,8 @@ describe('matchThroughGolden', () => {
         );
         expect(streamValueRoute('built', 'built')).toBeUndefined();
     });
-});
 
-describe("cutFramesUnder — a failure raised in a browser page shows the test's own line first", () => {
-    test("cuts every frame this router's own directory holds, wherever vitest interleaved its own around them", () => {
+    test("cutFramesUnder — a failure raised in a browser page shows the test's own line first — cuts every frame this router's own directory holds, wherever vitest interleaved its own around them", () => {
         // Given - a page's bundle, where vitest's own matcher plumbing sits ABOVE this router on the stack, between it and the throw
         const stack = [
             'Error: Output mismatch (the value in place)',
@@ -139,7 +137,7 @@ describe("cutFramesUnder — a failure raised in a browser page shows the test's
         );
     });
 
-    test('leaves a multi-line message untouched — a diff is not mistaken for a frame', () => {
+    test("cutFramesUnder — a failure raised in a browser page shows the test's own line first — leaves a multi-line message untouched — a diff is not mistaken for a frame", () => {
         // Given - a message with blank and dash-led lines, before the frames
         const stack = [
             'Error: Output mismatch',
@@ -162,7 +160,7 @@ describe("cutFramesUnder — a failure raised in a browser page shows the test's
         );
     });
 
-    test('a node frame with no parenthesised function name is read the same as one with one', () => {
+    test("cutFramesUnder — a failure raised in a browser page shows the test's own line first — a node frame with no parenthesised function name is read the same as one with one", () => {
         // Given - the two shapes V8 prints: a named caller, and a bare frame
         const stack = [
             'Error: x',
@@ -176,7 +174,7 @@ describe("cutFramesUnder — a failure raised in a browser page shows the test's
         );
     });
 
-    test('a stack with nothing under the given directory is returned as it stands', () => {
+    test("cutFramesUnder — a failure raised in a browser page shows the test's own line first — a stack with nothing under the given directory is returned as it stands", () => {
         // Given - a stack this router never routed
         const stack = ['Error: x', '    at /repo/specs/widget.spec.ts:9:3'].join('\n');
 

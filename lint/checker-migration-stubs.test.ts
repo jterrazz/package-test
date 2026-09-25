@@ -56,8 +56,8 @@ const SPEC_16 = [
     '',
 ].join('\n');
 
-describe('the stubs half of the 16 → 17 mover', () => {
-    test('moves a specs tree: the folder, its facades, the paths that named them and the names it imports', () => {
+describe('migrateStubs', () => {
+    test('the stubs half of the 16 → 17 mover — moves a specs tree: the folder, its facades, the paths that named them and the names it imports', () => {
         // Given - a leaf declaring its replies the 16 way
         const root = tree({
             'api/news/contracts/http/events.ts': UNIT_16,
@@ -107,7 +107,7 @@ describe('the stubs half of the 16 → 17 mover', () => {
         );
     });
 
-    test("moves a member's stubs beside its module tests, and leaves the product's own contracts", () => {
+    test("the stubs half of the 16 → 17 mover — moves a member's stubs beside its module tests, and leaves the product's own contracts", () => {
         // Given - a module test standing on a 16 facade, and a product folder that happens to be named contracts
         const root = tree(
             {

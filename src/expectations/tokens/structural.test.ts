@@ -11,8 +11,10 @@ import {
 const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 const UUID_B = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 
-describe('structural — float semantics (pinned)', () => {
-    test('a JSON context accepts any finite number, text context requires a decimal', () => {
+const WORKDIR = '/tmp/spec-run-abcdef';
+
+describe('structural', () => {
+    test('structural — float semantics (pinned) — a JSON context accepts any finite number, text context requires a decimal', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -27,10 +29,8 @@ describe('structural — float semantics (pinned)', () => {
         expect(structuralEquals('pi={{float}}', 'pi=3.14', scope)).toBeTruthy();
         expect(structuralEquals('pi={{float}}', 'pi=3', scope)).toBeFalsy();
     });
-});
 
-describe('structural — duration token', () => {
-    test('accepts ms, s, m, and h units', () => {
+    test('structural — duration token — accepts ms, s, m, and h units', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -41,10 +41,8 @@ describe('structural — duration token', () => {
         expect(structuralEquals('took {{duration}}', 'took 3h', scope)).toBeTruthy();
         expect(structuralEquals(match.duration(), '2 weeks', scope)).toBeFalsy();
     });
-});
 
-describe('structural — port range (0-65535)', () => {
-    test('embedded {{port}} rejects out-of-range values', () => {
+    test('structural — port range (0-65535) — embedded {{port}} rejects out-of-range values', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -63,10 +61,8 @@ describe('structural — port range (0-65535)', () => {
         expect(structuralEquals('{{port}}', '99999', scope)).toBeFalsy();
         expect(structuralEquals(match.port(), 99_999, scope)).toBeFalsy();
     });
-});
 
-describe('structural — capture equality', () => {
-    test('object captures compare by content, not key order', () => {
+    test('structural — capture equality — object captures compare by content, not key order', () => {
         // Given - the same object captured twice with different key orders
         const scope = new CaptureScope();
         expect(structuralEquals(match.ref('obj'), { a: 2, b: 1 }, scope)).toBeTruthy();
@@ -76,7 +72,7 @@ describe('structural — capture equality', () => {
         expect(structuralEquals(match.ref('obj'), { a: 2, b: 99 }, scope)).toBeFalsy();
     });
 
-    test('cross-context ref equality: 42 captured from JSON equals "42" from text', () => {
+    test('structural — capture equality — cross-context ref equality: 42 captured from JSON equals "42" from text', () => {
         // Given - a number captured from a JSON context
         const scope = new CaptureScope();
         expect(structuralEquals(match.ref('n'), 42, scope)).toBeTruthy();
@@ -86,7 +82,7 @@ describe('structural — capture equality', () => {
         expect(structuralEquals('{{int#n}}', '43', scope)).toBeFalsy();
     });
 
-    test('a ref is shared across textEquals and structuralEquals on one scope', () => {
+    test('structural — capture equality — a ref is shared across textEquals and structuralEquals on one scope', () => {
         // Given - a uuid captured through a text snapshot comparison
         const scope = new CaptureScope();
         expect(
@@ -98,7 +94,7 @@ describe('structural — capture equality', () => {
         expect(structuralEquals({ id: match.ref('s') }, { id: UUID_B }, scope)).toBeFalsy();
     });
 
-    test('ref(b, { not: "a" }) works in both directions; a never-captured "a" passes (pinned)', () => {
+    test('structural — capture equality — ref(b, { not: "a" }) works in both directions; a never-captured "a" passes (pinned)', () => {
         // Given - "a" captured first
         const scope = new CaptureScope();
         expect(structuralEquals(match.ref('a'), UUID_A, scope)).toBeTruthy();
@@ -112,10 +108,8 @@ describe('structural — capture equality', () => {
         const fresh = new CaptureScope();
         expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_A, fresh)).toBeTruthy();
     });
-});
 
-describe('structural — token grammar edges (pinned)', () => {
-    test('an unknown token is a literal; a literal "{{uuid}}" actual is unmatchable', () => {
+    test('structural — token grammar edges (pinned) — an unknown token is a literal; a literal "{{uuid}}" actual is unmatchable', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -127,7 +121,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals('{{uuid}}', '{{uuid}}', scope)).toBeFalsy();
     });
 
-    test('{{any}} crosses lines, {{string}} stays on one line', () => {
+    test('structural — token grammar edges (pinned) — {{any}} crosses lines, {{string}} stays on one line', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -137,7 +131,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(textEquals('A {{string}} Z', 'A xy Z', scope)).toBeTruthy();
     });
 
-    test('{{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
+    test('structural — token grammar edges (pinned) — {{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -152,7 +146,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals('A {{any}} Z', { nested: true }, scope)).toBeFalsy();
     });
 
-    test('iso8601 accepts Z and numeric offsets, rejects offset-less timestamps', () => {
+    test('structural — token grammar edges (pinned) — iso8601 accepts Z and numeric offsets, rejects offset-less timestamps', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -165,7 +159,7 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00', scope)).toBeFalsy();
     });
 
-    test('base64 and hex overlap on ambiguous values (pinned)', () => {
+    test('structural — token grammar edges (pinned) — base64 and hex overlap on ambiguous values (pinned)', () => {
         // Given - a value that is valid in both alphabets
         const scope = new CaptureScope();
 
@@ -177,10 +171,8 @@ describe('structural — token grammar edges (pinned)', () => {
         expect(structuralEquals(match.hex(), 'xyzt', scope)).toBeFalsy();
         expect(structuralEquals(match.base64(), 'not base64!', scope)).toBeFalsy();
     });
-});
 
-describe('structural — update-mode merges', () => {
-    test('mergeTextPreservingPlaceholders follows the actual line count (pinned)', () => {
+    test('structural — update-mode merges — mergeTextPreservingPlaceholders follows the actual line count (pinned)', () => {
         // Given - a previous snapshot with placeholders and a different shape
         const scope = new CaptureScope();
         const previous = 'id {{uuid}}\nstale\nextra {{number}}';
@@ -196,7 +188,7 @@ describe('structural — update-mode merges', () => {
         ).toBe('id {{uuid}}\nfresh\ncount 3\ntail');
     });
 
-    test('a mid-file insertion re-pairs previous placeholders by pattern, not by index', () => {
+    test('structural — update-mode merges — a mid-file insertion re-pairs previous placeholders by pattern, not by index', () => {
         // Given - a golden whose tokens sit on lines 1 and 3, and an actual run that inserted a new line above them (every token line shifted by one)
         const scope = new CaptureScope();
         const previous = 'id {{uuid}}\nstatic\ndone in {{duration}}';
@@ -208,7 +200,7 @@ describe('structural — update-mode merges', () => {
         );
     });
 
-    test('each previous placeholder line is spent once — twins do not collapse', () => {
+    test('structural — update-mode merges — each previous placeholder line is spent once — twins do not collapse', () => {
         // Given - one token line in the golden and two lines it could cover
         const scope = new CaptureScope();
 
@@ -218,7 +210,7 @@ describe('structural — update-mode merges', () => {
         ).toBe(`id {{uuid}}\nid ${UUID_B}`);
     });
 
-    test('mergePreservingPlaceholders follows array growth and shrinkage', () => {
+    test('structural — update-mode merges — mergePreservingPlaceholders follows array growth and shrinkage', () => {
         // Given - a previous fixture array with a placeholder per slot
         const previous = ['{{uuid}}', '{{number}}'];
 
@@ -233,7 +225,7 @@ describe('structural — update-mode merges', () => {
         expect(mergePreservingPlaceholders(previous, [UUID_A])).toStrictEqual(['{{uuid}}']);
     });
 
-    test('meta: a merged fixture passes the next comparison run', () => {
+    test('structural — update-mode merges — meta: a merged fixture passes the next comparison run', () => {
         // Given - fixtures freshly written by update mode
         const previousJson = { id: '{{uuid}}', name: 'STALE' };
         const actualJson = { id: UUID_B, name: 'Alice' };
@@ -248,12 +240,8 @@ describe('structural — update-mode merges', () => {
         expect(structuralEquals(mergedJson, actualJson, new CaptureScope())).toBeTruthy();
         expect(textEquals(mergedText, `id ${UUID_B}\nfresh`, new CaptureScope())).toBeTruthy();
     });
-});
 
-describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity)', () => {
-    const WORKDIR = '/tmp/spec-run-abcdef';
-
-    test('mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
+    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
         // Given - a fresh JSON fixture (no previous) whose values embed the cwd
         const actual = { cwd: WORKDIR, nested: { path: `${WORKDIR}/out.txt` }, other: 7 };
 
@@ -265,7 +253,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         });
     });
 
-    test('mergePreservingPlaceholders preserves a still-matching {{workdir}} placeholder', () => {
+    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — mergePreservingPlaceholders preserves a still-matching {{workdir}} placeholder', () => {
         // Given - a previous fixture that already tokenised the cwd
         const previous = { cwd: '{{workdir}}', id: '{{uuid}}', name: 'STALE' };
         const actual = { cwd: WORKDIR, id: UUID_A, name: 'Alice' };
@@ -278,7 +266,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         });
     });
 
-    test('no workdir given: string leaves are left untouched (no-op parity)', () => {
+    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — no workdir given: string leaves are left untouched (no-op parity)', () => {
         // Given - the same shape but no framework-known cwd (api/job mode)
         const actual = { cwd: WORKDIR };
 
@@ -286,7 +274,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         expect(mergePreservingPlaceholders(null, actual)).toStrictEqual({ cwd: WORKDIR });
     });
 
-    test('meta: a workdir-substituted JSON fixture passes the next run (with {{workdir}} inside)', () => {
+    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — meta: a workdir-substituted JSON fixture passes the next run (with {{workdir}} inside)', () => {
         // Given - a golden freshly written by update mode from cwd-bearing output
         const actual = { cwd: WORKDIR, log: `wrote ${WORKDIR}/out.txt`, name: 'Alice' };
         const merged = mergePreservingPlaceholders(null, actual, WORKDIR);
@@ -300,7 +288,7 @@ describe('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/
         expect(structuralEquals(merged, actual, new CaptureScope(WORKDIR))).toBeTruthy();
     });
 
-    test('parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {
+    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {
         // Given - the same cwd surfacing in a text stream and a JSON value
         const mergedText = mergeTextPreservingPlaceholders(
             null,

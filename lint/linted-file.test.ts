@@ -13,8 +13,8 @@ const linted = (physicalFilename: string, sourceCode: object = {}): LintedFile =
     sourceCode: sourceCode as LintedFile['sourceCode'],
 });
 
-describe('linted-file — what every rule asks, answered once per file', () => {
-    test('the answers are the ones the path functions give', () => {
+describe('linted-file', () => {
+    test('linted-file — what every rule asks, answered once per file — the answers are the ones the path functions give', () => {
         // Given - a spec under a specs tree
         const path = '/repo/specs/api/users/creation.spec.ts';
         const file = linted(path);
@@ -26,7 +26,7 @@ describe('linted-file — what every rule asks, answered once per file', () => {
         expect(segmentsOf(file)).toStrictEqual(projectSegments(path));
     });
 
-    test('a second rule asking about the same lint gets the answer the first one read', () => {
+    test('linted-file — what every rule asks, answered once per file — a second rule asking about the same lint gets the answer the first one read', () => {
         // Given - one file's lint, asked twice
         const file = linted('/repo/specs/api/users/creation.spec.ts');
         const first = identityOf(file);
@@ -35,7 +35,7 @@ describe('linted-file — what every rule asks, answered once per file', () => {
         expect(identityOf(file)).toBe(first);
     });
 
-    test('another lint, or another file, is answered afresh', () => {
+    test('linted-file — what every rule asks, answered once per file — another lint, or another file, is answered afresh', () => {
         // Given - one lint's answer
         const sourceCode = {};
         const first = identityOf(linted('/repo/specs/api/users/creation.spec.ts', sourceCode));

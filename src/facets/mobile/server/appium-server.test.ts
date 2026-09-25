@@ -5,8 +5,8 @@ import { describe, expect, test } from 'vitest';
 
 import { startAppiumServer } from './appium-server.js';
 
-describe('startAppiumServer', () => {
-    test('refuses a root with no appium binary, naming the install command', async () => {
+describe('appium-server', () => {
+    test('startAppiumServer — refuses a root with no appium binary, naming the install command', async () => {
         // Given - a project root where appium was never installed (the run's temp root removes it)
         const root = mkdtempSync(resolve(tmpdir(), 'appium-root-'));
 

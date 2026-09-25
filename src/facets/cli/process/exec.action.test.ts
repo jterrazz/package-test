@@ -43,8 +43,8 @@ function chainOver(command: CliPort): Chain {
     }).open({});
 }
 
-describe('.exec() — the arguments a command runs with', () => {
-    test('refuses an empty sequence', async () => {
+describe('exec', () => {
+    test('.exec() — the arguments a command runs with — refuses an empty sequence', async () => {
         // Given - a chain over a command that records its runs
         const chain = chainOver(new RecordingCommand());
 
@@ -52,7 +52,7 @@ describe('.exec() — the arguments a command runs with', () => {
         await expect(chain.exec([])).rejects.toThrow('exec([]) requires at least one command');
     });
 
-    test('refuses a sequence with waitFor/timeout', async () => {
+    test('.exec() — the arguments a command runs with — refuses a sequence with waitFor/timeout', async () => {
         // Given - a command sequence plus long-running options
         const chain = chainOver(new RecordingCommand());
 
@@ -62,7 +62,7 @@ describe('.exec() — the arguments a command runs with', () => {
         );
     });
 
-    test('with no arguments, runs the binary bare', async () => {
+    test('.exec() — the arguments a command runs with — with no arguments, runs the binary bare', async () => {
         // Given - a chain over a command that records its arguments
         const command = new RecordingCommand();
 
@@ -73,7 +73,7 @@ describe('.exec() — the arguments a command runs with', () => {
         expect(command.lastArgs).toBe('');
     });
 
-    test("hands the command the chain's environment", async () => {
+    test(".exec() — the arguments a command runs with — hands the command the chain's environment", async () => {
         // Given - a chain stating one variable
         const command = new RecordingCommand();
 
@@ -83,10 +83,8 @@ describe('.exec() — the arguments a command runs with', () => {
         // Then - the child starts with it
         expect(command.lastEnv).toStrictEqual({ TZ: 'UTC' });
     });
-});
 
-describe('.exec() — the folder a command runs in', () => {
-    test('exists while the test runs, and is removed once it has finished', async () => {
+    test('.exec() — the folder a command runs in — exists while the test runs, and is removed once it has finished', async () => {
         // Given - a check that runs after the test's own teardowns, and a chain over a recording command
         const command = new RecordingCommand();
         onTestFinished(() => {

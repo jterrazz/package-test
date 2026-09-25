@@ -36,8 +36,8 @@ function splitRun(...shards: Route[][]): string {
     return root;
 }
 
-describe('judgeSplit() — the route ratchet of a split run, judged at its merge', () => {
-    test("reads every shard's ledgers as one run's", async () => {
+describe('route-split', () => {
+    test("judgeSplit() — the route ratchet of a split run, judged at its merge — reads every shard's ledgers as one run's", async () => {
         // Given - two shards reaching the three routes between them
         const root = splitRun(
             [{ method: 'GET', path: '/users' }],
@@ -53,7 +53,7 @@ describe('judgeSplit() — the route ratchet of a split run, judged at its merge
         });
     });
 
-    test('reads none of the ledgers a whole run left', async () => {
+    test('judgeSplit() — the route ratchet of a split run, judged at its merge — reads none of the ledgers a whole run left', async () => {
         // Given - two shards reaching two routes of three, the whole run's ledger reaching the third
         const root = splitRun(
             [{ method: 'GET', path: '/users' }],
@@ -67,7 +67,7 @@ describe('judgeSplit() — the route ratchet of a split run, judged at its merge
         });
     });
 
-    test('holds the split to the ratchet a whole run is held to', async () => {
+    test('judgeSplit() — the route ratchet of a split run, judged at its merge — holds the split to the ratchet a whole run is held to', async () => {
         // Given - the one shard of a split, reaching one route of three
         const root = splitRun([{ method: 'GET', path: '/users' }]);
 
@@ -78,7 +78,7 @@ describe('judgeSplit() — the route ratchet of a split run, judged at its merge
         });
     });
 
-    test("fails a merge that finds no shard's ledgers, rather than passing it unjudged", async () => {
+    test("judgeSplit() — the route ratchet of a split run, judged at its merge — fails a merge that finds no shard's ledgers, rather than passing it unjudged", async () => {
         // Given - a split whose shard folders a whole run emptied, its own ledger left beside them
         const root = splitRun();
 

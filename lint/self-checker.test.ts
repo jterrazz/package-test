@@ -26,8 +26,8 @@ const MISFILED = {
     'api/users/list/listing.spec.ts': "import { api } from '../../api.specification.js';\n",
 };
 
-describe('the self checker — the passes only this package runs', () => {
-    test('a self pass reports on the tree it is handed', () => {
+describe('self-checker', () => {
+    test('the self checker — the passes only this package runs — a self pass reports on the tree it is handed', () => {
         // Given - a spec of a specimen filed by its route
         const root = specsTree(MISFILED);
 
@@ -37,7 +37,7 @@ describe('the self checker — the passes only this package runs', () => {
         ]);
     });
 
-    test('the published checker runs no self pass', () => {
+    test('the self checker — the passes only this package runs — the published checker runs no self pass', () => {
         // Given - the same tree, walked by every pass `dist/checker.js` runs
         const root = specsTree(MISFILED);
         const selfPasses = new Set<string>(SELF_PASS_IDS);

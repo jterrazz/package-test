@@ -39,8 +39,8 @@ export const jobFacet = defineFacet()({ ...composition, engines: ${engines}, loc
 `;
 }
 
-describe('facetFileFindings', () => {
-    test('an adapter is a name, a read of the config, or an engine built on them', () => {
+describe('facet-file', () => {
+    test('facetFileFindings — an adapter is a name, a read of the config, or an engine built on them', () => {
         // Given - the three forms an adapter takes
         const source = facetWiring(
             '(config) => ({ databases: databaseSet(config), jobs: config.jobs ?? [], seed })',
@@ -50,7 +50,7 @@ describe('facetFileFindings', () => {
         expect(findingsOf(source)).toStrictEqual([]);
     });
 
-    test('an adapter is named by the kind of logic it is written as', () => {
+    test('facetFileFindings — an adapter is named by the kind of logic it is written as', () => {
         // Given - an arrow, an object holding one, a definition built on, and an unknown call
         const source = facetWiring(
             '(config) => ({ at: () => 0, clock: { pin: () => 0 }, seeded: seed.build(config), sorted: [].toSorted() })',
@@ -65,17 +65,15 @@ describe('facetFileFindings', () => {
         ]);
     });
 
-    test('engines not written as an arrow handing back an object are one finding', () => {
+    test('facetFileFindings — engines not written as an arrow handing back an object are one finding', () => {
         // Given - engines computed in a block
         const source = facetWiring('(config) => { return { seed }; }');
 
         // Then - the engines, and nothing about what the block holds
         expect(findingsOf(source)).toStrictEqual(['engines']);
     });
-});
 
-describe('importsOf', () => {
-    test('maps every local name a program imports to its source', () => {
+    test('importsOf — maps every local name a program imports to its source', () => {
         // Given - a named, a renamed, a default and a namespace import
         const source =
             "import { a, b as c } from './one.js';\nimport d from './two.js';\nimport * as e from './three.js';\nexport const f = a;\n";

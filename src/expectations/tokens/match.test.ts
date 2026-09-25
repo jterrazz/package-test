@@ -6,8 +6,8 @@ import { mergePreservingPlaceholders, renderExpected, structuralEquals } from '.
 const UUID_A = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 const UUID_B = 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee';
 
-describe('match — typed matchers', () => {
-    test('uuid / iso8601 / number / string / any match by type', () => {
+describe('match', () => {
+    test('match — typed matchers — uuid / iso8601 / number / string / any match by type', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -24,7 +24,7 @@ describe('match — typed matchers', () => {
         expect(structuralEquals(match.any(), { deep: true }, scope)).toBeTruthy();
     });
 
-    test('regex matches strings against the pattern', () => {
+    test('match — typed matchers — regex matches strings against the pattern', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -33,7 +33,7 @@ describe('match — typed matchers', () => {
         expect(structuralEquals(match.regex(/^user-\d+$/u), 'admin-42', scope)).toBeFalsy();
     });
 
-    test('includes matches a string containing the substring — code-only, never a token', () => {
+    test('match — typed matchers — includes matches a string containing the substring — code-only, never a token', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -48,7 +48,7 @@ describe('match — typed matchers', () => {
         expect(String(match.includes('classify'))).toBe('{{includes:classify}}');
     });
 
-    test('matchers compose inside structures', () => {
+    test('match — typed matchers — matchers compose inside structures', () => {
         // Given - a structure mixing literals and matchers
         const scope = new CaptureScope();
         const expected = { id: match.uuid(), tags: ['a', match.string()], ttl: 3600 };
@@ -61,10 +61,8 @@ describe('match — typed matchers', () => {
             structuralEquals(expected, { id: UUID_A, tags: ['a', 7], ttl: 3600 }, scope),
         ).toBeFalsy();
     });
-});
 
-describe('match — full token vocabulary (CONVENTIONS D4)', () => {
-    test('identifier, time, and version tokens match their canonical forms', () => {
+    test('match — full token vocabulary (CONVENTIONS D4) — identifier, time, and version tokens match their canonical forms', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -86,7 +84,7 @@ describe('match — full token vocabulary (CONVENTIONS D4)', () => {
         expect(structuralEquals(match.base64(), 'aGVsbG8=', scope)).toBeTruthy();
     });
 
-    test('numeric and network tokens match their canonical forms', () => {
+    test('match — full token vocabulary (CONVENTIONS D4) — numeric and network tokens match their canonical forms', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -116,7 +114,7 @@ describe('match — full token vocabulary (CONVENTIONS D4)', () => {
         expect(structuralEquals(match.path(), 'no-slash', scope)).toBeFalsy();
     });
 
-    test('workdir matches the exact spec cwd known by the framework', () => {
+    test('match — full token vocabulary (CONVENTIONS D4) — workdir matches the exact spec cwd known by the framework', () => {
         // Given - a scope carrying the spec cwd
         const scope = new CaptureScope('/tmp/spec-abc');
 
@@ -131,7 +129,7 @@ describe('match — full token vocabulary (CONVENTIONS D4)', () => {
         expect(structuralEquals(match.workdir(), '/tmp/spec-abc', blind)).toBeFalsy();
     });
 
-    test('every token is capturable via {{type#ref}}', () => {
+    test('match — full token vocabulary (CONVENTIONS D4) — every token is capturable via {{type#ref}}', () => {
         // Given - a semver captured under #v
         const scope = new CaptureScope();
         expect(structuralEquals('v{{semver#v}}', 'v1.2.3', scope)).toBeTruthy();
@@ -140,10 +138,8 @@ describe('match — full token vocabulary (CONVENTIONS D4)', () => {
         expect(structuralEquals('version {{semver#v}}', 'version 1.2.3', scope)).toBeTruthy();
         expect(structuralEquals('version {{semver#v}}', 'version 9.9.9', scope)).toBeFalsy();
     });
-});
 
-describe('match — refs (capture semantics)', () => {
-    test('first occurrence captures, later occurrences must equal it', () => {
+    test('match — refs (capture semantics) — first occurrence captures, later occurrences must equal it', () => {
         // Given - one scope shared by two comparisons
         const scope = new CaptureScope();
 
@@ -155,7 +151,7 @@ describe('match — refs (capture semantics)', () => {
         expect(structuralEquals(match.ref('id'), UUID_B, scope)).toBeFalsy();
     });
 
-    test('{ not } asserts inequality with another capture', () => {
+    test('match — refs (capture semantics) — { not } asserts inequality with another capture', () => {
         // Given - a captured value under "a"
         const scope = new CaptureScope();
         expect(structuralEquals(match.ref('a'), UUID_A, scope)).toBeTruthy();
@@ -165,7 +161,7 @@ describe('match — refs (capture semantics)', () => {
         expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_B, scope)).toBeTruthy();
     });
 
-    test('scope isolates captures between spec executions', () => {
+    test('match — refs (capture semantics) — scope isolates captures between spec executions', () => {
         // Given - two independent scopes (one per chain)
         const first = new CaptureScope();
         const second = new CaptureScope();
@@ -174,10 +170,8 @@ describe('match — refs (capture semantics)', () => {
         expect(structuralEquals(match.ref('id'), UUID_A, first)).toBeTruthy();
         expect(structuralEquals(match.ref('id'), UUID_B, second)).toBeTruthy();
     });
-});
 
-describe('match — file-side placeholders', () => {
-    test('whole-string placeholders match typed values', () => {
+    test('match — file-side placeholders — whole-string placeholders match typed values', () => {
         // Given - a fresh scope
         const scope = new CaptureScope();
 
@@ -188,7 +182,7 @@ describe('match — file-side placeholders', () => {
         expect(structuralEquals('{{any}}', [1, 2, 3], scope)).toBeTruthy();
     });
 
-    test('embedded placeholders match inside longer strings', () => {
+    test('match — file-side placeholders — embedded placeholders match inside longer strings', () => {
         // Given - a fresh scope
         const scope = new CaptureScope();
 
@@ -200,7 +194,7 @@ describe('match — file-side placeholders', () => {
         expect(structuralEquals('took {{number}}ms', 'took 12ms', scope)).toBeTruthy();
     });
 
-    test('{{type#ref}} captures and enforces equality across occurrences', () => {
+    test('match — file-side placeholders — {{type#ref}} captures and enforces equality across occurrences', () => {
         // Given - one scope for the whole document
         const scope = new CaptureScope();
         const expected = { echo: '{{uuid#session}}', id: '{{uuid#session}}' };
@@ -211,10 +205,8 @@ describe('match — file-side placeholders', () => {
         const freshScope = new CaptureScope();
         expect(structuralEquals(expected, { echo: UUID_A, id: UUID_B }, freshScope)).toBeFalsy();
     });
-});
 
-describe('match — rendering and update merge', () => {
-    test('renderExpected turns matchers into placeholder text', () => {
+    test('match — rendering and update merge — renderExpected turns matchers into placeholder text', () => {
         // Given - a structure with matchers
         const rendered = renderExpected({ id: match.uuid(), name: match.ref('n') });
 
@@ -222,7 +214,7 @@ describe('match — rendering and update merge', () => {
         expect(rendered).toStrictEqual({ id: '{{uuid}}', name: '{{ref#n}}' });
     });
 
-    test('mergePreservingPlaceholders keeps placeholder-covered segments', () => {
+    test('match — rendering and update merge — mergePreservingPlaceholders keeps placeholder-covered segments', () => {
         // Given - a previous fixture with placeholders and stale literals
         const previous = { id: '{{uuid}}', name: 'STALE', when: '{{iso8601}}' };
         const actual = { id: UUID_B, name: 'Alice', when: '2026-07-17T10:00:00.000Z' };
@@ -234,7 +226,7 @@ describe('match — rendering and update merge', () => {
         expect(merged).toStrictEqual({ id: '{{uuid}}', name: 'Alice', when: '{{iso8601}}' });
     });
 
-    test('mergePreservingPlaceholders replaces placeholders that no longer match', () => {
+    test('match — rendering and update merge — mergePreservingPlaceholders replaces placeholders that no longer match', () => {
         // Given - a placeholder whose type no longer matches the actual value
         const previous = { id: '{{uuid}}' };
         const actual = { id: 'no-longer-a-uuid' };

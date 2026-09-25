@@ -3,11 +3,11 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — checker CLI contract', () => {
+describe('checker-cli', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
     // Apply — the whole stream is asserted, tokens covering the run cwd.
-    test('a root that is not a specs tree is read as the project holding one', async () => {
+    test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c12-spec-placement/'))
@@ -23,7 +23,7 @@ describe('lint — checker CLI contract', () => {
         `);
     });
 
-    test('a project checked out under a folder named `specs/` is a project root, not a tree', async () => {
+    test('lint — checker CLI contract — a project checked out under a folder named `specs/` is a project root, not a tree', async () => {
         // Given - a package whose checkout sits under `specs/`, with a finding one level down its own tree
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-under-specs/'))
@@ -40,7 +40,7 @@ describe('lint — checker CLI contract', () => {
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
-    test('a root holding no specs tree at all is refused, not reported clean', async () => {
+    test('lint — checker CLI contract — a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-no-specs/'))
@@ -53,7 +53,7 @@ describe('lint — checker CLI contract', () => {
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
-    test('a nonexistent root fails loudly instead of reporting a clean tree', async () => {
+    test('lint — checker CLI contract — a nonexistent root fails loudly instead of reporting a clean tree', async () => {
         // Given - a target directory that does not exist
         const result = await cli.exec('does-not-exist-xyz');
 
@@ -62,7 +62,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toContain('no such directory');
     });
 
-    test('`baseline` records the project where it stands, and the next run is held by it', async () => {
+    test('lint — checker CLI contract — `baseline` records the project where it stands, and the next run is held by it', async () => {
         // Given - a project with one dead fixture and no ratchet, recorded then judged
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -75,7 +75,7 @@ describe('lint — checker CLI contract', () => {
         );
     });
 
-    test('`baseline` rewrites the test section and keeps the typescript section byte for byte', async () => {
+    test('lint — checker CLI contract — `baseline` rewrites the test section and keeps the typescript section byte for byte', async () => {
         // Given - a family file holding both sections, the typescript one spelled on one line
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -88,7 +88,7 @@ describe('lint — checker CLI contract', () => {
         );
     });
 
-    test('a leftover test.baseline.json is never read: the section alone judges', async () => {
+    test('lint — checker CLI contract — a leftover test.baseline.json is never read: the section alone judges', async () => {
         // Given - the retired file holding a count the project is far from, beside the recorded section
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -101,7 +101,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stdout.text).not.toContain('test.baseline.json');
     });
 
-    test('a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
+    test('lint — checker CLI contract — a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
         // Given - a project with one dead fixture, recorded, then judged
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -113,7 +113,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toBe('');
     });
 
-    test('a green `--fix` run prints exactly the held line', async () => {
+    test('lint — checker CLI contract — a green `--fix` run prints exactly the held line', async () => {
         // Given - a project with one dead fixture, recorded, then fixed
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -125,7 +125,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toBe('');
     });
 
-    test('`--verbose` adds to the held line where the run stood and what ran', async () => {
+    test('lint — checker CLI contract — `--verbose` adds to the held line where the run stood and what ran', async () => {
         // Given - a project with one dead fixture, recorded, then judged verbosely
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -139,7 +139,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toBe('');
     });
 
-    test('a ratchet the project broke fails the run, naming each key and the gesture', async () => {
+    test('lint — checker CLI contract — a ratchet the project broke fails the run, naming each key and the gesture', async () => {
         // Given - a recorded debt the project paid, and a finding nobody recorded
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -150,7 +150,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
     });
 
-    test("a broken ratchet prints its own findings, and counts the plugin's in one line", async () => {
+    test("lint — checker CLI contract — a broken ratchet prints its own findings, and counts the plugin's in one line", async () => {
         // Given - the broken ratchet, and a report holding a diagnostic of the plugin and one of another
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -169,7 +169,7 @@ describe('lint — checker CLI contract', () => {
         `);
     });
 
-    test('the root member run judges the ratchet, and prints the tree finding it fails on', async () => {
+    test('lint — checker CLI contract — the root member run judges the ratchet, and prints the tree finding it fails on', async () => {
         // Given - the broken ratchet, judged by the run typescript check makes
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -180,7 +180,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
     });
 
-    test('with no ratchet, the root member run judges and prints only its own findings', async () => {
+    test('lint — checker CLI contract — with no ratchet, the root member run judges and prints only its own findings', async () => {
         // Given - a dead fixture under specs/, no jterrazz.baseline.json
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -191,7 +191,7 @@ describe('lint — checker CLI contract', () => {
         expect(result.stderr.text).toBe('');
     });
 
-    test('the plugin diagnostics are read from the report typescript check hands over', async () => {
+    test('lint — checker CLI contract — the plugin diagnostics are read from the report typescript check hands over', async () => {
         // Given - no oxlint installed, and a report holding one diagnostic of the plugin
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-oxlint-report/'))
@@ -206,7 +206,7 @@ describe('lint — checker CLI contract', () => {
         `);
     });
 
-    test('a checker that ran oxlint itself prints the plugin diagnostics it saw', async () => {
+    test('lint — checker CLI contract — a checker that ran oxlint itself prints the plugin diagnostics it saw', async () => {
         // Given - no report handed in, and a project oxlint reporting one diagnostic of the plugin
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-oxlint-run/'))
@@ -223,7 +223,7 @@ describe('lint — checker CLI contract', () => {
 
     // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
     // Full-output golden would couple this to the diagnostic formatting.
-    test('a report path that names no file fails loudly instead of counting nothing', async () => {
+    test('lint — checker CLI contract — a report path that names no file fails loudly instead of counting nothing', async () => {
         // Given - a report that was never written
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-oxlint-report/'))
@@ -233,10 +233,8 @@ describe('lint — checker CLI contract', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stderr.text).toContain('no such oxlint report');
     });
-});
 
-describe('lint — checker CLI, the logs a ratchet run prints', () => {
-    test('a run another run judges prints its findings, names the judge, and exits 0', async () => {
+    test('lint — checker CLI, the logs a ratchet run prints — a run another run judges prints its findings, names the judge, and exits 0', async () => {
         // Given - one specs tree of a project keeping jterrazz.baseline.json › test, the tree holding a finding the section does not
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -250,7 +248,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         `);
     });
 
-    test('`--format json` prints the findings on a green ratchet run too', async () => {
+    test('lint — checker CLI, the logs a ratchet run prints — `--format json` prints the findings on a green ratchet run too', async () => {
         // Given - a project whose one finding is recorded, judged with the JSON format
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
@@ -263,7 +261,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         `);
     });
 
-    test("`--format json` carries the checker's own findings, never the plugin's it judges", async () => {
+    test("lint — checker CLI, the logs a ratchet run prints — `--format json` carries the checker's own findings, never the plugin's it judges", async () => {
         // Given - a broken ratchet, and a report holding a diagnostic of the plugin and one of another
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))
@@ -277,7 +275,7 @@ describe('lint — checker CLI, the logs a ratchet run prints', () => {
         `);
     });
 
-    test('a green root member run prints exactly the held line', async () => {
+    test('lint — checker CLI, the logs a ratchet run prints — a green root member run prints exactly the held line', async () => {
         // Given - a project whose checker finding and plugin diagnostic are both recorded
         const result = await cli
             .fixture(directory('./fixtures/lint-violations/checker-ratchet/'))

@@ -3,8 +3,8 @@ import { describe, expect, test } from 'vitest';
 import { CaptureScope, match } from '../tokens/match.js';
 import { pairRows } from './rows.js';
 
-describe('pairRows — a table as a multiset of rows', () => {
-    test('rows in another order pair with the rows they match', () => {
+describe('pairRows', () => {
+    test('pairRows — a table as a multiset of rows — rows in another order pair with the rows they match', () => {
         // Given - two rows stated in the other order
         const pairing = pairRows(
             [
@@ -29,7 +29,7 @@ describe('pairRows — a table as a multiset of rows', () => {
         });
     });
 
-    test('a capture shared across rows settles the pairing each row alone could not', () => {
+    test('pairRows — a table as a multiset of rows — a capture shared across rows settles the pairing each row alone could not', () => {
         // Given - two rows each matching either row alone, the second requiring the first's id
         const scope = new CaptureScope();
         const pairing = pairRows(
@@ -54,7 +54,7 @@ describe('pairRows — a table as a multiset of rows', () => {
         expect(scope.get('first')).toBe('b');
     });
 
-    test('a row that matches none is shown against the row it resembles most, and a row too many alone', () => {
+    test('pairRows — a table as a multiset of rows — a row that matches none is shown against the row it resembles most, and a row too many alone', () => {
         // Given - one stated row off by a name, and a table holding a third row
         const pairing = pairRows(
             [
@@ -81,7 +81,7 @@ describe('pairRows — a table as a multiset of rows', () => {
         });
     });
 
-    test('ordered, the rows pair by position', () => {
+    test('pairRows — a table as a multiset of rows — ordered, the rows pair by position', () => {
         // Given - the same rows in another order, compared as an order
         const pairing = pairRows(
             [

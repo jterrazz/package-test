@@ -2,14 +2,14 @@ import { describe, expect, test } from 'vitest';
 
 import { nodeOnlyClass, refuse } from './node-only.js';
 
-describe('the page refuses what only node can do, where it was called', () => {
-    test('names the binding and says where it runs', () => {
+describe('node-only', () => {
+    test('the page refuses what only node can do, where it was called — names the binding and says where it runs', () => {
         // Given - a service the page has no socket for
         // Then - the refusal names it and the runtime that has one
         expect(() => refuse('postgres()')).toThrow(/^postgres\(\) runs under node/u);
     });
 
-    test('routes a rendered thing to the kind that renders', () => {
+    test('the page refuses what only node can do, where it was called — routes a rendered thing to the kind that renders', () => {
         // Given - any node-only binding reached from a page
         const message = (() => {
             try {
@@ -24,7 +24,7 @@ describe('the page refuses what only node can do, where it was called', () => {
         expect(message).toContain('a rendered thing is a `.test.tsx` beside its component');
     });
 
-    test('a node-only class is present and throws when it is constructed', () => {
+    test('the page refuses what only node can do, where it was called — a node-only class is present and throws when it is constructed', () => {
         // Given - a result class the page can name but never build
         const Stub: new () => unknown = nodeOnlyClass('CliResult');
 

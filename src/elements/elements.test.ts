@@ -22,8 +22,8 @@ import {
     within,
 } from './elements.js';
 
-describe('element vocabulary', () => {
-    test('builds a named descriptor as plain data', () => {
+describe('elements', () => {
+    test('element vocabulary — builds a named descriptor as plain data', () => {
         // Given - a link named by its accessible name
         const element = link('Articles');
 
@@ -31,7 +31,7 @@ describe('element vocabulary', () => {
         expect(element).toStrictEqual({ kind: 'link', name: 'Articles' });
     });
 
-    test('omits exact when it was not asked for', () => {
+    test('element vocabulary — omits exact when it was not asked for', () => {
         // Given - a descriptor built without options
         const element = button('Subscribe');
 
@@ -39,7 +39,7 @@ describe('element vocabulary', () => {
         expect(element).toStrictEqual({ kind: 'button', name: 'Subscribe' });
     });
 
-    test('carries exact when asked for', () => {
+    test('element vocabulary — carries exact when asked for', () => {
         // Given - a descriptor asking for a whole-name match
         const element = field('Email', { exact: true });
 
@@ -47,7 +47,7 @@ describe('element vocabulary', () => {
         expect(element).toStrictEqual({ exact: true, kind: 'field', name: 'Email' });
     });
 
-    test('builds an anonymous landmark without a name', () => {
+    test('element vocabulary — builds an anonymous landmark without a name', () => {
         // Given - the primary content region
         const element = main();
 
@@ -55,7 +55,7 @@ describe('element vocabulary', () => {
         expect(element).toStrictEqual({ kind: 'main' });
     });
 
-    test('builds a named landmark for pages carrying several of a region', () => {
+    test('element vocabulary — builds a named landmark for pages carrying several of a region', () => {
         // Given - a page with more than one nav
         const element = navigation('Breadcrumb');
 
@@ -63,7 +63,7 @@ describe('element vocabulary', () => {
         expect(element).toStrictEqual({ kind: 'navigation', name: 'Breadcrumb' });
     });
 
-    test('names the five roles a visitor reads rather than the container it sits in', () => {
+    test('element vocabulary — names the five roles a visitor reads rather than the container it sits in', () => {
         // Given - the roles the estate's UI specs were reaching for by hand
         const named = [dialog('Settings'), table('Posts'), row('A first post')];
 
@@ -75,7 +75,7 @@ describe('element vocabulary', () => {
         ]);
     });
 
-    test('lets the roles that usually carry no name stay anonymous', () => {
+    test('element vocabulary — lets the roles that usually carry no name stay anonymous', () => {
         // Given - the live region of a page, and the item of a list
         // Then - a name is optional, exactly as it is on a landmark
         expect([status(), listitem('Part 2')]).toStrictEqual([
@@ -83,10 +83,8 @@ describe('element vocabulary', () => {
             { kind: 'listitem', name: 'Part 2' },
         ]);
     });
-});
 
-describe('focused', () => {
-    test('modifies a descriptor rather than replacing it', () => {
+    test('focused — modifies a descriptor rather than replacing it', () => {
         // Given - the button a dialog should hand the keyboard back to
         const element = focused(button('Open'));
 
@@ -94,7 +92,7 @@ describe('focused', () => {
         expect(element).toStrictEqual({ focused: true, kind: 'button', name: 'Open' });
     });
 
-    test('survives scoping, so the keyboard can be asserted inside a landmark', () => {
+    test('focused — survives scoping, so the keyboard can be asserted inside a landmark', () => {
         // Given - a focused link designated inside the nav
         const element = within(navigation(), focused(link('Articles')));
 
@@ -106,10 +104,8 @@ describe('focused', () => {
             scope: { kind: 'navigation' },
         });
     });
-});
 
-describe('disabled / enabled', () => {
-    test('modify a descriptor rather than replacing it', () => {
+    test('disabled / enabled — modify a descriptor rather than replacing it', () => {
         // Given - the same control, asked about each direction of enablement
         // Then - one flag, two answers; the descriptor is untouched otherwise
         expect(disabled(button('Publish'))).toStrictEqual({
@@ -124,7 +120,7 @@ describe('disabled / enabled', () => {
         });
     });
 
-    test('survive scoping, so enablement can be asserted inside a landmark', () => {
+    test('disabled / enabled — survive scoping, so enablement can be asserted inside a landmark', () => {
         // Given - a disabled button designated inside a form
         const element = within(main(), disabled(button('Publish')));
 
@@ -136,10 +132,8 @@ describe('disabled / enabled', () => {
             scope: { kind: 'main' },
         });
     });
-});
 
-describe('option / selected', () => {
-    test('names an option the way every other role descriptor is named', () => {
+    test('option / selected — names an option the way every other role descriptor is named', () => {
         // Given - one of the channels a select offers
         const element = option('LinkedIn');
 
@@ -147,7 +141,7 @@ describe('option / selected', () => {
         expect(element).toStrictEqual({ kind: 'option', name: 'LinkedIn' });
     });
 
-    test('modifies the option a field is on rather than replacing it', () => {
+    test('option / selected — modifies the option a field is on rather than replacing it', () => {
         // Given - the chosen channel, named inside the field that holds it
         const element = within(field('Channel'), selected(option('LinkedIn')));
 
@@ -159,10 +153,8 @@ describe('option / selected', () => {
             selected: true,
         });
     });
-});
 
-describe('valued', () => {
-    test('carries the value the field must hold', () => {
+    test('valued — carries the value the field must hold', () => {
         // Given - the title a form was filled with
         const element = valued(field('Title'), 'Launch teaser');
 
@@ -174,17 +166,15 @@ describe('valued', () => {
         });
     });
 
-    test('states an empty value as emptiness, not as an absent modifier', () => {
+    test('valued — states an empty value as emptiness, not as an absent modifier', () => {
         // Given - the field a reset left behind
         const element = valued(field('Title'), '');
 
         // Then - the empty string is the value asked about
         expect(element.value).toBe('');
     });
-});
 
-describe('within', () => {
-    test('attaches the scope to the target', () => {
+    test('within — attaches the scope to the target', () => {
         // Given - a link designated inside the nav
         const element = within(navigation(), link('Articles'));
 
@@ -196,7 +186,7 @@ describe('within', () => {
         });
     });
 
-    test('nests scopes outside-in rather than replacing them', () => {
+    test('within — nests scopes outside-in rather than replacing them', () => {
         // Given - a target already scoped to a region
         const inner = within(region('Series'), link('Part 2'));
 
@@ -211,7 +201,7 @@ describe('within', () => {
         });
     });
 
-    test('accepts any descriptor as a scope, including the escape hatch', () => {
+    test('within — accepts any descriptor as a scope, including the escape hatch', () => {
         // Given - a container with no landmark role to stand on
         const element = within(testId('row-3'), button('Delete'));
 
@@ -219,7 +209,7 @@ describe('within', () => {
         expect(element.scope).toStrictEqual({ kind: 'testId', name: 'row-3' });
     });
 
-    test('leaves the original target untouched', () => {
+    test('within — leaves the original target untouched', () => {
         // Given - a descriptor reused across two scopes
         const target = link('Articles');
 

@@ -12,8 +12,8 @@ import { exportedNames, renderPublishedNames } from './published-names.js';
 /** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-describe('published names — the surface a consumer imports, by name', () => {
-    test('the three published entries export exactly the recorded names', async () => {
+describe('published-names', () => {
+    test('published names — the surface a consumer imports, by name — the three published entries export exactly the recorded names', async () => {
         // Given - the node types, the page bundle and the vitest types, as `npm run build` wrote them
         await registerMatchers();
         const published = renderPublishedNames(ROOT);
@@ -22,7 +22,7 @@ describe('published names — the surface a consumer imports, by name', () => {
         expect(text(published)).toMatch(file('./expected/published-names.txt'));
     });
 
-    test("a chain refuses, under a consumer's compiler options, a setting its facet does not share", () => {
+    test("published names — the surface a consumer imports, by name — a chain refuses, under a consumer's compiler options, a setting its facet does not share", () => {
         // Given - a consumer module over the built types, compiled with `strict` alone: without the `exactOptionalPropertyTypes` this package checks itself under
         const root = mkdtempSync(join(tmpdir(), 'consumer-types-'));
         writeFileSync(
@@ -59,7 +59,7 @@ describe('published names — the surface a consumer imports, by name', () => {
         );
     });
 
-    test('a name is read in every form a declaration file publishes it', () => {
+    test('published names — the surface a consumer imports, by name — a name is read in every form a declaration file publishes it', () => {
         // Given - a declaration file exporting by declaration, by list, renamed, and twice through an overload
         const root = mkdtempSync(join(tmpdir(), 'published-names-'));
         writeFileSync(

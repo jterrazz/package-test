@@ -54,8 +54,8 @@ function chainOver(log: string[], config: ServicesConfig): Chain {
     }).open(config);
 }
 
-describe('.seed() — the SQL files a chain runs first', () => {
-    test('empties the databases, then runs each file against the one it names, in order', async () => {
+describe('seed', () => {
+    test('.seed() — the SQL files a chain runs first — empties the databases, then runs each file against the one it names, in order', async () => {
         // Given - a chain seeding two databases
         const log: string[] = [];
         const chain = chainOver(log, { databaseKeys: ['analytics', 'db'] });
@@ -76,7 +76,7 @@ describe('.seed() — the SQL files a chain runs first', () => {
         ]);
     });
 
-    test('empties the databases even when the chain seeds nothing', async () => {
+    test('.seed() — the SQL files a chain runs first — empties the databases even when the chain seeds nothing', async () => {
         // Given - a chain that states no seed
         const log: string[] = [];
 
@@ -87,7 +87,7 @@ describe('.seed() — the SQL files a chain runs first', () => {
         expect(log).toStrictEqual(['reset']);
     });
 
-    test('refuses an unnamed seed when two databases are declared, as it is stated (A7)', () => {
+    test('.seed() — the SQL files a chain runs first — refuses an unnamed seed when two databases are declared, as it is stated (A7)', () => {
         // Given - two databases declared
         const chain = chainOver([], { databaseKeys: ['analytics', 'db'] });
 
@@ -96,7 +96,7 @@ describe('.seed() — the SQL files a chain runs first', () => {
         expect(() => chain.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
     });
 
-    test('refuses what is not one .sql file, naming file()', () => {
+    test('.seed() — the SQL files a chain runs first — refuses what is not one .sql file, naming file()', () => {
         // Given - a caller the compiler does not see
         const chain = chainOver([], {});
 

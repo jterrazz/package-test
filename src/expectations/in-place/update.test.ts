@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { shouldUpdateSnapshots } from './update.js';
 
-describe('update-mode detection (CONVENTIONS D5/E1)', () => {
+describe('update', () => {
     let savedArgv: string[];
     let savedTestUpdate: string | undefined;
 

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('lint — d10w tokens in requests (CONVENTIONS D10)', () => {
+describe('d10w-tokens-in-requests', () => {
     // Full-output golden: the checker's diagnostics are OUR product, so the
     // D11(d) id-only-grep carve-out (third-party linters) does not apply.
     test('warns when a token leaks into a requests/ file', async () => {

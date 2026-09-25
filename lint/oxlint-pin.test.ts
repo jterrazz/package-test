@@ -24,8 +24,8 @@ function installWith(own: string, toolchain: string): string {
     return root;
 }
 
-describe('the oxlint pin — the toolchain owns it and this manifest mirrors it', () => {
-    test('the declared devDependency is exactly what @jterrazz/typescript pins', () => {
+describe('oxlint-pin', () => {
+    test('the oxlint pin — the toolchain owns it and this manifest mirrors it — the declared devDependency is exactly what @jterrazz/typescript pins', () => {
         // Given - this repository as it is installed
         const declared = declaredRange(ROOT);
 
@@ -34,7 +34,7 @@ describe('the oxlint pin — the toolchain owns it and this manifest mirrors it'
         expect(declared).toBe(toolchainRange(ROOT));
     });
 
-    test('a range that drifted from the toolchain is visible as a difference', () => {
+    test('the oxlint pin — the toolchain owns it and this manifest mirrors it — a range that drifted from the toolchain is visible as a difference', () => {
         // Given - an install whose manifest moved on without the toolchain
         const root = installWith('^1.84.0', '^1.83.0');
 

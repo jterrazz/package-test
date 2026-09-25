@@ -61,7 +61,7 @@ function sourcesUnder(dir: string): string {
         .join('\n');
 }
 
-describe('whyOf — the convention in one sentence', () => {
+describe('lesson', () => {
     test.each([
         ['one sentence', 'A test waits on a condition.', 'A test waits on a condition.'],
         ['the first of two', 'A seed is SQL. Anything else is a fixture.', 'A seed is SQL.'],
@@ -76,15 +76,13 @@ describe('whyOf — the convention in one sentence', () => {
             'A token (e.g. `{{uuid}}`) is matched.',
         ],
         ['a lowercase continuation', 'It reads `x.ts`. then stops', 'It reads `x.ts`. then stops'],
-    ])('%s', (_, convention, why) => {
+    ])('whyOf — the convention in one sentence — %s', (_, convention, why) => {
         // Given - a catalogue sentence
         // Then - the why stops where the first sentence does
         expect(whyOf(convention)).toBe(why);
     });
-});
 
-describe('k11 — every message teaches: found, why, fix, read (meta-test)', () => {
-    test('k11 — every message of a static rule states the four parts, its why and read its row’s', () => {
+    test('k11 — every message teaches: found, why, fix, read (meta-test) — k11 — every message of a static rule states the four parts, its why and read its row’s', () => {
         // Given - every message the shipped plugin can print, before oxlint fills its data
         for (const [name, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
             const convention = rule.meta?.docs?.convention ?? '';
@@ -99,7 +97,7 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
         }
     });
 
-    test('k11 — every checker pass renders a whole lesson from its row', () => {
+    test('k11 — every message teaches: found, why, fix, read (meta-test) — k11 — every checker pass renders a whole lesson from its row', () => {
         // Given - one finding of each pass a checker runs, the published one and this package's own
         for (const pass of [...CHECKER_PASS_IDS, ...SELF_PASS_IDS]) {
             const message = lessonAt(
@@ -114,7 +112,7 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
         }
     });
 
-    test('k11 — every checker finding a spec goldens is a whole lesson', () => {
+    test('k11 — every message teaches: found, why, fix, read (meta-test) — k11 — every checker finding a spec goldens is a whole lesson', () => {
         // Given - the full-output goldens of the checker's own specs
         const lines = goldenCheckerLines();
 
@@ -125,7 +123,7 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
         }
     });
 
-    test('k11 — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {
+    test('k11 — every message teaches: found, why, fix, read (meta-test) — k11 — every refusal of the runtime opens on its row’s sentence, and is thrown somewhere', () => {
         // Given - the runtime rows that refuse, and the source that throws them
         const source = sourcesUnder(resolve(ROOT, 'src'));
         for (const [row, why] of Object.entries(REFUSAL_WHY)) {
@@ -141,7 +139,7 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
         }
     });
 
-    test('k11 — a message lacking a part is refused, naming the part', () => {
+    test('k11 — every message teaches: found, why, fix, read (meta-test) — k11 — a message lacking a part is refused, naming the part', () => {
         // Given - a rule whose fix was left empty, and one written as a plain sentence
         const withoutFix = lessons('j2-no-sleep', { sleep: { fix: '', found: 'a sleep' } }).sleep;
 

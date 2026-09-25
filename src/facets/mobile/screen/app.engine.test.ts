@@ -8,8 +8,8 @@ const scenario: MobileScenario = async () => {
     await Promise.resolve();
 };
 
-describe('appiumApp — the installed app a mobile chain opens', () => {
-    test('reaches the device session at the first open, and relaunches the declared bundle on it', async () => {
+describe('appiumApp', () => {
+    test('appiumApp — the installed app a mobile chain opens — reaches the device session at the first open, and relaunches the declared bundle on it', async () => {
         // Given - a runner's lazy device accessor, counting the sessions it is asked for
         const opened: DeviceOpenOptions[] = [];
         let reached = 0;

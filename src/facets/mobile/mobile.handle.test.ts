@@ -16,8 +16,15 @@ const ABSENT_DEVICE = { name: 'No Such Phone', os: '1.0' };
 /** A project root with no `node_modules/.bin/appium` in it. */
 const bareRoot = (): string => mkdtempSync(join(tmpdir(), 'mobile-root-'));
 
-describe('startMobile — a declared appium server', () => {
-    test('connects without resolving, booting or spawning anything', async () => {
+/** The run's server, booted for an iPhone 17 on iOS 26.5. */
+const run = {
+    device: { name: 'iPhone 17', os: '26.5' },
+    udid: 'SIM-17',
+    url: 'http://127.0.0.1:4723',
+};
+
+describe('mobile.handle', () => {
+    test('startMobile — a declared appium server — connects without resolving, booting or spawning anything', async () => {
         // Given - a server someone else runs, and a project with no appium of its own
         const handle = await startMobile({
             app: { bundleId: 'com.example.app' },
@@ -31,7 +38,7 @@ describe('startMobile — a declared appium server', () => {
         await handle.cleanup();
     });
 
-    test('hands a declared udid through untouched', async () => {
+    test('startMobile — a declared appium server — hands a declared udid through untouched', async () => {
         // Given - a server someone else runs, and the one simulator it should drive
         const handle = await startMobile({
             app: { bundleId: 'com.example.app' },
@@ -44,10 +51,8 @@ describe('startMobile — a declared appium server', () => {
         expect(handle.udid).toBe('SIM-UDID');
         await handle.cleanup();
     });
-});
 
-describe('startMobile — a runner with no device', () => {
-    test('is refused when no run serves one, naming the project declaration', async () => {
+    test('startMobile — a runner with no device — is refused when no run serves one, naming the project declaration', async () => {
         // Given - no device, no declared server, and no mobile({ device }) project around the file
         // Then - the constructor refuses before resolving or spawning anything
         await expect(
@@ -57,7 +62,7 @@ describe('startMobile — a runner with no device', () => {
         );
     });
 
-    test('is refused under a declared server, which is handed its device by capabilities', async () => {
+    test('startMobile — a runner with no device — is refused under a declared server, which is handed its device by capabilities', async () => {
         // Given - a server someone else runs, and no device to ask it for
         // Then - the constructor refuses, naming the server
         await expect(
@@ -70,17 +75,8 @@ describe('startMobile — a runner with no device', () => {
             'specification.mobile() names no device to ask the Appium server at http://127.0.0.1:4723 for',
         );
     });
-});
 
-describe('runDevice — the device the run serves', () => {
-    /** The run's server, booted for an iPhone 17 on iOS 26.5. */
-    const run = {
-        device: { name: 'iPhone 17', os: '26.5' },
-        udid: 'SIM-17',
-        url: 'http://127.0.0.1:4723',
-    };
-
-    test("a specification restating the project's device drives the booted simulator", () => {
+    test("runDevice — the device the run serves — a specification restating the project's device drives the booted simulator", () => {
         // Given - the same name, the os left out
         // Then - the project's device, on the udid the setup booted
         expect(runDevice({ name: 'iPhone 17' }, run)).toStrictEqual({
@@ -90,7 +86,7 @@ describe('runDevice — the device the run serves', () => {
         });
     });
 
-    test("a specification naming no device drives the project's, on the booted simulator", () => {
+    test("runDevice — the device the run serves — a specification naming no device drives the project's, on the booted simulator", () => {
         // Given - no device on the specification
         // Then - the project's device, on the udid the setup booted
         expect(runDevice(undefined, run)).toStrictEqual({
@@ -100,7 +96,7 @@ describe('runDevice — the device the run serves', () => {
         });
     });
 
-    test("a specification spelling the project's os another way drives the booted simulator", () => {
+    test("runDevice — the device the run serves — a specification spelling the project's os another way drives the booted simulator", () => {
         // Given - the os with its platform, in another case, where the project wrote the bare version
         // Then - the same runtime, so the project's device on the booted udid
         expect(runDevice({ name: 'iPhone 17', os: 'IOS 26.5' }, run)).toStrictEqual({
@@ -116,7 +112,7 @@ describe('runDevice — the device the run serves', () => {
         ).toStrictEqual({ name: 'iPhone 17', os: 'iOS 26.5', udid: 'SIM-17' });
     });
 
-    test('a specification naming another device is refused, naming both', () => {
+    test('runDevice — the device the run serves — a specification naming another device is refused, naming both', () => {
         // Given - another name, the same name on another os or platform, an os the run cannot confirm, another udid
         // Then - each is refused with the device the run drives
         expect(() => runDevice({ name: 'iPad Pro' }, run)).toThrow(

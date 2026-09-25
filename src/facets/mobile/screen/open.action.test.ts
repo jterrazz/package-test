@@ -24,8 +24,8 @@ const scenario: MobileScenario = async () => {
     await Promise.resolve();
 };
 
-describe('.open() — the screen a chain captures', () => {
-    test('relaunches through the app with the deep link and the scenario, and reads the screen it captured', async () => {
+describe('open', () => {
+    test('.open() — the screen a chain captures — relaunches through the app with the deep link and the scenario, and reads the screen it captured', async () => {
         // Given - an app double recording what each open is handed
         const opened: [string | undefined, MobileScenario | undefined][] = [];
         const app = {

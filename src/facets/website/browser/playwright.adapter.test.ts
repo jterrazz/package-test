@@ -51,62 +51,16 @@ function stubLauncher(failures = 0): {
     return { launch, launched };
 }
 
-describe('createSharedBrowser() — one browser per worker', () => {
-    test('launches once, however many runners ask, even at the same time', async () => {
-        // Given - one worker's launcher
-        const { launch, launched } = stubLauncher();
-        const shared = createSharedBrowser(launch);
-
-        // When - three runners ask, two of them together
-        const [first, second] = await Promise.all([shared(), shared()]);
-        const third = await shared();
-
-        // Then - one browser, handed to all three
-        expect(launched).toHaveLength(1);
-        expect([second, third]).toStrictEqual([first, first]);
-    });
-
-    test('launches again once the browser has disconnected', async () => {
-        // Given - a browser the worker shared, then lost
-        const { launch, launched } = stubLauncher();
-        const shared = createSharedBrowser(launch);
-        const lost = await shared();
-        lost.disconnect();
-
-        // When - a runner asks after the loss
-        await shared();
-
-        // Then - a second browser replaced the lost one
-        expect(launched.map((browser) => browser.id)).toStrictEqual([1, 2]);
-    });
-
-    test('keeps no failed launch: the next ask tries again', async () => {
-        // Given - a launcher whose first launch fails
-        const { launch, launched } = stubLauncher(1);
-        const shared = createSharedBrowser(launch);
-
-        // When - a runner asks, is refused, and asks again
-        const refused = shared();
-        await expect(refused).rejects.toThrow('chromium did not start');
-        await shared();
-
-        // Then - the second ask launched the one browser
-        expect(launched).toHaveLength(1);
-    });
-});
-
 /** What the adapter launches: the browser its `launch` seam resolves to. */
 type Browser = Awaited<
     ReturnType<
         NonNullable<NonNullable<ConstructorParameters<typeof PlaywrightAdapter>[0]>['launch']>
     >
 >;
-
 /** Does the stub carry what the adapter reads of a browser? */
 function isBrowser(value: object): value is Browser {
     return 'newContext' in value && 'on' in value;
 }
-
 /**
  * A stub chromium for the adapter: each context it hands out records whether
  * it was closed, and its page either answers a plain visit or, when `hold` is
@@ -115,7 +69,6 @@ function isBrowser(value: object): value is Browser {
  * screenshot the page was asked for, none written.
  */
 type StubContext = { closed: boolean };
-
 function stubChromium(hold = false): {
     browser: { closed: boolean; contexts: StubContext[] };
     launch: () => Promise<Browser>;
@@ -197,11 +150,55 @@ function stubChromium(hold = false): {
     };
     return { browser: state, launch, launches: () => launches, loading, shots };
 }
-
 const VISIT = { baseUrl: 'http://site.test', external: 'allow' } as const;
+/** A scenario that fails before it touches the page. */
+async function failingScenario(): Promise<void> {
+    await Promise.reject(new Error('the button is gone'));
+}
+describe('PlaywrightAdapter', () => {
+    test('createSharedBrowser() — one browser per worker — launches once, however many runners ask, even at the same time', async () => {
+        // Given - one worker's launcher
+        const { launch, launched } = stubLauncher();
+        const shared = createSharedBrowser(launch);
 
-describe('the PlaywrightAdapter — the runners of a worker share its browser', () => {
-    test('two runners visiting pages launch the one browser once', async () => {
+        // When - three runners ask, two of them together
+        const [first, second] = await Promise.all([shared(), shared()]);
+        const third = await shared();
+
+        // Then - one browser, handed to all three
+        expect(launched).toHaveLength(1);
+        expect([second, third]).toStrictEqual([first, first]);
+    });
+
+    test('createSharedBrowser() — one browser per worker — launches again once the browser has disconnected', async () => {
+        // Given - a browser the worker shared, then lost
+        const { launch, launched } = stubLauncher();
+        const shared = createSharedBrowser(launch);
+        const lost = await shared();
+        lost.disconnect();
+
+        // When - a runner asks after the loss
+        await shared();
+
+        // Then - a second browser replaced the lost one
+        expect(launched.map((browser) => browser.id)).toStrictEqual([1, 2]);
+    });
+
+    test('createSharedBrowser() — one browser per worker — keeps no failed launch: the next ask tries again', async () => {
+        // Given - a launcher whose first launch fails
+        const { launch, launched } = stubLauncher(1);
+        const shared = createSharedBrowser(launch);
+
+        // When - a runner asks, is refused, and asks again
+        const refused = shared();
+        await expect(refused).rejects.toThrow('chromium did not start');
+        await shared();
+
+        // Then - the second ask launched the one browser
+        expect(launched).toHaveLength(1);
+    });
+
+    test('the PlaywrightAdapter — the runners of a worker share its browser — two runners visiting pages launch the one browser once', async () => {
         // Given - two runners of one worker, over the same launcher
         const chromium = stubChromium();
         const first = new PlaywrightAdapter({ launch: chromium.launch });
@@ -224,7 +221,7 @@ describe('the PlaywrightAdapter — the runners of a worker share its browser', 
         ]);
     });
 
-    test("close() ends the runner's open visits only, and leaves the browser to the worker", async () => {
+    test("the PlaywrightAdapter — the runners of a worker share its browser — close() ends the runner's open visits only, and leaves the browser to the worker", async () => {
         // Given - two runners, each with a visit still loading
         const chromium = stubChromium(true);
         const closing = new PlaywrightAdapter({ launch: chromium.launch });
@@ -244,7 +241,7 @@ describe('the PlaywrightAdapter — the runners of a worker share its browser', 
         expect(chromium.browser.closed).toBe(false);
     });
 
-    test('close() does not close again a visit that already ended', async () => {
+    test('the PlaywrightAdapter — the runners of a worker share its browser — close() does not close again a visit that already ended', async () => {
         // Given - a runner whose visit ended normally, its context closed
         const chromium = stubChromium();
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });
@@ -261,15 +258,8 @@ describe('the PlaywrightAdapter — the runners of a worker share its browser', 
         // Then - the ended visit's context was no longer held
         expect(context.closed).toBe(false);
     });
-});
 
-/** A scenario that fails before it touches the page. */
-async function failingScenario(): Promise<void> {
-    await Promise.reject(new Error('the button is gone'));
-}
-
-describe('the PlaywrightAdapter — a failed scenario leaves its evidence', () => {
-    test("screenshots into the project's evidence folder, which outlives the run's temp root", async () => {
+    test("the PlaywrightAdapter — a failed scenario leaves its evidence — screenshots into the project's evidence folder, which outlives the run's temp root", async () => {
         // Given - a runner whose scenario fails, and the evidence folder removed after the test
         const chromium = stubChromium();
         const adapter = new PlaywrightAdapter({ launch: chromium.launch });

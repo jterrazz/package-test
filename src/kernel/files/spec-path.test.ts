@@ -10,9 +10,9 @@ import {
     requireDiskTarget,
 } from './spec-path.js';
 
-describe('the disk — file() and directory()', () => {
+describe('spec-path', () => {
     test.each(['./expected/out.txt', '../../fixtures/shop/config.json', './seeds/users.sql'])(
-        'file() names %s, branded as a file',
+        'the disk — file() and directory() — file() names %s, branded as a file',
         (path) => {
             // Given - a path that starts where a relative path starts
             const named = file(path as `./${string}`);
@@ -25,7 +25,7 @@ describe('the disk — file() and directory()', () => {
         },
     );
 
-    test('directory() names a path ending in /, branded as a directory', () => {
+    test('the disk — file() and directory() — directory() names a path ending in /, branded as a directory', () => {
         // Given - the shared pool, climbed to from a leaf
         // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
         const named = directory('../../fixtures/shop/');
@@ -36,7 +36,7 @@ describe('the disk — file() and directory()', () => {
     });
 
     test.each(['out.txt', 'expected/out.txt', '$FIXTURES/shop/', '/abs/out.txt', ''])(
-        'refuses %j: a path is relative to the spec file',
+        'the disk — file() and directory() — refuses %j: a path is relative to the spec file',
         (path) => {
             // Given - a bare name, a marker or an absolute path
             // Then - the refusal names the call and the form to write
@@ -46,7 +46,7 @@ describe('the disk — file() and directory()', () => {
         },
     );
 
-    test('file() refuses a trailing slash, and directory() requires one', () => {
+    test('the disk — file() and directory() — file() refuses a trailing slash, and directory() requires one', () => {
         // Given - each wrapper handed the other's path
         // Then - each names the one to use
         // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
@@ -59,7 +59,7 @@ describe('the disk — file() and directory()', () => {
         );
     });
 
-    test('a forged object is not the disk: the brand is what a verb reads', () => {
+    test('the disk — file() and directory() — a forged object is not the disk: the brand is what a verb reads', () => {
         // Given - the shape without the brand
         const forged = { path: './seeds/rows.sql' };
 
@@ -72,13 +72,11 @@ describe('the disk — file() and directory()', () => {
             /^found: fixture\("\.\/fixtures\/"\), a value where the disk is read/u,
         );
     });
-});
 
-describe('the disk — a golden is no value', () => {
     // RUNTIME D14 — a plain string has no golden: vitest's own toMatch, handed a
     // File() where no runner registered the golden, is refused instead of
     // Reading the path object as a pattern.
-    test('toMatch(file()) on a plain string is refused, with no runner to route it', () => {
+    test('the disk — a golden is no value — toMatch(file()) on a plain string is refused, with no runner to route it', () => {
         // Given - a string holding every letter of `[object Object]`, the pattern a path object would read as
         const text = 'the object of this test';
 
@@ -91,7 +89,7 @@ describe('the disk — a golden is no value', () => {
         );
     });
 
-    test('a file() matched by a string outside an assertion is refused the same way', () => {
+    test('the disk — a golden is no value — a file() matched by a string outside an assertion is refused the same way', () => {
         // Given - the path object handed where a pattern is read
         // checker-disable-next-line c8 -- negative spec: the path object is refused as a pattern, never read
         const golden = file('./expected/text.txt');
