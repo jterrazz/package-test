@@ -6,6 +6,7 @@ runs:
       stdout: |
           specs/app/widget/stubs/http/Bad_Name.ts:1:1  jterrazz(c4-stub-shape)
           specs/app/widget/stubs/latest.ts:1:1  jterrazz(c4-stub-shape)
-          specs/app/widget/stubs/openai/classify.ts:4:16  jterrazz(c4-stub-shape)
+          specs/app/widget/stubs/openai/classify.ts:5:14  jterrazz(c4-stub-shape)
+          specs/app/widget/stubs/openai/classify.ts:6:15  jterrazz(c4-stub-shape)
           specs/app/widget/widget.test.ts:1:1  jterrazz(c4-stub-shape)
           specs/app/widget/widget.test.ts:1:1  jterrazz(c4-stub-shape)

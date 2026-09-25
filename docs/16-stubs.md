@@ -23,7 +23,7 @@ export default defineStub({
 
 | Field       | Meaning                                                                                                                     |
 | ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `request`   | What outgoing call this stub speaks for — a provider builder (`http.*`, `openai.*`, `anthropic.*`)                          |
+| `request`   | What outgoing call this stub speaks for — a stub builder (`http.*`, `openai.*`, `anthropic.*`)                              |
 | `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                       |
 | `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves. |
 | `required?` | The chain FAILS unless it was actually requested — at least once, or exactly `times` times when `times` is set.             |
@@ -136,11 +136,11 @@ specs/<facet>/<feature>/
 
 The rules, enforced by [C4, C10 and C11](19-linting.md):
 
-- The **root** holds only `*.stubs.ts` facades and the provider directories `http`, `openai`, `anthropic`. The folder carries the provider — filenames drop it and go back to being business names.
+- The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; C4 judges the default by where its builder comes from, since the linter reads no types.
-- A unit stub is `<provider>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. Its `request` builder must name its own folder.
+- A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A server-sent stream is an `http` stub.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
-- **Tests import only `*.stubs.ts`.** Provider folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
+- **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
 - Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `shared/` folder.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
@@ -404,7 +404,7 @@ Two scoping notes:
 
 ## Pitfalls
 
-- **Reaching into a provider folder from a test.** `import events from './stubs/http/events.js'` is an error (C10). Add a named scenario export to the facade instead — that is what facades are for.
+- **Reaching into a kind folder from a test.** `import events from './stubs/http/events.js'` is an error (C10). Add a named scenario export to the facade instead — that is what facades are for.
 - **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the stub pins the _interaction_, not the wording.
 - **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
 - **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.

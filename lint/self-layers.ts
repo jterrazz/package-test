@@ -21,7 +21,7 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   servers and lays fixtures through the process and filesystem seams.
  * - `stubs/` — the stub, its exchange, the queue that serves it, and the
  *   user-facing builders, one folder per kind (`http/`, `openai/`,
- *   `anthropic/`).
+ *   `anthropic/`), listed once in `kinds.ts`.
  * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
  *   per result, and the accessors they compose.
  * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`) and the
@@ -175,6 +175,8 @@ export const FRAMEWORK_LAYERS = {
             'model/lesson/refusal',
             // The run owns one key of the ratchet the checker writes: route coverage.
             'model/routes/routes',
+            // The folders a stub may sit in are the builders the package exports, listed once.
+            'stubs/kinds',
         ],
         // oxlint's plugin types (erased) and the toolchain's config names
         // (inlined), so the checker and `check` find the same config.

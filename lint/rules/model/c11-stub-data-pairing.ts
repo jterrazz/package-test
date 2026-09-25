@@ -1,15 +1,13 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
+import { STUB_KINDS } from '../../../src/stubs/kinds.js';
 import { listDirectory } from '../../fs-cache.js';
 import { lessons } from '../../lesson.js';
 import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
-
-/** The provider folders that may carry data files. */
-const PROVIDERS = ['anthropic', 'http', 'openai'];
 
 /** Data files: served payloads and matched inputs, both owned by a stub. */
 const DATA_SUFFIXES = ['.request.ts', '.response.json'];
@@ -20,7 +18,7 @@ function ownerOf(entry: string): string {
 }
 
 /**
- * CONVENTIONS C11 — data is owned by a stub. Inside a provider folder every
+ * CONVENTIONS C11 — data is owned by a stub. Inside a kind folder every
  * `*.response.json` (served payload) and `*.request.ts` (matched prompt/body)
  * pairs with the sibling `<stem>.ts` that serves it, where the stem is the name
  * up to the FIRST dot: `events.fr.response.json` belongs to `events.ts`. A data
@@ -36,8 +34,8 @@ export const c11StubDataPairing: LintRule = {
             },
             Program(node: AstNode) {
                 const stubsDir = join(dirname(context.physicalFilename), 'stubs');
-                for (const provider of PROVIDERS) {
-                    const entries = listDirectory(join(stubsDir, provider));
+                for (const kind of STUB_KINDS) {
+                    const entries = listDirectory(join(stubsDir, kind));
                     if (entries === null) {
                         continue;
                     }
@@ -49,7 +47,7 @@ export const c11StubDataPairing: LintRule = {
                         const owner = ownerOf(entry);
                         if (!present.has(owner)) {
                             context.report({
-                                data: { entry, owner, provider },
+                                data: { entry, kind, owner },
                                 messageId: 'orphan',
                                 node,
                             });
@@ -63,8 +61,8 @@ export const c11StubDataPairing: LintRule = {
         docs: RULE_DOCS['c11-stub-data-pairing'],
         messages: lessons('c11-stub-data-pairing', {
             orphan: {
-                found: '`stubs/{{provider}}/{{entry}}` has no stub beside it',
-                fix: 'write `stubs/{{provider}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
+                found: '`stubs/{{kind}}/{{entry}}` has no stub beside it',
+                fix: 'write `stubs/{{kind}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
             },
         }),
         type: 'problem',

@@ -72,19 +72,31 @@ ruleTester.run('c4-stub-shape', c4StubShape as unknown as OxlintRule, {
             errors: [{ messageId: 'notDefineStub' }],
             filename: UNIT,
         },
-        // The folder says openai, the request builder says http.
+        // The folder says openai, every builder the unit calls says http.
         {
             code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
-            errors: [{ messageId: 'providerMismatch' }],
+            errors: [{ messageId: 'foreignBuilder' }, { messageId: 'foreignBuilder' }],
             filename: `${FEATURE}/openai/classify.ts`,
         },
-        // Nested below the provider folder.
+        // The request is the folder's kind, the reply another's: the unit mixes two kinds.
+        {
+            code: `import { defineStub, http, openai } from '@jterrazz/test';\nexport default defineStub({ request: openai.chat({ user: 'u' }), response: http.error(500) });`,
+            errors: [{ messageId: 'foreignBuilder' }],
+            filename: `${FEATURE}/openai/classify.ts`,
+        },
+        // A builder renamed at the import is still its kind.
+        {
+            code: `import { defineStub, openai as ai } from '@jterrazz/test';\nexport default defineStub({ request: ai.chat({ user: 'u' }), response: ai.reply({}) });`,
+            errors: [{ messageId: 'foreignBuilder' }, { messageId: 'foreignBuilder' }],
+            filename: UNIT,
+        },
+        // Nested below the kind folder.
         {
             code: `export default 1;`,
             errors: [{ messageId: 'tooDeep' }],
             filename: `${FEATURE}/http/nested/events.ts`,
         },
-        // The layout half: a stray .json at the root and a non-provider folder.
+        // The layout half: a stray .json at the root and a folder that is no stub kind.
         {
             code: 'test("x", () => {});',
             errors: 2,
@@ -127,7 +139,7 @@ ruleTester.run('c4-stub-shape', c4StubShape as unknown as OxlintRule, {
             code: `import type { Stubs } from '@jterrazz/test';\nimport { base } from './pipeline.stubs.js';\nfunction quiet(): Stubs {\n    return base.world;\n}\nexport default quiet();`,
             filename: FACADE,
         },
-        // The canonical unit stub, matching its provider folder.
+        // The canonical unit stub, matching its kind folder.
         {
             code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('/events'), response: http.json({}) });`,
             filename: UNIT,
@@ -136,6 +148,11 @@ ruleTester.run('c4-stub-shape', c4StubShape as unknown as OxlintRule, {
         {
             code: `import { defineStub, http } from '@jterrazz/test';\nexport default (id: string) => defineStub({ request: http.get('/a/' + id), response: http.error(410) });`,
             filename: `${FEATURE}/http/article-gone.ts`,
+        },
+        // A name the entry does not bind to a builder is no kind, whatever it is called.
+        {
+            code: `import { defineStub, openai } from '@jterrazz/test';\nimport * as http from './local-helpers.js';\nexport default defineStub({ request: openai.chat({ user: http.prompt() }), response: openai.reply({}) });`,
+            filename: `${FEATURE}/openai/classify.ts`,
         },
         // Matched data exports a value, not a stub.
         {

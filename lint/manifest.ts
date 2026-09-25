@@ -266,7 +266,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Outside `specs/**/stubs/`, an import resolving into a provider folder (`stubs/{http,openai,anthropic}/…`) is an error: a test imports only the `*.stubs.ts` facades.',
+            'Outside `specs/**/stubs/`, an import resolving into a kind folder (`stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.',
         facet: 'model',
         family: 'C',
         fix: 'Add a named scenario export to the facade and import that instead.',
@@ -279,7 +279,7 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Inside a provider folder, every `*.response.json` and every `*.request.ts` has a `<stem>.ts` sibling — the stem is the name up to the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.',
+            'Inside a kind folder, every `*.response.json` and every `*.request.ts` has a `<stem>.ts` sibling — the stem is the name up to the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.',
         facet: 'model',
         family: 'C',
         fix: 'Write the stub that serves the payload, or delete the payload.',
@@ -318,13 +318,13 @@ export const RULE_DOCS = {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Under `specs/**/stubs/`: the ROOT carries only `*.stubs.ts` facades and the provider folders `http` | `openai` | `anthropic`. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<provider>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and its `request` builder must name the provider of its own folder. A provider folder is flat and holds only `*.ts` and `*.response.json`.',
+            'Under `specs/**/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — in its request, its reply or anywhere else — is an error. A kind folder is flat and holds only `*.ts` and `*.response.json`.',
         facet: 'model',
         family: 'C',
-        fix: 'Move the file to the half it belongs to: a facade at the root, a unit under its provider.',
+        fix: 'Move the file to the half it belongs to: a facade at the root, a unit under the folder of the builder it calls.',
         id: 'C4',
         rationale:
-            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the provider — filenames go back to being domain words, and bulky data sits beside the stub that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
+            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the kind — filenames go back to being domain words, a unit reads as one kind of outside world, and bulky data sits beside the stub that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
         reach: 'stub',
     },
     'c6-tomatch-extension': {

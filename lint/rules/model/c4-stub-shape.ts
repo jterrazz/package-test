@@ -1,10 +1,10 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
+import { isStubKind, STUB_KINDS } from '../../../src/stubs/kinds.js';
 import {
     child,
     childList,
-    findProperty,
     identifierName,
     memberPropertyName,
     stringValue,
@@ -16,8 +16,8 @@ import { identityOf, segmentsOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The only directories a `stubs/` root may hold — the provider carriers. */
-const PROVIDERS = new Set(['anthropic', 'http', 'openai']);
+/** The kind folders a `stubs/` root may hold, as a message names them. */
+const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
 
 /** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
@@ -25,11 +25,11 @@ const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
 /** The public facade of a feature: `stubs/<kebab>.stubs.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.stubs\.[cm]?ts$/u;
-/** An internal unit stub: `stubs/<provider>/<kebab>.ts`. */
+/** An internal unit stub: `stubs/<kind>/<kebab>.ts`. */
 const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
-/** Matched data next to its stub: `stubs/<provider>/<stem>.request.ts`. */
+/** Matched data next to its stub: `stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
-/** Served data next to its stub: `stubs/<provider>/<stem>[.<qualifier>].response.json`. */
+/** Served data next to its stub: `stubs/<kind>/<stem>[.<qualifier>].response.json`. */
 const RESPONSE_DATA_FILE = /\.response\.json$/u;
 
 /** The name a specifier/declaration exports under, when it is `default`. */
@@ -70,27 +70,36 @@ function producesStub(declaration: AstNode | undefined): boolean {
     );
 }
 
-/**
- * The provider a `request:` value implies, when the builder is written as
- * `<provider>.<verb>(…)` — the only statically decidable form.
- */
-function requestProvider(request: AstNode | undefined): string | undefined {
-    if (request?.type !== 'CallExpression') {
-        return undefined;
+/** The package's own entry — published, or a repository's source. */
+const ENTRY = /^@jterrazz\/test$|(?:^|\/)src\/index\.js$/u;
+
+/** The local name each stub builder the file imports from the entry is bound to → its kind. */
+function builderNames(program: AstNode): Map<string, string> {
+    const names = new Map<string, string>();
+    for (const statement of childList(program, 'body')) {
+        if (
+            statement.type !== 'ImportDeclaration' ||
+            !ENTRY.test(stringValue(child(statement, 'source')) ?? '')
+        ) {
+            continue;
+        }
+        for (const specifier of childList(statement, 'specifiers')) {
+            const imported = child(specifier, 'imported');
+            const kind = identifierName(imported) ?? stringValue(imported);
+            const local = identifierName(child(specifier, 'local'));
+            if (kind !== undefined && local !== undefined && isStubKind(kind)) {
+                names.set(local, kind);
+            }
+        }
     }
-    const callee = request.callee as AstNode | undefined;
-    if (callee?.type !== 'MemberExpression') {
-        return undefined;
-    }
-    const object = callee.object as AstNode | undefined;
-    return object?.type === 'Identifier' ? (object.name as string) : undefined;
+    return names;
 }
 
 /**
  * The layout half — walks the feature's `stubs/` tree from the test file
  * that owns it. Covers what oxlint never visits: a stray `.json` at the root,
- * a directory that is not a provider, a nested folder or a foreign extension
- * inside a provider folder.
+ * a directory that is no stub kind, a nested folder or a foreign extension
+ * inside a kind folder.
  */
 function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
     const entries = listDirectory(stubsDir);
@@ -106,21 +115,21 @@ function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
             }
             continue;
         }
-        if (!PROVIDERS.has(entry)) {
-            context.report({ data: { entry }, messageId: 'badProviderDir', node });
+        if (!isStubKind(entry)) {
+            context.report({ data: { entry, kinds: KIND_FOLDERS }, messageId: 'badKindDir', node });
             continue;
         }
         for (const inner of listDirectory(path) ?? []) {
             if (isDirectory(join(path, inner))) {
                 context.report({
-                    data: { child: inner, provider: entry },
-                    messageId: 'providerSubfolder',
+                    data: { child: inner, kind: entry },
+                    messageId: 'kindSubfolder',
                     node,
                 });
             } else if (!/\.[cm]?ts$/u.test(inner) && !inner.endsWith('.response.json')) {
                 context.report({
-                    data: { child: inner, provider: entry },
-                    messageId: 'providerEntry',
+                    data: { child: inner, kind: entry },
+                    messageId: 'kindEntry',
                     node,
                 });
             }
@@ -219,7 +228,11 @@ function composes(node: AstNode): boolean {
  */
 function checkComposite(context: Context, program: AstNode, base: string): void {
     if (!COMPOSITE_FILE.test(base)) {
-        context.report({ data: { base }, messageId: 'rootFile', node: program });
+        context.report({
+            data: { base, kinds: KIND_FOLDERS },
+            messageId: 'rootFile',
+            node: program,
+        });
         return;
     }
     let named = false;
@@ -252,8 +265,8 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
     }
 }
 
-/** A unit stub under its provider folder. */
-function checkUnit(context: Context, program: AstNode, base: string, provider: string): void {
+/** A unit stub under its kind folder. */
+function checkUnit(context: Context, program: AstNode, base: string, kind: string): void {
     if (REQUEST_DATA_FILE.test(base)) {
         return; // Matched data (a prompt, an expected body) — it exports a value.
     }
@@ -263,6 +276,7 @@ function checkUnit(context: Context, program: AstNode, base: string, provider: s
     }
     let hasDefault = false;
     let wellFormed = false;
+    const builders = builderNames(program);
     walk(program, (node) => {
         if (node.type === 'ExportDefaultDeclaration') {
             hasDefault = true;
@@ -271,20 +285,12 @@ function checkUnit(context: Context, program: AstNode, base: string, provider: s
             hasDefault = true;
             wellFormed = true; // `export { stub as default }` — built above.
         }
-        if (isDefineStub(node)) {
-            const argument = (node.arguments as AstNode[] | undefined)?.[0];
-            const request =
-                argument === undefined
-                    ? undefined
-                    : (findProperty(argument, 'request')?.value as AstNode | undefined);
-            const declared = requestProvider(request);
-            if (declared !== undefined && PROVIDERS.has(declared) && declared !== provider) {
-                context.report({
-                    data: { declared, provider },
-                    messageId: 'providerMismatch',
-                    node,
-                });
-            }
+        const used =
+            node.type === 'MemberExpression'
+                ? builders.get(identifierName(child(node, 'object')) ?? '')
+                : undefined;
+        if (used !== undefined && used !== kind) {
+            context.report({ data: { kind, used }, messageId: 'foreignBuilder', node });
         }
     });
     if (!hasDefault) {
@@ -322,11 +328,11 @@ function checkOf(context: Context): Check | undefined {
         };
     }
     if (depth === 2) {
-        const provider = parts[stubsIndex + 1] ?? '';
-        // A non-provider directory is reported once, by the layout half.
-        return PROVIDERS.has(provider)
+        const kind = parts[stubsIndex + 1] ?? '';
+        // A folder that is no kind is reported once, by the layout half.
+        return isStubKind(kind)
             ? (node) => {
-                  checkUnit(context, node, base, provider);
+                  checkUnit(context, node, base, kind);
               }
             : undefined;
     }
@@ -339,12 +345,11 @@ function checkOf(context: Context): Check | undefined {
  * CONVENTIONS C4 — the structure of a feature's `stubs/` tree. The ROOT
  * holds only `*.stubs.ts` facades (their builders and sets exported by
  * name; a default export, when there is one, a `defineStubs`
- * composition) and the provider
- * directories `http` / `openai` / `anthropic`. A provider directory holds
- * `<kebab>.ts` unit stubs (default export = `defineStub(...)` or a
- * factory returning one) plus their sibling data (`*.response.json`,
- * `*.request.ts`) — the FOLDER carries the provider, so a unit whose `request`
- * builder names another provider is an error.
+ * composition) and one folder per stub KIND — a builder the package exports
+ * (`STUB_KINDS`). A kind folder holds `<kebab>.ts` unit stubs (default
+ * export = `defineStub(...)` or a factory returning one) plus their sibling
+ * data (`*.response.json`, `*.request.ts`) — the FOLDER carries the kind, so
+ * a unit that calls another kind's builder is an error.
  *
  * Two halves: the AST half reports on each stub file it visits, the layout
  * half walks the tree from the feature's test file (oxlint never visits a
@@ -366,13 +371,13 @@ export const c4StubShape: LintRule = {
     meta: {
         docs: RULE_DOCS['c4-stub-shape'],
         messages: lessons('c4-stub-shape', {
+            badKindDir: {
+                found: '`stubs/{{entry}}/` is no stub kind',
+                fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
+            },
             badName: {
                 found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
-                fix: 'rename it in kebab-case, without the provider — the folder carries it',
-            },
-            badProviderDir: {
-                found: '`stubs/{{entry}}/` is no provider folder',
-                fix: 'move its units into `http/`, `openai/` or `anthropic/`',
+                fix: 'rename it in kebab-case, without the kind — the folder carries it',
             },
             exportsNothing: {
                 found: 'the stub facade "{{base}}" exports nothing',
@@ -390,29 +395,29 @@ export const c4StubShape: LintRule = {
                 found: 'the default export of "{{base}}" is not built from stubs',
                 fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
             },
-            providerEntry: {
-                found: '`stubs/{{provider}}/{{child}}` is neither a `*.ts` stub nor a `*.response.json` payload',
+            foreignBuilder: {
+                found: 'a stub under `stubs/{{kind}}/` calls the `{{used}}` builder',
+                fix: 'move it to `stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
+            },
+            kindEntry: {
+                found: '`stubs/{{kind}}/{{child}}` is neither a `*.ts` stub nor a `*.response.json` payload',
                 fix: 'make it one of the two, or move it out of `stubs/`',
             },
-            providerMismatch: {
-                found: 'a stub under `stubs/{{provider}}/` whose request is a `{{declared}}.*` builder',
-                fix: 'move it to `stubs/{{declared}}/`',
-            },
-            providerSubfolder: {
-                found: '`stubs/{{provider}}/{{child}}/` nests a folder in a provider folder',
-                fix: 'move its files up into `stubs/{{provider}}/`',
+            kindSubfolder: {
+                found: '`stubs/{{kind}}/{{child}}/` nests a folder in a kind folder',
+                fix: 'move its files up into `stubs/{{kind}}/`',
             },
             rootEntry: {
                 found: '`stubs/{{entry}}` at the stubs root',
-                fix: 'move it into the provider folder of the stub it pairs with',
+                fix: 'move it into the kind folder of the stub it pairs with',
             },
             rootFile: {
                 found: 'the stub unit "{{base}}" sits at the `stubs/` root',
-                fix: 'move it into `http/`, `openai/` or `anthropic/`; the root holds only `*.stubs.ts` facades',
+                fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
             },
             tooDeep: {
-                found: 'the stub file "{{base}}" is nested below `stubs/<provider>/`',
-                fix: 'move it up into its provider folder',
+                found: 'the stub file "{{base}}" is nested below `stubs/<kind>/`',
+                fix: 'move it up into its kind folder',
             },
         }),
         type: 'problem',

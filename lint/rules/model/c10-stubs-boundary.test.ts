@@ -14,7 +14,7 @@ const TEST_FILE = '/repo/specs/api/feature/feature.test.ts';
 
 ruleTester.run('c10-stubs-boundary', c10StubsBoundary as unknown as OxlintRule, {
     invalid: [
-        // A test reaching into a provider folder.
+        // A test reaching into a kind folder.
         {
             code: `import events from './stubs/http/events.js';`,
             errors: [{ messageId: 'internal' }],

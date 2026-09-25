@@ -349,7 +349,7 @@ specs/
 │       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules C31, C32)
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
-│       ├── stubs/             # <name>.stubs.ts facade + <provider>/<name>.ts units + their data
+│       ├── stubs/             # <name>.stubs.ts facade + <kind>/<name>.ts units + their data
 │       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule C1)
