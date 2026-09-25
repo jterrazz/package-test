@@ -1,6 +1,6 @@
 import type { Started } from '../../../kernel/chain/config.js';
+import type { DeviceScreen, MobileScenario } from '../device/device.port.js';
 import type { MobileConfig } from '../mobile.handle.js';
-import type { DeviceScreen, MobileScenario } from './device.port.js';
 
 /**
  * The installed app a mobile runner declared, opened on the device session

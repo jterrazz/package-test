@@ -4,9 +4,10 @@ import { resolve } from 'node:path';
 import { AmbiguousElementError, formatElement } from '../../../elements/ambiguity.js';
 import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
+import { openSession } from '../session/driver-session.js';
+import type { AdapterDevice, AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
+import type { SessionLedger } from '../session/session-ledger.js';
 import { describeMobileAmbiguity } from './ambiguity.js';
-import { openSession } from './appium.session.js';
-import type { AdapterDevice, AttachFn, Driver, RemoteFn } from './appium.session.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -15,7 +16,6 @@ import type {
     MobileElementMatch,
     MobileElementRef,
     MobileVisitor,
-    SessionLedger,
 } from './device.port.js';
 import { projectScreen } from './projection.js';
 

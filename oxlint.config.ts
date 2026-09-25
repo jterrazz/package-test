@@ -40,6 +40,7 @@ const config: OxlintConfig = defineConfig(
                     'src/facets/api/routes/**',
                     'src/facets/cli/documents/literate-plugin.ts',
                     'src/facets/mobile/session/**',
+                    'src/facets/mobile/server/**',
                     // The page a component renders into, and the goldens it
                     // Serves through the runner's commands.
                     'src/facets/component/page/**',

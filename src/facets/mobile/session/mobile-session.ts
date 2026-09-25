@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import type { ProvidedContext } from 'vitest';
 import type { TestProject } from 'vitest/node';
 
-import { serveAppium } from './appium-server.js';
+import { serveAppium } from '../server/appium-server.js';
 import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
 
 /**

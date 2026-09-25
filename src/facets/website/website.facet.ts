@@ -8,7 +8,7 @@ import { getCallerDir } from '../../kernel/files/caller.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { stubBackend } from '../../world/stubs/backend/stub-backend.engine.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
-import { pageClock } from './browser/page-clock.js';
+import { pageClock } from './browser/clock.engine.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { rawFetch } from './fetch/fetch.action.js';
 import { visit } from './visit/visit.action.js';

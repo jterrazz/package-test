@@ -6,13 +6,14 @@ import { releaseIsolation, startServices } from '../../world/services/services.j
 import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
 import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
-import type { DevicePort, DeviceTimeouts, SessionLedger } from './device/device.port.js';
+import type { DevicePort, DeviceTimeouts } from './device/device.port.js';
 import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
-import { mobileServer, serveAppium } from './session/appium-server.js';
-import type { AppiumServer, MobileDevice, RunServer } from './session/appium-server.js';
+import { mobileServer, serveAppium } from './server/appium-server.js';
+import type { AppiumServer, MobileDevice, RunServer } from './server/appium-server.js';
+import { sameRuntime } from './server/simulator.js';
+import type { SessionLedger } from './session/session-ledger.js';
 import { mobileSessions, sessionLedger } from './session/session-ledger.js';
-import { sameRuntime } from './session/simulator.js';
 
 // ── Types ──
 

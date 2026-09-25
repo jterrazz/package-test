@@ -2,7 +2,7 @@ import { DRAWN_DESCRIPTORS, DRAWN_VERBS, OWN_VERBS, WITHIN } from '../../../elem
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import type { MobileScenario } from '../device/device.port.js';
-import type { AppPort } from './open.port.js';
+import type { AppPort } from './app.port.js';
 import { ScreenResult } from './screen.result.js';
 
 /** What `.open()` puts on a chain. */

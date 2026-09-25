@@ -2,7 +2,28 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { join } from 'node:path';
 
 import { VITEST_ARTIFACTS_DIR } from '../../../kernel/files/artifacts.js';
-import type { RecordedSession, SessionLedger } from '../device/device.port.js';
+
+/** A driver session the run recorded: where it lives, and what the server answered for it. */
+export type RecordedSession = {
+    /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
+    capabilities: Record<string, unknown>;
+    /** The Appium server's base URL. */
+    serverUrl: string;
+    /** The W3C session id. */
+    sessionId: string;
+};
+
+/**
+ * The run's driver sessions: the one a runner attaches to, found by the
+ * server and the capabilities it asks for, and the one it records when it
+ * had to create it. A recorded session is the run's to end, not the runner's.
+ */
+export type SessionLedger = {
+    /** The session recorded for this server and these capabilities, if the run opened one. */
+    lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession | undefined;
+    /** Record the session a runner created for these capabilities. */
+    record: (requested: Record<string, unknown>, session: RecordedSession) => void;
+};
 
 /**
  * The run's driver sessions, kept on disk so every file of a `mobile()` run

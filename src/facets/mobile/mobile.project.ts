@@ -5,7 +5,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { facetProject } from '../../vitest/facet-project.js';
 import type { FacetProjectOptions } from '../../vitest/facet-project.js';
-import type { MobileDevice } from './session/appium-server.js';
+import type { MobileDevice } from './server/appium-server.js';
 
 /**
  * The global setup that holds one driver session per run — this facet's

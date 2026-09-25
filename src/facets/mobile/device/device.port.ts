@@ -114,32 +114,10 @@ export type DeviceTimeouts = {
     launch?: number | undefined;
 };
 
-/** A driver session the run recorded: where it lives, and what the server answered for it. */
-export type RecordedSession = {
-    /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
-    capabilities: Record<string, unknown>;
-    /** The Appium server's base URL. */
-    serverUrl: string;
-    /** The W3C session id. */
-    sessionId: string;
-};
-
-/**
- * The run's driver sessions: the one a runner attaches to, found by the
- * server and the capabilities it asks for, and the one it records when it
- * had to create it. A recorded session is the run's to end, not the runner's.
- */
-export type SessionLedger = {
-    /** The session recorded for this server and these capabilities, if the run opened one. */
-    lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession | undefined;
-    /** Record the session a runner created for these capabilities. */
-    record: (requested: Record<string, unknown>, session: RecordedSession) => void;
-};
-
 /**
  * Abstract device interface for the mobile specification runner.
  * One implementation, `appium.adapter.ts` beside this port — a single driver session per
- * runner, or per run under a {@link SessionLedger}, opened on the first
+ * runner, or per run under the run's session ledger, opened on the first
  * `open()` and reused; each open terminates and relaunches the app for a
  * deterministic fresh state.
  */

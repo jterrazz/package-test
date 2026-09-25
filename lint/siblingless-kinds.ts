@@ -48,7 +48,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/facets/mobile/screen/open.port.ts',
+            'src/facets/mobile/screen/app.port.ts',
             'src/facets/component/render/page.port.ts',
             'src/facets/component/render/options.ts',
             'src/facets/component/render/scenario.ts',
@@ -97,7 +97,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
     },
     {
-        claims: oneOf('src/facets/mobile/session/appium-server.ts'),
+        claims: oneOf('src/facets/mobile/server/appium-server.ts'),
         name: 'a mobile module that needs a device',
         why: 'the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and the Appium server is the rest',
     },
@@ -158,7 +158,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/stubs/interceptor/msw-node.ts',
             'src/world/stubs/interceptor/server.ts',
             'src/world/stubs/interceptor/worker.ts',
-            'src/facets/website/browser/page-clock.ts',
+            'src/facets/website/browser/clock.engine.ts',
             'src/world/services/postgres/template.ts',
             'src/world/clock/clock.engine.ts',
             'src/facets/component/page/clock.engine.ts',

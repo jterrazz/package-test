@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { appiumApp } from './appium.app.js';
-import type { DeviceOpenOptions, DevicePort, MobileScenario } from './device.port.js';
+import type { DeviceOpenOptions, DevicePort, MobileScenario } from '../device/device.port.js';
+import { appiumApp } from './app.engine.js';
 
 /** A scenario the session is handed, and does nothing. */
 const scenario: MobileScenario = async () => {

@@ -1,6 +1,6 @@
 import type { attach, remote } from 'webdriverio';
 
-import type { SessionLedger } from './device.port.js';
+import type { SessionLedger } from './session-ledger.js';
 
 /** The session factory — webdriverio's `remote`, the adapter's single seam onto a new session. */
 export type RemoteFn = typeof remote;
