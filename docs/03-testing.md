@@ -89,7 +89,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 107   |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 108   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 161   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
@@ -394,7 +394,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability    | api | jobs | cli | integration | website | mobile | component | module |
 | ------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 5      |
+| `clock()`     | —   | —    | —   | —           | —       | —      | —         | 7      |
 | `intercept()` | —   | —    | —   | —           | —       | —      | —         | 2      |
 | `mockOf()`    | —   | —    | —   | —           | —       | —      | —         | 1      |
 | `match.*`     | —   | —    | —   | —           | —       | —      | —         | 8      |
