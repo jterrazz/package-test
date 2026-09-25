@@ -31,7 +31,7 @@ Decisions this package alone took are in `docs/decisions/`. The agent-facing ski
 ```bash
 make install                      # the dependencies
 make build                        # MUST precede lint and the unit project
-make lint                         # typescript check + the conventions checker + the self checker
+make lint                         # the static verdict — what it runs is docs/02-developing.md's make table
 make fix                          # the fixers: the checker's --fix, then typescript fix (the formatter last), each whatever the other said
 make test                         # every project, with coverage — needs Docker and chromium
 make check                        # the whole verdict: build, lint, test

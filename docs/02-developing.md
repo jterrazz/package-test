@@ -12,7 +12,7 @@ The repository answers six `make` targets, the same six every repository of the 
 | -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `make install` | Install the dependencies (`npm ci`, again only when the lockfile moves)                                                                                                                   |
 | `make build`   | Build the bundle — before `lint` and before the `unit` project; an unchanged tree restores it from the build cache instead                                                                |
-| `make lint`    | Typecheck, lint, format check, knip, then the conventions checker                                                                                                                         |
+| `make lint`    | Typecheck, lint, format check, knip, then the conventions checker and the self checker (the source tree's structure locks)                                                                |
 | `make fix`     | Build, then the two fixers — the checker's `--fix`, then `npx typescript fix`, whose formatter formats what the checker wrote — each run whatever the other said, and fails if either did |
 | `make test`    | Every suite, with coverage, then the coverage floor                                                                                                                                       |
 | `make check`   | The whole verdict: build, lint, test                                                                                                                                                      |
@@ -40,6 +40,8 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 | A matcher, or update-mode behaviour               | `src/expectations/goldens/` and `src/expectations/in-place/` — `src/vitest/` only for the hook that wires them                                                                                                              |
 | An external dependency's adapter                  | the ONE slice that owns the engine — a world area (`src/world/services/<db>/`, `src/world/stubs/network/` …) or a facet's concept folder (`src/facets/website/browser/` …), and no other                                    |
 | A `{{token}}` or the structural comparison        | `src/expectations/tokens/`                                                                                                                                                                                                  |
+| A descriptor, a landmark, or how one is spelled   | `src/elements/` — `elements.ts` (the constructors), `descriptor.ts` (the types), `vocabulary-rows.ts` (a visitor verb's rows), `spelling.ts`, `landmarks.ts`, `ambiguity.ts` (the W3 refusal)                               |
+| A runner-config default, or a project helper      | `src/vitest/preset.ts` and `src/vitest/project-kit.ts` — or the facet's own `<facet>.project.ts` for its project                                                                                                            |
 | The `<case>.spec.yaml` grammar                    | `src/facets/cli/documents/spec-document.ts` — read by BOTH the runner and the checker                                                                                                                                       |
 | How a cli document runs                           | `src/facets/cli/documents/literate.ts`                                                                                                                                                                                      |
 | A mechanized rule                                 | `lint/manifest.ts` (`lint/self-manifest.ts` for a self rule), its audience stated, **and** its implementation under `lint/rules/<facet-or-model>/` — wired in `lint/plugin.ts`, or in `lint/self-plugin.ts` for a self rule |
@@ -89,11 +91,11 @@ A **specification file** (`*.specification.ts`, under `specs/`) creates a runner
 
 ```
 specification.api(…)         → { api, cleanup, docker }
-specification.job(…)        → { job, cleanup }                        // no docker — jobs never spawn containers
+specification.job(…)         → { job, cleanup }            // no docker — jobs never spawn containers
 specification.cli(…)         → { cli, cleanup, docker }
-specification.integration(…) → { integration, cleanup }                // a module, against real services or a golden
-specification.website(…)     → { website, cleanup, url }               // no docker — a browser, not a container
-specification.mobile(…)      → { mobile, cleanup, udid }               // no docker — a simulator, not a container
+specification.integration(…) → { integration, cleanup }    // a module, against real services or a golden
+specification.website(…)     → { website, cleanup, url }   // no docker — a browser, not a container
+specification.mobile(…)      → { mobile, cleanup, udid }   // no docker — a simulator, not a container
 ```
 
 The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule A3) — and every specification file registers `afterAll(cleanup)` (rule A4).
