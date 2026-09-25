@@ -49,6 +49,6 @@ type Expected<Key extends string> = {
 export type ListedMembers = Assert<Same<keyof Listed, 'clock' | 'seed' | 'trigger' | 'with'>>;
 export type ListedSignatures = Assert<Same<Listed<'db'>, Expected<'db'>>>;
 export type SharesOnlyTheComposedSetting = Assert<
-    Same<Parameters<Listed['with']>[0], Pick<ChainContext, 'clock'>>
+    Same<keyof Parameters<Listed['with']>[0], 'clock'>
 >;
 export type NoWithUnlessListed = Assert<Same<keyof Unshared, 'clock' | 'seed' | 'trigger'>>;

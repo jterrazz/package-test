@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
@@ -19,6 +20,43 @@ describe('published names — the surface a consumer imports, by name', () => {
 
         // Then - a name that appears or disappears is a change of the public surface, recorded here
         expect(text(published)).toMatch(file('./expected/published-names.txt'));
+    });
+
+    test("a chain refuses, under a consumer's compiler options, a setting its facet does not share", () => {
+        // Given - a consumer module over the built types, compiled with `strict` alone: without the `exactOptionalPropertyTypes` this package checks itself under
+        const root = mkdtempSync(join(tmpdir(), 'consumer-types-'));
+        writeFileSync(
+            join(root, 'consumer.ts'),
+            [
+                `import type { JobsSpecification } from '${join(ROOT, 'dist', 'index.js')}';`,
+                'declare const jobs: JobsSpecification<never>;',
+                "jobs.with({ headers: { 'accept-language': 'fr' } });",
+            ].join('\n'),
+        );
+        const compiled = spawnSync(
+            process.execPath,
+            [
+                resolve(ROOT, 'node_modules/typescript/bin/tsc'),
+                '--noEmit',
+                '--strict',
+                '--skipLibCheck',
+                '--pretty',
+                'false',
+                '--module',
+                'esnext',
+                '--moduleResolution',
+                'bundler',
+                '--target',
+                'esnext',
+                join(root, 'consumer.ts'),
+            ],
+            { cwd: root, encoding: 'utf8' },
+        );
+
+        // Then - `with()` takes the clock alone, as the source states it: a computed type must not widen in a consumer's build
+        expect(compiled.stdout).toContain(
+            `'headers' does not exist in type 'Pick<ChainContext, "clock">'`,
+        );
     });
 
     test('a name is read in every form a declaration file publishes it', () => {

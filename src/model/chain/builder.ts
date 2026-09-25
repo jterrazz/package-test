@@ -3,6 +3,7 @@ import { relative } from 'node:path';
 
 import { runSpecDocument } from '../../actions/run/literate.js';
 import type { LiterateRunFlags } from '../../actions/run/literate.js';
+import { declared as declaredContracts } from '../../capabilities/intercept/declared.js';
 import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
 import { routeRequest } from '../../capabilities/params/route.js';
 import type { RouteArguments, RouteOptionsAny } from '../../capabilities/params/route.js';
@@ -12,14 +13,11 @@ import { CallResult } from '../../results/call.result.js';
 import { CliResult } from '../../results/cli.result.js';
 import { FetchResult } from '../../results/fetch.result.js';
 import { HttpResult } from '../../results/http.result.js';
-import type { JobsResult } from '../../results/jobs.result.js';
 import { PageResult } from '../../results/page.result.js';
-import { BaseResult } from '../../results/result.js';
 import { ScreenResult } from '../../results/screen.result.js';
 import { copyPlan } from '../../seams/fs/fixtures.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
-import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
@@ -114,27 +112,6 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
      * every chain it starts beginning with those settings.
      */
     with: (context: Pick<ChainContext, 'clock' | 'headers'>) => ApiSpecification<DatabaseKey>;
-};
-
-/**
- * The `jobs` facet — job chain entry handed out by `specification.jobs()`.
- * Jobs run in-process by definition (CONVENTIONS A8).
- */
-export type JobsSpecification<DatabaseKey extends string = string> = {
-    /** Pin the job's `Date` at `iso` for this chain — the calendar the job reads. */
-    clock: (iso: string) => JobsSpecification<DatabaseKey>;
-    /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
-    intercept: InterceptMethod<JobsSpecification<DatabaseKey>>;
-    /** Queue a SQL seed — `file('./seeds/<name>.sql')` — to run before the action. */
-    seed: (
-        source: SeedSource,
-        options?: { database?: DatabaseKey },
-    ) => JobsSpecification<DatabaseKey>;
-
-    /** Execute the named job registered via the `jobs` option and resolve with the result. */
-    trigger: (name: string) => Promise<JobsResult>;
-    /** The facet with the clock a whole file shares, every chain it starts pinned at it. */
-    with: (context: Pick<ChainContext, 'clock'>) => JobsSpecification<DatabaseKey>;
 };
 
 /**
@@ -268,12 +245,12 @@ export type MobileSpecification = {
  * Fluent builder for declaring a single test specification.
  *
  * Chain setup methods ({@link seed}, {@link fixture}, {@link env}), then call
- * an action ({@link get}, {@link post}, {@link exec}, {@link trigger}) —
+ * an action ({@link get}, {@link post}, {@link exec}, {@link call}) —
  * actions are terminal: they execute the specification and resolve to a
  * typed result.
  *
  * Facets expose this class through the narrower {@link ApiSpecification} /
- * {@link JobsSpecification} / {@link CliSpecification} views so each facet
+ * {@link CliSpecification} views so each facet
  * only surfaces the methods that make sense for it.
  */
 export class SpecificationBuilder
@@ -447,22 +424,7 @@ export class SpecificationBuilder
             );
         }
 
-        if (
-            Array.isArray(requestOrContracts) ||
-            isContracts(requestOrContracts) ||
-            isContract(requestOrContracts)
-        ) {
-            this.contracts.push(...contractsOf(requestOrContracts));
-            return this;
-        }
-
-        if (maybeResponse === undefined) {
-            throw new Error(
-                '.intercept(): a bare request needs its response — pass a contract ' +
-                    '(defineContract({ request, response })) or the inline pair .intercept(request, response).',
-            );
-        }
-        this.contracts.push({ request: requestOrContracts, response: maybeResponse });
+        this.contracts.push(...declaredContracts('.intercept', requestOrContracts, maybeResponse));
         return this;
     }
 
@@ -682,19 +644,6 @@ export class SpecificationBuilder
      */
     async call<T>(subject: (services: never) => Promise<T> | T): Promise<CallResult<T>> {
         return await this.executeSetup(null, async () => await this.runCallAction(subject));
-    }
-
-    // ── Job actions (terminal) ──
-
-    /**
-     * Execute the named job registered via the `jobs` option of
-     * `specification.jobs()` and resolve with the result.
-     *
-     * @example
-     *   const result = await jobs.intercept(classifyArticle).trigger('report-refresh');
-     */
-    async trigger(name: string): Promise<BaseResult> {
-        return await this.executeSetup(null, async () => await this.runJobAction(name));
     }
 
     // ── Private execution pipeline ──
@@ -963,27 +912,6 @@ export class SpecificationBuilder
         return this.config.baseUrl;
     }
 
-    private async runJobAction(name: string): Promise<BaseResult> {
-        if (!this.config.jobs?.length) {
-            throw new Error(
-                'Job actions require jobs registered via the jobs option of specification.jobs()',
-            );
-        }
-
-        const job = this.config.jobs.find((j) => j.name === name);
-        if (!job) {
-            const available = this.config.jobs.map((j) => j.name).join(', ');
-            throw new Error(`trigger("${name}"): job not found. Available: ${available}`);
-        }
-
-        await job.execute();
-
-        return new BaseResult({
-            config: this.config,
-            testDir: this.testDir,
-        });
-    }
-
     /**
      * Automatic connection-URL injection (CONVENTIONS B6): `<KEY>_URL` for
      * every declared service, plus the standard aliases when unambiguous —
@@ -1154,7 +1082,6 @@ function withDockerTestRunId(config: SpecificationConfig): SpecificationConfig {
 
 /** One view per chain, so a setup hands back the handle it was called on. */
 const apiViews = new WeakMap<SpecificationBuilder, ApiSpecification>();
-const jobsViews = new WeakMap<SpecificationBuilder, JobsSpecification>();
 
 /**
  * The api view of a chain already started: every setup hands back the same
@@ -1202,41 +1129,6 @@ function apiFacet(start: () => SpecificationBuilder): ApiSpecification {
         request: async (source) => await start().request(source),
         seed: (source, options) => apiView(start().seed(source, options)),
         with: (context) => apiFacet(() => start().with(context)),
-    };
-}
-
-/** The jobs view of a chain already started — its `run` is the jobs one. */
-function jobsView(builder: SpecificationBuilder): JobsSpecification {
-    const known = jobsViews.get(builder);
-    if (known !== undefined) {
-        return known;
-    }
-    const view: JobsSpecification = {
-        clock: (iso) => jobsView(builder.clock(iso)),
-        intercept: interceptInto(() => builder, jobsView),
-        seed: (source, options) => jobsView(builder.seed(source, options)),
-        trigger: async (name) => await builder.trigger(name),
-        with: (context) => jobsView(builder.with(context)),
-    };
-    jobsViews.set(builder, view);
-    return view;
-}
-
-/**
- * Create the `jobs` facet bound to the given adapter configuration.
- */
-export function createJobsFacet(config: SpecificationConfig): JobsSpecification {
-    return jobsFacet(() => new SpecificationBuilder(config, getCallerDir()));
-}
-
-/** The jobs facet over a chain start. */
-function jobsFacet(start: () => SpecificationBuilder): JobsSpecification {
-    return {
-        clock: (iso) => jobsView(start().clock(iso)),
-        intercept: interceptInto(start, jobsView),
-        seed: (source, options) => jobsView(start().seed(source, options)),
-        trigger: async (name) => await start().trigger(name),
-        with: (context) => jobsFacet(() => start().with(context)),
     };
 }
 

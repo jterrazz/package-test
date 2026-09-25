@@ -42,7 +42,7 @@
         "typescript/prefer-nullish-coalescing": 5,
         "typescript/require-await": 15,
         "typescript/restrict-template-expressions": 1,
-        "typescript/strict-boolean-expressions": 80,
+        "typescript/strict-boolean-expressions": 79,
         "typescript/strict-void-return": 43,
         "typescript/switch-exhaustiveness-check": 3,
         "typescript/use-unknown-in-catch-callback-variable": 1,

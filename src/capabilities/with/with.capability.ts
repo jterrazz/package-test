@@ -1,3 +1,4 @@
+import type { Sharing } from '../../model/chain/capability.js';
 import type { CliEnv } from '../../model/ports/cli.port.js';
 
 /**
@@ -12,4 +13,16 @@ export type ChainContext = {
     env?: CliEnv;
     /** The headers every request carries — a chain's own `.headers()` merges over them. */
     headers?: Record<string, string>;
+};
+
+/**
+ * `with()`: start from what a whole file shares, each setting folded in as
+ * its own setup would state it, so a later setup of the chain overrides or
+ * merges exactly as it would over an earlier one. A key the facet composes no
+ * setup for is ignored.
+ */
+export const sharing: Sharing = {
+    kind: 'context',
+    name: 'with',
+    row: { group: 'Setup', name: '.with()', probe: '.with({' },
 };

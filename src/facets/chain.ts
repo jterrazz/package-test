@@ -1,15 +1,20 @@
 import type { ActionSignatures } from '../actions/signatures.js';
 import type { SetupSignatures } from '../capabilities/signatures.js';
 import type { ChainContext } from '../capabilities/with/with.capability.js';
-import type { ContextKey, FacetParams } from '../model/chain/capability.js';
+import type { Capability, FacetParams } from '../model/chain/capability.js';
 import type { Composition } from './define-facet.js';
 
 /** The names a list of definitions puts on the chain. */
 type Names<List extends readonly { readonly name: string }[]> = List[number]['name'];
 
-/** The `with()` keys of the contextual setups a composition lists. */
+/**
+ * The `with()` keys of the contextual setups a composition lists, read off
+ * each setup's own type parameter: an optional `context` read by its shape
+ * would infer as every key wherever it is absent, under a consumer's options
+ * (no `exactOptionalPropertyTypes`) though not under this package's.
+ */
 type ContextOf<C extends Composition> = C['capabilities'][number] extends infer Member
-    ? Member extends { readonly context?: infer Key extends ContextKey }
+    ? Member extends Capability<string, infer _Slice, infer _Args, infer _Needs, infer Key>
         ? Key
         : never
     : never;

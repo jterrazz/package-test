@@ -13,8 +13,8 @@ import type {
     ServiceRecord,
     StartedServices,
 } from '../../model/services/services.js';
-import { createJobsFacet } from './jobs.chain.js';
 import type { JobsSpecification } from './jobs.chain.js';
+import { jobsFacet } from './jobs.facet.js';
 
 // ── Types ──
 
@@ -81,7 +81,7 @@ export async function startJobs<Services extends ServiceRecord>(
                 await started.orchestrator.stop();
             }
         },
-        jobs: createJobsFacet(config),
+        jobs: jobsFacet.open(config),
         orchestrator: started?.orchestrator ?? null,
     };
 }

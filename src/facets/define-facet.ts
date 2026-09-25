@@ -54,7 +54,11 @@ type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberName
 
 /** What a facet adds to its composition: the engines it arms, and where its paths start. */
 type Wiring<C extends Composition> = {
-    /** The adapters the constructor's configuration starts, one per port key. */
+    /**
+     * The adapters the constructor's configuration starts, one per port key —
+     * its parameter typed as written: a parameter left to context makes the
+     * whole facet context-sensitive, and the composition is then not inferred.
+     */
     readonly engines: (config: SpecificationConfig) => EnginesOf<C> & object;
     /** The directory a chain's relative paths start from — the test file's, in node. */
     readonly locate: () => string;

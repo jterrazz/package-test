@@ -3,7 +3,7 @@ import { afterAll, describe, expect, test } from 'vitest';
 import { registerContracts, stopContractServer } from '../../seams/msw/server.js';
 import { defineContract } from '../../stubs/contract.js';
 import { http } from '../../stubs/http/http.js';
-import { declared, interceptThrough } from './intercept.scope.js';
+import { interceptThrough } from './intercept.scope.js';
 
 /** The module-scope double as the node entry publishes it. */
 const intercept = interceptThrough(registerContracts);
@@ -151,14 +151,6 @@ describe('intercept — the network double in module scope', () => {
 
         // Then - the first block's contract answers nothing any more
         await expect(stale()).rejects.toThrow('/today');
-    });
-
-    test('refuses a bare request with no response', () => {
-        // Given - a request half handed over alone, as only an untyped caller can hand it (the overloads refuse the shape at every typed site)
-        // Then - the refusal names both ways to give it its reply
-        expect(() => declared(http.get('https://weather.test/today'))).toThrow(
-            'a bare request needs its response',
-        );
     });
 
     test('refuses an empty declaration', async () => {

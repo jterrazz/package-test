@@ -1,8 +1,7 @@
 import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
+import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
 import type { RenderResult } from '../../results/render.result.js';
 import type { ComponentUi } from '../../seams/vitest-browser/ui.js';
-import type { ContractInput } from '../../stubs/contract.js';
-import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 
 /**
  * The component facet's shape, stated where BOTH runtimes can read it.
@@ -25,10 +24,7 @@ export type ComponentChain = {
      * and the same strictness as every other facet (D7), served by msw's
      * worker instead of its node interceptor.
      */
-    intercept: {
-        (contracts: ContractInput): ComponentChain;
-        (request: ContractRequest, response: ContractResponder | ContractResponse): ComponentChain;
-    };
+    intercept: InterceptMethod<ComponentChain>;
     /** Mount the subject, run the scenario, and capture what the page shows. */
     render: (subject: RenderSubject, scenario?: ComponentScenario) => Promise<RenderResult>;
     /**

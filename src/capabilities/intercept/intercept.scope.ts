@@ -15,9 +15,9 @@ import type { ContractRegistration } from '../../seams/msw/handlers.js';
  * request no contract accepted) is raised THERE, which is what makes the
  * double a guard rather than a convenience.
  */
-import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
+import { declared } from './declared.js';
 
 /**
  * One block's worth of declared network. Disposed at the end of the scope that
@@ -60,33 +60,6 @@ export type Intercept = ((
         response: ContractResponder | ContractResponse,
         options?: InterceptOptions,
     ) => Promise<InterceptScope>);
-
-/**
- * The contracts a call declared, whichever of the two forms it used. Exported
- * for its own module test: the bare-request refusal is a runtime guard the
- * compiler already states, so no typed call site can reach it.
- *
- * @internal
- */
-export function declared(
-    requestOrContracts: ContractInput | ContractRequest,
-    maybeResponse?: ContractResponder | ContractResponse,
-): Contract[] {
-    if (
-        Array.isArray(requestOrContracts) ||
-        isContracts(requestOrContracts) ||
-        isContract(requestOrContracts)
-    ) {
-        return contractsOf(requestOrContracts);
-    }
-    if (maybeResponse === undefined) {
-        throw new Error(
-            'intercept(): a bare request needs its response — pass a contract ' +
-                '(defineContract({ request, response })) or the inline pair intercept(request, response).',
-        );
-    }
-    return [{ request: requestOrContracts, response: maybeResponse }];
-}
 
 /** Is this argument the options object rather than a response? */
 function isOptions(value: unknown): value is InterceptOptions {
@@ -162,6 +135,7 @@ export function interceptThrough(
               ? maybeResponseOrOptions
               : undefined;
         const contracts = declared(
+            'intercept',
             requestOrContracts,
             options === maybeResponseOrOptions
                 ? undefined

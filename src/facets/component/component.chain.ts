@@ -1,4 +1,5 @@
 import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
+import { declared } from '../../capabilities/intercept/declared.js';
 import { RenderResult } from '../../results/render.result.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
@@ -18,7 +19,6 @@ import {
     mountReact,
 } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { MountedSurface } from '../../seams/vitest-browser/vitest-browser.adapter.js';
-import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import type { ComponentChain } from './component.shape.js';
@@ -118,20 +118,6 @@ function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
 /** Is the subject a function that fills a container, rather than a React tree? */
 function isDomMount(subject: RenderSubject): subject is DomMount {
     return typeof subject === 'function';
-}
-
-/** A bare request needs its response — the same refusal every facet gives. */
-function inlinePair(
-    request: ContractRequest,
-    response: ContractResponder | ContractResponse | undefined,
-): Contract {
-    if (response === undefined) {
-        throw new Error(
-            '.intercept(): a bare request needs its response — pass a contract ' +
-                '(defineContract({ request, response })) or the inline pair .intercept(request, response).',
-        );
-    }
-    return { request, response };
 }
 
 /**
@@ -255,12 +241,7 @@ function chainOf(state: ChainState): ComponentChain {
             requestOrContracts: ContractInput | ContractRequest,
             maybeResponse?: ContractResponder | ContractResponse,
         ): ComponentChain => {
-            const added =
-                Array.isArray(requestOrContracts) ||
-                isContracts(requestOrContracts) ||
-                isContract(requestOrContracts)
-                    ? contractsOf(requestOrContracts)
-                    : [inlinePair(requestOrContracts, maybeResponse)];
+            const added = declared('.intercept', requestOrContracts, maybeResponse);
             return chainOf({ ...state, contracts: [...state.contracts, ...added] });
         },
         render: async (subject, scenario) => await render(state, subject, scenario),
