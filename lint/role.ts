@@ -1,5 +1,6 @@
 import { basename, dirname, join, relative } from 'node:path';
 
+import { GROUND_DIRS } from '../src/kernel/files/ground.js';
 import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
 import { folderChanged, isFile } from './fs-cache.js';
 
@@ -48,7 +49,7 @@ export type FileIdentity = {
 };
 
 /** The four ground names — what the specs of a row stand ON, never a spec. */
-const GROUND = new Set(['expected', 'fixtures', 'requests', 'seeds']);
+const GROUND = new Set<string>(GROUND_DIRS);
 
 /** A vitest config, whatever extension the project writes it in. */
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;

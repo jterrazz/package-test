@@ -3,6 +3,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import { ATTACHMENTS_DIR, VITEST_ARTIFACTS_DIR } from '../kernel/files/artifacts.js';
+import { GROUND_GLOB } from '../kernel/files/ground.js';
 import { tempRootSetup } from '../kernel/files/temp-root.js';
 
 /**
@@ -27,7 +28,7 @@ export const HOOK_TIMEOUT_MS = 30_000;
  * Merged, not replaced: vite concatenates arrays, so a consumer's `exclude`
  * ADDS to this list and never has to spread `configDefaults.exclude` again.
  */
-export const EXCLUDE = [...configDefaults.exclude, '**/{fixtures,expected,seeds,requests}/**'];
+export const EXCLUDE = [...configDefaults.exclude, GROUND_GLOB];
 
 /**
  * What a test may never carry into the next one, and the one policy the
@@ -56,7 +57,7 @@ export const HYGIENE = {
  * options (vitest omits them from a project's config), so they are absent here
  * on purpose — setting them would be silently dropped.
  */
-function projectDefaults(): TestProjectInlineConfiguration {
+export function projectDefaults(): TestProjectInlineConfiguration {
     return {
         cacheDir: VITEST_ARTIFACTS_DIR,
         test: {
@@ -109,18 +110,6 @@ export function onProjectDefaults(
     return merged.test === undefined ? merged : { ...merged, test: statedOnce(merged.test) };
 }
 
-/**
- * The node facets' canonical projects.
- *
- * Each one collects the facet's own tree — `specs/<facet>/**\/*.spec.ts`, the
- * suffix that says "the assembled product" — carries the preset's budgets and
- * artefact directory, and runs in group 0 — the browser facets follow, so two
- * Chromiums never share a slot on a two-vCPU runner. `{ include, exclude,
- * timeout, serial }` is what a repository states when its tree, its budget or
- * its parallelism differs;
- * everything else is the framework's.
- */
-
 /** What every helper accepts on top of its canonical project. */
 export type FacetProjectOptions = {
     /**
@@ -143,7 +132,17 @@ export type FacetProjectOptions = {
     timeout?: number;
 };
 
-/** The globs a node facet collects, and the ones a caller stated instead. */
+/**
+ * A node facet's canonical project.
+ *
+ * It collects the facet's own tree — `specs/<facet>/**\/*.spec.ts`, the suffix
+ * that says "the assembled product" — or the globs a caller stated instead,
+ * carries the preset's budgets and artefact directory, and runs in group 0 —
+ * the browser facets follow, so two Chromiums never share a slot on a two-vCPU
+ * runner. `{ include, exclude, timeout, serial }` is what a repository states
+ * when its tree, its budget or its parallelism differs; everything else is the
+ * framework's.
+ */
 export function facetProject(
     facet: string,
     options: FacetProjectOptions,

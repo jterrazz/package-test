@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 import { treeEntries } from '../src/kernel/files/git-tree.js';
+import { GROUND_DIRS } from '../src/kernel/files/ground.js';
 import type { TokenViolation } from './checker.js';
 
 /**
@@ -30,7 +31,7 @@ export const SOURCE_ROOT = [
 ];
 
 /** The folders that are ground — what a test stands on — never a concept of the code. */
-const GROUND = new Set(['expected', 'fixtures', 'requests', 'seeds']);
+const GROUND = new Set<string>(GROUND_DIRS);
 
 /** Folder names that say what a file IS rather than what it is about: a role rides on the file suffix. */
 const ROLE_NAMES = new Set([

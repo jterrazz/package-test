@@ -1,51 +1,11 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectConfiguration, ViteUserConfig } from 'vitest/config';
 
-import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import { literate } from '../facets/cli/cli.project.js';
 import type { LiterateOptions } from '../facets/cli/cli.project.js';
-import {
-    ATTACHMENTS_DIR,
-    BLOB_DIR,
-    COVERAGE_DIR,
-    REPORTER_OUTPUT_FILES,
-    VITEST_ARTIFACTS_DIR,
-} from '../kernel/files/artifacts.js';
-import { tempRootSetup } from '../kernel/files/temp-root.js';
-import {
-    EXCLUDE,
-    HOOK_TIMEOUT_MS,
-    HYGIENE,
-    onProjectDefaults,
-    statedOnce,
-    TEST_TIMEOUT_MS,
-} from './project-kit.js';
-
-/**
- * `defineSpecConfig()` — the shared vitest config every repository of the
- * ecosystem starts from.
- *
- * Fourteen hand-rolled `vitest.config.ts` files had converged on the same
- * handful of settings and disagreed on the rest by accident; the preset is
- * their common ground, stated once. A consumer writes ONE call and keeps
- * everything vitest offers: what it passes is a plain vite/vitest config,
- * merged OVER the defaults, so any of them is overridable in place.
- *
- * ```typescript
- * // vitest.config.ts
- * import { defineSpecConfig } from '@jterrazz/test/vitest';
- *
- * export default defineSpecConfig({
- *     literate: { specification: './specs/cli/cli.specification.ts' },
- *     test: {
- *         projects: [
- *             { test: { include: ['src/**\/*.test.ts'], name: 'unit' } },
- *             { test: { include: ['specs/api/**\/*.test.ts'], name: 'api' } },
- *         ],
- *     },
- * });
- * ```
- */
+import { BLOB_DIR, COVERAGE_DIR, REPORTER_OUTPUT_FILES } from '../kernel/files/artifacts.js';
+import { GROUND_GLOB } from '../kernel/files/ground.js';
+import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project-kit.js';
 
 /**
  * Options are a vite/vitest config plus one key of the framework's own.
@@ -90,7 +50,7 @@ const COVERAGE = {
         // A spec is a test, and the fixture app a spec drives is ground —
         // Beside a module as much as under `specs/`.
         'specs/**',
-        '**/{fixtures,expected,seeds,requests}/**',
+        GROUND_GLOB,
         '**/*.d.ts',
         '**/*.test-d.ts',
         '**/*.fixtures.ts',
@@ -133,19 +93,9 @@ export function reporterOutputFiles(argv: readonly string[]): Record<string, str
 
 /** Defaults for the root config — the project ones, plus what only a root carries. */
 function rootDefaults(): ViteUserConfig {
-    return {
-        cacheDir: VITEST_ARTIFACTS_DIR,
-        test: {
-            attachmentsDir: ATTACHMENTS_DIR,
-            coverage: COVERAGE,
-            exclude: EXCLUDE,
-            globalSetup: [inPlaceSetup(), tempRootSetup()],
-            hookTimeout: HOOK_TIMEOUT_MS,
-            ...HYGIENE,
-            outputFile: reporterOutputFiles(process.argv),
-            testTimeout: TEST_TIMEOUT_MS,
-        },
-    };
+    return mergeConfig(projectDefaults(), {
+        test: { coverage: COVERAGE, outputFile: reporterOutputFiles(process.argv) },
+    }) as ViteUserConfig;
 }
 
 /**
@@ -185,6 +135,31 @@ function withProjectDefaults(project: TestProjectConfiguration): TestProjectConf
     return onProjectDefaults(project);
 }
 
+/**
+ * `defineSpecConfig()` — the shared vitest config every repository of the
+ * ecosystem starts from.
+ *
+ * Fourteen hand-rolled `vitest.config.ts` files had converged on the same
+ * handful of settings and disagreed on the rest by accident; the preset is
+ * their common ground, stated once. A consumer writes ONE call and keeps
+ * everything vitest offers: what it passes is a plain vite/vitest config,
+ * merged OVER the defaults, so any of them is overridable in place.
+ *
+ * ```typescript
+ * // vitest.config.ts
+ * import { defineSpecConfig } from '@jterrazz/test/vitest';
+ *
+ * export default defineSpecConfig({
+ *     literate: { specification: './specs/cli/cli.specification.ts' },
+ *     test: {
+ *         projects: [
+ *             { test: { include: ['src/**\/*.test.ts'], name: 'unit' } },
+ *             { test: { include: ['specs/api/**\/*.test.ts'], name: 'api' } },
+ *         ],
+ *     },
+ * });
+ * ```
+ */
 export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
     const { literate: literateOptions, ...userConfig } = config;
 

@@ -36,6 +36,9 @@ export const GROUND_DIRS = [
     GROUND_SEEDS,
 ] as const;
 
+/** Every ground folder at any depth, as a glob — what a runner and a coverage report leave out. */
+export const GROUND_GLOB = `**/{${GROUND_DIRS.join(',')}}/**`;
+
 /**
  * The one folder of a specs root that holds the ground several leaves share:
  * `<specs>/shared/<role>/`, the four roles below it. It is reserved directly

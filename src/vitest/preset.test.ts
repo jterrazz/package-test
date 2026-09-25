@@ -97,7 +97,7 @@ describe('preset', () => {
         const config = defineSpecConfig();
 
         // Then - the four ground folders never get collected
-        expect(config.test?.exclude).toContain('**/{fixtures,expected,seeds,requests}/**');
+        expect(config.test?.exclude).toContain('**/{expected,fixtures,requests,seeds}/**');
         expect(config.test?.exclude).toContain('**/node_modules/**');
     });
 
@@ -113,7 +113,7 @@ describe('preset', () => {
             test: { hookTimeout: 30_000, testTimeout: 30_000 },
         });
         expect((project as { test: { exclude: string[] } }).test.exclude).toContain(
-            '**/{fixtures,expected,seeds,requests}/**',
+            '**/{expected,fixtures,requests,seeds}/**',
         );
     });
 
@@ -131,7 +131,7 @@ describe('preset', () => {
 
         // Then - vite concatenates: the preset's exclusions survive, so a consumer never has to spread `configDefaults.exclude` by hand
         expect(config.test?.exclude).toContain('specs/smoke/**');
-        expect(config.test?.exclude).toContain('**/{fixtures,expected,seeds,requests}/**');
+        expect(config.test?.exclude).toContain('**/{expected,fixtures,requests,seeds}/**');
     });
 
     test('defineSpecConfig() — what the consumer states wins — a project overrides the preset per project', () => {
@@ -168,7 +168,7 @@ describe('preset', () => {
         expect(excludeOf(config)).toStrictEqual([
             '**/node_modules/**',
             '**/.git/**',
-            '**/{fixtures,expected,seeds,requests}/**',
+            '**/{expected,fixtures,requests,seeds}/**',
             'specs/**',
             '**/*.test.tsx',
         ]);
@@ -195,7 +195,7 @@ describe('preset', () => {
         const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
 
         // Then - the root is the only place its exclusions can come from, so nothing is dropped
-        expect(config.test?.exclude).toContain('**/{fixtures,expected,seeds,requests}/**');
+        expect(config.test?.exclude).toContain('**/{expected,fixtures,requests,seeds}/**');
     });
 
     test('defineSpecConfig() — the hygiene a suite does not have to write — never retries: a flaky test is fixed or deleted', () => {
