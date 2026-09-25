@@ -99,6 +99,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/actions/render/console-recorder.ts',
             'src/actions/render/render.action.ts',
+        ),
+        name: 'a module that runs only in a page',
+        why: 'it reads the `document` and `window` of the page it renders in, which node has none of — E5 forbids a simulated one and M3 a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof',
+    },
+    {
+        claims: oneOf(
             'src/actions/run/literate.ts',
             'src/facets/api/api.facet.ts',
             'src/facets/api/api.handle.ts',

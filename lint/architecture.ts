@@ -5,6 +5,7 @@ import { basename, dirname, relative, resolve } from 'node:path';
 import { parseProgram } from '../src/seams/oxc-parser/parse.js';
 import { child, childList, isNode, stringValue, walk } from './ast.js';
 import type { AstNode } from './rule-shape.js';
+import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 
 /**
  * The architecture a facet is composed in, read off the tree: the folders a
@@ -125,7 +126,8 @@ export async function definitionsIn(
 /**
  * What is out of place about one definition, a sentence each: a setup is
  * named for its folder and an action for the folder `actionFolders` gives
- * it; a setup or an action is tested beside its module; a setup names a
+ * it; a setup or an action is tested beside its module, unless a kind of
+ * `siblingless-kinds.ts` claims that module; a setup names a
  * `<folder>.port.ts` exactly when it arms an engine.
  */
 export function straysOf(
@@ -141,7 +143,8 @@ export function straysOf(
     }
     if (
         definition.kind !== 'context' &&
-        !existsSync(resolve(root, path.replace(/\.ts$/u, '.test.ts')))
+        !existsSync(resolve(root, path.replace(/\.ts$/u, '.test.ts'))) &&
+        !SIBLINGLESS_KINDS.some((kind) => kind.claims(path))
     ) {
         found.push(`${path}: ${definition.name} has no test beside it`);
     }

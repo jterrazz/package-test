@@ -44,10 +44,10 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'A definition is its folder. The folders of `src/capabilities/` are exactly the setups `SetupSignatures` names, `with`, and the options a route action takes, and the layer map declares the same ones; the layer map\u2019s action folders are exactly those the actions `ActionSignatures` names are placed in, and `src/actions/` holds no other. Every setup a `<name>.capability.ts` exports is named `<name>` and every action an `*.action.ts` exports is one its folder holds; each is tested beside its module, and a setup has a `<name>.port.ts` exactly when it arms an engine.',
+            'A definition is its folder. The folders of `src/capabilities/` are exactly the setups `SetupSignatures` names, `with`, and the options a route action takes, and the layer map declares the same ones; the layer map\u2019s action folders are exactly those the actions `ActionSignatures` names are placed in, and `src/actions/` holds no other. Every setup a `<name>.capability.ts` exports is named `<name>` and every action an `*.action.ts` exports is one its folder holds; each is tested beside its module, or claimed by a kind of `lint/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` exactly when it arms an engine.',
         facet: 'model',
         family: 'I',
-        fix: 'Name the definition for its folder, write its test beside it, and declare the port its `arm` goes through (or drop the port it does not use).',
+        fix: 'Name the definition for its folder, write its test beside it (or declare its kind in `lint/siblingless-kinds.ts` when no test can run it where it lives), and declare the port its `arm` goes through (or drop the port it does not use).',
         id: 'I8',
         name: 'i8-definition-is-its-folder',
         rationale:

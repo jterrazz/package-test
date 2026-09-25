@@ -122,7 +122,7 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         ).toStrictEqual([]);
     });
 
-    test('i8 — a definition is named for its folder, tested beside itself, and armed through a port of its own', async () => {
+    test('i8 — a definition is named for its folder, tested beside itself or declared siblingless, and armed through a port of its own', async () => {
         // Given - every definition a capability or an action module exports
         const definitions = await definitionsIn(ROOT, [
             ...modulesOf(ROOT, 'capabilities', '.capability.ts'),
