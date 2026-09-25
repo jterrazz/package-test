@@ -17,7 +17,7 @@ import { postgres, process, redis, sqlite } from '@jterrazz/test';
 | `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`)   | `file:/…/….sqlite`                    |
 | `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout` | `http://127.0.0.1:port`               |
 
-**Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the seams are optional peers since 16.0, loaded lazily by the one module that owns each ([04 — Operating](04-operating.md#what-a-consumer-must-bring)). The refusal, when one is missing, names the facet that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
+**Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the drivers are optional peers since 16.0, each loaded lazily by the one adapter under `world/services/` that owns it ([04 — Operating](04-operating.md#what-a-consumer-must-bring)). The refusal, when one is missing, names the service that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
 
 `image` overrides the container image and `env` (postgres only) the environment variables; each factory carries a default for both, so a record that states neither still starts a real service.
 
@@ -130,12 +130,6 @@ docker/
 - The template is built ONCE per container: its name is the script's digest, one worker builds it under an advisory lock while the others wait and then find it, and each worker then takes `CREATE DATABASE … TEMPLATE` — a copy of the finished schema, whatever the script did to build it. A script that fails leaves no template behind, and the error names the script.
 - A project with one database needs no folder of its own: a postgres handle falls back to `docker/postgres/init.sql` when nothing sits under its own name.
 - Testcontainers starts each declared service from the handle's image and environment. There is no second definition of the stack to keep in step.
-
-## A stub's `required` is verified per `.call()`
-
-A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
-
-This is the same boundary rule B1 already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
 
 ## One container per project
 

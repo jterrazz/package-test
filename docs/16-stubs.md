@@ -1,6 +1,6 @@
 # 16 — Stubs: the outside world, declared
 
-Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on all four facets that reach the network.
+Everything the outside world replies is declared as a **stub**: a request to match and a response to serve, together in one named artifact. There is no second form — no mock format, no fixture-path string, no `.http` intercept file. Stubs are the whole vocabulary, on every facet that reaches the network — `api`, `job`, `integration`, `component`, `website` and `mobile`.
 
 A stub states what the provider replies, and nothing runs it against the provider it stands for — so it is named for what it does, never for a verification it does not make.
 
@@ -250,14 +250,15 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([07](07-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
-## Two engines, one queue
+## Three engines, one queue
 
-| Facets              | Engine                                            | Notes                                                                               |
-| ------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `api`, `job`        | **MSW**, in-process                               | The app runs here, so its outgoing requests pass through this process               |
-| `website`, `mobile` | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
+| Facets                                                    | Engine                                            | Notes                                                                               |
+| --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `api`, `job`, `integration`, and a module's `intercept()` | **msw server**, in-process                        | The subject runs here, so its outgoing requests pass through this process           |
+| `component`                                               | **msw worker**, in the page                       | The component runs in Chromium, so the service worker answers its requests there    |
+| `website`, `mobile`                                       | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
 
-Both consume the **same** selection queue, so a stub behaves identically on either side: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub backend — is gone; "sticky" is now just the default (`times` omitted), written down.
+All three consume the **same** selection queue, so a stub behaves identically whichever answers it: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub backend — is gone; "sticky" is now just the default (`times` omitted), written down.
 
 The stub backend resets between chains, the way databases do: one chain = one terminal action, and its stubs replace the previous chain's wholesale.
 
@@ -418,9 +419,16 @@ read: docs/19-linting.md#d7-strict-intercepts
 
 At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route.
 
+### `required` is verified per terminal action
+
+A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
+
+This is the same boundary rule B1 already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
+
 Two scoping notes:
 
 - **A chain with zero stubs does not guard its network** — a deliberate, documented boundary.
+- **A rendered component is the exception.** Its network is strict even with no stub declared, because a page shares its process with nothing else the test does — [07 — Component specs](07-component.md#unique-here).
 
 ## Pitfalls
 
