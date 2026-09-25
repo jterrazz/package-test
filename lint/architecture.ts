@@ -63,10 +63,11 @@ function loadedBy(path: string): string[] {
 }
 
 /**
- * Every node builtin the modules load, following their relative imports to
- * any depth, as `<module> imports <builtin>`.
+ * Every load that leaves the tree, following the modules' relative imports to
+ * any depth: a node builtin, as `<module> imports <builtin>`, and a package —
+ * which the walk cannot follow into — as `<module> imports <package>, a package`.
  */
-export function builtinsReached(root: string, starts: string[]): string[] {
+export function outsideLoadsReached(root: string, starts: string[]): string[] {
     const seen = new Set<string>();
     const pending = starts.map((path) => resolve(root, path));
     const found: string[] = [];
@@ -79,6 +80,8 @@ export function builtinsReached(root: string, starts: string[]): string[] {
                 } else if (specifier.startsWith('.')) {
                     const target = resolve(dirname(path), specifier.replace(/\.js$/u, '.ts'));
                     pending.push(existsSync(target) ? target : `${target}x`);
+                } else {
+                    found.push(`${relative(root, path)} imports ${specifier}, a package`);
                 }
             }
         }

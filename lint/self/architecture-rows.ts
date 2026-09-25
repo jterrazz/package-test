@@ -30,14 +30,14 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'The chain kernel and every setup load in a page: no module the facet definer (`src/facets/define-facet.ts`) or a module of a capability folder (`src/capabilities/<name>/`) reaches — through its value imports, its re-exports and every `import()` of a string literal, at any depth — imports a node builtin. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.',
+            'The chain kernel and every setup load in a page: no module the facet definer (`src/facets/define-facet.ts`) or a module of a capability folder (`src/capabilities/<name>/`) reaches — through its value imports, its re-exports and every `import()` of a string literal, at any depth — imports a node builtin, or a package at all: the walk cannot follow a package into its own imports, so none is reached. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.',
         facet: 'model',
         family: 'I',
-        fix: 'Put what needs the builtin behind the port of the engine that owns it — an adapter under `src/seams/`, handed in by the facet — or import only its type.',
+        fix: 'Put what needs the builtin or the package behind the port of the engine that owns it — an adapter under `src/seams/`, handed in by the facet — or import only its type.',
         id: 'I7',
         name: 'i7-kernel-loads-in-a-page',
         rationale:
-            'The component facet composes the same kernel and setups inside a browser page, and I1 cannot see a builtin: it judges declared edges between trees and skips `node:*`, so one reached at any depth is a component chain that stops bundling.',
+            'The component facet composes the same kernel and setups inside a browser page, and I1 cannot see a builtin: it judges declared edges between trees and skips `node:*`, so one reached at any depth — directly, or inside a package — is a component chain that stops bundling.',
         reach: 'module',
     },
     {

@@ -7,7 +7,13 @@ import type { ActionSignatures } from '../src/actions/signatures.js';
 import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
 import type { SetupSignatures } from '../src/capabilities/signatures.js';
 import type { FacetParams } from '../src/model/chain/capability.js';
-import { builtinsReached, definitionsIn, foldersOf, modulesOf, straysOf } from './architecture.js';
+import {
+    definitionsIn,
+    foldersOf,
+    modulesOf,
+    outsideLoadsReached,
+    straysOf,
+} from './architecture.js';
 import { FRAMEWORK_LAYERS } from './self-layers.js';
 
 /** The repository root, from this module's place inside `lint/`. */
@@ -63,16 +69,16 @@ const ACTION_FOLDERS = {
  * kernel and a setup load must load there too.
  */
 describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
-    test('i7 — the kernel and every setup load no node builtin, at any depth', () => {
+    test('i7 — the kernel and every setup load no node builtin and no package, at any depth', () => {
         // Given - the facet definer, which reaches the kernel, and every module of every capability folder
         const starts = ['src/facets/define-facet.ts', ...modulesOf(ROOT, 'capabilities', '.ts')];
 
         // Then - a page can load each of them: a builtin a setup reaches is a component chain that no longer bundles
-        expect(builtinsReached(ROOT, starts)).toStrictEqual([]);
+        expect(outsideLoadsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('a builtin is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
-        // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads one, one of them lazily
+    test('a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
+        // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads builtins, one of them lazily, and a package
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));
         writeFileSync(
@@ -81,14 +87,15 @@ describe('the architecture a facet is composed in (meta-tests I7, I8)', () => {
         );
         writeFileSync(
             join(root, 'src/next.ts'),
-            "import { cwd } from 'node:process';\nexport { join } from 'path';\nexport const here = cwd;\nexport async function later() {\n    return import('node:os');\n}\n",
+            "import { cwd } from 'node:process';\nimport { parse } from 'yaml';\nexport { join } from 'path';\nexport const here = cwd;\nexport const read = parse;\nexport async function later() {\n    return import('node:os');\n}\n",
         );
 
-        // Then - the sibling's three builtins, the lazy one included, and the inline-typed import, which still loads its module
-        expect(builtinsReached(root, ['src/start.ts'])).toStrictEqual([
+        // Then - the sibling's three builtins, the lazy one included, its package, which the walk cannot follow, and the inline-typed import, which still loads its module
+        expect(outsideLoadsReached(root, ['src/start.ts'])).toStrictEqual([
             'src/next.ts imports node:os',
             'src/next.ts imports node:process',
             'src/next.ts imports path',
+            'src/next.ts imports yaml, a package',
             'src/start.ts imports node:fs',
         ]);
     });
