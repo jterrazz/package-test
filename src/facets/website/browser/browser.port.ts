@@ -23,10 +23,8 @@ export type BrowserConsoleMessage = {
 
 /** The verbs a visit scenario is handed; every action auto-waits, `see()` is the one synchronization primitive. */
 export type Visitor = {
-    /** Check a checkbox or radio. */
     check: (element: ElementRef) => Promise<void>;
     click: (element: ElementRef) => Promise<void>;
-    /** Fill a form field with a value. */
     fill: (element: ElementRef, value: string) => Promise<void>;
     /** Wait until the element is gone, hidden or never in the document. */
     gone: (element: ElementRef) => Promise<void>;
@@ -37,7 +35,6 @@ export type Visitor = {
     press: (key: string) => Promise<void>;
     /** Wait until the element is visible — the only synchronization primitive. */
     see: (element: ElementRef) => Promise<void>;
-    /** Select an option in a select field. */
     select: (element: ElementRef, option: string) => Promise<void>;
 };
 
