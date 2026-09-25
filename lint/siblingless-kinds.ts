@@ -124,6 +124,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/model/goldens/match-options.ts',
+            'src/results/console.ts',
             'src/results/container.ts',
             'src/results/directory.ts',
             'src/results/fetch.result.ts',

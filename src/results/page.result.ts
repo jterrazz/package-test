@@ -4,6 +4,7 @@ import type {
     BrowserMetaElement,
     BrowserPage,
 } from '../model/ports/browser.port.js';
+import { consoleOf, errorsOf } from './console.js';
 import { JsonAccessor } from './json.js';
 import { BaseResult } from './result.js';
 import { TextAccessor } from './text.js';
@@ -51,8 +52,7 @@ export class PageResult extends BaseResult {
      * `toMatch(file('./expected/home.console.txt'))`.
      */
     get console(): TextAccessor {
-        const lines = this.page.consoleMessages.map((m) => `[${m.type}] ${m.text}`).join('\n');
-        return new TextAccessor(lines, 'console', this.testDir, {
+        return new TextAccessor(consoleOf(this.page.consoleMessages), 'console', this.testDir, {
             captures: this.captures,
             transform: this.config.transform,
         });
@@ -65,11 +65,7 @@ export class PageResult extends BaseResult {
      * a cli result.
      */
     get errors(): TextAccessor {
-        const lines = this.page.consoleMessages
-            .filter((m) => m.type === 'error')
-            .map((m) => m.text)
-            .join('\n');
-        return new TextAccessor(lines, 'errors', this.testDir, {
+        return new TextAccessor(errorsOf(this.page.consoleMessages), 'errors', this.testDir, {
             captures: this.captures,
             transform: this.config.transform,
         });

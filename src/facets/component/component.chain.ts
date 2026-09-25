@@ -1,5 +1,6 @@
 import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
 import { declared } from '../../capabilities/intercept/declared.js';
+import { consoleOf, errorsOf } from '../../results/console.js';
 import { RenderResult } from '../../results/render.result.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
@@ -221,13 +222,10 @@ async function render(
 
     const { entries } = recorder;
     return new RenderResult({
-        console: entries.map((entry) => `[${entry.type}] ${entry.text}`).join('\n'),
+        console: consoleOf(entries),
         // oxlint-disable-next-line unicorn/prefer-dom-node-text-content -- RENDERED text is the subject: `textContent` carries a `<style>` body and every node the page does not display, and the website twin reads `innerText` for the same reason
         content: document.body.innerText,
-        errors: entries
-            .filter((entry) => entry.type === 'error')
-            .map((entry) => entry.text)
-            .join('\n'),
+        errors: errorsOf(entries),
         html: surface.container.innerHTML,
         tree: await ariaTree(),
     });
