@@ -117,18 +117,21 @@ test('reports nothing when the parent takes it off the screen itself', async () 
     expect(onClose).not.toHaveBeenCalled();
 });
 
-test('holds its contract under the <StrictMode> a chain wraps the tree in', async () => {
+test('holds its contract under <StrictMode>', async () => {
     // Given - the same host inside <StrictMode>: the extra checks React runs under it must not turn one dismissal into two, nor lose the opener
     const onClose = vi.fn<() => void>();
-    await component
-        .wrap((ui) => <StrictMode>{ui}</StrictMode>)
-        .render(<Host onClose={onClose} />, async (visitor) => {
+    await component.render(
+        <StrictMode>
+            <Host onClose={onClose} />
+        </StrictMode>,
+        async (visitor) => {
             await visitor.click(button('Open'));
             await visitor.see(dialog('Host'));
             await visitor.press('Escape');
             await visitor.gone(dialog('Host'));
             await visitor.see(focused(button('Open')));
-        });
+        },
+    );
 
     // Then - one dismissal, and the keyboard back where it came from
     expect(onClose).toHaveBeenCalledOnce();
