@@ -13,7 +13,7 @@ export type WaitUntilOptions = {
 const DEFAULT_TIMEOUT_MS = 5000;
 const DEFAULT_INTERVAL_MS = 50;
 
-/** Wait until a condition holds; measured on `performance.now()`, so `clock.at()` cannot freeze the deadline. */
+/** Wait until a condition holds; measured on `performance.now()`, so `clock.at()` cannot freeze it — under `clock.run()` it never wakes: use `clock.advance()`. */
 export async function waitUntil(
     predicate: () => boolean | Promise<boolean>,
     options: WaitUntilOptions = {},

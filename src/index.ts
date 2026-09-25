@@ -122,4 +122,5 @@ export { text } from './expectations/text/text-subject.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
 export { lintReport } from './facets/cli/index.js';
+// Also carries the vitest `Assertion` augmentation: the one `types` entry publishes the matchers through it.
 export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';
