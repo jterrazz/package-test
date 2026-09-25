@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 
 import { parseSpecDocument, SPEC_EXTENSION } from '../src/facets/cli/documents/spec-document.js';
 import { treeEntries } from '../src/kernel/files/git-tree.js';
-import { parseYamlSource } from '../src/kernel/files/yaml-document.js';
+import { parseYamlSource } from '../src/kernel/yaml/document.js';
 
 /**
  * The published schema, run against the documents it describes.

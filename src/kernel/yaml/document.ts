@@ -14,7 +14,7 @@ import type { CollectionTag, Document, ScalarTag } from 'yaml';
  *
  * The node types and guards are re-exported rather than imported by each
  * consumer: one module owns the yaml engine (I11 pins it here), so consumers
- * import its node types from this file.
+ * import its node types from this file, the one module of `kernel/yaml/`.
  */
 
 export { isMap, isPair, isScalar, isSeq, Scalar } from 'yaml';

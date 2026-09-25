@@ -8,14 +8,8 @@ import {
     parseYamlSource,
     renderYamlSource,
     yamlSyntaxErrors,
-} from '../../../kernel/files/yaml-document.js';
-import type {
-    Node,
-    Pair,
-    YAMLMap,
-    YAMLSeq,
-    YamlSource,
-} from '../../../kernel/files/yaml-document.js';
+} from '../../../kernel/yaml/document.js';
+import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../../kernel/yaml/document.js';
 
 /**
  * The `<case>.spec.yaml` document — one scenario, written as data.

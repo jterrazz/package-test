@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { blockScalar, parseYamlSource, renderYamlSource } from './yaml-document.js';
+import { blockScalar, parseYamlSource, renderYamlSource } from './document.js';
 
 /**
  * The `yaml` wrapper, read on its own — text in, text out. What is judged here

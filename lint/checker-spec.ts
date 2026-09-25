@@ -12,14 +12,8 @@ import type { SpecDocument, SpecFile } from '../src/facets/cli/documents/spec-do
 import { treeEntries, treeKind, treeNames } from '../src/kernel/files/git-tree.js';
 import { GROUND_FIXTURES } from '../src/kernel/files/ground.js';
 import { resolveSpecPath } from '../src/kernel/files/resolve.js';
-import {
-    isMap,
-    isScalar,
-    isSeq,
-    renderYamlSource,
-    Scalar,
-} from '../src/kernel/files/yaml-document.js';
-import type { Node, Pair, YAMLMap } from '../src/kernel/files/yaml-document.js';
+import { isMap, isScalar, isSeq, renderYamlSource, Scalar } from '../src/kernel/yaml/document.js';
+import type { Node, Pair, YAMLMap } from '../src/kernel/yaml/document.js';
 import type { CheckerPassId, Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
 

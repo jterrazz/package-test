@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { testSectionAt } from '../../../kernel/config/test-section.js';
-import { parseYamlSource } from '../../../kernel/files/yaml-document.js';
+import { parseYamlSource } from '../../../kernel/yaml/document.js';
 
 /**
  * Route coverage, measured at run time.

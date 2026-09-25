@@ -68,7 +68,7 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     'vitest-mock-extended': ['src/world/mocks/'],
     'vitest/browser': ['src/facets/component/'],
     webdriverio: ['src/facets/mobile/'],
-    yaml: ['src/kernel/files/yaml-document.ts'],
+    yaml: ['src/kernel/yaml/document.ts'],
 };
 
 /** Is the path a module the code runs — no test, no type test, no fixture module, no ground? */

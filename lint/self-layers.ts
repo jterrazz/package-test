@@ -46,9 +46,11 @@ export const FRAMEWORK_LAYERS = {
             config: ['@jterrazz/typescript/config'],
             context: [],
             // A scratch folder ends with the test that asked for it (vitest's
-            // `onTestFinished`); the yaml document is the one yaml engine.
-            files: ['vitest', 'yaml'],
+            // `onTestFinished`).
+            files: ['vitest'],
             refusals: [],
+            // The yaml document is the one yaml engine.
+            yaml: ['yaml'],
         },
         imports: ['kernel/'],
     },
@@ -144,7 +146,7 @@ export const FRAMEWORK_LAYERS = {
             'kernel/files/spec-path',
             // Every gate judges the tree the runtime reads: what git does not ignore.
             'kernel/files/git-tree',
-            'kernel/files/yaml-document',
+            'kernel/yaml/document',
             // The checker reads the `test` section by the runtime's own reader,
             // Loading the file synchronously itself, since every pass is sync.
             'kernel/config/settings',
