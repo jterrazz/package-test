@@ -25,7 +25,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 | [19 — Linting](19-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED catalogue of the rules a consumer meets                                   |
 | [20 — Spec documents](20-documents.md)      | The `<case>.spec.yaml` format of the cli facet and the lint rules: one file one test, the keys, paths, the three doors, update                                    |
 
-The decisions this package alone took stand in [`decisions/`](decisions/), numbered in the order they were taken, the mold `_template.md` beside them. A decision that spans several repositories belongs to the corpus that spans them. The API is the types the package publishes; no page restates it.
+The decisions this package alone took stand in [`decisions/`](decisions/), numbered in the order they were taken, the mold `_template.md` beside them. Neither 03 nor `decisions/` ships in the tarball, so from inside an install read them in the repository, at <https://github.com/jterrazz/package-test/tree/main/docs> ([04 — Operating](04-operating.md#what-leaves-the-tree)). A decision that spans several repositories belongs to the corpus that spans them. The API is the types the package publishes; no page restates it.
 
 ## How to read it
 
