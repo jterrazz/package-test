@@ -7,9 +7,7 @@ import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
 import { findContainersByLabel, inspectContainer, removeContainers } from './docker-cli.js';
 
-/**
- * Raw output from a command execution, including exit code and captured output streams.
- */
+/** Raw output of a command: exit code and captured streams. */
 export type CliOutput = {
     /** Process exit code (0 = success). */
     exitCode: number;
@@ -19,19 +17,13 @@ export type CliOutput = {
     stderr: string;
 };
 
-/**
- * Configuration for the docker-aware cli mode. When set on a cli
- * specification, the runner generates a test-run id, injects it into the
- * child env under `envVar`, then queries Docker for every container carrying
- * `testRunLabel=<id>` after the command exits.
- */
+/** The docker-aware cli mode: containers carrying `testRunLabel=<id>` are found after the command exits. */
 export type DockerSpecConfig = {
     envVar: string;
     nameLabel: string;
     testRunLabel: string;
 };
 
-/** What a command's result publishes, as the capability matrix rows it states — `.exec()`'s and `.run()`'s alike. */
 export const CLI_RESULT_ROWS: readonly MatrixRow[] = [
     { group: 'Result accessor', name: '.stdout', probe: 'result.stdout' },
     { group: 'Result accessor', name: '.stderr', probe: 'result.stderr' },
@@ -55,20 +47,7 @@ type CapturedContainer = {
     inspect: unknown;
 };
 
-/**
- * Result from a command action (`.exec()`).
- *
- * When the runner was configured with a `docker` option, the result also
- * exposes container accessors and participates in `Symbol.asyncDispose`
- * cleanup. The Docker shell-outs are **lazy**: a test that never calls
- * `.container(...)` never queries the Docker daemon, so command-only tests
- * pay zero Docker cost even when the runner is Docker-aware.
- *
- * Dispose always runs one final label-filtered `docker ps` to catch
- * containers that were spawned during `.exec` but never asserted on —
- * tests still get leak-free cleanup even if they forget to reach into
- * a container.
- */
+/** Result of `.exec()`; with `docker`, containers are queried lazily and removed on dispose. */
 export class CliResult extends BaseResult {
     private readonly commandOutput: CliOutput;
     private containersCache: Map<string, CapturedContainer> | null = null;
@@ -92,7 +71,6 @@ export class CliResult extends BaseResult {
         this.transform = options.transform;
     }
 
-    /** The process exit code. */
     get exitCode(): number {
         return this.commandOutput.exitCode;
     }
@@ -129,17 +107,7 @@ export class CliResult extends BaseResult {
         return new FilesystemAccessor(this.workDir, this.testDir, this.captures);
     }
 
-    /**
-     * Look up a container the command spawned during this run by the value of
-     * its name-label (as declared in the `docker.nameLabel` of the
-     * `specification.cli()` options).
-     * First access triggers a one-shot `docker ps` + `docker inspect`
-     * query and caches the result for the rest of the result's lifetime.
-     * Tests that don't call this never touch Docker.
-     *
-     * Returns an accessor with `.exists === false` when no container
-     * carries that name — callers can still assert absence without a try.
-     */
+    /** A container the command spawned, by its name-label; `.exists` is `false` when none carries it. */
     container(name: string): ContainerAccessor {
         this.ensureDockerAware('container');
         this.loadContainers();
@@ -161,10 +129,7 @@ export class CliResult extends BaseResult {
         if (!this.dockerConfig || !this.testRunId) {
             return;
         }
-        // If the test touched `.container(...)` we already have the id set.
-        // Otherwise re-query once to catch containers spawned during `.exec`
-        // that the test never asserted on — still clean them up so tests
-        // running in parallel never collide.
+        // Re-query when the test never asked: containers it never asserted on are still removed.
         const ids =
             this.containersCache === null
                 ? findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId)

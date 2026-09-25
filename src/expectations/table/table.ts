@@ -1,35 +1,17 @@
 import { CaptureScope } from '../tokens/match.js';
 
-/** A table as a whole-table comparison reads it: every column, in the table's order, and every row. */
 export type TableContent = { columns: string[]; rows: unknown[][] };
 
-/** A cell as a value written in place can state it: an instant is its ISO text. */
 function comparableCell(cell: unknown): unknown {
     return cell instanceof Date ? cell.toISOString() : cell;
 }
 
-/**
- * The query side of a database, as a table accessor reads it — what every
- * database a chain declares offers.
- */
 export type TableSource = {
-    /** The table's columns, in the order the table declares them. */
     columns: (table: string) => Promise<string[]>;
-    /** The table's rows, as arrays of the named columns' values. */
     query: (table: string, columns: string[]) => Promise<unknown[][]>;
 };
 
-/**
- * Read-only accessor for a database table after a specification run.
- *
- * Assertions go through `expect()` (async — they query the database), and the
- * table is compared WHOLE — every column, in the table's order, every row:
- *
- *     await expect(result.table('users', { database: 'db' })).toMatch([
- *         ['{{int}}', 'Alice', 'alice@test.com'],
- *     ]);
- *     await expect(result.table('users', { database: 'db' })).toBeEmpty();
- */
+/** Read-only accessor for a database table, compared whole: every column, every row. */
 export class TableAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
@@ -49,11 +31,7 @@ export class TableAccessor {
         return await this.db.query(this.name, columns);
     }
 
-    /**
-     * The whole table, as the whole-table `toMatch` compares it.
-     *
-     * @internal
-     */
+    /** @internal */
     async content(): Promise<TableContent> {
         const columns = await this.db.columns(this.name);
         if (columns.length === 0) {

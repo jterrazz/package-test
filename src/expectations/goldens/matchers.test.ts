@@ -22,15 +22,7 @@ const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 
 const WORKDIR = '/tmp/spec-run-abcdef';
 
-/**
- * Update mode ON and a fresh isolated scratch test-dir, both undone when the
- * test ends (the preset unstubs the env) — the Given of the per-subject write gate (D13). The stream
- * subject is covered end-to-end by the cli assertions specs; the json,
- * response and tree subjects pin the SAME gate by stubbing TEST_UPDATE=1 and
- * asserting the fixture on disk is never created or overwritten when
- * `{ frozen: true }` is set — the invariant that keeps a deliberately-wrong
- * negative fixture survivable across update runs.
- */
+/** Update mode on in a scratch test-dir, both undone when the test ends. */
 function updateModeScratch(): string {
     vi.stubEnv('TEST_UPDATE', '1');
     const scratch = mkdtempSync(join(tmpdir(), 'frozen-gate-'));
@@ -40,7 +32,6 @@ function updateModeScratch(): string {
     return scratch;
 }
 
-/** A text/plain reply whose text would parse as JSON. */
 function plainCount(dir: string): ResponseAccessor {
     return new ResponseAccessor(
         { body: '42', headers: { 'content-type': 'text/plain' }, status: 200 },
@@ -48,7 +39,6 @@ function plainCount(dir: string): ResponseAccessor {
     );
 }
 
-/** A scratch directory holding `expected/count.http` with `content`, removed afterwards. */
 function goldenDir(content: string): { dir: string; read: () => string } {
     const dir = mkdtempSync(join(tmpdir(), 'untyped-golden-'));
     onTestFinished(() => {
@@ -60,13 +50,10 @@ function goldenDir(content: string): { dir: string; read: () => string } {
     return { dir, read: () => readFileSync(path, 'utf8') };
 }
 
-/** The whole-result comparison as a test calls it: a value, its options, and a stack of the test's making. */
 type Whole = (expected: unknown, options: unknown, stack: string) => unknown;
 
-/** The comparison as it is registered: a value, and the call the router hands it. */
 type Registered = (expected: unknown, call: { options: unknown; stack: string }) => unknown;
 
-/** The registered whole-result comparison on `subject`, negated or not. */
 function wholeOf(subject: unknown, negated = false): Whole {
     // oxlint-disable-next-line vitest/valid-expect -- the assertion's matcher is the registered comparison, called below by the name no member access spells
     const assertion = expect(subject);
@@ -75,15 +62,11 @@ function wholeOf(subject: unknown, negated = false): Whole {
     return (expected, options, stack) => target[WHOLE_MATCHER]?.(expected, { options, stack });
 }
 
-/**
- * A scratch test holding `call` on its second line, and the stack a
- * `toMatch` standing there would hand the comparison. Removed afterwards.
- */
 function scratchTest(call: string): { file: string; read: () => string; stack: string } {
     const scratch = mkdtempSync(join(tmpdir(), 'whole-in-place-'));
     const testFile = join(scratch, 'scratch.test.ts');
     writeFileSync(testFile, `test('records', async () => {\n    ${call}\n});\n`);
-    // A scratch test is read back by the test that wrote it: written at once, never left for the run's end.
+    // A scratch test is read back by the test that wrote it: written at once.
     deferRewritesTo(null);
     onTestFinished(() => {
         rmSync(scratch, { force: true, recursive: true });
@@ -96,11 +79,7 @@ function scratchTest(call: string): { file: string; read: () => string; stack: s
     };
 }
 
-/**
- * Uuids in an order no test can predict from their names, drawn from a fixed
- * sequence so every run draws the same ones: what a table keyed by random
- * ids hands back, without sampling randomness.
- */
+/** A fixed sequence of uuids in an order no test predicts from their names. */
 function uuidDraw(): () => string {
     let state = 7;
     return () => {
@@ -109,7 +88,6 @@ function uuidDraw(): () => string {
     };
 }
 
-/** A database double holding one table, `users`, with the rows given. */
 function usersTable(rows: unknown[][]): DatabasePort {
     return {
         columns: async () => await Promise.resolve(['id', 'name', 'created_at']),
@@ -267,7 +245,6 @@ describe('matchers', () => {
         expect(failure).toBeNull();
     });
 
-    // C13 — the 16 ground names are gone: no bridge reads them.
     test("toMatch is vitest's for a value, and the golden for the disk (D14) — a golden named in expected/ is not read from the 16 _expected/ beside it", () => {
         // Given - a spec directory holding only the 16 folder, and a golden it would match
         const specDir = mkdtempSync(join(tmpdir(), 'bridge-'));
@@ -286,9 +263,7 @@ describe('matchers', () => {
         }
     });
 
-    // RUNTIME D14 — `toMatch` routes the disk to the golden, a value handed to a
-    // result subject to the whole-result comparison, and a value it cannot be
-    // compared to is refused naming what the subject takes.
+    // RUNTIME D14 — `toMatch` routes the disk to the golden, and a value to the whole-result comparison or a refusal.
     test("toMatch is vitest's for a value, and the golden for the disk (D14) — a stream is compared whole to a text in place: a RegExp is refused naming its .text", () => {
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m\n', 'stdout', '/tmp');

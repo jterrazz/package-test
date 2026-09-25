@@ -44,7 +44,6 @@ describe('match', () => {
         expect(structuralEquals(match.includes('classify'), 'please rank this', scope)).toBeFalsy();
         expect(structuralEquals(match.includes('42'), 42, scope)).toBeFalsy();
 
-        // And - it renders as its own form, outside the `{{token}}` vocabulary
         expect(String(match.includes('classify'))).toBe('{{includes:classify}}');
     });
 
@@ -99,10 +98,8 @@ describe('match', () => {
         expect(structuralEquals(match.ip(), '127.0.0.1', scope)).toBeTruthy();
         expect(structuralEquals(match.ip(), '255.255.255.255', scope)).toBeTruthy();
         expect(structuralEquals(match.ip(), 'localhost', scope)).toBeFalsy();
-        // Each octet is bounded 0-255 (parity with {{port}}) — 999 is rejected
         expect(structuralEquals(match.ip(), '999.1.1.1', scope)).toBeFalsy();
         expect(structuralEquals(match.ip(), '256.0.0.1', scope)).toBeFalsy();
-        // Embedded {{ip}} placeholder enforces the same range
         expect(structuralEquals('host {{ip}}', 'host 10.0.0.8', scope)).toBeTruthy();
         expect(structuralEquals('host {{ip}}', 'host 300.0.0.8', scope)).toBeFalsy();
         expect(structuralEquals(match.url(), 'https://example.com/x?y=1', scope)).toBeTruthy();

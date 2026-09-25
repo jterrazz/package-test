@@ -1,20 +1,4 @@
-/**
- * A value written in place, read as the text it states.
- *
- * A test writes a multi-line expectation — a response, a stream, a seed — as a
- * template literal indented with the code around it. The indentation belongs to
- * the test, not to the value: a text that opens on a line break is read with
- * that line break dropped, the whitespace the closing backtick's line holds
- * dropped, and the indentation every non-empty line shares removed. A text
- * that does not open on a line break is the value exactly as written.
- *
- * @example
- *   dedent(`
- *       HTTP/1.1 200 OK
- *
- *       {"ok": true}
- *   `) // 'HTTP/1.1 200 OK\n\n{"ok": true}\n'
- */
+/** A text opening on a line break loses that break, the closing line's whitespace and the shared indentation. */
 export function dedent(text: string): string {
     if (!text.startsWith('\n')) {
         return text;

@@ -1,23 +1,5 @@
-/**
- * Structural comparison engine shared by every fixture matcher.
- *
- * Handles three kinds of "expected" values:
- * - plain JSON values → strict deep equality
- * - {@link Matcher} instances (code-side `match.*`)
- * - strings containing `{{placeholder}}` forms (file-side fixtures)
- *
- * One unified `{{token}}` grammar (CONVENTIONS D4) — the same vocabulary
- * works in `expected/*.http` (body and headers), `expected/*.json`, and
- * text snapshots (`expected/*.txt`).
- *
- * Ref captures (`match.ref(name)` / `{{type#name}}`) are recorded in the
- * {@link CaptureScope} supplied by the caller.
- */
-
 import { CaptureScope, Matcher, TOKEN_KINDS } from './match.js';
 import type { MatcherKind } from './match.js';
-
-// ── Token pattern sources (embedded-in-string contexts) ──
 
 const UUID_SOURCE = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';
 const ULID_SOURCE = '[0-9A-HJKMNP-TV-Z]{26}';
@@ -32,11 +14,9 @@ const SEMVER_SOURCE = String.raw`\d+\.\d+\.\d+(?:-[0-9A-Za-z.-]+)?(?:\+[0-9A-Za-
 const SHA_SOURCE = '[0-9a-f]{7,64}';
 const HEX_SOURCE = '[0-9a-fA-F]+';
 const BASE64_SOURCE = '[A-Za-z0-9+/]+={0,2}';
-// 0-65535 enforced in the pattern itself so embedded {{port}} placeholders
-// reject out-of-range values ("99999") consistently with isPortValue.
+// The range lives in the pattern, so an embedded `{{port}}` rejects "99999".
 const PORT_SOURCE = String.raw`(?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|\d{1,4})`;
-// Each octet is 0-255, enforced in the pattern itself so embedded {{ip}}
-// placeholders reject out-of-range values ("999.1.1.1") — parity with {{port}}.
+// Each octet 0-255 in the pattern itself, so embedded `{{ip}}` rejects "999.1.1.1".
 const IP_OCTET = String.raw`(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)`;
 const IP_SOURCE = String.raw`(?:${IP_OCTET}\.){3}${IP_OCTET}`;
 const URL_SOURCE = String.raw`https?:\/\/[^\s"'<>]+`;
@@ -75,13 +55,11 @@ const PLACEHOLDER_RE = new RegExp(
     'gu',
 );
 
-/** Whether a fixture string contains at least one `{{placeholder}}`. */
 export function hasPlaceholders(value: string): boolean {
     PLACEHOLDER_RE.lastIndex = 0;
     return PLACEHOLDER_RE.test(value);
 }
 
-/** Key-order-independent stringification for captured-object comparison. */
 function stableStringify(value: unknown): string {
     if (Array.isArray(value)) {
         return `[${value.map((item) => stableStringify(item)).join(',')}]`;
@@ -99,8 +77,7 @@ function capturedEquals(a: unknown, b: unknown): boolean {
     if (Object.is(a, b)) {
         return true;
     }
-    // Cross-context captures: a number captured from JSON must equal its
-    // String form captured from text ("42" vs 42).
+    // Cross-context captures: a number from JSON equals its string form from text.
     if (
         (typeof a === 'number' && typeof b === 'string') ||
         (typeof a === 'string' && typeof b === 'number')
@@ -108,8 +85,7 @@ function capturedEquals(a: unknown, b: unknown): boolean {
         return String(a) === String(b);
     }
     if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
-        // Stable (sorted-key) form: two captures of the same object must be
-        // equal regardless of key insertion order.
+        // Sorted-key form: two captures of one object are equal whatever the key order.
         return stableStringify(a) === stableStringify(b);
     }
     return false;
@@ -196,18 +172,14 @@ function matcherMatches(matcher: Matcher, actual: unknown, scope: CaptureScope):
 }
 
 type ParsedPlaceholderString = {
-    /** Whole-string single placeholder (typed match against any actual). */
     single: null | { kind: MatcherKind; ref?: string | undefined };
-    /** Embedded form — regex over the string with one group per placeholder. */
     pattern: RegExp;
     refs: { index: number; kind: MatcherKind; ref?: string | undefined }[];
-    /** Unanchored source of {@link pattern} — for embedding in a larger regex. */
     source: string;
 };
 
 function placeholderSource(kind: MatcherKind, scope: CaptureScope): string {
     if (kind === 'workdir') {
-        // The exact cwd of the spec — known by the framework, never a pattern.
         return scope.workdir === undefined ? '(?!)' : escapeRegExp(scope.workdir);
     }
     const source = EMBEDDED_SOURCES[kind];
@@ -247,11 +219,6 @@ function parsePlaceholderString(expected: string, scope: CaptureScope): ParsedPl
     return { pattern: new RegExp(`^${source}$`, 'u'), refs, single, source };
 }
 
-/**
- * Unanchored regex source matching a fixture string — plain text escaped
- * verbatim, each `{{token}}` expanded to its embedded grammar. Used to route
- * declared `.http` intercept paths (`/articles/{{uuid}}`) as URL patterns.
- */
 export function placeholderPatternSource(expected: string): string {
     return parsePlaceholderString(expected, new CaptureScope()).source;
 }
@@ -259,8 +226,6 @@ export function placeholderPatternSource(expected: string): string {
 function placeholderStringMatches(expected: string, actual: unknown, scope: CaptureScope): boolean {
     const parsed = parsePlaceholderString(expected, scope);
 
-    // Whole-string single placeholder: typed match against the raw actual
-    // value (numbers stay numbers, objects allowed for {{any}}).
     if (parsed.single) {
         if (!kindMatches(parsed.single.kind, actual, scope)) {
             return false;
@@ -271,7 +236,6 @@ function placeholderStringMatches(expected: string, actual: unknown, scope: Capt
         return true;
     }
 
-    // Embedded placeholders: string-level regex match.
     if (typeof actual !== 'string' && typeof actual !== 'number') {
         return false;
     }
@@ -295,11 +259,7 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
 
-/**
- * Deep structural equality with matcher / placeholder support. Ref captures
- * are recorded in `scope` in traversal order (arrays left-to-right, object
- * keys in expected-key order).
- */
+/** Captures are recorded in traversal order: arrays left to right, object keys in expected-key order. */
 export function structuralEquals(expected: unknown, actual: unknown, scope: CaptureScope): boolean {
     if (expected instanceof Matcher) {
         return matcherMatches(expected, actual, scope);
@@ -329,14 +289,7 @@ export function structuralEquals(expected: unknown, actual: unknown, scope: Capt
     return Object.is(expected, actual);
 }
 
-/**
- * Deep structural SUBSET match (toMatchObject-style) with matcher /
- * placeholder support. Plain objects match when every expected key is present
- * and recursively subset-matches — the actual value may carry extra keys.
- * Arrays require equal length with each element subset-matched. Leaves fall
- * back to {@link structuralEquals} semantics (matchers, placeholders, strict
- * equality). Used by request-body filters on intercept triggers.
- */
+/** Subset match: extra keys on the actual value are allowed; arrays still need equal length. */
 export function structuralSubset(expected: unknown, actual: unknown, scope: CaptureScope): boolean {
     if (expected instanceof Matcher) {
         return matcherMatches(expected, actual, scope);
@@ -361,10 +314,6 @@ export function structuralSubset(expected: unknown, actual: unknown, scope: Capt
     return Object.is(expected, actual);
 }
 
-/**
- * Multi-line text comparison with `{{token}}` support — used by text
- * snapshots (`expected/*.txt`). Without placeholders this is strict equality.
- */
 export function textEquals(expected: string, actual: string, scope: CaptureScope): boolean {
     if (!hasPlaceholders(expected)) {
         return expected === actual;
@@ -372,13 +321,7 @@ export function textEquals(expected: string, actual: string, scope: CaptureScope
     return placeholderStringMatches(expected, actual, scope);
 }
 
-/**
- * Substring comparison with `{{token}}` support — the `contains` half of the
- * `files:` assertions of a spec document. Without placeholders this is
- * `String.includes`; with them the fixture text becomes an UNANCHORED pattern,
- * so `wrote {{path}}` is found inside a larger file, and its `#ref` captures are
- * recorded exactly as a whole-text comparison records them.
- */
+/** With placeholders the fixture text becomes an unanchored pattern. */
 export function textContains(expected: string, actual: string, scope: CaptureScope): boolean {
     if (!hasPlaceholders(expected)) {
         return actual.includes(expected);
@@ -393,10 +336,6 @@ export function textContains(expected: string, actual: string, scope: CaptureSco
     );
 }
 
-/**
- * Render an expected value for failure diffs and serialization: Matcher
- * instances become their placeholder text, everything else is untouched.
- */
 export function renderExpected(value: unknown): unknown {
     if (value instanceof Matcher) {
         return value.toString();
@@ -412,13 +351,7 @@ export function renderExpected(value: unknown): unknown {
     return value;
 }
 
-/**
- * Substitute the framework-known cwd (`workdir`) for its `{{workdir}}` token in
- * every string leaf of a structured value. The structural mirror of the text
- * path's `actual.replaceAll(workdir, '{{workdir}}')` — so a golden written under
- * `TEST_UPDATE=1` stores the token, not a run-specific temp path (CONVENTIONS
- * D5). A no-op when `workdir` is undefined (no cwd, e.g. api/job mode).
- */
+/** So a golden written under `TEST_UPDATE=1` stores the token, not a temp path (D5). */
 function substituteWorkdirDeep(value: unknown, workdir: string): unknown {
     if (typeof value === 'string') {
         return value.replaceAll(workdir, '{{workdir}}');
@@ -434,16 +367,6 @@ function substituteWorkdirDeep(value: unknown, workdir: string): unknown {
     return value;
 }
 
-/**
- * Update-mode merge: rewrite a fixture from the actual output while
- * preserving every segment of the previous fixture that was covered by a
- * placeholder (and still matches the actual value).
- *
- * Token preservation is symmetric with the text path (CONVENTIONS D5): a
- * previous `{{placeholder}}` (including `{{workdir}}`) that still matches the
- * RAW actual value is kept; every other leaf is taken from the actual output
- * with the framework-known cwd substituted back to `{{workdir}}`.
- */
 export function mergePreservingPlaceholders(
     previous: unknown,
     actual: unknown,
@@ -454,8 +377,7 @@ export function mergePreservingPlaceholders(
         workdir === undefined ? value : substituteWorkdirDeep(value, workdir);
 
     function merge(prev: unknown, act: unknown): unknown {
-        // Placeholders match against the RAW actual (so `{{workdir}}` sees the
-        // real cwd); a non-matching leaf falls back to the substituted actual.
+        // Placeholders match the raw actual, so `{{workdir}}` sees the real cwd.
         if (typeof prev === 'string' && hasPlaceholders(prev)) {
             return placeholderStringMatches(prev, act, scope) ? prev : subst(act);
         }
@@ -476,21 +398,7 @@ export function mergePreservingPlaceholders(
     return merge(previous, actual);
 }
 
-/**
- * Update-mode merge for text snapshots: a previous line whose placeholders
- * still match an actual line is preserved; every other line is taken from the
- * actual output. Values the framework knows to be dynamic (`{{workdir}}`) are
- * substituted automatically (CONVENTIONS D5).
- *
- * Pairing is by **pattern, not by line index**. The aligned line is tried
- * first, so a golden that still lines up comes back byte-identical; what is
- * left over is then re-paired by matching each remaining previous placeholder
- * line against each unresolved actual line, in file order. That is what makes a
- * MID-FILE INSERTION safe: inserting a line shifts everything below it, and the
- * shifted `{{duration}}` / `{{uuid}}` lines are recognised where they landed
- * instead of being rewritten as raw values. Each previous line is used at most
- * once, so two identical placeholder lines cannot collapse into one.
- */
+/** Paired by pattern, not line index: a mid-file insertion keeps the shifted token lines. Each previous line is used once. */
 export function mergeTextPreservingPlaceholders(
     previous: null | string,
     actual: string,
@@ -508,9 +416,6 @@ export function mergeTextPreservingPlaceholders(
     const rawLines = actual.split('\n');
     const consumed = new Set<number>();
 
-    // A previous line covers an actual one when, read as a placeholder
-    // pattern, it matches it — either the substituted form (a `{{workdir}}`
-    // token against the token) or the raw one (the token against the real cwd).
     const covers = (prevIndex: number, actualIndex: number): boolean => {
         const prev = prevLines[prevIndex];
         if (prev === undefined || !hasPlaceholders(prev)) {

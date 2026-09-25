@@ -1,13 +1,3 @@
-/**
- * Code-side dynamic-value matchers (`match.*`) and the capture scope shared
- * by every assertion of a single spec execution.
- *
- * Matchers are used inside `toMatchRows` rows and any structural comparison;
- * their file-side twins are the `{{placeholder}}` forms in `expected/*.http`
- * fixtures (body AND headers), `expected/*.json` files, and text snapshots
- * (`expected/*.txt`). One grammar, one vocabulary (CONVENTIONS D4).
- */
-
 /** The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. */
 export type MatcherKind =
     | 'any'
@@ -35,7 +25,6 @@ export type MatcherKind =
     | 'uuid'
     | 'workdir';
 
-/** Every kind usable as a `{{token}}` in fixture files (all but ref/regex/includes). */
 export const TOKEN_KINDS = [
     'any',
     'base64',
@@ -60,13 +49,9 @@ export const TOKEN_KINDS = [
     'workdir',
 ] as const;
 
-/** A token kind valid inside a fixture `{{...}}` placeholder. */
 export type TokenKind = (typeof TOKEN_KINDS)[number];
 
-/**
- * A dynamic-value matcher. Created via the {@link match} factories — never
- * constructed directly by user code.
- */
+/** A dynamic-value matcher, created through the `match` factories. */
 export class Matcher {
     /** For kind 'includes': the substring the actual value must contain. */
     readonly includes?: string | undefined;
@@ -119,7 +104,6 @@ export class Matcher {
     }
 }
 
-/** A no-argument matcher factory — what every typed entry of `match` is. */
 type TypedMatcher = () => Matcher;
 
 const typed =
@@ -127,20 +111,7 @@ const typed =
     (): Matcher =>
         new Matcher(kind);
 
-/**
- * Dynamic-value matchers for structural comparisons — the code-side mirror of
- * the `{{token}}` fixture grammar (CONVENTIONS D4).
- *
- * @example
- *   await expect(result.table('users', { database: 'db' })).toMatchRows({
- *       columns: ['id', 'name'],
- *       rows: [[match.uuid(), 'Alice']],
- *   });
- */
-/**
- * The matcher roster: one no-argument factory per token kind, plus the three
- * code-only forms the `{{token}}` grammar does not carry.
- */
+/** Dynamic-value matchers, the code-side mirror of the `{{token}}` grammar (D4). */
 export type MatchFactories = Record<TokenKind, TypedMatcher> & {
     includes: (substring: string) => Matcher;
     ref: (name: string, options?: { not?: string }) => Matcher;
@@ -158,20 +129,11 @@ export const match: MatchFactories = {
     duration: typed('duration'),
     /** Matches an email address. */
     email: typed('email'),
-    /**
-     * Matches a float. In JSON contexts any finite number passes (JSON does
-     * not distinguish `42` from `42.0`); in text contexts the decimal part
-     * is required (`4.2`, never `42`).
-     */
+    /** Matches a float: any finite number in JSON; in text the decimal part is required. */
     float: typed('float'),
     /** Matches a hexadecimal string. */
     hex: typed('hex'),
-    /**
-     * Matches a string CONTAINING the given substring. Code-only, like
-     * {@link match.regex} — the `{{token}}` fixture vocabulary does not grow.
-     * The explicit way to match part of a string where a stub string filter
-     * (`openai.chat({ user })`) means exact equality.
-     */
+    /** Matches a string containing the substring; code-only, like `match.regex`. */
     includes: (substring: string): Matcher => new Matcher('includes', { includes: substring }),
     /** Matches an integer (or an integer string in text contexts). */
     int: typed('int'),
@@ -185,12 +147,7 @@ export const match: MatchFactories = {
     path: typed('path'),
     /** Matches a TCP/UDP port number (0-65535). */
     port: typed('port'),
-    /**
-     * Capture-and-compare. The first occurrence of `ref(name)` captures the
-     * actual value; every later occurrence must strictly equal the capture.
-     * `{ not: other }` additionally asserts inequality with the capture named
-     * `other`. Scope: the current spec execution (reset per chain).
-     */
+    /** Capture-and-compare: the first `ref(name)` captures, every later one must equal it; `{ not }` asserts inequality. */
     ref: (name: string, options?: { not?: string }): Matcher =>
         new Matcher('ref', { notRef: options?.not, refName: name }),
     /** Matches a string against the given regular expression. */
@@ -213,17 +170,10 @@ export const match: MatchFactories = {
     workdir: typed('workdir'),
 };
 
-/**
- * Named captures recorded by `match.ref()` / `{{type#ref}}` placeholders.
- * One scope lives on each spec result — every assertion chained off the same
- * result shares it, and a new chain starts fresh.
- */
+/** Named captures of `match.ref()` / `{{type#ref}}`, one scope per spec result. */
 export class CaptureScope {
     private readonly values = new Map<string, unknown>();
-    /**
-     * The exact working directory of the current spec, when the framework
-     * knows it (cli mode). Drives the `{{workdir}}` token / `match.workdir()`.
-     */
+    /** The spec's working directory when known (cli mode), for `{{workdir}}`. */
     workdir?: string | undefined;
 
     constructor(workdir?: string) {
@@ -242,7 +192,7 @@ export class CaptureScope {
         this.values.set(name, value);
     }
 
-    /** A copy to try a comparison on: what it captures stays in the copy until {@link adopt}ed. */
+    /** A copy to try a comparison on: its captures stay there until adopted. */
     fork(): CaptureScope {
         const copy = new CaptureScope(this.workdir);
         for (const [name, value] of this.values) {

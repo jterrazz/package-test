@@ -10,16 +10,8 @@ import {
     WHOLE_MATCHER,
 } from './text-assertions.js';
 
-/**
- * The framework routes `toMatch`'s disk arguments to the golden and leaves every
- * value to vitest — identically on both sides of the browser seam, since both
- * builds call the same function.
- */
-
-/** What `overwriteMethod` is handed: the original, and the method that replaces it. */
 type Overwrite = (original: (...args: unknown[]) => unknown) => (...args: unknown[]) => unknown;
 
-/** A chai whose `toMatch` records who answered, over `subject`. */
 function chaiWith(
     answered: string[],
     subject?: unknown,
@@ -55,7 +47,6 @@ function chaiWith(
     };
 }
 
-/** The `toMatch` a chai carries once the route is laid over it. */
 function toMatchOf(chai: ReturnType<typeof chaiWith>): (this: unknown, value: unknown) => void {
     return chai.Assertion.prototype.toMatch as (this: unknown, value: unknown) => void;
 }

@@ -1,35 +1,18 @@
 import type { CaptureScope } from '../tokens/match.js';
 import { structuralEquals } from '../tokens/structural.js';
 
-/**
- * A table's rows against the rows a test states.
- *
- * A table has no order of its own: the rows a query returns come back in
- * whatever order the database keeps them, and a first column of random ids
- * orders them differently run to run. So rows compare as a multiset by
- * default — each stated row paired with a row of the table it matches, cell
- * by cell through the token grammar — and in order only when order is the
- * claim, `{ ordered: true }`, the order of the table's first column.
- *
- * A token that captures (`{{uuid#event}}`) binds on the pairing that holds:
- * candidate pairs are tried on a fork of the scope, and only the pairing the
- * comparison settles on writes its captures back.
- */
+/** A table has no order: rows compare as a multiset unless `{ ordered: true }`. Captures bind only on the pairing the comparison settles on. */
 
-/** Rows as a value written in place states them: one array of cells per row. */
 export type Rows = readonly (readonly unknown[])[];
 
-/** One line of a table comparison: a stated row, a row of the table, or both — and whether they match. */
 export type RowPair = {
     actual?: undefined | unknown[];
     expected?: readonly unknown[] | undefined;
     matched: boolean;
 };
 
-/** A table comparison: whether it passes, and the rows paired for its diff and its rewrite. */
 export type RowPairing = { pairs: RowPair[]; pass: boolean };
 
-/** Does a stated row match a row of the table, captures recorded in `scope`? */
 function rowFits(expected: readonly unknown[], actual: unknown[], scope: CaptureScope): boolean {
     return (
         expected.length === actual.length &&
@@ -37,7 +20,6 @@ function rowFits(expected: readonly unknown[], actual: unknown[], scope: Capture
     );
 }
 
-/** How many cells of a stated row match a row of the table — what pairs two rows that differ. */
 function fittingCells(
     expected: readonly unknown[],
     actual: unknown[],
@@ -47,7 +29,6 @@ function fittingCells(
         .length;
 }
 
-/** Row by row, in the table's order. */
 function pairInOrder(expected: Rows, actual: unknown[][], scope: CaptureScope): RowPairing {
     const count = Math.max(expected.length, actual.length);
     const pairs: RowPair[] = [];
@@ -60,11 +41,6 @@ function pairInOrder(expected: Rows, actual: unknown[][], scope: CaptureScope): 
     return { pairs, pass: pairs.every((pair) => pair.matched) };
 }
 
-/**
- * The most stated rows that can each take a row of their own, by augmenting
- * paths over what each could match alone: row of the table → the stated row
- * that holds it.
- */
 function maximumMatching(
     fits: readonly (readonly boolean[])[],
     width: number,
@@ -90,11 +66,6 @@ function maximumMatching(
     return taken;
 }
 
-/**
- * A pairing of every stated row with a row of its own that holds with the
- * captures shared across rows — searched in the stated order, each candidate
- * tried on a fork — or `undefined` when none does.
- */
 function consistentPairing(
     expected: Rows,
     actual: unknown[][],
@@ -135,10 +106,8 @@ function consistentPairing(
     return chosen;
 }
 
-/** What no match paired: the stated rows, and the rows of the table, by index. */
 type Leftovers = { rows: number[]; stated: number[] };
 
-/** The rows no match paired, each stated row with the unpaired row of the table it resembles most. */
 function pairLeftovers(
     expected: Rows,
     actual: unknown[][],
@@ -166,7 +135,6 @@ function pairLeftovers(
     return paired;
 }
 
-/** As a multiset: every stated row paired with a row of the table it matches, whatever their order. */
 function pairAsMultiset(expected: Rows, actual: unknown[][], scope: CaptureScope): RowPairing {
     const fits = expected.map((row) =>
         actual.map((candidate) => rowFits(row, candidate, scope.fork())),
@@ -206,11 +174,6 @@ function pairAsMultiset(expected: Rows, actual: unknown[][], scope: CaptureScope
     return { pairs, pass: false };
 }
 
-/**
- * Pair the rows a test states with the rows a table holds — as a multiset,
- * or in the table's order when `ordered` — for the verdict, the diff, and the
- * rows update mode writes.
- */
 export function pairRows(
     expected: Rows,
     actual: unknown[][],

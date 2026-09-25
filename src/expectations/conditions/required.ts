@@ -1,16 +1,4 @@
-/**
- * The value, or a failure that says what was missing and why it mattered.
- *
- * A test reaching into a captured structure — a row, a header, the third
- * element of a list — meets `T | undefined` and has to do something about it.
- * The two things it usually does are both wrong: `!` erases the question, and
- * an `if (!x) throw new Error('missing')` re-states the same three lines in
- * every repository. `required` is that gesture with the reason attached, so the failure reads as
- * a sentence rather than as a `TypeError` two frames further down.
- *
- * @example
- *   const id = required(result.response.body.id, 'the creation reply carries the new id');
- */
+/** The value, or a failure naming what was missing and why it mattered. */
 export function required<T>(value: null | T | undefined, why: string): T {
     if (value === null || value === undefined) {
         throw new Error(

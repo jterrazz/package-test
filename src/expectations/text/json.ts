@@ -1,22 +1,7 @@
 import { CaptureScope } from '../tokens/match.js';
 import { stripAnsiCodes } from './ansi.js';
 
-/**
- * Read-only accessor for a JSON payload parsed from a text stream — stdout,
- * a fetched body, a page's head, a device's screen.
- *
- * Lazily parses the JSON on first use; parse errors are deferred until the
- * value is read so that callers can still read the raw stream text without
- * triggering a throw.
- *
- * ANSI escape sequences are stripped by default before `JSON.parse`
- * (CONVENTIONS D6). When a `transform` is configured on the spec runner, it
- * runs on the stripped text — an escape hatch for application noise not
- * covered by the `{{token}}` grammar.
- *
- * Assertions go through `expect()`: `expect(result.json).toMatch('name.json')`
- * (deep-equal against `expected/<name>`, with `{{placeholder}}` support).
- */
+/** Read-only accessor for a JSON payload; parsed lazily, so the raw text stays readable when it is not JSON. */
 export class JsonAccessor<Value = unknown> {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
@@ -45,13 +30,7 @@ export class JsonAccessor<Value = unknown> {
         this.captures = options.captures ?? new CaptureScope();
     }
 
-    /**
-     * The parsed JSON value. Throws if the text is not valid JSON.
-     *
-     * `Value` is `unknown` unless the subject that produced this accessor
-     * knows better — `.call<T>()` does, and hands its T straight through so a
-     * one-field reading needs no cast in the test.
-     */
+    /** The parsed JSON value; throws when the text is not valid JSON. */
     get value(): Value {
         const stripped = stripAnsiCodes(this.rawText);
         const source = this.transform ? this.transform(stripped) : stripped;

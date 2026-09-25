@@ -4,7 +4,6 @@ import { CaptureScope } from '../tokens/match.js';
 import { textEquals } from '../tokens/structural.js';
 import { formatResponseDiff, formatStdoutDiff } from './diff.js';
 
-/** The diff as a reader sees it, ANSI stripped. */
 const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
 
 const tokenAware = (expected: string, actual: string): boolean =>

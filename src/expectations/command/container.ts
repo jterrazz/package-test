@@ -20,16 +20,7 @@ function readInspectState(inspect: any): { running: boolean; status: string } {
     };
 }
 
-/**
- * Assertion accessor for a single Docker container captured by the docker()
- * spec mode. Mirrors the shape of {@link CliResult} so tests use the same
- * vocabulary (`stdout.toContain`, `file(...).content`, etc.) regardless
- * of where output came from.
- *
- * Sync state (`exists`, `running`, `status`) is derived from the `docker
- * inspect` payload captured at result-construction time. Logs are fetched
- * lazily on first access to `stdout`/`stderr`.
- */
+/** Assertion accessor for one Docker container the docker() mode captured. */
 export class ContainerAccessor {
     private cachedLogs: null | string = null;
     private readonly containerId: null | string;
@@ -40,12 +31,7 @@ export class ContainerAccessor {
     private readonly testDir: string;
     private readonly transform?: ((text: string) => string) | undefined;
 
-    /**
-     * Underlying Docker container ID, or `null` if no container was captured
-     * for this name. Useful when a follow-up CLI command needs to reference
-     * the container by id (e.g. `spwn world inspect <id>`). Prefer the other
-     * accessors for common reads — pulling the raw id is the escape hatch.
-     */
+    /** The container id, or `null` when none was captured. */
     get id(): null | string {
         return this.containerId;
     }
@@ -71,10 +57,7 @@ export class ContainerAccessor {
         }
     }
 
-    /**
-     * Raw `docker inspect` object for this container. Throws if the container
-     * was not captured (i.e. `.exists === false`).
-     */
+    /** Raw `docker inspect` object; throws when the container was not captured. */
     get inspect(): JsonAccessor {
         this.requireExists('inspect');
         return new JsonAccessor(JSON.stringify(this.inspectData), 'inspect', this.testDir, {
@@ -98,11 +81,7 @@ export class ContainerAccessor {
         });
     }
 
-    /**
-     * Read a file from inside the container via `docker exec cat`. The
-     * returned object satisfies the same {@link FileAccessor} shape used by
-     * the host filesystem accessor, so tests do not need to learn a new API.
-     */
+    /** A file inside the container, read with `docker exec cat`. */
     file(path: string): FileAccessor {
         const id = this.requireExists('file');
         const exists = execInContainer(id, ['test', '-e', path]).exitCode === 0;
@@ -124,10 +103,7 @@ export class ContainerAccessor {
         };
     }
 
-    /**
-     * Run a shell command inside the container and get back the same
-     * {@link CliResult} used for host-side executions.
-     */
+    /** Run a shell command inside the container. */
     async exec(cmd: string): Promise<CliResult> {
         const id = this.requireExists('exec');
         const commandOutput = execInContainer(id, ['sh', '-c', cmd]);
@@ -156,10 +132,6 @@ export class ContainerAccessor {
     }
 }
 
-/**
- * Build the `docker(containerId)` reader handed out by `specification.api()`
- * and `specification.cli()` — a lazy accessor over `docker inspect`.
- */
 export function createDockerReader(testDir: string): (containerId: string) => ContainerAccessor {
     return (containerId: string): ContainerAccessor => {
         try {

@@ -1,14 +1,7 @@
 import { CaptureScope } from '../tokens/match.js';
 import { walkDirectory } from './directory.js';
 
-/**
- * Read-only accessor for the whole temporary working directory used by a
- * command spec.
- *
- * Assertions go through `expect()` (async — they walk the disk):
- * `await expect(result.filesystem).toMatch('scaffolded')` compares the
- * tree against the fixture directory `expected/<name>/`.
- */
+/** Read-only accessor for the working directory of a command spec. */
 export class FilesystemAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;

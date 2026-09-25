@@ -14,7 +14,6 @@ import {
     writePendingRewrites,
 } from './in-place.js';
 
-/** A scratch test file holding `source`, removed when the test ends. */
 function scratchFile(source: string): string {
     const directory = mkdtempSync(join(tmpdir(), 'in-place-'));
     const file = join(directory, 'scratch.test.ts');
@@ -25,7 +24,6 @@ function scratchFile(source: string): string {
     return file;
 }
 
-/** What a rendered value reads as in a test: a quoted line's value, or a template's text, unescaped. */
 function readRendered(rendered: string): string {
     const quoted: unknown = rendered.startsWith('"') ? JSON.parse(rendered) : undefined;
     if (typeof quoted === 'string') {

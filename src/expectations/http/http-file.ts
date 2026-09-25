@@ -1,29 +1,14 @@
-/**
- * The `.http` grammar — a start line, headers, a blank line, a body — and the
- * response files the goldens judge by. The request files the api facet sends
- * are parsed by `facets/api/request/request-file.ts` on the same sections.
- *
- * Responses (`expected/*.http`) hold the expected status, a SUBSET of
- * headers, and the expected JSON body. Status, headers, and body support
- * `{{placeholder}}` forms:
- *
- *     HTTP/1.1 201 Created
- *     content-type: {{string}}
- *
- *     { "id": "{{uuid#user}}" }
- */
+/** Responses hold the status, a subset of headers and the body; each supports `{{placeholder}}` forms. */
 
 export type ParsedResponseFile = {
     /** Parsed JSON body — or the raw text when the body is not valid JSON. */
     body: unknown;
-    /** True when a body section is present. */
     hasBody: boolean;
     headers: Record<string, string>;
     /** Status token as written — usually numeric, may be a placeholder. */
     status: string;
 };
 
-/** A message's three sections: its start line, its header lines, its body. */
 export function splitSections(content: string): {
     body: string;
     headerLines: string[];
@@ -54,7 +39,6 @@ export function splitSections(content: string): {
     return { body, headerLines, startLine };
 }
 
-/** The header lines as a record — each `Name: value`, refused otherwise. */
 export function parseHeaders(headerLines: string[], fileName: string): Record<string, string> {
     const headers: Record<string, string> = {};
     for (const line of headerLines) {
@@ -67,10 +51,8 @@ export function parseHeaders(headerLines: string[], fileName: string): Record<st
     return headers;
 }
 
-/** How a body is read, by the media type that labels it. */
 export type BodyKind = 'binary' | 'json' | 'sniffed' | 'text';
 
-/** The media types outside `text/*` and `+xml` whose bodies are text. */
 const TEXT_MEDIA_TYPES = new Set([
     'application/javascript',
     'application/x-ndjson',
@@ -80,10 +62,8 @@ const TEXT_MEDIA_TYPES = new Set([
     'application/yaml',
 ]);
 
-/** The top-level types whose bodies are bytes. */
 const BINARY_TOP_LEVEL_TYPES = ['audio/', 'font/', 'image/', 'video/'];
 
-/** The media types outside those top-level types whose bodies are bytes. */
 const BINARY_MEDIA_TYPES = new Set([
     'application/gzip',
     'application/octet-stream',
@@ -97,12 +77,6 @@ const BINARY_MEDIA_TYPES = new Set([
     'application/zip',
 ]);
 
-/**
- * The kind a `content-type` labels: JSON (`application/json`, `+json`),
- * text (`text/*`, `+xml`, and the text media types above), binary (`audio/*`,
- * `font/*`, `image/*`, `video/*` and the binary media types above), or
- * sniffed — any other type, and no type at all.
- */
 export function bodyKind(contentType: string | undefined): BodyKind {
     const media = contentType?.split(';')[0]?.trim().toLowerCase() ?? '';
     if (media === 'application/json' || media.endsWith('+json')) {
@@ -120,12 +94,7 @@ export function bodyKind(contentType: string | undefined): BodyKind {
     return 'sniffed';
 }
 
-/**
- * The value a body's text holds, read by its `content-type`: the surrounding
- * whitespace dropped, then a text type's body as its text, and any other
- * body as the JSON value it parses to — or its text when it is not JSON. A
- * blank text holds no body: `undefined`.
- */
+/** A blank text holds no body: `undefined`. */
 export function readBody(text: string, contentType?: string): unknown {
     const body = text.trim();
     if (body.length === 0) {
@@ -141,16 +110,10 @@ export function readBody(text: string, contentType?: string): unknown {
     }
 }
 
-/** The `content-type` a header map states, whatever the case of its name. */
 function statedContentType(headers: Record<string, string>): string | undefined {
     return Object.entries(headers).find(([name]) => name.toLowerCase() === 'content-type')?.[1];
 }
 
-/**
- * Parse a response `.http` file. First line must be `HTTP/1.1 <status>`. Its
- * body is read by the `content-type` the file states, or by `contentType` —
- * the actual response's — when it states none.
- */
 export function parseResponseFile(
     content: string,
     fileName: string,
@@ -195,12 +158,7 @@ const STATUS_TEXT: Record<number, string> = {
     503: 'Service Unavailable',
 };
 
-/**
- * Serialize a response fixture (used by update mode). A text body is written
- * as it is when the fixture's `content-type` — or `contentType`, the actual
- * response's, when it states none — labels it text, as JSON when it labels
- * it JSON, and as it is otherwise unless the text would read back as JSON.
- */
+/** A body is written as text or JSON by its `content-type`, the actual response's when the fixture states none. */
 export function serializeResponseFile(
     response: {
         body: unknown;
@@ -231,7 +189,6 @@ export function serializeResponseFile(
     return `${lines.join('\n')}\n`;
 }
 
-/** Is this body written as its own text, rather than as JSON? */
 function writtenAsText(body: unknown, kind: BodyKind): body is string {
     if (typeof body !== 'string' || kind === 'json') {
         return false;

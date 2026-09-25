@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { BaseResult } from './result.js';
 import type { TableSource } from './table/table.js';
 
-/** A database double holding one table, `users`, whose rows are the given ones. */
 function holding(rows: unknown[][]): TableSource {
     return {
         columns: async (table) => await Promise.resolve(table === 'users' ? ['id', 'name'] : []),

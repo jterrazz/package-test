@@ -1,20 +1,9 @@
-/**
- * How a mismatch reads: every diff a failed expectation prints — a table's
- * rows, a response, a stream, an exit code, a directory tree, a file — and the
- * normalisers a test compares printed output through.
- */
-
-// ── Colors ──
-
 const GREEN = '\u001B[32m';
 const RED = '\u001B[31m';
 const DIM = '\u001B[2m';
 const BOLD = '\u001B[1m';
 const RESET = '\u001B[0m';
 
-// ── Table diff ──
-
-/** One line of a table diff: a stated row, a row of the table, or both — and whether they match. */
 export type TableDiffPair = {
     actual?: undefined | unknown[];
     expected?: readonly unknown[] | undefined;
@@ -64,9 +53,6 @@ export function formatTableDiff(
     return lines.join('\n');
 }
 
-// ── Response diff ──
-
-/** A body's lines as the diff shows them: a text pair as its own lines, anything else as JSON. */
 function bodyLines(expected: unknown, actual: unknown): [string[], string[]] {
     if (typeof expected === 'string' && typeof actual === 'string') {
         return [expected.split('\n'), actual.split('\n')];
@@ -110,9 +96,6 @@ export function formatResponseDiff(file: string, expected: unknown, actual: unkn
     return lines.join('\n');
 }
 
-// ── Stdout/stderr diff ──
-
-/** Line-level equality for the diff. Defaults to strict string equality. */
 type LineEquals = (expected: string, actual: string) => boolean;
 
 const strictEquals: LineEquals = (expected, actual) => expected === actual;
@@ -131,8 +114,7 @@ function renderLines(
         const act = actualLines[i];
 
         if (exp !== undefined && act !== undefined && equals(exp, act)) {
-            // The line MATCHED — render the expected form, which is the one
-            // carrying the token, and mark nothing.
+            // The line matched: render the expected form, the one carrying the token.
             rendered.push(`  ${exp}`);
             continue;
         }
@@ -148,21 +130,7 @@ function renderLines(
     return { marked, rendered };
 }
 
-/**
- * Render an expected/received diff over two texts.
- *
- * `equals` is how a line is judged EQUAL. Callers that compare through the
- * `{{token}}` grammar pass a token-aware predicate, so a `{{url}}` line that
- * matched is shown as equal — with its token, not as a `-`/`+` pair against
- * the concrete URL. Marking a line the comparison ACCEPTED buries the one it
- * rejected: the reader then has to work out which of the differences is the
- * actual cause.
- *
- * Safety net: if the token-aware pass marks nothing at all, the whole diff
- * would render as a clean block against a failure that really happened (a
- * `#ref` captured inconsistently across lines, say). The strict rendering is
- * used instead, so a diff always shows the reader something.
- */
+/** `equals` is token-aware, so a matched `{{url}}` line shows as equal; if it marks nothing, the strict rendering is used. */
 export function formatStdoutDiff(
     file: string,
     expected: string,
@@ -191,8 +159,6 @@ export function formatStdoutDiff(
 
     return [...lines, ...rendered].join('\n');
 }
-
-// ── Directory diff ──
 
 type DirectoryDiffData = {
     added: string[];
@@ -268,8 +234,6 @@ function countLineDifferences(expected: string[], actual: string[]): number {
     }
     return count;
 }
-
-// ── Helpers ──
 
 function rowLabel(n: number): string {
     return n === 1 ? '1 row' : `${n} rows`;

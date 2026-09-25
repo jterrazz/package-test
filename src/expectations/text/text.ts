@@ -2,27 +2,7 @@ import { CaptureScope } from '../tokens/match.js';
 import { stripAnsiCodes } from './ansi.js';
 import { grep as grepBlocks } from './grep.js';
 
-/**
- * Read-only accessor for a captured text handle — THE universal one: stdout,
- * stderr, container logs, and file text all surface as a `TextAccessor`.
- *
- * `.text` is the COMPARABLE text — ANSI escape sequences stripped (CONVENTIONS
- * D6), the runner's `transform` applied — the same text a golden compares, so
- * a stream compared as a value reads exactly what its golden would:
- * `expect(result.stdout.text).toContain('built')`. `.raw` is the stream as it
- * was captured. `toString()` / `valueOf()` give `.text`, so `String(stream)`
- * and template-literal interpolation read what a reader means.
- *
- * Text operations are **closed** over the type: `.grep(pattern)` returns a
- * `TextAccessor` (not a bare string), preserving the `expected/`-resolution
- * context and the `transform`, so results are chainable
- * (`result.stdout.grep(a).grep(b)`) and snapshot-able
- * (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`).
- *
- * Its matchers are vitest's on `.text`, and the golden half of `toMatch` on
- * the accessor itself: `expect(result.stdout).toMatch(file('./expected/help.txt'))`
- * (with `{{token}}` support, CONVENTIONS D4).
- */
+/** The captured text accessor: `.text` is what a golden compares (ANSI stripped, `transform` applied), `.raw` the capture. */
 export class TextAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;
@@ -57,13 +37,7 @@ export class TextAccessor {
         return this.transform ? this.transform(stripped) : stripped;
     }
 
-    /**
-     * Keep only the blank-line-separated blocks of the text that contain
-     * `pattern` (how linter/compiler output is structured), returned as a new
-     * `TextAccessor` — the same subject type, so the result is chainable and
-     * snapshot-able. The scalpel for probing large tool outputs; snapshot the
-     * whole surface by default, reach for `.grep()` for targeted checks.
-     */
+    /** Keep only the blank-line-separated blocks containing `pattern`, as a new `TextAccessor`. */
     grep(pattern: string): TextAccessor {
         return new TextAccessor(grepBlocks(this.raw, pattern), this.streamName, this.testDir, {
             captures: this.captures,

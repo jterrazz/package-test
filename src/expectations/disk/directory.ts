@@ -5,8 +5,6 @@ import { relative, resolve, sep } from 'node:path';
 import { CaptureScope } from '../tokens/match.js';
 import { textEquals } from '../tokens/structural.js';
 
-// ── Directory walk + diff (internal helpers) ──
-
 const DEFAULT_IGNORES = ['.git', '.DS_Store', 'node_modules', '.next', 'dist', '.turbo', '.cache'];
 
 export type DirectoryDiff = {
@@ -15,9 +13,6 @@ export type DirectoryDiff = {
     removed: string[];
 };
 
-/**
- * Recursively walk a directory, returning sorted relative paths of files only.
- */
 export async function walkDirectory(
     root: string,
     options: { ignore?: string[] } = {},
@@ -51,11 +46,7 @@ export async function walkDirectory(
     return out;
 }
 
-/**
- * Compare two directory trees file-by-file. Fixture file contents honor the
- * unified `{{token}}` grammar (CONVENTIONS D4) — captures are recorded in
- * `scope` in sorted-path order.
- */
+/** Fixture contents honour the `{{token}}` grammar (D4); captures recorded in sorted-path order. */
 export async function diffDirectories(
     expectedRoot: string,
     actualRoot: string,
@@ -85,15 +76,7 @@ export async function diffDirectories(
     return { added, changed, removed };
 }
 
-// ── DirectoryAccessor (user-facing) ──
-
-/**
- * Read-only accessor for a directory produced by a spec action.
- *
- * Assertions go through `expect()` (async — they walk the disk):
- * `await expect(result.directory('out')).toMatch('scaffold/out')`
- * compares the tree against the fixture directory `expected/<name>/`.
- */
+/** Read-only accessor for a directory a spec action produced. */
 export class DirectoryAccessor {
     /** @internal Ref-capture scope shared by the current spec execution. */
     readonly captures: CaptureScope;

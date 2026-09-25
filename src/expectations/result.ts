@@ -19,19 +19,10 @@ export type FileAccessor = {
     grep: (pattern: string) => TextAccessor;
 };
 
-/**
- * What a result reads of the configuration its chain was opened over: the
- * databases a `.table()` queries, which of them the services record declares
- * (CONVENTIONS A7), and how a captured stream is normalised.
- */
 export type ResultConfig = ChainConfig & {
     database?: TableSource | undefined;
     databaseKeys?: readonly string[] | undefined;
     databases?: ReadonlyMap<string, TableSource> | undefined;
-    /**
-     * Optional normaliser applied to a captured stream before every
-     * comparison, and read by `.text`; `.raw` keeps the capture.
-     */
     transform?: ((text: string) => string) | undefined;
 };
 
@@ -41,13 +32,7 @@ export type BaseResultOptions = {
     workDir?: string | undefined;
 };
 
-/**
- * Base result - common accessors available after any action type.
- * Extended by HttpResult, CliResult, and used directly by job results.
- *
- * Every result carries a fresh {@link CaptureScope}: `match.ref()` captures
- * and `{{type#ref}}` placeholders are scoped to one spec execution.
- */
+/** Accessors available after any action; each result carries a fresh `CaptureScope`. */
 export class BaseResult {
     /** @internal Ref-capture scope shared by every assertion on this result. */
     readonly captures: CaptureScope;
@@ -59,10 +44,7 @@ export class BaseResult {
         this.config = options.config;
         this.testDir = options.testDir;
         this.workDir = options.workDir;
-        // The framework knows the exact cwd of the spec — this is what the
-        // {{workdir}} token / match.workdir() compare against (CONVENTIONS
-        // D4). The realpath form is what child processes print ($PWD /
-        // process.cwd() resolve tmpdir symlinks on macOS).
+        // The realpath form is what child processes print as `$PWD` (macOS resolves the tmpdir symlink).
         this.captures = new CaptureScope(
             options.workDir ? safeRealpath(options.workDir) : undefined,
         );
