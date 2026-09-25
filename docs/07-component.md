@@ -96,7 +96,7 @@ export default defineSpecConfig({
 
 ```tsx
 import { button, component, content, defineStub, file, http } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
 
@@ -105,15 +105,17 @@ const listing = defineStub({
     response: http.json({ posts: [{ id: 1, title: 'A first post' }], total: 200 }),
 });
 
-test('says how much of the collection the table is showing', async () => {
-    // Given - a page of one row answering for a collection of two hundred
-    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        await visitor.see(content('Showing 1 of 200 posts'));
-    });
+describe('PostTable', () => {
+    test('says how much of the collection the table is showing', async () => {
+        // Given - a page of one row answering for a collection of two hundred
+        const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
+            await visitor.see(content('Showing 1 of 200 posts'));
+        });
 
-    // Then - the table is qualified by what it is not showing
-    await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
-    expect(result.console.text).toBe('');
+        // Then - the table is qualified by what it is not showing
+        await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
+        expect(result.console.text).toBe('');
+    });
 });
 ```
 

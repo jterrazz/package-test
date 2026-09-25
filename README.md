@@ -19,16 +19,18 @@ Which kind a test is, is the first question — [the fork](docs/18-conventions.m
 ```typescript
 // src/domain/ranking.test.ts
 import { clock } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { rank } from './ranking.js';
 
-test('ranks a fresher post above an older one of equal score', () => {
-    // Given - two posts of equal score, one written this morning
-    using _ = clock.at('2026-03-04T09:30:00Z');
+describe('rank', () => {
+    test('ranks a fresher post above an older one of equal score', () => {
+        // Given - two posts of equal score, one written this morning
+        using _ = clock.at('2026-03-04T09:30:00Z');
 
-    // Then - the fresher one leads
-    expect(rank(posts).map((post) => post.id)).toStrictEqual(['fresh', 'stale']);
+        // Then - the fresher one leads
+        expect(rank(posts).map((post) => post.id)).toStrictEqual(['fresh', 'stale']);
+    });
 });
 ```
 
@@ -37,19 +39,21 @@ test('ranks a fresher post above an older one of equal score', () => {
 ```typescript
 // specs/integration/posts/find.spec.ts
 import { file } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { findPost } from '../../../src/posts/find-post.js';
 import { integration } from '../integration.specification.js';
 
-test('finds the post the migration wrote', async () => {
-    // Given - a seeded database
-    const result = await integration
-        .seed(file('./seeds/posts.sql'))
-        .call(({ db }) => findPost(db, 'p-1'));
+describe('find', () => {
+    test('finds the post the migration wrote', async () => {
+        // Given - a seeded database
+        const result = await integration
+            .seed(file('./seeds/posts.sql'))
+            .call(({ db }) => findPost(db, 'p-1'));
 
-    // Then - the row comes back as the repository shapes it
-    expect(result.value).toMatch(file('./expected/found.json'));
+        // Then - the row comes back as the repository shapes it
+        expect(result.value).toMatch(file('./expected/found.json'));
+    });
 });
 ```
 
@@ -58,7 +62,7 @@ test('finds the post the migration wrote', async () => {
 ```tsx
 // src/presentation/post-table.test.tsx
 import { component, content, defineStub, file, http } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
 
@@ -67,14 +71,16 @@ const listing = defineStub({
     response: http.json({ posts: [{ id: 1, title: 'A first post' }], total: 200 }),
 });
 
-test('says how much of the collection the table is showing', async () => {
-    // Given - a page of one row answering for a collection of two hundred
-    const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
-        await visitor.see(content('Showing 1 of 200 posts'));
-    });
+describe('PostTable', () => {
+    test('says how much of the collection the table is showing', async () => {
+        // Given - a page of one row answering for a collection of two hundred
+        const result = await component.intercept(listing).render(<PostTable />, async (visitor) => {
+            await visitor.see(content('Showing 1 of 200 posts'));
+        });
 
-    // Then - the table is qualified by what it is not showing
-    await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
+        // Then - the table is qualified by what it is not showing
+        await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
+    });
 });
 ```
 
@@ -83,21 +89,23 @@ test('says how much of the collection the table is showing', async () => {
 ```typescript
 // specs/website/subscribe/subscribe.spec.ts
 import { button, content, field } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-test('subscribes through the form and captures the final state', async () => {
-    // Given - a visitor on the homepage
-    const result = await website.visit('/', async (visitor) => {
-        await visitor.fill(field('Email'), 'visitor@site.test');
-        await visitor.click(button('Subscribe'));
-        await visitor.see(content('Thanks for subscribing'));
-    });
+describe('subscribe', () => {
+    test('subscribes through the form and captures the final state', async () => {
+        // Given - a visitor on the homepage
+        const result = await website.visit('/', async (visitor) => {
+            await visitor.fill(field('Email'), 'visitor@site.test');
+            await visitor.click(button('Subscribe'));
+            await visitor.see(content('Thanks for subscribing'));
+        });
 
-    // Then - the page says so, and the console is clean
-    expect(result.content.text).toContain('Thanks for subscribing');
-    expect(result.errors.text).toBe('');
+        // Then - the page says so, and the console is clean
+        expect(result.content.text).toContain('Thanks for subscribing');
+        expect(result.errors.text).toBe('');
+    });
 });
 ```
 
@@ -106,43 +114,47 @@ test('subscribes through the form and captures the final state', async () => {
 ```typescript
 // specs/mobile/events/bookmark.spec.ts
 import { button, content } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { mobile } from '../mobile.specification.js';
 
-test('bookmarks an event from its detail screen', async () => {
-    // Given - a visitor on the events feed
-    const result = await mobile.open('news://events', async (visitor) => {
-        await visitor.tap(button('Fauci inquiry'));
-        await visitor.see(content('reports'));
-        await visitor.tap(button('Bookmark'));
-    });
+describe('bookmark', () => {
+    test('bookmarks an event from its detail screen', async () => {
+        // Given - a visitor on the events feed
+        const result = await mobile.open('news://events', async (visitor) => {
+            await visitor.tap(button('Fauci inquiry'));
+            await visitor.see(content('reports'));
+            await visitor.tap(button('Bookmark'));
+        });
 
-    // Then - the capture reflects the screen after the interaction
-    expect(result.content.text).toContain('Bookmarked');
+        // Then - the capture reflects the screen after the interaction
+        expect(result.content.text).toContain('Bookmarked');
+    });
 });
 ```
 
 **An API** — the assembled app, met through a complete HTTP exchange, the whole response written where the test reads it ([docs/10](docs/10-api.md)):
 
 ```typescript
-// specs/api/users/create.spec.ts
-import { expect, test } from 'vitest';
+// specs/api/users/create/shape.spec.ts
+import { describe, expect, test } from 'vitest';
 
-import { api } from '../api.specification.js';
+import { api } from '../../api.specification.js';
 
-test('creates a user and answers with it', async () => {
-    // Given - the complete request
-    const result = await api.post('/users', { name: 'Alice' });
+describe('shape', () => {
+    test('creates a user and answers with it', async () => {
+        // Given - the complete request
+        const result = await api.post('/users', { name: 'Alice' });
 
-    // Then - the whole response, and the row it wrote
-    expect(result.response).toMatch(`
-        HTTP/1.1 201 Created
-        content-type: application/json
+        // Then - the whole response, and the row it wrote
+        expect(result.response).toMatch(`
+            HTTP/1.1 201 Created
+            content-type: application/json
 
-        {"id": "{{uuid}}", "name": "Alice"}
-    `);
-    await expect(result.table('users')).toMatch([['{{uuid}}', 'Alice']]);
+            {"id": "{{uuid}}", "name": "Alice"}
+        `);
+        await expect(result.table('users')).toMatch([['{{uuid}}', 'Alice']]);
+    });
 });
 ```
 
@@ -151,19 +163,21 @@ test('creates a user and answers with it', async () => {
 ```typescript
 // specs/job/digest/daily-digest.spec.ts
 import { file } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { job } from '../job.specification.js';
 
-test('writes one digest row per active subscriber', async () => {
-    // Given - two subscribers, from the seed beside the test
-    const result = await job.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
+describe('daily-digest', () => {
+    test('writes one digest row per active subscriber', async () => {
+        // Given - two subscribers, from the seed beside the test
+        const result = await job.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
 
-    // Then - the whole table
-    await expect(result.table('digests')).toMatch([
-        [1, 'a@site.test'],
-        [2, 'b@site.test'],
-    ]);
+        // Then - the whole table
+        await expect(result.table('digests')).toMatch([
+            [1, 'a@site.test'],
+            [2, 'b@site.test'],
+        ]);
+    });
 });
 ```
 

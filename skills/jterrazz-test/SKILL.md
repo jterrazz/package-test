@@ -23,7 +23,7 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 8. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
 9. The repository itself, a suite over several apps? → **repository suite**, `specs/<family>/<aspect>.test.ts`
 
-The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60; `make fix` splits, moves and retitles ([docs/18](../../docs/18-conventions.md#one-file-one-subject)).
+The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60. A colocated `.test.ts(x)` holds one `describe` too, titled with its subject — the export of the module beside it (`describe('LocaleNote', …)`). `make fix` splits, moves and retitles ([docs/18](../../docs/18-conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 

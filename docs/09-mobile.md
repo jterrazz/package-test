@@ -232,12 +232,14 @@ afterAll(cleanup);
 // specs/mobile/events/feed.spec.ts
 import newsroom from './stubs/newsroom.stubs.js';
 
-test('renders the events feed from the declared backend', async () => {
-    // Given - the backend under stub for this chain
-    const result = await mobile.intercept(newsroom).open('news://events');
+describe('feed', () => {
+    test('renders the events feed from the declared backend', async () => {
+        // Given - the backend under stub for this chain
+        const result = await mobile.intercept(newsroom).open('news://events');
 
-    // Then - the screen rendered what the stub declared
-    expect(result.screen).toMatch(file('./expected/events.screen.json'));
+        // Then - the screen rendered what the stub declared
+        expect(result.screen).toMatch(file('./expected/events.screen.json'));
+    });
 });
 ```
 

@@ -39,17 +39,19 @@ A module test is plain vitest: `test`, `expect`, the native matchers. What the f
 
 ```typescript
 import { clock } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { twoPosts } from './ranking.fixtures.js';
 import { rank } from './ranking.js';
 
-test('ranks a fresher post above an older one of equal score', () => {
-    // Given - two posts of equal score, one written this morning
-    using _ = clock.at('2026-03-04T09:30:00Z');
+describe('rank', () => {
+    test('ranks a fresher post above an older one of equal score', () => {
+        // Given - two posts of equal score, one written this morning
+        using _ = clock.at('2026-03-04T09:30:00Z');
 
-    // Then - the fresher one leads
-    expect(rank(twoPosts).map((post) => post.id)).toStrictEqual(['fresh', 'stale']);
+        // Then - the fresher one leads
+        expect(rank(twoPosts).map((post) => post.id)).toStrictEqual(['fresh', 'stale']);
+    });
 });
 ```
 
@@ -57,16 +59,16 @@ test('ranks a fresher post above an older one of equal score', () => {
 
 The table is the rule set, and every row names the rule that holds it ([19 — Linting](19-linting.md)).
 
-| May                                                                                                                            | May not                                                                                                                                | Rule         |
-| ------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------- | ------------ |
-| import its module and pure helpers; a sibling `<file>.fixtures.ts`                                                             | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` or `__fixtures__/` directory                            | I4           |
-| `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list with the reason written beside it                   | I4           |
-| `await using _ = await intercept(http.get(url), http.json(…))`                                                                 | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                           | M3, F6       |
-| `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                               | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`  | D16/D16w, M3 |
-| `vi.stubEnv('X', 'y')` for a module whose stub IS an env read — it restores itself                                             | `process.env.X = …`, a raw assignment nothing gives back                                                                               | E9w          |
-| flat `test()`; one level of `describe` for grouping; a `test.each` table (B4 judges the table once, not once per row)          | a nested `describe`; a `beforeEach` / `beforeAll` that builds the Given                                                                | J10, J6w     |
-| `expect(text(value).text).toContain(…)`; `toStrictEqual` against a literal                                                     | a golden (`toMatch(file(…))`) — a module with a golden is an integration spec ([06](06-integration.md)); any `toMatchSnapshot` matcher | D20          |
-| —                                                                                                                              | `document` / `window` / `navigator`; `@vitest-environment happy-dom`; `react-dom/server`                                               | G4, E5, F6   |
+| May                                                                                                                                                                                    | May not                                                                                                                                | Rule          |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
+| import its module and pure helpers; a sibling `<file>.fixtures.ts`                                                                                                                     | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` or `__fixtures__/` directory                            | I4            |
+| `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in                                                         | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list with the reason written beside it                   | I4            |
+| `await using _ = await intercept(http.get(url), http.json(…))`                                                                                                                         | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                           | M3, F6        |
+| `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                                                                                       | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`  | D16/D16w, M3  |
+| `vi.stubEnv('X', 'y')` for a module whose stub IS an env read — it restores itself                                                                                                     | `process.env.X = …`, a raw assignment nothing gives back                                                                               | E9w           |
+| one top-level `describe` titled with the subject — the module's export, `describe('rank', …)` — every test inside it; a `test.each` table (B4 judges the table once, not once per row) | a nested `describe`; a second `describe`, or a test beside it; a `beforeEach` / `beforeAll` that builds the Given                      | C31, J10, J6w |
+| `expect(text(value).text).toContain(…)`; `toStrictEqual` against a literal                                                                                                             | a golden (`toMatch(file(…))`) — a module with a golden is an integration spec ([06](06-integration.md)); any `toMatchSnapshot` matcher | D20           |
+| —                                                                                                                                                                                      | `document` / `window` / `navigator`; `@vitest-environment happy-dom`; `react-dom/server`                                               | G4, E5, F6    |
 
 A module that fetches a RELATIVE url is browser code and cannot run under node as it stands: either state where it resolves (`intercept(stubs, { origin })`, below) or specify it where it renders — a component spec.
 
@@ -143,7 +145,7 @@ There is no result object here, because there is no chain to hand one back. The 
 - **Reaching for `vi.mock` to avoid injecting a port.** The mock outlives the test's intent: every importer of that specifier gets the double, and the design pressure the injection would have applied is gone. Double the port.
 - **`vi.setSystemTime` instead of `clock`.** A fake timer taken without `using` outlasts the test that took it, and the next test in the file inherits a clock nobody declared. M3 refuses it and names the primitive.
 - **Importing a `.json` payload.** I4 refuses it. Put the payload in `<file>.fixtures.ts`, where the compiler reads it.
-- **Nesting `describe`.** One level groups; two describe a structure the test file does not have. J10 refuses the second.
+- **Nesting `describe`.** The one level is THE describe, titled with the subject, holding every test ([18 § One file, one subject](18-conventions.md#one-file-one-subject)); a second level describes a structure the test file does not have. C31 refuses a file with no describe or two, J10 the nesting.
 - **Asserting on a DOM.** There is no document here, and there will not be one: G4 refuses the globals, E5 refuses the `@vitest-environment` comment that would conjure them, and the route is a `.test.tsx` in a real browser.
 - **Letting the Given drift into `beforeEach`.** A Given nobody can read in the test is a Given nobody maintains. J6w says so.
 

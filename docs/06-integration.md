@@ -17,22 +17,24 @@ afterAll(cleanup);
 ```typescript
 // specs/integration/orders/orders.spec.ts
 import { file } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { listOrders } from '../../../src/orders/orders.js';
 import { integration } from '../integration.specification.js';
 
-test('reads the orders the day left behind', async () => {
-    // Given - two orders in the real database, from the seed beside the test
-    const result = await integration
-        .seed(file('./seeds/two-orders.sql'))
-        .call(async ({ db }) => await listOrders(db.connectionString));
+describe('orders', () => {
+    test('reads the orders the day left behind', async () => {
+        // Given - two orders in the real database, from the seed beside the test
+        const result = await integration
+            .seed(file('./seeds/two-orders.sql'))
+            .call(async ({ db }) => await listOrders(db.connectionString));
 
-    // Then - the module answered with both, compared whole
-    expect(result.value).toMatch([
-        { id: 1, reference: 'ORD-1', total: 42 },
-        { id: 2, reference: 'ORD-2', total: 108 },
-    ]);
+        // Then - the module answered with both, compared whole
+        expect(result.value).toMatch([
+            { id: 1, reference: 'ORD-1', total: 42 },
+            { id: 2, reference: 'ORD-2', total: 108 },
+        ]);
+    });
 });
 ```
 
