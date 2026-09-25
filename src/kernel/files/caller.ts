@@ -66,6 +66,7 @@ export function isFrameworkFrame(
     return frameworkTrees.some((tree) => isStrictlyInside(safeRealpath(tree), real));
 }
 
+/** Must be called before the first `await`: async resumption drops the caller's frames. */
 export function getCallerDir(): string {
     const caller = callerFrames().find(
         ({ file }) => !file.includes('node_modules') && !isFrameworkFrame(file),

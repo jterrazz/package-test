@@ -38,7 +38,6 @@ export type ApiHandle<DatabaseKey extends string = string> = {
 export async function startApi<Services extends ServiceRecord>(
     options: ApiSpecificationOptions<Services>,
 ): Promise<ApiHandle<DatabaseKeys<Services>>> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

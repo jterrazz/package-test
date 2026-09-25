@@ -39,7 +39,6 @@ export type JobHandle<DatabaseKey extends string = string> = {
 export async function startJob<Services extends ServiceRecord>(
     options: JobSpecificationOptions<Services>,
 ): Promise<JobHandle<DatabaseKeys<Services>>> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

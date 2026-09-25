@@ -166,7 +166,6 @@ export type WebsiteHandle = {
 export async function startWebsite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
 ): Promise<WebsiteHandle> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
 

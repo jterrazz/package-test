@@ -66,7 +66,6 @@ async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefin
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
 

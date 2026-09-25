@@ -80,7 +80,6 @@ export async function startCli<Services extends ServiceRecord>(
     bin: string,
     options: CliSpecificationOptions<Services> = {},
 ): Promise<CliHandle<DatabaseKeys<Services>>> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

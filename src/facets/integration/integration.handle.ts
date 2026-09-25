@@ -30,7 +30,6 @@ export type IntegrationHandle<
 export async function startIntegration<Services extends ServiceRecord>(
     options: IntegrationSpecificationOptions<Services> = {},
 ): Promise<IntegrationHandle<Services, DatabaseKeys<Services>>> {
-    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);
