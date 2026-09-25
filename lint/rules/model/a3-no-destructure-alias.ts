@@ -5,7 +5,6 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Unwrap `await <expr>` down to the call expression, if that is what it is. */
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     let current = node;
     while (current?.type === 'AwaitExpression') {
@@ -14,14 +13,7 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     return current?.type === 'CallExpression' ? current : undefined;
 }
 
-/**
- * CONVENTIONS A3 — the constructor's return is destructured with the canonical
- * names, no aliasing: `const { api, cleanup, docker } = await
- * specification.api(…)`. A renamed binding (`{ api: myApi }`) is flagged.
- *
- * Renaming at the IMPORT site (`import { cli as dockerCli } from …`) stays
- * legal — the canonical name is enforced where the record is destructured.
- */
+/** Renaming at the import site stays legal: the canonical name is enforced where the record is destructured. */
 export const a3NoDestructureAlias: LintRule = {
     createOnce(context: Context): Visitor {
         return {

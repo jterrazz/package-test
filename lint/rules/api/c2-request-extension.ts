@@ -9,15 +9,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS C2 — `requests/` holds what a spec SENDS: a whole request as a
- * `.http`, or a body a verb sends (`.json`, `.txt`, …), and every one of them
- * carries its extension, which is how it is sent — a `.http` whole, a `.json`
- * parsed, anything else verbatim. Anchored on the feature's visited test
- * file: its sibling `requests/` is probed (cached) and a file with no
- * extension is reported on the test file. A folder is not a request and is
- * not judged here.
- */
+/** Anchored on the visited test file: its sibling `requests/` is probed, and a file with no extension is reported there. */
 export const c2RequestExtension: LintRule = {
     createOnce(context: Context): Visitor {
         return {

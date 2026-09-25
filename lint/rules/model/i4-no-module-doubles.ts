@@ -9,13 +9,7 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
-/**
- * Known DATA extensions — the closed list of what counts as a file asset. The
- * classification is an allowlist, never "has a dot": a module specifier is
- * routinely dotted for reasons that have nothing to do with a file type
- * (`../entities/dashboard.post`, `@scope/kernel/plugin.registry`), and reading
- * those as assets flagged perfectly ordinary code imports.
- */
+/** An allowlist, never "has a dot": `../entities/dashboard.post` is ordinary code. */
 const DATA_EXTENSIONS = [
     'avif',
     'bin',
@@ -56,7 +50,6 @@ const DATA_EXTENSIONS = [
 ];
 const DATA_ASSET = new RegExp(`\\.(?:${DATA_EXTENSIONS.join('|')})$`, 'iu');
 
-/** Is this call `vi.mock(…)` / `vi.doMock(…)` — the module-level double? */
 function isModuleDouble(node: AstNode): boolean {
     const callee = child(node, 'callee');
     if (callee?.type !== 'MemberExpression' || callee.computed === true) {
@@ -70,15 +63,7 @@ function isModuleDouble(node: AstNode): boolean {
     );
 }
 
-/**
- * The specifier a module double names, in either spelling.
- *
- * `vi.mock('./x.js', …)` states it as a string; `vi.mock(import('./x.js'), …)`
- * states it as a dynamic import, which is the form `vitest/prefer-import-in-mock`
- * requires. Reading only the string left an allow-listed native module with no
- * green spelling: satisfy this rule and the upstream one fires, satisfy that one
- * and this fires.
- */
+/** `vi.mock(import('./x.js'), …)` too: `vitest/prefer-import-in-mock` requires that form, so reading only the string left no green spelling. */
 function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     const literal = stringValue(argument);
     if (literal !== undefined) {
@@ -90,22 +75,17 @@ function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     return stringValue(child(argument, 'source'));
 }
 
-/** A bundler suffix (`./payload.json?raw`, `./doc.md#frag`) is not part of the extension. */
+/** `./payload.json?raw`, `./doc.md#frag`. */
 function withoutSuffix(source: string): string {
     return source.replace(/[?#].*$/u, '');
 }
 
-/** What I4 reads of the file it judges. */
 type Scope = {
-    /** The modules the config lets a test double. */
     allowed: Set<string>;
-    /** The banned folder the file sits in, when it does. */
     banned: string | undefined;
-    /** Is the file a module test — the one role the data-asset clause binds? */
     isTest: boolean;
 };
 
-/** I4's scope over the file being linted — none for a file it does not judge. */
 function scopeOf(context: Context): Scope | undefined {
     const option = context.options[0];
     const stated =
@@ -119,42 +99,15 @@ function scopeOf(context: Context): Scope | undefined {
     const banned = segmentsOf(context)
         .slice(0, -1)
         .find((part) => part === '__mocks__' || part === '__fixtures__');
-    // Every TEST file — plus any file sitting inside one of the two banned
-    // directories, which is the clause that names the directory itself.
+    // Plus any file inside one of the two banned directories: that clause names the directory itself.
     if (!isTestRole(role) && banned === undefined) {
         return undefined;
     }
-    // The data-asset clause is the MODULE role's alone: a stub unit
-    // legitimately imports the `.response.json` it stands for.
+    // The module role's alone: a stub unit imports the `.response.json` it stands for.
     return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
 }
 
-/**
- * CONVENTIONS I4 — a test doubles a PORT, never a module.
- *
- * `vi.mock` replaces a specifier for everyone: the subject keeps its import,
- * the test keeps its expectation, and the thing in between is a file the
- * runner rewrote. The ladder's answer is a port — `mockOf<Port>()`, `vi.fn()`,
- * `vi.spyOn` on an object the test passes in — and the one case it cannot
- * reach is a NATIVE module a consumer cannot inject (a simulator binding, a
- * platform shim). That case is an allow-list: `modules: string[]` in the
- * config, with a comment saying why each one is there.
- *
- * The rule reaches every test file — a module test, a rendered one, a spec
- * under `specs/` — and flags:
- *
- * - `vi.mock(…)` / `vi.doMock(…)` of a specifier outside the allow-list;
- * - files living in a `__mocks__/` or `__fixtures__/` directory;
- * - in a `module`-role test only, an import of a known data asset (`.json`,
- *   `.txt`, `.sql`, …) — a test needing a real file is a specification and
- *   belongs under `specs/`. A stub unit legitimately imports its payload.
- *
- * `vi.stubGlobal` is not here: an upstream rule carries it as an option (M3),
- * and one owner per convention is ADR-005's law.
- *
- * A specifier whose extension is not on the data list is CODE, dotted or not:
- * `<subject>.<role>` module names are a naming convention, not a file type.
- */
+/** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it. `vi.stubGlobal` is an upstream option (M3, ADR-005). */
 export const i4NoModuleDoubles: LintRule = {
     createOnce(context: Context): Visitor {
         let scope: Scope | undefined;
@@ -173,8 +126,6 @@ export const i4NoModuleDoubles: LintRule = {
                     return;
                 }
                 const named = mockedSpecifier(childList(node, 'arguments')[0]);
-                // A native module a consumer cannot inject is the one case the
-                // ladder cannot reach, and the config says which.
                 if (named === undefined || scope?.allowed.has(named) !== true) {
                     context.report({ messageId: 'viMock', node });
                 }

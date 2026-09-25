@@ -7,12 +7,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS C6 — the extension is part of a golden file's path and mandatory
- * in `toMatch(file(…))` (`'./expected/help.txt'`, never `'./expected/help'`). A
- * tree is `toMatch(directory(…))`, whose path ends in `/` — out of this rule's
- * reach.
- */
+/** A tree is `toMatch(directory(…))`, whose path ends in `/`: out of reach. */
 export const c6ToMatchExtension: LintRule = {
     createOnce(context: Context): Visitor {
         return {

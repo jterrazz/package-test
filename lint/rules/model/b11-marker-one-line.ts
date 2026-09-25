@@ -15,47 +15,24 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * A directive, not prose — a tool's instruction that happens to be a comment.
- *
- * A suppression written under a marker is not a wrapped sentence: folding it
- * into the marker line would DISABLE it, and reporting it would tell the author
- * to do exactly that. The one place the two shapes meet is here, so the list
- * lives here — the linters' `-disable`/`-enable` pair and the formatters'
- * `-ignore`, which is the word every one of them uses (`oxfmt-ignore` is the
- * estate's).
- */
+/** Folding a suppression into the marker line would disable it: `-disable`/`-enable`, and the formatters' `-ignore` (`oxfmt-ignore` is the estate's). */
 const DIRECTIVE =
     /^(?:oxlint|eslint|checker|prettier|biome|dprint)-(?:disable|enable)|^(?:prettier|oxfmt|biome|dprint)-ignore|^@ts-|^(?:v8|c8|node|istanbul) ignore|^type-coverage:/u;
 
-/** Is the comment an instruction to a tool rather than a sentence to a reader? */
 function isDirective(comment: Comment): boolean {
     return DIRECTIVE.test(comment.value.trim());
 }
 
-/** Where a line starts, for the offset given. */
 function lineStartAt(text: string, offset: number): number {
     return text.lastIndexOf('\n', offset - 1) + 1;
 }
 
-/** Where the line holding the offset ends (the newline, or the end of file). */
 function lineEndAt(text: string, offset: number): number {
     const newline = text.indexOf('\n', offset);
     return newline === -1 ? text.length : newline;
 }
 
-/**
- * CONVENTIONS B11 — a marker is exactly one line.
- *
- * The narration is a SENTENCE about the subject, and a sentence that runs onto
- * a second comment line stops being one: the reader meets a paragraph where the
- * dialect promised a line, and the second line is invisible to every tool that
- * reads the marker (B4's order, the catalogue, a reviewer skimming). The
- * criterion is mechanical — a marker comment with another `//` comment directly
- * below it at the same indentation — and so is the fix: fold the continuation
- * into the sentence, or separate the two with a blank line so the second is a
- * comment of its own.
- */
+/** The criterion is a marker comment with another `//` comment directly below it at the same indentation. */
 export const b11MarkerOneLine: LintRule = {
     createOnce(context: Context): Visitor {
         return {

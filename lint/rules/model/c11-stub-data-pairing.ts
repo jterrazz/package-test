@@ -9,22 +9,14 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Data files: served payloads and matched inputs, both owned by a stub. */
 const DATA_SUFFIXES = ['.request.ts', '.response.json'];
 
-/** The owning stub of a data file: its name up to the FIRST dot, `.ts`. */
+/** `events.fr.response.json` belongs to `events.ts`. */
 function ownerOf(entry: string): string {
     return `${entry.slice(0, entry.indexOf('.'))}.ts`;
 }
 
-/**
- * CONVENTIONS C11 — data is owned by a stub. Inside a kind folder every
- * `*.response.json` (served payload) and `*.request.ts` (matched prompt/body)
- * pairs with the sibling `<stem>.ts` that serves it, where the stem is the name
- * up to the FIRST dot: `events.fr.response.json` belongs to `events.ts`. A data
- * file with no owner is dead weight no test can reach — reported on the feature's
- * test file, since oxlint never visits a `.json`.
- */
+/** Reported on the feature's test file, since oxlint never visits a `.json`. */
 export const c11StubDataPairing: LintRule = {
     createOnce(context: Context): Visitor {
         return {

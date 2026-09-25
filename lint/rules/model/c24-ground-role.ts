@@ -15,13 +15,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * The ground folder each verb reads, and which argument names the disk. `run`
- * reads a document: one that is a spec stands beside its test, under NO ground
- * folder (C16 holds the same law from the tree's side), and one that is an
- * INPUT — a deliberately wrong document a negative spec runs, which no glob
- * may collect — is file material, under `fixtures/`.
- */
+/** A document that is a spec stands beside its test (C16); one that is an input to a negative spec is file material, under `fixtures/`. */
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {
     fixture: { argument: 0, grounds: [GROUND_FIXTURES] },
     post: { argument: 1, grounds: [GROUND_REQUESTS] },
@@ -32,17 +26,12 @@ const ROLES: Record<string, { argument: number; grounds: readonly (string | unde
     toMatch: { argument: 0, grounds: [GROUND_EXPECTED] },
 };
 
-/** The block a declaration's bindings live in: the declarator's declaration's parent. */
 function blockOf(declarator: AstNode): AstNode | undefined {
     const declaration = declarator.parent as AstNode | undefined;
     return declaration?.parent as AstNode | undefined;
 }
 
-/**
- * The `file()`/`directory()` a verb's argument names — written inline, or an
- * identifier bound by a `const` of this file to one: the nearest declaration
- * of that name whose block encloses the call, as the language resolves it.
- */
+/** An identifier resolves to the nearest `const` of that name whose block encloses the call, as the language resolves it. */
 function diskArgument(
     argument: AstNode | undefined,
     bindings: ReadonlyMap<string, readonly AstNode[]>,
@@ -65,24 +54,11 @@ function diskArgument(
     return undefined;
 }
 
-/** The first ground folder a path passes through, if any. */
 function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundName(segment));
 }
 
-/**
- * CONVENTIONS C24 — the verb and the ground folder agree. `seed()` reads
- * `seeds/`, `request()` and a request body read `requests/`, `fixture()` reads
- * `fixtures/`, a golden reads `expected/`, and `run()` reads a document beside
- * the test — or, for a document that is an input, under `fixtures/`. The same
- * four folders under the specs root's `shared/` hold what several leaves
- * share, so `../../shared/seeds/x.sql` is a seed and
- * `../../shared/fixtures/seeds/x.sql` is not. A
- * `file()`/`directory()` handed to a verb is judged by the FIRST ground folder
- * its literal path passes through —
- * handed inline, or bound first to a `const` of the same file, which the rule
- * follows to the verb it reaches. A computed path is out of reach.
- */
+/** Judged by the first ground folder the literal path passes through; a computed path is out of reach. */
 export const c24GroundRole: LintRule = {
     createOnce(context: Context): Visitor {
         let bindings = new Map<string, AstNode[]>();

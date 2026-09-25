@@ -16,23 +16,19 @@ import { identityOf, segmentsOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The kind folders a `stubs/` root may hold, as a message names them. */
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
 
-/** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
-/** A file oxlint itself visits — the AST half of the rule reports on those. */
 const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
-/** The public facade of a feature: `stubs/<kebab>.stubs.ts`. */
+/** `stubs/<kebab>.stubs.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.stubs\.[cm]?ts$/u;
-/** An internal unit stub: `stubs/<kind>/<kebab>.ts`. */
+/** `stubs/<kind>/<kebab>.ts`. */
 const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
-/** Matched data next to its stub: `stubs/<kind>/<stem>.request.ts`. */
+/** `stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
-/** Served data next to its stub: `stubs/<kind>/<stem>[.<qualifier>].response.json`. */
+/** `stubs/<kind>/<stem>[.<qualifier>].response.json`. */
 const RESPONSE_DATA_FILE = /\.response\.json$/u;
 
-/** The name a specifier/declaration exports under, when it is `default`. */
 function exportsDefault(node: AstNode): boolean {
     const specifiers = (node.specifiers as AstNode[] | undefined) ?? [];
     return specifiers.some((specifier) => {
@@ -44,7 +40,6 @@ function exportsDefault(node: AstNode): boolean {
     });
 }
 
-/** Is this node a `defineStub(...)` call — bare, or on a namespace the entry is bound to? */
 function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
     const callee = child(node, 'callee');
     if (node.type !== 'CallExpression' || callee === undefined) {
@@ -59,7 +54,6 @@ function isDefineStub(node: AstNode, namespaces: ReadonlySet<string>): boolean {
     );
 }
 
-/** A default export that may legitimately produce a stub (value or factory). */
 function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<string>): boolean {
     if (declaration === undefined) {
         return false;
@@ -69,19 +63,15 @@ function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<
         declaration.type === 'ArrowFunctionExpression' ||
         declaration.type === 'FunctionDeclaration' ||
         declaration.type === 'FunctionExpression' ||
-        // `export default newsroomArticle` — the value is built above; the type
-        // channel (Stub) covers what the AST cannot follow here.
+        // The value is built above; the `Stub` type covers what the AST cannot follow.
         declaration.type === 'Identifier'
     );
 }
 
-/** The package's own entry — published, or a repository's source. */
 const ENTRY = /^@jterrazz\/test$|(?:^|\/)src\/index\.js$/u;
 
-/** What a file binds from the entry: each stub builder's local name → its kind, and the namespaces. */
 type EntryBindings = { builders: Map<string, string>; namespaces: Set<string> };
 
-/** The local names the file binds from the entry — named builders, and `import * as` namespaces. */
 function entryBindings(program: AstNode): EntryBindings {
     const bindings: EntryBindings = { builders: new Map(), namespaces: new Set() };
     for (const statement of childList(program, 'body')) {
@@ -107,10 +97,7 @@ function entryBindings(program: AstNode): EntryBindings {
     return bindings;
 }
 
-/**
- * The stub kind a member expression reaches the builder of — `http.get` through
- * a named import, `t.http` through a namespace — or `undefined`.
- */
+/** `http.get` through a named import, `t.http` through a namespace. */
 function kindReached(node: AstNode, bindings: EntryBindings): string | undefined {
     if (node.type !== 'MemberExpression') {
         return undefined;
@@ -126,12 +113,7 @@ function kindReached(node: AstNode, bindings: EntryBindings): string | undefined
         : undefined;
 }
 
-/**
- * The layout half — walks the feature's `stubs/` tree from the test file
- * that owns it. Covers what oxlint never visits: a stray `.json` at the root,
- * a directory that is no stub kind, a nested folder or a foreign extension
- * inside a kind folder.
- */
+/** Oxlint never visits a `.json`, a directory that is no kind, nor an empty one, so the layout is walked from the owning test file. */
 function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
     const entries = listDirectory(stubsDir);
     if (entries === null) {
@@ -140,7 +122,6 @@ function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
     for (const entry of entries) {
         const path = join(stubsDir, entry);
         if (!isDirectory(path)) {
-            // Source files at the root are reported on themselves (AST half).
             if (!SOURCE_FILE.test(entry)) {
                 context.report({ data: { entry }, messageId: 'rootEntry', node });
             }
@@ -168,13 +149,10 @@ function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
     }
 }
 
-/** A module that is a facade — `./<name>.stubs`, with or without its extension. */
 const FACADE_SOURCE = /\.stubs(?:\.[cm]?[jt]s)?$/u;
 
-/** The type `defineStubs(...)` returns — a builder declared to return it composes. */
 const COMPOSITION_TYPE = 'Stubs';
 
-/** Is this function declared to return the composition's own type? */
 function returnsComposition(fn: AstNode | undefined): boolean {
     const annotation = child(child(fn, 'returnType'), 'typeAnnotation');
     return (
@@ -183,7 +161,6 @@ function returnsComposition(fn: AstNode | undefined): boolean {
     );
 }
 
-/** The local names an import from a sibling facade binds — its scenarios. */
 function facadeImports(node: AstNode): string[] {
     if (!FACADE_SOURCE.test(stringValue(child(node, 'source')) ?? '')) {
         return [];
@@ -193,7 +170,6 @@ function facadeImports(node: AstNode): string[] {
     );
 }
 
-/** The name a builder declared to return the composition is bound to. */
 function compositionBuilder(node: AstNode): string | undefined {
     if (node.type === 'FunctionDeclaration') {
         return returnsComposition(node) ? identifierName(child(node, 'id')) : undefined;
@@ -206,12 +182,7 @@ function compositionBuilder(node: AstNode): string | undefined {
     return undefined;
 }
 
-/**
- * The names whose value is a composition without the file calling
- * `defineStubs` itself: the bindings imported from a sibling facade (its
- * named exports are scenarios, compositions by C4), and the builders this file
- * declares with the composition's return type.
- */
+/** A sibling facade's named exports are scenarios, compositions by C4. */
 function compositionNames(node: AstNode, names: Set<string>): void {
     const found =
         node.type === 'ImportDeclaration' ? facadeImports(node) : [compositionBuilder(node)];
@@ -222,7 +193,6 @@ function compositionNames(node: AstNode, names: Set<string>): void {
     }
 }
 
-/** A default export whose value one of `names` produces — the name itself, or a call to it. */
 function namesComposition(declaration: AstNode | undefined, names: ReadonlySet<string>): boolean {
     const value =
         declaration?.type === 'CallExpression' ? child(declaration, 'callee') : declaration;
@@ -230,7 +200,6 @@ function namesComposition(declaration: AstNode | undefined, names: ReadonlySet<s
     return name !== undefined && names.has(name);
 }
 
-/** Does this export declaration export a value by a name of its own — never `default`, never a type alone? */
 function exportsByName(node: AstNode): boolean {
     if (node.exportKind === 'type') {
         return false;
@@ -241,7 +210,6 @@ function exportsByName(node: AstNode): boolean {
     return child(node, 'declaration') !== undefined || !exportsDefault(node);
 }
 
-/** Is this a call that composes a world — `defineStubs(…)`, or a `.with(…)` on one? */
 function composes(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
@@ -253,10 +221,6 @@ function composes(node: AstNode): boolean {
     );
 }
 
-/**
- * The facade: `<kebab>.stubs.ts`, exporting its builders and sets by
- * name — and, when it has a default export, a composition there.
- */
 function checkComposite(context: Context, program: AstNode, base: string): void {
     if (!COMPOSITE_FILE.test(base)) {
         context.report({
@@ -280,8 +244,7 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
             named = exportsByName(node) || named;
             if (exportsDefault(node)) {
                 hasDefault = true;
-                // `export { default } from './other.stubs.js'` — a
-                // composition re-export is a legitimate way to build the world.
+                // A composition re-export is a legitimate way to build the world.
                 composed =
                     stringValue(node.source as AstNode | undefined) !== undefined || composed;
             }
@@ -296,10 +259,9 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
     }
 }
 
-/** A unit stub under its kind folder. */
 function checkUnit(context: Context, program: AstNode, base: string, kind: string): void {
     if (REQUEST_DATA_FILE.test(base)) {
-        return; // Matched data (a prompt, an expected body) — it exports a value.
+        return;
     }
     if (!UNIT_FILE.test(base)) {
         context.report({ data: { base }, messageId: 'badName', node: program });
@@ -316,7 +278,7 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
                 wellFormed;
         } else if (node.type === 'ExportNamedDeclaration' && exportsDefault(node)) {
             hasDefault = true;
-            wellFormed = true; // `export { stub as default }` — built above.
+            wellFormed = true;
         }
         const used = kindReached(node, bindings);
         if (used !== undefined && used !== kind) {
@@ -330,15 +292,12 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
     }
 }
 
-/** What C4 checks of a file's program. */
 type Check = (node: AstNode) => void;
 
-/** What C4 checks of the file being linted, by where it sits — nothing out of every stub tree. */
 function checkOf(context: Context): Check | undefined {
     const file = context.physicalFilename;
     const parts = segmentsOf(context);
-    // `src/**/stubs/` is the framework's own stub MODULE, not a
-    // feature's stub tree — only specs carry the convention.
+    // `src/**/stubs/` is the framework's own stub module: only specs carry the convention.
     if (!identityOf(context).inSpecs) {
         return undefined;
     }
@@ -371,20 +330,7 @@ function checkOf(context: Context): Check | undefined {
     };
 }
 
-/**
- * CONVENTIONS C4 — the structure of a feature's `stubs/` tree. The ROOT
- * holds only `*.stubs.ts` facades (their builders and sets exported by
- * name; a default export, when there is one, a `defineStubs`
- * composition) and one folder per stub KIND — a builder the package exports
- * (`STUB_KINDS`). A kind folder holds `<kebab>.ts` unit stubs (default
- * export = `defineStub(...)` or a factory returning one) plus their sibling
- * data (`*.response.json`, `*.request.ts`) — the FOLDER carries the kind, so
- * a unit that calls another kind's builder is an error.
- *
- * Two halves: the AST half reports on each stub file it visits, the layout
- * half walks the tree from the feature's test file (oxlint never visits a
- * `.json` fixture or an empty directory).
- */
+/** The folder carries the kind, so a unit calling another kind's builder is an error. */
 export const c4StubShape: LintRule = {
     createOnce(context: Context): Visitor {
         let check: Check | undefined;

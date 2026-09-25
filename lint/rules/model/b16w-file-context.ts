@@ -17,7 +17,6 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { subjectFolder, subjectsOf } from '../../subject.js';
 import type { Subject } from '../../subject.js';
 
-/** The settings a facet's `with()` takes — what a whole file may share. */
 const SETTINGS: Record<string, readonly string[]> = {
     api: ['clock', 'headers'],
     cli: ['env'],
@@ -26,13 +25,10 @@ const SETTINGS: Record<string, readonly string[]> = {
     website: ['clock', 'headers'],
 };
 
-/** One setup call of a chain: its name, its argument's source, and the span `.name(…)` takes. */
 type Setting = { argument: string; end: number; name: string; start: number };
 
-/** A chain off a handle: its root identifier, its outermost call, and its settings. */
 type Chain = { end: number; handle: string; root: AstNode; settings: Setting[]; start: number };
 
-/** The runner handles a spec imports from a specification module, by their names. */
 function handlesOf(program: AstNode): Set<string> {
     const handles = new Set<string>();
     for (const statement of childList(program, 'body')) {
@@ -53,7 +49,7 @@ function handlesOf(program: AstNode): Set<string> {
     return handles;
 }
 
-/** The chain a call ends, when it hangs off a handle: its root and its setup calls, outermost last. */
+/** Setup calls outermost last. */
 function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | undefined {
     const settings: Setting[] = [];
     let current: AstNode | undefined = call;
@@ -86,7 +82,7 @@ function chainOf(call: AstNode, handles: Set<string>, text: string): Chain | und
     };
 }
 
-/** Every chain of the file, each by its outermost call — a call inside another chain's span is part of it. */
+/** A call inside another chain's span is part of it. */
 function chainsOf(program: AstNode, handles: Set<string>, text: string): Chain[] {
     const chains: Chain[] = [];
     walk(program, (node) => {
@@ -107,7 +103,6 @@ function chainsOf(program: AstNode, handles: Set<string>, text: string): Chain[]
     return chains;
 }
 
-/** The settings every chain of the file states alike — the same name, the same argument. */
 function sharedSettings(chains: Chain[]): Setting[] {
     const [first, ...rest] = chains;
     if (first === undefined || rest.length === 0) {
@@ -122,21 +117,16 @@ function sharedSettings(chains: Chain[]): Setting[] {
     );
 }
 
-/** The actions a route's folder ends on — never the name of what it acts on. */
 const ACTIONS = new Set(['create', 'delete', 'get', 'list', 'update']);
 
-/** A kebab or path word in camelCase: `report-refresh` → `reportRefresh`. */
+/** `report-refresh` → `reportRefresh`. */
 function camelOf(word: string): string {
     return word.replaceAll(/[-_.](?<letter>[a-z0-9])/gu, (_, letter: string) =>
         letter.toUpperCase(),
     );
 }
 
-/**
- * The word a subject is called by: the resource a route's folder ends on
- * (`events/list/` → `events`, `indicators/chart/` → `chart`), the job, the
- * command's first word — `undefined` for a subject with no standard name.
- */
+/** `events/list/` → `events`, `indicators/chart/` → `chart`; `undefined` for a subject with no standard name. */
 function subjectWord(subject: Subject): string | undefined {
     if (subject.facet === 'job') {
         return subject.job;
@@ -148,11 +138,7 @@ function subjectWord(subject: Subject): string | undefined {
     return folder.findLast((segment) => !ACTIONS.has(segment));
 }
 
-/**
- * The name the view takes: the file's subject — so every file of one folder
- * names its view alike — `<subject>View` when the file already holds that
- * name, and `<handle>InFile` for a file whose chains reach no named subject.
- */
+/** Every file of one folder names its view alike: `<subject>View` when the file already holds that name, `<handle>InFile` when no named subject is reached. */
 function viewName(handle: string, text: string, program: AstNode): string {
     const taken = new Set<string>();
     walk(program, (node) => {
@@ -172,7 +158,6 @@ function viewName(handle: string, text: string, program: AstNode): string {
     return free(name) ? name : `${name}View`;
 }
 
-/** The edits that declare the view once and start every chain from it, its shared settings dropped. */
 function declareOnce(
     fixer: Fixer,
     {
@@ -209,15 +194,7 @@ function declareOnce(
     return edits;
 }
 
-/**
- * CONVENTIONS B16w — a setting every chain of a spec file states alike (the
- * same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`) is the file's,
- * stated once: `const events = api.with({ clock: '…' })`. Reported at the
- * first chain's setting; `--fix` declares the view after the imports, starts
- * every chain from it, and drops the setting from each.
- *
- * A warning: two chains alike may be a coincidence the next test breaks.
- */
+/** A warning: two chains alike may be a coincidence the next test breaks. */
 export const b16wFileContext: LintRule = {
     createOnce(context: Context): Visitor {
         return {

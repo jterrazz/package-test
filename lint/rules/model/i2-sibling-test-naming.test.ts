@@ -10,8 +10,6 @@ import { i2SiblingTestNaming } from './i2-sibling-test-naming.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -29,10 +27,6 @@ const OWN = resolve(import.meta.dirname, '../../../specs/lint/i2-sibling-test-na
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
-/**
- * A git checkout nobody has staged anything in: a new module and its new test,
- * and a test whose module `.gitignore` names.
- */
 const UNSTAGED = checkoutUnder('work', ['src']);
 writeFileSync(join(UNSTAGED, 'src/fresh.ts'), 'export {};\n');
 writeFileSync(join(UNSTAGED, 'src/local.ts'), 'export {};\n');

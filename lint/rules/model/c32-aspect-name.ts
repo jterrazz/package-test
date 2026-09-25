@@ -6,10 +6,8 @@ import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { aspectOf } from '../../test-title.js';
 
-/** An aspect is lowercase words joined by single hyphens. */
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-/** The names that say a file holds what did not fit elsewhere — no aspect at all. */
 export const GENERIC_ASPECTS = new Set([
     'basic',
     'edge-cases',
@@ -21,12 +19,6 @@ export const GENERIC_ASPECTS = new Set([
     'tests',
 ]);
 
-/**
- * CONVENTIONS C32 — a spec file's name is its aspect: kebab-case, and never a
- * name that says the file holds what fit nowhere else (`misc`, `other`,
- * `edge-cases`, …). The folder already says WHAT is specified; the name says
- * which question about it the file answers.
- */
 export const c32AspectName: LintRule = {
     createOnce(context: Context): Visitor {
         return {

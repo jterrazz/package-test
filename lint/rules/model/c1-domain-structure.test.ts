@@ -9,13 +9,10 @@ import { c1DomainStructure } from './c1-domain-structure.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-/** Two repository suites on disk, each a door because it holds a test: a runner in either is judged by depth. */
 const SUITES = groundTree({ 'posts/add/add.test.ts': '', 'tree/row-names.test.ts': '' });
 
 ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule, {
@@ -194,10 +191,6 @@ ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unkno
     ],
 });
 
-/**
- * A ground folder on disk, since the clause asks the filesystem whether the
- * test it is looking at has a module beside it. Returns the specs root.
- */
 function groundTree(files: Record<string, string>): string {
     const prefix = resolve(tmpdir(), 'c1-ground-');
     const root = resolve(mkdtempSync(prefix), 'specs');

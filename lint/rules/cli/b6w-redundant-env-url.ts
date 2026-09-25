@@ -7,13 +7,6 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
 
-/**
- * CONVENTIONS B6 (warning) — in `cli` mode with services, the framework
- * already injects `<KEY>_URL` for every service (plus the unambiguous
- * `DATABASE_URL` / `REDIS_URL` aliases). A `.env()` entry that assigns a
- * `*_URL` key from a service's `.connectionString` re-does that injection by
- * hand and is flagged as redundant.
- */
 export const b6wRedundantEnvUrl: LintRule = {
     createOnce(context: Context): Visitor {
         return {

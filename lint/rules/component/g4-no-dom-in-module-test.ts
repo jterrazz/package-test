@@ -6,10 +6,8 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The globals that only exist where a document does. */
 const DOM_GLOBALS = new Set(['document', 'HTMLElement', 'navigator', 'window']);
 
-/** The node kinds that BIND a name, and the key each one binds it under. */
 const BINDINGS: Record<string, string> = {
     CatchClause: 'param',
     ClassDeclaration: 'id',
@@ -20,14 +18,7 @@ const BINDINGS: Record<string, string> = {
     VariableDeclarator: 'id',
 };
 
-/**
- * Every name this file declares for itself.
- *
- * A file-wide set rather than a scope chain: the rule only needs to know that
- * `document` is the test's own binding somewhere, and a name shadowed in one
- * scope is not a global in another. It can only under-report, which is the
- * right direction for a guard.
- */
+/** File-wide rather than a scope chain: it can only under-report, the right direction for a guard. */
 function declaredNames(root: AstNode): Set<string> {
     const names = new Set<string>();
     const add = (node: AstNode | undefined): void => {
@@ -53,7 +44,6 @@ function declaredNames(root: AstNode): Set<string> {
     return names;
 }
 
-/** The node kinds a name sits in when it is a TYPE, not a value the test reaches. */
 const TYPE_POSITIONS = new Set([
     'TSInterfaceHeritage',
     'TSQualifiedName',
@@ -61,7 +51,6 @@ const TYPE_POSITIONS = new Set([
     'TSTypeReference',
 ]);
 
-/** Is this identifier read as a value, rather than named as a property, a key or a type? */
 function isValueReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
     if (parent === undefined) {
@@ -71,9 +60,7 @@ function isValueReference(node: AstNode): boolean {
         return false;
     }
     if (parent.type === 'UnaryExpression' && parent.operator === 'typeof') {
-        // `typeof window === 'undefined'` REACHES no document: it is how a
-        // module states it runs in both runtimes, and the test of that guard
-        // is a module test by definition.
+        // `typeof window === 'undefined'` reaches no document: it is how a module states it runs in both runtimes.
         return false;
     }
     if (parent.type === 'MemberExpression') {
@@ -85,22 +72,7 @@ function isValueReference(node: AstNode): boolean {
     return true;
 }
 
-/**
- * CONVENTIONS G4 — a module test touches no DOM.
- *
- * A module test runs under node, where `document` does not exist: a test that
- * reaches for one is not testing a module, it is rendering something, and the
- * place for that is a `.test.tsx` beside the component.
- *
- * Reach is the `module` role OUTSIDE `specs/`: a `.test.tsx` is the rendered
- * kind and lives in a page, where those globals are what it is there to use;
- * and under `specs/` an api or cli spec is a `.test.ts` too until the `spec`
- * role exists, so the guard stops at the tree it can judge.
- *
- * A name in a TYPE position (`x as HTMLElement`) and a `typeof window` guard
- * name no document: neither reaches one, and a module that must run in both
- * runtimes is tested by exactly that guard.
- */
+/** Reach is the `module` role outside `specs/`: under `specs/` an api or cli spec is a `.test.ts` too. */
 export const g4NoDomInModuleTest: LintRule = {
     createOnce(context: Context): Visitor {
         let declared = new Set<string>();

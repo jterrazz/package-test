@@ -8,14 +8,7 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS E8 — `literate.specification` names a file that exists.
- *
- * The literate door hands every `<case>.spec.yaml` to the runner exported by
- * that module; a path that resolves to nothing fails at collection time with a
- * message about an import, several layers away from the line that caused it.
- * The config states a path relative to itself, so the check is one `stat`.
- */
+/** The config states the path relative to itself, so the check is one `stat`. */
 export const e8LiterateSpecificationExists: LintRule = {
     createOnce(context: Context): Visitor {
         return {

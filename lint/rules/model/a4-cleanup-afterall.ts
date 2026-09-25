@@ -6,7 +6,6 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Does this declarator destructure `cleanup` out of a specification call? */
 function destructuresCleanup(node: AstNode): boolean {
     if (node.type !== 'VariableDeclarator') {
         return false;
@@ -27,7 +26,6 @@ function destructuresCleanup(node: AstNode): boolean {
     );
 }
 
-/** Is this an `afterAll(…)` call whose subtree references `cleanup`? */
 function isAfterAllWithCleanup(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
@@ -47,12 +45,6 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
     return found;
 }
 
-/**
- * CONVENTIONS A4 — a specification file calls `afterAll(cleanup)`. Flags a
- * `*.specification.ts` file that destructures `cleanup` from a
- * `specification.*` call but never hands it to `afterAll` (directly or inside
- * a callback).
- */
 export const a4CleanupAfterall: LintRule = {
     createOnce(context: Context): Visitor {
         return {

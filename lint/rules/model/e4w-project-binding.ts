@@ -6,22 +6,7 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS E4w (warning) — a project that collects a facet root is NAMED for
- * it, and a project named for a facet collects that root.
- *
- * `--project component` has to mean the same thing in every repository: it is
- * the one word a CI job, a Makefile target and an agent all type. A project
- * called `components` collecting `specs/component/**` costs nothing here and
- * everything the first time someone reads a failure in another repository.
- *
- * Any other name is out of reach: a repository suite calls its projects what it
- * likes, and `unit` is only asked not to reach inside a specs tree.
- *
- * What the include collects is read from the GLOB and the config's own place in
- * its package, never from the absolute path: a checkout living under a folder
- * called `specs` collects nothing of the kind.
- */
+/** Read from the glob and the config's place in its package, never the absolute path: a checkout under a folder called `specs` collects nothing of the kind. */
 export const e4wProjectBinding: LintRule = {
     createOnce(context: Context): Visitor {
         return {

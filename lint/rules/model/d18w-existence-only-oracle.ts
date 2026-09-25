@@ -7,32 +7,14 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Matchers that pass for almost any value — the shape of an existence check. */
 const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
 
-/** Matchers that are an existence check only under `not`. */
 const NEGATED_EXISTENCE = new Set(['toBeNull', 'toBeUndefined']);
 
-/**
- * Matchers that assert nothing once their argument is left out — and only in
- * the affirmative. `expect(onClose).not.toHaveBeenCalled()` is the precise
- * opposite: it states that nothing happened, which nothing else can state.
- */
+/** Only affirmative: `expect(onClose).not.toHaveBeenCalled()` states that nothing happened, which nothing else can. */
 const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
 
-/**
- * CONVENTIONS D18w (warning) — the test's ONE assertion is an existence check.
- *
- * `expect(x).toBeDefined()` passes for `0`, `''`, `[]`, the wrong object and
- * the right one; as a test's only oracle it records that the call returned
- * rather than what it answered. A single one beside a real assertion is a
- * precondition and stays silent — the rule fires only when it is the whole
- * proof.
- *
- * A NEGATED bare matcher is the opposite of a loose one:
- * `expect(onClose).not.toHaveBeenCalled()` passes for one state of the world
- * and fails for every other, so it is a whole proof on its own.
- */
+/** Fires only when it is the whole proof: beside a real assertion it is a precondition. */
 export const d18wExistenceOnlyOracle: LintRule = {
     createOnce(context: Context): Visitor {
         return {

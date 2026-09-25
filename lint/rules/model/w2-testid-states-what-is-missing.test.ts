@@ -6,13 +6,10 @@ import { w2TestIdStatesWhatIsMissing } from './w2-testid-states-what-is-missing.
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-/** A website spec — the file kind a scenario is written in. */
 const SPEC = '/repo/specs/website/home/subscribe.spec.ts';
 
 ruleTester.run(

@@ -16,18 +16,9 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** How many probes on one subject make a cluster, unless the option says otherwise. */
 const DEFAULT_THRESHOLD = 3;
 
-/**
- * The accessors a golden can pin whole — a stream, a rendered page, a tree.
- *
- * A probe on `result.status` is not on this list: a status IS one value, and
- * d15w already owns the test whose only oracle is one. Neither are `value` and
- * `error`: a returned value and a raised error are single readings that a
- * component's `input.value` and a refusal's message spell the same way, and
- * "golden the subject" is not the fix for three reads of one string.
- */
+/** Not `status` (d15w's), nor `value` and `error`: single readings a golden would not improve. */
 const GOLDENABLE = new Set([
     'alternates',
     'canonical',
@@ -40,10 +31,8 @@ const GOLDENABLE = new Set([
     'tree',
 ]);
 
-/** The matchers that read a PIECE of a subject rather than the whole of it. */
 const PROBES = new Set(['toBe', 'toContain', 'toEqual', 'toMatch']);
 
-/** Is the subject one of the accessors a golden could pin whole? */
 function goldenableSubject(subject: AstNode | undefined): string | undefined {
     const path = memberPath(subject);
     if (path === undefined) {
@@ -53,7 +42,6 @@ function goldenableSubject(subject: AstNode | undefined): string | undefined {
     return GOLDENABLE.has(tail) ? path : undefined;
 }
 
-/** The cluster size the rule's option states, else the default. */
 function thresholdOf(option: unknown): number {
     const stated =
         typeof option === 'object' && option !== null && 'threshold' in option
@@ -62,17 +50,7 @@ function thresholdOf(option: unknown): number {
     return typeof stated === 'number' ? stated : DEFAULT_THRESHOLD;
 }
 
-/**
- * CONVENTIONS D19w (warning) — three probes on one goldenable subject and no
- * golden on it.
- *
- * Each `toContain` states one line of an output the framework can pin whole;
- * three of them state three, leave everything between them unstated, and still
- * have to be rewritten one by one the day the output changes. The threshold is
- * an option because "how many greps are a cluster" is the one part of this that
- * is taste — the default is three, and a `toMatch(file('./expected/<file>'))` on the same
- * subject silences it however many probes stand beside it.
- */
+/** The threshold is an option: how many probes make a cluster is taste. A golden on the same subject silences it. */
 export const d19wProbeCluster: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -100,9 +78,7 @@ export const d19wProbeCluster: LintRule = {
                         goldened.add(subject);
                         return;
                     }
-                    // A negated probe states an ABSENCE — three of them are
-                    // three things the output must not carry, which no golden
-                    // of what it does carry can say.
+                    // A negated probe states an absence, which no golden of what the output carries can say.
                     if (PROBES.has(assertion.matcher) && !assertion.modifiers.includes('not')) {
                         probes.set(subject, (probes.get(subject) ?? 0) + 1);
                     }

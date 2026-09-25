@@ -6,7 +6,6 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Is this property the RUNNER's browser block, rather than a key that shares its name? */
 function isRunnerBrowserBlock(node: AstNode): boolean {
     for (
         let current = child(node, 'parent');
@@ -20,7 +19,6 @@ function isRunnerBrowserBlock(node: AstNode): boolean {
     return false;
 }
 
-/** Is this node inside a call to `component(...)`? */
 function insideComponentCall(node: AstNode): boolean {
     for (
         let current = child(node, 'parent');
@@ -37,17 +35,6 @@ function insideComponentCall(node: AstNode): boolean {
     return false;
 }
 
-/**
- * CONVENTIONS E6 — a browser project comes from `component()`.
- *
- * A hand-rolled `browser: { … }` block is a project that has to rediscover
- * everything the seam already knows: the provider pinned to the runner's exact
- * version, the service worker served from the framework's own install, the JSX
- * transform the current Vite actually uses, the dependencies a cold cache must
- * pre-bundle, and the artefact directories Browser Mode otherwise leaks at the
- * repository root. Every one of those is a run that fails on the second
- * machine, so the helper owns them and a config states only what is its own.
- */
 export const e6ComponentProjectHelper: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -57,9 +44,7 @@ export const e6ComponentProjectHelper: LintRule = {
                     if (candidate.type !== 'Property' || propertyKeyName(candidate) !== 'browser') {
                         return;
                     }
-                    // A `browser` key somewhere else in a config — a `define`
-                    // flag, an env record — is not a project's browser block.
-                    // The runner's sits under `test`.
+                    // A `browser` key elsewhere in a config (a `define` flag, an env record) is not a project's: the runner's sits under `test`.
                     if (!isRunnerBrowserBlock(candidate)) {
                         return;
                     }

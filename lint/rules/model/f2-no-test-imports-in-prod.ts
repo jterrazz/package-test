@@ -14,25 +14,7 @@ import {
 } from '../../production.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS F2 — production never reaches test material. In a production
- * module (`production.ts` defines it, for every guard), a reference in any
- * form — import, `import type`, re-export, `import()`, `require()` — that
- * reaches a test package, a test/spec/specification/fixtures module, ground,
- * the `specs/` tree or a stub, directly, through a `paths` alias or a
- * `#…` import, or through a module that is not production, is an error; so is
- * a path the module builds from where it sits (`new URL(…, import.meta.url)`,
- * `join(import.meta.dirname, …)`) or reads (`readFileSync('./…')`) into test
- * material.
- *
- * Sanctioned exceptions: `@jterrazz/test/oxlint`, the tool-facing, zero-runtime
- * lint entry (F1) — a shared oxlint preset legitimately imports it; and a test
- * package the unit's `jterrazz.config.ts` allows under `test.production.allow`,
- * with the reason its product runs it.
- *
- * This repository's runner coupling (I1) turns the rule off by path in its
- * own oxlint config.
- */
+/** This repository's runner coupling (I1) turns the rule off by path in its own oxlint config. */
 export const f2NoTestImportsInProd: LintRule = {
     createOnce(context: Context): Visitor {
         let allowed: ReadonlySet<string> = new Set();

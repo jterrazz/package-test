@@ -18,7 +18,6 @@ import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 import { testTitle } from '../../test-title.js';
 
-/** How a file's top level falls short of one group holding every test, and where it shows. */
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
     const [only, second] = members.filter((statement) => isGroup(statement));
     const stray = members.find((statement) => isTest(statement));
@@ -31,12 +30,7 @@ function runFinding(members: AstNode[]): undefined | { messageId: string; node: 
     return stray === undefined ? undefined : { messageId: 'testOutside', node: stray };
 }
 
-/**
- * The finding on the one group's title when it is not the file's name, with
- * its fix: a plain group's renamed, the title it said kept on each of its
- * tests when it holds tests alone; a table's — `describe.each(…)(…)`, run
- * once per row — prefixed so what names its rows stays, unless it is computed.
- */
+/** A table's title is prefixed so what names its rows stays, unless it is computed. */
 function titleFinding(
     source: string,
     group: AstNode,
@@ -73,21 +67,7 @@ function titleFinding(
     return { fix, messageId, node: title };
 }
 
-/**
- * CONVENTIONS C31 — a test file holds ONE top-level `describe`, titled with
- * a spec's aspect or a colocated test's subject ({@link testTitle}), so the
- * report's first word, `<name> > …`, names the file a failure came from. A
- * `describe.each` names its rows: its title starts with the name,
- * `'pagination — page %s'`.
- *
- * `--fix` renames a title that says something else (a table's by prefixing
- * the name), wraps the tests of a file that has no `describe` in one, and
- * merges several groups, or a test beside the one, into one — a group's
- * tests titled `<group> — <test>`, one level deep as J10 wants. The
- * statements between the tests stay at module scope, above the `describe`. A
- * group that holds anything but tests, or runs per row, is left to its
- * author: its hooks and its table are a scope the merge would change.
- */
+/** A group holding anything but tests, or running per row, is left to its author: the merge would change the scope of its hooks and table. */
 export const c31DescribeNamesFile: LintRule = {
     createOnce(context: Context): Visitor {
         return {

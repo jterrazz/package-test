@@ -7,20 +7,11 @@ import { identityOf, specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * An import a spec may draw a value from without it being an expectation of
- * someone else's: its runner, and its stubs.
- */
 function isRunnerOrStub(source: string): boolean {
     return /\.specification(?:\.[jt]s)?$/u.test(source) || /(?:^|\/)stubs\//u.test(source);
 }
 
-/**
- * The names a spec imports from another module of its specs tree that is
- * neither its runner nor a stub. A module outside the tree — the product's
- * own source, its `package.json` — is the subject's data, not an expectation
- * someone wrote for the test.
- */
+/** A module outside the specs tree is the subject's data, not an expectation someone wrote for the test. */
 function foreignNames(program: AstNode, filename: string, specs: string): Map<string, string> {
     const names = new Map<string, string>();
     for (const statement of childList(program, 'body')) {
@@ -43,7 +34,6 @@ function foreignNames(program: AstNode, filename: string, specs: string): Map<st
     return names;
 }
 
-/** The identifier a matcher argument reads as a value — itself, or the root of its member chain. */
 function rootRead(argument: AstNode): string | undefined {
     let current: AstNode | undefined = argument;
     while (current?.type === 'MemberExpression') {
@@ -52,16 +42,7 @@ function rootRead(argument: AstNode): string | undefined {
     return identifierName(current);
 }
 
-/**
- * CONVENTIONS D29 — a spec states its own expectations. A value imported
- * from another module of the specs tree and handed to a matcher as the
- * expected value is an expectation written elsewhere: the reader of the test cannot see what it
- * asserts, and a change to the shared module moves assertions nobody reviews
- * as such. The runner and the stubs are imported, and so are typed
- * helpers — a helper is CALLED, and what it builds is the test's own. A
- * module outside the specs tree is the product's: a spec may compare against
- * its data (`package.json`'s version, a constant the product exports).
- */
+/** A typed helper is called, and what it builds is the test's own. */
 export const d29NoForeignExpectation: LintRule = {
     createOnce(context: Context): Visitor {
         return {

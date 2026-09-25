@@ -12,8 +12,6 @@ import { c7SeedsSqlOnly } from './c7-seeds-sql-only.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -21,12 +19,10 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
-/** A leaf whose seeds/ holds two files that are not SQL. */
 const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.json'), '[]\n');
 writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.csv'), 'id\n');
 
-/** A git checkout whose seeds/ tracks one `.sql` and holds a new, unstaged `.json` beside it. */
 const UNTRACKED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
 writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
@@ -35,7 +31,6 @@ execFileSync('git', ['add', 'package.json', 'specs/app/widget/seeds/users.sql'],
     cwd: UNTRACKED_STRAY,
 });
 
-/** The same checkout, its `.json` named by `.gitignore`. */
 const IGNORED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
 writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
 writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
@@ -87,7 +82,6 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
     ],
 });
 
-/** One lint pass of C7 over `file`, in this process: the reports it makes. */
 function lintPass(file: string): string[] {
     const reported: string[] = [];
     const context: Pick<Context, 'filename' | 'physicalFilename' | 'report' | 'sourceCode'> = {

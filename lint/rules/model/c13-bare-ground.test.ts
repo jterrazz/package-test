@@ -8,8 +8,6 @@ import { c13BareGround } from './c13-bare-ground.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -18,13 +16,10 @@ const ruleTester = new RuleTester();
 // against the shared E2E fixture trees rather than on synthetic paths.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
-/** A package whose module test still stands on the 16 `_expected/`. */
 const MODULE_16 = checkoutUnder('work', ['src/report/_expected']);
 
-/** A tree left on the 16 stub vocabulary: `contracts/` beside a spec and beside a module test. */
 const ON_16_STUBS = `${SPECS_LINT}/c13-bare-ground/fixtures/on-16-stubs`;
 
-/** A product whose own folder is named `contracts/` — no 16 facade in it. */
 const PRODUCT_CONTRACTS = packageWith({
     'src/billing/billing.test.ts': 'test("x", () => {});\n',
     'src/billing/contracts/invoice.ts': 'export type Invoice = { total: number };\n',

@@ -11,12 +11,7 @@ const KNOWN_TOKEN_LITERAL = new RegExp(
     'u',
 );
 
-/**
- * Is this function a pure chain of `.replace(…, '{{token}}')` normalisations?
- * Accepts an arrow with an expression body or a single-return body whose
- * expression is nested `.replace()` calls; every replacement must be a string
- * literal that is exactly a known `{{token}}`.
- */
+/** Every replacement must be a string literal that is exactly a known `{{token}}`. */
 function isTokenEquivalentTransform(fn: AstNode): boolean {
     if (fn.type !== 'ArrowFunctionExpression' && fn.type !== 'FunctionExpression') {
         return false;
@@ -46,13 +41,6 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     return sawReplace && expression?.type === 'Identifier';
 }
 
-/**
- * CONVENTIONS D6 (warning) — `transform` survives only as an escape hatch for
- * applicative noise the tokens do not cover (ANSI is already stripped by
- * default). A transform that only rewrites dynamic segments into known
- * `{{token}}` literals duplicates the token grammar: put the tokens in the
- * fixture instead.
- */
 export const d6wTransformTokenEquivalent: LintRule = {
     createOnce(context: Context): Visitor {
         return {

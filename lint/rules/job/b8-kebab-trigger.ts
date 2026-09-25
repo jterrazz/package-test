@@ -6,21 +6,15 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Stable kebab-case job identifier: `nightly-report`, `send-welcome-emails`. */
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
-/** The kebab-case spelling of a job name: its words, lowercased, joined by `-`. */
 function kebabOf(name: string): string {
     return toKebabCase(name)
         .replaceAll(/[^a-z0-9]+/gu, '-')
         .replaceAll(/^-|-$/gu, '');
 }
 
-/**
- * CONVENTIONS B8 — a job `name` passed to `.trigger()` is a stable kebab-case
- * identifier; it is a contract between the app and its tests. Only string
- * literals are checked — dynamic names are out of static reach.
- */
+/** Only string literals are checked: a dynamic name is out of static reach. */
 export const b8KebabTrigger: LintRule = {
     createOnce(context: Context): Visitor {
         return {

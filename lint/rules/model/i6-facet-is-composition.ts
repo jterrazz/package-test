@@ -7,10 +7,8 @@ import { lessonsAt } from '../../lesson.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js';
 
-/** What a facet's folder file is: its composition, its constructor, or neither. */
 type FacetFile = 'composition' | 'constructor' | undefined;
 
-/** `src/facets/<facet>/<facet>.facet.ts` is the composition, `<facet>.handle.ts` its constructor. */
 function facetFileOf(filename: string): FacetFile {
     const [file = '', facet = '', facets = '', src = ''] = segments(filename).toReversed();
     if (src !== 'src' || facets !== 'facets') {
@@ -22,14 +20,7 @@ function facetFileOf(filename: string): FacetFile {
     return file === `${facet}.handle.ts` ? 'constructor' : undefined;
 }
 
-/**
- * CONVENTIONS I6 — a facet file is a composition, and its constructor opens it.
- *
- * `src/facets/<facet>/<facet>.facet.ts` holds its imports, the `composition`,
- * the chain interface computed from it and the `defineFacet(…)` that wires
- * its engines; `<facet>.handle.ts` never runs a definition's step nor builds
- * a result. A `self` rule: these folders are this package's architecture.
- */
+/** A `self` rule: these folders are this package's architecture. */
 export const i6FacetIsComposition: LintRule = {
     createOnce(context: Context): Visitor {
         let file: FacetFile;

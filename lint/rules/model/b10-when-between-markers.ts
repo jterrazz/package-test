@@ -14,16 +14,6 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS B10 — `// When -` is optional, but where it is written it narrates
- * the ACTION, so it sits after the Given and before the Then.
- *
- * B4 holds the two mandatory markers; this rule holds the optional one's place.
- * A `When` written above the Given, or below the Then, tells the reader the
- * story in an order the code does not follow — the narration then costs more
- * than it gives, and the fix is either to move it to the action or to drop it
- * where the chain IS the action.
- */
 export const b10WhenBetweenMarkers: LintRule = {
     createOnce(context: Context): Visitor {
         return {

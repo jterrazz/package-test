@@ -8,17 +8,7 @@ import type { LintRule, Visitor } from '../../rule-shape.js';
 
 const PACKAGE = '@jterrazz/test';
 
-/**
- * CONVENTIONS F1 — everything a SPEC needs is imported from `@jterrazz/test`;
- * internal subpaths do not exist.
- *
- * The exception is not a list kept here: it is the package's own `exports` map
- * (`/oxlint`, the tool-facing plugin entry; `/vitest`, the runner-config
- * surface `vitest.config.ts` imports). A published subpath IS the public
- * contract, so reading the manifest is what keeps the rule from outlawing an
- * import the package itself prescribes. Each is exempt from any file — an
- * oxlint config, a shared preset, a vitest config.
- */
+/** The exception is the package's own `exports` map, read, not listed: a published subpath is the public contract. */
 export const f1NoSubpathImport: LintRule = {
     createOnce(context: Context): Visitor {
         const allowed = new Set(declaredSubpaths());

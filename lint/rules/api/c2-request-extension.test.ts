@@ -9,21 +9,16 @@ import { c2RequestExtension } from './c2-request-extension.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-// The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
-/** A leaf whose requests/ holds two files that carry no extension. */
 const TWO_BARE = checkoutUnder('work', ['specs/app/widget/requests']);
 writeFileSync(join(TWO_BARE, 'specs/app/widget/requests/order'), '{}\n');
 writeFileSync(join(TWO_BARE, 'specs/app/widget/requests/notes'), 'notes\n');
 
-/** A leaf whose requests/ holds everything a spec sends: a request, two bodies, a folder of them. */
 const SENT = checkoutUnder('work', ['specs/app/widget/requests/orders']);
 writeFileSync(join(SENT, 'specs/app/widget/requests/create.http'), 'POST /orders\n');
 writeFileSync(join(SENT, 'specs/app/widget/requests/order.json'), '{}\n');

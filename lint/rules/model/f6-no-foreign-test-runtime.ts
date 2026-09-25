@@ -7,15 +7,10 @@ import { RULE_DOCS } from '../../manifest.js';
 import type { FileRole } from '../../role.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * A foreign runtime, and what the framework offers in its place. The message a
- * group carries is its FIX, because a ban with no destination is an argument
- * rather than a rule.
- */
+/** A group's message is its fix: a ban with no destination is an argument. */
 type Group = {
     fix: string;
     matches: (source: string) => boolean;
-    /** The roles the group reaches, when it is narrower than the rule's own. */
     roles?: FileRole[];
 };
 
@@ -70,28 +65,10 @@ const GROUPS: Group[] = [
     },
 ];
 
-/**
- * The roles that RUN a test — never a fixture app's config or a provider module
- * that happens to sit under `specs/`. A fixture project's own `vitest.config.ts`
- * has to name the provider, and a `providers.tsx` has to import the adapter it
- * wraps: neither is a spec speaking a second dialect.
- */
+/** A fixture project's own config must name the provider, and a `providers.tsx` must import the adapter it wraps. */
 const REACHED = new Set<FileRole>(['component', 'module', 'spec', 'specification']);
 
-/**
- * CONVENTIONS F6 — a test file imports no second test runtime.
- *
- * Every seam the framework owns is one a spec must not reach around: a test
- * that imports the adapter speaks the adapter's dialect, and a repository ends
- * up with as many vocabularies as it has seams. The groups the rule carries are
- * every seam this vocabulary replaces — the runner, the browser, the simulator,
- * the network, the clock and the doubles — each carrying the destination that
- * answers the need it was reached for.
- *
- * `react-dom/server` is the one group with a role of its own: rendering a
- * component to a string in a `.test.ts` is the shape the fork exists to name,
- * and in a `.test.tsx` it is a legitimate thing for a component to do.
- */
+/** `react-dom/server` alone has a role of its own: in a `.test.tsx` rendering to a string is legitimate. */
 export const f6NoForeignTestRuntime: LintRule = {
     createOnce(context: Context): Visitor {
         return {

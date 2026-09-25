@@ -43,7 +43,6 @@ const GATE = packageWith({
 const GATE_SERVICE = join(GATE, 'src/browser/service.ts');
 const BARREL = join(ROOT, 'src/index.ts');
 
-/** A case in the production module, and the message it must raise. */
 const refused = (code: string, messageId: string, filename = PROD) => ({
     code,
     errors: [{ messageId }],

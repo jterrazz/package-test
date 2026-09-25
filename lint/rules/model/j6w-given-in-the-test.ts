@@ -7,13 +7,10 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The hooks that BUILD something — there is no restore-only form of these. */
 const BUILDERS = new Set(['beforeAll', 'beforeEach']);
 
-/** The hooks that may stand, when all they do is give back what the test took. */
 const TEARDOWNS = new Set(['afterAll', 'afterEach']);
 
-/** The calls a teardown may carry: each one RESTORES, none of them builds. */
 const RESTORES = new Set([
     'cleanup',
     'vi.resetAllMocks',
@@ -23,16 +20,12 @@ const RESTORES = new Set([
     'vi.useRealTimers',
 ]);
 
-/** Is every call in this hook's body a restore? */
 function restoreOnly(hook: AstNode): boolean {
     const callback = childList(hook, 'arguments')[0];
     if (callback === undefined) {
         return false;
     }
-    // `afterAll(cleanup)`, `afterEach(vi.restoreAllMocks)` — the restore handed
-    // over by name, A4's own idiom. Reading the bare identifier alone made a
-    // `vi` member fall through to the walk, which finds no call at all and
-    // reported the teardown as doing more than giving back.
+    // `afterAll(cleanup)`, `afterEach(vi.restoreAllMocks)`: a restore handed over by name.
     const handedOver = memberPath(callback) ?? identifierName(callback);
     if (handedOver !== undefined) {
         return RESTORES.has(handedOver);
@@ -52,20 +45,7 @@ function restoreOnly(hook: AstNode): boolean {
     return calls >= 1 && calls === restores;
 }
 
-/**
- * CONVENTIONS J6w (warning) — the Given lives INSIDE the test.
- *
- * A hook moves the setup out of the only place a reader looks: the test states
- * a name and an assertion, and what it stands on is somewhere above, shared
- * with every other test in the file and quietly depended on by half of them. A
- * shared value is a function each test calls; the framework's own primitives —
- * `clock.at()`, `intercept()`, `using` — restore themselves, so the hook they
- * would have needed does not exist.
- *
- * A teardown that only GIVES BACK is not a Given and stands: `afterAll(cleanup)`
- * is A4's own idiom, and a file that took the timers or the globals says so
- * where it gives them back.
- */
+/** A teardown that only gives back is no Given, and stands. */
 export const j6wGivenInTheTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {

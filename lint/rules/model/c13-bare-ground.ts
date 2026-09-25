@@ -12,19 +12,12 @@ import { specsAnchorOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 
-/** The folder 16 declared its stubs in — `stubs/` since 17.0.0. */
 const CONTRACTS_DIR = 'contracts';
-/** A 16 stubs facade, `<name>.contracts.ts` — what marks a `contracts/` outside `specs/` as a stubs folder. */
 const CONTRACTS_FACADE = /\.contracts\.[cm]?[jt]s$/u;
 
-/**
- * Is `dir` a 16 stubs folder left behind: any `contracts/` in a specs tree, and
- * outside one only a folder holding a `*.contracts.ts` facade — a product may
- * name a folder of its own `contracts/`.
- */
+/** Outside a specs tree only a folder holding a `*.contracts.ts` facade: a product may name a folder `contracts/`. */
 function isLeftoverContracts(dir: string, inSpecs: boolean): boolean {
     return (
         isDirectory(dir) &&
@@ -32,24 +25,7 @@ function isLeftoverContracts(dir: string, inSpecs: boolean): boolean {
     );
 }
 
-/**
- * CONVENTIONS C13 — ground folders carry bare, reserved names. A directory
- * named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` beside a test is
- * the 16.x name: since `@jterrazz/test` 17.0.0 the four are `fixtures/`,
- * `expected/`, `requests/` and `seeds/`, wherever a test stands on a file — a
- * spec under `specs/`, or a module test beside its module.
- *
- * The stub folder moved the same way — a `contracts/` beside a test is the
- * 16.x name of `stubs/` — and is named in the same breath.
- *
- * The catch this rule exists for: a tree that keeps the old names still runs —
- * every path names its folder in full — so nothing fails, and the repository
- * speaks two dialects of the same law. This rule states the rename.
- *
- * Anchored on the visited test file, exactly as C2/C7/C11 are: the test's own
- * sibling directories are probed, plus the old pool at the nearest specs root
- * when the test sits under one.
- */
+/** A tree keeping the 16 names still runs, so nothing else would say so. Anchored on the visited test file, as C2/C7/C11 are. */
 export const c13BareGround: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -77,7 +53,7 @@ export const c13BareGround: LintRule = {
                 for (const legacy of Object.keys(RENAMED_GROUND_DIRS)) {
                     probe(dirname(file), legacy);
                 }
-                // The pool is ground for the whole tree, no spec sits beside it, and 17 keeps it under `shared/`.
+                // The 16 pool is ground for the whole tree, and 17 keeps it under `shared/`.
                 if (anchor !== undefined) {
                     probe(anchor.directory, '_fixtures', `${SHARED_GROUND}/${GROUND_FIXTURES}`);
                 }

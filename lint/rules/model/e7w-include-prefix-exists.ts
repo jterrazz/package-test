@@ -8,17 +8,7 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS E7w (warning) — an `include` whose static prefix is not a
- * directory collects nothing.
- *
- * A project that collects nothing PASSES: the run is green, the suite it was
- * supposed to run never executed, and the only trace is a zero nobody reads. A
- * folder renamed one commit earlier is all it takes, so the prefix is checked
- * against the filesystem the config sits in — and so is the glob itself, since
- * the class that actually bit a consumer was a SUFFIX renamed under a folder
- * that still exists (C12's `--fix` moving `.test.ts` to `.spec.ts`).
- */
+/** The glob is checked too: a suffix renamed under a folder that still exists (C12's `--fix`) collects nothing as surely. */
 export const e7wIncludePrefixExists: LintRule = {
     createOnce(context: Context): Visitor {
         return {

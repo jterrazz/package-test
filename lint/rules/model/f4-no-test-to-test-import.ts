@@ -5,15 +5,9 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
-/** The three suffixes that declare tests — `.test.ts(x)` and `.spec.ts`. */
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/u;
 
-/**
- * CONVENTIONS F4 — a `*.test.ts` never imports another `*.test.ts`. Shared
- * test data belongs in a `*.fixtures.ts` neighbour (F5), shared runners in a
- * `*.specification.ts` file (A1).
- */
 export const f4NoTestToTestImport: LintRule = {
     createOnce(context: Context): Visitor {
         return {

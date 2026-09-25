@@ -10,16 +10,13 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The relative path a golden matcher names, when the call is one and names it literally. */
 function goldenPathOf(node: AstNode): string | undefined {
     const name = goldenOf(node)?.path;
     return name !== undefined && isRelativePath(name) ? name : undefined;
 }
 
-/** A captured-ref token: `{{kind#ref}}`. Captures the ref name. */
 const REF_TOKEN = /\{\{[A-Za-z][A-Za-z0-9]*#(?<ref>[\w.-]+)\}\}/gu;
 
-/** Is this call `match.ref(...)`? */
 function isMatchRef(node: AstNode): boolean {
     const callee = node.callee as AstNode | undefined;
     if (callee?.type !== 'MemberExpression' || memberPropertyName(callee) !== 'ref') {
@@ -29,7 +26,6 @@ function isMatchRef(node: AstNode): boolean {
     return object?.type === 'Identifier' && object.name === 'match';
 }
 
-/** Ref names captured in a fixture text (or a directory-tree snapshot's files). */
 function refsInFixture(target: string): string[] {
     const refs: string[] = [];
     const collect = (text: string): void => {
@@ -52,14 +48,7 @@ function refsInFixture(target: string): string[] {
     return refs;
 }
 
-/**
- * CONVENTIONS D9 (warning) — a capture ref (`match.ref('order')`,
- * `{{uuid#order}}`) earns its keep only when it is asserted more than once (the
- * point of a capture is the equality check on later occurrences). Aggregating
- * per file — code `match.ref` literals plus the `{{kind#ref}}` tokens of the
- * golden files the file references — a ref that appears exactly once
- * everywhere is a plain matcher wearing a name.
- */
+/** Counted per file: code `match.ref` literals plus the `{{kind#ref}}` tokens of the goldens it names. */
 export const d9wSingleUseRef: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -71,11 +60,7 @@ export const d9wSingleUseRef: LintRule = {
                 const featureDir = dirname(context.physicalFilename);
                 const counts = new Map<string, number>();
                 const codeNodes = new Map<string, AstNode>();
-                // Fallback report site for a ref that lives ONLY in a fixture:
-                // The golden matcher's node that pulled it in. Per D9's normative
-                // text the count aggregates code + the goldens it references,
-                // fixtures, so a fixture-only ref used once must still warn —
-                // attached to its referencing node since it has no code site.
+                // A ref living only in a golden has no code site: it is reported on the matcher that pulled the golden in.
                 const fixtureNodes = new Map<string, AstNode>();
                 const bump = (ref: string): void => {
                     counts.set(ref, (counts.get(ref) ?? 0) + 1);

@@ -5,7 +5,6 @@ import { c33FileSize, groupsOf, MAX_SPEC_LINES } from './c33-file-size.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-/** A spec of `lines` lines: tests, padded with comment lines. */
 function specOf(lines: number, titles: string[]): string {
     const body = titles.map((title) => `test('${title}', () => {});`);
     return [...body, ...Array.from({ length: lines - body.length }, () => '// …')].join('\n');

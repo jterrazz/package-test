@@ -5,14 +5,9 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** Always-synchronous matchers — awaiting them is redundant noise (D2). */
 const SYNC_MATCHERS = new Set(['toBe', 'toContain', 'toEqual', 'toHaveLength']);
 
-/**
- * Does the member-call spine root at an `expect(…)` call, WITHOUT a `.resolves`
- * / `.rejects` modifier? Those modifiers make an otherwise-sync matcher async,
- * so `await expect(p).resolves.toEqual(…)` is NOT a redundant await.
- */
+/** `.resolves`/`.rejects` make a sync matcher async, so that await is not redundant. */
 function rootsAtSyncExpect(node: AstNode | undefined): boolean {
     let current = node;
     while (current !== undefined) {
@@ -35,12 +30,6 @@ function rootsAtSyncExpect(node: AstNode | undefined): boolean {
     return false;
 }
 
-/**
- * CONVENTIONS D2 (warning) — the mirror of {@link d2AwaitIoMatcher}: only the
- * IO-backed matchers are async. `await expect(x).toBe(y)` awaits a plain value,
- * which reads as if the assertion were IO and hides the D2 signal. Drop the
- * `await`.
- */
 export const d2wAwaitSyncMatcher: LintRule = {
     createOnce(context: Context): Visitor {
         return {

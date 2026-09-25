@@ -17,17 +17,10 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * The matchers whose ARGUMENT is a whole expected shape — a sampled value
- * anywhere inside one of these is under the oracle just as surely as a direct
- * argument of `expect`.
- */
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
 
-/** The two calls that PIN the clock — under one of them, a reading is a constant. */
 const PINS = new Set(['clock.advance', 'clock.at']);
 
-/** Does this test pin the clock it then reads? */
 function pinsTheClock(scope: AstNode): boolean {
     let pinned = false;
     walk(scope, (inner) => {
@@ -42,7 +35,6 @@ function pinsTheClock(scope: AstNode): boolean {
     return pinned;
 }
 
-/** Every sampled call at or under `node`. */
 function sampledUnder(node: AstNode | undefined): AstNode[] {
     if (node === undefined) {
         return [];
@@ -56,25 +48,7 @@ function sampledUnder(node: AstNode | undefined): AstNode[] {
     return found;
 }
 
-/**
- * CONVENTIONS D16 — no sampled value under an oracle.
- *
- * A test that compares against `Date.now()` or `Math.random()` proves that two
- * readings of the same machine agree, which they always do: the assertion holds
- * whatever the subject does, and the day it fails it fails for the clock. The
- * reach is deliberately NARROW — the sampled call has to be what the assertion
- * READS (a direct argument of `expect` or of its matcher, or anywhere inside a
- * structural matcher's expected shape) — because the wider net is d16w's, at
- * warn, where a false positive costs a line rather than a build.
- *
- * A test that PINS the clock is out of reach: under `clock.at()` a reading is
- * a constant the test chose, and `expect(row.createdAt).toEqual(new Date())`
- * is the comparison the message asks for. Reporting it would have named the
- * fix the author had already applied.
- *
- * `*.specification.ts(x)` is out of reach by role: a runner's own startup
- * legitimately samples (a per-run label, a temp directory).
- */
+/** Deliberately narrow, the wider net is d16w's. A test pinning the clock is out of reach: its reading is a constant it chose. A specification may sample (a per-run label). */
 export const d16SampledOracle: LintRule = {
     createOnce(context: Context): Visitor {
         const report = (found: AstNode[]): void => {
@@ -93,7 +67,6 @@ export const d16SampledOracle: LintRule = {
                     return;
                 }
                 walk(callback, (inner) => {
-                    // `expect(<sampled>)` — the subject itself is a reading.
                     if (isExpectCall(inner)) {
                         report(childList(inner, 'arguments').filter(isSampledValue));
                         return;

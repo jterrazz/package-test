@@ -7,14 +7,11 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** An HTTP status code lives in this range — the numeric-literal gate. */
 const MIN_STATUS = 100;
 const MAX_STATUS = 599;
 
-/** Matchers that pin a single value — the shape of a status probe. */
 const EQUALITY_MATCHERS = new Set(['toBe', 'toEqual']);
 
-/** Is `node` an `expect(…)` call (bare `expect` identifier callee)? */
 function isExpectCall(node: AstNode | undefined): boolean {
     if (node?.type !== 'CallExpression') {
         return false;
@@ -23,7 +20,6 @@ function isExpectCall(node: AstNode | undefined): boolean {
     return callee?.type === 'Identifier' && callee.name === 'expect';
 }
 
-/** Is `node` a numeric literal in the HTTP status range (100–599)? */
 function isStatusLiteral(node: AstNode | undefined): boolean {
     if (node?.type !== 'Literal' || typeof node.value !== 'number') {
         return false;
@@ -32,12 +28,7 @@ function isStatusLiteral(node: AstNode | undefined): boolean {
     return Number.isInteger(value) && value >= MIN_STATUS && value <= MAX_STATUS;
 }
 
-/**
- * Is `node` a status probe — `expect(X.status).toBe(N)` / `.toEqual(N)` where
- * `X.status` is any `.status` member access and `N` is a numeric literal in the
- * HTTP status range? The numeric-literal gate keeps container-status STRINGS
- * (`expect(neo.status).toBe('running')`) out.
- */
+/** The numeric gate keeps container-status strings (`expect(neo.status).toBe('running')`) out. */
 function isStatusProbe(node: AstNode): boolean {
     if (node.type !== 'CallExpression') {
         return false;
@@ -50,7 +41,6 @@ function isStatusProbe(node: AstNode): boolean {
     if (matcher === undefined || !EQUALITY_MATCHERS.has(matcher)) {
         return false;
     }
-    // The subject is a direct `expect(<subject>)` — no `.not`/`.resolves` chain.
     const expectCall = callee.object as AstNode | undefined;
     if (!isExpectCall(expectCall)) {
         return false;
@@ -63,19 +53,7 @@ function isStatusProbe(node: AstNode): boolean {
     return isStatusLiteral(expected);
 }
 
-/**
- * CONVENTIONS D11/D15 (warning) — a spec test whose ONLY assertions are HTTP
- * status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal
- * 100–599) throws away the full-response golden. Pin the whole response instead:
- * `expect(result.response).toMatch(file('./expected/case.http'))`.
- *
- * This complements d12w (which needs a CLUSTER of ≥3 body probes): the lone
- * `expect(result.status).toBe(422)` as a test's sole assertion falls below that
- * threshold yet still hides everything the response carries. The rule fires only
- * when EVERY `expect(…)` in the callback is a status probe — a status probe
- * sitting NEXT TO a real assertion (a whole-result `toMatch`, a table's rows, `toContain`, …) is
- * the legitimate scalpel and stays silent.
- */
+/** Fires only when every `expect(…)` of the callback is a status probe: one beside a real assertion is the scalpel, and d12w needs a cluster of three. */
 export const d15wStatusOnlyProbe: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -89,10 +67,6 @@ export const d15wStatusOnlyProbe: LintRule = {
                     return;
                 }
 
-                // Count every `expect(…)` call and how many are status probes.
-                // Any non-status assertion (whole-result toMatch, a table's rows, toContain, or a
-                // status compared to a string) makes probes < expects — the
-                // scalpel allowance stays silent.
                 let expectCalls = 0;
                 let statusProbes = 0;
                 walk(callback, (inner) => {

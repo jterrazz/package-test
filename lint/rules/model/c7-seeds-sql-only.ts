@@ -9,12 +9,7 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS C7 — `.seed()` carries DATABASE state only: `seeds/` contains
- * nothing but `*.sql` fragments. File state goes through `.fixture()`; there
- * is no seed handler and no prefix dispatch. Anchored on the feature's visited
- * test file (the listing of the sibling `seeds/`).
- */
+/** Anchored on the visited test file, reading the listing of its sibling `seeds/`. */
 export const c7SeedsSqlOnly: LintRule = {
     createOnce(context: Context): Visitor {
         return {

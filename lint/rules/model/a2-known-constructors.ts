@@ -5,17 +5,8 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The six constructors, and only six. */
 const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
 
-/**
- * CONVENTIONS A2 — `specification.api()`, `specification.job()`,
- * `specification.cli()`, `specification.integration()`,
- * `specification.website()` and `specification.mobile()` are the only
- * members. Any other access (`specification.app`, `.http`, `.stack`, …) is
- * flagged at the member site. A rendered component has no constructor: it
- * starts nothing, so it is a chain, not a member of this record.
- */
 export const a2KnownConstructors: LintRule = {
     createOnce(context: Context): Visitor {
         return {

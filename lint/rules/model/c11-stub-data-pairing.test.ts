@@ -16,7 +16,6 @@ const ruleTester = new RuleTester();
 // The rule is fs-anchored — the cases run against the shared fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
-/** A matched input with no stub beside it, in another kind's folder. */
 const ORPHAN_INPUT = checkoutUnder('work', ['specs/app/widget/stubs/anthropic']);
 writeFileSync(
     join(ORPHAN_INPUT, 'specs/app/widget/stubs/anthropic/summary.request.ts'),

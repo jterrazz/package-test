@@ -18,13 +18,9 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The accessors a result is compared WHOLE through — the subjects this rule counts. */
 const WHOLE_SUBJECTS = new Set(['json', 'response']);
 
-/**
- * The names a test binds to what a terminal action resolved to —
- * `const result = await api.get('/users')`: the results it reads.
- */
+/** `const result = await api.get('/users')`. */
 function resultNames(body: AstNode): Set<string> {
     const names = new Set<string>();
     const collect = (node: AstNode): void => {
@@ -38,11 +34,7 @@ function resultNames(body: AstNode): Set<string> {
     return names;
 }
 
-/**
- * Is this read inside a function handed to `expect(…)` — a refusal whose
- * THROW is the subject (`expect(() => result.json.value).toThrow(…)`)? What
- * it reads is never compared, by design.
- */
+/** A refusal whose throw is the subject (`expect(() => result.json.value).toThrow(…)`) never compares what it reads. */
 function inRefusal(node: AstNode): boolean {
     let current = child(node, 'parent');
     while (current !== undefined) {
@@ -59,7 +51,6 @@ function inRefusal(node: AstNode): boolean {
     return false;
 }
 
-/** `<result>.response` / `<result>.json`, spelled — `undefined` for any other member. */
 function accessorOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const root = identifierName(child(node, 'object'));
     const property = memberPropertyName(node) ?? '';
@@ -68,7 +59,7 @@ function accessorOf(node: AstNode, results: ReadonlySet<string>): string | undef
         : undefined;
 }
 
-/** `<result>.table('<name>')`, spelled — a computed name is out of reach. */
+/** A computed name is out of reach. */
 function tableOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const callee = child(node, 'callee');
     if (callee?.type !== 'MemberExpression' || memberPropertyName(callee) !== 'table') {
@@ -81,10 +72,6 @@ function tableOf(node: AstNode, results: ReadonlySet<string>): string | undefine
         : undefined;
 }
 
-/**
- * The subject a node reads, spelled: `result.response`, `result.json`, or
- * `result.table('users')` — `undefined` for anything else.
- */
 function subjectOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     if (node.type === 'MemberExpression') {
         return accessorOf(node, results);
@@ -92,10 +79,7 @@ function subjectOf(node: AstNode, results: ReadonlySet<string>): string | undefi
     return node.type === 'CallExpression' ? tableOf(node, results) : undefined;
 }
 
-/**
- * The subject an assertion compares WHOLE: `toMatch` handed a value or its
- * golden (a RegExp matches a part), or a table's `toBeEmpty()`.
- */
+/** A RegExp matches a part. */
 function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string | undefined {
     const assertion = assertionOf(node);
     if (assertion?.subject === undefined || assertion.modifiers.includes('not')) {
@@ -110,32 +94,7 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
     return whole ? subjectOf(assertion.subject, results) : undefined;
 }
 
-/**
- * CONVENTIONS D20 — every test compares its whole result.
- *
- * A test that reads a response, a json or a table holds ONE comparison of it
- * whole — `expect(result.response).toMatch(…)`, the value written in place or
- * its golden; `await expect(result.table('users')).toMatch([…])` or
- * `toBeEmpty()`. A precise assertion on one property is allowed only IN
- * ADDITION to it: probes alone are a partial oracle, and what they do not name
- * is free to regress unseen. This is D12w's warning grown into the rule it was
- * standing in for — a cluster of body probes is one shape of the defect, a
- * lone one is another.
- *
- * Static and exact within one test: the results are the names a test binds to
- * an awaited terminal action, and a subject is `<result>.response`,
- * `<result>.json` or `<result>.table('<literal>')`. A result read through a
- * helper, a computed table name, or a comparison made in a helper is out of
- * reach — the rule stays silent rather than guess.
- *
- * A read whose value is only CARRIED into a later request of the same test —
- * the cursor a page hands back, sent to fetch the next — is not a read of the
- * result as a claim, and owes no comparison: a cursor walk splits into one
- * test per page. Carried means every use of the value, through the names and
- * helpers it passes, ends in the arguments of a chain off a handle that is
- * awaited, in place or through the name that holds it; one `expect(…)` of it
- * makes it a read again.
- */
+/** Static and exact within one test: a result read through a helper or a computed table name is out of reach, and the rule stays silent rather than guess. A carried read (`carried.ts`) owes no comparison. */
 export const d20WholeResult: LintRule = {
     createOnce(context: Context): Visitor {
         return {

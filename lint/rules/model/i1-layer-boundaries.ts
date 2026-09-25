@@ -9,25 +9,14 @@ import { moduleReferenceVisitor } from '../../production.js';
 import { projectRootOf, projectSegments } from '../../role.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
-/** What one layer under `src/` may import. */
 export type LayerOptions = {
-    /**
-     * One folder = one external dependency: each key is a direct child folder of
-     * the layer, its value the packages THAT folder may import. A folder may
-     * always import from itself, and from `imports`.
-     */
+    /** Each key a direct child folder of the layer, its value the packages that folder may import. */
     folders?: Record<string, string[]>;
-    /**
-     * Paths inside `src/` this layer may import — a prefix when it ends with
-     * `/` (`core/`), an exact module path otherwise (`vitest/matchers`).
-     */
+    /** A prefix when it ends with `/`, an exact module path otherwise. */
     imports?: string[];
-    /** External packages this layer may import (whole name, or `<name>/…`). */
+    /** Whole name, or `<name>/…`. */
     packages?: string[];
-    /**
-     * Per-module escape hatches: a module path inside `src/` → the extra
-     * `imports` that one file may make. For the lazy seam a layer opens once.
-     */
+    /** The lazy seam a layer opens once. */
     seams?: Record<string, string[]>;
 };
 
@@ -37,12 +26,7 @@ function matchesPackage(source: string, packages: string[]): boolean {
     return packages.some((name) => source === name || source.startsWith(`${name}/`));
 }
 
-/**
- * The path a layer map names a file by: relative to the (last) `src` segment
- * below the project root, or `lint/…` for the rules a package ships at its
- * root — a `lint/` beside a `src/` (the repository spine). `undefined`
- * anywhere else.
- */
+/** Relative to the last `src` segment, or `lint/…` for a root `lint/` beside a `src/`; `undefined` anywhere else. */
 function pathInLayers(path: string): string | undefined {
     const parts = projectSegments(path);
     const srcIndex = parts.lastIndexOf('src');
@@ -55,12 +39,10 @@ function pathInLayers(path: string): string | undefined {
     return lintIndex === -1 || !besideSrc ? undefined : parts.slice(lintIndex).join('/');
 }
 
-/** Strip a `.js`/`.ts`-style extension for exact-path comparison. */
 function withoutExtension(path: string): string {
     return path.replace(/\.[cm]?[jt]sx?$/u, '');
 }
 
-/** Does `target` match one of the declared paths (prefix, or exact module)? */
 function matchesPath(target: string, patterns: string[]): boolean {
     return patterns.some((pattern) =>
         pattern.endsWith('/')
@@ -69,14 +51,12 @@ function matchesPath(target: string, patterns: string[]): boolean {
     );
 }
 
-/** The layer a production module sits in, and what it may reach from there. */
 type Boundary = {
     allowsExternal: (source: string) => boolean;
     allowsInternal: (target: string) => boolean;
     layer: string;
 };
 
-/** The boundary of the file being linted — none when no layer is declared, or it sits in none. */
 function boundaryOf(context: Context): Boundary | undefined {
     const layers = (context.options[0] as Options | undefined)?.layers;
     if (layers === undefined || Object.keys(layers).length === 0) {
@@ -98,41 +78,13 @@ function boundaryOf(context: Context): Boundary | undefined {
         allowsExternal: (source) => matchesPackage(source, ownPackages),
         allowsInternal: (target) =>
             matchesPath(target, ownImports) ||
-            // A folder always owns its own files (`integrations/redis/*`).
+            // A folder always owns its own files.
             (folder !== undefined && target.startsWith(`${layer}/${folder}/`)),
         layer,
     };
 }
 
-/**
- * CONVENTIONS I1 — the layers under `src/` and their sanctioned edges, DECLARED
- * by the project:
- *
- *     'jterrazz/i1-layer-boundaries': ['error', {
- *         layers: {
- *             core: { imports: ['core/', 'integrations/docker/'] },
- *             integrations: { folders: { postgres: ['pg'] }, imports: ['core/'] },
- *         },
- *     }]
- *
- * With no layer map the rule is INERT, and it ships none of its own: a
- * built-in map would judge a consumer with those directory names against a
- * description of a different package, and a consumer with any other
- * architecture against a rule that could never say anything true. An
- * architecture is the project's to state.
- *
- * Per layer: `packages` are the external dependencies it may import, `imports`
- * the paths inside `src/` it may reach (a `foo/` prefix, or an exact module
- * path), `folders` expresses "one folder = one external dependency" (each child
- * folder may import its own packages and its own files), and `seams` opens a
- * named module to an extra edge — the lazy import a layer allows exactly once.
- *
- * A file under a layer the map does not name is out of scope, as is anything
- * that is not a production module (`production.ts`: tests, fixtures modules,
- * ground — F2/I4 govern those), and any file outside `src/` — except the root
- * `lint/` of the repository spine, whose files a map names `lint/…`. An edge is
- * read in every form a module names another, `require()` included.
- */
+/** Inert with no layer map, and it ships none: an architecture is the project's to state. */
 export const i1LayerBoundaries: LintRule = {
     createOnce(context: Context): Visitor {
         let boundary: Boundary | undefined;

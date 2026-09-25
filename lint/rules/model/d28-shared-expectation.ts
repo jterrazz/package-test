@@ -16,22 +16,19 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** A source span: where a node starts and ends. */
 type Span = { end: number; start: number };
 
-/** The key of a node that holds a NAME rather than a read: a member's, an object key, a declared id. */
 const NAMING_KEYS: Record<string, string> = {
     MemberExpression: 'property',
     Property: 'key',
     VariableDeclarator: 'id',
 };
 
-/** Does `key` of `node` hold a name rather than a read? */
 function namesNotReads(node: AstNode, key: string): boolean {
     return key === 'parent' || (NAMING_KEYS[node.type] === key && node.computed !== true);
 }
 
-/** Every place an identifier is READ — never a member's name, an object key, or its own declaration. */
+/** Never a member's name, an object key, or its own declaration. */
 function readsOf(node: AstNode, name: string, reads: AstNode[] = []): AstNode[] {
     if (node.type === 'Identifier') {
         if (identifierName(node) === name) {
@@ -54,7 +51,6 @@ function readsOf(node: AstNode, name: string, reads: AstNode[] = []): AstNode[] 
     return reads;
 }
 
-/** The names a file hands straight to a matcher as the expected value. */
 function expectedNames(program: AstNode): Set<string> {
     const names = new Set<string>();
     walk(program, (node) => {
@@ -71,7 +67,6 @@ function expectedNames(program: AstNode): Set<string> {
     return names;
 }
 
-/** The spans of the file's tests — a `test(…)`/`it(…)` call, modifiers included. */
 function testSpans(program: AstNode): Span[] {
     const spans: Span[] = [];
     walk(program, (node) => {
@@ -82,12 +77,10 @@ function testSpans(program: AstNode): Span[] {
     return spans;
 }
 
-/** The test a read stands in, by its span — none for a read outside every test. */
 function testOf(read: AstNode, tests: Span[]): Span | undefined {
     return tests.find((span) => nodeStart(read) >= span.start && nodeEnd(read) <= span.end);
 }
 
-/** The file-level `const` declarators, each with the statement that declares it. */
 function fileConstants(program: AstNode): { declarator: AstNode; statement: AstNode }[] {
     return childList(program, 'body').flatMap((statement) => {
         const declaration =
@@ -104,17 +97,7 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
     });
 }
 
-/**
- * CONVENTIONS D28 — a file-level expectation serves several tests. A `const`
- * at the top of a spec handed to a matcher as the expected value, and read by
- * ONE test, is that test's expectation written away from it: the reader of the
- * test has to scroll to know what it expects, and nothing is shared for the
- * price. Read by two tests or more, it is shared and stays.
- *
- * `--fix` writes the value in place when the test reads it once, and deletes
- * the constant. A constant a helper reads — outside every test — counts as
- * shared: no scan can tell how many tests call the helper.
- */
+/** A constant a helper reads counts as shared: no scan can tell how many tests call the helper. */
 export const d28SharedExpectation: LintRule = {
     createOnce(context: Context): Visitor {
         return {

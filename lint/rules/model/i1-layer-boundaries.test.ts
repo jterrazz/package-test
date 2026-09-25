@@ -8,19 +8,11 @@ import { i1LayerBoundaries } from './i1-layer-boundaries.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 const rule = i1LayerBoundaries as unknown as OxlintRule;
 
 const ruleTester = new RuleTester();
 
-/**
- * A synthetic layer map that exercises each form of the option — prefix and
- * exact-module edges, folder grants, per-module seams, a `lint/` beside a
- * `src/`. It describes no real tree; the package's own map is exercised
- * below, from `lint/self-layers.ts`.
- */
 const SYNTHETIC_LAYERS = {
     facets: {
         imports: ['facets/', 'model/'],
@@ -45,13 +37,10 @@ const SYNTHETIC_LAYERS = {
 
 const framework = [{ layers: SYNTHETIC_LAYERS }];
 
-/** This repository's root: a `lint/` beside a `src/`, the spine the rule reads. */
 const SPINE = resolve(import.meta.dirname, '../../..');
 
-/** The same spine, checked out under a folder named `src/`. */
 const UNDER_SRC = checkoutUnder('src', ['src']);
 
-/** A spine no package holds — a repository alone — checked out under a folder named `src/`. */
 const REPOSITORY_UNDER_SRC = repositoryUnder('src', ['src']);
 
 ruleTester.run('i1-layer-boundaries (a declared map)', rule, {

@@ -1,7 +1,6 @@
 import { asOxlintRule, ruleTester } from '../../rule-tester.fixtures.js';
 import { i6FacetIsComposition } from './i6-facet-is-composition.js';
 
-/** A facet file as the architecture writes it: imports, the composition, the chain, the definition. */
 const COMPOSED = `
 import { trigger } from './trigger.action.js';
 import { clock } from '../../world/clock/clock.capability.js';
@@ -27,7 +26,6 @@ export const jobFacet = defineFacet<JobSpecification>()({
 });
 `;
 
-/** A constructor that opens its facet. */
 const OPENS = `
 import { BaseResult } from '../../expectations/result.js';
 import { seed } from '../../world/services/seed/seed.capability.js';

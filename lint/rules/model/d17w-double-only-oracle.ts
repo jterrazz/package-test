@@ -16,15 +16,12 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The three ways this vocabulary makes a double. */
 const DOUBLE_FACTORIES = new Set(['mockOf', 'vi.fn', 'vi.spyOn']);
 
-/** The matchers that read a double's call log rather than a result. */
 function readsTheCallLog(matcher: string): boolean {
     return matcher.startsWith('toHaveBeenCalled') || matcher.startsWith('toHaveBeenLastCalled');
 }
 
-/** Is the initialiser one of the double factories? */
 function makesADouble(init: AstNode | undefined): boolean {
     if (init === undefined) {
         return false;
@@ -39,7 +36,6 @@ function makesADouble(init: AstNode | undefined): boolean {
     return path !== undefined && DOUBLE_FACTORIES.has(path);
 }
 
-/** Every binding in the file whose value is a double this test built. */
 function doubleBindings(root: AstNode): Set<string> {
     const names = new Set<string>();
     walk(root, (node) => {
@@ -54,23 +50,7 @@ function doubleBindings(root: AstNode): Set<string> {
     return names;
 }
 
-/**
- * CONVENTIONS D17w (warning) — a module test whose every assertion reads a
- * double it built itself.
- *
- * The test then proves that the test called the test: the subject can return
- * anything, raise anything, or return nothing at all, and every `expect` still
- * passes. Something the subject PRODUCED has to appear — a returned value, a
- * state read back, an error.
- *
- * The reach is the colocated module test — a `.test.ts` beside its module,
- * outside every specs tree, which is what `module` reach means everywhere in
- * the catalogue. On a component a callback prop IS the contract with the
- * parent, and `expect(onClose).toHaveBeenCalledOnce()` is the only honest way
- * to read it; on a spec the double is rare and the result accessors are the
- * subject; and a `module`-role file under `specs/` is a repository suite,
- * which the tree passes judge.
- */
+/** Module tests only: on a component a callback prop is the contract with the parent, and reading it is honest. */
 export const d17wDoubleOnlyOracle: LintRule = {
     createOnce(context: Context): Visitor {
         return {

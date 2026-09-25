@@ -5,7 +5,6 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The `expect(…)` call a matcher's member chain starts from, through any `.not`. */
 function expectCallOf(node: AstNode | undefined): AstNode | undefined {
     let current = node;
     while (current?.type === 'MemberExpression') {
@@ -14,10 +13,8 @@ function expectCallOf(node: AstNode | undefined): AstNode | undefined {
     return identifierName(child(current, 'callee')) === 'expect' ? current : undefined;
 }
 
-/** The accessors whose value a list of lists may be — a json, never a table. */
 const JSON_SUBJECTS = new Set(['head', 'json', 'jsonLd', 'screen', 'value']);
 
-/** Is this argument rows written in place — a list holding a list? */
 function isRowsLiteral(argument: AstNode | undefined): boolean {
     return (
         argument?.type === 'ArrayExpression' &&
@@ -25,7 +22,6 @@ function isRowsLiteral(argument: AstNode | undefined): boolean {
     );
 }
 
-/** What the subject handed to `expect(…)` names: a `.table(…)` read, a json accessor, or neither. */
 function subjectKind(subject: AstNode | undefined): 'json' | 'table' | undefined {
     const callee = subject?.type === 'CallExpression' ? child(subject, 'callee') : undefined;
     if (callee !== undefined) {
@@ -35,11 +31,7 @@ function subjectKind(subject: AstNode | undefined): 'json' | 'table' | undefined
     return name !== undefined && JSON_SUBJECTS.has(name) ? 'json' : undefined;
 }
 
-/**
- * Is this `toMatch` a table compared whole — its subject a `.table(…)` read,
- * or its argument rows written in place on a subject no json accessor names?
- * Either way a query answers it.
- */
+/** Either way a query answers it. */
 function comparesTable(node: AstNode): boolean {
     const expectCall = expectCallOf(child(child(node, 'callee'), 'object'));
     const kind = subjectKind(childList(expectCall, 'arguments')[0]);
@@ -48,7 +40,6 @@ function comparesTable(node: AstNode): boolean {
     );
 }
 
-/** Does the member-call spine root at an `expect(…)` call? */
 function rootsAtExpect(node: AstNode | undefined): boolean {
     let current = node;
     while (current !== undefined) {
@@ -67,30 +58,13 @@ function rootsAtExpect(node: AstNode | undefined): boolean {
     return false;
 }
 
-/**
- * The matcher's promise is dropped only when the call is a bare statement
- * (`expect(result.table('users')).toMatch([]);`). Any other position uses the value —
- * awaited, returned, an arrow body, assigned, or passed to an outer
- * `expect(promise).rejects.toThrow(…)` — so the promise is handled.
- */
+/** Dropped only as a bare statement: awaited, returned, assigned or handed to an outer `expect(…).rejects` is handled. */
 function isDropped(node: AstNode): boolean {
     const parent = node.parent as AstNode | undefined;
     return parent?.type === 'ExpressionStatement';
 }
 
-/**
- * CONVENTIONS D2 — a `toMatch` whose argument or subject makes it IO (a
- * table's whole-table comparison runs SQL, `toMatch(directory(…))` walks a
- * tree) returns a promise and must be `await`ed (or returned). A bare
- * `expect(result.table('users')).toMatch([…])` silently resolves nothing and
- * the assertion never runs.
- *
- * `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever their
- * argument, so the type-aware `typescript/no-floating-promises`, on in every
- * profile of the toolchain, refuses them dropped; `toMatch` keeps this rule,
- * because its type follows the subject and the rows written in place are read
- * here by their shape.
- */
+/** `toBeEmpty` and `toBeRunning` are typed `Promise<void>`, so `typescript/no-floating-promises` refuses them dropped; `toMatch`'s type follows its subject, so it stays here. */
 export const d2AwaitIoMatcher: LintRule = {
     createOnce(context: Context): Visitor {
         return {

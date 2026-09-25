@@ -7,8 +7,6 @@ import { i4NoModuleDoubles } from './i4-no-module-doubles.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -16,7 +14,6 @@ const ruleTester = new RuleTester();
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
 const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
-/** A package checked out under a folder named `__mocks__/`. */
 const UNDER_MOCKS = checkoutUnder('__mocks__', ['src']);
 
 ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRule, {

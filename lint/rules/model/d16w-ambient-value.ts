@@ -17,10 +17,8 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The matchers whose whole argument D16 already reads as the oracle. */
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
 
-/** Every sampled call at or under `node`, by source offset. */
 function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
     if (node === undefined) {
         return;
@@ -32,19 +30,7 @@ function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
     });
 }
 
-/**
- * CONVENTIONS D16w (warning) — time or randomness sampled ANYWHERE in a test.
- *
- * The wider net around D16: a value sampled into the Given travels into the
- * subject, and the assertion that reads it back is the same tautology one step
- * removed. It is a warning because the legitimate cases exist — an elapsed-time
- * bound, a label the test never asserts on — and each of them is a line the
- * author states rather than a build the rule stops.
- *
- * Silent where D16 already refuses (the same offset reported twice reads as two
- * faults), and silent on a name built in a template literal: a per-run
- * directory name is the one sampled value the framework cannot mint for you.
- */
+/** Silent where D16 already refuses, and on a name built in a template literal: a per-run directory name is the one sampled value the framework cannot mint. */
 export const d16wAmbientValue: LintRule = {
     createOnce(context: Context): Visitor {
         return {

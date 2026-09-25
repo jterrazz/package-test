@@ -6,13 +6,7 @@ import { specsAnchorOf } from '../../linted-file.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js';
 
-/**
- * The framework's own top-level `src/` layers. Deep-importing any of these from
- * a spec couples the spec to internals the public entry exists to hide. These
- * segment names are the framework's layers in this repository alone — a
- * spec's import of its own app (`server: () => createApp()` importing
- * `../../src/app.js`) names none of them, and stays allowed.
- */
+/** These segment names are the framework's layers in this repository alone; a spec importing its own app (`../../src/app.js`) names none of them. */
 const FRAMEWORK_LAYERS = new Set([
     'elements',
     'expectations',
@@ -22,23 +16,12 @@ const FRAMEWORK_LAYERS = new Set([
     'world',
 ]);
 
-/**
- * CONVENTIONS F7 — from `specs/`, a relative import resolving inside the
- * framework repo's `src/{kernel,world,elements,expectations,facets,vitest}/` is forbidden: a
- * spec of the framework reaches it through the public entry, as a consumer
- * does. A consumer's imports of its OWN app source are always allowed — that
- * is the pattern.
- *
- * A `self` rule: those folder names mean the framework's layers only in
- * this repository, so the rule ships in the self plugin alone. A
- * `@jterrazz/test/<subpath>` import is F1's, from any file.
- */
+/** A `self` rule: the folder names mean the framework's layers only here. */
 export const f7NoFrameworkInternals: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => specsAnchorOf(context) !== undefined,
             ...importSourceVisitor(({ node, source }) => {
-                // Relative imports that resolve inside a `src/` tree.
                 const marker = source.indexOf('/src/');
                 if (marker === -1 && !source.startsWith('src/')) {
                     return;
@@ -46,7 +29,7 @@ export const f7NoFrameworkInternals: LintRule = {
                 const internal = marker === -1 ? source.slice(4) : source.slice(marker + 5);
                 const layer = internal.split('/')[0] ?? '';
                 if (!FRAMEWORK_LAYERS.has(layer)) {
-                    return; // Consumer's own app source (e.g. src/app.js) — the pattern.
+                    return;
                 }
                 context.report({
                     data: { source },

@@ -5,12 +5,6 @@ import { e4wProjectBinding } from './e4w-project-binding.js';
 
 const CONFIG = '/repo/vitest.config.ts';
 
-/**
- * A real config in a real package whose ABSOLUTE path carries a `specs`
- * segment above it — the shape a checkout under `~/specs/` has, read here from
- * a fixture that exists on disk so the package boundary is a fact and not a
- * string.
- */
 const UNDER_A_SPECS_PATH = resolve(
     import.meta.dirname,
     '../../../specs/lint/e4w-project-binding/fixtures/compliant/vitest.config.ts',

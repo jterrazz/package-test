@@ -8,21 +8,11 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * The root the convention would derive: the
- * framework's own walk-up, run against this layer's fs probe. The rule
- * flags a `root` that the runner would have found by itself, so the two MUST
- * be the same function — a private copy of the walk drifted from it before.
- */
+/** The framework's own walk-up, run against this layer's fs probe: the rule and the runner must share one function. */
 function derivedRoot(startDir: string): string | undefined {
     return findRoot(startDir, isFile);
 }
 
-/**
- * CONVENTIONS A9 (warning) — `root` is an override reserved for cases the
- * convention cannot resolve. When the literal points at the very directory the
- * walk-up would have found, it is redundant and flagged.
- */
 export const a9wRedundantRoot: LintRule = {
     createOnce(context: Context): Visitor {
         return {

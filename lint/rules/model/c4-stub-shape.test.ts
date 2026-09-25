@@ -12,12 +12,10 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-/** The layout half is fs-anchored — it runs against the shared fixture trees. */
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 const FEATURE = '/repo/specs/api/feature/stubs';
 
-/** A package checked out under a folder named `stubs/`. */
 const UNDER_STUBS = checkoutUnder('stubs', ['specs/api/feature']);
 const FACADE = `${FEATURE}/newsroom.stubs.ts`;
 const UNIT = `${FEATURE}/http/events.ts`;

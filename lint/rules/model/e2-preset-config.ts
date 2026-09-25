@@ -6,16 +6,12 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/** The helper every vitest config in this vocabulary starts from. */
 const PRESET = 'defineSpecConfig';
 
-/** Vitest's own way of layering one config over another. */
 const MERGE = 'mergeConfig';
 
-/** Wrappers that annotate an expression without changing what it IS. */
 const ANNOTATIONS = new Set(['TSAsExpression', 'TSNonNullExpression', 'TSSatisfiesExpression']);
 
-/** Strip the annotations off an expression. */
 function unwrap(node: AstNode | undefined): AstNode | undefined {
     let current = node;
     while (current !== undefined && ANNOTATIONS.has(current.type)) {
@@ -24,7 +20,6 @@ function unwrap(node: AstNode | undefined): AstNode | undefined {
     return current;
 }
 
-/** The initialiser of the named const in this file, when it has one. */
 function initialiserOf(program: AstNode, name: string): AstNode | undefined {
     let found: AstNode | undefined;
     walk(program, (node) => {
@@ -39,14 +34,7 @@ function initialiserOf(program: AstNode, name: string): AstNode | undefined {
     return found;
 }
 
-/**
- * Is this expression the preset, or a merge that STARTS from it?
- *
- * `mergeConfig(defineSpecConfig(...), overrides)` is the vitest-sanctioned way
- * to layer a config, and what it layers over is the preset: the budgets and
- * the paths are there. The merge is followed one argument deep — a preset
- * buried under two merges is a config a reader can no longer place.
- */
+/** Followed one argument deep: a preset under two merges is a config a reader can no longer place. */
 function startsFromThePreset(node: AstNode | undefined): boolean {
     if (node?.type !== 'CallExpression') {
         return false;
@@ -63,20 +51,7 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
     );
 }
 
-/**
- * CONVENTIONS E2 — a `vitest.config.*` starts from `defineSpecConfig()`.
- *
- * The preset is where the budgets, the artefact directories, the ground
- * exclusion and the Vitest 5 paths live; a config that starts from `defineConfig`
- * runs the same tests with vitest's five-second budget, writes its attachments
- * at the repository root, and collects the ground its specs stand on as specs.
- * None of that is visible in the file that caused it, which is why it is a rule
- * and not a recommendation.
- *
- * `export default <Identifier>` and a `satisfies`/`as` annotation both resolve:
- * the typed-identifier form is a legitimate spelling of the same config, and so
- * is `mergeConfig(defineSpecConfig(…), …)`.
- */
+/** `export default <Identifier>` and a `satisfies`/`as` annotation both resolve. */
 export const e2PresetConfig: LintRule = {
     createOnce(context: Context): Visitor {
         return {

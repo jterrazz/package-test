@@ -15,10 +15,6 @@ import { RULE_DOCS } from '../../manifest.js';
 import { isTestRole } from '../../role.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * Does `arguments[1]` of a `toMatch(file(path), options)` call carry `{ frozen: true }`?
- * A frozen fixture opts out of update-mode rewriting, so it is exempt.
- */
 function hasFrozenOption(args: AstNode[]): boolean {
     const options = args[1];
     if (options?.type !== 'ObjectExpression') {
@@ -29,15 +25,7 @@ function hasFrozenOption(args: AstNode[]): boolean {
     return value?.type === 'Literal' && value.value === true;
 }
 
-/**
- * Is this `toMatch(…)` call nested inside a WRAPPING `expect(…)` — the shape of a
- * negative assertion (`expect(() => …toMatch(…)).toThrow()` or
- * `expect(…toMatch(…)).rejects.toThrow()`)? The subject's own `expect(x)` is the
- * member OBJECT of `.toMatch` (a descendant), never an ancestor, so a positive
- * `expect(x).toMatch('f')` never trips this. The walk stays inside the current
- * expression: it stops at the first statement boundary or non-`expect` call, so
- * a `toMatch` merely written inside `inUpdateMode(() => …)` is NOT flagged.
- */
+/** The walk stops at the first statement boundary or non-`expect` call, so a `toMatch` written inside `inUpdateMode(() => …)` is not flagged. */
 const TRANSPARENT_ANCESTORS = new Set([
     'ArrowFunctionExpression',
     'AwaitExpression',
@@ -63,29 +51,13 @@ function isWrappedInExpect(node: AstNode): boolean {
     return false;
 }
 
-/**
- * CONVENTIONS D13 (warning) — a golden matcher whose failure is the behaviour under
- * test (wrapped in `expect(() => …).toThrow()` or `expect(…).rejects.toThrow()`)
- * asserts a DELIBERATELY-WRONG or MISSING fixture. Under `TEST_UPDATE=1` an
- * unfrozen fixture is silently rewritten with the actual output — the matcher
- * writes instead of throwing — which destroys the negative case (the assertion
- * then no longer throws). Pass `{ frozen: true }` so the fixture is never
- * rewritten and the mismatch/error still throws in update mode.
- *
- * Two shapes, and the rule takes both: the WRAPPED form
- * (`expect(() => …toMatch(…)).toThrow()`), which is exact, and the bounded
- * heuristic of {@link inAThrowingHelper} — a golden inside a HELPER whose body
- * also asserts a throw, which is where a helper that owns the try/catch puts
- * it. There is no process note left behind: what the AST could not reach was
- * ONE shape, and this is it.
- */
+/** Under `TEST_UPDATE=1` an unfrozen fixture is rewritten instead of throwing, which destroys the negative case. */
 const FUNCTION_NODES = new Set([
     'ArrowFunctionExpression',
     'FunctionDeclaration',
     'FunctionExpression',
 ]);
 
-/** Does this subtree contain a `.toThrow(…)` call or a `.rejects` member? */
 function assertsAThrow(body: AstNode): boolean {
     let found = false;
     walk(body, (inner: AstNode) => {
@@ -100,7 +72,6 @@ function assertsAThrow(body: AstNode): boolean {
     return found;
 }
 
-/** Is this function the callback a `test(…)` / `it(…)` was handed? */
 function isTestCallback(fn: AstNode): boolean {
     const parent = fn.parent as AstNode | undefined;
     if (parent?.type !== 'CallExpression') {
@@ -115,22 +86,7 @@ function isTestCallback(fn: AstNode): boolean {
     return name === 'it' || name === 'test';
 }
 
-/**
- * The bounded second shape: a `toMatch(file('<path>'))` inside a HELPER whose
- * body also asserts a throw.
- *
- * The shape is a golden routed through a helper that owns the try/catch
- * (`catchMessage(() => …toMatch(file('./expected/f.txt')))`). Inter-procedural analysis is out of
- * an oxlint JS plugin's reach, but that helper holds both halves in one body,
- * and that is decidable.
- *
- * Bounded twice, because each bound answers a real false positive found on this
- * package's own tree. The enclosing function must not be the TEST callback
- * itself: a test that writes a fixture under `TEST_UPDATE` and later asserts a
- * diff has both halves in its body and neither belongs to the other. The
- * caller only reaches here for a golden — a `toMatch` whose argument names the
- * disk.
- */
+/** The enclosing function must not be the test callback itself: a test writing a fixture under `TEST_UPDATE` and later asserting a diff holds both halves unrelated. */
 function inAThrowingHelper(node: AstNode): boolean {
     let current = node.parent as AstNode | undefined;
     while (current !== undefined) {
@@ -146,7 +102,6 @@ function inAThrowingHelper(node: AstNode): boolean {
     return false;
 }
 
-/** The accessors a value in place compares whole — `toMatch` on them is the framework's, rewritten by update mode. */
 const RESULT_SUBJECTS = new Set([
     'body',
     'console',
@@ -166,7 +121,6 @@ const RESULT_SUBJECTS = new Set([
     'value',
 ]);
 
-/** Is the subject handed to `expect(…)` a result the framework compares whole — an accessor, a table, a `text(…)`? */
 function isResultSubject(subject: AstNode | undefined): boolean {
     if (subject?.type === 'CallExpression') {
         const callee = child(subject, 'callee');
@@ -178,11 +132,7 @@ function isResultSubject(subject: AstNode | undefined): boolean {
     return name !== undefined && RESULT_SUBJECTS.has(name);
 }
 
-/**
- * Is this a `toMatch(<value>)` on a result — the value written in place,
- * which update mode rewrites in the test as it rewrites a golden file? A
- * RegExp is a part, and vitest's.
- */
+/** Update mode rewrites a value in place as it rewrites a golden file; a RegExp is a part, and vitest's. */
 function inPlaceOf(node: AstNode): boolean {
     const callee = child(node, 'callee');
     if (memberPropertyName(callee ?? node) !== 'toMatch') {

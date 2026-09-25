@@ -3,12 +3,10 @@ import { c34TestBodySize, MAX_TEST_LINES } from './c34-test-body-size.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-/** A test call whose body spans `lines` lines, its opening and closing lines included. */
 function testOf(lines: number, opener = "test('a', () => {"): string {
     return [opener, ...Array.from({ length: lines - 2 }, () => '    // …'), '});'].join('\n');
 }
 
-/** A test of `gestures` lines of gestures whose one assertion's `toMatch` value spans `claim` lines. */
 function claimedTestOf(gestures: number, claim: number): string {
     const value = ['`', ...Array.from({ length: claim - 2 }, () => '        line'), '    `'];
     return [

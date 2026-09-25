@@ -5,15 +5,6 @@ import { lessons } from '../../lesson.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
-/**
- * CONVENTIONS W1 — a scenario is the When: the visitor interacts, the capture
- * reflects the final state, and assertions live in the Then on the returned
- * result. An `expect()` inside the scenario callback is flagged.
- *
- * The three scenario-carrying actions are one list (`ast.ts`): `.visit()` on a
- * page, `.open()` on a screen and `.render()` on a component all hand the same
- * visitor to the same kind of callback.
- */
 export const w1ScenarioPure: LintRule = {
     createOnce(context: Context): Visitor {
         return {

@@ -10,8 +10,6 @@ import { a9wRedundantRoot } from './a9w-redundant-root.js';
 RuleTester.describe = describe;
 RuleTester.it = it;
 
-// Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
@@ -21,10 +19,6 @@ const ruleTester = new RuleTester();
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 const SPEC_FILE = `${SPECS_LINT}/a9w-redundant-root/fixtures/violation/specs/cli/rooted.specification.ts`;
 
-/**
- * A git checkout whose `pkg/package.json` is `.gitignore`d: the runtime's walk
- * passes it, so the root it derives for `pkg/specs/` is the checkout's.
- */
 const IGNORED_MARKER = checkoutUnder('work', ['pkg/specs']);
 writeFileSync(join(IGNORED_MARKER, 'pkg/package.json'), '{}\n');
 writeFileSync(join(IGNORED_MARKER, '.gitignore'), 'pkg/package.json\n');

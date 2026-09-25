@@ -7,17 +7,8 @@ import { identityOf } from '../../linted-file.js';
 import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
 
-/** A specifier reaching into a kind folder — the internal half of stubs/. */
 const INTERNAL_UNIT = new RegExp(`(?:^|/)stubs/(?:${STUB_KINDS.join('|')})/`, 'u');
 
-/**
- * CONVENTIONS C10 — the stubs boundary. A feature's `stubs/` folder has
- * a PUBLIC half (`*.stubs.ts` facades: the default export is the world, the
- * named exports are its scenarios) and an INTERNAL half (the unit stubs the
- * facades compose, one folder per stub kind). Outside `stubs/`,
- * importing a unit is an error — a test routes through the facade, so a
- * scenario is named once, next to the world it derives from.
- */
 export const c10StubsBoundary: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -28,8 +19,7 @@ export const c10StubsBoundary: LintRule = {
             }),
             before() {
                 const { inSpecs, role } = identityOf(context);
-                // Inside stubs/ the internal half is the file's own business — and
-                // that folder IS a role, so the rule asks the identity, not the path.
+                // Inside `stubs/` the internal half is the file's own business.
                 return inSpecs && role !== 'stub';
             },
         };
