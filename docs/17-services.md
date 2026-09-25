@@ -186,15 +186,15 @@ docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
-| Service      | Isolation strategy                                                                                                                           |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path                                         |
-| `redis()`    | A database index per (worker, service) pair — worker `w`'s services take `1 + 4w` to `4 + 4w` — acquired empty, the connection string's path |
-| `sqlite()`   | Template file copied per worker                                                                                                              |
+| Service      | Isolation strategy                                                                                                                        |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path                                      |
+| `redis()`    | A database index per (worker, service) pair — pool id `w`'s services take `4w − 3` to `4w` — acquired empty, the connection string's path |
+| `sqlite()`   | Template file copied per worker                                                                                                           |
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
 
-A redis container's 256 indexes are its own `0` and four per worker, so it serves 63 workers holding four redis services each; a fifth service in one worker, or a worker past the 63rd, is refused before it connects, with the way out in the sentence.
+A redis container's 256 indexes are its own `0` and four per worker, so it serves pool ids 1 to 63 holding four redis services each; a process outside a vitest pool is worker `0` and shares pool id 1's band, since it never runs beside a pool against one project's container. A fifth service in one worker, or a pool id past 63, is refused before it connects, with the way out in the sentence. Two handles of one (worker, service) pair share its index, and the index stays theirs until the last of them releases it.
 
 On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 

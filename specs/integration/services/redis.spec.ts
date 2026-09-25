@@ -184,8 +184,8 @@ describe('redis', () => {
             return indexes;
         });
 
-        // Then - index 0 stays the container's own, and each worker's band of four starts at 1 + 4 × its id
-        expect(result.value).toMatch(['/161', '/165']);
+        // Then - index 0 stays the container's own, and pool id w's band of four starts at 4w − 3
+        expect(result.value).toMatch(['/157', '/161']);
     });
 
     // RUNTIME G2 — a pool id is a worker at any --maxWorkers, not modulo a count of indexes.

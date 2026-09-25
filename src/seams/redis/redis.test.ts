@@ -1,6 +1,31 @@
 import { describe, expect, test } from 'vitest';
 
 import { redis } from './redis.js';
+import type { RedisHandle } from './redis.js';
+
+/** A handle of one service, pointed at a port nothing listens on: acquire takes its index, then fails to flush it. */
+function unreachableService(service: string): RedisHandle {
+    const handle = redis();
+    handle.serviceName = service;
+    handle.connectionString = 'redis://localhost:1';
+    return handle;
+}
+
+/** The index a handle's connection string carries, and the refusal its acquire met, if any. */
+async function acquired(
+    handle: RedisHandle,
+    worker: string,
+): Promise<{ index: string; refused: boolean }> {
+    const reason = await handle
+        .isolation()
+        .acquire(worker)
+        .then(() => '')
+        .catch((error: unknown) => (error instanceof Error ? error.message : String(error)));
+    return {
+        index: new URL(handle.connectionString).pathname,
+        refused: reason.includes('has no database index'),
+    };
+}
 
 /*
  * What the handle answers BEFORE it reaches a container: the string it builds,
@@ -119,5 +144,60 @@ describe('redis handle', () => {
         await expect(fifth.isolation().acquire('60')).rejects.toThrow(
             'redis: worker 60 has no database index for "e" — a worker holds 4 redis services at once; declare fewer',
         );
+    });
+
+    test('serves pool id 63 its four services, the last index of the container, and worker 0 the band of pool id 1', async () => {
+        // Given - four services of pool id 63, and one of worker 0 and of pool id 1
+        const last = await Promise.all(
+            ['a', 'b', 'c', 'd'].map(
+                async (service) => await acquired(unreachableService(service), '63'),
+            ),
+        );
+        const first = await Promise.all([
+            acquired(unreachableService('outside'), '0'),
+            acquired(unreachableService('pooled'), '1'),
+        ]);
+
+        // Then - pool id 63 holds 249 to 252, nothing refused, and worker 0 shares pool id 1's first index
+        expect({ first, last }).toStrictEqual({
+            first: [
+                { index: '/1', refused: false },
+                { index: '/1', refused: false },
+            ],
+            last: [
+                { index: '/249', refused: false },
+                { index: '/250', refused: false },
+                { index: '/251', refused: false },
+                { index: '/252', refused: false },
+            ],
+        });
+    });
+
+    test('keeps a slot while any handle holds it, so another service never lands on a live index', async () => {
+        // Given - two handles of worker 50's "cache" and one of its "queue"; the first cache and the queue released
+        const [firstCache, queue, secondCache] = [
+            unreachableService('cache'),
+            unreachableService('queue'),
+            unreachableService('cache'),
+        ];
+        const held = [
+            await acquired(firstCache, '50'),
+            await acquired(queue, '50'),
+            await acquired(secondCache, '50'),
+        ];
+        await Promise.allSettled([firstCache.isolation().release(), queue.isolation().release()]);
+
+        // When - another queue of worker 50 acquires
+        const later = await acquired(unreachableService('queue'), '50');
+
+        // Then - both caches shared the first index, and the later queue took the freed one, not the index the second cache still holds
+        expect({ held, later }).toStrictEqual({
+            held: [
+                { index: '/197', refused: false },
+                { index: '/198', refused: false },
+                { index: '/197', refused: false },
+            ],
+            later: { index: '/198', refused: false },
+        });
     });
 });

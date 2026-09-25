@@ -16,7 +16,12 @@ const DATABASES = 256;
 /** The indexes a worker holds, one per redis service of the record it runs. */
 const SERVICES_PER_WORKER = 4;
 
-/** How many workers a container serves every index of. */
+/**
+ * How many workers a container serves every index of: pool ids 1 to 63. Pool
+ * id `w` holds the band `4w − 3` to `4w`; worker 0, the id outside a vitest
+ * pool, shares pool id 1's, since it never runs beside a pool against one
+ * project's container.
+ */
 const WORKERS = Math.floor((DATABASES - 1) / SERVICES_PER_WORKER);
 
 /** A container with an index for every (worker, service) pair a run can hold. */
@@ -24,31 +29,44 @@ const PAIR_INDEXES: ContainerOptions = {
     command: ['redis-server', '--databases', String(DATABASES)],
 };
 
+/** The slot a pair holds, and how many handles of this process hold it. */
+type Held = { holders: number; slot: number };
+
 /**
  * The service slot each (worker, service) pair holds in this process: one
  * worker id per process, so the pairs of every other worker are theirs.
  */
-const slots = new Map<string, Map<string, number>>();
+const slots = new Map<string, Map<string, Held>>();
 
 /** The slot a pair holds — the one it already had, or the lowest its worker holds free. */
 function takeSlot(worker: string, service: string): number {
-    const held = slots.get(worker) ?? new Map<string, number>();
+    const held = slots.get(worker) ?? new Map<string, Held>();
     slots.set(worker, held);
     const own = held.get(service);
     if (own !== undefined) {
-        return own;
+        own.holders += 1;
+        return own.slot;
     }
-    const taken = new Set(held.values());
+    const taken = new Set([...held.values()].map((pair) => pair.slot));
     let slot = 0;
     while (taken.has(slot)) {
         slot += 1;
     }
-    held.set(service, slot);
+    held.set(service, { holders: 1, slot });
     return slot;
 }
 
+/** Let go of one handle's hold on a pair: its slot is free once no handle holds it. */
 function freeSlot(worker: string, service: string): void {
-    slots.get(worker)?.delete(service);
+    const held = slots.get(worker);
+    const own = held?.get(service);
+    if (own === undefined) {
+        return;
+    }
+    own.holders -= 1;
+    if (own.holders === 0) {
+        held?.delete(service);
+    }
 }
 
 export class RedisHandle implements ServiceHandle {
@@ -131,11 +149,11 @@ export class RedisHandle implements ServiceHandle {
     isolation(): IsolationStrategy {
         return {
             acquire: async (workerId: string) => {
+                this.letGo();
                 const worker = Number.parseInt(workerId, 10) || 0;
                 const service = this.serviceName ?? this.type;
                 const slot = takeSlot(workerId, service);
-                const index = 1 + worker * SERVICES_PER_WORKER + slot;
-                if (slot >= SERVICES_PER_WORKER || index >= DATABASES) {
+                if (slot >= SERVICES_PER_WORKER || worker > WORKERS) {
                     freeSlot(workerId, service);
                     throw new Error(
                         slot >= SERVICES_PER_WORKER
@@ -144,7 +162,7 @@ export class RedisHandle implements ServiceHandle {
                     );
                 }
                 this.pair = { service, worker: workerId };
-                this.dbIndex = index;
+                this.dbIndex = 1 + SERVICES_PER_WORKER * (Math.max(worker, 1) - 1) + slot;
                 // The index is in the string the app is handed, or the app
                 // Would write to the shared index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;
@@ -158,15 +176,24 @@ export class RedisHandle implements ServiceHandle {
             },
 
             release: async () => {
-                await this.reset();
-                if (this.pair !== null) {
-                    freeSlot(this.pair.worker, this.pair.service);
-                    this.pair = null;
+                try {
+                    await this.reset();
+                } finally {
+                    this.letGo();
                 }
-                this.dbIndex = 0;
-                this.connectionString = this.sharedConnectionString;
             },
         };
+    }
+
+    /** Give back the pair this handle holds, and the container's own string with it. */
+    private letGo(): void {
+        if (this.pair === null) {
+            return;
+        }
+        freeSlot(this.pair.worker, this.pair.service);
+        this.pair = null;
+        this.dbIndex = 0;
+        this.connectionString = this.sharedConnectionString;
     }
 }
 
