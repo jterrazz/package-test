@@ -26,4 +26,11 @@ describe('mobile() — one driver session per run', () => {
         });
         expect(mobile().test?.provide).toBeUndefined();
     });
+
+    test('mobile() runs serial by default — one simulator, no `serial` to pass', () => {
+        // Given - the canonical mobile project, stated by nobody
+        // Then - files run one at a time, whether or not the caller says so
+        expect(mobile().test?.fileParallelism).toBe(false);
+        expect(mobile({ serial: true }).test?.fileParallelism).toBe(false);
+    });
 });

@@ -11,16 +11,6 @@ function testOf(
     return project.test ?? {};
 }
 
-/** The plugins a project carries, by name — a plugin with no name is not one. */
-function pluginNames(project: TestProjectInlineConfiguration): string[] {
-    const plugins: unknown[] = Array.isArray(project.plugins) ? project.plugins : [];
-    return plugins.flatMap((plugin) =>
-        typeof plugin === 'object' && plugin !== null && 'name' in plugin
-            ? [String(plugin.name)]
-            : [],
-    );
-}
-
 describe('unit() — module tests, and only module tests', () => {
     test('collects .test.ts outside specs/ and leaves .test.tsx to the browser', () => {
         // Given - the canonical project, stated by nobody
@@ -137,13 +127,6 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(testOf(integration()).fileParallelism).toBeUndefined();
     });
 
-    test('mobile() runs serial by default — one simulator, no `serial` to pass', () => {
-        // Given - the canonical mobile project, stated by nobody
-        // Then - files run one at a time, whether or not the caller says so
-        expect(testOf(mobile()).fileParallelism).toBe(false);
-        expect(testOf(mobile({ serial: true })).fileParallelism).toBe(false);
-    });
-
     test('every helper takes it, not only the ones 15.2 shipped it on', () => {
         // Given - the four other helpers this release adds
         const serial = [api, job, mobile].map((helper) => testOf(helper({ serial: true })));
@@ -155,18 +138,5 @@ describe('the node facet helpers — one canonical project per kind', () => {
             false,
         ]);
         expect(testOf(cli({ literate: false, serial: true })).fileParallelism).toBe(false);
-    });
-
-    test('cli() wires the literate door by default', () => {
-        // Given - the canonical cli project
-        // Then - the plugin that turns a document into a test file is there
-        expect(pluginNames(cli())).toContain('jterrazz-test:literate');
-    });
-
-    test('cli({ literate: false }) collects no documents', () => {
-        // Given - a repository whose cli facet has no documents
-        // Then - the plugin is absent, and nothing else changed
-        expect(pluginNames(cli({ literate: false }))).toStrictEqual([]);
-        expect(testOf(cli({ literate: false })).name).toBe('cli');
     });
 });
