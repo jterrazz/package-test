@@ -380,6 +380,16 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         }
     });
 
+    test('every catalogue row declares ONE audience', () => {
+        // Given - the two audiences a rule can have
+        const AUDIENCES = new Set(['consumer', 'self']);
+
+        // Then - each row says whether a project using the package meets it, or only this package's own suite does
+        for (const entry of catalog) {
+            expect(AUDIENCES.has(entry.audience), `${entry.name} audience`).toBe(true);
+        }
+    });
+
     test('every catalogue entry has a unique implementation name', () => {
         // Given - the assembled catalogue
         // Then - no two entries share a name (each maps to a distinct implementation)

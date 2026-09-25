@@ -31,6 +31,23 @@ export type Visitor = Record<string, (node: AstNode) => void> & {
  */
 export type RuleDoc = {
     /**
+     * Who the rule is for — ONE per row, and never a default.
+     *
+     * - `consumer` — meaningful in any project that uses the package: it is
+     *   wired into what the package publishes (the plugin, the checker, the
+     *   runtime, the types) and its row is in the public catalogue
+     *   (`docs/19-linting.md`);
+     * - `self` — this package's own suite discipline: its catalogue, its
+     *   capability matrix, its specimens, its skill, its meta-tests. It is
+     *   wired only in this repository's own lint configuration and
+     *   meta-tests, nothing the tarball carries runs it, and its row is read
+     *   where the package says how it tests itself (`docs/03-testing.md`).
+     *
+     * A rule that is both is two rules: its consumer half ships, its self
+     * half stays home.
+     */
+    audience: 'consumer' | 'self';
+    /**
      * Enforcement channel — ONE per row, and the row says which.
      *
      * A convention enforced two ways is two rows, because the two answer
