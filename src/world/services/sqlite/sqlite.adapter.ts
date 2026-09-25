@@ -382,14 +382,11 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
 
         try {
             if (this.prismaSchema) {
-                const { execSync } = await import('node:child_process');
-                execSync(prismaPushCommand(this.prismaSchema), {
-                    env: {
-                        ...process.env,
-                        DATABASE_URL: `file:${buildPath}`,
-                        PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
-                    },
-                    stdio: 'pipe',
+                const { runToCompletion } = await import('../process/serve.adapter.js');
+                runToCompletion(prismaPushCommand(this.prismaSchema), {
+                    ...process.env,
+                    DATABASE_URL: `file:${buildPath}`,
+                    PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
                 });
 
                 // Checkpoint WAL so the template is a single file (safe to copy)

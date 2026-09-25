@@ -1,4 +1,4 @@
-import { spawn, spawnSync } from 'node:child_process';
+import { execSync, spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
@@ -7,6 +7,16 @@ import { resolve as resolvePath } from 'node:path';
 const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
+
+/**
+ * Run `command` to completion in a shell, its output captured — a build step
+ * a service needs before it serves (sqlite's `prisma db push`). The one place
+ * `world/` runs a process, beside the one it serves; a non-zero exit throws,
+ * naming the command and what it printed.
+ */
+export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
+    execSync(command, { env, stdio: 'pipe' });
+}
 
 /**
  * The ONE shape an external process takes — the site under test, a backend a

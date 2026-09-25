@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import type { Server } from 'node:http';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
-import { ServeAdapter } from './serve.adapter.js';
+import { runToCompletion, ServeAdapter } from './serve.adapter.js';
 
 /**
  * A server that binds the port the OS hands it, announces it, and answers with
@@ -124,5 +124,20 @@ describe('serve adapter', () => {
         } finally {
             server.close();
         }
+    });
+});
+
+describe('runToCompletion — a build step a service runs before it serves', () => {
+    test('the command sees the environment it is handed, and a failure throws naming it', () => {
+        // Given - a step that succeeds only when it is handed the database it builds
+        const step = `node -e "process.exit(process.env.DATABASE_URL === 'file:x.db' ? 0 : 3)"`;
+
+        // Then - handed it, the step completes; handed nothing, it throws with the command
+        expect(() => {
+            runToCompletion(step, { ...process.env, DATABASE_URL: 'file:x.db' });
+        }).not.toThrow();
+        expect(() => {
+            runToCompletion(step, { PATH: process.env.PATH });
+        }).toThrow(/Command failed: node -e/u);
     });
 });
