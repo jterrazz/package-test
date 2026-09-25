@@ -12,7 +12,7 @@ import {
     textEquals,
 } from '../../../expectations/tokens/structural.js';
 import { safeRealpath } from '../../../kernel/files/resolve.js';
-import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
+import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fixtures.engine.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
@@ -26,7 +26,7 @@ import type { SpecDocument, SpecFile, SpecFileAssertion, SpecRun } from './spec-
  *
  * The engine composes pieces that already exist rather than adding a second of
  * anything — {@link fsFixtures} for `fixture:`, the copy `.fixture()` lays
- * through; the runner's own command adapter for each run, {@link ServeAdapter}
+ * through; the runner's own command adapter for each run, {@link ServedProcess}
  * for `serve:`, the `{{token}}` engine for every comparison, and
  * {@link mergeTextPreservingPlaceholders} for the rewrite. What is new here
  * is only the ORCHESTRATION the chain cannot express: several commands
@@ -305,7 +305,7 @@ async function startServers(
     workdir: string,
 ): Promise<{ env: CliEnv; stop: () => Promise<void> }> {
     const registry = config.serveRegistry ?? {};
-    const started: ServeAdapter[] = [];
+    const started: ServedProcess[] = [];
     const env: CliEnv = {};
 
     const stop = async (): Promise<void> => {
@@ -327,7 +327,7 @@ async function startServers(
                 }`,
             );
         }
-        const adapter = new ServeAdapter(
+        const adapter = new ServedProcess(
             { command: registration.command, ready: registration.ready },
             config.root ?? process.cwd(),
             'cli',

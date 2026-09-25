@@ -3,6 +3,8 @@ import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
+import type { ProcessOptions } from './process.adapter.js';
+
 /** Grace period between SIGTERM and the SIGKILL escalation. */
 const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
@@ -17,50 +19,6 @@ const READY_POLL_INTERVAL_MS = 250;
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
-
-/**
- * The ONE shape an external process takes — the site under test, a backend a
- * page talks to, a bundler a simulator loads from. Built by `process()`
- * (chapter 17) and accepted wherever a facet starts something outside this
- * process: `website({ server })`, `services: { api: process(…) }`, and the
- * literate `serve:` registry.
- */
-export type ProcessOptions = {
-    /**
-     * A one-shot command run ONCE per specification, before the process is
-     * spawned, which must exit 0 — a build, a migration, a fixture load. Its
-     * failure is the specification's, and it says so.
-     */
-    before?: string;
-    /** Shell command that starts the process. Receives the chosen port as `PORT`. */
-    command: string;
-    /** Working directory, relative to the project root. Default: the root itself. */
-    cwd?: string;
-    /**
-     * Environment for the child, on top of the runner's own. A function
-     * receives the services already started beside this one, so a process can
-     * be handed a sibling's connection string.
-     */
-    env?:
-        | ((services: Record<string, { connectionString: string }>) => Record<string, string>)
-        | Record<string, string>;
-    /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
-    port?: number;
-    /**
-     * How readiness is observed. Two forms:
-     *
-     * - a **path** (or nothing) — the framework picks the port, injects it as
-     *   `PORT`, and polls `<baseUrl><path>` until it answers any HTTP status
-     *   (default `/`). This is `specification.website()`'s form.
-     * - a **regex over the child's output** with ONE capture group holding the
-     *   port the server chose itself. Nothing is injected as `PORT`: the server
-     *   announces its port and the framework reads it from the banner. This is
-     *   the form a literate `serve:` registration uses.
-     */
-    ready?: RegExp | string;
-    /** Readiness budget in milliseconds. Default 30 000. */
-    timeout?: number;
-};
 
 const delay = async (ms: number): Promise<void> => {
     await new Promise((resolve) => setTimeout(resolve, ms));
@@ -96,7 +54,7 @@ async function findFreePort(): Promise<number> {
  * outlive the spec run (same escalation as the cli exec adapter: SIGTERM,
  * then SIGKILL after a 2 s grace).
  */
-export class ServeAdapter {
+export class ServedProcess {
     /** The port the server ended up on — known only after {@link start}. */
     port: null | number = null;
     private child: ChildProcess | null = null;

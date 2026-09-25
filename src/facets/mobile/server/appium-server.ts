@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
+import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { MobileDevice } from '../device/device.port.js';
 import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
 
@@ -29,7 +29,7 @@ export type AppiumServer = {
  * root's `node_modules/.bin` — appium is an optional peer, so its absence
  * refuses with the exact install command. Process lifecycle (free port via
  * `PORT`, readiness poll, SIGTERM→SIGKILL group escalation on stop) is the
- * serve adapter's — one implementation for every child the framework spawns.
+ * served process's — one implementation for every child the framework spawns.
  */
 export async function startAppiumServer(root: string): Promise<AppiumServer> {
     const bin = resolve(root, 'node_modules', '.bin', 'appium');
@@ -37,8 +37,8 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
         throw new Error(APPIUM_INSTALL_HINT);
     }
 
-    const serve = new ServeAdapter(
-        // The serve adapter injects its free port as `PORT`; appium only
+    const serve = new ServedProcess(
+        // The served process injects its free port as `PORT`; appium only
         // Reads a flag, so the shell forwards one into the other.
         { command: `"${bin}" --port "$PORT"`, ready: '/status', timeout: APPIUM_READY_TIMEOUT_MS },
         root,

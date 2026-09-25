@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'vitest';
 
-import { processService } from './process.js';
-import type { ProcessHandle } from './process.js';
+import { processService } from './process.adapter.js';
+import type { ProcessHandle } from './process.adapter.js';
 
 /** A server that binds the port the OS hands it and announces it — no spec picks a port. */
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(process.env.GREETING ?? 'ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;

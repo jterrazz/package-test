@@ -205,7 +205,7 @@ export const META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/world/services/process/serve.adapter.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
+            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/world/services/process/serve.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
         facet: 'model',
         family: 'K',
         fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`.',

@@ -382,7 +382,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
 
         try {
             if (this.prismaSchema) {
-                const { runToCompletion } = await import('../process/serve.adapter.js');
+                const { runToCompletion } = await import('../process/serve.js');
                 runToCompletion(prismaPushCommand(this.prismaSchema), {
                     ...process.env,
                     DATABASE_URL: `file:${buildPath}`,

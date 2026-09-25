@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import type { DatabasePort } from '../database.port.js';
-import { ProcessHandle } from '../process/process.js';
+import { ProcessHandle } from '../process/process.adapter.js';
 import type { ServiceRecord } from '../services.js';
 import { Orchestrator } from './orchestrator.js';
 import type { AppInfo } from './startup-report.js';

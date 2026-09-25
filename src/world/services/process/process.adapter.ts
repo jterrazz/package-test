@@ -2,8 +2,51 @@
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import type { ServiceHandle } from '../service.port.js';
-import { ServeAdapter } from './serve.adapter.js';
-import type { ProcessOptions } from './serve.adapter.js';
+import { ServedProcess } from './serve.js';
+
+/**
+ * The ONE shape an external process takes — the site under test, a backend a
+ * page talks to, a bundler a simulator loads from. Built by `process()`
+ * (chapter 17) and accepted wherever a facet starts something outside this
+ * process: `website({ server })`, `services: { api: process(…) }`, and the
+ * literate `serve:` registry.
+ */
+export type ProcessOptions = {
+    /**
+     * A one-shot command run ONCE per specification, before the process is
+     * spawned, which must exit 0 — a build, a migration, a fixture load. Its
+     * failure is the specification's, and it says so.
+     */
+    before?: string;
+    /** Shell command that starts the process. Receives the chosen port as `PORT`. */
+    command: string;
+    /** Working directory, relative to the project root. Default: the root itself. */
+    cwd?: string;
+    /**
+     * Environment for the child, on top of the runner's own. A function
+     * receives the services already started beside this one, so a process can
+     * be handed a sibling's connection string.
+     */
+    env?:
+        | ((services: Record<string, { connectionString: string }>) => Record<string, string>)
+        | Record<string, string>;
+    /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
+    port?: number;
+    /**
+     * How readiness is observed. Two forms:
+     *
+     * - a **path** (or nothing) — the framework picks the port, injects it as
+     *   `PORT`, and polls `<baseUrl><path>` until it answers any HTTP status
+     *   (default `/`). This is `specification.website()`'s form.
+     * - a **regex over the child's output** with ONE capture group holding the
+     *   port the server chose itself. Nothing is injected as `PORT`: the server
+     *   announces its port and the framework reads it from the banner. This is
+     *   the form a literate `serve:` registration uses.
+     */
+    ready?: RegExp | string;
+    /** Readiness budget in milliseconds. Default 30 000. */
+    timeout?: number;
+};
 
 /**
  * An external process, declared like any other service.
@@ -29,7 +72,7 @@ export class ProcessHandle implements ServiceHandle {
     connectionString = '';
     started = false;
 
-    private adapter: null | ServeAdapter = null;
+    private served: null | ServedProcess = null;
     private readonly options: ProcessOptions;
 
     constructor(options: ProcessOptions) {
@@ -100,21 +143,21 @@ export class ProcessHandle implements ServiceHandle {
     ): Promise<void> {
         const stated =
             typeof this.options.env === 'function' ? this.options.env(services) : this.options.env;
-        this.adapter = new ServeAdapter(this.options, root, 'process', {
+        this.served = new ServedProcess(this.options, root, 'process', {
             ...stated,
             // Every process of one run carries the same id, minted by the
             // Facet: a spec that needs a unique label reads it instead of
             // Sampling `Date.now()` into an oracle (CONVENTIONS D16).
             TEST_RUN_ID: runId,
         });
-        this.connectionString = await this.adapter.start();
+        this.connectionString = await this.served.start();
         this.started = true;
     }
 
     /** Terminate the process group. Idempotent. */
     async shutdown(): Promise<void> {
-        await this.adapter?.stop();
-        this.adapter = null;
+        await this.served?.stop();
+        this.served = null;
         this.started = false;
     }
 

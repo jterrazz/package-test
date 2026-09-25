@@ -18,7 +18,7 @@ import { treeEntries } from '../src/kernel/files/git-tree.js';
  */
 
 /** The module test that proves the PORT form, relative to the root. */
-const PORT_FORM_PROOF = 'src/world/services/process/serve.adapter.test.ts';
+const PORT_FORM_PROOF = 'src/world/services/process/serve.test.ts';
 
 /** Where a port is read from what the process was handed. */
 const HANDED_PORT = /process\.env\.PORT\b|\$PORT\b|\$\{PORT\}/u;

@@ -5,9 +5,9 @@ import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
-import { ProcessHandle } from '../../world/services/process/process.js';
-import { ServeAdapter } from '../../world/services/process/serve.adapter.js';
-import type { ProcessOptions } from '../../world/services/process/serve.adapter.js';
+import { ProcessHandle } from '../../world/services/process/process.adapter.js';
+import type { ProcessOptions } from '../../world/services/process/process.adapter.js';
+import { ServedProcess } from '../../world/services/process/serve.js';
 import type { ServiceRecord } from '../../world/services/services.js';
 import type { StartedServices } from '../../world/services/startup/start-services.js';
 import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
@@ -179,11 +179,11 @@ async function startDeclared(
 async function startSite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
     context: SiteContext<Services>,
-): Promise<{ baseUrl: string; serve: null | ServeAdapter }> {
+): Promise<{ baseUrl: string; serve: null | ServedProcess }> {
     if (!options.server) {
         return { baseUrl: (options.url ?? '').replace(/\/$/u, ''), serve: null };
     }
-    const serve = new ServeAdapter(
+    const serve = new ServedProcess(
         resolveServer(options.server, context.services),
         context.root,
         'website',

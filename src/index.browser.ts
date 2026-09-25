@@ -21,7 +21,7 @@ import type { postgres as postgresFn } from './world/services/postgres/postgres.
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
-} from './world/services/process/process.js';
+} from './world/services/process/process.adapter.js';
 import type { redis as redisFn } from './world/services/redis/redis.adapter.js';
 import type { sqlite as sqliteFn } from './world/services/sqlite/sqlite.adapter.js';
 

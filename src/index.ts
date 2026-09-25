@@ -70,8 +70,11 @@ export type {
 export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
 export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';
-export { processService as process, ProcessHandle } from './world/services/process/process.js';
-export { type ProcessOptions } from './world/services/process/serve.adapter.js';
+export {
+    processService as process,
+    ProcessHandle,
+    type ProcessOptions,
+} from './world/services/process/process.adapter.js';
 export { type DatabaseKeys, type ServiceRecord } from './world/services/services.js';
 export type { SeedSource } from './world/services/seed/seed.capability.js';
 export type { DatabasePort } from './world/services/database.port.js';
