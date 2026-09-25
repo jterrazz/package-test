@@ -1,7 +1,8 @@
 # TODO — the product backlog
 
 What this package intends to do next, and nothing else. A rule's backlog is chapter 18's
-(§ Backlog, each line with the criterion it would be coded against); a decision that has
+([§ The backlog](docs/18-conventions.md#the-backlog--the-criterion-written-coded-on-its-first-occurrence),
+each line with the criterion it would be coded against); a decision that has
 been taken is a record under `docs/decisions/`; what a release carries is its GitHub
 release notes. An item delivered leaves this file.
 
@@ -41,7 +42,8 @@ then implement against numbers. By expected return, descending.
 ## 3. What the stub vocabulary still cannot say
 
 Found by package-analytics' 15.3 adoption (2026-09-20). Both are product lines: a
-rule about either one is a chapter-12 backlog line, and it waits on the surface.
+rule about either one is a line of [18 § The backlog](docs/18-conventions.md#the-backlog--the-criterion-written-coded-on-its-first-occurrence),
+and it waits on the surface.
 
 - **A stub cannot state an ABSENT header.** A response's headers are matched as a
   SUBSET, which proves presence and nothing else, so "this reply carries no
@@ -52,30 +54,7 @@ rule about either one is a chapter-12 backlog line, and it waits on the surface.
   "the call never happened". `http.never(request)` — or `required: false` with
   `times: 0` — states it, and fails at chain end if the subject reached the route.
 
-## 4. The cells the matrix says this package owes itself
-
-The capability matrix (`docs/03-testing.md`, generated) is green because each of
-these carries a written reason, and the reason is `owed`. Each is one spec, and
-the list is the matrix's **Exemptions** section read as work.
-
-- **`.clock()` on job** — the setup is on the facet; no `specs/job/` spec pins
-  a calendar. The api and integration clock specs cover the same chain setup,
-  which is exactly why nobody noticed.
-- **`.intercept()` on website** — the website facet gained it in 15.3 and the
-  package never specified it there.
-- **The website tree's half of the vocabulary** — `press`, `hover`, `check`,
-  `goto`, `heading`, `testId`, `dialog`, `status`, `table`, `row`, `listitem`,
-  and the landmarks `banner`, `complementary`, `form`, `search` (the last four
-  on component too). The vocabulary's whole claim is that it is ONE vocabulary
-  on every surface that draws; a name proven on one of them is a claim with a
-  third of its evidence.
-- **The options nothing states** — `root` on cli, website and component,
-  `external` and `backend` on website, and the component project's `clock`,
-  `locale`, `timezone` and `viewport`.
-- **Three accessors and a golden kind** — `.html`, `.title` and `.links` on a
-  website page, `toMatchRows()` on a component, and a `.json` golden on api.
-
-## 5. Asks of `@jterrazz/typescript`
+## 4. Asks of `@jterrazz/typescript`
 
 - **The member walk misses a `specs/`-rooted member.** `discover_specs_roots`, in the toolchain's check command, looks for a CHILD directory named `specs` and never considers the
   member directory itself, so a workspace declaring `packages: ['specs']` (spwn's shape)
