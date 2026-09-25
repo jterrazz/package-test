@@ -6,8 +6,8 @@ import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
 import { packedFiles, selfExposures, selfRuleNames, strandedBundles } from './audience.js';
-import { CHECKER_PASSES } from './manifest.js';
 import { codeOf } from './rule-code.js';
+import { SELF_CHECKER_PASSES } from './self-manifest.js';
 
 /**
  * K12 (meta-test) — a rule only this package is held to never reaches a
@@ -138,7 +138,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
     test('the published checker runs no self pass, over the trees that trip each one', () => {
         // Given - the bin the tarball publishes, run over every fixture a self pass's documents stand on
         const bin = checkerBin();
-        const passes = CHECKER_PASSES.filter((row) => row.audience === 'self');
+        const passes = SELF_CHECKER_PASSES;
         expect(packed.has(bin.replace(/^\.\//u, ''))).toBe(true);
         expect(passes.length).toBeGreaterThan(0);
         for (const { name } of passes) {

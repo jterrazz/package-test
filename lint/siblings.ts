@@ -118,9 +118,10 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/chain/service-images.ts',
             'lint/manifest.ts',
             'lint/rule-code.ts',
+            'lint/self-manifest.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifest)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.(?:chain|result)\.ts$/u.test(path),

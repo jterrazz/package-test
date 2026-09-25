@@ -1,10 +1,10 @@
 import type { Context } from '@oxlint/plugins';
 
 import { importSourceVisitor } from '../../ast.js';
-import { lessons } from '../../lesson.js';
+import { lessonsAt } from '../../lesson.js';
 import { specsAnchorOf } from '../../linted-file.js';
-import { RULE_DOCS } from '../../manifest.js';
 import type { LintRule, Visitor } from '../../rule-shape.js';
+import { SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js';
 
 /**
  * The framework's own top-level `src/` layers. Deep-importing any of these from
@@ -50,8 +50,8 @@ export const f7NoFrameworkInternals: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['f7-no-framework-internals'],
-        messages: lessons('f7-no-framework-internals', {
+        docs: SELF_RULE_DOCS['f7-no-framework-internals'],
+        messages: lessonsAt(selfRowOf('f7-no-framework-internals'), {
             deepImport: {
                 found: 'a spec deep-imports "{{source}}", a framework internal',
                 fix: 'import it from `@jterrazz/test` (`src/index.js` in this repository); a probe of what the entry does not publish is a module test beside its module',

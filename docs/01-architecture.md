@@ -72,7 +72,7 @@ A convention this package states is held by a **channel**, and every row of the 
 - **meta** — what the framework's own suite holds about itself: the catalogue's freshness, its completeness, the reach of its rules — [03 — Testing](03-testing.md) owns the channel.
 - **process** — the judgement no single channel settles: asset-driven grouping, golden-file discipline, retro-propagation.
 
-The channel a rule sits on is not prose here: it is a field of `lint/manifest.ts`, the single source of truth from which the catalogue in [19 — Linting](19-linting.md) is generated. So is its audience: a `consumer` rule is what a project using the package meets and is listed there, a `self` rule holds only this package's own suite and is listed in [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules). A rule and its normative sentence live together in the code, so the two cannot drift.
+The channel a rule sits on is not prose here: it is a field of `lint/manifest.ts`, the single source of truth from which the catalogue in [19 — Linting](19-linting.md) is generated. So is its audience: a `consumer` rule is what a project using the package meets and is listed there, a `self` rule holds only this package's own suite, has its row in `lint/self-manifest.ts`, and is listed in [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules). A rule and its normative sentence live together in the code, so the two cannot drift.
 
 ## What the tree publishes
 

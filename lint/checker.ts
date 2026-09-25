@@ -559,10 +559,15 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
  * compiler convention oxlint's own findings normalise to:
  * `<file>:<line>:<column>: <severity> jterrazz-check(<code>): <message>`.
  */
-export function formatViolation(violation: TokenViolation): string {
+export function reportLine(violation: TokenViolation, message: string): string {
     const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
-    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${messageOf(violation)}`;
+    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${message}`;
+}
+
+/** A consumer pass's finding as its report line, its lesson read off its row. */
+export function formatViolation(violation: TokenViolation): string {
+    return reportLine(violation, messageOf(violation));
 }
 
 /** Render violations the way the lint chain prints them. One line per finding. */

@@ -1,6 +1,6 @@
 import { lessonLine } from '../src/model/lesson/lesson.js';
 import type { Lesson } from '../src/model/lesson/lesson.js';
-import { catalog } from './manifest.js';
+import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry, RULE_DOCS } from './manifest.js';
 import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
 
@@ -43,11 +43,15 @@ export function whyOf(convention: string): string {
     return convention;
 }
 
-/** The catalogue row a name designates — a static rule, a checker pass, a meta row. */
+/**
+ * The `consumer` row a name designates — a static rule, a checker pass. A
+ * `self` row is not found here: the published code reads the consumer
+ * catalogue alone, and a self rule hands its own row to {@link lessonsAt}.
+ */
 export function rowOf(name: string): CatalogEntry {
-    const row = catalog.find((entry) => entry.name === name);
+    const row = consumerCatalog.find((entry) => entry.name === name);
     if (row === undefined) {
-        throw new Error(`no catalogue row is named ${name}`);
+        throw new Error(`no consumer row is named ${name}`);
     }
     return row;
 }
@@ -56,29 +60,44 @@ export function rowOf(name: string): CatalogEntry {
  * The heading a row is read at: `docs/19-linting.md#<row>` for a `consumer`
  * row, `docs/03-testing.md#<row>` for a `self` one.
  */
+export function readAt(row: CatalogEntry): string {
+    const chapter = row.audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
+    return `${chapter}#${row.name}`;
+}
+
+/** The heading a consumer row is read at. */
 export function readOf(name: string): string {
-    const chapter = rowOf(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
-    return `${chapter}#${name}`;
+    return readAt(rowOf(name));
 }
 
 /** One finding of a row as the line a reader acts on. */
+export function lessonAt(row: CatalogEntry, teaching: Teaching): string {
+    return lessonLine({ ...teaching, read: readAt(row), why: whyOf(row.convention) });
+}
+
+/** One finding of a consumer row as the line a reader acts on. */
 export function lessonOf(name: string, teaching: Teaching): string {
-    return lessonLine({ ...teaching, read: readOf(name), why: whyOf(rowOf(name).convention) });
+    return lessonAt(rowOf(name), teaching);
 }
 
 /**
- * A static rule's `meta.messages`: each message keyed as the rule reports it,
- * rendered whole. A `{{data}}` placeholder in `found` or `fix` is oxlint's, and
- * filled at report time with the case's values.
+ * A static rule's `meta.messages`, from its row: each message keyed as the
+ * rule reports it, rendered whole. A `{{data}}` placeholder in `found` or
+ * `fix` is oxlint's, and filled at report time with the case's values.
  */
+export function lessonsAt<Key extends string>(
+    row: CatalogEntry,
+    messages: Record<Key, Teaching>,
+): Record<Key, string> {
+    return Object.fromEntries(
+        Object.entries<Teaching>(messages).map(([key, teaching]) => [key, lessonAt(row, teaching)]),
+    ) as Record<Key, string>;
+}
+
+/** A consumer rule's `meta.messages`. */
 export function lessons<Key extends string>(
     rule: keyof typeof RULE_DOCS,
     messages: Record<Key, Teaching>,
 ): Record<Key, string> {
-    return Object.fromEntries(
-        Object.entries<Teaching>(messages).map(([key, teaching]) => [
-            key,
-            lessonOf(rule, teaching),
-        ]),
-    ) as Record<Key, string>;
+    return lessonsAt(rowOf(rule), messages);
 }

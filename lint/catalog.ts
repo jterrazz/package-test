@@ -1,5 +1,6 @@
-import { catalog, FAMILIES } from './manifest.js';
+import { FAMILIES } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
+import { catalog } from './self-manifest.js';
 
 /**
  * The conventions-catalogue generator — renders the mechanized rule catalogue
@@ -26,7 +27,7 @@ export const DOCS_END = '<!-- /GENERATED:catalog -->';
 
 /** Markers delimiting the `self` rows inside `docs/03-testing.md`. */
 export const SELF_START =
-    '<!-- GENERATED:self-rules — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->';
+    '<!-- GENERATED:self-rules — do not edit by hand; run `npm run docs`. Source: lint/self-manifest.ts -->';
 export const SELF_END = '<!-- /GENERATED:self-rules -->';
 
 /** The rows a project using the package meets — the public catalogue's. */

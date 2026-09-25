@@ -7,8 +7,9 @@ import type { RuleDoc } from './rule-shape.js';
  *
  * The constitution (`docs/18-conventions.md`) holds only principles, the
  * enforcement channels, process rules and design rationales. Every per-rule
- * normative sentence lives HERE, next to (or on) the code that enforces it. Seven
- * channels are assembled into one {@link catalog}:
+ * normative sentence lives HERE, next to (or on) the code that enforces it.
+ * This module holds the `consumer` rows, one list per channel, assembled into
+ * {@link consumerCatalog}; the `self` rows are `self-manifest.ts`'s:
  *
  * - **statique** — the `jterrazz/*` oxlint rules (`RULE_DOCS`, attached to each
  *   rule's `meta.docs`);
@@ -20,15 +21,15 @@ import type { RuleDoc } from './rule-shape.js';
  *   (`RUNTIME_RULES`);
  * - **type** — what the compiler refuses, proven by `src/type-channel.test-d.ts`
  *   (`TYPE_ROWS`);
- * - **meta** — what this package's own tests hold about the catalogue and about
- *   itself (`META_ROWS`);
  * - **process** — review-borne rules no channel can fully mechanize
  *   (`PROCESS_RULES`).
  *
- * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write the `consumer` rows in `docs/19-linting.md` and the `self` rows
- * in `docs/03-testing.md` — each row declares its audience.
- * `plugin.test.ts` guards freshness and completeness.
+ * The published code — the plugin's messages, the checker's findings — reads
+ * this module and never `self-manifest.ts`, so no bundle the tarball carries
+ * holds a `self` row. The catalogue generator (`catalog.ts` /
+ * `dist/catalog.js`) reads both, through `self-manifest.ts`'s `catalog`, to
+ * (re)write the `consumer` rows in `docs/19-linting.md` and the `self` rows in
+ * `docs/03-testing.md`. `plugin.test.ts` guards freshness and completeness.
  *
  * This module is pure data — it imports a type and the sentences the runtime's
  * refusals open on (`REFUSAL_WHY`, whose rows begin with them), so the lint
@@ -49,7 +50,8 @@ export type CatalogEntry = {
  * in French while the catalogue had one reader; a message a consumer's CI
  * prints, and a chapter their agent reads, are not that — and a half-French
  * catalogue is worse than either, because a reader cannot tell which half they
- * are in. K5 holds the line with a deny-list of the tokens that were here.
+ * are in. A meta-test holds the line with a deny-list of the tokens that were
+ * here.
  */
 export const FAMILIES: Record<string, string> = {
     A: 'Creating runners',
@@ -67,9 +69,9 @@ export const FAMILIES: Record<string, string> = {
 };
 
 /**
- * The **statique** channel — one entry per oxlint rule: a `consumer` one ships
- * in the `jterrazz` plugin (`plugin.ts`), a `self` one in the `jterrazz-self`
- * plugin this repository alone loads (`self-plugin.ts`). Each rule
+ * The **statique** channel — one entry per rule of the published `jterrazz`
+ * plugin (`plugin.ts`); the rules of the plugin this repository alone loads
+ * have theirs in `self-manifest.ts`. Each rule
  * file attaches its entry as `meta.docs`, so a rule and its normative text can
  * never drift (the completeness meta-test asserts every rule carries one).
  *
@@ -738,19 +740,6 @@ export const RULE_DOCS = {
             "Keeping test artefacts out of production protects the consumer's application bundle.",
         reach: 'all',
     },
-    'f7-no-framework-internals': {
-        audience: 'self',
-        channel: 'statique',
-        convention:
-            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{model,facets,seams,runner,lint}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is F1's. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
-        facet: 'model',
-        family: 'F',
-        fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',
-        id: 'F7',
-        rationale:
-            'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; the five folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
-        reach: 'specs',
-    },
     'f4-no-test-to-test-import': {
         audience: 'consumer',
         channel: 'statique',
@@ -1302,20 +1291,6 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         reach: 'spec',
     },
     {
-        audience: 'self',
-        channel: 'checker',
-        convention:
-            'A spec of a SPECIMEN is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under `<specs>/shared/fixtures/` — a specification module it imports a runner from, one that module imports a runner from, or the spec itself when it builds its runner inline, names the shared fixtures in a literal: a file inside a specimen’s folder — the app module, the binary, the script a command runs — or the folder itself as the root a `server: { command }` of the runner it feeds runs from, whether the literal is written in the call or in a `const` the call names (a root alone is where the services read their ground, and no app) — or an integration spec importing the module of the shared fixtures its chains call, specifies the framework, not that app, and sits one folder below its facet, in a folder the capability matrix names for that facet’s column (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. The vocabulary is closed: each capability the matrix declares for the column, the words before its first parenthesis kebab-cased (`.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`); a capability of another column is no folder of this facet (`appium` is mobile’s, never `cli/appium/`). A first-level folder that is no facet has no column, and takes a capability of any. C29 and C30 leave such a spec alone. An error at the file’s first line of code, where a reasoned `checker-disable-next-line c35` above it silences it.',
-        facet: 'model',
-        family: 'C',
-        fix: 'Move the file to `<specs>/<facet>/<capability>/<aspect>.spec.ts`, the capability it asks about, named as the matrix names it in that facet’s column.',
-        id: 'C35',
-        name: 'c35-capability-folder',
-        rationale:
-            'A specimen exists to exercise the framework, and its routes are nobody’s product: filed by the route, the framework’s own specs read as an app’s, and the reader looking for what `.seed()` promises opens a folder named for a URL.',
-        reach: 'spec',
-    },
-    {
         audience: 'consumer',
         channel: 'checker',
         convention:
@@ -1398,202 +1373,6 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         rationale:
             'The number of databases fixes the call API; the cross-file analysis catches the omission before run time.',
         reach: 'tests',
-    },
-];
-
-/**
- * The **meta** channel — what the package's own tests hold about the catalogue
- * and about itself.
- *
- * These rows never reach a consumer: they are the guards that keep the other
- * six channels honest. A rule with no fixture, a message linking to a heading
- * that moved, an id cited in a chapter that resolves to nothing, a reach a
- * reader could only learn by reading the implementation — each is a way the
- * catalogue stops being true without anything failing, and each has a test
- * here that fails instead.
- */
-export const META_ROWS: CatalogEntry[] = [
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every environment variable the framework reads is on the allow-list, and a dynamic read carries its sanction comment.',
-        facet: 'model',
-        family: 'E',
-        fix: 'Add the variable to `env-allowlist.ts`, or read it through the option that already exists.',
-        id: 'E1',
-        name: 'e1-env-allowlist',
-        rationale:
-            'An env read nobody declared is a behaviour a consumer cannot see, cannot set, and cannot turn off.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every rule id cited in `docs/**`, `skills/**`, `README.md` or a rule message resolves to a catalogue row.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Cite a row that exists, or write the row.',
-        id: 'K2',
-        name: 'k2-cited-ids-resolve',
-        rationale:
-            'A chapter citing "rule X" that resolves to nothing is worse than silence: the reader goes looking for a guard that was never written.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            "Every diagnostic's `read:` part is its own row's heading, generated from the row, and the heading exists in the generated chapter.",
-        facet: 'model',
-        family: 'K',
-        fix: 'Let `lessons()` write the `read:` part; never type one.',
-        id: 'K3',
-        name: 'k3-message-anchors',
-        rationale:
-            'The anchor is the only route most readers ever take into the catalogue, and forty hand-written tails drifted the first time a heading moved.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
-        facet: 'model',
-        family: 'K',
-        fix: "Write the message as its `found` and its `fix` — `lessons()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.",
-        id: 'K11',
-        name: 'k11-messages-teach',
-        rationale:
-            'A message is the only page of the catalogue most readers see: one that names the fault without its reason or its gesture sends the reader to the chapter for what the line could have said.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every REACH a row can state is proven on one fixture project laid out with every path role, by at least one rule of that reach, judged by a single oxlint run.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Add the path to the reach fixture and state what each rule says about it.',
-        id: 'K4',
-        name: 'k4-reach-per-path',
-        rationale:
-            'A stated reach nothing checks is a sentence: the gates that drifted from their rows were the ones no fixture ever put a file in front of.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'No catalogue sentence has gone back to French — a deny-list of the tokens the manifest actually carried.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Write the row in English, like every sentence the catalogue publishes.',
-        id: 'K5',
-        name: 'k5-english-catalogue',
-        rationale:
-            "A message a consumer's CI prints and a chapter their agent reads are not a private notebook, and a half-translated catalogue is worse than either.",
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'A source module with no `<file>.test.ts` beside it falls into one declared kind, and the kind states where its proof is instead.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Write the sibling test, or write the kind that claims it and the one line saying what covers it.',
-        id: 'K7',
-        name: 'k7-siblingless-module-declared',
-        rationale:
-            'I2 says a module test lives beside its module; it never said every module has one. What was missing is the list of the ones that do not, and why.',
-        reach: 'module',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every capability a facet DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package\u2019s own test files in that facet, or its row names the reason it is not.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Write the spec, or state the reason on the capability row — a blank cell says nothing and a zero with no reason is a surface nobody holds.',
-        id: 'K6',
-        name: 'k6-matrix-no-empty-cell',
-        rationale:
-            'A suite proves what it runs, never what it does not: a facet can grow a method and be green forever without one test touching it.',
-        reach: 'specs',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every `docs/NN` a source comment cites names a chapter that exists.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Point the link at the heading as it is now written, or restore the heading it named.',
-        id: 'K8',
-        name: 'k8-corpus-coordinates-resolve',
-        rationale:
-            'A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s; the 16.0 renumbering left the map pointing at a heading the same commit had replaced.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/seams/process/serve.adapter.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
-        facet: 'model',
-        family: 'K',
-        fix: 'Bind port 0, print the port the OS gave, and declare `ready: /listening on port (\\d+)/`.',
-        id: 'K9',
-        name: 'k9-spec-server-port-zero',
-        rationale:
-            'A port picked, released, then bound is a window another server of the same run can take: `make check` failed twice on a spec reaching a stranger on the port it was handed, and passed on the rerun.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'A lint-rule document — under `specs/lint/`, less the fixtures another document feeds a violation through — that asserts a failing `exit:` also goldens `stdout:` or `stderr:`: the report that says WHICH rule fired, not only that one did.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Golden the run’s report beside its `exit:`.',
-        id: 'K10',
-        name: 'k10-lint-document-goldens-report',
-        rationale:
-            'An exit code alone proves a rule ended the run, never which one: a document pinned to it keeps passing once the wrong rule starts firing for the wrong reason.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and the tarball exposes no `self` rule: no packed file is a self bundle or a chunk only an unpacked bundle loads; no module the `exports` map publishes, under each condition that loads it, carries at any depth a rule object whose `meta.docs` says `self`, a `jterrazz-self/` name, or a rule map — the `testing` fragment’s and its overrides’ included — naming a self row; and the published checker runs no self pass.',
-        facet: 'model',
-        family: 'K',
-        fix: 'State the audience on the row, and wire a self rule in `lint/self-plugin.ts` or `lint/self-checker.ts` — never in `lint/plugin.ts` or `lint/checker.ts`.',
-        id: 'K12',
-        name: 'k12-rule-audience',
-        rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 (whose self half is F7) refused a consumer’s own `src/model/`.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        convention:
-            'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.',
-        facet: 'model',
-        family: 'M',
-        fix: 'Specify the facet on the package itself before a rule presumes it.',
-        id: 'M1',
-        name: 'm1-constructor-has-a-tree',
-        rationale:
-            'A facet the framework never ran against itself is a surface nobody has met, and P10 says the seam is proven before the rule wave.',
-        reach: 'all',
     },
 ];
 
@@ -2022,19 +1801,6 @@ export const PROCESS_RULES: CatalogEntry[] = [
             'A review judgement — the static channel cannot tell a legitimate grep from a lazy one.',
         reach: 'tests',
     },
-    {
-        audience: 'self',
-        channel: 'process',
-        convention:
-            'Every defect class discovered produces, in the same change, the guard that stops it coming back (a static rule, a meta-test or a runtime error) — or documents why no channel can hold it.',
-        facet: 'model',
-        family: 'K',
-        fix: 'Write the guard in the same change, or write down why no channel can hold it.',
-        id: 'K1',
-        name: 'k1-retro-propagation',
-        rationale: 'This is the rule that grows the other channels instead of letting them rot.',
-        reach: 'all',
-    },
 ];
 
 /** Split an id into (family letter, numeric, variant) for natural ordering. */
@@ -2048,32 +1814,43 @@ function sortKey(entry: CatalogEntry): [string, number, string] {
 }
 
 /**
- * The full catalogue, deterministically ordered — the statique rules (from
- * {@link RULE_DOCS}) plus every other channel, sorted by family, then convention
- * number, then variant/name. The generator and the freshness meta-test both
- * consume this, so a stable order keeps generated output byte-identical.
+ * Rows in catalogue order — by family, then convention number, then
+ * variant/name — so a chapter generated from them is byte-identical from one
+ * run to the next.
  */
-const statiqueEntries: CatalogEntry[] = [];
-for (const [name, doc] of Object.entries(RULE_DOCS)) {
-    statiqueEntries.push({ name, ...doc });
+export function ordered(rows: CatalogEntry[]): CatalogEntry[] {
+    return rows.toSorted((a, b) => {
+        const [al, an, av] = sortKey(a);
+        const [bl, bn, bv] = sortKey(b);
+        if (al !== bl) {
+            return al.localeCompare(bl);
+        }
+        if (an !== bn) {
+            return an - bn;
+        }
+        return av.localeCompare(bv);
+    });
 }
 
-export const catalog: CatalogEntry[] = [
-    ...statiqueEntries,
+/** Statique docs as rows, each named by the rule it is attached to. */
+export function statiqueRows(docs: Record<string, RuleDoc>): CatalogEntry[] {
+    const rows: CatalogEntry[] = [];
+    for (const [name, doc] of Object.entries(docs)) {
+        rows.push({ name, ...doc });
+    }
+    return rows;
+}
+
+/**
+ * The `consumer` catalogue, in catalogue order: every row of this module, and
+ * the only rows the published code reads. The `self` rows are
+ * `self-manifest.ts`'s, which no published entry imports.
+ */
+export const consumerCatalog: CatalogEntry[] = ordered([
+    ...statiqueRows(RULE_DOCS),
     ...UPSTREAM_RULES,
     ...TYPE_ROWS,
-    ...META_ROWS,
     ...CHECKER_PASSES,
     ...RUNTIME_RULES,
     ...PROCESS_RULES,
-].sort((a, b) => {
-    const [al, an, av] = sortKey(a);
-    const [bl, bn, bv] = sortKey(b);
-    if (al !== bl) {
-        return al.localeCompare(bl);
-    }
-    if (an !== bn) {
-        return an - bn;
-    }
-    return av.localeCompare(bv);
-});
+]);

@@ -48,7 +48,7 @@
         "typescript/use-unknown-in-catch-callback-variable": 1,
         "unicorn/consistent-function-scoping": 6,
         "unicorn/no-array-for-each": 4,
-        "unicorn/no-array-sort": 20,
+        "unicorn/no-array-sort": 19,
         "unicorn/no-immediate-mutation": 7,
         "unicorn/no-lonely-if": 1,
         "unicorn/prefer-single-call": 2,

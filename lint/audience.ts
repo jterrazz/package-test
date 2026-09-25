@@ -2,7 +2,7 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { dirname, join, normalize, relative } from 'node:path';
 
-import { catalog } from './manifest.js';
+import { catalog } from './self-manifest.js';
 
 /**
  * What the tarball carries, read the way npm reads it — so a meta-test can

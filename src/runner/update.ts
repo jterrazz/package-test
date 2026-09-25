@@ -1,7 +1,7 @@
 /**
- * Snapshot update-mode detection. `TEST_UPDATE=1` (framework convention, see
- * CONVENTIONS E1) or vitest's `-u` / `--update` flag turn fixture mismatches
- * into fixture rewrites.
+ * Snapshot update-mode detection. `TEST_UPDATE=1` (the framework's one
+ * variable, `TEST_`-prefixed) or vitest's `-u` / `--update` flag turn fixture
+ * mismatches into fixture rewrites.
  */
 export function shouldUpdateSnapshots(): boolean {
     if (process.env.TEST_UPDATE === '1') {

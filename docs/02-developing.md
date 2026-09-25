@@ -33,17 +33,17 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 
 ### Which file a change opens
 
-| Changing…                                         | Opens                                                                                                                                                                             |
-| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `model/chain/builder.ts`                                                                                                                              |
-| What a result exposes                             | `src/model/result/` — accessors stay READ-ONLY                                                                                                                                    |
-| A matcher, or update-mode behaviour               | `src/model/goldens/` and `src/runner/` — the two sides of the runner coupling                                                                                                     |
-| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `model/` and no more                                                                                                               |
-| A `{{token}}` or the structural comparison        | `src/model/matching/`                                                                                                                                                             |
-| The `<case>.spec.yaml` grammar                    | `src/model/literate/` — read by BOTH the runner and the checker                                                                                                                   |
-| How a cli document runs                           | `src/facets/cli/literate.ts`                                                                                                                                                      |
-| A mechanized rule                                 | `lint/manifest.ts`, its audience stated, **and** its implementation under `lint/rules/<facet-or-model>/` — wired in `lint/plugin.ts`, or in `lint/self-plugin.ts` for a self rule |
-| A principle, or a criterion no machine can settle | [18 — Conventions](18-conventions.md), the constitution                                                                                                                           |
+| Changing…                                         | Opens                                                                                                                                                                                                                       |
+| ------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| A facet's chain, setups or terminal actions       | `src/facets/<facet>/`, over `model/chain/builder.ts`                                                                                                                                                                        |
+| What a result exposes                             | `src/model/result/` — accessors stay READ-ONLY                                                                                                                                                                              |
+| A matcher, or update-mode behaviour               | `src/model/goldens/` and `src/runner/` — the two sides of the runner coupling                                                                                                                                               |
+| An external dependency's adapter                  | `src/seams/<dep>/`, which imports that dep and `model/` and no more                                                                                                                                                         |
+| A `{{token}}` or the structural comparison        | `src/model/matching/`                                                                                                                                                                                                       |
+| The `<case>.spec.yaml` grammar                    | `src/model/literate/` — read by BOTH the runner and the checker                                                                                                                                                             |
+| How a cli document runs                           | `src/facets/cli/literate.ts`                                                                                                                                                                                                |
+| A mechanized rule                                 | `lint/manifest.ts` (`lint/self-manifest.ts` for a self rule), its audience stated, **and** its implementation under `lint/rules/<facet-or-model>/` — wired in `lint/plugin.ts`, or in `lint/self-plugin.ts` for a self rule |
+| A principle, or a criterion no machine can settle | [18 — Conventions](18-conventions.md), the constitution                                                                                                                                                                     |
 
 ### What a change owes
 

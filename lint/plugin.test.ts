@@ -10,10 +10,9 @@ import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { anchor, spliceCatalog, spliceSelfRules } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import {
-    catalog,
     CHECKER_PASSES,
+    consumerCatalog,
     FAMILIES,
-    META_ROWS,
     PROCESS_RULES,
     RULE_DOCS,
     RUNTIME_RULES,
@@ -23,6 +22,14 @@ import {
 import plugin, { recommendedRules, testing } from './plugin.js';
 import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
 import { SELF_PASS_IDS } from './self-checker.js';
+import {
+    catalog,
+    META_ROWS,
+    SELF_CHECKER_PASSES,
+    SELF_PROCESS_RULES,
+    SELF_RULE_DOCS,
+    selfCatalog,
+} from './self-manifest.js';
 import selfPlugin, { selfRules } from './self-plugin.js';
 
 /**
@@ -57,7 +64,7 @@ function namespaceOf(id: string): string {
 
 /** The statique rows of one audience, by rule id. */
 function statiqueRowsOf(audience: string): string[] {
-    return Object.entries(RULE_DOCS)
+    return Object.entries({ ...RULE_DOCS, ...SELF_RULE_DOCS })
         .filter(([, doc]) => doc.audience === audience)
         .map(([id]) => id)
         .toSorted();
@@ -128,9 +135,15 @@ const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
 /** The passes only this package runs — `dist/self-checker.js`, never shipped. */
 const SELF_PASSES = new Set<string>(SELF_PASS_IDS);
 
+/** The audiences a list of rows declares, each once. */
+function audiences(rows: { audience: string }[]): string[] {
+    return [...new Set(rows.map((row) => row.audience))];
+}
+
 /** The checker-channel rows of one audience, by name. */
 function checkerRowsOf(audience: string): string[] {
-    return CHECKER_PASSES.filter((entry) => entry.audience === audience)
+    return [...CHECKER_PASSES, ...SELF_CHECKER_PASSES]
+        .filter((entry) => entry.audience === audience)
         .map((entry) => entry.name)
         .toSorted();
 }
@@ -292,7 +305,7 @@ function carries(text: string, token: string): boolean {
 describe('conventions catalogue — completeness (meta-test)', () => {
     test('every shipped plugin rule carries a statique meta.docs entry', () => {
         // Given - each rule of either plugin, and the manifest read by rule id
-        const docsById: Record<string, unknown> = RULE_DOCS;
+        const docsById: Record<string, unknown> = { ...RULE_DOCS, ...SELF_RULE_DOCS };
         for (const [id, rule] of Object.entries(allRules)) {
             // Then - it attaches its manifest doc as meta.docs (channel statique)
             expect(rule.meta?.docs, `rule ${id} is missing meta.docs`).toBeDefined();
@@ -317,7 +330,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
 
     test('runtime and process manifest entries are documented (convention + rationale)', () => {
         // Given - the review-borne / execution-time channels
-        for (const entry of [...RUNTIME_RULES, ...PROCESS_RULES]) {
+        for (const entry of [...RUNTIME_RULES, ...PROCESS_RULES, ...SELF_PROCESS_RULES]) {
             // Then - each carries non-empty normative text and a rationale (its "implementation" is the framework runtime or human review — documented here, not a lint rule)
             expect(entry.convention.length, `${entry.name} convention`).toBeGreaterThan(0);
             expect(entry.rationale.length, `${entry.name} rationale`).toBeGreaterThan(0);
@@ -440,6 +453,14 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         for (const entry of catalog) {
             expect(AUDIENCES.has(entry.audience), `${entry.name} audience`).toBe(true);
         }
+    });
+
+    test('k12 — a row lives in the manifest of its audience', () => {
+        // Given - the two manifests: the one the published code reads, and the one no published entry imports
+        // Then - the published manifest holds consumer rows alone, the self manifest self rows alone, and together they are the whole catalogue
+        expect(audiences(consumerCatalog)).toStrictEqual(['consumer']);
+        expect(audiences(selfCatalog)).toStrictEqual(['self']);
+        expect(consumerCatalog.length + selfCatalog.length).toBe(catalog.length);
     });
 
     test('every catalogue entry has a unique implementation name', () => {
