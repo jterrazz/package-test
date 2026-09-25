@@ -5,6 +5,7 @@
         "src/runner/index.ts",
         "lint/plugin.ts",
         "lint/checker-cli.ts",
+        "lint/self-checker-cli.ts",
         "lint/catalog-cli.ts",
         "lint/coverage-cli.ts"
     ],

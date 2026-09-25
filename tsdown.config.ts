@@ -4,7 +4,7 @@ import { defineConfig } from 'tsdown';
  * Three build groups by consumption model:
  *
  * - **ESM-only** — `index` (imported by vitest, which is ESM-only), plus the
- *   `checker`/`catalog` CLIs (invoked as `node dist/*.js`). None has a CommonJS
+ *   `checker`/`catalog`/`self-checker` CLIs (invoked as `node dist/*.js`). None has a CommonJS
  *   consumer, so a `require` build would be dead weight.
  * - **Browser** — `browser/index`, what the `browser` condition of `exports["."]`
  *   resolves to. Built for a page (`platform: 'browser'`), with the four seams
@@ -37,6 +37,7 @@ export default defineConfig([
             'mobile-session': 'src/runner/mobile-session.ts',
             'route-coverage': 'src/runner/route-coverage.ts',
             'route-split': 'src/runner/route-split-cli.ts',
+            'self-checker': 'lint/self-checker-cli.ts',
             'services-setup': 'src/seams/testcontainers/run-setup.ts',
             'temp-root': 'src/runner/temp-root.ts',
             vitest: 'src/runner/index.ts',

@@ -33,6 +33,7 @@
         "!dist/catalog.*",
         "!dist/coverage.*",
         "!dist/route-split.*",
+        "!dist/self-*",
         "!dist/**/*.map",
         "docs",
         "schema"
@@ -67,7 +68,7 @@
         "build": "tsdown --config tsdown.config.ts",
         "build:cached": "rm -rf dist && TURBO_TELEMETRY_DISABLED=1 turbo run build --output-logs=new-only",
         "docs": "npm run build:cached && node dist/catalog.js",
-        "lint": "typescript check && node dist/checker.js",
+        "lint": "typescript check && node dist/checker.js && node dist/self-checker.js",
         "test": "vitest --run",
         "coverage": "npm run build:cached && vitest --run --coverage && node dist/coverage.js --write",
         "coverage:check": "node dist/coverage.js",

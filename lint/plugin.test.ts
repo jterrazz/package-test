@@ -22,6 +22,7 @@ import {
 } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
 import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
+import { SELF_PASS_IDS } from './self-checker.js';
 
 /**
  * Catalogue meta-test — the docs-as-code contract.
@@ -105,6 +106,16 @@ function metaProofs(): Set<string> {
  * decision d) so the meta-test cannot drift from the passes the CLI runs.
  */
 const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
+
+/** The passes only this package runs — `dist/self-checker.js`, never shipped. */
+const SELF_PASSES = new Set<string>(SELF_PASS_IDS);
+
+/** The checker-channel rows of one audience, by name. */
+function checkerRowsOf(audience: string): string[] {
+    return CHECKER_PASSES.filter((entry) => entry.audience === audience)
+        .map((entry) => entry.name)
+        .toSorted();
+}
 
 /**
  * Specs/lint E2E files that probe the checker's CLI boundary rather than a
@@ -278,12 +289,11 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         expect(Object.keys(RULE_DOCS).sort()).toStrictEqual([...pluginRules].sort());
     });
 
-    test('every checker-channel manifest entry maps to a bundled checker pass', () => {
-        // Given - the checker channel of the manifest
-        // Then - each entry names a real pass run by dist/checker.js
-        expect(CHECKER_PASSES.map((entry) => entry.name).sort()).toStrictEqual(
-            [...CHECKER_PASS_IDS].sort(),
-        );
+    test('every checker-channel manifest entry maps to a pass of the checker its audience runs', () => {
+        // Given - the checker channel of the manifest, split by audience
+        // Then - a consumer row names a pass dist/checker.js runs, a self row one dist/self-checker.js runs, and neither checker runs a pass of the other audience
+        expect(checkerRowsOf('consumer')).toStrictEqual([...CHECKER_PASS_IDS].toSorted());
+        expect(checkerRowsOf('self')).toStrictEqual([...SELF_PASSES].toSorted());
     });
 
     test('runtime and process manifest entries are documented (convention + rationale)', () => {
@@ -684,7 +694,7 @@ describe('conventions catalogue — the channels answer for themselves (meta-tes
             (entry: { id: string; name: string; upstream?: string }) => boolean,
         ][] = [
             ['statique', (entry) => pluginRules.has(entry.name)],
-            ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name)],
+            ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name) || SELF_PASSES.has(entry.name)],
             [
                 // The row names the upstream rule it rests on, and the proof is
                 // An assertion on THAT rule's resolved option — a file-level
@@ -776,8 +786,8 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
     });
 
     test('every checker pass has a specs/lint E2E spec that runs the built checker', () => {
-        // Given - each pass dist/checker.js runs, tree and member alike
-        for (const id of CHECKER_PASS_IDS) {
+        // Given - each pass dist/checker.js runs, tree and member alike, and each dist/self-checker.js runs
+        for (const id of [...CHECKER_PASS_IDS, ...SELF_PASSES]) {
             // Then - its documents in specs/lint/<id>/, or its own test under specs/lint/checker/: a pass the registry names and no spec runs is a sentence with nothing behind it
             expect(
                 withDocuments.has(id) ||
@@ -795,6 +805,7 @@ describe('conventions catalogue — E2E inventory (meta-test)', () => {
             expect(
                 pluginRules.has(id) ||
                     CHECKER_PASS_IDS.has(id) ||
+                    SELF_PASSES.has(id) ||
                     CLI_CONTRACT_SPECS.has(id) ||
                     metaRows.has(id),
                 `${id} maps to no rule, pass, meta row, or CLI-contract spec`,

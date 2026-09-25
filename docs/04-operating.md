@@ -16,7 +16,7 @@ Because validate runs inside the release workflow, a red suite stops a publicati
 
 ## What leaves the tree
 
-The tarball is what `files` declares and nothing else: `dist/`, minus `dist/catalog.*`, `dist/coverage.*` and the source maps the build writes for coverage, plus `docs/` and `schema/`. The catalogue generator is a development gesture with no consumer — it writes this repository's own projections — so it is built but never shipped.
+The tarball is what `files` declares and nothing else: `dist/`, minus `dist/catalog.*`, `dist/coverage.*`, `dist/self-*` and the source maps the build writes for coverage, plus `docs/` and `schema/`. The catalogue generator is a development gesture with no consumer — it writes this repository's own projections — so it is built but never shipped; so is every `dist/self-*` bundle, which wires a rule only this package is held to ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
 
 **The manual ships with the code**, because the code points at it: every relative link of the shipped `README.md` and every `(… — see docs/19-linting.md#…)` a rule message ends on is read from inside an install, and a chapter that is not there makes both a dead end. The `package-exports` meta-test holds it — a citation whose file the manifest does not publish fails the suite.
 

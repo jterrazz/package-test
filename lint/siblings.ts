@@ -188,6 +188,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/catalog-cli.ts',
             'lint/checker-cli.ts',
             'lint/coverage-cli.ts',
+            'lint/self-checker-cli.ts',
             'src/runner/route-split-cli.ts',
         ),
         name: 'a bundled CLI entry',

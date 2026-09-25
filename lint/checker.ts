@@ -16,7 +16,6 @@ import {
 } from '../src/model/literate/spec-document.js';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { treeEntries } from '../src/seams/git/tree.js';
-import { checkCapabilityFolder } from './checker-capability.js';
 import {
     checkCopiedGround,
     checkDatabaseProperty,
@@ -42,6 +41,7 @@ import { checkOneSubject, checkSubjectFolder } from './checker-subject.js';
 import { lessonOf } from './lesson.js';
 import type { Teaching } from './lesson.js';
 import { codeOf } from './rule-code.js';
+import type { SelfPassId } from './self-checker.js';
 
 /**
  * The conventions checker — the non-oxlint static channel.
@@ -131,7 +131,6 @@ export const TREE_PASS_IDS = [
     'c28-ground-shared-or-inline',
     'c29-one-subject',
     'c30-subject-folder',
-    'c35-capability-folder',
     'c8-disk-target-exists',
     'c8-spec-registered-name',
     'c9-dead-fixtures',
@@ -167,7 +166,8 @@ export const MEMBER_PASS_IDS = [
 ] as const;
 
 /**
- * Every logical pass bundled into `dist/checker.js` — the authoritative registry
+ * Every logical pass bundled into `dist/checker.js` — the `consumer` passes
+ * alone, a `self` pass being `self-checker.ts`'s — the authoritative registry
  * both the manifest catalogue (docs) and the E2E inventory meta-test derive
  * from, so neither can name a pass the CLI does not actually run.
  */
@@ -175,8 +175,15 @@ export const CHECKER_PASS_IDS: string[] = [
     ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
 ];
 
-/** The name of a pass the checker runs — its catalogue row's. */
-export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
+/**
+ * The name of a pass a checker runs — its catalogue row's: the published
+ * checker's, or the self checker's (`self-checker.ts`), whose findings share
+ * this shape and this report line.
+ */
+export type CheckerPassId =
+    | (typeof MEMBER_PASS_IDS)[number]
+    | (typeof TREE_PASS_IDS)[number]
+    | SelfPassId;
 
 export type Severity = 'error' | 'warn';
 
@@ -539,7 +546,6 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
         ...checkGroundSharing(rootDir),
         ...checkOneSubject(rootDir),
         ...checkSubjectFolder(rootDir),
-        ...checkCapabilityFolder(rootDir),
         ...checkCopiedGround(rootDir),
         ...checkLocalFixtureReach(rootDir),
         ...checkDiskTargetsExist(rootDir),

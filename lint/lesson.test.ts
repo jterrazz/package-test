@@ -9,6 +9,7 @@ import { CHECKER_PASS_IDS } from './checker.js';
 import { lessonOf, lessons, readOf, whyOf } from './lesson.js';
 import { CHECKER_PASSES, RUNTIME_RULES } from './manifest.js';
 import plugin from './plugin.js';
+import { SELF_PASS_IDS } from './self-checker.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -80,8 +81,8 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
     });
 
     test('k11 — every checker pass renders a whole lesson from its row', () => {
-        // Given - one finding of each pass the checker runs
-        for (const pass of CHECKER_PASS_IDS) {
+        // Given - one finding of each pass a checker runs, the published one and this package's own
+        for (const pass of [...CHECKER_PASS_IDS, ...SELF_PASS_IDS]) {
             const message = lessonOf(pass, { fix: 'the gesture', found: 'the finding' });
 
             // Then - the row's sentence and heading fill the two parts a finding does not write
