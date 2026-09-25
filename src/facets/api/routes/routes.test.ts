@@ -1,28 +1,6 @@
-import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { tmpdir } from 'node:os';
-import { join } from 'node:path';
-import { describe, expect, onTestFinished, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-import {
-    heldUnreached,
-    measure,
-    openApiRoutes,
-    reachesRoute,
-    readLedgers,
-    recordUnreached,
-    routesLedger,
-    unreachedRoutes,
-    writeLedger,
-} from './routes.js';
-
-/** A scratch directory, removed when the test ends. */
-function scratch(): string {
-    const directory = mkdtempSync(join(tmpdir(), 'routes-'));
-    onTestFinished(() => {
-        rmSync(directory, { force: true, recursive: true });
-    });
-    return directory;
-}
+import { openApiRoutes, reachesRoute, unreachedRoutes } from './routes.js';
 
 describe('route coverage — what a request reaches', () => {
     test('a parameter takes one segment, a wildcard the rest, and a query is no segment', () => {
@@ -94,52 +72,5 @@ describe('route coverage — what a request reaches', () => {
         expect(openApiRoutes('{"paths": {"/a": {"delete": {}}}}', true)).toStrictEqual([
             { method: 'DELETE', path: '/a' },
         ]);
-    });
-});
-
-describe('route coverage — the ledgers and the ratchet', () => {
-    test('every ledger the run wrote is read back, and measured together', () => {
-        // Given - two specifications' ledgers
-        const directory = join(scratch(), 'routes');
-        writeLedger(directory, { declared: [{ method: 'GET', path: '/a' }], reached: [] });
-        writeLedger(directory, { declared: [], reached: [{ method: 'GET', path: '/a' }] });
-
-        // Then - one measure over both
-        expect(measure(readLedgers(directory))).toStrictEqual({
-            declared: [{ method: 'GET', path: '/a' }],
-            reached: [{ method: 'GET', path: '/a' }],
-        });
-    });
-
-    test('recording keeps every other key of the file, and removes its own at zero', () => {
-        // Given - a baseline holding a typescript section and a checker key
-        const root = scratch();
-        const path = join(root, 'jterrazz.baseline.json');
-        writeFileSync(
-            path,
-            '{\n    "typescript": { "a": 1 },\n    "test": { "jterrazz/x": 2 }\n}\n',
-        );
-
-        // When - two unreached routes are recorded, then none
-        recordUnreached(root, 2);
-        const recorded = heldUnreached(root);
-        recordUnreached(root, 0);
-
-        // Then - held, then gone, the other keys untouched
-        expect(recorded).toBe(2);
-        expect(JSON.parse(readFileSync(path, 'utf8'))).toStrictEqual({
-            test: { 'jterrazz/x': 2 },
-            typescript: { a: 1 },
-        });
-    });
-});
-
-describe('route coverage — where a worker writes its ledger', () => {
-    test('a run whose global setup provides no ledger measures no route coverage', async () => {
-        // Given - the unit project, which declares no route-coverage setup
-        const ledger = await routesLedger();
-
-        // Then - no folder to write a ledger into
-        expect(ledger).toBeUndefined();
     });
 });

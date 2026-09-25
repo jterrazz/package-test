@@ -3,12 +3,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
+import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
+import type { Shard } from './ledger.js';
 import { setupRoutes } from './route-coverage.js';
 import type { RouteProject } from './route-coverage.js';
 import { PARTIAL_UNJUDGED, SHARD_UNJUDGED } from './route-judge.js';
 import { judgeSplit, partialSplitUnjudged } from './route-split.js';
-import { ROUTES_DIR, shardLedgersDir, writeLedger } from './routes.js';
-import type { Shard } from './routes.js';
 
 describe('route coverage — the global setup reads the run', () => {
     test("a shard's ledgers go to its own folder, a whole run's are left, and its teardown judges nothing", async () => {

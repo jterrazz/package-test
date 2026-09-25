@@ -147,6 +147,10 @@ export const FRAMEWORK_LAYERS = {
             // Every gate judges the tree the runtime reads: what git does not ignore.
             'kernel/files/git-tree',
             'kernel/files/yaml-document',
+            // The checker reads the `test` section by the runtime's own reader,
+            // Loading the file synchronously itself, since every pass is sync.
+            'kernel/config/settings',
+            'kernel/config/test-section',
             // A finding and a refusal teach in one form: the four parts, and how they read.
             'kernel/refusals/lesson',
             // The runtime's refusals open on the sentence their catalogue row does.
@@ -161,7 +165,7 @@ export const FRAMEWORK_LAYERS = {
             // The run owns one key of the ratchet the checker writes (route
             // Coverage), and the .spec.yaml grammar is read by the runner AND
             // The checker: one owner each, reached where it lives.
-            'facets/api/routes/routes',
+            'facets/api/routes/baseline',
             'facets/cli/documents/spec-document',
         ],
         // oxlint's plugin types (erased), the toolchain's config names

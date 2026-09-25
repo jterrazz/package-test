@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
 import { judgeSplit, NO_SHARD_LEDGERS } from './route-split.js';
-import { ROUTES_DIR, shardLedgersDir, writeLedger } from './routes.js';
 import type { Route } from './routes.js';
 
 /** A green merge, judged. */

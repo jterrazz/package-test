@@ -12,7 +12,7 @@ import {
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
-import { routesLedger, writeLedger } from './routes/routes.js';
+import { routesLedger, writeLedger } from './routes/ledger.js';
 import { HonoAdapter } from './server/hono.adapter.js';
 import type { ServerPort } from './server/server.port.js';
 

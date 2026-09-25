@@ -2,10 +2,10 @@ import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
+import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from './ledger.js';
+import type { Shard } from './ledger.js';
 import { judgeRoutes } from './route-judge.js';
 import type { RunScope } from './route-judge.js';
-import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from './routes.js';
-import type { Shard } from './routes.js';
 
 /**
  * The api project's global setup: route coverage, measured over the run.

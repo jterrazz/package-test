@@ -21,7 +21,7 @@ import type { AstNode } from './rule-shape.js';
  * ratchet's key, the `.spec.yaml` grammar).
  */
 const REACHED_INSIDE_A_FACET = new Set([
-    'src/facets/api/routes/routes.ts',
+    'src/facets/api/routes/baseline.ts',
     'src/facets/cli/documents/literate-plugin.ts',
     'src/facets/cli/documents/spec-document.ts',
 ]);

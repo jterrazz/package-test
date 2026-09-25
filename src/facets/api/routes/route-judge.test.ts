@@ -3,8 +3,9 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { heldUnreached } from './baseline.js';
+import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
-import { heldUnreached, writeLedger } from './routes.js';
 
 /** A green run, judged. */
 const GREEN = { failed: 0, scope: 'whole', update: false } as const;
