@@ -2,7 +2,7 @@ import { lessonLine } from '../src/model/lesson/lesson.js';
 import type { Lesson } from '../src/model/lesson/lesson.js';
 import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry, RULE_DOCS } from './manifest.js';
-import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
+import { CATALOGUE_CHAPTER } from './rule-code.js';
 
 /**
  * The two parts of a lesson a message writes for its case — what it found, and
@@ -46,7 +46,8 @@ export function whyOf(convention: string): string {
 /**
  * The `consumer` row a name designates — a static rule, a checker pass. A
  * `self` row is not found here: the published code reads the consumer
- * catalogue alone, and a self rule hands its own row to {@link lessonsAt}.
+ * catalogue alone, and a self rule hands its own row, and its own chapter, to
+ * {@link lessonsAt}.
  */
 export function rowOf(name: string): CatalogEntry {
     const row = consumerCatalog.find((entry) => entry.name === name);
@@ -57,11 +58,11 @@ export function rowOf(name: string): CatalogEntry {
 }
 
 /**
- * The heading a row is read at: `docs/19-linting.md#<row>` for a `consumer`
- * row, `docs/03-testing.md#<row>` for a `self` one.
+ * The heading a row is read at, in the chapter its audience lists it in: the
+ * catalogue, `docs/19-linting.md#<row>`, unless a self row's caller names its
+ * own.
  */
-export function readAt(row: CatalogEntry): string {
-    const chapter = row.audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
+export function readAt(row: CatalogEntry, chapter = CATALOGUE_CHAPTER): string {
     return `${chapter}#${row.name}`;
 }
 
@@ -70,9 +71,13 @@ export function readOf(name: string): string {
     return readAt(rowOf(name));
 }
 
-/** One finding of a row as the line a reader acts on. */
-export function lessonAt(row: CatalogEntry, teaching: Teaching): string {
-    return lessonLine({ ...teaching, read: readAt(row), why: whyOf(row.convention) });
+/** One finding of a row as the line a reader acts on, read in `chapter`. */
+export function lessonAt(
+    row: CatalogEntry,
+    teaching: Teaching,
+    chapter = CATALOGUE_CHAPTER,
+): string {
+    return lessonLine({ ...teaching, read: readAt(row, chapter), why: whyOf(row.convention) });
 }
 
 /** One finding of a consumer row as the line a reader acts on. */
@@ -83,14 +88,19 @@ export function lessonOf(name: string, teaching: Teaching): string {
 /**
  * A static rule's `meta.messages`, from its row: each message keyed as the
  * rule reports it, rendered whole. A `{{data}}` placeholder in `found` or
- * `fix` is oxlint's, and filled at report time with the case's values.
+ * `fix` is oxlint's, and filled at report time with the case's values. Each
+ * is read in `chapter`.
  */
 export function lessonsAt<Key extends string>(
     row: CatalogEntry,
     messages: Record<Key, Teaching>,
+    chapter = CATALOGUE_CHAPTER,
 ): Record<Key, string> {
     return Object.fromEntries(
-        Object.entries<Teaching>(messages).map(([key, teaching]) => [key, lessonAt(row, teaching)]),
+        Object.entries<Teaching>(messages).map(([key, teaching]) => [
+            key,
+            lessonAt(row, teaching, chapter),
+        ]),
     ) as Record<Key, string>;
 }
 

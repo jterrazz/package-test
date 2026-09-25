@@ -41,7 +41,8 @@ export type RuleDoc = {
      *   capability matrix, its specimens, its skill, its meta-tests. It is
      *   wired only in this repository's own lint configuration and
      *   meta-tests, nothing the tarball carries runs it, and its row is read
-     *   where the package says how it tests itself (`docs/03-testing.md`).
+     *   where the package says how it tests itself (`docs/03-testing.md` of
+     *   its repository, a chapter the tarball leaves out).
      *
      * A rule that is both is two rules: its consumer half ships, its self
      * half stays home.

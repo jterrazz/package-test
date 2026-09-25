@@ -6,7 +6,7 @@ import { reportLine } from './checker.js';
 import type { TokenViolation } from './checker.js';
 import { lessonAt } from './lesson.js';
 import { runSelfChecks, SELF_PASS_IDS } from './self-checker.js';
-import { selfRowOf } from './self-manifest.js';
+import { SELF_CHAPTER, selfRowOf } from './self-manifest.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -34,7 +34,7 @@ for (const specsRoot of discoverSpecRoots(root)) {
 }
 
 for (const finding of findings) {
-    const lesson = lessonAt(selfRowOf(finding.rule), finding);
+    const lesson = lessonAt(selfRowOf(finding.rule), finding, SELF_CHAPTER);
     console.error(reportLine(finding, lesson));
 }
 

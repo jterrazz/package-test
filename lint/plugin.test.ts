@@ -20,11 +20,12 @@ import {
     UPSTREAM_RULES,
 } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
-import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
+import { CATALOGUE_CHAPTER } from './rule-code.js';
 import { SELF_PASS_IDS } from './self-checker.js';
 import {
     catalog,
     META_ROWS,
+    SELF_CHAPTER,
     SELF_CHECKER_PASSES,
     SELF_PROCESS_RULES,
     SELF_RULE_DOCS,

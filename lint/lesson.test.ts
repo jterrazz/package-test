@@ -9,8 +9,9 @@ import { CHECKER_PASS_IDS } from './checker.js';
 import { lessonAt, lessons, readAt, whyOf } from './lesson.js';
 import { RUNTIME_RULES } from './manifest.js';
 import plugin from './plugin.js';
+import { CATALOGUE_CHAPTER } from './rule-code.js';
 import { SELF_PASS_IDS } from './self-checker.js';
-import { catalog } from './self-manifest.js';
+import { catalog, SELF_CHAPTER } from './self-manifest.js';
 import selfPlugin from './self-plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
@@ -22,6 +23,11 @@ function rowNamed(name: string): (typeof catalog)[number] {
         throw new Error(`no row is named ${name}`);
     }
     return row;
+}
+
+/** The chapter a row's audience lists it in. */
+function chapterOf(name: string): string {
+    return rowNamed(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
 }
 
 /** A checker line as the report prints it: the lesson after the code. */
@@ -86,7 +92,9 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
                 // Then - no part is missing, and the row's own sentence and heading are the ones it states
                 expect(missingParts(message), `${name}.${key}`).toStrictEqual([]);
                 expect(lessonParts(message)?.why, `${name}.${key}`).toBe(whyOf(convention));
-                expect(lessonParts(message)?.read, `${name}.${key}`).toBe(readAt(rowNamed(name)));
+                expect(lessonParts(message)?.read, `${name}.${key}`).toBe(
+                    readAt(rowNamed(name), chapterOf(name)),
+                );
             }
         }
     });
@@ -94,7 +102,11 @@ describe('k11 — every message teaches: found, why, fix, read (meta-test)', () 
     test('k11 — every checker pass renders a whole lesson from its row', () => {
         // Given - one finding of each pass a checker runs, the published one and this package's own
         for (const pass of [...CHECKER_PASS_IDS, ...SELF_PASS_IDS]) {
-            const message = lessonAt(rowNamed(pass), { fix: 'the gesture', found: 'the finding' });
+            const message = lessonAt(
+                rowNamed(pass),
+                { fix: 'the gesture', found: 'the finding' },
+                chapterOf(pass),
+            );
 
             // Then - the row's sentence and heading fill the two parts a finding does not write
             expect(missingParts(message)).toStrictEqual([]);

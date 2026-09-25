@@ -119,6 +119,23 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         expect(danglingImports(installed, packed)).toStrictEqual([]);
     });
 
+    test('no packed module cites a page the tarball leaves out', () => {
+        // Given - every page a packed module names, the `read:` part of a lesson among them
+        const cited = [...packed]
+            .filter((path) => MODULE_FILE.test(path))
+            .flatMap((path) =>
+                [
+                    ...readFileSync(join(installed, path), 'utf8').matchAll(/docs\/[\w./-]+\.md/gu),
+                ].map(([page]) => `${path}: ${page}`),
+            );
+
+        // Then - some are, and each is in the tarball: the chapter of the self rows stays home, and so does the code that routes a reader there
+        expect(cited.length).toBeGreaterThan(0);
+        expect(
+            cited.filter((line) => !packed.has(line.slice(line.indexOf(': ') + 2))),
+        ).toStrictEqual([]);
+    });
+
     test('the walk finds a self rule wherever an export nests it', () => {
         // Given - a fragment that hides one of each kind at depth: a rule map in an override, a plugin name, a rule object, a rule keyed by its bare name
         const fragment = {
