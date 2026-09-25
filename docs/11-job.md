@@ -18,11 +18,11 @@ import { afterAll } from 'vitest';
 import { specification, postgres } from '@jterrazz/test';
 import { nightlyReport, supportDrafts } from '../../src/jobs.js';
 
+// Hoisted, so a test can read this database after a chain that rejected
+export const analyticsDb = postgres(); // → "analytics-db", init from docker/analytics-db/
+
 export const { job, cleanup } = await specification.job({
-    services: {
-        db: postgres(),
-        analyticsDb: postgres(), // → "analytics-db", init from docker/analytics-db/
-    },
+    services: { db: postgres(), analyticsDb },
     jobs: ({ db, analyticsDb }) => [nightlyReport(db, analyticsDb), supportDrafts(db)],
 });
 
@@ -37,7 +37,7 @@ afterAll(cleanup);
 | `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule A8)                   |
 | `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule A9)                                    |
 
-There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet (rule A2). A `Job` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
+There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet. A `Job` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
 
 ## The chain
 
@@ -146,9 +146,13 @@ The full builder catalogue lives in [stubs](16-stubs.md).
 
 ### A crash is read by its rejection
 
-A job that throws rejects `.trigger()` with its own error, and what it wrote before the throw stays in the database — read it from the service handle, since a rejected chain hands back no result:
+A job that throws rejects `.trigger()` with its own error, and what it wrote before the throw stays in the database — read it from the service handle, since a rejected chain hands back no result. That is why the constructor above hoists `analyticsDb` out of the record: a handle declared on its own is one a test can import and query.
 
 ```typescript
+import { expect, test } from 'vitest';
+
+import { analyticsDb, job } from '../job.specification.js';
+
 test('a crashed job leaves what it wrote first', async () => {
     // Given - a job that writes one row, then throws
     const run = job.trigger('crash-after-insert');
@@ -161,7 +165,7 @@ test('a crashed job leaves what it wrote first', async () => {
 
 ## Pitfalls
 
-- **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition (rule A2); what a job reads from the outside is its `services` record (rule A8).
+- **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition; what a job reads from the outside is its `services` record (rule A8).
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
 - **Forgetting `times` on the leading stub of a sequence.** With no `times` the first stub is unlimited, so it answers every call and the recovery stub behind it is never reached.
 - **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).
