@@ -2,8 +2,9 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
-import { releaseIsolation, startServices } from '../../world/services/services.js';
-import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
+import type { ServiceRecord } from '../../world/services/services.js';
+import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
+import type { StartedServices } from '../../world/services/startup/start-services.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
 import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
 import type { DevicePort, DeviceTimeouts } from './device/device.port.js';
@@ -14,8 +15,6 @@ import type { AppiumServer, MobileDevice, RunServer } from './server/appium-serv
 import { sameRuntime } from './server/simulator.js';
 import type { SessionLedger } from './session/session-ledger.js';
 import { mobileSessions, sessionLedger } from './session/session-ledger.js';
-
-// ── Types ──
 
 /** What `specification.mobile()` hands its chain: the device, the app it opens, and the stub backend. */
 export type MobileConfig = {

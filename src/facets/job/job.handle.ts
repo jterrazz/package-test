@@ -1,18 +1,14 @@
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
+import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
+import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../world/services/services.js';
-import type {
-    DatabaseKeys,
-    ServiceRecord,
-    ServicesConfig,
-    StartedServices,
-} from '../../world/services/services.js';
-import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
+} from '../../world/services/startup/start-services.js';
+import type { StartedServices } from '../../world/services/startup/start-services.js';
 import type { JobSpecification } from './job.facet.js';
 import { jobFacet } from './job.facet.js';
 

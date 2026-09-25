@@ -4,12 +4,12 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
+import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../world/services/services.js';
-import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
+} from '../../world/services/startup/start-services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
 import { routesLedger, writeLedger } from './routes/ledger.js';
