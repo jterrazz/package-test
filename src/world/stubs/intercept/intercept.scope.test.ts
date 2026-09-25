@@ -1,12 +1,9 @@
 import { afterAll, describe, expect, test } from 'vitest';
 
 import { http } from '../http/http.js';
-import { registerStubs, stopStubServer } from '../network/server.js';
+import { stopStubServer } from '../network/server.js';
 import { defineStub } from '../stub.js';
-import { interceptThrough } from './intercept.scope.js';
-
-/** The module-scope double as the node entry publishes it. */
-const intercept = interceptThrough(registerStubs);
+import { intercept } from './process-intercept.js';
 
 afterAll(async () => {
     await stopStubServer();
