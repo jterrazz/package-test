@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../../elements/element.port.js';
+import type { ElementRef } from '../../../elements/descriptor.js';
 
 /** The simulator a runner drives: by name (and OS), or by its UDID. */
 export type MobileDevice = {

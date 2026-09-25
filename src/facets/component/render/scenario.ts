@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../../elements/element.port.js';
+import type { ElementRef } from '../../../elements/descriptor.js';
 import type { ComponentUi, DomMount } from '../page/ui.js';
 
 /**

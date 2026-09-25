@@ -119,12 +119,7 @@ export {
     valued,
     within,
 } from './elements/elements.js';
-export type {
-    ElementKind,
-    ElementMatch,
-    ElementRef,
-    LandmarkKind,
-} from './elements/element.port.js';
+export type { ElementKind, ElementMatch, ElementRef, LandmarkKind } from './elements/descriptor.js';
 
 // ── The expectations: tokens, accessors, conditions, goldens ──
 export {

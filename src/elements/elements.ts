@@ -1,4 +1,4 @@
-import type { ElementRef } from './element.port.js';
+import type { ElementRef } from './descriptor.js';
 
 /**
  * The element vocabulary — user-facing descriptors for visit scenarios.
@@ -63,11 +63,11 @@ export const testId = (id: string): ElementRef => ({ kind: 'testId', name: id })
  * the pages carrying several of the same region (`navigation('Breadcrumb')`).
  */
 
-/** A landmark factory — the optionally-named containers `within()` accepts. */
-type LandmarkFactory = (name?: string, options?: ElementOptions) => ElementRef;
+/** A factory of an optionally-named kind — each landmark, and the five roles after them. */
+type OptionallyNamedFactory = (name?: string, options?: ElementOptions) => ElementRef;
 
-const landmark =
-    (kind: ElementRef['kind']): LandmarkFactory =>
+const optionallyNamed =
+    (kind: ElementRef['kind']): OptionallyNamedFactory =>
     (name?: string, options?: ElementOptions): ElementRef => ({
         kind,
         ...(name === undefined ? {} : { name }),
@@ -75,28 +75,28 @@ const landmark =
     });
 
 /** The `banner` landmark — the page header. */
-export const banner: LandmarkFactory = landmark('banner');
+export const banner: OptionallyNamedFactory = optionallyNamed('banner');
 
 /** The `complementary` landmark — an `<aside>`, a sidebar. */
-export const complementary: LandmarkFactory = landmark('complementary');
+export const complementary: OptionallyNamedFactory = optionallyNamed('complementary');
 
 /** The `contentinfo` landmark — the page footer. */
-export const contentinfo: LandmarkFactory = landmark('contentinfo');
+export const contentinfo: OptionallyNamedFactory = optionallyNamed('contentinfo');
 
 /** The `form` landmark — a form carrying an accessible name. */
-export const form: LandmarkFactory = landmark('form');
+export const form: OptionallyNamedFactory = optionallyNamed('form');
 
 /** The `main` landmark — the primary content of the document. */
-export const main: LandmarkFactory = landmark('main');
+export const main: OptionallyNamedFactory = optionallyNamed('main');
 
 /** The `navigation` landmark — a `<nav>`. Name it when a page has several. */
-export const navigation: LandmarkFactory = landmark('navigation');
+export const navigation: OptionallyNamedFactory = optionallyNamed('navigation');
 
 /** The `region` landmark — a `<section>` carrying an accessible name. */
-export const region: LandmarkFactory = landmark('region');
+export const region: OptionallyNamedFactory = optionallyNamed('region');
 
 /** The `search` landmark. */
-export const search: LandmarkFactory = landmark('search');
+export const search: OptionallyNamedFactory = optionallyNamed('search');
 
 /**
  * Restrict a descriptor to the inside of another — the answer to ambiguity,
@@ -122,19 +122,19 @@ export const within = (scope: ElementRef, target: ElementRef): ElementRef => ({
  */
 
 /** A modal or non-modal `<dialog>`, by accessible name. A closed one is absent. */
-export const dialog: LandmarkFactory = landmark('dialog');
+export const dialog: OptionallyNamedFactory = optionallyNamed('dialog');
 
 /** A live region announcing a result — `role="status"`, an `<output>`. */
-export const status: LandmarkFactory = landmark('status');
+export const status: OptionallyNamedFactory = optionallyNamed('status');
 
 /** A table, by its caption or accessible name. */
-export const table: LandmarkFactory = landmark('table');
+export const table: OptionallyNamedFactory = optionallyNamed('table');
 
 /** A row of a table or grid, by the text of its cells. */
-export const row: LandmarkFactory = landmark('row');
+export const row: OptionallyNamedFactory = optionallyNamed('row');
 
 /** An item of a list, by its text. Retires the `.first()` of an unnamed `<li>`. */
-export const listitem: LandmarkFactory = landmark('listitem');
+export const listitem: OptionallyNamedFactory = optionallyNamed('listitem');
 
 /**
  * An option of a select or a listbox, by its label — named inside the field

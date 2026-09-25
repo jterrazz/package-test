@@ -8,7 +8,7 @@ import {
     formatElement,
     LANDMARK_SELECTOR,
 } from '../../../elements/ambiguity.js';
-import type { ElementMatch, ElementRef } from '../../../elements/element.port.js';
+import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentVisitor } from '../render/scenario.js';
 import type { ComponentUi, DomMount } from './ui.js';

@@ -9,7 +9,7 @@ import {
     formatElement,
     LANDMARK_SELECTOR,
 } from '../../../elements/ambiguity.js';
-import type { ElementMatch, ElementRef } from '../../../elements/element.port.js';
+import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
 import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
 import type {
     BrowserConsoleMessage,

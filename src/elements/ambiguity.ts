@@ -1,5 +1,5 @@
 import { refusal } from '../kernel/refusals/refusal.js';
-import type { ElementMatch, ElementRef, LandmarkKind } from './element.port.js';
+import type { ElementMatch, ElementRef, LandmarkKind } from './descriptor.js';
 
 /**
  * The ambiguity refusal — CONVENTIONS W3.

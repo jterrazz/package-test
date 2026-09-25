@@ -59,7 +59,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/component/viewport/viewport.port.ts',
             'src/kernel/chain/chain.ts',
             'src/kernel/chain/config.ts',
-            'src/elements/element.port.ts',
+            'src/elements/descriptor.ts',
             'src/facets/website/browser/browser.port.ts',
             'src/facets/cli/process/cli.port.ts',
             'src/world/services/containers/container.port.ts',
@@ -79,7 +79,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/kernel/context/with.capability.ts',
             'src/kernel/files/artifacts.ts',
-            'src/elements/verbs.ts',
+            'src/elements/vocabulary-rows.ts',
             'src/world/services/containers/service-images.ts',
             'lint/manifest.ts',
             'lint/rule-code.ts',

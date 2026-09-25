@@ -1,7 +1,7 @@
 import type { ComponentChain, ComponentVisitor } from '../facets/component/index.js';
 import type { MobileVisitor } from '../facets/mobile/index.js';
 import type { Visitor } from '../facets/website/index.js';
-import type { ElementRef } from './element.port.js';
+import type { ElementRef } from './descriptor.js';
 
 /**
  * The verb rows of CONVENTIONS W6, held by the COMPILER.

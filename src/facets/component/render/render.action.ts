@@ -5,7 +5,7 @@ import {
     DRAWN_DESCRIPTORS,
     DRAWN_VERBS,
     WITHIN,
-} from '../../../elements/verbs.js';
+} from '../../../elements/vocabulary-rows.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';

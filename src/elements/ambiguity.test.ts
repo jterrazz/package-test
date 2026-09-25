@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { REFUSAL_WHY } from '../kernel/refusals/refusal.js';
 import { describeAmbiguity, formatElement } from './ambiguity.js';
-import type { ElementMatch } from './element.port.js';
+import type { ElementMatch } from './descriptor.js';
 import { link, main, navigation, region, within } from './elements.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({

@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../../elements/element.port.js';
+import type { ElementRef } from '../../../elements/descriptor.js';
 
 /** A `<link>` element captured from the rendered document's head. */
 export type BrowserLinkElement = {
