@@ -916,13 +916,17 @@ function slugOf(heading: string): string {
         .replaceAll(/\s/gu, '-');
 }
 
-/** Every anchor a page offers: the slug of each of its headings. */
+/** Every anchor a page offers: the slug of each of its headings, and each explicit `<a id>`. */
 function anchorsOf(text: string): Set<string> {
     const found = new Set<string>();
     for (const line of text.split('\n')) {
         const heading = /^#{1,6}\s+(?<title>.+?)\s*$/u.exec(line)?.groups?.title;
         if (heading !== undefined) {
             found.add(slugOf(heading));
+        }
+        // A catalogue row carries its own anchor, the rule id — a link may land on it.
+        for (const anchor of line.matchAll(/<a id="(?<id>[^"]+)"><\/a>/gu)) {
+            found.add(anchor.groups?.id ?? '');
         }
     }
     return found;
