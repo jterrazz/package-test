@@ -85,7 +85,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 106   |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 107   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 155   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
@@ -176,11 +176,11 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **112 modules** have no sibling test, and every one of them is claimed:
+Today **111 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                                                                                                                                                       |
 | --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| composition root or barrel (4)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                |
+| composition root or barrel (3)          | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                |
 | type-only declaration (23)              | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                    |
 | constant data (11)                      | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary) |
 | a facet's vitest project (6)            | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                                                                                                                                         |
@@ -382,7 +382,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 11     |
+| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 12     |
 | `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 11     |
 | `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
 

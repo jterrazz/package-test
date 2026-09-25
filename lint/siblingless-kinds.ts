@@ -30,12 +30,7 @@ const oneOf =
  */
 export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
-        claims: oneOf(
-            'src/index.ts',
-            'src/surface.ts',
-            'src/browser/index.ts',
-            'src/runner/index.ts',
-        ),
+        claims: oneOf('src/surface.ts', 'src/browser/index.ts', 'src/runner/index.ts'),
         name: 'composition root or barrel',
         why: 'it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry',
     },
