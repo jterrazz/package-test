@@ -4,7 +4,7 @@ import { parseRequestFile } from '../../../expectations/http/http-file.js';
 import { dedent } from '../../../expectations/text/dedent.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { SliceReader } from '../../../kernel/chain/action.js';
-import type { MatrixRow, Run } from '../../../kernel/chain/capability.js';
+import type { ChainSignature, MatrixRow, Run } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { resolveSpecPath } from '../../../kernel/files/resolve.js';
 import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../kernel/files/spec-path.js';
@@ -13,7 +13,7 @@ import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';
 import { params } from './params.capability.js';
 import { routeRequest } from './route.js';
-import type { RouteOptionsAny } from './route.js';
+import type { RouteArguments, RouteOptionsAny } from './route.js';
 
 /** The app a request is sent to — the one its constructor was handed. */
 type Needs = { server: ServerPort };
@@ -85,6 +85,36 @@ async function send(
     return new HttpResult({ config, response, testDir });
 }
 
+/** What the request family puts on a chain: one HTTP exchange each. */
+export type RequestSignature = ChainSignature & {
+    readonly chain: {
+        /** Send a DELETE request to a route — `(template, { params })` — and resolve with the result. */
+        delete: <Path extends string>(
+            path: Path,
+            ...options: RouteArguments<Path>
+        ) => Promise<HttpResult>;
+        /** Send a GET request to a route — `(template, { params })` — and resolve with the result. */
+        get: <Path extends string>(
+            path: Path,
+            ...options: RouteArguments<Path>
+        ) => Promise<HttpResult>;
+        /** Send a POST request — the body a value or a `file()` — and resolve with the result. */
+        post: <Path extends string>(
+            path: Path,
+            body?: unknown,
+            ...options: RouteArguments<Path>
+        ) => Promise<HttpResult>;
+        /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
+        put: <Path extends string>(
+            path: Path,
+            body?: unknown,
+            ...options: RouteArguments<Path>
+        ) => Promise<HttpResult>;
+        /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
+        request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
+    };
+};
+
 /**
  * `.request(source)`: send a complete request — first line `METHOD /path`,
  * then headers until a blank line, then the body — written in the test
@@ -94,6 +124,7 @@ export const request = defineAction<
     'request',
     [source: DiskFile<'.http'> | string],
     HttpResult,
+    RequestSignature,
     Needs
 >({
     accessors: ACCESSORS,
@@ -126,6 +157,7 @@ export const get = defineAction<
     'get',
     [path: string, options?: RouteOptionsAny],
     HttpResult,
+    RequestSignature,
     Needs
 >({
     accessors: ACCESSORS,
@@ -145,6 +177,7 @@ export const post = defineAction<
     'post',
     [path: string, body?: unknown, options?: RouteOptionsAny],
     HttpResult,
+    RequestSignature,
     Needs
 >({
     accessors: ACCESSORS,
@@ -169,6 +202,7 @@ export const put = defineAction<
     'put',
     [path: string, body?: unknown, options?: RouteOptionsAny],
     HttpResult,
+    RequestSignature,
     Needs
 >({
     accessors: ACCESSORS,
@@ -193,6 +227,7 @@ export const del = defineAction<
     'delete',
     [path: string, options?: RouteOptionsAny],
     HttpResult,
+    RequestSignature,
     Needs
 >({
     accessors: ACCESSORS,

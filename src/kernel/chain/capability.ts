@@ -32,6 +32,21 @@ export type FacetParams = {
     readonly services: Record<string, unknown>;
 };
 
+/**
+ * The methods a definition puts on a chain, as a function of the chain a
+ * setup hands back (`self`) and the facet's parameters (`params`). Each
+ * definition declares its own beside itself — an interface extending this one
+ * whose `chain` names its methods over `this['self']` and `this['params']` —
+ * and `ChainOf` fills both in, so a facet's chain type is COMPUTED from the
+ * definitions it composes while the kernel names none of their methods.
+ */
+// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name: a facet fills `self` and `params` in by intersecting it
+export interface ChainSignature {
+    readonly chain: object;
+    readonly params: FacetParams;
+    readonly self: unknown;
+}
+
 /** What an armed effect leaves behind until the action settles. */
 export type Armed = {
     /** Undo the effect. Released in reverse arm order; an engine may defer the undo to the test's end. */
@@ -60,14 +75,16 @@ export type SetupContext<Needs, Config extends ChainConfig = ChainConfig> = {
  *
  * `Needs` names the engines it is armed through, by port key
  * (`{ network: InterceptPort }`); the facet hands them in, so a definition knows
- * its port and never an adapter. `Context` is the `with()` key a file states it
- * by, for the three settings a file may share. `Config` is the configuration
- * it reads, declared by its owner over the kernel's `ChainConfig`.
+ * its port and never an adapter. `Signature` is the method it puts on a
+ * chain. `Context` is the `with()` key a file states it by, for the three
+ * settings a file may share. `Config` is the configuration it reads, declared
+ * by its owner over the kernel's `ChainConfig`.
  */
 export type Capability<
     Name extends string,
     Slice,
     Args extends readonly unknown[],
+    Signature extends ChainSignature = ChainSignature,
     Needs extends object = Record<never, never>,
     Context extends ContextKey = never,
     Config extends ChainConfig = ChainConfig,
@@ -80,6 +97,8 @@ export type Capability<
     /** Arm order across the setups of a chain: seed 10, fixture 20, viewport 30, intercept 40, clock 50. */
     readonly phase: number;
     readonly row: MatrixRow;
+    /** The method it puts on a chain — a type alone, never set: what `ChainOf` reads. */
+    readonly signature?: Signature;
     /**
      * The effect before the action, through the engines alone. Absent when an
      * action reads the slice instead.
@@ -96,7 +115,14 @@ export type Capability<
 };
 
 /** Any setup, whatever it holds — what a composition lists. */
-export type AnyCapability = Capability<string, unknown, readonly unknown[], object, ContextKey>;
+export type AnyCapability = Capability<
+    string,
+    unknown,
+    readonly unknown[],
+    ChainSignature,
+    object,
+    ContextKey
+>;
 
 /** An argument an action takes beside its subject rather than a setup of the chain — `{ params }`. */
 export type ActionOption<Name extends string> = {
@@ -113,11 +139,12 @@ export function defineCapability<
     const Name extends string,
     Slice,
     const Args extends readonly unknown[],
+    Signature extends ChainSignature = ChainSignature,
     Needs extends object = Record<never, never>,
     const Context extends ContextKey = never,
     Config extends ChainConfig = ChainConfig,
 >(
-    definition: Omit<Capability<Name, Slice, Args, Needs, Context, Config>, 'kind'>,
-): Capability<Name, Slice, Args, Needs, Context, Config> {
+    definition: Omit<Capability<Name, Slice, Args, Signature, Needs, Context, Config>, 'kind'>,
+): Capability<Name, Slice, Args, Signature, Needs, Context, Config> {
     return { ...definition, kind: 'setup' };
 }

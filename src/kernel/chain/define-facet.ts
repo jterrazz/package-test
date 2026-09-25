@@ -22,9 +22,16 @@ export type Composition = {
 
 /** The engines one definition performs through, by port key. */
 type NeedsOf<Member> =
-    Member extends Capability<string, infer _Slice, infer _Args, infer Needs, infer _Context>
+    Member extends Capability<
+        string,
+        infer _Slice,
+        infer _Args,
+        infer _Signature,
+        infer Needs,
+        infer _Context
+    >
         ? Needs
-        : Member extends Action<string, infer _Args, infer _Result, infer Needs>
+        : Member extends Action<string, infer _Args, infer _Result, infer _Signature, infer Needs>
           ? Needs
           : unknown;
 

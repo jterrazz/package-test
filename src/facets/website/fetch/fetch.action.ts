@@ -1,8 +1,17 @@
 import { defineAction } from '../../../kernel/chain/action.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
+
+/** What `.fetch()` puts on a chain. */
+export type FetchSignature = ChainSignature & {
+    readonly chain: {
+        /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
+        fetch: (path: string) => Promise<FetchResult>;
+    };
+};
 
 /**
  * `.fetch(path)`: one raw HTTP GET against the site under test — redirects
@@ -13,6 +22,7 @@ export const rawFetch = defineAction<
     'fetch',
     [path: string],
     FetchResult,
+    FetchSignature,
     Record<never, never>,
     WebsiteConfig
 >({

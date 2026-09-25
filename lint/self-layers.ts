@@ -50,12 +50,6 @@ export const FRAMEWORK_LAYERS = {
             refusals: [],
         },
         imports: ['kernel/'],
-        // PENDING the restructure's follow-ups: each edge below leaves with
-        // The commit that moves its type to its owner.
-        seams: {
-            'kernel/chain/action-signatures.ts': ['facets/', 'elements/', 'expectations/'],
-            'kernel/chain/setup-signatures.ts': ['world/', 'facets/'],
-        },
     },
     // What surrounds the subject, controlled by the test: the kernel only, each
     // Area its engine.

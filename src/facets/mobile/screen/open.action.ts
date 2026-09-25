@@ -1,8 +1,21 @@
 import { DRAWN_DESCRIPTORS, DRAWN_VERBS, OWN_VERBS, WITHIN } from '../../../elements/rows.js';
 import { defineAction } from '../../../kernel/chain/action.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import type { MobileScenario } from '../device/device.port.js';
 import type { AppPort } from './open.port.js';
 import { ScreenResult } from './screen.result.js';
+
+/** What `.open()` puts on a chain. */
+export type OpenSignature = ChainSignature & {
+    readonly chain: {
+        /**
+         * Relaunch the app and resolve with the captured screen. With a deep
+         * link, the app opens on it; with a scenario, the visitor interacts
+         * first (the When) and the capture reflects the FINAL screen state.
+         */
+        open: (deepLink?: string, scenario?: MobileScenario) => Promise<ScreenResult>;
+    };
+};
 
 /**
  * `.open(deepLink?, scenario?)`: relaunch the app from a fresh state, apply
@@ -13,6 +26,7 @@ export const open = defineAction<
     'open',
     [deepLink?: string, scenario?: MobileScenario],
     ScreenResult,
+    OpenSignature,
     { app: AppPort }
 >({
     accessors: [

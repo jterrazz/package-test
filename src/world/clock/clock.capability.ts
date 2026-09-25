@@ -1,9 +1,25 @@
 import { defineCapability } from '../../kernel/chain/capability.js';
+import type { ChainSignature } from '../../kernel/chain/capability.js';
 import type { ClockPort } from './clock.port.js';
 import { instantOf } from './instant.js';
 
 /** `.clock(iso)`, handing back the chain it was called on. */
 export type ClockMethod<Self> = (iso: string) => Self;
+
+/** What `.clock()` puts on a chain, handing back the chain it was called on. */
+export type ClockChain<Self> = {
+    /**
+     * Pin `Date` at `iso` for this chain: this process's own for an app, a job
+     * or a module run in it, the page's for a visit or a render.
+     */
+    clock: ClockMethod<Self>;
+};
+
+/** The signature `ChainOf` reads off `clock`. */
+// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
+export interface ClockSignature extends ChainSignature {
+    readonly chain: ClockChain<this['self']>;
+}
 
 /**
  * `.clock(iso)`: the instant the subject's calendar reads for this chain. The
@@ -18,6 +34,7 @@ export const clock = defineCapability<
     'clock',
     null | string,
     [iso: string],
+    ClockSignature,
     { clock: ClockPort },
     'clock'
 >({

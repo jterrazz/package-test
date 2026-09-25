@@ -1,4 +1,5 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import type { ServiceHandle } from '../../../world/services/service.port.js';
 import { toConstantCase } from '../../../world/services/startup/binding.js';
 import type { CliConfig } from '../cli.handle.js';
@@ -7,13 +8,32 @@ import type { CliEnv } from './cli.port.js';
 /** `.env(record)`, handing back the chain it was called on. */
 export type EnvMethod<Self> = (env: CliEnv) => Self;
 
+/** What `.env()` puts on a chain, handing back the chain it was called on. */
+export type EnvChain<Self> = {
+    /** Set environment variables on the child process. `$WORKDIR` expands; `null` unsets. */
+    env: EnvMethod<Self>;
+};
+
+/** The signature `ChainOf` reads off `env`. */
+// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
+export interface EnvSignature extends ChainSignature {
+    readonly chain: EnvChain<this['self']>;
+}
+
 /**
  * `.env(record)`: the variables every child of the chain starts with, on top
  * of `process.env` — `null` unsets one, `$WORKDIR` expands to the working
  * directory in its resolved form. Chained calls merge, a later one winning.
  * Read by the actions that start a child; there is nothing to arm.
  */
-export const env = defineCapability<'env', CliEnv, [env: CliEnv], Record<never, never>, 'env'>({
+export const env = defineCapability<
+    'env',
+    CliEnv,
+    [env: CliEnv],
+    EnvSignature,
+    Record<never, never>,
+    'env'
+>({
     context: 'env',
     initial: {},
     name: 'env',

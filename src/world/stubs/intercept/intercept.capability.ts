@@ -1,4 +1,5 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange/exchange.js';
 import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
@@ -11,6 +12,18 @@ import type { InterceptPort } from './intercept.port.js';
 export type InterceptMethod<Self> = ((stubs: StubInput) => Self) &
     ((request: StubRequest, response: StubResponder | StubResponse) => Self);
 
+/** What `.intercept()` puts on a chain, handing back the chain it was called on. */
+export type InterceptChain<Self> = {
+    /** Declare outgoing calls — a stub, a list, a composite, or an inline request + response pair. */
+    intercept: InterceptMethod<Self>;
+};
+
+/** The signature `ChainOf` reads off `intercept`. */
+// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
+export interface InterceptSignature extends ChainSignature {
+    readonly chain: InterceptChain<this['self']>;
+}
+
 /**
  * `.intercept(…)`: the outgoing calls this chain expects, and what they reply
  * (CONVENTIONS D7). Calls append; composition and overriding live in
@@ -21,6 +34,7 @@ export const intercept = defineCapability<
     'intercept',
     readonly Stub[],
     [requestOrStubs: StubInput | StubRequest, response?: StubResponder | StubResponse],
+    InterceptSignature,
     { network: InterceptPort }
 >({
     arm: async (stubs, { network }) => await network.arm(stubs),

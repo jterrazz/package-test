@@ -1,4 +1,5 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { validateDatabaseOption } from '../../../kernel/chain/database-option.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
@@ -17,6 +18,18 @@ export type SeedMethod<Self, DatabaseKey extends string> = (
 /** One queued seed: the file, relative to the test, and the database it names. */
 type QueuedSeed = { readonly database: string | undefined; readonly path: string };
 
+/** What `.seed()` puts on a chain: the database it names is one the facet's services record declares. */
+export type SeedChain<Self, DatabaseKey extends string> = {
+    /** Queue a SQL seed — `file('./seeds/<name>.sql')` — to run before the action. */
+    seed: SeedMethod<Self, DatabaseKey>;
+};
+
+/** The signature `ChainOf` reads off `seed`. */
+// oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
+export interface SeedSignature extends ChainSignature {
+    readonly chain: SeedChain<this['self'], this['params']['databaseKey']>;
+}
+
 /**
  * `.seed(file, { database })`: a SQL file run before the action, after every
  * declared database is emptied. The path and the `database` option are judged
@@ -27,6 +40,7 @@ export const seed = defineCapability<
     'seed',
     readonly QueuedSeed[],
     [source: SeedSource, options?: { database?: string }],
+    SeedSignature,
     { databases: SeedPort },
     never,
     ServicesConfig

@@ -3,6 +3,7 @@ import { relative } from 'node:path';
 import { CLI_RESULT_ROWS } from '../../../expectations/command/cli.result.js';
 import type { CliResult } from '../../../expectations/command/cli.result.js';
 import { defineAction } from '../../../kernel/chain/action.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { resolveSpecPath, safeRealpath } from '../../../kernel/files/resolve.js';
 import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
@@ -11,6 +12,20 @@ import type { CliConfig } from '../cli.handle.js';
 import { env as chainEnv, childEnv } from '../process/env.capability.js';
 import { runSpecDocument } from './literate.js';
 import type { LiterateRunFlags } from './literate.js';
+
+/** What `.run()` puts on a chain. */
+export type RunSignature = ChainSignature & {
+    readonly chain: {
+        /**
+         * Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
+         * servers) and every run, each asserted — and resolve with the LAST run's
+         * result, so a `.test.ts` can add an assertion the document cannot express
+         * (a directory golden, a grep). The document is named with `file()`, from
+         * the test file beside it.
+         */
+        run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<CliResult>;
+    };
+};
 
 /**
  * `.run(file('./<case>.spec.yaml'))`: run a document — its ground and every
@@ -23,6 +38,7 @@ export const run = defineAction<
     'run',
     [document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags],
     CliResult,
+    RunSignature,
     Record<never, never>,
     CliConfig
 >({

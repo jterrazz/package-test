@@ -9,6 +9,7 @@ import {
     WITHIN,
 } from '../../../elements/rows.js';
 import { defineAction } from '../../../kernel/chain/action.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
@@ -16,6 +17,18 @@ import { PageResult } from './page.result.js';
 
 /** The worker's one browser, launched on the first visit that asks for it. */
 type Needs = { browser: () => Promise<BrowserPort> };
+
+/** What `.visit()` puts on a chain. */
+export type VisitSignature = ChainSignature & {
+    readonly chain: {
+        /**
+         * Render the page in the shared browser and resolve with the captured
+         * document. With a scenario, the visitor interacts first (the When) and
+         * the capture reflects the FINAL page state.
+         */
+        visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
+    };
+};
 
 /**
  * `.visit(path, scenario)`: render the page in the shared browser and resolve
@@ -27,6 +40,7 @@ export const visit = defineAction<
     'visit',
     [path: string, scenario?: VisitScenario],
     PageResult,
+    VisitSignature,
     Needs,
     WebsiteConfig
 >({

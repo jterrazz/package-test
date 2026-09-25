@@ -9,6 +9,7 @@ import {
 } from '../../../elements/rows.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { defineAction } from '../../../kernel/chain/action.js';
+import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { wrap } from '../page/wrap.capability.js';
 import { recordConsole } from './console-recorder.js';
 import type { PagePort } from './page.port.js';
@@ -79,6 +80,14 @@ async function mount(
     };
 }
 
+/** What `.render()` puts on a chain. */
+export type RenderSignature = ChainSignature & {
+    readonly chain: {
+        /** Mount the subject, run the scenario, and capture what the page shows. */
+        render: (subject: RenderSubject, scenario?: ComponentScenario) => Promise<RenderResult>;
+    };
+};
+
 /**
  * `.render(subject, scenario?)`: mount the subject, run the scenario (the
  * When), and capture what the page shows. A second render in one test
@@ -92,6 +101,7 @@ export const render = defineAction<
     'render',
     [subject: RenderSubject, scenario?: ComponentScenario],
     RenderResult,
+    RenderSignature,
     { page: PagePort }
 >({
     accessors: [

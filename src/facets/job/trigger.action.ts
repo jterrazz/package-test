@@ -1,15 +1,31 @@
 import { BaseResult } from '../../expectations/result.js';
 import { defineAction } from '../../kernel/chain/action.js';
+import type { ChainSignature } from '../../kernel/chain/capability.js';
 import type { Job } from './job.handle.js';
+import type { JobResult } from './job.result.js';
 
 /** The jobs a chain may trigger — the `jobs` option of `specification.job()`, as started. */
 export type JobsPort = readonly Job[];
+
+/** What `.trigger()` puts on a chain. */
+export type TriggerSignature = ChainSignature & {
+    readonly chain: {
+        /** Execute the named job registered via the `jobs` option and resolve with the result. */
+        trigger: (name: string) => Promise<JobResult>;
+    };
+};
 
 /**
  * `.trigger(name)`: run the named job in this process and resolve with what
  * reads its effects — the databases, never a working directory.
  */
-export const trigger = defineAction<'trigger', [name: string], BaseResult, { jobs: JobsPort }>({
+export const trigger = defineAction<
+    'trigger',
+    [name: string],
+    BaseResult,
+    TriggerSignature,
+    { jobs: JobsPort }
+>({
     accessors: [
         { group: 'Result accessor', member: 'table', name: '.table()', probe: 'result.table(' },
     ],

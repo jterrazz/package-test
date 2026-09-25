@@ -1,4 +1,4 @@
-import type { ActionOption, MatrixRow, Run } from './capability.js';
+import type { ActionOption, ChainSignature, MatrixRow, Run } from './capability.js';
 import type { ChainConfig } from './config.js';
 
 /** Read a setup's slice by its definition — the one way an action sees what the chain was told. */
@@ -9,14 +9,15 @@ export type SliceReader = <Slice>(capability: {
 
 /**
  * A terminal action a chain ends on, defined once for every facet that
- * composes it. `Needs` names the engines it performs through, by port key;
- * `Config` is the configuration it reads, declared by its owner over the
- * kernel's `ChainConfig`.
+ * composes it. `Signature` is the method it puts on a chain; `Needs` names
+ * the engines it performs through, by port key; `Config` is the configuration
+ * it reads, declared by its owner over the kernel's `ChainConfig`.
  */
 export type Action<
     Name extends string,
     Args extends readonly unknown[],
     Result,
+    Signature extends ChainSignature = ChainSignature,
     Needs extends object = Record<never, never>,
     Config extends ChainConfig = ChainConfig,
 > = {
@@ -29,6 +30,8 @@ export type Action<
     /** The arguments it takes beside its subject, each the matrix row it states. */
     readonly options?: readonly ActionOption<string>[];
     readonly row: MatrixRow;
+    /** The method it puts on a chain — a type alone, never set: what `ChainOf` reads. */
+    readonly signature?: Signature;
     /** The rows of the verbs its visitor hands a scenario, for an action that drives one. */
     readonly verbs?: readonly MatrixRow[];
     /**
@@ -45,17 +48,18 @@ export type Action<
 };
 
 /** Any action, whatever it takes and hands back — what a composition lists. */
-export type AnyAction = Action<string, readonly unknown[], unknown, object>;
+export type AnyAction = Action<string, readonly unknown[], unknown, ChainSignature, object>;
 
 /** Define a terminal action; the definition is its own runtime value. */
 export function defineAction<
     const Name extends string,
     const Args extends readonly unknown[],
     Result,
+    Signature extends ChainSignature = ChainSignature,
     Needs extends object = Record<never, never>,
     Config extends ChainConfig = ChainConfig,
 >(
-    definition: Omit<Action<Name, Args, Result, Needs, Config>, 'kind'>,
-): Action<Name, Args, Result, Needs, Config> {
+    definition: Omit<Action<Name, Args, Result, Signature, Needs, Config>, 'kind'>,
+): Action<Name, Args, Result, Signature, Needs, Config> {
     return { ...definition, kind: 'action' };
 }
