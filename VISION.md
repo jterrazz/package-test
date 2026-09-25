@@ -3579,3 +3579,44 @@ Minors carried from the reviews:
 - U4 changes the order of the viewport restore and the console recorder.
 - U5's I6/I7 walker has known gaps: a tagged template, an assignment, and
   the `capabilities.reduce` false positive.
+
+## Architecture migration, integrated (2026-09-25): test, S6 — gates RED on I8
+
+S6, the seal (branch HEAD `159668ad`), was cherry-picked onto `vision/17`
+with no merge commit and no fixup to fold. HEAD before this entry is
+`c01c42f5`. There were no conflicts. `npm run docs` (exit 0) and
+`make fix` (exit 0) left the tree unchanged. The review allowed dropping
+`ef1e665d`, the formatter's blank lines in VISION.md, but it is kept:
+`make fix` writes the same two lines, and the format pass needs them.
+**`make check` exit 2**: 1 test fails out of 2707, and 605 of 606 files
+pass. Before S6, three tests failed.
+
+S6 settles I6, I7 and the compositions list from the U5 and U1–U4
+conflict. One conflict is still open, **for the owner**:
+
+- I8 finds no sibling test beside `capabilities/headers`,
+  `actions/fetch` or `actions/render`. Meanwhile
+  `lint/siblingless-kinds.ts` claims all three are proven by specs, so the
+  two self gates contradict each other. No filler test was written. For
+  `render`, a real test under node needs `vi.stubGlobal`, which the lint
+  forbids, and E5 forbids a simulated DOM. A possible way out is to put
+  the console recorder's `addEventListener` behind the page port. Decide
+  which gate gives way. Until then, `vision/17` is red on this one test.
+
+Minors carried from the review:
+
+- The final I1 map in `lint/self-layers.ts` keeps three edges that plan
+  §4.4 drops: `model → results/`, `facets → results/` (the handles'
+  `createDockerReader`) and `seams → results/text`. The code still takes
+  them. Either record this as a plan correction, or add a follow-up that
+  moves the docker reader and the golden comparison behind a port.
+- The U2 cast in `src/facets/integration/integration.handle.ts` is still
+  there, and no decision records a generic `open<Self>`.
+- The component node stub is an object literal typed `ComponentChain`. It
+  is not built through `refusing<ComponentChain>()`.
+- The `baseUrl` guards in `.visit()` and `.fetch()` stay. Q11 covers
+  adapter guards, and `baseUrl` is not an engine.
+- `make test-mobile` was not run. It needs Xcode and a simulator.
+
+The S6 worktree and branch are removed. The U1–U5 worktrees are kept, as
+the previous entry decided.
