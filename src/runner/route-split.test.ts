@@ -5,7 +5,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { ROUTES_DIR, shardLedgersDir, writeLedger } from '../model/routes/routes.js';
 import type { Route } from '../model/routes/routes.js';
-import { judgeSplit } from './route-split.js';
+import { judgeSplit, NO_SHARD_LEDGERS } from './route-split.js';
 
 /** A green merge, judged. */
 const GREEN = { failed: 0, update: false };
@@ -75,6 +75,16 @@ describe('judgeSplit() — the route ratchet of a split run, judged at its merge
         await expect(judgeSplit(root, GREEN)).resolves.toStrictEqual({
             failure:
                 'api routes: 2 declared route(s) no test reached, the ratchet holds 0 — send each from a spec, or record them with TEST_UPDATE=1:\n  GET /users/:id\n  DELETE /users/:id',
+        });
+    });
+
+    test("fails a merge that finds no shard's ledgers, rather than passing it unjudged", async () => {
+        // Given - a split whose shard folders a whole run emptied, its own ledger left beside them
+        const root = splitRun();
+
+        // Then - the merge names what it lacks and the way to get it
+        await expect(judgeSplit(root, GREEN)).resolves.toStrictEqual({
+            failure: NO_SHARD_LEDGERS,
         });
     });
 });
