@@ -157,7 +157,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/component/golden/golden.ts',
             'src/facets/component/page/page.engine.ts',
             'src/facets/component/page/page-runtime.ts',
-            'src/facets/component/page/ui.ts',
             'src/facets/component/page/vitest-browser.adapter.ts',
             'src/facets/component/viewport/viewport.engine.ts',
         ),

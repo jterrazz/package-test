@@ -1,5 +1,21 @@
+import type { ReactNode } from 'react';
+
 import type { ElementRef } from '../../../elements/descriptor.js';
-import type { ComponentUi, DomMount } from '../page/ui.js';
+
+/**
+ * What a component test hands to `.render()` as a React tree. `react` is an
+ * optional peer: a project that specifies no component installs none, and
+ * `skipLibCheck` — which every `@jterrazz/typescript` profile sets — keeps the
+ * unresolved type off its build.
+ */
+export type ComponentUi = ReactNode;
+
+/**
+ * A vanilla DOM subject: a function handed the container it must fill. Its
+ * optional return is the teardown, the way a DOM library states one.
+ */
+// oxlint-disable-next-line typescript/no-invalid-void-type -- `void` in the union IS the shape: a mount with nothing to tear down is written with no `return` at all, which is what a DOM library's own signature says
+export type DomMount = (container: HTMLElement) => (() => void) | void;
 
 /**
  * The interaction vocabulary a render scenario is handed — the When: the verbs

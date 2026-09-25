@@ -1,4 +1,4 @@
-import type { ComponentUi, DomMount } from '../page/ui.js';
+import type { ComponentUi, DomMount } from './scenario.js';
 import type { ComponentVisitor } from './scenario.js';
 
 /** What a mounted subject offers the chain, React or vanilla DOM alike. */

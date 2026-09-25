@@ -1,6 +1,6 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import type { ComponentUi } from '../page/ui.js';
+import type { ComponentUi } from './scenario.js';
 
 /** What dresses a React tree before it is mounted. */
 type Wrapper = (ui: ComponentUi) => ComponentUi;

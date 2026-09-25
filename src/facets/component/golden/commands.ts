@@ -85,6 +85,30 @@ export const inPlaceWrite: BrowserCommand<[string, string], string> = (context, 
 
 /**
  * The commands, as `component()` registers them — one list, so the names the
- * page calls and the names the project registers cannot drift.
+ * page calls and the names the project registers cannot drift: the page's
+ * `server.commands` type below is computed from it.
  */
 export const COMPONENT_COMMANDS = { ariaTree, goldenRead, goldenWrite, inPlaceWrite };
+
+/** The page's side of a command: its arguments without the context, its result awaited. */
+type PageSide<Command> =
+    Command extends BrowserCommand<infer Args, infer Result>
+        ? (...args: Args) => Promise<Awaited<Result>>
+        : never;
+
+/** Every registered command, as the page calls it. */
+type PageCommands = {
+    [Name in keyof typeof COMPONENT_COMMANDS]: PageSide<(typeof COMPONENT_COMMANDS)[Name]>;
+};
+
+/*
+ * A `declare module` merges only as an interface, and only from a file that is
+ * itself a module and part of the program — a lone `.d.ts` would have to be
+ * pulled in by an empty import, and its single `export {}` is exactly what a
+ * formatter is free to drop, turning the augmentation into an ambient
+ * declaration that SHADOWS the module it meant to extend.
+ */
+declare module 'vitest/browser' {
+    // oxlint-disable-next-line typescript/consistent-type-definitions, typescript/no-empty-interface, typescript/no-empty-object-type -- `BrowserCommands` is vitest's own interface: only an interface merges into it, and it extends the computed list rather than restating it
+    interface BrowserCommands extends PageCommands {}
+}

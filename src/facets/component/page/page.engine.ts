@@ -1,6 +1,6 @@
 import type { PagePort } from '../render/page.port.js';
+import type { ComponentUi } from '../render/scenario.js';
 import { afterThisTest, projectWrapper } from './page-runtime.js';
-import type { ComponentUi } from './ui.js';
 import type { ariaTree, componentVerbs, mountDom, mountReact } from './vitest-browser.adapter.js';
 
 /** What a render reaches through the adapter. */

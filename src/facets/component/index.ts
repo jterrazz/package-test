@@ -5,4 +5,4 @@ export { component } from './component.handle.js';
 export type { RenderResult } from './render/render.result.js';
 export type { RenderedText } from './render/rendered-text.js';
 export type { ComponentScenario, ComponentVisitor, RenderSubject } from './render/scenario.js';
-export type { ComponentUi, DomMount } from './page/ui.js';
+export type { ComponentUi, DomMount } from './render/scenario.js';
