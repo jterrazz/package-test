@@ -48,7 +48,7 @@ describe('component', () => {
         // Given - the project's browser block
         const project = testOf(await component());
 
-        // Then - the three things a page cannot do for itself are reachable from it
+        // Then - the four things a page cannot do for itself are reachable from it
         expect(Object.keys(project.browser?.commands ?? {}).toSorted()).toStrictEqual([
             'ariaTree',
             'goldenRead',
