@@ -77,7 +77,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/facets/api/request/params.capability.ts',
             'src/kernel/context/with.capability.ts',
             'src/kernel/files/artifacts.ts',
             'src/elements/rows.ts',

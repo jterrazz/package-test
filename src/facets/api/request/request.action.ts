@@ -11,8 +11,7 @@ import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../kernel/fi
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
 import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';
-import { params } from './params.capability.js';
-import { routeRequest } from './route.js';
+import { params, routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
 
 /** The app a request is sent to — the one its constructor was handed. */

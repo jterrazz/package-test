@@ -1,3 +1,4 @@
+import type { ActionOption } from '../../../kernel/chain/capability.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 
 /**
@@ -10,6 +11,17 @@ import { refusal } from '../../../kernel/refusals/refusal.js';
  * filled, each value URI-encoded. A path with no `:name` segment is sent as
  * written, and handing it `{ params: {} }` states that it IS the route.
  */
+
+/**
+ * `{ params }`: the values of a route template's parameters, handed to a
+ * request beside the template it names — the option the request actions
+ * declare, filled and refused below.
+ */
+export const params: ActionOption<'params'> = {
+    kind: 'option',
+    name: 'params',
+    row: { group: 'Route option', member: 'params', name: '{ params }', probe: 'params:' },
+};
 
 /** The parameter names a route template holds: `/events/:id/timeline?x=1` → `'id'`. */
 export type RouteParamNames<Path extends string> = Path extends `${infer Route}?${string}`
@@ -41,9 +53,9 @@ const PARAMETER = /^:(?<name>[A-Za-z_$][\w$]*)$/u;
 
 /** The call a refusal tells the test to write: the template, handed a value per parameter. */
 function callWith(method: string, template: string, names: readonly string[]): string {
-    const params =
+    const values =
         names.length === 0 ? '{}' : `{ ${names.map((name) => `${name}: …`).join(', ')} }`;
-    return `.${method.toLowerCase()}(${JSON.stringify(template)}, { params: ${params} })`;
+    return `.${method.toLowerCase()}(${JSON.stringify(template)}, { params: ${values} })`;
 }
 
 /**
@@ -56,13 +68,13 @@ export function routeRequest(
     template: string,
     options?: RouteOptionsAny,
 ): RouteRequest {
-    const params = options?.params;
+    const values = options?.params;
     const [route = '', ...query] = template.split('?');
     const names = route
         .split('/')
         .map((segment) => PARAMETER.exec(segment)?.groups?.name)
         .filter((name) => name !== undefined);
-    if (params === undefined) {
+    if (values === undefined) {
         if (names.length > 0) {
             throw new TypeError(
                 refusal('b12-route-params-runtime', {
@@ -73,8 +85,8 @@ export function routeRequest(
         }
         return { path: template };
     }
-    const missing = names.filter((name) => !Object.hasOwn(params, name));
-    const extra = Object.keys(params).filter((name) => !names.includes(name));
+    const missing = names.filter((name) => !Object.hasOwn(values, name));
+    const extra = Object.keys(values).filter((name) => !names.includes(name));
     if (missing.length > 0 || extra.length > 0) {
         const told = [
             ...missing.map((name) => `:${name} has no value`),
@@ -91,7 +103,7 @@ export function routeRequest(
         .split('/')
         .map((segment) => {
             const name = PARAMETER.exec(segment)?.groups?.name;
-            return name === undefined ? segment : encodeURIComponent(String(params[name]));
+            return name === undefined ? segment : encodeURIComponent(String(values[name]));
         })
         .join('/');
     return { path: [filled, ...query].join('?'), template };
