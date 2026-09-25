@@ -3465,3 +3465,55 @@ removed.
       not a leak; optionally run each bin over the F7 fixtures too.
 
 Audience batch, integrated (2026-09-25): intelligence
+
+## Architecture migration, integrated (2026-09-25): test, S0
+
+One step of the @jterrazz/test architecture migration landed on
+package-test's `vision/17`, cut from `5cc2114d`: step S0, the skeleton.
+Its 8 commits were cherry-picked in order with no conflict, no fixup to
+fold and no merge commit. `npm run docs` exit 0 and `make fix` exit 0
+left no generated file to regenerate. `make check` exit 0 (580 files,
+2655 tests). HEAD before this entry is `e88bf7a8`. The worktree
+`pt-arch-s0` and the branch `vision17-test-arch-s0` are removed.
+
+- **S0, the skeleton** (branch HEAD `f4b93a16`). Integrated after its
+  review, which found nothing major. What the step left undone:
+    - The stubBackend InterceptPort adapter (plan step 5) is not built.
+      Nothing uses it until U1/U3, and an unused export fails knip.
+    - `JobHandle` stays in src/model/chain/config.ts, because
+      SpecificationConfig names it and model/ may not import actions/.
+    - builder.test.ts cases stay in place. They cover the builder, which
+      still serves api, cli, integration, website and mobile until S6.
+    - Plan §7 R6 is not pinned: no module test shows that loading
+      src/index.ts does not load msw/node.
+- Eight minor findings stay open:
+    - The default type argument prints differently:
+      `JobsSpecification<string>` where vision/17 printed
+      `JobsSpecification`. Record it in the plan's R1 note, or pin it with
+      a type-channel row.
+    - lint/self-layers.ts gives all of `model/` a `results/` edge. Narrow
+      it to seams for model/chain/builder.ts and
+      model/goldens/matchers.ts. **S6 decision:** matchers.ts imports
+      accessors as values, and the final §4.4 map has no model→results
+      edge. Either move the accessor comparison or declare the edge.
+    - capabilities/intercept/intercept.scope.ts imports a type from
+      seams/msw/handlers.js, against K-arch-2. Declare
+      `ContractRegistration` as a port type on the capability side, or
+      let S6 decide it with the `.wrap()` gap.
+    - R6 is not pinned (see above). Add a module test that imports the
+      node entry in a fresh module graph and asserts msw/node is not
+      loaded.
+    - The seed effect has two live definitions: builder.executeSetup and
+      seams/fs/database-set.ts. databaseSet's two refusals have no test
+      of their own. Add a sibling test before builder.test goes in S6.
+    - Doc drift: docs/19-linting.md:535 does not list the
+      `src/seams/vitest/**` F2 exemption. The docs/01 claim that the
+      runner is named in "exactly TWO places" is no longer true. The
+      SharingOf JSDoc example names `api.with({ clock })` on `jobs.with`,
+      and `jobs.clock` reads "the subject's".
+    - Only specs/jobs/clock/branch.spec.ts has its regression stated in
+      the commit body. Hold the next units to one line per spec.
+    - Disclosed behaviour change: a clock refused while arming now
+      releases the msw handlers armed before it (pinned in
+      perform.test.ts). It has no owner Q. Accepted unless the owner wants
+      it listed with Q1/Q2.
