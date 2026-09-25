@@ -3670,3 +3670,40 @@ Release notes: the declared type of `JsonAccessor`'s constructor is now
 `Contract` names in favour of `Stub`.
 
 The arch-post and stubs-rename worktrees and branches are removed.
+
+## Architecture migration, integrated (2026-09-25): test, component-grouping — gates RED on I8
+
+Integrated onto `vision/17` by cherry-pick, with no merge commits:
+
+- **component-grouping** (branch HEAD `46c2e7aa`): the component tree
+  is filed by capability, one folder per `component` column capability,
+  and C35 holds it. The step also carries the redis release that still
+  gives its pair back, the services and architecture pages it touched,
+  and two runner fixes: a merge with no shard's ledgers fails, and a
+  shard filtered by `-t` leaves its split unjudged. The seven commits
+  applied without conflict.
+
+Three fixes from the review landed with it. The quote-status note above
+now cites `specs/component/intercept/`. docs/03's component paragraph
+says a test is filed by what it chiefly asks about, and split only where
+separate units carry its claims. C35's lead sentence now covers the
+component tree, and `npm run docs` regenerated its catalogue row.
+
+`make fix` exits 0. **`make check` exits 2**: 1 test fails out of 2723,
+and 612 of 613 files pass. The failure is the same I8, and it is still
+**for the owner**.
+
+Open, **for the owner or maintainer**:
+
+- Seven component tests claim two capabilities and are filed by the
+  dominant one. Split them, or keep the rule docs/03 now states.
+  `mockOf` and `waitUntil` have no component row.
+- Does `route-split.js` ship to consumers as a bin?
+- The stale-shard fix has not been run end to end with
+  `make test SHARD=i/n`. It is a HYPOTHESIS until it is.
+- The coverage floor was not verified here, because `make test` stops on
+  I8 before `coverage:check` runs.
+- docs/17's leak paragraph needs a package-test follow-ups page to link
+  to. That page is the maintainer's to create.
+
+The component-grouping worktree and branch are removed.
