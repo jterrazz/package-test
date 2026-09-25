@@ -3372,3 +3372,36 @@ No unit landed on package-intelligence's `vision/17`, cut from
       `f25c84f`'s commit body. Accept that as recorded. docs/03-testing.md
       should state that the meta rows are `self` and that the refusals are
       the API's contract, with no catalogue row.
+
+## Audience batch, integrated (2026-09-25): typescript
+
+The audience unit landed on package-typescript's `vision/17`: its 15
+commits were cherry-picked in order onto `cc9c3a4`, with no fixup to fold
+and no merge commit, then the owner's acceptance of ADR-011 and the
+"superseded in part" line under ADR-003's status. @jterrazz/test was
+reinstalled from package-test `a83d926b` (`npm ci`). `make fix` exit 0
+left no generated file to regenerate; `make check` exit 0 (159 files, 475
+tests). HEAD is `aeb6d83`. The worktree `ptc-audience` and the branch
+`vision17-typescript-audience` are removed.
+
+- **Every rule declares its audience** (branch HEAD `7a1b00d`). Integrated
+  after its second review. Four minor findings stay open:
+    - The shell-bin proof checks variable names, not behaviour. A
+      `function selected {` form, a lowercase variable, or an argv flag
+      re-inlines a pass selector with tarball.test.ts and audience.test.ts
+      green. Require every `selected` word in a packed `.sh` to be the one
+      definition or a consumer-pass call, collect variable names of any
+      case minus those the scripts assign, and add a bin variant per
+      `--flag)` case. docs/03-testing.md:132 claims more than the proof.
+    - A fragment whose audience is computed ships as `self` with the proofs
+      green, through a builder a consumer calls (`layers()`) or one built
+      after a turn. Call every exported fragment builder in the module walk,
+      or freeze `audience` in `fragment()`; otherwise name the hole in
+      docs/03.
+    - The runtime refusal count misses `throw Error(` without `new`,
+      `reject(` of any argument, and `exit "$status"`. Widen REFUSALS in
+      audience.test.ts.
+    - Shipped docs/06-quality-checks.md:211, docs/07-lint-presets.md:29 and
+      :204, lint/_contract.js:23 and :53 and lint/catalog.js:23 link to
+      docs/03-testing.md, which `files` excludes. **Owner call:** ship
+      docs/03, or repoint those links to the repository URL.
