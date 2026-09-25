@@ -40,51 +40,23 @@ The reason for the wide reach: a repository has **one** way to write a test, so 
 
 ## The third door: a repository suite
 
-Two doors carry every test the fork names: a UNIT sits beside the module it
-covers (`<file>.test.ts`, I2), and the ASSEMBLED product sits under
-`specs/<facet>/` and reaches the runner that folder promises (`<aspect>.spec.ts`,
-C12 and C18). A few specifications have neither address, and they are not
-mistakes.
+Two doors carry every test the fork names: a UNIT sits beside the module it covers (`<file>.test.ts`, I2), and the ASSEMBLED product sits under `specs/<facet>/` and reaches the runner that folder promises (`<aspect>.spec.ts`, C12 and C18). A few specifications have neither address, and they are not mistakes.
 
 ### What has no address of its own
 
-What they specify is a REPOSITORY's own surface: the subpaths its
-`package.json` publishes, a `.d.ts` beside every `.js` it ships, the lint guards
-a tree owes, the files a build is expected to write. There is no one module to
-sit beside — they resolve every module there is — and no runner to reach, since
-nothing is started. Put under a facet folder, C18 refuses them ("reaches no
-runner"); put beside a module under `src/`, I2 refuses them ("no neighbour
-`exports.ts` found"). Both refusals are right, and a legitimate file shape with
-no green position is a hole in the conventions, not a defect in the file.
+What they specify is a REPOSITORY's own surface: the subpaths its `package.json` publishes, a `.d.ts` beside every `.js` it ships, the lint guards a tree owes, the files a build is expected to write. There is no one module to sit beside — they resolve every module there is — and no runner to reach, since nothing is started. Put under a facet folder, C18 refuses them ("reaches no runner"); put beside a module under `src/`, I2 refuses them ("no neighbour `exports.ts` found"). Both refusals are right, and a legitimate file shape with no green position is a hole in the conventions, not a defect in the file.
 
 ### The door, and the depth it is judged by
 
-**The third door is a FIRST-LEVEL folder under `specs/` that is not a facet
-name.** It is a repository suite: it covers a TREE rather than a product served
-through an entry. C12's rename clause does not reach it, C18 and C20 do not
-reach it, and C1's declared depth is what judges its shape.
+**The third door is a FIRST-LEVEL folder under `specs/` that is not a facet name.** It is a repository suite: it covers a TREE rather than a product served through an entry. C12's rename clause does not reach it, C18 and C20 do not reach it, and C1's declared depth is what judges its shape.
 
-**C1 judges a suite exactly as it judges a facet.** The suite folder is the
-first level and the tests sit one level down, in a folder named for what they
-cover: at the default depth, `specs/<suite>/<domain>/<aspect>.test.ts`. A test
-written straight into the suite folder is refused for the same reason one at a
-facet root is — the level that says what a file covers would be missing. This
-package's own `specs/lint/` is two levels deep for that reason.
+**C1 judges a suite exactly as it judges a facet.** The suite folder is the first level and the tests sit one level down, in a folder named for what they cover: at the default depth, `specs/<suite>/<domain>/<aspect>.test.ts`. A test written straight into the suite folder is refused for the same reason one at a facet root is — the level that says what a file covers would be missing. This package's own `specs/lint/` is two levels deep for that reason.
 
-**A suite is a door because it holds tests.** One test is enough: a
-first-level folder holding a single `.test.ts` is a suite, and legal. A
-first-level folder that holds none — a `support/` of helpers and mocks — is no
-suite, no facet and not `shared/`, and C1 refuses each module in it, a runner
-included, in every mode: a runner lives at the root of the facet it builds, a
-test helper beside the tests it serves, a fixture under
-`specs/shared/fixtures/`.
+**A suite is a door because it holds tests.** One test is enough: a first-level folder holding a single `.test.ts` is a suite, and legal. A first-level folder that holds none — a `support/` of helpers and mocks — is no suite, no facet and not `shared/`, and C1 refuses each module in it, a runner included, in every mode: a runner lives at the root of the facet it builds, a test helper beside the tests it serves, a fixture under `specs/shared/fixtures/`.
 
 ### The two names the estate shares
 
-Two suites carry names the whole estate shares, because two repositories
-inventing two names for one idea is the drift a vocabulary exists to stop: a
-package's own published SURFACE is `surface/`, and a repository's own lint
-guards are `lint/`. Every other suite is named for what it covers.
+Two suites carry names the whole estate shares, because two repositories inventing two names for one idea is the drift a vocabulary exists to stop: a package's own published SURFACE is `surface/`, and a repository's own lint guards are `lint/`. Every other suite is named for what it covers.
 
 ```
 specs/
@@ -100,14 +72,9 @@ specs/
 
 ### The suffix, and the one thing the door does not license
 
-The files there carry `.test.ts` — the UNIT's word — because what they prove is
-read without assembling anything, and `unit()` is what collects them (`roots`,
-or `include` outright). A facet helper would put them in a project whose budget
-and services they never use.
+The files there carry `.test.ts` — the UNIT's word — because what they prove is read without assembling anything, and `unit()` is what collects them (`roots`, or `include` outright). A facet helper would put them in a project whose budget and services they never use.
 
-One thing the door does not license: a module test parked under `specs/` to
-escape I2. The question to ask of a file before it goes through is whether any
-single module could hold its test — if one could, that module is its address.
+One thing the door does not license: a module test parked under `specs/` to escape I2. The question to ask of a file before it goes through is whether any single module could hold its test — if one could, that module is its address.
 
 ## Process rules (review-borne)
 
@@ -197,7 +164,16 @@ A test's body spans at most 60 lines of gestures (C34), in a module test as in a
 
 ### A specimen's spec
 
-A framework specifies itself against apps it keeps as ground, under `specs/shared/fixtures/` — SPECIMENS, not the project's product. A spec whose runner drives one (its specification module, the one that module builds on, or the spec itself when it builds its runner inline, names the shared fixtures: a file inside a specimen’s folder — the app module, the binary, the script a command runs — or the folder itself as the root a `server: { command }` of the runner it feeds runs from, written in the call or in a `const` the call names; a root alone is where the services read their ground, and no app), or an integration spec importing the module of the shared fixtures its chains call, specifies the FRAMEWORK, and the route, the job or the command the specimen answers on is no subject of the project: C29 and C30 leave it alone. Where such a spec is filed is the framework's own to say; this package's answer is [03 — Testing § A specimen's capability folder](03-testing.md#a-specimens-capability-folder). An application's specs keep the route's folder — its routes are its product.
+A framework specifies itself against apps it keeps as ground, under `specs/shared/fixtures/` — SPECIMENS, not the project's product. A spec that drives a specimen specifies the FRAMEWORK, and the route, the job or the command the specimen answers on is no subject of the project: C29 and C30 leave it alone.
+
+A spec drives a specimen when either holds:
+
+- **its runner names the shared fixtures** — the specification module, the one that module builds on, or the spec itself when it builds its runner inline. It names them by:
+    - a file inside a specimen's folder — the app module, the binary, the script a command runs;
+    - or the folder itself, as the root a `server: { command }` of the runner it feeds runs from, written in the call or in a `const` the call names. A root alone does not count: it is where the services read their ground, and no app.
+- **it is an integration spec importing the module of the shared fixtures its chains call.**
+
+Where such a spec is filed is the framework's own to say; this package's answer is [03 — Testing § A specimen's capability folder](03-testing.md#a-specimens-capability-folder). An application's specs keep the route's folder — its routes are its product.
 
 ### What a file shares
 
@@ -211,28 +187,36 @@ One rule decides every folder of a spec tree: **what a spec stands on sits in on
 
 The specs root holds its facets and ONE more folder, `shared/`: the ground several leaves share, in the same four folders — `<specs>/shared/fixtures/`, `<specs>/shared/seeds/`, `<specs>/shared/requests/`, `<specs>/shared/expected/` — each entry in the folder of its role. `shared` is reserved beside the four, directly under the specs root: no facet takes the name (C1), and deeper the word is free — `GET /shared` files under `<specs>/api/shared/get/`. A role folder at the specs root itself is shared ground outside `shared/`, refused as a folder and fixed by `jterrazz-test-check --fix`, which moves it under `shared/` and rewrites every literal that named it (C15). A shared seed is `<specs>/shared/seeds/catalog.sql`, reached as `../../shared/seeds/catalog.sql`; parked at `<specs>/shared/fixtures/seeds/` it is file state by its first ground folder, and C24 refuses it naming `<specs>/shared/seeds/`.
 
-Three further rules decide WHETHER and WHERE ground lives, and they are one question asked from three sides. **A file exists only if it is shared**: a golden or a request ONE test reads, and no module test names, belongs in that test, written in place — the value `toMatch` compares, the request's text or its body — unless it is a directory tree, a binary file or longer than its role's cap: 30 lines for a request or a body, 150 for an expectation. The caps hold the other way too: a request written in the test past 30 lines, or an expectation past 150, belongs in a file beside the test. A `fixtures/` entry is file state and stays a file, and so does a seed: SQL is never written in a test, so a seed one test reads lives beside it in `./seeds/`. Read by several tests of one leaf, a file sits beside them: an entry of the shared ground that exactly one leaf reaches for belongs in the leaf's folder of the same role — `<specs>/shared/seeds/x.sql` becomes `<leaf>/seeds/x.sql` (C28, both halves autofixed by `jterrazz-test-check --fix`) — unless a module test names it too — by a relative literal or by the literal pieces C8 reads — since a module test reads from outside every leaf and the entry is shared. **What several leaves share lives there once**: an entry two leaves hold byte for byte, under the same role, is a copy whatever each is called, and belongs in the shared folder of its role — a warning, since two leaves may mean to diverge tomorrow (C27; when the copies share a name, `--fix` moves one up, deletes the others and rewrites every relative literal that named one — copies of several names wait for the author to pick the name). **A path leaves its leaf only into that ground**: a `file()` or `directory()` whose target is neither under the referring spec's own directory nor under one of the four under `<specs>/shared/` is an error, and the sharing it wants is what those folders declare (C15) — a leaf reaching into a sibling's ground is one such path, so C15 holds that case too. One nesting is no sibling: a route's leaf holds the leaves of the routes under it (`map/pois/detail/` inside `map/pois/`), and ground the two share lives in the route's own folder of its role, which the inner leaf reaches by climbing (`../seeds/base.sql`) — C15 accepts the ground of an enclosing leaf, and C28 moves an entry of the shared ground there when only that route and the routes under it read it. So write ground local first: the day a second leaf copies an entry, C27 moves it up, and the day only one leaf is left, C28 moves it back down — and the day only one test is left, C28 writes it into that test — an entry of the shared ground announces "other specs depend on me, change me with care", and it is there only while that is true.
+Three further rules decide WHETHER and WHERE ground lives, and they are one question asked from three sides.
+
+**A file exists only if it is shared**: a golden or a request ONE test reads, and no module test names, belongs in that test, written in place — the value `toMatch` compares, the request's text or its body — unless it is a directory tree, a binary file or longer than its role's cap: 30 lines for a request or a body, 150 for an expectation. The caps hold the other way too: a request written in the test past 30 lines, or an expectation past 150, belongs in a file beside the test. A `fixtures/` entry is file state and stays a file, and so does a seed: SQL is never written in a test, so a seed one test reads lives beside it in `./seeds/`. Read by several tests of one leaf, a file sits beside them: an entry of the shared ground that exactly one leaf reaches for belongs in the leaf's folder of the same role — `<specs>/shared/seeds/x.sql` becomes `<leaf>/seeds/x.sql` (C28, both halves autofixed by `jterrazz-test-check --fix`) — unless a module test names it too — by a relative literal or by the literal pieces C8 reads — since a module test reads from outside every leaf and the entry is shared.
+
+**What several leaves share lives there once**: an entry two leaves hold byte for byte, under the same role, is a copy whatever each is called, and belongs in the shared folder of its role — a warning, since two leaves may mean to diverge tomorrow (C27; when the copies share a name, `--fix` moves one up, deletes the others and rewrites every relative literal that named one — copies of several names wait for the author to pick the name).
+
+**A path leaves its leaf only into that ground**: a `file()` or `directory()` whose target is neither under the referring spec's own directory nor under one of the four under `<specs>/shared/` is an error, and the sharing it wants is what those folders declare (C15) — a leaf reaching into a sibling's ground is one such path, so C15 holds that case too. One nesting is no sibling: a route's leaf holds the leaves of the routes under it (`map/pois/detail/` inside `map/pois/`), and ground the two share lives in the route's own folder of its role, which the inner leaf reaches by climbing (`../seeds/base.sql`) — C15 accepts the ground of an enclosing leaf, and C28 moves an entry of the shared ground there when only that route and the routes under it read it.
+
+So write ground local first: the day a second leaf copies an entry, C27 moves it up, and the day only one leaf is left, C28 moves it back down — and the day only one test is left, C28 writes it into that test — an entry of the shared ground announces "other specs depend on me, change me with care", and it is there only while that is true.
 
 Two more hold what each path says. **The verb and the folder agree**: `seed()` reads `seeds/`, `request()` and a request body read `requests/`, `fixture()` reads `fixtures/`, a golden reads `expected/` (C24). **What a path names exists**, of the kind its wrapper says — and a path a test resolves from its own directory with literal pieces alone (`resolve(import.meta.dirname, '..', 'fixtures', 'gone')`, one piece only when spelled `./` or `../` — a lone bare piece is as often a folder the test makes) too, a module test's as a spec's (C8, the checker, reported where the path is written; the runtime refuses the same with the path it resolved to). A fixer that moves ground rewrites every whole relative literal that named it, a module test's included; a path built from pieces, or spelled into a command a process runs, is the author's to rewrite, and C8 names it once the ground has moved. And a path is **built in the test that stands on it**: it resolves against the spec that starts the chain, so a `file()` built in a shared helper would name a different file for every spec that reaches it — a helper takes the `file()` as a parameter (C26).
 
-| Thing           | Rule                                                                                                                                                                                                                                  |
-| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Specs root      | `specs/` (`api/`, `job/`, `cli/`, `integration/`, `website/`, `mobile/`) — one folder per constructor, beside `shared/`, the ground several leaves share: `shared/fixtures/`, `shared/seeds/`, `shared/requests/`, `shared/expected/` |
-| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                                                                           |
-| Instances       | `api`, `job`, `cli`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                                                                         |
-| Spec file       | `specs/<facet>/<subject>/<aspect>.spec.ts` — the assembled product's word (C12); the subject's folder derived where the facet has one ([One file, one subject](#one-file-one-subject))                                                |
-| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([20](20-documents.md))                                                                                                                                   |
-| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                                                                               |
-| Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                                                                                |
-| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                                                                                                                                       |
-| Stubs           | `stubs/<name>.stubs.ts` (facade) · `stubs/<kind>/<name>.ts` (unit, kind ∈ http\|openai\|anthropic — the stub builders the package exports)                                                                                            |
-| Stub data       | `stubs/<kind>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                                                                                                                                            |
-| Requests        | what a spec sends: `requests/<name>.http`, read by `.request(file('./requests/<name>.http'))`, and a body `requests/<name>.<ext>`, sent by `.post(path, file('./requests/<name>.json'))`                                              |
-| Seeds           | database state: `seeds/<name>.sql`, read by `.seed(file('./seeds/<name>.sql'))` — beside its test, or at the level of the tests that share it; SQL is never written in a test                                                         |
-| Fixtures        | `fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/shared/fixtures/`, reached by the path that climbs to it, as `specs/shared/seeds/` is for seeds                                                            |
-| Goldens         | `expected/<name>.<ext>` (everything asserted, response `.http` included), read by `.toMatch(file('./expected/<name>.<ext>'))`; a tree by `.toMatch(directory('./expected/<name>/'))`                                                  |
-| Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                                                                            |
-| Framework env   | `TEST_UPDATE`                                                                                                                                                                                                                         |
+| Thing           | Rule                                                                                                                                                                                                                                                                                                                   |
+| --------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Specs root      | `specs/` (`api/`, `job/`, `cli/`, `integration/`, `website/`, `mobile/`) — one folder per constructor, beside `shared/`, the ground several leaves share: `shared/fixtures/`, `shared/seeds/`, `shared/requests/`, `shared/expected/`, and any repository suite ([the third door](#the-third-door-a-repository-suite)) |
+| Specification   | `specs/<facet>/<name>.specification.ts` (at the facet root)                                                                                                                                                                                                                                                            |
+| Instances       | `api`, `job`, `cli`, `integration`, `website`, `mobile` — enforced by the destructuring (A3)                                                                                                                                                                                                                           |
+| Spec file       | `specs/<facet>/<subject>/<aspect>.spec.ts` — the assembled product's word (C12); the subject's folder derived where the facet has one ([One file, one subject](#one-file-one-subject))                                                                                                                                 |
+| Spec document   | `<case>.spec.yaml`, beside the spec it belongs to — never under `expected/` ([20](20-documents.md))                                                                                                                                                                                                                    |
+| Module test     | `<file>.test.ts`, sibling of `<file>.ts` (under `src/`)                                                                                                                                                                                                                                                                |
+| Component test  | `<file>.test.tsx`, sibling of `<file>.tsx` — or of the `<file>.ts` of a hook or a DOM function ([07](07-component.md))                                                                                                                                                                                                 |
+| Module fixtures | `<file>.fixtures.ts`, sibling of the `.test.ts` (typed exports)                                                                                                                                                                                                                                                        |
+| Stubs           | `stubs/<name>.stubs.ts` (facade) · `stubs/<kind>/<name>.ts` (unit, kind ∈ http\|openai\|anthropic — the stub builders the package exports)                                                                                                                                                                             |
+| Stub data       | `stubs/<kind>/<name>[.<qualifier>].response.json` (served) · `<name>.request.ts` (matched)                                                                                                                                                                                                                             |
+| Requests        | what a spec sends: `requests/<name>.http`, read by `.request(file('./requests/<name>.http'))`, and a body `requests/<name>.<ext>`, sent by `.post(path, file('./requests/<name>.json'))`                                                                                                                               |
+| Seeds           | database state: `seeds/<name>.sql`, read by `.seed(file('./seeds/<name>.sql'))` — beside its test, or at the level of the tests that share it; SQL is never written in a test                                                                                                                                          |
+| Fixtures        | `fixtures/<name>` (file state) — the leaf's own; the shared pool is `specs/shared/fixtures/`, reached by the path that climbs to it, as `specs/shared/seeds/` is for seeds                                                                                                                                             |
+| Goldens         | `expected/<name>.<ext>` (everything asserted, response `.http` included), read by `.toMatch(file('./expected/<name>.<ext>'))`; a tree by `.toMatch(directory('./expected/<name>/'))`                                                                                                                                   |
+| Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                                                                                                                                                             |
+| Framework env   | `TEST_UPDATE`                                                                                                                                                                                                                                                                                                          |
 
 ## I — Source-code architecture
 
@@ -271,7 +255,7 @@ rather than a product, and C1's declared depth is what judges its shape.
 
 The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([06](06-integration.md)).
 
-The table is total: **a folder under `specs/` is a constructor's name, and there is no ninth row**. A probe of an adapter against a real service — a database driver, a cache handle — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module.
+The table is total: **a folder under `specs/` is a constructor's name, `shared/`, or a repository suite, and there is no tenth row**. A probe of an adapter against a real service — a database driver, a cache handle — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module.
 
 ## The doubles ladder
 
@@ -279,7 +263,7 @@ Closed and ordered. An agent takes the FIRST rung that fits, and nothing below r
 
 1. **The real thing**, in-process — a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
 2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([17](17-services.md)): real, isolated per worker, reset at the start of every chain.
-3. **A stub** — `.intercept()` on a chain (api, job, integration, component, website, mobile), `intercept()` in module scope ([16](16-stubs.md)). One queue, three transports, strict from the first stub (rule D7); a streamed body is `http.stream` / `http.sse`.
+3. **A stub** — `.intercept()` on a chain (api, job, integration, component, website, mobile), `intercept()` in module scope ([16](16-stubs.md)). One queue, three transports ([16 § Three engines, one queue](16-stubs.md#three-engines-one-queue)), strict from the first stub (rule D7); a streamed body is `http.stream` / `http.sse`.
 4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function-shaped dependency. Asserting a call on one is a boundary observation; asserting ONLY on doubles the test built is not a test of anything. `T` is constrained to `object` and has no default, so a double asked for nothing answers for `object` — TypeScript falls back to the constraint where no inference site says otherwise, and the refusal lands where the double is USED rather than where it was made. State the port.
 
 **Off the ladder**, each with a destination: `vi.stubGlobal('fetch')` → `intercept()`; a raw `msw`/`nock`/`sinon` import → a stub; `vi.useFakeTimers` / `vi.setSystemTime` → `clock`; `toMatchSnapshot` → a golden under `expected/`; `vi.mock` of an application module → inject the port instead. A native module a consumer genuinely cannot inject is the one allow-listed exception, per specifier, with a reason.
@@ -331,12 +315,7 @@ A facet pins the same instant for the chain it is stated on — `.clock(iso)` on
 
 ## The backlog — the criterion written, coded on its first occurrence
 
-A rule is written when its defect class has been SEEN once and its criterion is
-decidable. A class nobody has seen yet is not a rule: it is a line
-here, with the criterion it would be written against, so the day it appears the
-guard is a translation rather than a design. The R8 dry run — the whole
-catalogue run over every repository of the workbench — is what moves a line
-either way.
+A rule is written when its defect class has been SEEN once and its criterion is decidable. A class nobody has seen yet is not a rule: it is a line here, with the criterion it would be written against, so the day it appears the guard is a translation rather than a design. The R8 dry run — the whole catalogue run over every repository of the workbench — is what moves a line either way.
 
 | Line                           | The criterion, ready to code                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -353,10 +332,7 @@ either way.
 | E10 no retry                   | a `retry:` option on `test(`/`describe(`, or `test.retry(`, or `retry` in a vitest config — react-query's `retry: false` is not one                                                                                                                                                                                                                                                                                                                        |
 | I5 no namespace spy            | a `vi.spyOn(<namespace import>, …)` — a module's own export spied through its namespace object                                                                                                                                                                                                                                                                                                                                                             |
 
-**Parked**, for a criterion that is not settled: **D23** no negated golden (15
-hits on the workbench, every one a `toMatch(/re/)` the criterion must exclude)
-and **D24** unreachable stub (the criterion has to compare filter arguments,
-not just methods and urls).
+**Parked**, for a criterion that is not settled: **D23** no negated golden (15 hits on the workbench, every one a `toMatch(/re/)` the criterion must exclude) and **D24** unreachable stub (the criterion has to compare filter arguments, not just methods and urls).
 
 ## What stays human, and why
 
