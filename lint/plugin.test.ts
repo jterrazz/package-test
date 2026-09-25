@@ -95,6 +95,7 @@ function metaProofs(): Set<string> {
     const found = new Set<string>();
     const sources = [
         read('lint/plugin.test.ts'),
+        read('lint/audience.test.ts'),
         read('lint/document-report.test.ts'),
         read('lint/env-allowlist.test.ts'),
         read('lint/lesson.test.ts'),
@@ -431,7 +432,7 @@ describe('conventions catalogue — completeness (meta-test)', () => {
         }
     });
 
-    test('every catalogue row declares ONE audience', () => {
+    test('k12 — every catalogue row declares ONE audience', () => {
         // Given - the two audiences a rule can have
         const AUDIENCES = new Set(['consumer', 'self']);
 

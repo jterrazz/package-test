@@ -1571,6 +1571,20 @@ export const META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
+            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and the tarball exposes no `self` rule: no packed file is a self bundle or a chunk only an unpacked bundle loads, the published plugin and its `testing` fragment name no self rule, and the published checker runs no self pass.',
+        facet: 'model',
+        family: 'K',
+        fix: 'State the audience on the row, and wire a self rule in `lint/self-plugin.ts` or `lint/self-checker.ts` — never in `lint/plugin.ts` or `lint/checker.ts`.',
+        id: 'K12',
+        name: 'k12-rule-audience',
+        rationale:
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 refused a consumer’s own `src/model/`.',
+        reach: 'all',
+    },
+    {
+        audience: 'self',
+        channel: 'meta',
+        convention:
             'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.',
         facet: 'model',
         family: 'M',
