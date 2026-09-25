@@ -104,7 +104,7 @@ function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boole
 export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
     // A name designates the accessible name WHOLE; `{ exact: false }` is the
-    // Opt-out, and an ABSENT option is the default rather than a choice.
+    // opt-out, and an ABSENT option is the default rather than a choice.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -124,8 +124,8 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
         return locateSearch(scope, element, exact);
     }
     // Every other kind IS an ARIA role — landmark or not — and the vocabulary
-    // Names them after the role they locate, so one branch answers for all of
-    // Them and a descriptor added to the vocabulary needs nothing here.
+    // names them after the role they locate, so one branch answers for all of
+    // them and a descriptor added to the vocabulary needs nothing here.
     return scope.getByRole(
         element.kind,
         element.name === undefined ? { exact } : { exact, name: element.name },
@@ -161,9 +161,9 @@ function candidates(locator: Locator): ElementMatch[] {
             const label = node.getAttribute('aria-label')?.trim();
             return {
                 // A role descriptor matches on the ACCESSIBLE name, so a
-                // Candidate whose label is not its text has to say the label:
+                // candidate whose label is not its text has to say the label:
                 // Naming only the text sends the author after something that
-                // Never matched.
+                // never matched.
                 accessibleName: label !== undefined && label !== text ? label : undefined,
                 context: context ?? undefined,
                 contextName: nameOf(landmark),
@@ -311,10 +311,10 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
         gone: async (element) => {
             await act(element, async (locator) => {
                 // Polled rather than asserted through `expect.element`: that
-                // Helper REFUSES a locator matching nothing, and "nothing
-                // Matches" is the commonest way for a thing to be gone. Absence
-                // Is one question — removed, or still there and not shown — and
-                // The poll retries it the same way every other verb retries.
+                // helper REFUSES a locator matching nothing, and "nothing
+                // matches" is the commonest way for a thing to be gone. Absence
+                // is one question — removed, or still there and not shown — and
+                // the poll retries it the same way every other verb retries.
                 await polling(
                     () => isGone(locator, element),
                     `${formatElement(element)} is still on the screen`,
@@ -346,7 +346,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                 }
                 if (element.selected !== undefined) {
                     // No matcher answers for an `<option>`: `toBeChecked` is
-                    // The checkbox/radio/aria-checked one. `:checked` is what
+                    // the checkbox/radio/aria-checked one. `:checked` is what
                     // CSS gives a selected option, and `gone()` reads it too.
                     await polling(
                         () => locator.query()?.matches(':checked') === true,

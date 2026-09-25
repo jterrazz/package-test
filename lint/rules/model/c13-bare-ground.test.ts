@@ -15,7 +15,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The rule probes the filesystem around the visited test file, so the cases run
-// Against the shared E2E fixture trees rather than on synthetic paths.
+// against the shared E2E fixture trees rather than on synthetic paths.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 /** A package whose module test still stands on the 16 `_expected/`. */
@@ -89,7 +89,7 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
             filename: `${SPECS_LINT}/c13-bare-ground/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Anchored on TEST files only: a module beside the same legacy directory
-        // Is not a spec, so it is not a probe site.
+        // is not a spec, so it is not a probe site.
         {
             code: 'export const helper = () => {};',
             filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/helper.ts`,

@@ -109,7 +109,7 @@ export async function observeProcess(
         });
 
         // Process exited before the pattern matched. Without a pattern,
-        // A clean exit within the timeout is a success.
+        // a clean exit within the timeout is a success.
         child.on('exit', (code) => {
             exited = true;
             if (killTimer) {
@@ -123,7 +123,7 @@ export async function observeProcess(
                 return;
             }
             // A pattern was expected but never appeared — even a clean
-            // Exit is a failure.
+            // exit is a failure.
             finish(code === 0 ? 1 : (code ?? 1));
         });
     });
@@ -163,7 +163,7 @@ export class ExecAdapter implements CliPort {
             timeout: input?.timeout,
         });
         // A killed run reports 124, the same code the long-running path uses
-        // For a timeout — one answer to "the command ran out of time".
+        // for a timeout — one answer to "the command ran out of time".
         // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- `spawnSync` types `error` as `Error`, which carries no `code`; the assertion is what reaches it
         const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
         return {
@@ -181,12 +181,12 @@ export class ExecAdapter implements CliPort {
     ): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
         // Same shell invocation as the one-shot path — no naive whitespace
-        // Split, so quoted arguments behave identically in both forms.
+        // split, so quoted arguments behave identically in both forms.
         //
         // `detached` puts the child in its OWN process group (POSIX), so
-        // Termination can target the whole group: killing only the direct
-        // Shell child would orphan its descendants (a `tsdown --watch`
-        // Grandchild survives the spec and leaks). No effect sought on
+        // termination can target the whole group: killing only the direct
+        // shell child would orphan its descendants (a `tsdown --watch`
+        // grandchild survives the spec and leaks). No effect sought on
         // Windows — the group kill below degrades to a direct kill there.
         const child = spawn(`${this.command} ${args}`, [], {
             cwd,
@@ -196,8 +196,8 @@ export class ExecAdapter implements CliPort {
             stdio: ['pipe', 'pipe', 'pipe'],
         });
         // Group-aware kill: signal the process GROUP (negative pid) so every
-        // Descendant gets SIGTERM/SIGKILL too; fall back to the direct child
-        // Kill when groups are unsupported (Windows) or the group is gone.
+        // descendant gets SIGTERM/SIGKILL too; fall back to the direct child
+        // kill when groups are unsupported (Windows) or the group is gone.
         const kill = (signal?: NodeJS.Signals | number): boolean => {
             if (child.pid !== undefined && process.platform !== 'win32') {
                 try {

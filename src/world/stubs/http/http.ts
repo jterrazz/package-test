@@ -71,7 +71,7 @@ function frameEvent(event: SseEvent): string {
     }
     const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
     // A multi-line payload is several `data:` lines: the parser joins them
-    // With newlines, and a raw newline inside one would end the frame.
+    // with newlines, and a raw newline inside one would end the frame.
     for (const line of payload.split('\n')) {
         lines.push(`data: ${line}`);
     }

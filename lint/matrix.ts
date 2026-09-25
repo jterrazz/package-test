@@ -218,7 +218,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
         });
     };
     // Written out rather than folded: the compiler then holds the invariant
-    // That every column has a tree, which a `fromEntries` cast would drop.
+    // that every column has a tree, which a `fromEntries` cast would drop.
     return {
         api: read('api'),
         cli: read('cli'),
@@ -292,10 +292,10 @@ export function capabilities(): Capability[] {
         probe: `{{${kind}`,
         probeByColumn: { module: `match.${kind}` },
         // A token family is declared by the ENGINE, not by a facet: every
-        // Facet that reads a golden can carry any of the twenty-one, and a
-        // Family no golden of this package happens to need is not a hole in
-        // That facet. The engine's own proof is the module column, which these
-        // Rows do not exempt.
+        // facet that reads a golden can carry any of the twenty-one, and a
+        // family no golden of this package happens to need is not a hole in
+        // that facet. The engine's own proof is the module column, which these
+        // rows do not exempt.
         exempt: {
             api: TOKENS_ARE_THE_ENGINES,
             cli: TOKENS_ARE_THE_ENGINES,
@@ -492,7 +492,7 @@ export function layers(root: string): Layer[] {
         0,
     );
     // A `*.specification.ts` builds a runner; it is not itself a spec, and
-    // Counting it here would credit the layer with files that assert nothing.
+    // counting it here would credit the layer with files that assert nothing.
     const facetSpecs = COLUMNS.filter((column) => column !== 'module').reduce(
         (total, column) =>
             total +

@@ -72,9 +72,9 @@ function implementationOf(node: AstNode): AstNode | undefined {
 export const j2NoSleep: LintRule = {
     createOnce(context: Context): Visitor {
         // The source spans of the double implementations seen so far in the
-        // File. The walk is top-down, so a double's span is recorded before
-        // Anything inside it is visited — which is what makes "inside a double"
-        // Answerable without a parent pointer the plugin API does not give.
+        // file. The walk is top-down, so a double's span is recorded before
+        // anything inside it is visited — which is what makes "inside a double"
+        // answerable without a parent pointer the plugin API does not give.
         let doubles: { end: number; start: number }[] = [];
         const insideADouble = (node: AstNode): boolean =>
             doubles.some((span) => nodeStart(node) >= span.start && nodeEnd(node) <= span.end);
@@ -84,9 +84,9 @@ export const j2NoSleep: LintRule = {
                 return isTestRole(identityOf(context).role);
             },
             // A function-valued property of an object literal: the object is a
-            // Double, and its methods are implementations. Opened here rather
-            // Than on the object, so a `setTimeout(…)` sitting in a non-function
-            // Property is still the test's own.
+            // double, and its methods are implementations. Opened here rather
+            // than on the object, so a `setTimeout(…)` sitting in a non-function
+            // property is still the test's own.
             Property(node: AstNode) {
                 const implementation = implementationOf(node);
                 if (implementation !== undefined) {

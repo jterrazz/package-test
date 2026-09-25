@@ -58,7 +58,7 @@ export const e6ComponentProjectHelper: LintRule = {
                         return;
                     }
                     // A `browser` key somewhere else in a config — a `define`
-                    // Flag, an env record — is not a project's browser block.
+                    // flag, an env record — is not a project's browser block.
                     // The runner's sits under `test`.
                     if (!isRunnerBrowserBlock(candidate)) {
                         return;

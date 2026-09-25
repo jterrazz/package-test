@@ -73,9 +73,9 @@ export const d9wSingleUseRef: LintRule = {
                 const codeNodes = new Map<string, AstNode>();
                 // Fallback report site for a ref that lives ONLY in a fixture:
                 // The golden matcher's node that pulled it in. Per D9's normative
-                // Text the count aggregates code + the goldens it references,
-                // Fixtures, so a fixture-only ref used once must still warn —
-                // Attached to its referencing node since it has no code site.
+                // text the count aggregates code + the goldens it references,
+                // fixtures, so a fixture-only ref used once must still warn —
+                // attached to its referencing node since it has no code site.
                 const fixtureNodes = new Map<string, AstNode>();
                 const bump = (ref: string): void => {
                     counts.set(ref, (counts.get(ref) ?? 0) + 1);

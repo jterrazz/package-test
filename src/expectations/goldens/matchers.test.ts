@@ -287,8 +287,8 @@ describe('matchers', () => {
     });
 
     // RUNTIME D14 — `toMatch` routes the disk to the golden, a value handed to a
-    // Result subject to the whole-result comparison, and a value it cannot be
-    // Compared to is refused naming what the subject takes.
+    // result subject to the whole-result comparison, and a value it cannot be
+    // compared to is refused naming what the subject takes.
     test("toMatch is vitest's for a value, and the golden for the disk (D14) — a stream is compared whole to a text in place: a RegExp is refused naming its .text", () => {
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m\n', 'stdout', '/tmp');

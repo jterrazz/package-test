@@ -27,7 +27,7 @@ ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as
             filename: '/repo/specs/api/seeding/seeding.test.ts',
         },
         // Not even from a spec whose subject IS the adapter: that probe is a
-        // Module test beside its module.
+        // module test beside its module.
         {
             code: 'import { redis } from "../../src/world/services/redis/redis.adapter.js";',
             errors: 1,
@@ -81,7 +81,7 @@ ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as
             filename: '/repo/specs/app/widget/widget.test.ts',
         },
         // A seam probe reaches its adapter through the public entry, which
-        // Re-exports it — that is the whole point of the entry.
+        // re-exports it — that is the whole point of the entry.
         {
             code: 'import { redis } from "../../index.js";',
             filename: '/repo/specs/integration/redis/redis.test.ts',

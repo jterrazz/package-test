@@ -39,7 +39,7 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
 
     const serve = new ServedProcess(
         // The served process injects its free port as `PORT`; appium only
-        // Reads a flag, so the shell forwards one into the other.
+        // reads a flag, so the shell forwards one into the other.
         { command: `"${bin}" --port "$PORT"`, ready: '/status', timeout: APPIUM_READY_TIMEOUT_MS },
         root,
         'mobile',

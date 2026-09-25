@@ -47,10 +47,10 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
             filename: SRC_TEST,
         },
         // A spec under specs/ is a test too: module mocking is banned there as
-        // Well — the reach is every test file, not the src/ tree.
+        // well — the reach is every test file, not the src/ tree.
         { code: 'vi.mock("./x.js");', errors: [{ messageId: 'viMock' }], filename: SPEC },
         // The dynamic-import spelling is the same double, and an allow-list
-        // That does not name it does not clear it.
+        // that does not name it does not clear it.
         {
             code: 'vi.mock(import("./match.js"), () => ({}));',
             errors: [{ messageId: 'viMock' }],
@@ -88,17 +88,17 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         { code: 'import { schema } from "./user.schema.js";', filename: SRC_TEST },
         { code: 'import { version } from "node:process";', filename: SRC_TEST },
         // Non-test src files may import what F2/I1 allow — assets are not
-        // Checked there (only vi.mock and banned dirs apply).
+        // checked there (only vi.mock and banned dirs apply).
         {
             code: 'import data from "./payload.json";',
             filename: '/repo/src/specification/config.ts',
         },
         // A spec under specs/ reads real files by design — the asset clause is
-        // The module role's alone.
+        // the module role's alone.
         { code: 'import seed from "./seeds/users.sql";', filename: SPEC },
         // The allow-list clears the native module in BOTH spellings: the
         // String one, and the dynamic import `vitest/prefer-import-in-mock`
-        // Asks for — an allow-listed module has a green spelling under both.
+        // asks for — an allow-listed module has a green spelling under both.
         {
             code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
             filename: SRC_TEST,

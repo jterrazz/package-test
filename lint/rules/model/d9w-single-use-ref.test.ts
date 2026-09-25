@@ -16,8 +16,8 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // D9 aggregates capture-ref uses across code (`match.ref`) AND the `{{kind#ref}}`
-// Tokens of the `expected/` fixtures a test references — so the cases need a
-// Real feature dir with real fixtures on disk. Built once at module load (before
+// tokens of the `expected/` fixtures a test references — so the cases need a
+// real feature dir with real fixtures on disk. Built once at module load (before
 // Vitest executes the collected cases) so the rule can read them.
 const featureDir = mkdtempSync(join(tmpdir(), 'd9w-'));
 const specsFeatureDir = join(featureDir, 'specs', 'app', 'widget');
@@ -44,7 +44,7 @@ ruleTester.run('d9w-single-use-ref', d9wSingleUseRef as unknown as OxlintRule, {
             filename: WIDGET,
         },
         // A ref that lives ONLY in a referenced fixture, used once: reported on
-        // The referencing toMatch node (the rule enhancement — no code site).
+        // the referencing toMatch node (the rule enhancement — no code site).
         {
             code: 'expect(result.stdout).toMatch(file("./expected/lonely.txt"));',
             errors: 1,

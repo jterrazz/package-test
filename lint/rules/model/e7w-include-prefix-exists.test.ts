@@ -4,7 +4,7 @@ import { asOxlintRule, ruleTester } from '../../rule-tester.fixtures.js';
 import { e7wIncludePrefixExists } from './e7w-include-prefix-exists.js';
 
 // Placed at this package's own root: `specs/api` exists here and `specs/lint2`
-// Does not, so the probe answers against a real tree.
+// does not, so the probe answers against a real tree.
 const ROOT = resolve(import.meta.dirname, '../../..');
 const CONFIG = resolve(ROOT, 'vitest.config.ts');
 

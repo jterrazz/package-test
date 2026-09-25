@@ -100,7 +100,7 @@ export function isFrameworkFrame(
         return false;
     }
     // Both sides go through realpath: an install reached by symlink (a `file:`
-    // Link, a pnpm store, a worktree) must still compare equal to itself.
+    // link, a pnpm store, a worktree) must still compare equal to itself.
     const real = safeRealpath(filePath);
     return frameworkTrees.some((tree) => isInside(safeRealpath(tree), real));
 }

@@ -163,8 +163,8 @@ export class CliResult extends BaseResult {
         }
         // If the test touched `.container(...)` we already have the id set.
         // Otherwise re-query once to catch containers spawned during `.exec`
-        // That the test never asserted on — still clean them up so tests
-        // Running in parallel never collide.
+        // that the test never asserted on — still clean them up so tests
+        // running in parallel never collide.
         const ids =
             this.containersCache === null
                 ? findContainersByLabel(this.dockerConfig.testRunLabel, this.testRunId)

@@ -45,10 +45,10 @@ const COVERAGE = {
     exclude: [
         // Browser Mode instruments what the PAGE loaded, which is the bundle:
         // Without this line react-dom alone is 19 000 statements and the
-        // Project's own number disappears under its dependencies.
+        // project's own number disappears under its dependencies.
         '**/node_modules/**',
         // A spec is a test, and the fixture app a spec drives is ground —
-        // Beside a module as much as under `specs/`.
+        // beside a module as much as under `specs/`.
         'specs/**',
         GROUND_GLOB,
         '**/*.d.ts',

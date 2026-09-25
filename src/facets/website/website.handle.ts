@@ -193,7 +193,7 @@ async function startSite<Services extends ServiceRecord>(
         'website',
         {
             // Every process of one run carries the same id, minted by the
-            // Facet — never sampled by a spec (CONVENTIONS D16, P7).
+            // facet — never sampled by a spec (CONVENTIONS D16, P7).
             TEST_RUN_ID: context.started?.runId ?? randomUUID(),
             ...serverBackendEnv(options.backend, context.backendUrl),
         },
@@ -242,12 +242,12 @@ export async function startWebsite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
 ): Promise<WebsiteHandle> {
     // Caller detection must run before any await — async resumption drops
-    // The calling file's frames from the stack.
+    // the calling file's frames from the stack.
     const callerDir = getCallerDir();
     await registerMatchers();
 
     // The type already forbids `backend` with `url`; the runtime check covers
-    // Untyped callers with the same sentence.
+    // untyped callers with the same sentence.
     if (options.backend && !options.server) {
         throw new Error(
             'specification.website(): `backend` requires `server` mode — a deployed `url` cannot be pointed at a local stub.',
@@ -255,7 +255,7 @@ export async function startWebsite<Services extends ServiceRecord>(
     }
 
     // The stub starts BEFORE the server command, so the child finds its URL
-    // In the environment from the very first request it makes.
+    // in the environment from the very first request it makes.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -282,8 +282,8 @@ export async function startWebsite<Services extends ServiceRecord>(
 
     // The worker's one browser, launched lazily on the first `.visit()` so
     // `.fetch()`-only spec files never pay the browser cost. The playwright
-    // Integration stays a lazy import (CONVENTIONS I1) — the dependency is
-    // Optional and only loaded when a spec actually renders a page.
+    // integration stays a lazy import (CONVENTIONS I1) — the dependency is
+    // optional and only loaded when a spec actually renders a page.
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {

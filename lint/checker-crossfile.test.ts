@@ -4,10 +4,10 @@ import { suppressedLines } from './checker-crossfile.js';
 
 // The cross-file passes (checkDeadFixtures / checkDatabaseProperty /
 // CheckDockerRunnerAwaitUsing) read whole feature TREES off disk, so a module
-// Test exercising them would need real files — a specification, not a unit
+// test exercising them would need real files — a specification, not a unit
 // (CONVENTIONS §I). Those live in specs/lint/checker/ as E2E goldens. What
-// Stays here is the pure, code-input logic: the checker-channel suppression
-// Mechanism, tested exhaustively on source strings.
+// stays here is the pure, code-input logic: the checker-channel suppression
+// mechanism, tested exhaustively on source strings.
 
 describe('checker-crossfile', () => {
     test('checker suppression — suppressedLines (checker-disable comments) — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {

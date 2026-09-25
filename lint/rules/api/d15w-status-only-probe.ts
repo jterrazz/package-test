@@ -91,8 +91,8 @@ export const d15wStatusOnlyProbe: LintRule = {
 
                 // Count every `expect(…)` call and how many are status probes.
                 // Any non-status assertion (whole-result toMatch, a table's rows, toContain, or a
-                // Status compared to a string) makes probes < expects — the
-                // Scalpel allowance stays silent.
+                // status compared to a string) makes probes < expects — the
+                // scalpel allowance stays silent.
                 let expectCalls = 0;
                 let statusProbes = 0;
                 walk(callback, (inner) => {

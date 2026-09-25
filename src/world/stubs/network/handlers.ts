@@ -56,8 +56,8 @@ export function toMswResponse(msw: any, response: StubResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
         // Not a reply: msw makes the request itself fail, which is what the
-        // Caller's `fetch` sees when nothing is listening. Both engines honour
-        // It — `setupServer` and `setupWorker` share this response shape.
+        // caller's `fetch` sees when nothing is listening. Both engines honour
+        // it — `setupServer` and `setupWorker` share this response shape.
         return msw.HttpResponse.error();
     }
     if (body === null || body === undefined) {
@@ -65,7 +65,7 @@ export function toMswResponse(msw: any, response: StubResponse): unknown {
     }
     if (isStreamBody(body)) {
         // A stream is the one body the engine must NOT serialise: it is the
-        // Pieces and their order that the subject reads.
+        // pieces and their order that the subject reads.
         return new msw.HttpResponse(toReadableStream(body), {
             headers: { ...NEVER_CACHED, 'content-type': body.contentType, ...headers },
             status,
@@ -122,7 +122,7 @@ export function buildStubHandlers(
                         return recordViolation(request.method, request.url);
                     }
                     // A dynamic response is a function evaluated against the
-                    // Observed request at serve time; a fixed one is used as-is.
+                    // observed request at serve time; a fixed one is used as-is.
                     const response =
                         typeof stub.response === 'function'
                             ? stub.response(observed)
@@ -137,11 +137,11 @@ export function buildStubHandlers(
     }
 
     // Catch-all LAST: any request no specific handler claimed is a strict
-    // Failure. Handlers registered in one use() call are matched in order.
+    // failure. Handlers registered in one use() call are matched in order.
     //
     // `bypass` is what keeps the engine from eating the RUNNER's own traffic:
     // In a page every module is an HTTP request, the dependency cache included,
-    // And a 501 to one of those stops the run rather than failing a spec.
+    // and a 501 to one of those stops the run rather than failing a spec.
     handlers.push(
         msw.http.all('*', ({ request }: { request: Request }) =>
             bypass?.(request.url) === true

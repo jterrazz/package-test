@@ -110,7 +110,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
         }
 
         // Its own name first, then the type's — one database in a project needs
-        // No folder of its own, and several each get one named after their key.
+        // no folder of its own, and several each get one named after their key.
         const initPaths = [
             resolve(dockerDir, `${this.serviceName}/init.sql`),
             resolve(dockerDir, 'postgres/init.sql'),

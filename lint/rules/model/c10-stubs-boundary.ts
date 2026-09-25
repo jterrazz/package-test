@@ -29,7 +29,7 @@ export const c10StubsBoundary: LintRule = {
             before() {
                 const { inSpecs, role } = identityOf(context);
                 // Inside stubs/ the internal half is the file's own business — and
-                // That folder IS a role, so the rule asks the identity, not the path.
+                // that folder IS a role, so the rule asks the identity, not the path.
                 return inSpecs && role !== 'stub';
             },
         };

@@ -68,8 +68,8 @@ function compilePredicate(
 ): string {
     const name = escapePredicate(element.name ?? '');
     // A label designates the WHOLE label — the same default as the
-    // Web vocabulary, compiled to equality; `{ exact: false }` is the opt-out
-    // And compiles to `CONTAINS`.
+    // web vocabulary, compiled to equality; `{ exact: false }` is the opt-out
+    // and compiles to `CONTAINS`.
     const contains = (attribute: string): string =>
         element.exact === false ? `${attribute} CONTAINS '${name}'` : `${attribute} == '${name}'`;
     const visible = options?.anyVisibility ? '1 == 1' : 'visible == 1';
@@ -206,7 +206,7 @@ export class AppiumAdapter implements DevicePort {
         const driver = await this.session(options.bundleId);
 
         // Deterministic fresh state: every open terminates the app first,
-        // Then relaunches it — plainly, or straight onto the deep link.
+        // then relaunches it — plainly, or straight onto the deep link.
         try {
             await driver.executeScript('mobile: terminateApp', [{ bundleId: options.bundleId }]);
         } catch {
@@ -223,12 +223,12 @@ export class AppiumAdapter implements DevicePort {
                 await options.scenario(this.createVisitor(driver));
             } catch (error) {
                 // Evidence on failure: a screenshot of the state the
-                // Scenario died in, referenced from the error itself.
+                // scenario died in, referenced from the error itself.
                 const evidence = await this.captureEvidence(driver);
                 const suffix = evidence ? `\nEvidence: ${evidence}` : '';
                 // A W3 refusal is already a complete, self-explaining
-                // Message — re-wrapping it would print the whole thing
-                // Twice (once inline, once as the cause).
+                // message — re-wrapping it would print the whole thing
+                // twice (once inline, once as the cause).
                 if (error instanceof AmbiguousElementError) {
                     error.message += suffix;
                     throw error;
@@ -328,7 +328,7 @@ export class AppiumAdapter implements DevicePort {
                     if (first !== undefined) {
                         try {
                             // The FOUND element is scrolled into view by id,
-                            // Whatever its container; `mobile: scroll`'s
+                            // whatever its container; `mobile: scroll`'s
                             // `toVisible` is for table and collection views.
                             await driver.executeScript('mobile: scrollToElement', [
                                 { elementId: first.elementId },

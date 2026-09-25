@@ -176,9 +176,9 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
             }
             // Ground is ground, whichever of the four names it carries: a
             // `.test.ts` under `expected/` is a GOLDEN — the file a fixer is
-            // Expected to produce — and one under `fixtures/` is the input of
-            // That same golden. Neither is a spec, and neither reaches a runner
-            // By construction.
+            // expected to produce — and one under `fixtures/` is the input of
+            // that same golden. Neither is a spec, and neither reaches a runner
+            // by construction.
             if (isUnderGround(relative(path, file))) {
                 continue;
             }
@@ -251,8 +251,8 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
     )) {
         const entries = entriesOf(directory);
         // A `.test.tsx` is out of reach, as it is for C1: a rendered unit sits
-        // Beside its component, and a tree of them has no domain folders for
-        // The ground to move into.
+        // beside its component, and a tree of them has no domain folders for
+        // the ground to move into.
         const tests = entries
             .filter((entry) => entry.isFile() && isNodeTestFileName(entry.name))
             .map((entry) => join(directory, entry.name));

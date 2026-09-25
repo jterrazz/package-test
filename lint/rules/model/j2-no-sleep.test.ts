@@ -47,21 +47,21 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
             filename: SPEC_FILE,
         },
         // A double's implementation ends where its call does: the sleep AFTER
-        // One is the test waiting, and still an error.
+        // one is the test waiting, and still an error.
         {
             code: 'const clone = vi.fn(() => 1); await new Promise((resolve) => setTimeout(resolve, 5));',
             errors: [{ messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // An object literal's implementation ends where the function does: the
-        // Sleep in the test body after it is the test waiting.
+        // sleep in the test body after it is the test waiting.
         {
             code: 'const git: GitPort = { clone: async () => await Promise.resolve() }; await new Promise((resolve) => setTimeout(resolve, 5));',
             errors: [{ messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // A property that is not a function is no implementation: the timer is
-        // The test's own, wherever the object it sits in came from.
+        // the test's own, wherever the object it sits in came from.
         {
             code: 'const options = { handle: setTimeout(tick, 5) };',
             errors: [{ messageId: 'sleep' }],
@@ -75,8 +75,8 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
             filename: SPEC_FILE,
         },
         // A timer inside a test DOUBLE stages the world — a clone that settles
-        // Late, so the results come back out of order — and the test is not the
-        // One waiting.
+        // late, so the results come back out of order — and the test is not the
+        // one waiting.
         {
             code: 'const clone = vi.fn(() => new Promise((resolve) => setTimeout(resolve, 5)));',
             filename: SPEC_FILE,

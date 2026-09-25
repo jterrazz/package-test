@@ -355,7 +355,7 @@ function configPresent(
     subject: string,
 ): TokenViolation[] {
     // A delegating `test` script is the MEMBERS' tests, not this package's,
-    // And the walk stops at the next `package.json` for the same reason.
+    // and the walk stops at the next `package.json` for the same reason.
     const testScript = manifest.scripts?.test;
     const ownsTests =
         (typeof testScript === 'string' && !DELEGATING_TEST.test(testScript)) ||
@@ -409,8 +409,8 @@ function seamDependencies(member: {
 }): TokenViolation[] {
     const { label, manifest, memberDir, subject } = member;
     // The workspace is walked UP to rather than taken from the anchor: the run
-    // Started inside the member has to read the same jest as the run started at
-    // The root, or one gate contradicts the other.
+    // started inside the member has to read the same jest as the run started at
+    // the root, or one gate contradicts the other.
     const jestRuns =
         declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));
     return declaredSeams(manifest, jestRuns).map((seam) => ({
@@ -530,7 +530,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         ...(config === null ? [] : simulatedDom(config, rootDir)),
         ...seamDependencies({ label, manifest, memberDir, subject }),
         // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
-        // That never reached a `specs/` tree.
+        // that never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
         ...groundSynonyms(memberDir, label),
         // C8 over the module tests: the tree pass reads the tests under `specs/`.
@@ -597,7 +597,7 @@ export function discoverMembers(rootDir: string): string[] {
             const child = join(dir, entry.name);
             const path = relative(rootDir, child).split(sep).join('/');
             // A directory a pattern claims IS a member, and a member is never
-            // Walked into: what it contains is its own workspace, not this one's.
+            // walked into: what it contains is its own workspace, not this one's.
             if (patterns.some((pattern) => pattern.test(path)) && readManifest(child) !== null) {
                 members.add(child);
                 continue;
@@ -647,13 +647,13 @@ const SPECS_DEPTH = 6;
 export function discoverSpecRoots(rootDir: string): string[] {
     const roots = new Set<string>();
     // A directory with no manifest is no member, and the walk still owes an
-    // Answer about it: a tree named by hand is judged on what it HOLDS.
+    // answer about it: a tree named by hand is judged on what it HOLDS.
     const members = discoverMembers(rootDir);
     for (const member of members.length === 0 ? [rootDir] : members) {
         // A member whose own root IS the tree — a workspace declaring
         // `packages: ['specs']`. Without this, the run the toolchain merges
-        // Into the ratchet walked no tree at all and the member's facet
-        // Findings were reachable only by naming the path by hand.
+        // into the ratchet walked no tree at all and the member's facet
+        // findings were reachable only by naming the path by hand.
         if (basename(member) === 'specs') {
             roots.add(member);
         }

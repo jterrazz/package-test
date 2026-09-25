@@ -133,7 +133,7 @@ export const w5wScenarioSettles: LintRule = {
             before() {
                 const identity = identityOf(context);
                 // A scenario of the ASSEMBLED product: a `.spec.ts`, or — in a tree
-                // That has not taken the suffix yet — a `.test.ts` under `specs/`. A
+                // that has not taken the suffix yet — a `.test.ts` under `specs/`. A
                 // `.test.tsx` is the component's, and out of reach.
                 return identity.role === 'spec' || (identity.role === 'module' && identity.inSpecs);
             },

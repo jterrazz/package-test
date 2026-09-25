@@ -153,7 +153,7 @@ export function projectScreen(xml: string): DeviceScreen {
     }
 
     // Texts start below the application node — the app's own label is chrome,
-    // Not screen content.
+    // not screen content.
     const texts: string[] = [];
     for (const child of root.children) {
         collectTexts(child, texts);

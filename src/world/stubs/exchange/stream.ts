@@ -27,7 +27,7 @@ export function toReadableStream(body: StreamBody): ReadableStream<Uint8Array> {
                 return;
             }
             // The spacing is BETWEEN chunks: the first one is not held back,
-            // Or every streamed reply would start late by one interval.
+            // or every streamed reply would start late by one interval.
             if (body.delayBetweenChunks > 0 && index > 0) {
                 await pause(body.delayBetweenChunks);
             }

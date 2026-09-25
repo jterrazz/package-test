@@ -185,8 +185,8 @@ function judgingProject(): string | undefined {
 /** The published code of a finding — the key the ratchet records it under. */
 function codeOfFinding(violation: TokenViolation): string {
     // The published code is the CONVENTION code — the id's first segment —
-    // Whatever a pass calls itself internally: two spellings of one rule would
-    // Be two lines of debt.
+    // whatever a pass calls itself internally: two spellings of one rule would
+    // be two lines of debt.
     return `${CHECKER_NAMESPACE}(${codeOf(violation.rule)})`;
 }
 
@@ -437,8 +437,8 @@ function projectFindings(root: string): TokenViolation[] {
         const prefix = relative(root, specsRoot);
         for (const violation of runAllChecks(specsRoot)) {
             // A tree pass reports relative to the tree it walked; the
-            // Project-wide run has to say WHICH tree, or two members' findings
-            // Read alike.
+            // project-wide run has to say WHICH tree, or two members' findings
+            // read alike.
             found.push({ ...violation, file: `${prefix}/${violation.file}` });
         }
     }
@@ -724,8 +724,8 @@ if (member !== undefined) {
     const what = `for member ${relative(root, dir) || '.'}`;
     if (dir === root) {
         // The project root's own member run — the one `typescript check`
-        // Always makes — is the ratchet run: it judges, and prints, the whole
-        // Project's counts where a file keeps them.
+        // always makes — is the ratchet run: it judges, and prints, the whole
+        // project's counts where a file keeps them.
         fixProject(root);
         ratchet({
             counted: () => projectFindings(root),

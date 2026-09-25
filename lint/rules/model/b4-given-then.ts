@@ -44,7 +44,7 @@ export const b4GivenThen: LintRule = {
                     return;
                 }
                 // A table's narration sits in the argument list, before the
-                // Title; a plain test's sits in its body.
+                // title; a plain test's sits in its body.
                 const scope = testCalleeHasModifier(child(node, 'callee'), 'each')
                     ? node
                     : callback;

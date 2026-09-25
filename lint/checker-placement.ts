@@ -141,7 +141,7 @@ export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
         const rel = relative(specsRoot, from);
         const first = rel.split(/[/\\]/u)[0] ?? '';
         // The tree the file sits in, as the reader sees it: a facet folder when
-        // There is one, and `specs/` itself when the tree IS one facet's.
+        // there is one, and `specs/` itself when the tree IS one facet's.
         const where = FACETS.has(first) ? `specs/${first}/` : 'specs/';
         return {
             file: rel,
@@ -182,20 +182,20 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         const parts = relative(specsRoot, path).split(/[/\\]/u);
         const facet = parts[0];
         // A file loose at the specs root has no facet to belong to (C1 owns
-        // That), and a non-facet first level is a repository suite — unless the
-        // Tree itself is one facet's, which its root specification says.
+        // that), and a non-facet first level is a repository suite — unless the
+        // tree itself is one facet's, which its root specification says.
         if (!rooted && (parts.length < 2 || facet === undefined || !FACETS.has(facet))) {
             continue;
         }
         // A `<module>.test.ts` beside the `<module>.ts` it covers is I2's one
-        // Pairing, legal anywhere — ground that is CODE keeps its unit test.
+        // pairing, legal anywhere — ground that is CODE keeps its unit test.
         if (parts.some((part) => isGroundName(part))) {
             continue;
         }
         // A file that reaches no runner is C18's, and C18 says to MOVE it
-        // Beside its module. Renaming it here would answer the other rule's
-        // Finding with the opposite fix, and `--fix` would turn a module test
-        // Into a spec the tree then has to explain.
+        // beside its module. Renaming it here would answer the other rule's
+        // finding with the opposite fix, and `--fix` would turn a module test
+        // into a spec the tree then has to explain.
         if (!reachesRunner(textOf(path))) {
             continue;
         }

@@ -72,8 +72,8 @@ function isValueReference(node: AstNode): boolean {
     }
     if (parent.type === 'UnaryExpression' && parent.operator === 'typeof') {
         // `typeof window === 'undefined'` REACHES no document: it is how a
-        // Module states it runs in both runtimes, and the test of that guard
-        // Is a module test by definition.
+        // module states it runs in both runtimes, and the test of that guard
+        // is a module test by definition.
         return false;
     }
     if (parent.type === 'MemberExpression') {

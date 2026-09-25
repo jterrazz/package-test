@@ -81,10 +81,10 @@ describe('docs-typecheck', () => {
         const blocks = frameworkBlocks();
         expect(blocks.length).toBeGreaterThan(0);
         // And - the rendered examples are among them: a chapter whose examples
-        // Are all JSX must not be the one this guard silently skips
+        // are all JSX must not be the one this guard silently skips
         expect(blocks.some((block) => block.jsx)).toBeTruthy();
         // And - so are the mobile samples: the facet no CI provisions is the
-        // One whose samples nothing else would ever compile
+        // one whose samples nothing else would ever compile
         expect(blocks.some((block) => block.code.includes('specification.mobile'))).toBe(true);
 
         // Then - tsc --noEmit accepts them all (no drift from the real API)

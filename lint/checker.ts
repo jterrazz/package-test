@@ -227,7 +227,7 @@ export function findUnknownTokens(text: string): { line: number; token: string }
                 continue;
             }
             // Not a well-formed token: flag only when it starts with a KNOWN
-            // Kind followed by junk (a malformed ref), never arbitrary noise.
+            // kind followed by junk (a malformed ref), never arbitrary noise.
             const kind = LEADING_WORD.exec(inner)?.groups?.kind;
             if (kind !== undefined && KNOWN.has(kind) && inner !== kind) {
                 violations.push({ line: index + 1, token: match[0] });
@@ -279,7 +279,7 @@ function decodeText(path: string): null | string {
         return null;
     }
     // Reject bytes that are not valid UTF-8 text (NUL or U+FFFD replacement
-    // Char) — a binary snapshot carries no token grammar.
+    // char) — a binary snapshot carries no token grammar.
     return text.includes('\u0000') || text.includes('\uFFFD') ? null : text;
 }
 
@@ -414,8 +414,8 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 continue;
             }
             // A spec document lives BESIDE its test, not under ground — it IS
-            // The scenario, not material a scenario stands on — so it is
-            // Checked wherever the walk finds it, and C16 says where that is.
+            // the scenario, not material a scenario stands on — so it is
+            // checked wherever the walk finds it, and C16 says where that is.
             if (entry.name.endsWith(SPEC_EXTENSION)) {
                 if (rel.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))) {
                     violations.push({
@@ -504,9 +504,9 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 });
             }
             // d5 reaches GROUND, not documents alone: a golden that pins a
-            // Loopback port, a temp directory or somebody's home passed once,
-            // On one machine — the same literal, in the other half of the
-            // Same tree.
+            // loopback port, a temp directory or somebody's home passed once,
+            // on one machine — the same literal, in the other half of the
+            // same tree.
             for (const [index, line] of text.split('\n').entries()) {
                 const volatileLiteral = volatileLiteralIn(line);
                 if (volatileLiteral === undefined) {

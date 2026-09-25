@@ -136,7 +136,7 @@ export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
     // Caller detection must run before any await — async resumption drops
-    // The calling file's frames from the stack.
+    // the calling file's frames from the stack.
     const callerDir = getCallerDir();
     await registerMatchers();
 
@@ -144,7 +144,7 @@ export async function startMobile<Services extends ServiceRecord>(
     const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
 
     // The declared services come up before the app is ever launched: a dev
-    // Build reaches its bundler on the first frame it renders.
+    // build reaches its bundler on the first frame it renders.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the empty record stands for an absent one, and every facet states the default the same way
     const services = (options.services ?? {}) as Services;
     let started: null | StartedServices = null;
@@ -158,7 +158,7 @@ export async function startMobile<Services extends ServiceRecord>(
     }
 
     // The stub starts last (nothing can fail after it), so a constructor
-    // Refusal never leaves an orphaned server keeping the process alive.
+    // refusal never leaves an orphaned server keeping the process alive.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -167,13 +167,13 @@ export async function startMobile<Services extends ServiceRecord>(
     }
 
     // One driver session per runner, opened lazily on the first `.open()` —
-    // Or, under a server that outlives the file (a declared one, or the run's
-    // Own) in a `mobile()` project, one per RUN: the project's global setup
-    // Provides the ledger the session is recorded in. A server this runner
-    // Spawned stops with it, so its session cannot outlive the file. The
+    // or, under a server that outlives the file (a declared one, or the run's
+    // own) in a `mobile()` project, one per RUN: the project's global setup
+    // provides the ledger the session is recorded in. A server this runner
+    // spawned stops with it, so its session cannot outlive the file. The
     // Appium/webdriverio integration stays a lazy import
     // (CONVENTIONS I1) — the dependency is optional and only loaded when a
-    // Spec actually opens the app.
+    // spec actually opens the app.
     let device: DevicePort | null = null;
     const getDevice = async (): Promise<DevicePort> => {
         if (!device) {

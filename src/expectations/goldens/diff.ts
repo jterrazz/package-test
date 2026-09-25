@@ -132,7 +132,7 @@ function renderLines(
 
         if (exp !== undefined && act !== undefined && equals(exp, act)) {
             // The line MATCHED — render the expected form, which is the one
-            // Carrying the token, and mark nothing.
+            // carrying the token, and mark nothing.
             rendered.push(`  ${exp}`);
             continue;
         }

@@ -21,7 +21,7 @@ export type { ChainContext } from './kernel/context/with.capability.js';
 export type { TestSettings } from './kernel/config/settings.js';
 
 // ── The disk: a string is a value, and what a test stands on is named by one
-// Of these two — the only argument a verb that reads the disk accepts ──
+// of these two — the only argument a verb that reads the disk accepts ──
 export {
     directory,
     type DiskDirectory,
@@ -89,7 +89,7 @@ export { clock, type PinnedClock } from './world/clock/clock.js';
 export { mockOf, type MockOfOptions, type MockPort } from './world/mocks/mock-of.js';
 
 // ── The elements: ONE vocabulary for visit (website), render (component) and
-// Open (mobile); landmarks are website/component-only and refuse on a mobile verb ──
+// open (mobile); landmarks are website/component-only and refuse on a mobile verb ──
 export {
     banner,
     button,
@@ -129,8 +129,8 @@ export {
     type MatcherKind,
 } from './expectations/tokens/match.js';
 // Results and accessors are TYPES, not values: a spec never constructs one and
-// Never asks an `instanceof` — a result is what a terminal action HANDS BACK,
-// And `text()` is the one that hands an accessor out.
+// never asks an `instanceof` — a result is what a terminal action HANDS BACK,
+// and `text()` is the one that hands an accessor out.
 export type { BaseResult, FileAccessor } from './expectations/result.js';
 export type { CliResult, DockerSpecConfig } from './expectations/command/cli.result.js';
 export type { ContainerAccessor } from './expectations/command/container.js';

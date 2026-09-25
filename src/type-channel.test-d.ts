@@ -34,8 +34,8 @@ type Assert<Row extends true> = Row;
 type Carries<Verbs, Verb extends string> = Verb extends keyof Verbs ? true : false;
 
 // W6 — the verb set is the boundary between the facets: a page is navigated,
-// A screen is tapped, and neither vocabulary borrows the other's word. `goto`
-// Is the page's alone: a component has no address to navigate to.
+// a screen is tapped, and neither vocabulary borrows the other's word. `goto`
+// is the page's alone: a component has no address to navigate to.
 export type WebsiteGoes = Assert<Carries<Visitor, 'goto'>>;
 export type MobileNeverGoes = Assert<Carries<MobileVisitor, 'goto'> extends false ? true : false>;
 export type ComponentNeverGoes = Assert<
@@ -43,7 +43,7 @@ export type ComponentNeverGoes = Assert<
 >;
 
 // `rerender` and `unmount` are what a PARENT does to a component: swap its
-// Props, take it off the screen. Neither is anything a visitor does to a page.
+// props, take it off the screen. Neither is anything a visitor does to a page.
 export type ComponentRerenders = Assert<Carries<ComponentVisitor, 'rerender'>>;
 export type ComponentUnmounts = Assert<Carries<ComponentVisitor, 'unmount'>>;
 export type WebsiteNeverRerenders = Assert<
@@ -55,9 +55,9 @@ export type MobileNeverRerenders = Assert<
 >;
 
 // `gone` is on both rendered facets — the absence primitive `see` cannot
-// State — and never on a simulator's visitor: the four states of a control are
-// Modifiers of the ONE descriptor type every facet shares, so the boundary is
-// The VERB set, not the ref.
+// state — and never on a simulator's visitor: the four states of a control are
+// modifiers of the ONE descriptor type every facet shares, so the boundary is
+// the VERB set, not the ref.
 export type WebsiteSeesAbsence = Assert<Carries<Visitor, 'gone'>>;
 export type ComponentSeesAbsence = Assert<Carries<ComponentVisitor, 'gone'>>;
 export type MobileNeverAsksAboutAbsence = Assert<
@@ -74,7 +74,7 @@ export type ComponentWraps = Assert<Carries<ComponentChain, 'wrap'>>;
 /** Every row of the channel, as one function the compiler reads. */
 export async function typeRows(): Promise<void> {
     // A8 — the `services` record types the factory argument: a key that is not
-    // In the record is not a service, and the failure belongs at the call.
+    // in the record is not a service, and the failure belongs at the call.
     await specification.api({
         server: (services) =>
             // @ts-expect-error A8 — `cache` is not a key of the services record [`Property 'cache' does not exist on type '{ db: PostgresHandle; }'`]
@@ -83,14 +83,14 @@ export async function typeRows(): Promise<void> {
     });
 
     // A11 — `server` and `url` state two different subjects (a site this run
-    // Starts, a site already running), so the pair is inexpressible.
+    // starts, a site already running), so the pair is inexpressible.
     await specification.website(
         // @ts-expect-error A11 — `server` and `url` are mutually exclusive [`Types of property 'url' are incompatible`]
         { server: { command: 'npm start' }, url: 'https://site.test' },
     );
 
     // A2 — a constructor is named for its facet, and every facet name is
-    // Singular: the plural 17 retired stays retired.
+    // singular: the plural 17 retired stays retired.
     // @ts-expect-error A2 — `jobs` is retired: `specification.job()` [`Property 'jobs' does not exist on type 'Specification'`]
     await specification.jobs({ jobs: [] });
 
@@ -99,14 +99,14 @@ export async function typeRows(): Promise<void> {
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
 
     // B3 — a chain carries no label: the test's name is the sentence, and a
-    // Second one inside the chain would be a second place to read it.
+    // second one inside the chain would be a second place to read it.
     // @ts-expect-error B3 — a chain carries no label [`Property 'label' does not exist on type 'ApiSpecification<never>'`]
     api.label('the happy path');
 
     // B2 — a string is a value and the disk is `file()` or `directory()`: a
-    // Bare string where a file is meant, a file with the wrong tail, a path that
-    // Is not relative, a directory without its `/` — none of them compiles. The
-    // Golden rows are D14's, below.
+    // bare string where a file is meant, a file with the wrong tail, a path that
+    // is not relative, a directory without its `/` — none of them compiles. The
+    // golden rows are D14's, below.
     // @ts-expect-error B2 — a bare string is a value, not a file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
     api.seed('./seeds/x.sql');
     // @ts-expect-error B2 — a seed's path ends in `.sql` [`Type '"./seeds/x.json"' is not assignable to type 'RelativePath<".sql">'`]
@@ -129,7 +129,7 @@ export async function typeRows(): Promise<void> {
     await cli.exec(file('./fixtures/args.txt'));
 
     // B2 — the verbs 17 retired stay retired: the disk is an ARGUMENT of the
-    // Simple verb, never a second verb named for it.
+    // simple verb, never a second verb named for it.
     // @ts-expect-error B2 — `seedFile` is retired: `seed(file(…))` [`Property 'seedFile' does not exist on type 'ApiSpecification<never>'`]
     api.seedFile('./seeds/x.sql');
     // @ts-expect-error B2 — `requestFile` is retired: `request(file(…))` [`Property 'requestFile' does not exist on type 'ApiSpecification<never>'`]
@@ -142,7 +142,7 @@ export async function typeRows(): Promise<void> {
     await cli.runFile('./case.spec.yaml');
 
     // D14 — the golden half of `toMatch` takes the disk its subject has: a
-    // Value subject has none, a stream's is a file, a tree's is a directory.
+    // value subject has none, a stream's is a file, a tree's is a directory.
     const out = await cli.exec();
     // @ts-expect-error D14 — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
     expect('abc').toMatch(file('./expected/abc.txt'));
@@ -155,14 +155,14 @@ export async function typeRows(): Promise<void> {
     await expect(out.filesystem).toMatch(directory('./expected/tree/'));
 
     // What the rows are written FOR — the disk where the disk is meant, a seed
-    // Always among it.
+    // always among it.
     await api.seed(file('./seeds/orders.sql')).post('/orders', file('./requests/order.json'));
     await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/a.json')).exec();
 
     const result = await api.get('/orders/1');
 
     // B12 — a route with parameters is written as its template, and the
-    // Template types the params: every name it holds, and no other.
+    // template types the params: every name it holds, and no other.
     await api.get('/orders/:id/lines/:line?full=1', { params: { id: 1, line: 'a' } });
     await api.post('/orders/:id/lines', file('./requests/line.json'), { params: { id: 1 } });
     await api.get('/orders/latest', { params: {} });
@@ -174,17 +174,17 @@ export async function typeRows(): Promise<void> {
     await api.delete('/orders/:id', { params: { orderId: 1 } });
 
     // B1 — exactly one terminal action closes a chain: what a terminal action
-    // Answers is a RESULT, and a result has no verbs to continue with.
+    // answers is a RESULT, and a result has no verbs to continue with.
     // @ts-expect-error B1 — one terminal action closes the chain [`Property 'get' does not exist on type 'HttpResult'`]
     await result.get('/orders/2');
 
     // D1 — a result accessor is read-only: the answer a run produced is
-    // Evidence, and a test that can rewrite its evidence proves nothing.
+    // evidence, and a test that can rewrite its evidence proves nothing.
     // @ts-expect-error D1 — a result accessor is read-only [`Cannot assign to 'status' because it is a read-only property`]
     result.status = 200;
 
     // M2 — `mockOf<Port>()` needs the port: the type argument IS the contract
-    // The double stands for, and without it the double has no surface at all.
+    // the double stands for, and without it the double has no surface at all.
     const anonymous = mockOf();
     // @ts-expect-error M2 — a double with no port has nothing to call [`Property 'send' does not exist on type 'object'`]
     anonymous.send('reader@site.test');

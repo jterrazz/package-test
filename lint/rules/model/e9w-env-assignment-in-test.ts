@@ -46,7 +46,7 @@ export const e9wEnvAssignmentInTest: LintRule = {
                 }
             },
             // Deleting a variable of the environment is a write too: it is
-            // Gone for every file the worker runs afterwards.
+            // gone for every file the worker runs afterwards.
             UnaryExpression(node: AstNode) {
                 if (node.operator === 'delete' && isEnvTarget(child(node, 'argument'))) {
                     context.report({ messageId: 'rawAssignment', node });

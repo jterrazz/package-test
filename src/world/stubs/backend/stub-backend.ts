@@ -193,7 +193,7 @@ export class StubBackend {
         }
         const url = request.url ?? '/';
         // The body is read off the stream so `match` predicates and body
-        // Filters see the payload — the stub is a real server, not MSW.
+        // filters see the payload — the stub is a real server, not MSW.
         const observed: MatchableRequest = {
             body: await readBody(request),
             headers,
@@ -224,16 +224,16 @@ export class StubBackend {
         const { body } = reply;
         if (isStreamBody(body)) {
             // A declared stream is written piece by piece with the connection
-            // Held open — the one body this server must not serialise, because
-            // What the client is specified against is the order it reads in.
+            // held open — the one body this server must not serialise, because
+            // what the client is specified against is the order it reads in.
             response.writeHead(status, {
                 ...cors,
                 'content-type': body.contentType,
                 ...reply.headers,
             });
             // Piped rather than looped over: the stream's own plumbing writes
-            // Each piece as it is produced and ends the response after the
-            // Last one, which is what closes the connection.
+            // each piece as it is produced and ends the response after the
+            // last one, which is what closes the connection.
             await toReadableStream(body).pipeTo(
                 new WritableStream<Uint8Array>({
                     close() {

@@ -33,10 +33,10 @@ const SHA_SOURCE = '[0-9a-f]{7,64}';
 const HEX_SOURCE = '[0-9a-fA-F]+';
 const BASE64_SOURCE = '[A-Za-z0-9+/]+={0,2}';
 // 0-65535 enforced in the pattern itself so embedded {{port}} placeholders
-// Reject out-of-range values ("99999") consistently with isPortValue.
+// reject out-of-range values ("99999") consistently with isPortValue.
 const PORT_SOURCE = String.raw`(?:6553[0-5]|655[0-2]\d|65[0-4]\d{2}|6[0-4]\d{3}|[1-5]\d{4}|\d{1,4})`;
 // Each octet is 0-255, enforced in the pattern itself so embedded {{ip}}
-// Placeholders reject out-of-range values ("999.1.1.1") — parity with {{port}}.
+// placeholders reject out-of-range values ("999.1.1.1") — parity with {{port}}.
 const IP_OCTET = String.raw`(?:25[0-5]|2[0-4]\d|1\d\d|[1-9]?\d)`;
 const IP_SOURCE = String.raw`(?:${IP_OCTET}\.){3}${IP_OCTET}`;
 const URL_SOURCE = String.raw`https?:\/\/[^\s"'<>]+`;
@@ -109,7 +109,7 @@ function capturedEquals(a: unknown, b: unknown): boolean {
     }
     if (a !== null && b !== null && typeof a === 'object' && typeof b === 'object') {
         // Stable (sorted-key) form: two captures of the same object must be
-        // Equal regardless of key insertion order.
+        // equal regardless of key insertion order.
         return stableStringify(a) === stableStringify(b);
     }
     return false;
@@ -260,7 +260,7 @@ function placeholderStringMatches(expected: string, actual: unknown, scope: Capt
     const parsed = parsePlaceholderString(expected, scope);
 
     // Whole-string single placeholder: typed match against the raw actual
-    // Value (numbers stay numbers, objects allowed for {{any}}).
+    // value (numbers stay numbers, objects allowed for {{any}}).
     if (parsed.single) {
         if (!kindMatches(parsed.single.kind, actual, scope)) {
             return false;
@@ -455,7 +455,7 @@ export function mergePreservingPlaceholders(
 
     function merge(prev: unknown, act: unknown): unknown {
         // Placeholders match against the RAW actual (so `{{workdir}}` sees the
-        // Real cwd); a non-matching leaf falls back to the substituted actual.
+        // real cwd); a non-matching leaf falls back to the substituted actual.
         if (typeof prev === 'string' && hasPlaceholders(prev)) {
             return placeholderStringMatches(prev, act, scope) ? prev : subst(act);
         }
@@ -509,8 +509,8 @@ export function mergeTextPreservingPlaceholders(
     const consumed = new Set<number>();
 
     // A previous line covers an actual one when, read as a placeholder
-    // Pattern, it matches it — either the substituted form (a `{{workdir}}`
-    // Token against the token) or the raw one (the token against the real cwd).
+    // pattern, it matches it — either the substituted form (a `{{workdir}}`
+    // token against the token) or the raw one (the token against the real cwd).
     const covers = (prevIndex: number, actualIndex: number): boolean => {
         const prev = prevLines[prevIndex];
         if (prev === undefined || !hasPlaceholders(prev)) {

@@ -37,7 +37,7 @@ function landmarkOf(match: ElementMatch): string | undefined {
 function formatMatch(match: ElementMatch, index: number): string {
     const attribute = match.detail ? ` ${quoteDetail(match)}` : '';
     // The accessible name is what a role descriptor MATCHED on. When it is not
-    // The text — an `aria-label` — the text alone names the wrong thing.
+    // the text — an `aria-label` — the text alone names the wrong thing.
     const named = match.accessibleName ? `  named ${JSON.stringify(match.accessibleName)}` : '';
     const context = match.context ? `  in <${match.context}>` : '';
     return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${named}${context}`;
@@ -70,8 +70,8 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
     // A landmark holding EVERY candidate narrows nothing, and offering it reads
-    // As a fix while leaving the spec exactly as ambiguous. Only the ones that
-    // Cut the set are offered, each with what it leaves.
+    // as a fix while leaving the spec exactly as ambiguous. Only the ones that
+    // cut the set are offered, each with what it leaves.
     const narrowing = landmarkCounts(matches).filter(([, count]) => count < matches.length);
     if (!element.scope) {
         const [first, ...rest] = narrowing;
@@ -85,8 +85,8 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     }
 
     // Only worth offering to a descriptor that opted OUT: exact is the default,
-    // So telling an ordinary descriptor to "match the name whole" would be
-    // Telling it to do what it is already doing.
+    // so telling an ordinary descriptor to "match the name whole" would be
+    // telling it to do what it is already doing.
     if (element.exact === false && element.name !== undefined) {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {

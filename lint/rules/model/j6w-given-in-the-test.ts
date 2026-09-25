@@ -30,9 +30,9 @@ function restoreOnly(hook: AstNode): boolean {
         return false;
     }
     // `afterAll(cleanup)`, `afterEach(vi.restoreAllMocks)` — the restore handed
-    // Over by name, A4's own idiom. Reading the bare identifier alone made a
+    // over by name, A4's own idiom. Reading the bare identifier alone made a
     // `vi` member fall through to the walk, which finds no call at all and
-    // Reported the teardown as doing more than giving back.
+    // reported the teardown as doing more than giving back.
     const handedOver = memberPath(callback) ?? identifierName(callback);
     if (handedOver !== undefined) {
         return RESTORES.has(handedOver);

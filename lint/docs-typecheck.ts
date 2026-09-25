@@ -61,7 +61,7 @@ export function isFrameworkBlock(block: DocBlock): boolean {
             ALLOWED_NEIGHBOURS.has(source),
     );
     // A fragment leaning on ambient vitest globals it never imports is prose,
-    // Not a runnable example — checking it would only raise phantom TS2304s.
+    // not a runnable example — checking it would only raise phantom TS2304s.
     const selfContained = !TEST_GLOBAL.test(code) || sources.includes('vitest');
     return importsResolve && selfContained;
 }

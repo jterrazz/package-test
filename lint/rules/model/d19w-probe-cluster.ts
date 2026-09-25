@@ -101,8 +101,8 @@ export const d19wProbeCluster: LintRule = {
                         return;
                     }
                     // A negated probe states an ABSENCE — three of them are
-                    // Three things the output must not carry, which no golden
-                    // Of what it does carry can say.
+                    // three things the output must not carry, which no golden
+                    // of what it does carry can say.
                     if (PROBES.has(assertion.matcher) && !assertion.modifiers.includes('not')) {
                         probes.set(subject, (probes.get(subject) ?? 0) + 1);
                     }

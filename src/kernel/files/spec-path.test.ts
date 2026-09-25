@@ -74,8 +74,8 @@ describe('spec-path', () => {
     });
 
     // RUNTIME D14 — a plain string has no golden: vitest's own toMatch, handed a
-    // File() where no runner registered the golden, is refused instead of
-    // Reading the path object as a pattern.
+    // file() where no runner registered the golden, is refused instead of
+    // reading the path object as a pattern.
     test('the disk — a golden is no value — toMatch(file()) on a plain string is refused, with no runner to route it', () => {
         // Given - a string holding every letter of `[object Object]`, the pattern a path object would read as
         const text = 'the object of this test';

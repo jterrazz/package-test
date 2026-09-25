@@ -80,7 +80,7 @@ export class ServedProcess {
         this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
         // Banner mode: the SERVER picks the port and announces it, so nothing
-        // Is injected as PORT — the framework reads the capture group instead.
+        // is injected as PORT — the framework reads the capture group instead.
         const port = banner ? null : (this.options.port ?? (await findFreePort()));
         const timeout = this.options.timeout ?? DEFAULT_READY_TIMEOUT;
 

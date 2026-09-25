@@ -29,8 +29,8 @@ export class RenderResult {
         tree: string;
     }) {
         // The test's own directory is resolved SERVER-side by the golden
-        // Commands (`context.testPath`), so a page-captured accessor carries no
-        // Directory of its own — there is no disk here to resolve one against.
+        // commands (`context.testPath`), so a page-captured accessor carries no
+        // directory of its own — there is no disk here to resolve one against.
         this.console = new RenderedText(streams.console, 'console', '');
         this.content = new RenderedText(streams.content, 'content', '');
         this.errors = new RenderedText(streams.errors, 'errors', '');

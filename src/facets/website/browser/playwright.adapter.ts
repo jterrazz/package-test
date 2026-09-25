@@ -81,9 +81,9 @@ const FIELD_ROLES = [
 function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // Playwright's own option bags are exact-optional: an absent `name` is no
-    // Name filter at all. `exact` is the framework's default, not playwright's
+    // name filter at all. `exact` is the framework's default, not playwright's
     // — a name designates the accessible name WHOLE, and `{ exact: false }` is
-    // The opt-out.
+    // the opt-out.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -100,8 +100,8 @@ function locate(root: MatchScope, element: ElementRef): Locator {
         return scope.getByText(name, { exact });
     }
     // Every other kind IS an ARIA role — landmark or not — and the vocabulary
-    // Names each after the role it locates, so one branch answers for all of
-    // Them and a descriptor added to the vocabulary needs nothing here.
+    // names each after the role it locates, so one branch answers for all of
+    // them and a descriptor added to the vocabulary needs nothing here.
     return scope.getByRole(
         element.kind,
         element.name === undefined ? { exact } : { exact, name: element.name },
@@ -118,7 +118,7 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
     return await locator.evaluateAll(
         (nodes, { landmarks, limit }) => {
             // The landmark's accessible name, as the role engine reads it: its
-            // Label, else the text of what its `aria-labelledby` names.
+            // label, else the text of what its `aria-labelledby` names.
             // oxlint-disable-next-line unicorn/consistent-function-scoping -- this function is serialized into the page: a helper at module scope never reaches it
             const nameOf = (landmark: Element | null | undefined): string | undefined => {
                 const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
@@ -234,7 +234,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
         return await locator.inputValue({ timeout: VALUE_POLL_MS });
     } catch (error) {
         // A strict-mode violation is the W3 refusal and belongs to `act()`;
-        // Anything else means the field is not on the page (yet).
+        // anything else means the field is not on the page (yet).
         if (isStrictViolation(error)) {
             throw error;
         }
@@ -440,10 +440,10 @@ export class PlaywrightAdapter implements BrowserPort {
         this.contexts.add(context);
 
         // Cross-origin policy: with 'block', any request leaving the site
-        // Under test is aborted — analytics and CDNs never make the visit
-        // Non-deterministic (the browser-side analog of strict intercepts).
+        // under test is aborted — analytics and CDNs never make the visit
+        // non-deterministic (the browser-side analog of strict intercepts).
         // The declared stub backend is a legitimate cross-origin target and
-        // Stays reachable through `allowedOrigins`.
+        // stays reachable through `allowedOrigins`.
         if (options.external === 'block') {
             const allowed = new Set([
                 new URL(options.baseUrl).origin,
@@ -462,7 +462,7 @@ export class PlaywrightAdapter implements BrowserPort {
             const page = await context.newPage();
             // The page's own calendar, pinned before the first byte is parsed:
             // A script reading `Date.now()` on load must see the stated instant,
-            // Not the moment the navigation happened to start.
+            // not the moment the navigation happened to start.
             if (options.clock !== undefined) {
                 await page.clock.setFixedTime(new Date(options.clock));
             }
@@ -471,8 +471,8 @@ export class PlaywrightAdapter implements BrowserPort {
                 consoleMessages.push({ text: message.text(), type: message.type() });
             });
             // An exception nothing in the page caught is an error of the
-            // Visit, spelled as the browser's own `ErrorEvent` spells it — the
-            // Line a mounted component's error stream carries.
+            // visit, spelled as the browser's own `ErrorEvent` spells it — the
+            // line a mounted component's error stream carries.
             page.on('pageerror', (error) => {
                 consoleMessages.push({
                     text: `Uncaught ${error.name}: ${error.message}`,
@@ -487,12 +487,12 @@ export class PlaywrightAdapter implements BrowserPort {
                     await options.scenario(createVisitor(page, options.baseUrl));
                 } catch (error) {
                     // Evidence on failure: a screenshot of the state the
-                    // Scenario died in, referenced from the error itself.
+                    // scenario died in, referenced from the error itself.
                     const evidence = await this.captureEvidence(page);
                     const suffix = evidence ? `\nEvidence: ${evidence}` : '';
                     // A W3 refusal is already a complete, self-explaining
-                    // Message — re-wrapping it would print the whole thing
-                    // Twice (once inline, once as the cause).
+                    // message — re-wrapping it would print the whole thing
+                    // twice (once inline, once as the cause).
                     if (error instanceof AmbiguousElementError) {
                         error.message += suffix;
                         throw error;
@@ -531,8 +531,8 @@ export class PlaywrightAdapter implements BrowserPort {
             });
 
             // The ARIA snapshot comes from the same Playwright method the
-            // Component facet's server command calls, so both facets speak ONE
-            // Dialect and a page tree and a component tree are comparable.
+            // component facet's server command calls, so both facets speak ONE
+            // dialect and a page tree and a component tree are comparable.
             const tree = await page.locator('body').ariaSnapshot();
 
             return {

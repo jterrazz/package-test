@@ -17,7 +17,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees (the
-// Violation fixture has a package.json at its root, so the walk-up derives it).
+// violation fixture has a package.json at its root, so the walk-up derives it).
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 const SPEC_FILE = `${SPECS_LINT}/a9w-redundant-root/fixtures/violation/specs/cli/rooted.specification.ts`;
 

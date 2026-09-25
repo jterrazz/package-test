@@ -49,7 +49,7 @@ ruleTester.run(
                 filename: SPEC,
             },
             // The bounded heuristic: the helper owns the try/catch, so the
-            // Enclosing function is where both halves meet.
+            // enclosing function is where both halves meet.
             {
                 code: `const message = catchMessage(() => {
                 expect(result.stdout).toMatch(file('./expected/wrong.txt'));

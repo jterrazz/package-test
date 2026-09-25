@@ -70,7 +70,7 @@ function producesStub(declaration: AstNode | undefined, namespaces: ReadonlySet<
         declaration.type === 'FunctionDeclaration' ||
         declaration.type === 'FunctionExpression' ||
         // `export default newsroomArticle` — the value is built above; the type
-        // Channel (Stub) covers what the AST cannot follow here.
+        // channel (Stub) covers what the AST cannot follow here.
         declaration.type === 'Identifier'
     );
 }
@@ -281,7 +281,7 @@ function checkComposite(context: Context, program: AstNode, base: string): void 
             if (exportsDefault(node)) {
                 hasDefault = true;
                 // `export { default } from './other.stubs.js'` — a
-                // Composition re-export is a legitimate way to build the world.
+                // composition re-export is a legitimate way to build the world.
                 composed =
                     stringValue(node.source as AstNode | undefined) !== undefined || composed;
             }
@@ -338,7 +338,7 @@ function checkOf(context: Context): Check | undefined {
     const file = context.physicalFilename;
     const parts = segmentsOf(context);
     // `src/**/stubs/` is the framework's own stub MODULE, not a
-    // Feature's stub tree — only specs carry the convention.
+    // feature's stub tree — only specs carry the convention.
     if (!identityOf(context).inSpecs) {
         return undefined;
     }

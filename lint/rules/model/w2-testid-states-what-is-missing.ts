@@ -48,7 +48,7 @@ export const w2TestIdStatesWhatIsMissing: LintRule = {
                 return true;
             }
             // A comment the source text scan cannot see (a block form, or one
-            // The formatter moved): ask the comment list for the same window.
+            // the formatter moved): ask the comment list for the same window.
             return comments.some((comment) => {
                 const at = commentLine(context, comment);
                 return (at === line || at === line - 1) && REASON.test(`//${comment.value}`);

@@ -78,7 +78,7 @@ function indexOf(top: string, paths: string[], index: string, listedAt: number):
     const children = new Map<string, Set<string>>();
     for (const path of paths) {
         // An untracked nested repository is listed as `sub/`: the trailing
-        // Separator names no child.
+        // separator names no child.
         const segments = path.split('/').filter((segment) => segment !== '');
         let parent = top;
         for (const segment of segments) {
@@ -148,7 +148,7 @@ function workTreeOf(dir: string, read: string): null | WorkTree {
         stdio: ['ignore', 'pipe', 'ignore'],
     });
     // `--show-cdup` prints an empty line at the top level: the two answers are
-    // Read by position, never trimmed together.
+    // read by position, never trimmed together.
     const [cdup = '', index = ''] = (located.stdout ?? '').split('\n');
     const top = resolve(dir, cdup);
     const tree =

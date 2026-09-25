@@ -202,8 +202,8 @@ const citingFiles = (): string[] => {
         for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
             // A decision record is written once and never edited: it names
-            // The rules its decision REMOVED, and those ids resolve to
-            // Nothing by design.
+            // the rules its decision REMOVED, and those ids resolve to
+            // nothing by design.
             if (path.endsWith('.md') && !path.startsWith('docs/decisions/')) {
                 found.push(path);
             }
@@ -235,11 +235,11 @@ const knownNames = (): Set<string> =>
         ...SELF_PASSES,
         ...catalog.map((entry) => entry.name),
         // A fixture tree is named after the rule it stands for, with a tail
-        // Saying which case it holds — the inventory meta-test already pairs
-        // Each of them with its rule, so the directory listing IS the vocabulary.
+        // saying which case it holds — the inventory meta-test already pairs
+        // each of them with its rule, so the directory listing IS the vocabulary.
         ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
         // A golden is named after the case it holds, which is the rule's
-        // Name plus what the run did to the tree.
+        // name plus what the run did to the tree.
         ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
             file.replace(/\.[a-z]+$/u, ''),
         ),
@@ -317,8 +317,8 @@ const e2eSpecIds = new Set([
     ...withDocuments,
     ...entries
         // A spec's own ground is material it stands on, never a spec: the
-        // Reach fixture holds a file in every role, and each one is named
-        // For what it is rather than for a rule.
+        // reach fixture holds a file in every role, and each one is named
+        // for what it is rather than for a rule.
         .filter((entry) => entry.endsWith('.test.ts') && !entry.includes('fixtures/'))
         .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
 ]);
@@ -791,8 +791,8 @@ describe('plugin', () => {
         for (const file of [...citingFiles(), ...citingSources()]) {
             for (const line of read(file).split('\n')) {
                 // A migration sentence NAMES what it retired — that is what it
-                // Is for, and a consumer's config still naming one is what it
-                // Warns about. The names on that line are gone by design.
+                // is for, and a consumer's config still naming one is what it
+                // warns about. The names on that line are gone by design.
                 if (line.includes('no longer exist')) {
                     continue;
                 }
@@ -862,8 +862,8 @@ describe('plugin', () => {
             ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name) || SELF_PASSES.has(entry.name)],
             [
                 // The row names the upstream rule it rests on, and the proof is
-                // An assertion on THAT rule's resolved option — a file-level
-                // Check passed for any row as long as one assertion existed.
+                // an assertion on THAT rule's resolved option — a file-level
+                // check passed for any row as long as one assertion existed.
                 'upstream',
                 (entry) =>
                     entry.upstream !== undefined &&

@@ -54,13 +54,13 @@ ruleTester().run('e4w-project-binding', asOxlintRule(e4wProjectBinding), {
             filename: CONFIG,
         },
         // A checkout that lives under a folder called `specs`: the package
-        // Root bounds the search, so `unit` collects its own `src/`.
+        // root bounds the search, so `unit` collects its own `src/`.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'unit', include: ['src/**/*.test.ts'] }] } });`,
             filename: UNDER_A_SPECS_PATH,
         },
         // An option spelled `include` that is not a project's — package
-        // Specifiers, never a tree.
+        // specifiers, never a tree.
         {
             code: `export default defineSpecConfig({ optimizeDeps: { include: ['react-dom/client'] }, test: { projects: [{ name: 'api', include: ['specs/api/**/*.spec.ts'] }] } });`,
             filename: CONFIG,

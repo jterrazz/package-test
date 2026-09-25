@@ -47,10 +47,10 @@ async function loadDatabase(): Promise<typeof Database> {
             return betterSqlite3.default;
         });
         // The package can be installed and still not WORK: its binding is
-        // Compiled by an install script that npm, pnpm and bun all withhold by
-        // Default. Open one in-memory database here, where the refusal can name
-        // The peer and the command, rather than letting a `bindings` stack
-        // Trace surface from whichever spec happened to seed first.
+        // compiled by an install script that npm, pnpm and bun all withhold by
+        // default. Open one in-memory database here, where the refusal can name
+        // the peer and the command, rather than letting a `bindings` stack
+        // trace surface from whichever spec happened to seed first.
         requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
             const Probe = constructor;
             new Probe(':memory:').close();
@@ -341,7 +341,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         for (;;) {
             // A valid template is the answer, whoever built it. An invalid one
             // (a 0-byte leftover from a crashed run) reads as absent, so the
-            // Build below replaces it instead of poisoning every later run with
+            // build below replaces it instead of poisoning every later run with
             // "no such table".
             if (isValidSqliteTemplate(this.templatePath)) {
                 break;
@@ -473,9 +473,9 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
             acquire: async (workerId: string) => {
                 this.closeDb();
                 // Per-RUN scratch, deleted on release — it stays in the OS temp
-                // Dir on purpose: it is not something a project produces. The
-                // Pid joins the name because a worker id is only unique inside
-                // One vitest run, and two runs share this directory.
+                // dir on purpose: it is not something a project produces. The
+                // pid joins the name because a worker id is only unique inside
+                // one vitest run, and two runs share this directory.
                 this.workerDbPath = resolve(
                     tmpdir(),
                     `test-worker-${workerId}-${process.pid}-${Date.now()}.sqlite`,

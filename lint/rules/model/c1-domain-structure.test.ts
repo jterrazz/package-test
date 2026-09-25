@@ -211,7 +211,7 @@ function groundTree(files: Record<string, string>): string {
 
 const CODE_GROUND = groundTree({
     // Ground that is CODE: the build of the subject under test, with its own
-    // Unit test beside it — and a spec that only wandered in.
+    // unit test beside it — and a spec that only wandered in.
     'cli/fixtures/binary/binary.test.ts': '',
     'cli/fixtures/binary/binary.ts': '',
     'cli/fixtures/binary/orphan.test.ts': '',
@@ -264,7 +264,7 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
     ],
     valid: [
         // `binary.ts` + `binary.test.ts`: I2's pairing, inside the ground it
-        // Belongs to — the depth rules never reach it.
+        // belongs to — the depth rules never reach it.
         { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts` },
         {
             code: 'const x = 1;',
@@ -278,7 +278,7 @@ ruleTester.run('c1-domain-structure (depth: off)', c1DomainStructure as unknown 
     invalid: [],
     valid: [
         // Everything the other modes reject is accepted: the tree's shape is
-        // Declared to be guarded somewhere else entirely.
+        // declared to be guarded somewhere else entirely.
         {
             code: 'const x = 1;',
             filename: '/repo/specs/job/job.test.ts',

@@ -4,7 +4,7 @@ import { asOxlintRule, packageWith, ruleTester } from '../../rule-tester.fixture
 import { f2NoTestImportsInProd } from './f2-no-test-imports-in-prod.js';
 
 // One package on disk: the aliases, the stubs folders and the modules a
-// Reference passes through are read from the tree beside the linted file.
+// reference passes through are read from the tree beside the linted file.
 const ROOT = packageWith({
     'package.json': JSON.stringify({
         imports: { '#domain/*': './src/domain/*', '#fixtures/*': './specs/fixtures/*' },
@@ -145,7 +145,7 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         // A folder named `stubs/` with no facade is not a stubs folder.
         { code: 'import { engine } from "../model/stubs/engine.js";', filename: PROD },
         // A production module on the way is judged for itself: the barrel is
-        // Clean, the helper that imports the fixtures is where the finding is.
+        // clean, the helper that imports the fixtures is where the finding is.
         { code: 'export * from "./domain/helpers.js";', filename: BARREL },
         // A module that is not production and reaches nothing.
         { code: 'export * from "../tests/format.js";', filename: BARREL },

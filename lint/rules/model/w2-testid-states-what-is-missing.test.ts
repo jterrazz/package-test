@@ -55,7 +55,7 @@ ruleTester.run(
                 filename: SPEC,
             },
             // A comment two lines up is out of the window: it reads as being
-            // About something else.
+            // about something else.
             {
                 code: `const result = await website.visit('/', async (visitor) => {
                 // testId: the widget renders no accessible name

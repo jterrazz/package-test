@@ -61,7 +61,7 @@ export const FRAMEWORK_LAYERS = {
         imports: ['kernel/'],
     },
     // What surrounds the subject, controlled by the test: the kernel only, each
-    // Area its engine.
+    // area its engine.
     world: {
         folders: {
             clock: ['vitest'],
@@ -73,7 +73,7 @@ export const FRAMEWORK_LAYERS = {
         imports: ['kernel/'],
         seams: {
             // A stub's request filter IS an expectation on the outgoing
-            // Request: one `match.*` / `{{token}}` grammar, never a second.
+            // request: one `match.*` / `{{token}}` grammar, never a second.
             'world/stubs/exchange/queue.ts': ['expectations/tokens/'],
             'world/stubs/filters.ts': ['expectations/tokens/'],
             'world/stubs/http/http.ts': ['expectations/tokens/'],
@@ -84,7 +84,7 @@ export const FRAMEWORK_LAYERS = {
     // How a result is judged.
     expectations: { imports: ['kernel/', 'expectations/'], packages: ['vitest'] },
     // What is tested: one slice per constructor. A folder owns its files, and
-    // No facet lists another (`facets/` is absent from `imports`).
+    // no facet lists another (`facets/` is absent from `imports`).
     facets: {
         folders: {
             api: enginesOwnedIn('src/facets/api/'),
@@ -97,7 +97,7 @@ export const FRAMEWORK_LAYERS = {
         },
         imports: ['kernel/', 'world/', 'elements/', 'expectations/'],
         // Projects (`vitest/config`), the provided readers and the global
-        // Setups (`vitest`, `vitest/node`).
+        // setups (`vitest`, `vitest/node`).
         packages: ['vitest'],
         seams: {
             // The facets layer's one composition: the six constructors as one record.
@@ -110,7 +110,7 @@ export const FRAMEWORK_LAYERS = {
                 'facets/website/website.handle',
             ],
             // A facet's project is built on the project kit, which runs in
-            // The Vitest main process only, never in test code.
+            // the Vitest main process only, never in test code.
             'facets/api/api.project.ts': ['vitest/project-kit'],
             'facets/cli/cli.project.ts': ['vitest/project-kit'],
             'facets/component/component.project.ts': ['vitest/project-kit'],
@@ -133,7 +133,7 @@ export const FRAMEWORK_LAYERS = {
             'facets/mobile/mobile.project',
             'facets/website/website.project',
             // Update mode's global setup, which every project carries: its
-            // Owner resolves where it sits.
+            // owner resolves where it sits.
             'expectations/in-place/in-place-setup',
         ],
         packages: ['vitest'],
@@ -142,10 +142,10 @@ export const FRAMEWORK_LAYERS = {
         imports: [
             'lint/',
             // The coverage ratchet reads the report the preset asked for, and
-            // There is ONE answer to where a tool writes what it generates.
+            // there is ONE answer to where a tool writes what it generates.
             'kernel/files/artifacts',
             // The four ground names have ONE home; a rule that probed for its
-            // Own copy of them could drift from what the runner resolves.
+            // own copy of them could drift from what the runner resolves.
             'kernel/files/ground',
             // A9's rule must derive the root with the framework's own walk, not a copy.
             'kernel/files/resolve',
@@ -155,7 +155,7 @@ export const FRAMEWORK_LAYERS = {
             'kernel/files/git-tree',
             'kernel/yaml/document',
             // The checker reads the `test` section by the runtime's own reader,
-            // Loading the file synchronously itself, since every pass is sync.
+            // loading the file synchronously itself, since every pass is sync.
             'kernel/config/settings',
             'kernel/config/test-section',
             // A finding and a refusal teach in one form: the four parts, and how they read.
@@ -164,14 +164,14 @@ export const FRAMEWORK_LAYERS = {
             'kernel/refusals/refusal',
             'expectations/tokens/match',
             // C28's fixer writes a value in place; the runtime's own dedent is
-            // What reads it back, so the fixer proves its guess against it.
+            // what reads it back, so the fixer proves its guess against it.
             'expectations/text/dedent',
             'world/services/record-key',
             // The folders a stub may sit in are the builders the package exports, listed once.
             'world/stubs/kinds',
             // The run owns one key of the ratchet the checker writes (route
-            // Coverage), and the .spec.yaml grammar is read by the runner AND
-            // The checker: one owner each, reached where it lives.
+            // coverage), and the .spec.yaml grammar is read by the runner AND
+            // the checker: one owner each, reached where it lives.
             'facets/api/routes/baseline',
             'facets/cli/documents/spec-document',
         ],

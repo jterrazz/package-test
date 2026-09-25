@@ -96,8 +96,8 @@ function matchStreamFile(accessor: TextAccessor, name: string, frozen: boolean):
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Update mode writes TOKENS, not values: placeholder-covered lines of
-        // The previous fixture are preserved, and values the framework knows
-        // To be dynamic ({{workdir}}) are substituted (CONVENTIONS D5).
+        // the previous fixture are preserved, and values the framework knows
+        // to be dynamic ({{workdir}}) are substituted (CONVENTIONS D5).
         const merged = mergeTextPreservingPlaceholders(
             recordedGolden(filePath),
             actual,
@@ -124,7 +124,7 @@ function matchJsonFile(accessor: JsonAccessor, name: string, frozen: boolean): M
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Writes TOKENS, not values — parity with the text path: preserve
-        // Still-matching placeholders and substitute the known cwd back to
+        // still-matching placeholders and substitute the known cwd back to
         // {{workdir}} (CONVENTIONS D5).
         const previous = recordedGolden(filePath);
         const merged = mergePreservingPlaceholders(
@@ -300,8 +300,8 @@ async function matchTreeFile(
 
     if (shouldUpdateSnapshots() && !frozen) {
         // Preserve placeholder-covered file contents from the previous
-        // Fixture (CONVENTIONS D5) — everything else comes from the actual
-        // Tree.
+        // fixture (CONVENTIONS D5) — everything else comes from the actual
+        // tree.
         const previousContents = new Map<string, string>();
         if (existsSync(fixtureDir)) {
             for (const file of await walkDirectory(fixtureDir)) {

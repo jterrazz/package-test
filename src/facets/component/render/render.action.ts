@@ -51,8 +51,8 @@ async function unmountHeld(): Promise<void> {
             await surface.unmount();
         } catch {
             // A scenario that already called `visitor.unmount()` has nothing
-            // Left to take down, and taking it down twice is not a failure
-            // Worth raising from a teardown that has done its job.
+            // left to take down, and taking it down twice is not a failure
+            // worth raising from a teardown that has done its job.
         }
     }
 }

@@ -278,8 +278,8 @@ export const testing: OxlintConfig = {
                     { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
                 ],
                 // J10 — one level of `describe` groups a file; a second is a
-                // Tree of contexts a reader has to hold in their head, and the
-                // Name of the test stops being the sentence it was.
+                // tree of contexts a reader has to hold in their head, and the
+                // name of the test stops being the sentence it was.
                 'vitest/max-nested-describe': ['error', { max: 1 }],
                 'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
                 'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],

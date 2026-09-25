@@ -262,7 +262,7 @@ describe('sqlite', () => {
         expect(isStaleTemplateLock(lockPath)).toBeFalsy();
 
         // And - long past the build budget, the holder is presumed dead: a
-        // Crashed worker must not wedge the suite forever
+        // crashed worker must not wedge the suite forever
         expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBeTruthy();
         releaseTemplateLock(lockPath);
     });

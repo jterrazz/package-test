@@ -342,15 +342,15 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
             continue;
         }
         // The path's folders are the ground this entry sits in; the entry is
-        // Matched on what the template states after the last of them, up to
-        // The folder the hole may name.
+        // matched on what the template states after the last of them, up to
+        // the folder the hole may name.
         const before = body.slice(0, opens);
         const cut = before.lastIndexOf('/');
         const prefix = before.slice(cut + 1);
         const suffix = body.slice(closes + 1);
         // A template that is ALL hole names everything; it vouches for
-        // Nothing in particular, and C9 already downgrades that file's
-        // Findings to warn through `hasNonLiteralFixtureArg`.
+        // nothing in particular, and C9 already downgrades that file's
+        // findings to warn through `hasNonLiteralFixtureArg`.
         if (prefix.length > 0 || suffix.length > 0) {
             const folders = before.slice(0, Math.max(cut, 0));
             found.push({
@@ -415,7 +415,7 @@ export function suppressedLines(text: string, id: string): Set<number> {
         let match = /checker-disable-next-line\s+(?<ids>.*)$/iu.exec(line);
         if (match !== null && applies(match.groups?.ids ?? '')) {
             // The next line of CODE: a directive of another tool may stand
-            // Between, since each of them also claims the next line.
+            // between, since each of them also claims the next line.
             for (let next = index + 1; next < lines.length; next += 1) {
                 const following = (lines[next] ?? '').trim();
                 if (following.length > 0 && !following.startsWith('//')) {
@@ -727,7 +727,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
     for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
         const text = readSource(testFile);
         // Which enforced specs does this test import? Enforce only when exactly
-        // One applies (mixed DB configurations are ambiguous → skip).
+        // one applies (mixed DB configurations are ambiguous → skip).
         const applicable = new Set<SpecModel>();
         for (const binding of namedImports(text)) {
             const target = resolveRelativeImport(testFile, binding.source);
@@ -853,7 +853,7 @@ function isConventionalSubdir(path: string): boolean {
         return false;
     }
     // A real seeds/expected/… holds leaf fixtures: never a test, never a
-    // Nested ground subdir (those signal a feature dir named like one).
+    // nested ground subdir (those signal a feature dir named like one).
     const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
         return false;
@@ -898,7 +898,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
         const rel = relative(rootDir, dir);
 
         // A domain owns 1..n `<aspect>.test.ts` (C1') — the ground is dead
-        // Weight only when the domain carries no test at all.
+        // weight only when the domain carries no test at all.
         if (testFiles.length === 0) {
             violations.push({
                 file: rel,
@@ -949,7 +949,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
         // Every reference in the specs tree, excluding those made from
-        // Inside the pool itself (a dead entry cannot vouch for another).
+        // inside the pool itself (a dead entry cannot vouch for another).
         const references: References = { paths: new Set(), patterns: [] };
         for (const file of listReferrers(specsRoot, pool)) {
             referencesOf(file, references);

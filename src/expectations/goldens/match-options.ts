@@ -123,23 +123,23 @@ type SubjectIsNoValue = { readonly 'a result accessor is compared whole': never 
 
 declare module 'vitest' {
     // ONE interface carries every matcher, and it is `Assertion`: a setup
-    // That resolves `vitest`'s types twice (a nested or duplicated install, a
+    // that resolves `vitest`'s types twice (a nested or duplicated install, a
     // `file:` link) picks up one augmentation and not the other when the
-    // Matchers are split across two interfaces — a failure that reads as a
-    // Regression in the package rather than as a resolution problem. Declared
-    // Together, they are present together or absent together.
+    // matchers are split across two interfaces — a failure that reads as a
+    // regression in the package rather than as a resolution problem. Declared
+    // together, they are present together or absent together.
     //
     // `toMatch` keeps vitest's own signature — a string or a RegExp is a
-    // Value — and gains the golden half where the subject has one.
+    // value — and gains the golden half where the subject has one.
     //
     // The two type parameters are vitest's own, repeated CHARACTER for
-    // Character: an augmentation whose parameter list differs from the
-    // Declaration it merges into is refused outright (TS2428), so this line
-    // Tracks the runner's — `R` is the return shape a promisified assertion
-    // Threads through, `T` the received value every branch below keys on.
+    // character: an augmentation whose parameter list differs from the
+    // declaration it merges into is refused outright (TS2428), so this line
+    // tracks the runner's — `R` is the return shape a promisified assertion
+    // threads through, `T` the received value every branch below keys on.
     // A sync golden returns `R`; every async matcher states `Promise<void>`,
-    // Because a golden read across the browser seam is async where the
-    // Identical node accessor is sync, and the chai chain cannot infer that.
+    // because a golden read across the browser seam is async where the
+    // identical node accessor is sync, and the chai chain cannot infer that.
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface: a type alias redeclares the name and every matcher is lost
     interface Assertion<R extends Promise<void> | void = void, T = unknown> {
         /**

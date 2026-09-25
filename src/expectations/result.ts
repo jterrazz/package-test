@@ -62,7 +62,7 @@ export class BaseResult {
         // The framework knows the exact cwd of the spec — this is what the
         // {{workdir}} token / match.workdir() compare against (CONVENTIONS
         // D4). The realpath form is what child processes print ($PWD /
-        // Process.cwd() resolve tmpdir symlinks on macOS).
+        // process.cwd() resolve tmpdir symlinks on macOS).
         this.captures = new CaptureScope(
             options.workDir ? safeRealpath(options.workDir) : undefined,
         );

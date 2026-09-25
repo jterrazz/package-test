@@ -27,7 +27,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 export function ruleTester(): RuleTester {
     // Aliased on import: the runner's own hygiene rules read `describe(…)` and
     // `it(…)` as a suite being DECLARED, and here they are being handed to a
-    // Tester that will declare them itself, once per rule case.
+    // tester that will declare them itself, once per rule case.
     RuleTester.describe = (name, body) => {
         declareSuite(name, body);
     };

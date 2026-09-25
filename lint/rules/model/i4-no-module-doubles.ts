@@ -120,12 +120,12 @@ function scopeOf(context: Context): Scope | undefined {
         .slice(0, -1)
         .find((part) => part === '__mocks__' || part === '__fixtures__');
     // Every TEST file — plus any file sitting inside one of the two banned
-    // Directories, which is the clause that names the directory itself.
+    // directories, which is the clause that names the directory itself.
     if (!isTestRole(role) && banned === undefined) {
         return undefined;
     }
     // The data-asset clause is the MODULE role's alone: a stub unit
-    // Legitimately imports the `.response.json` it stands for.
+    // legitimately imports the `.response.json` it stands for.
     return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
 }
 
@@ -174,7 +174,7 @@ export const i4NoModuleDoubles: LintRule = {
                 }
                 const named = mockedSpecifier(childList(node, 'arguments')[0]);
                 // A native module a consumer cannot inject is the one case the
-                // Ladder cannot reach, and the config says which.
+                // ladder cannot reach, and the config says which.
                 if (named === undefined || scope?.allowed.has(named) !== true) {
                     context.report({ messageId: 'viMock', node });
                 }

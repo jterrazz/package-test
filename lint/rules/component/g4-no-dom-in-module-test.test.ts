@@ -35,7 +35,7 @@ tester.run('g4-no-dom-in-module-test', asOxlintRule(g4NoDomInModuleTest), {
             filename: MODULE_TEST,
         },
         // Under specs/ a `.test.ts` is a product spec until the `spec` role
-        // Exists; the guard stops at the tree it can judge.
+        // exists; the guard stops at the tree it can judge.
         { code: 'test("x", () => { document.title; });', filename: PRODUCT_SPEC },
         // A rendered unit IS the kind that has a document.
         { code: 'test("x", () => { document.body.append(node); });', filename: COMPONENT_TEST },

@@ -164,7 +164,7 @@ export class RedisHandle implements ServiceHandle {
                 this.pair = { service, worker: workerId };
                 this.dbIndex = 1 + SERVICES_PER_WORKER * (Math.max(worker, 1) - 1) + slot;
                 // The index is in the string the app is handed, or the app
-                // Would write to the shared index 0 while reset flushes this one.
+                // would write to the shared index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;
                 this.connectionString = `${this.connectionString}/${this.dbIndex}`;
                 // The container outlives the file that held this index before.

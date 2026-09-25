@@ -184,7 +184,7 @@ function catalogueSections(): string[] {
 function renderDocsCatalog(): string {
     const c = counts();
     // The channels with rows are the ones named; one that has none yet is not
-    // Announced with a zero, because a reader would go looking for it.
+    // announced with a zero, because a reader would go looking for it.
     const named = [
         [c.statique, '**statique** (oxlint rules)'],
         [c.upstream, '**upstream** (options set on an upstream rule)'],

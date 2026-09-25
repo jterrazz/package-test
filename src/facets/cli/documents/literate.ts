@@ -229,7 +229,7 @@ function assertRun(
 ): void {
     const { actual, run } = outcome;
     // An exit-code mismatch is reported ALONE: when the command did something
-    // Else entirely, its stream diffs are consequences, not causes.
+    // else entirely, its stream diffs are consequences, not causes.
     if (actual.exitCode !== run.exitCode) {
         throw failure(document, run, context, [
             [
@@ -237,7 +237,7 @@ function assertRun(
                 `  expected: ${run.exitCode}`,
                 `  received: ${actual.exitCode}`,
                 // The stream is byte-exact, so it carries its own final
-                // Newline; the joiner adds the separator, not the stream.
+                // newline; the joiner adds the separator, not the stream.
                 ...(outcome.stderr.length > 0
                     ? ['', 'stderr was:', outcome.stderr.replace(/\n$/u, '')]
                     : []),
@@ -397,20 +397,20 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         file = readSpecFile(readFileSync(filePath, 'utf8'), displayPath);
     } catch (error) {
         // A grammar refusal is about the FILE, not about the engine that read
-        // It: the message already names the line, so the stack says the same.
+        // it: the message already names the line, so the stack says the same.
         throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
     const { document } = file;
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
     // `fixture:` layers on top of whatever the chain already copied, in
-    // Declaration order — identical semantics to chained `.fixture()` calls.
+    // declaration order — identical semantics to chained `.fixture()` calls.
     for (const fixture of document.fixtures) {
         fsFixtures.layer(fixture.path, fileDir, workDir);
     }
 
     // One resolved spelling of the working directory, read by everything that
-    // Names it: `{{workdir}}` in a golden, `$WORKDIR` in an env value, and
+    // names it: `{{workdir}}` in a golden, `$WORKDIR` in an env value, and
     // `TEST_WORKDIR` in a served stub's environment.
     const workdir = safeRealpath(workDir);
     const servers = await startServers(document, config, displayPath, workdir);
@@ -425,7 +425,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
     );
 
     // A rewrite states what the runs DID, so it asserts nothing and needs every
-    // Run to have executed; a normal session judges each run where it stands.
+    // run to have executed; a normal session judges each run where it stands.
     const rewriting = shouldUpdateSnapshots() && options.frozen !== true;
     const outcomes: RunOutcome[] = [];
     try {
@@ -450,10 +450,10 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
             };
             outcomes.push(outcome);
             // HERE, before the next command runs. A run's `files:` describes
-            // The working directory as THIS run left it — a lock file the next
-            // Command creates, a build output the next one removes — and a
-            // Working directory only ever holds its latest state. Judging the
-            // Whole session at the end would ask every run about the same tree.
+            // the working directory as THIS run left it — a lock file the next
+            // command creates, a build output the next one removes — and a
+            // working directory only ever holds its latest state. Judging the
+            // whole session at the end would ask every run about the same tree.
             if (!rewriting) {
                 assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
             }

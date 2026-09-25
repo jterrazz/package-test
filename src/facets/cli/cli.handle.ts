@@ -164,7 +164,7 @@ export async function startCli<Services extends ServiceRecord>(
     options: CliSpecificationOptions<Services> = {},
 ): Promise<CliHandle<DatabaseKeys<Services>>> {
     // Caller detection must run before any await — async resumption drops
-    // The calling file's frames from the stack.
+    // the calling file's frames from the stack.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

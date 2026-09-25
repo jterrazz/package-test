@@ -35,7 +35,7 @@ const named =
         kind,
         name,
         // The descriptor records what the AUTHOR stated, not the default: an
-        // Absent `exact` is exact, and only a stated `false` is a substring.
+        // absent `exact` is exact, and only a stated `false` is a substring.
         ...(options?.exact === undefined ? {} : { exact: options.exact }),
     });
 

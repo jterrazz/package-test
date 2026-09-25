@@ -17,10 +17,10 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the E2E fixture trees. Each one
-// Carries its own package.json: that is what makes its `src/` tree sit OUTSIDE
-// A specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
+// carries its own package.json: that is what makes its `src/` tree sit OUTSIDE
+// a specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
 // The guard on the `tests/` clause — a `tests` segment with no package above it
-// Is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
+// is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
 const FIXTURES = resolve(
     import.meta.dirname,
     '../../../specs/lint/i2-sibling-test-naming/fixtures',
@@ -110,7 +110,7 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
             filename: `${OWN}/sibling/src/helper.test.ts`,
         },
         // A REPOSITORY suite: a module-role test under a specs/ tree covers a
-        // Tree, not one module — the orphan clause requires `!inSpecs`.
+        // tree, not one module — the orphan clause requires `!inSpecs`.
         {
             code: 'test("x", () => {});',
             filename: `${FIXTURES}/repository-suite/specs/build/a.test.ts`,

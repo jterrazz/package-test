@@ -66,7 +66,7 @@ ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
             filename: TEST_FILE,
         },
         // A suppression under a marker is an instruction to a tool, not a
-        // Wrapped sentence: folding it into the marker would disable it.
+        // wrapped sentence: folding it into the marker would disable it.
         {
             code: `test('ships', () => {
     // Given - a paid order
@@ -89,7 +89,7 @@ ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
             filename: TEST_FILE,
         },
         // A formatter's directive is an instruction, and folding it in would
-        // Turn it off — `-ignore` is the word every formatter uses.
+        // turn it off — `-ignore` is the word every formatter uses.
         {
             code: `test('ships', () => {
     // Given - a table of orders

@@ -4,8 +4,8 @@ import { asOxlintRule, ruleTester } from '../../rule-tester.fixtures.js';
 import { e8LiterateSpecificationExists } from './e8-literate-specification-exists.js';
 
 // The config is placed at this package's own root, so the literate path that
-// Resolves is one of its real specification files and the one that does not is
-// Absent from the same tree — the rule answers against a real filesystem.
+// resolves is one of its real specification files and the one that does not is
+// absent from the same tree — the rule answers against a real filesystem.
 const ROOT = resolve(import.meta.dirname, '../../..');
 const CONFIG = resolve(ROOT, 'vitest.config.ts');
 

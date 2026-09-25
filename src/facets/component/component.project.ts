@@ -138,7 +138,7 @@ function callerDirectory(): string {
     const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
     if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
         // Bundled beside the config (no node_modules above it) or not bundled
-        // At all: either way the frame sits in the config's own directory.
+        // at all: either way the frame sits in the config's own directory.
         return dirname(file);
     }
     return nearestHolding(bundled) ?? process.cwd();
@@ -193,7 +193,7 @@ async function reroot(
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
         // Absolute before it is handed over: `loadConfigFromFile` resolves a
-        // Relative path against the CWD, which is the tool's, not the config's.
+        // relative path against the CWD, which is the tool's, not the config's.
         from = isAbsolute(source) ? source : resolve(root, source);
         const file = await loadConfigFromFile(environment, from);
         loaded = file?.config;
@@ -380,7 +380,7 @@ export async function component(
     options: ComponentProjectOptions = {},
 ): Promise<TestProjectInlineConfiguration> {
     // Read before the first `await`: the caller's frame is only on the stack
-    // While the helper's own synchronous body is running.
+    // while the helper's own synchronous body is running.
     const root = options.root ?? callerDirectory();
     assertProviderPin();
     const { playwright } = await import('@vitest/browser-playwright');
@@ -391,9 +391,9 @@ export async function component(
         ...pipeline,
         ...jsxPipeline(pipeline),
         // A cold Vite cache optimises dependencies DURING the first run and
-        // Reloads the tester mid-flight ("Vitest failed to find the runner").
+        // reloads the tester mid-flight ("Vitest failed to find the runner").
         // A fresh CI checkout is exactly that state, so the page's own runtime
-        // Is declared up front. An optional peer that is absent is skipped.
+        // is declared up front. An optional peer that is absent is skipped.
         optimizeDeps: optimizeDepsOf(pipeline.optimizeDeps),
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
         test: {
@@ -401,8 +401,8 @@ export async function component(
                 commands: COMPONENT_COMMANDS,
                 enabled: true,
                 // A reference screenshot is a golden, and it has its own option
-                // In Vitest 5 — separate from the failure screenshot below,
-                // Which is a diagnostic. Both are artefacts, so both are moved.
+                // in Vitest 5 — separate from the failure screenshot below,
+                // which is a diagnostic. Both are artefacts, so both are moved.
                 expect: { toMatchScreenshot: { screenshotDirectory: SCREENSHOTS_DIR } },
                 headless: true,
                 instances: [{ browser: 'chromium' as const }],
@@ -413,7 +413,7 @@ export async function component(
                     },
                 }),
                 // Browser Mode drops a failure screenshot beside the test by
-                // Default; it is an artefact and belongs under `.artifacts/<tool>/`.
+                // default; it is an artefact and belongs under `.artifacts/<tool>/`.
                 screenshotDirectory: SCREENSHOTS_DIR,
                 viewport: viewportOf(options),
             },
@@ -421,14 +421,14 @@ export async function component(
             ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'component',
             // `shouldUpdateSnapshots()` reads process.env/argv, which a page
-            // Does not have, and a wrap module is imported by URL there: both
-            // Cross into the page as provided values.
+            // does not have, and a wrap module is imported by URL there: both
+            // cross into the page as provided values.
             provide: providedToPage(options),
             ...(options.wrap === undefined
                 ? {}
                 : { setupFiles: [writeSetupFile(options.wrap, root)] }),
             // Two Chromiums must never share a slot on a 2-vCPU runner: node
-            // Projects run first (0), the website facet next (1), this one last.
+            // projects run first (0), the website facet next (1), this one last.
             sequence: { groupOrder: 2 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },

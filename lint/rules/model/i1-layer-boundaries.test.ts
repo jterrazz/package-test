@@ -9,7 +9,7 @@ RuleTester.describe = describe;
 RuleTester.it = it;
 
 // Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// Types each handler with its node's interface.
+// types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
 const rule = i1LayerBoundaries as unknown as OxlintRule;
 
@@ -198,7 +198,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
             options: framework,
         },
         // A file under no declared layer is out of scope — here, the
-        // Composition root, which lives above the layers.
+        // composition root, which lives above the layers.
         {
             code: 'import { registerStubs } from "./seams/msw/server.js";',
             filename: '/repo/src/index.ts',
@@ -211,9 +211,9 @@ ruleTester.run('i1-layer-boundaries (no map)', rule, {
     invalid: [],
     valid: [
         // Given no declared architecture, the rule says nothing: an
-        // Architecture is the project's to state, not the linter's to assume.
+        // architecture is the project's to state, not the linter's to assume.
         // A consumer whose directories HAPPEN to be named like the framework's
-        // Was judged against a map describing a different package.
+        // was judged against a map describing a different package.
         { code: 'import { Client } from "pg";', filename: '/app/src/model/orders/order.ts' },
         {
             code: 'import { stripe } from "stripe";',
