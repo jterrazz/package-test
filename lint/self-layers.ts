@@ -159,7 +159,7 @@ export const FRAMEWORK_LAYERS = {
             // C28's fixer writes a value in place; the runtime's own dedent is
             // What reads it back, so the fixer proves its guess against it.
             'expectations/text/dedent',
-            'world/services/startup/binding',
+            'world/services/record-key',
             // The folders a stub may sit in are the builders the package exports, listed once.
             'world/stubs/kinds',
             // The run owns one key of the ratchet the checker writes (route

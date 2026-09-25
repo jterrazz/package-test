@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { toConstantCase, toKebabCase } from './binding.js';
+import { toConstantCase, toKebabCase } from './record-key.js';
 
 describe('the two vocabularies a record key feeds', () => {
     test('a service directory under docker/ is the kebab-case of the key', () => {
