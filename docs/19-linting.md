@@ -2,7 +2,7 @@
 
 > **Maintenance note** — This documentation is living: when implementation or usage reveals a new edge case, document it in the relevant chapter in the same change.
 
-`@jterrazz/test` ships the static enforcement channel of its own conventions: an **oxlint JS plugin** (`@jterrazz/test/oxlint`) carrying every **statique** convention rule (the constitution is [18 — Conventions](18-conventions.md)), plus a small **conventions checker** binary for the file kinds oxlint never visits (data fixtures). Together they make the conventions programmatic instead of review-borne.
+`@jterrazz/test` ships the static enforcement channel of its own conventions: an **oxlint JS plugin** (`@jterrazz/test/oxlint`) carrying every **statique** convention rule (the constitution is [18 — Conventions](18-conventions.md)), plus the **conventions checker**, a binary running the passes oxlint cannot: the data fixtures it never visits, the cross-file, tree and member passes, and the ratchet. Together they make the conventions programmatic instead of review-borne.
 
 ## Enabling the plugin
 
@@ -70,7 +70,7 @@ export default testing;
 
 This registers the plugin and enables the whole `jterrazz/*` catalogue at its intended severities; oxlint's own default rules still run, but no `@jterrazz/typescript` formatting/style preset is imposed. To deviate, spread and override: `export default { ...testing, rules: { ...testing.rules, 'jterrazz/c1-domain-structure': 'off' } }`.
 
-The static plugin is only one of the seven channels. The **conventions checker** (token/HTTP grammar, the document passes, and the cross-file and tree passes — D4, C8/C9, C12/C16/C18/C20/C21w, A7, B5, J9) ships as a standalone binary; run it as the minimal second channel with no `@jterrazz/typescript` orchestration:
+The static plugin is only one of the seven channels. The **conventions checker** — every rule the catalogue's Channel column gives to `checker` — ships as a standalone binary; run it as the minimal second channel with no `@jterrazz/typescript` orchestration:
 
 ```bash
 npx jterrazz-test-check specs
@@ -82,7 +82,7 @@ What it walks is what git does NOT ignore, like every tree gate of the toolchain
 
 The same listing answers every single path a pass probes — C8's target, C9 and C28's pool entry, C13's golden and specification, the member pass's manifests and workspace anchors, the package a walk stops at, the fixture D5 reads — and every file the plugin's disk-anchored rules read, the neighbour I2 looks for and the stray C7 refuses alike, and the root A9w derives, which the runtime derives from the same listing: an ignored file neither satisfies nor violates a rule. The one path read on disk is a repository's own `.git`, which git never lists.
 
-`--fix` applies the rewritable passes, then checks what is left. The first of them is the 16 → 17 mover (C13's fixer), and its gate is per file: it moves only a file C13 still finds 16.x-shaped — one with a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder beside it, or one naming a 16 pool by `$FIXTURES/`; every other file is on 17, whatever its tree holds, and every string in it, a refusal a negative spec keeps on purpose included, stays as written. It walks two kinds of tree: a `specs/` tree, and — on the run with no path, or a named project root — the module tests of every member, outside `specs/`, never inside ground or a nested package. It renames every `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` to its bare name — the 16 pool at the specs root to `<specs>/shared/fixtures/` — never entering ground, and rewrites each literal call and document of a 16.x-shaped file to name the disk with `file()` or `directory()` — `.seed('x.sql')` → `.seed(file('./seeds/x.sql'))`, `.request('x.http')` → `.request(file('./requests/x.http'))`, `.fixture('$FIXTURES/app/')` → `.fixture(directory('../../shared/fixtures/app/'))`, `toMatch('help.txt')` → `toMatch(file('./expected/help.txt'))` when that golden exists, a golden tree → `toMatch(directory('./expected/<name>/'))`, `.run('x.spec.yaml')` → `.run(file('./x.spec.yaml'))` — and imports the two wrappers from the entry the specification file uses. A 16 contract is a 17 stub: on every file, outside the gate, a `contracts/` folder — any one in a `specs/` tree, one holding a `*.contracts.ts` facade beside a module test — is renamed `stubs/`, each facade `<name>.stubs.ts`, every relative literal that named one follows, and a name 16 published and 17 renamed (`defineContract(s)`, `Contract`, `Contracts`, the `Contract…` types) takes its 17 name wherever a file imports it from the entry. A stream compared as a value reads its text (`expect(result.stdout).toContain('x')` → `expect(result.stdout.text).toContain('x')`), and a stream asserted empty is an empty text (`await expect(result.stderr).toBeEmpty()` → `expect(result.stderr.text).toBe('')`; a table keeps `toBeEmpty`). On every file, outside the gate, a suppression directive naming a rule 17 renamed — a comment, never a string literal that spells one — names its new id, and the one line it covers reads the accessor the new rule is about (`.text` → `.raw` under D8w's) — a renamed directive no longer matches, so a second run changes nothing. Each member's oxlint config follows the same map: an override of a renamed rule names its new id, and one of a static rule 17 retired is removed, since oxlint refuses to start on a rule the plugin does not define ([04](04-operating.md#what-a-170-adoption-meets)). It reads the 17 prototype's `…File` verbs too. Run it once on a 16.x tree, read the diff, and fix by hand what it names and cannot move: a computed argument, a domain named with a reserved word. **C13 and its mover are the migration and nothing else: they retire in 17.1**, once the estate's wave has run — a tree that still carries a 16 folder after that is migrated by hand.
+`--fix` applies the rewritable passes, then checks what is left; the first of them is the 16 → 17 mover, C13's fixer, which retires in 17.1. What it moves and rewrites, and what it leaves to the reader, is [04 — Operating § What a 17.0 adoption meets](04-operating.md#what-a-170-adoption-meets)'s.
 
 ## What oxlint's own `vitest` plugin owns
 
@@ -114,17 +114,7 @@ One convention code may carry more than one ROW, when one convention is held ove
 
 Seven columns. **Code** and **Implementation** are the two names a rule answers to — the convention id you cite in a review, and the rule id you address in a config; the Implementation cell also carries the row's anchor, so a message's `read:` part, `docs/19-linting.md#<rule-id>`, lands on the row. **Channel** is which of the seven enforces it. **Reach** is which files it looks at, in the vocabulary of `roleOf` (`lint/role.ts`): `module` a `*.test.ts`, `component` a `*.test.tsx`, `specification` a `*.specification.ts`, `config` a `vitest.config.*`, `ground` a `fixtures`/`expected`/`requests`/`seeds` tree, plus the two shapes that are not a role — `tests` (any file a test conventions bind) and `all`. Every rule reads a path BELOW the project root that holds the file, never its absolute segments — the nearest package root, or, for a tree no package holds, the repository root (its `.git`): a checkout under a folder named `fixtures/`, `stubs/`, `src/`, `specs/` or `__tests__/` answers for nothing in the project it holds. **Convention** is the normative sentence, **Fix** the one imperative line that resolves it, **Rationale** why the rule exists. A `—` in Reach or Fix is a row that states none.
 
-The catalogue is grouped **model first, then one section per facet**, because a
-family is a kind of convention and not an audience: `C — Files & folders` mixes
-a rule every facet obeys with one only the literate door can break. A reader
-adopting one constructor reads `model` — the tree every facet is made of — and
-their own section, and stops. The grouping is the `facet` field of each manifest
-row — required, like `fix` and `reach` — and for a statique rule it is also
-where the implementation sits
-(`lint/rules/model/`, `lint/rules/api/`, …). The checker's passes carry
-the field without the folder: several passes share one module because they share
-one walk of the tree, and splitting the walk to split the file would cost a
-second traversal per pass.
+The catalogue is grouped **model first, then one section per facet**, because a family is a kind of convention and not an audience: `C — Files & folders` mixes a rule every facet obeys with one only the literate door can break. A reader adopting one constructor reads `model` — the rules every facet shares — and their own section, and stops. `model` names that catalogue group and the `lint/rules/model/` folder holding its rules, not a `src/` folder. The grouping is the `facet` field of each manifest row — required, like `fix` and `reach` — and for a statique rule it is also where the implementation sits (`lint/rules/model/`, `lint/rules/api/`, …). The checker's passes carry the field without the folder: several passes share one module because they share one walk of the tree, and splitting the walk to split the file would cost a second traversal per pass.
 
 <!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->
 
@@ -383,7 +373,7 @@ Every rule a project using the framework meets, across its enforcement channels 
 
 <!-- /GENERATED:catalog -->
 
-Conventions with no oxlint rule are covered by another channel — the catalogue above names each one: the **checker step** (D4 / D4b / D10, below), the **cross-file checker passes** (C9, B5-by-inference, A7), and the **runtime / process** channels (D7, D11). The **type channel** (C4 trigger members, D1 read-only accessors) carries no catalogue row — the type system enforces it without a rule.
+A convention with no oxlint rule is held by another channel, and the Channel column above names which.
 
 Rules marked _fs-checked_ probe the filesystem, anchored on files oxlint is already visiting (a feature's sibling `requests/`, `seeds/`, `expected/`, a module test's neighbour), with per-run caching — they never scan the tree blindly.
 
@@ -420,7 +410,7 @@ B4 still passes on the second form, which is what makes it worth knowing: nothin
 
 `@jterrazz/typescript` v10 turns that rule off — 198 of 198 hits on real estate code were false positives on wrapped `//` prose — so the rewrite stops happening under the preset. The one-line discipline outlives it anyway: a marker is the title of a step, and reasoning that does not fit on one line belongs in a docblock above the test, never in the marker.
 
-## The conventions checker (D4)
+## The conventions checker
 
 Oxlint only parses JS/TS. The D4 token grammar also constrains **data fixtures** under `requests/**` and `expected/**`, so that channel ships as a separate step, bundled as `dist/checker.js` and exposed as the `jterrazz-test-check` bin:
 
@@ -438,8 +428,8 @@ npx jterrazz-test-check specs   # or `node node_modules/@jterrazz/test/dist/chec
 **It prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding, the message last:
 
 ```
-specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): "../users/fixtures/x/" leaves api/orders — …
-specs/api/requests/x.http:3:1: warning jterrazz-check(d10): token {{uuid}} in a requests/ file — …
+specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): found: "../users/fixtures/x/" leaves specs/api/orders · why: … · fix: … · read: docs/19-linting.md#c15-local-fixture-reach
+specs/api/requests/x.http:3:1: warning jterrazz-check(d10w): found: token {{uuid}} in a requests/ file · why: … · fix: … · read: docs/19-linting.md#d10w-tokens-in-requests
 ```
 
 The code is the convention code — the id's first segment — so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A golden that proves a finding keeps only `file:line:column  jterrazz-check(<code>)`: `lintReport`, exported from the package root, normalises oxlint's `unix` lines and these alike, and drops every other line — a rule's spec document binds its runner with `specification.cli(bin, { transform: lintReport })`, so a reworded message moves no golden. The runner states oxlint's format, `--format=unix` or `--format=agent`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and `lintReport` refuses them rather than read them as a clean run.
@@ -478,11 +468,7 @@ fix:
 
 Three findings are about a MEMBER rather than about a spec tree, and a member with no `specs/` root has to be judged all the same — the first of the three is precisely "this member has tests and no configuration for them".
 
-| Id  | Finds                                                                                                                                                  |
-| --- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| E3  | a member with tests of its OWN — a `test` script that does not delegate, or a `*.test.ts(x)` outside another package's tree — and no `vitest.config.*` |
-| E5b | a `vitest.config.*` naming `environment: 'happy-dom'` or `'jsdom'`                                                                                     |
-| F8  | a dependency the framework carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only) or a seam it replaced                               |
+They are [E3](#e3-config-present) (a member with tests of its own and no `vitest.config.*`), [E5b](#e5b-no-simulated-dom-config-member) (a config naming a simulated DOM) and [F8](#f8-no-seam-dependency) (a dependency the framework carries, or a seam it replaced); each row says what it finds.
 
 A workspace ROOT is a member like any other, and owes a config only for tests that are its own: the walk stops at the next `package.json`, and a `test` script that hands the work to the members (`--workspaces`, `pnpm -r`, `turbo run`) is the members' tests, not the root's. `yaml` is read from devDependencies alone — in `dependencies` it is the product's own YAML library, which the framework never ships to it.
 
@@ -500,9 +486,37 @@ The member pass also carries the two findings a tree walk of the member makes: C
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
-This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per package — `{ "typescript": {...}, "test": {...} }` — and this package owns the `test` section: `{ "<key>": count }` for its two rulebooks, `jterrazz/<rule>` for every diagnostic of the oxlint plugin and `jterrazz-check/<code>` for every checker finding, which `@jterrazz/typescript` sets aside from its own section: one finding, one section, one judge. `jterrazz-test-check baseline [root]` writes the section from where the project stands and leaves every other section byte for byte. The section is EXACT: an entry states where the project stands, never a ceiling, so a count below its entry breaks it as an entry at zero does, and `--fix` — which `make fix` runs — re-records both falls, lowering the entry or dropping it, before it judges; a count that rose and a key with no entry are never written by a fix, only by `baseline`. Before it counts anything, and after its own rewrites and movers, `--fix` applies the plugin's own autofixes — the project's oxlint under a wrapper of its root config that arms the `jterrazz/*` rules alone, in that config and in every config it extends — a plugin armed through `extends` keeps its fixes, and a JSON config, `.jsonc` or extended, is read as oxlint reads it, comments and trailing commas allowed — so no other rulebook's fixer writes a byte — and the ratchet counts the checker's findings and the plugin's diagnostics over the one tree they leave: one `make fix` settles a diagnostic its fix writes (B16w's view, C31's describe, D28's shared expectation). A subtree under a nested oxlint config gets a run of its own, under the same wrapper of ITS config: a config handed with `-c` turns oxlint's nested discovery off, so the root's run leaves the subtree alone rather than write where another config governs, and the subtree's run fixes it by the config the ratchet's count judges it by — so one `make fix` settles the nested subtrees too. A config oxlint could not load under the wrapper stops `--fix`, naming it: oxlint exits 1 for it as for diagnostics left, and a pass that read it as the latter would have fixed nothing and said nothing. `--fix` refuses `--oxlint-report`, a report of the tree before its fixes. `routes/unreached` is the run's key: the api run counts the routes and alone judges it, as exactly (see [10 — Api](10-api.md)), and the checker's recordings keep it as the run left it. Its one recorder is a test run under `TEST_UPDATE=1` ([10 — Route coverage](10-api.md#route-coverage)): `--fix`, and so `make fix`, never re-records it, even when the count fell. The retired `test.baseline.json` is never read; `typescript check` refuses a leftover one (`baseline-legacy`), since the file is the toolchain's.
+This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per package — `{ "typescript": {...}, "test": {...} }` — and this package owns the `test` section.
 
-ONE run owns the verdict: the run over the whole project — path-less, a named project root, or `--member` on the project root, the run `typescript check` always makes — and what it prints follows the verdict. Green, it is exactly one line, `jterrazz.baseline.json › test: 106 held across 7 rules` — every entry the section holds, the run's `routes/unreached` included, and `jterrazz.baseline.json › test: nothing held` when it holds none — whether the run checked, fixed or judged the root member — the form `typescript check` shows beside its own ratchet's, the held findings not repeated on every run, and where the run stood and what ran added only by `--verbose`; failing, it prints every checker finding it counts before the reasons, and the plugin's diagnostics as one line, `conventions checker: <n> plugin diagnostic(s) judged, printed by oxlint's own pass`, when they come from `--oxlint-report` — the pass that wrote the report prints each of them — or each in full, on the checker's own report line, when the checker ran oxlint itself and is their one printer; so every finding is printed exactly once and a failing verdict and its evidence are one log. `--format json` prints the checker's findings whatever the verdict. It counts the project's checker findings and the plugin's diagnostics, which the toolchain no longer judges — read from the JSON report `typescript check` hands over with `--oxlint-report <file>`, so a check runs oxlint once, or, without the flag, from a run of the project's own oxlint, with its own config and without `--type-aware` — and fails on a count above its entry, a key with findings and no entry, a count below its entry, or an entry at zero. Severity is not read: a warning is exactly the debt a ratchet holds down. A project with no `test` section fails on any error finding and any plugin diagnostic, naming the gesture that records them; that run judges its own findings and the plugin's, and prints its own and the plugin's the same way, a tree's being its own run's — and green, it prints one line too, `jterrazz.baseline.json › test: nothing held`. Every other run under a project that keeps the section — one `specs/` root, another member — prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by jterrazz.baseline.json › test`.
+#### The section
+
+- **Its keys** are `{ "<key>": count }` for its two rulebooks: `jterrazz/<rule>` for every diagnostic of the oxlint plugin and `jterrazz-check/<code>` for every checker finding, which `@jterrazz/typescript` sets aside from its own section — one finding, one section, one judge.
+- **It is EXACT.** An entry states where the project stands, never a ceiling, so a count below its entry breaks it as an entry at zero does.
+- **`jterrazz-test-check baseline [root]` writes it** from where the project stands, and leaves every other section byte for byte. A count that rose and a key with no entry are written by `baseline` alone, never by a fix.
+- **`routes/unreached` is the run's key.** The api run counts the routes and alone judges it, as exactly ([10 — Api § Route coverage](10-api.md#route-coverage)); its one recorder is a test run under `TEST_UPDATE=1`, and the checker's recordings — `--fix`, and so `make fix`, included — keep it as the run left it, even when the count fell.
+- **The retired `test.baseline.json` is never read**; `typescript check` refuses a leftover one (`baseline-legacy`), since the file is the toolchain's.
+
+#### What `--fix` does to it
+
+- **It re-records both falls** — lowering an entry or dropping it — before it judges, and `make fix` runs it.
+- **It runs the plugin's own autofixes first**, after its own rewrites and movers: the project's oxlint, under a wrapper of its root config that arms the `jterrazz/*` rules alone, in that config and in every config it extends — a plugin armed through `extends` keeps its fixes, and a JSON config, `.jsonc` or extended, is read as oxlint reads it, comments and trailing commas allowed. So no other rulebook's fixer writes a byte, and the ratchet counts the checker's findings and the plugin's diagnostics over the one tree they leave: one `make fix` settles a diagnostic its fix writes (B16w's view, C31's describe, D28's shared expectation).
+- **A nested oxlint config gets a run of its own**, under the same wrapper of ITS config: a config handed with `-c` turns oxlint's nested discovery off, so the root's run leaves the subtree alone rather than write where another config governs, and the subtree's run fixes it by the config the ratchet's count judges it by.
+- **A config oxlint could not load under the wrapper stops `--fix`**, naming it: oxlint exits 1 for it as for diagnostics left, and a pass that read it as the latter would have fixed nothing and said nothing.
+- **It refuses `--oxlint-report`**, a report of the tree before its fixes.
+
+#### Which run owns the verdict
+
+ONE run owns it: the run over the whole project — path-less, a named project root, or `--member` on the project root, the run `typescript check` always makes. Every other run under a project that keeps the section — one `specs/` root, another member — prints what it found and leaves the verdict to that run, naming the file that judges it relative to the project, `judged by jterrazz.baseline.json › test`.
+
+It counts the project's checker findings and the plugin's diagnostics, which the toolchain no longer judges — read from the JSON report `typescript check` hands over with `--oxlint-report <file>`, so a check runs oxlint once, or, without the flag, from a run of the project's own oxlint, with its own config and without `--type-aware`. It fails on a count above its entry, a key with findings and no entry, a count below its entry, or an entry at zero. Severity is not read: a warning is exactly the debt a ratchet holds down.
+
+A project with no `test` section fails on any error finding and any plugin diagnostic, naming the gesture that records them; that run judges its own findings and the plugin's, and prints them the same way, a tree's being its own run's.
+
+#### What it prints
+
+- **Green, exactly one line** — `jterrazz.baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `jterrazz.baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run, and where the run stood and what ran are added only by `--verbose`.
+- **Failing**, every checker finding it counts, before the reasons; and the plugin's diagnostics either as one line, `conventions checker: <n> plugin diagnostic(s) judged, printed by oxlint's own pass`, when they come from `--oxlint-report` — the pass that wrote the report prints each of them — or each in full, on the checker's own report line, when the checker ran oxlint itself and is their one printer. So every finding is printed exactly once, and a failing verdict and its evidence are one log.
+- **`--format json`** prints the checker's findings whatever the verdict.
 
 The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 
@@ -541,7 +555,7 @@ The **cross-file checker passes** carry their own suppression comment (oxlint di
 expect(() => api.seed(file('./seeds/one-user.sql'))).toThrow(/* … */);
 ```
 
-`// checker-disable-next-line <id>[,<id>] -- reason` suppresses the named passes (`a7`, `b5`, `c9`, or `*`) on the next non-blank line; `// checker-disable-line <id>` suppresses its own line. The text after `--` is stripped before the ids are matched, so it never affects suppression — it is required by house convention (every suppression explains itself), not by the checker. The idiomatic use is a negative spec that deliberately violates a convention to exercise the runtime channel.
+`// checker-disable-next-line <id>[,<id>] -- reason` suppresses the named checker codes (any pass's code, or `*`) on the next non-blank line; `// checker-disable-line <id>` suppresses its own line. The text after `--` is stripped before the ids are matched, so it never affects suppression — it is required by house convention (every suppression explains itself), not by the checker. The idiomatic use is a negative spec that deliberately violates a convention to exercise the runtime channel.
 
 ## Build-before-lint
 

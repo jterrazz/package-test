@@ -84,7 +84,8 @@ disk with `file()` or `directory()` and a full relative path —
 `.fixture('$FIXTURES/app/')` to `.fixture(directory('../../shared/fixtures/app/'))`,
 `toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
 `.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
-wrappers from the entry the specification file already uses.
+wrappers from the entry the specification file already uses. It reads the 17
+prototype's `…File` verbs too.
 
 A stream is a stream in 17, not a string: the mover makes one compared as a
 value read its text — `expect(result.stdout).toContain('x')` to
