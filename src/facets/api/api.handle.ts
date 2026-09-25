@@ -13,7 +13,7 @@ import { createDockerReader } from '../../results/container.js';
 import type { ContainerAccessor } from '../../results/container.js';
 import { routesLedger } from '../../runner/provided.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
-import type { ApiSpecification } from './api.chain.js';
+import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
 
 // ── Types ──

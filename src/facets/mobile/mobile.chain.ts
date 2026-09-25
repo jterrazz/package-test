@@ -1,7 +1,0 @@
-/**
- * The mobile chain — the composition's, named here.
- *
- * The constructor beside it opens the composition (`mobile.facet.ts`); this
- * file states, in the facet's own folder, the name of the chain it hands out.
- */
-export type { MobileSpecification } from './mobile.facet.js';

@@ -12,7 +12,7 @@ import type {
     ServiceRecord,
     StartedServices,
 } from '../../model/services/services.js';
-import type { IntegrationSpecification } from './integration.chain.js';
+import type { IntegrationSpecification } from './integration.facet.js';
 import { integrationFacet } from './integration.facet.js';
 
 // ── Types ──

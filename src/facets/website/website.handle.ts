@@ -12,7 +12,7 @@ import { releaseIsolation, startServices } from '../../model/services/services.j
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
-import type { WebsiteSpecification } from './website.chain.js';
+import type { WebsiteSpecification } from './website.facet.js';
 import { websiteFacet } from './website.facet.js';
 
 /**

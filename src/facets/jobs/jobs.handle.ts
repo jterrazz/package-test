@@ -13,7 +13,7 @@ import type {
     ServiceRecord,
     StartedServices,
 } from '../../model/services/services.js';
-import type { JobsSpecification } from './jobs.chain.js';
+import type { JobsSpecification } from './jobs.facet.js';
 import { jobsFacet } from './jobs.facet.js';
 
 // ── Types ──

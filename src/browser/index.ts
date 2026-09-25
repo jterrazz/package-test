@@ -13,6 +13,8 @@
 
 import { interceptThrough } from '../capabilities/intercept/intercept.scope.js';
 import type { Intercept } from '../capabilities/intercept/intercept.scope.js';
+import { componentFacet } from '../facets/component/component.facet.js';
+import type { ComponentChain } from '../facets/component/component.facet.js';
 import type { Specification } from '../facets/specification.js';
 import type {
     processService as processFn,
@@ -31,7 +33,12 @@ import { nodeOnlyClass, refuse } from './node-only.js';
 registerBrowserMatchers();
 
 // ── The component facet — real here, and only here ──
-export { component } from '../facets/component/component.chain.js';
+/**
+ * The component chain, opened once for the page. It carries no
+ * configuration: what every render shares is the project's (`component()` in
+ * `vitest.config.ts`), read by the engines where the page provides it.
+ */
+export const component: ComponentChain = componentFacet.open({});
 
 /**
  * The module-scope network double, on msw's WORKER — the same contracts and

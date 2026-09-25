@@ -11,7 +11,7 @@ import type { AppiumServer, MobileDevice, RunServer } from '../../seams/appium/a
 import { sessionLedger } from '../../seams/appium/session-ledger.js';
 import { sameRuntime } from '../../seams/simctl/simulator.js';
 import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
-import type { MobileSpecification } from './mobile.chain.js';
+import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
 
 // ── Types ──

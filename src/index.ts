@@ -60,13 +60,13 @@ export { type DatabaseKeys, type ServiceRecord } from './model/services/services
 
 // Facets — each chain is named in its own folder, beside the constructor that
 // Builds it.
-export type { ApiSpecification } from './facets/api/api.chain.js';
-export type { CliSpecification } from './facets/cli/cli.chain.js';
-export type { IntegrationSpecification } from './facets/integration/integration.chain.js';
-export type { JobsSpecification } from './facets/jobs/jobs.chain.js';
+export type { ApiSpecification } from './facets/api/api.facet.js';
+export type { CliSpecification } from './facets/cli/cli.facet.js';
+export type { IntegrationSpecification } from './facets/integration/integration.facet.js';
+export type { JobsSpecification } from './facets/jobs/jobs.facet.js';
 export type { JobsResult } from './results/jobs.result.js';
-export type { MobileSpecification } from './facets/mobile/mobile.chain.js';
-export type { WebsiteSpecification } from './facets/website/website.chain.js';
+export type { MobileSpecification } from './facets/mobile/mobile.facet.js';
+export type { WebsiteSpecification } from './facets/website/website.facet.js';
 export type { ChainContext } from './capabilities/with/with.capability.js';
 export type { SeedSource } from './capabilities/seed/seed.capability.js';
 export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './model/chain/config.js';

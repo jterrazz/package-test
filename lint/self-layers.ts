@@ -24,9 +24,9 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   `anthropic/`).
  * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
  *   per result, and the accessors they compose.
- * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`) and the chain
- *   (`.chain.ts`), or the composition (`<facet>.facet.ts`) its chain is
- *   computed from, plus what is unique to the facet. It reaches `model/`,
+ * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`) and the
+ *   composition (`<facet>.facet.ts`) its chain is computed from, plus what
+ *   is unique to the facet. It reaches `model/`,
  *   `stubs/`, `results/`, `capabilities/` and `actions/` freely; each
  *   constructor opens the seams its runtime needs, and each composition the
  *   adapters its engines are.

@@ -37,7 +37,7 @@ export type {
     ComponentVisitor,
     RenderSubject,
 } from './actions/render/scenario.js';
-export type { ComponentChain } from './facets/component/component.shape.js';
+export type { ComponentChain } from './facets/component/component.facet.js';
 export type { RenderResult } from './results/render.result.js';
 export type { RenderedText } from './results/rendered-text.js';
 export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';

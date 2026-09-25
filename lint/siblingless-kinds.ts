@@ -24,7 +24,7 @@ const oneOf =
  * The declared kinds, first match wins.
  *
  * Every kind names its paths, or matches a shape the tree enforces
- * (`<facet>.chain.ts`, `projects/<facet>.project.ts`). None of them is a prefix: a
+ * (`projects/<facet>.project.ts`). None of them is a prefix: a
  * kind claiming `src/seams/` would claim every module written there next
  * year too, and K7 would be a poster rather than a gate.
  */
@@ -86,11 +86,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary)',
     },
     {
-        claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
-        name: 'the facet file set, as a re-export',
-        why: 'each names the chain its constructor hands out rather than implementing it — a composition (`jobs`, `api`, `website`, `integration`, `cli`, `mobile`, `component`) — and the facet specs and `facet-matrix.test.ts` hold the thing they name',
-    },
-    {
         claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),
         name: "a facet's vitest project",
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
@@ -109,7 +104,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/api/api.handle.ts',
             'src/facets/cli/cli.facet.ts',
             'src/facets/cli/cli.handle.ts',
-            'src/facets/component/component.facet.ts',
             'src/facets/component/component.handle.ts',
             'src/facets/integration/integration.facet.ts',
             'src/facets/integration/integration.handle.ts',
