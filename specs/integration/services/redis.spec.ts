@@ -1,4 +1,4 @@
-import { describe, expect, test } from 'vitest';
+import { describe, expect, inject, test } from 'vitest';
 
 import { redis } from '../../../src/index.js';
 import { integration } from '../redis.specification.js';
@@ -97,43 +97,83 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — two redis services of one record are two stores: the worker's index is one per container.
+    // RUNTIME G2 — two redis services of one worker are two indexes of one container.
     test('two redis services keep their own keys, whatever the other one resets', async () => {
-        // Given - a key written through the first service, then the second one reset
+        // Given - a key written through each service, then the second one reset
         const result = await integration.call(async ({ cache, queue }) => {
             const { createClient } = await import('redis');
             const writer = createClient({ url: cache.connectionString });
             await writer.connect();
-            await writer.set('cache-key', 'cache-value');
+            await writer.set('shared-name', 'cache-value');
             await writer.quit();
+            const other = createClient({ url: queue.connectionString });
+            await other.connect();
+            const crossed = await other.get('shared-name');
+            await other.quit();
 
             await queue.reset();
 
             const reader = createClient({ url: cache.connectionString });
             await reader.connect();
-            const kept = await reader.get('cache-key');
+            const kept = await reader.get('shared-name');
             await reader.quit();
-            return { kept };
+            return { crossed, kept };
         });
 
-        // Then - the first service's key outlived the second's reset
+        // Then - neither saw the other's key, and the first service's key outlived the second's reset
         expect(result.value).toMatch({
+            crossed: null,
             kept: 'cache-value',
+        });
+    });
+
+    // RUNTIME G2 — the run starts ONE redis container: two services are two indexes, not two containers.
+    test('two redis services are served by the one container the run started', async () => {
+        // Given - each service's address, and the run's answer to a redis request
+        const result = await integration.call(async ({ cache, queue }) => {
+            const run = inject('serviceContainers');
+            const asked = await fetch(`${run}/containers`, {
+                body: JSON.stringify({
+                    env: { ...cache.environment },
+                    image: cache.defaultImage,
+                    port: cache.defaultPort,
+                    ...queue.containerOptions,
+                }),
+                method: 'POST',
+            });
+            const address: unknown = JSON.parse(await asked.text());
+            const first = new URL(cache.connectionString);
+            const second = new URL(queue.connectionString);
+            const runPort =
+                typeof address === 'object' && address !== null && 'port' in address
+                    ? String(address.port)
+                    : null;
+            return {
+                indexes: first.pathname !== second.pathname,
+                sameContainer: first.port === second.port && first.port === runPort,
+            };
+        });
+
+        // Then - one container, and each service on an index of its own
+        expect(result.value).toMatch({
+            indexes: true,
+            sameContainer: true,
         });
     });
 
     // RUNTIME G2 — each worker takes its own database index, and the string the app is handed says which.
     test('two workers take two database indexes, and the connection string carries each', async () => {
-        // Given - two handles on the runner's container, acquired by workers 1 and 2
+        // Given - two "cache" handles on the runner's container, acquired by workers 40 and 41
         const result = await integration.call(async ({ cache }) => {
             const container = new URL(cache.connectionString);
             container.pathname = '';
             const [first, second] = [redis(), redis()];
             await Promise.all(
                 [first, second].map(async (handle, worker) => {
+                    handle.serviceName = 'cache';
                     handle.connectionString = container.toString().replace(/\/$/u, '');
                     handle.started = true;
-                    await handle.isolation().acquire(String(worker + 1));
+                    await handle.isolation().acquire(String(worker + 40));
                 }),
             );
             const indexes = [first, second].map(
@@ -144,8 +184,8 @@ describe('redis', () => {
             return indexes;
         });
 
-        // Then - index 0 stays the container's own, and neither worker is on the other's
-        expect(result.value).toMatch(['/2', '/3']);
+        // Then - index 0 stays the container's own, and each worker's band of four starts at 1 + 4 × its id
+        expect(result.value).toMatch(['/161', '/165']);
     });
 
     // RUNTIME G2 — a pool id is a worker at any --maxWorkers, not modulo a count of indexes.

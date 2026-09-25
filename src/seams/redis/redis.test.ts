@@ -76,26 +76,48 @@ describe('redis handle', () => {
         });
     });
 
-    test('asks for a container of its own once the stack names it', () => {
+    test('asks for one container whatever service the stack names it', () => {
         // Given - a handle the stack named "queue"
         const queue = redis();
         queue.serviceName = 'queue';
 
-        // Then - its request names the service, so a second redis of the record is a second container
+        // Then - its request names no service, so every redis of the run is one container
         expect(queue.containerOptions).toStrictEqual({
             command: ['redis-server', '--databases', '256'],
-            service: 'queue',
         });
     });
 
     test('refuses a worker past its container indexes, naming the way out', async () => {
-        // Given - a handle acquired by pool id 255, the first with no index left
+        // Given - a handle acquired by pool id 64, the first with no index left
         const crowded = redis();
         crowded.connectionString = 'redis://localhost:1';
 
         // Then - it refuses before it connects, rather than sharing an index
-        await expect(crowded.isolation().acquire('255')).rejects.toThrow(
-            'redis: worker 255 has no database index — a container serves 254 workers; run with fewer (--maxWorkers)',
+        await expect(crowded.isolation().acquire('64')).rejects.toThrow(
+            'redis: worker 64 has no database index for "redis" — a container serves 63 workers; run with fewer (--maxWorkers)',
+        );
+    });
+
+    test('refuses a fifth redis service in one worker, naming the way out', async () => {
+        // Given - four services of worker 60 holding their indexes, and a fifth asking
+        const held = ['a', 'b', 'c', 'd'].map((name) => {
+            const handle = redis();
+            handle.serviceName = name;
+            return handle;
+        });
+        const fifth = redis();
+        fifth.serviceName = 'e';
+        fifth.connectionString = 'redis://localhost:1';
+        await Promise.allSettled(
+            held.map(async (handle) => {
+                handle.connectionString = 'redis://localhost:1';
+                await handle.isolation().acquire('60');
+            }),
+        );
+
+        // Then - it refuses before it connects, rather than sharing a pair's index
+        await expect(fifth.isolation().acquire('60')).rejects.toThrow(
+            'redis: worker 60 has no database index for "e" — a worker holds 4 redis services at once; declare fewer',
         );
     });
 });

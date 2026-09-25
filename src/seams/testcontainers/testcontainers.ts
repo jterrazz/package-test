@@ -17,16 +17,11 @@ export function reuseEnabled(env: NodeJS.ProcessEnv): boolean {
     return env.TESTCONTAINERS_REUSE_ENABLE === 'true' && !onCi;
 }
 
-/** The label naming the one service a container serves, when it serves one alone. */
-export const SERVICE_LABEL = 'com.jterrazz.test.service';
-
 /** The labels a container is started with. */
-export function containerLabels(reuse: boolean, service?: string): Record<string, string> {
-    return {
-        [CONTAINER_LABEL]: 'true',
-        ...(reuse ? { [REUSED_LABEL]: 'true' } : {}),
-        ...(service === undefined ? {} : { [SERVICE_LABEL]: service }),
-    };
+export function containerLabels(reuse: boolean): Record<string, string> {
+    return reuse
+        ? { [CONTAINER_LABEL]: 'true', [REUSED_LABEL]: 'true' }
+        : { [CONTAINER_LABEL]: 'true' };
 }
 
 /**
@@ -39,7 +34,6 @@ export class TestcontainersAdapter implements ContainerPort {
     private readonly env: Record<string, string>;
     private readonly command: string[] | undefined;
     private readonly tmpfs: Record<string, string> | undefined;
-    private readonly service: string | undefined;
     private readonly reuse: boolean;
     private container: any = null;
 
@@ -49,7 +43,6 @@ export class TestcontainersAdapter implements ContainerPort {
         this.env = options.env ?? {};
         this.command = options.command;
         this.tmpfs = options.tmpfs;
-        this.service = options.service;
         this.reuse = options.reuse ?? reuseEnabled(process.env);
     }
 
@@ -62,7 +55,7 @@ export class TestcontainersAdapter implements ContainerPort {
 
         let builder = new GenericContainer(this.image)
             .withExposedPorts(this.containerPort)
-            .withLabels(containerLabels(this.reuse, this.service));
+            .withLabels(containerLabels(this.reuse));
 
         for (const [key, value] of Object.entries(this.env)) {
             builder = builder.withEnvironment({ [key]: value });

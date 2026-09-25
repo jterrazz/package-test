@@ -38,10 +38,4 @@ export type ContainerOptions = {
     command?: string[];
     /** Paths mounted as memory disks, each with its mount options. */
     tmpfs?: Record<string, string>;
-    /**
-     * The one service the container serves: two requests naming two services
-     * are two containers, however alike otherwise. Unnamed, the container is
-     * any alike request's.
-     */
-    service?: string;
 };

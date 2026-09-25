@@ -49,13 +49,4 @@ describe('container reuse', () => {
             run: { 'com.jterrazz.test': 'true' },
         });
     });
-
-    test('labels a container a service holds alone with that service, so reuse finds it by it', () => {
-        // Given - the labels of a container that serves the "queue" service alone
-        // Then - the service is in its definition, and two services alike are two containers
-        expect(containerLabels(false, 'queue')).toStrictEqual({
-            'com.jterrazz.test': 'true',
-            'com.jterrazz.test.service': 'queue',
-        });
-    });
 });

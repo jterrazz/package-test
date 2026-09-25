@@ -137,7 +137,7 @@ This is the same boundary rule B1 already states from the other side — one cha
 
 ## One container per run
 
-A container-backed service is started once per RUN, not once per file. The `api()`, `jobs()` and `integration()` projects carry a global setup that serves the run's containers on a loopback port and provides its address to the workers. The first file that declares a service starts its container; every later file, in any worker, is handed the same one; the run stops them all after the last file. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)). A redis isolates a worker by an index, one per container, so each `redis()` of a record asks for a container of its own: `cache: redis()` and `queue: redis()` are two containers, and one's reset never reaches the other's keys.
+A container-backed service is started once per RUN, not once per file. The `api()`, `jobs()` and `integration()` projects carry a global setup that serves the run's containers on a loopback port and provides its address to the workers. The first file that declares a service starts its container; every later file, in any worker, is handed the same one; the run stops them all after the last file. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)). Every `redis()` is the same request too, so `cache: redis()` and `queue: redis()` share one container, started with `--databases 256`, and each takes an index of its own — one's reset flushes that index alone and never reaches the other's keys.
 
 A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), starts a container per specification and stops it with the file.
 
@@ -147,7 +147,7 @@ The setup reaches Docker in the background and pulls each pinned default image t
 
 `TESTCONTAINERS_REUSE_ENABLE=true` keeps the containers alive between runs: the next run finds them by the hash of their definition instead of starting them, and a postgres finds its templates already built. It is off unless asked for, and off on CI whatever the variable says — a CI run starts from nothing and leaves nothing. A reused container is one run's at a time: two runs at once on one machine share it, and each would drop the other's worker databases.
 
-Every container the package starts carries the label `com.jterrazz.test=true`, a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it, and a container one service holds alone `com.jterrazz.test.service=<service>`, so a reused one is found again by its service.
+Every container the package starts carries the label `com.jterrazz.test=true`, and a reused one `com.jterrazz.test.reuse=true` besides, since it outlives the run by design and nothing reaps it.
 
 The containers of a run that is not reused are removed at teardown. A run that dies leaves them to testcontainers' reaper, which is not proven to catch every one: containers started before the label existed have been seen to outlive it, and why is an open question. Whatever the reaper did, the label lists every container the package started, and the reused ones are removed by hand:
 
@@ -160,13 +160,15 @@ docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
-| Service      | Isolation strategy                                                                                            |
-| ------------ | ------------------------------------------------------------------------------------------------------------- |
-| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path          |
-| `redis()`    | A database index per worker (2–255, 1 outside a vitest worker), acquired empty — the connection string's path |
-| `sqlite()`   | Template file copied per worker                                                                               |
+| Service      | Isolation strategy                                                                                                                           |
+| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| `postgres()` | A database per worker, cloned from the template its init script built — the connection string's path                                         |
+| `redis()`    | A database index per (worker, service) pair — worker `w`'s services take `1 + 4w` to `4 + 4w` — acquired empty, the connection string's path |
+| `sqlite()`   | Template file copied per worker                                                                                                              |
 
 The handle's `connectionString` is the worker's: the app built from it writes where the reset flushes, and a client opened on the container's bare address reaches the container's own database, which no worker uses and no reset flushes.
+
+A redis container's 256 indexes are its own `0` and four per worker, so it serves 63 workers holding four redis services each; a fifth service in one worker, or a worker past the 63rd, is refused before it connects, with the way out in the sentence.
 
 On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
