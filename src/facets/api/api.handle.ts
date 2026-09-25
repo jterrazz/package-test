@@ -1,5 +1,5 @@
 import { getCallerDir } from '../../model/chain/caller.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import { writeLedger } from '../../model/routes/routes.js';
@@ -84,7 +84,7 @@ export async function startApi<Services extends ServiceRecord>(
     const app = options.server(services);
     const server = new HonoAdapter(app);
 
-    const config: SpecificationConfig = {
+    const config: StartedWith<'server'> = {
         database,
         databaseKeys,
         databases,

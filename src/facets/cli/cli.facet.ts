@@ -5,10 +5,9 @@ import { env } from '../../capabilities/env/env.capability.js';
 import { fixture } from '../../capabilities/fixture/fixture.capability.js';
 import { seed } from '../../capabilities/seed/seed.capability.js';
 import { sharing } from '../../capabilities/with/with.capability.js';
-import { required } from '../../model/assertions/required.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { databaseSet } from '../../seams/fs/database-set.js';
 import { fsFixtures } from '../../seams/fs/fixtures.js';
 import type { ChainOf } from '../chain.js';
@@ -47,10 +46,10 @@ export interface CliSpecification<DatabaseKey extends string = string> extends C
     CliSpecification<DatabaseKey>
 > {}
 
-export const cliFacet = defineFacet<CliSpecification>()({
+export const cliFacet = defineFacet<CliSpecification, StartedWith<'command'>>()({
     ...composition,
-    engines: (config: SpecificationConfig) => ({
-        command: required(config.command, 'specification.cli() starts the command adapter'),
+    engines: (config: StartedWith<'command'>) => ({
+        command: config.command,
         databases: databaseSet(config),
         workdir: fsFixtures,
     }),

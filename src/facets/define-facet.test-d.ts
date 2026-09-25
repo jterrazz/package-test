@@ -1,5 +1,7 @@
 import type { Action } from '../model/chain/action.js';
 import type { Capability } from '../model/chain/capability.js';
+import type { StartedWith } from '../model/chain/config.js';
+import type { ServerPort } from '../model/ports/server.port.js';
 import { defineFacet } from './define-facet.js';
 
 /**
@@ -28,3 +30,17 @@ export const inventive = defineFacet<Noted & { label: () => Noted }>()(
     // @ts-expect-error the chain type names `label`, the composition does not [`onTheChainButNotComposed`]
     { ...composition, ...wiring },
 );
+
+/** A facet armed through the server its constructor starts. */
+const served = defineFacet<Noted, StartedWith<'server'>>()({
+    ...composition,
+    engines: (config: StartedWith<'server'>) => ({ server: config.server }),
+    locate: () => '/specs',
+});
+
+declare const server: ServerPort;
+
+export const openedOnItsServer = served.open({ server });
+
+// @ts-expect-error the facet is armed through a server, and this configuration started none
+export const openedWithoutIt = served.open({});

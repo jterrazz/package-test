@@ -1,6 +1,6 @@
 import type { LiterateServeRegistration } from '../../actions/run/literate.js';
 import { getCallerDir } from '../../model/chain/caller.js';
-import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/config.js';
+import type { DockerSpecConfig, StartedWith } from '../../model/chain/config.js';
 import { resolveCommand, resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { CliEnv } from '../../model/ports/cli.port.js';
@@ -137,7 +137,7 @@ export async function startCli<Services extends ServiceRecord>(
         started = await startServices(services, root, { type: 'none' });
     }
 
-    const config: SpecificationConfig = {
+    const config: StartedWith<'command'> = {
         command: new ExecAdapter(resolvedBin),
         database: started?.database,
         databaseKeys,

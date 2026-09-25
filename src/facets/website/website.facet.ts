@@ -7,11 +7,11 @@ import { intercept } from '../../capabilities/intercept/intercept.capability.js'
 import { sharing } from '../../capabilities/with/with.capability.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { pageClock } from '../../seams/playwright/page-clock.js';
 import { stubBackend } from '../../seams/stub-backend/stub-backend.engine.js';
 import type { ChainOf } from '../chain.js';
-import { defineFacet, required } from '../define-facet.js';
+import { defineFacet } from '../define-facet.js';
 import type { WebsiteSpecificationOptions } from './website.handle.js';
 
 const composition = {
@@ -42,10 +42,10 @@ export interface WebsiteSpecification extends ChainOf<
     WebsiteSpecification
 > {}
 
-export const websiteFacet = defineFacet<WebsiteSpecification>()({
+export const websiteFacet = defineFacet<WebsiteSpecification, StartedWith<'browser'>>()({
     ...composition,
-    engines: (config: SpecificationConfig) => ({
-        browser: required(config.browser, 'browser'),
+    engines: (config: StartedWith<'browser'>) => ({
+        browser: config.browser,
         clock: pageClock,
         network: stubBackend(config.backend, 'website'),
     }),

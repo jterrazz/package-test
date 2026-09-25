@@ -1,5 +1,5 @@
 import { getCallerDir } from '../../model/chain/caller.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from '../../model/ports/device.port.js';
@@ -261,7 +261,7 @@ export async function startMobile<Services extends ServiceRecord>(
         return device;
     };
 
-    const config: SpecificationConfig = {
+    const config: StartedWith<'bundleId' | 'device'> = {
         backend: backend ?? undefined,
         backendUrl,
         bundleId: options.app.bundleId,

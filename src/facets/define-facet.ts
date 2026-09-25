@@ -53,30 +53,30 @@ type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberName
     : { readonly onTheChainButNotComposed: Exclude<keyof Self, MemberNames<C>> };
 
 /** What a facet adds to its composition: the engines it arms, and where its paths start. */
-type Wiring<C extends Composition> = {
+type Wiring<C extends Composition, Config extends SpecificationConfig> = {
     /**
      * The adapters the constructor's configuration starts, one per port key —
      * its parameter typed as written: a parameter left to context makes the
      * whole facet context-sensitive, and the composition is then not inferred.
      */
-    readonly engines: (config: SpecificationConfig) => EnginesOf<C> & object;
+    readonly engines: (config: Config) => EnginesOf<C> & object;
     /** The directory a chain's relative paths start from — the test file's, in node. */
     readonly locate: () => string;
 };
 
 /** A facet, ready to open a chain over the configuration its constructor built. */
-type Facet<Self> = {
+type Facet<Self, Config extends SpecificationConfig> = {
     readonly composition: Composition;
-    readonly open: (config: SpecificationConfig) => Self;
+    readonly open: (config: Config) => Self;
 };
 
-/** The definer `defineFacet<Self>()` hands back. */
-type FacetDefiner<Self> = <const C extends Composition>(
-    facet: C & SameMembers<Self, C> & Wiring<C>,
-) => Facet<Self>;
+/** The definer `defineFacet<Self, Config>()` hands back. */
+type FacetDefiner<Self, Config extends SpecificationConfig> = <const C extends Composition>(
+    facet: C & SameMembers<Self, C> & Wiring<C, Config>,
+) => Facet<Self, Config>;
 
-/** A composition and its wiring, as the chain reads them at run time. */
-type Wired = Composition & Wiring<Composition>;
+/** A composition and where its paths start, as the chain reads them at run time. */
+type Wired = Composition & Pick<Wiring<Composition, SpecificationConfig>, 'locate'>;
 
 /** The one setup `with()` folds each contextual setup's value through. */
 function shared(
@@ -137,26 +137,16 @@ function chainOf(
 }
 
 /**
- * The engine a constructor started, handed to a composition armed through it.
- * Every constructor starts the engines its composition names, so an absent
- * one is a facet wired wrong — refused when the facet is opened, never when a
- * spec first reaches for it.
- */
-export function required<Engine>(engine: Engine | undefined, port: string): Engine {
-    if (engine === undefined) {
-        throw new Error(
-            `defineFacet(): the constructor started no \`${port}\` engine, and the composition is armed through it`,
-        );
-    }
-    return engine;
-}
-
-/**
  * Define a facet by what it composes. `Self` is the chain type the facet
  * publishes, computed from the same composition; the compiler refuses a
- * composition that names other members than it.
+ * composition that names other members than it. `Config` is the
+ * configuration it opens over — `StartedWith<…>` the engines its constructor
+ * must start, so a facet opened without one does not compile.
  */
-export function defineFacet<Self>(): FacetDefiner<Self> {
+export function defineFacet<
+    Self,
+    Config extends SpecificationConfig = SpecificationConfig,
+>(): FacetDefiner<Self, Config> {
     return (facet) => ({
         composition: facet,
         open: (config) =>

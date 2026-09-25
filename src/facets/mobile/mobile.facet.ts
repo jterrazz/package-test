@@ -3,7 +3,7 @@ import { open } from '../../actions/open/open.action.js';
 import { intercept } from '../../capabilities/intercept/intercept.capability.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { appiumApp } from '../../seams/appium/appium.app.js';
 import { stubBackend } from '../../seams/stub-backend/stub-backend.engine.js';
 import type { ChainOf } from '../chain.js';
@@ -37,9 +37,9 @@ export interface MobileSpecification extends ChainOf<
     MobileSpecification
 > {}
 
-export const mobileFacet = defineFacet<MobileSpecification>()({
+export const mobileFacet = defineFacet<MobileSpecification, StartedWith<'bundleId' | 'device'>>()({
     ...composition,
-    engines: (config: SpecificationConfig) => ({
+    engines: (config: StartedWith<'bundleId' | 'device'>) => ({
         app: appiumApp(config),
         network: stubBackend(config.backend, 'mobile'),
     }),

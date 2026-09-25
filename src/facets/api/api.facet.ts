@@ -7,12 +7,12 @@ import { seed } from '../../capabilities/seed/seed.capability.js';
 import { sharing } from '../../capabilities/with/with.capability.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { databaseSet } from '../../seams/fs/database-set.js';
 import { mswNode } from '../../seams/msw/msw-node.js';
 import { processClock } from '../../seams/vitest/clock.engine.js';
 import type { ChainOf } from '../chain.js';
-import { defineFacet, required } from '../define-facet.js';
+import { defineFacet } from '../define-facet.js';
 import type { ApiSpecificationOptions } from './api.handle.js';
 
 const composition = {
@@ -41,13 +41,13 @@ export interface ApiSpecification<DatabaseKey extends string = string> extends C
     ApiSpecification<DatabaseKey>
 > {}
 
-export const apiFacet = defineFacet<ApiSpecification>()({
+export const apiFacet = defineFacet<ApiSpecification, StartedWith<'server'>>()({
     ...composition,
-    engines: (config: SpecificationConfig) => ({
+    engines: (config: StartedWith<'server'>) => ({
         clock: processClock,
         databases: databaseSet(config),
         network: mswNode,
-        server: required(config.server, 'server'),
+        server: config.server,
     }),
     locate: getCallerDir,
 });

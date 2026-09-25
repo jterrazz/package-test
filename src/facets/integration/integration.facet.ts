@@ -6,7 +6,7 @@ import { seed } from '../../capabilities/seed/seed.capability.js';
 import { sharing } from '../../capabilities/with/with.capability.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { databaseSet } from '../../seams/fs/database-set.js';
 import { mswNode } from '../../seams/msw/msw-node.js';
 import { processClock } from '../../seams/vitest/clock.engine.js';
@@ -44,13 +44,13 @@ export interface IntegrationSpecification<
     IntegrationSpecification<Services, DatabaseKey>
 > {}
 
-export const integrationFacet = defineFacet<IntegrationSpecification>()({
+export const integrationFacet = defineFacet<IntegrationSpecification, StartedWith<'services'>>()({
     ...composition,
-    engines: (config: SpecificationConfig) => ({
+    engines: (config: StartedWith<'services'>) => ({
         clock: processClock,
         databases: databaseSet(config),
         network: mswNode,
-        services: config.services ?? {},
+        services: config.services,
     }),
     locate: getCallerDir,
 });

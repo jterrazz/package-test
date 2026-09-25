@@ -1,5 +1,5 @@
 import { getCallerDir } from '../../model/chain/caller.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import {
@@ -75,7 +75,7 @@ export async function startIntegration<Services extends ServiceRecord>(
         started = await startServices(services, root, { type: 'none' });
     }
 
-    const config: SpecificationConfig = {
+    const config: StartedWith<'services'> = {
         database: started?.database,
         databaseKeys,
         databases: started?.databases,

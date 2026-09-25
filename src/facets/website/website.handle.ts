@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { getCallerDir } from '../../model/chain/caller.js';
-import type { SpecificationConfig } from '../../model/chain/config.js';
+import type { StartedWith } from '../../model/chain/config.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { BrowserPort } from '../../model/ports/browser.port.js';
@@ -276,7 +276,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         return browser;
     };
 
-    const config: SpecificationConfig = {
+    const config: StartedWith<'browser'> = {
         backend: backend ?? undefined,
         backendUrl,
         baseUrl,

@@ -3,8 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { defineAction } from '../model/chain/action.js';
 import { defineCapability } from '../model/chain/capability.js';
 import type { Sharing } from '../model/chain/capability.js';
-import type { SpecificationConfig } from '../model/chain/config.js';
-import { defineFacet, required } from './define-facet.js';
+import { defineFacet } from './define-facet.js';
 
 /** A setup that appends what it is told. */
 const note = defineCapability({
@@ -119,21 +118,5 @@ describe('defineFacet — the chain a composition opens', () => {
             own: '2027-01-01T00:00:00Z',
             shared: '2026-03-04T09:30:00Z',
         });
-    });
-
-    test('a facet opened without an engine its composition is armed through is refused at open, naming the port', () => {
-        // Given - a facet whose constructor arms a server, opened over a configuration that carries none
-        const facet = defineFacet<Toy>()({
-            ...composition,
-            engines: (config: SpecificationConfig) => ({
-                server: required(config.server, 'server'),
-            }),
-            locate: () => '/specs',
-        });
-
-        // Then - opening refuses, naming the missing engine, rather than a spec later reading `undefined`
-        expect(() => facet.open({})).toThrow(
-            'defineFacet(): the constructor started no `server` engine, and the composition is armed through it',
-        );
     });
 });

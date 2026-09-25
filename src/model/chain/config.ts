@@ -110,3 +110,11 @@ export type SpecificationConfig = {
      */
     transform?: ((text: string) => string) | undefined;
 };
+
+/**
+ * A configuration whose constructor started the named engines — each of them
+ * present, so a facet armed through them is handed them by type.
+ */
+export type StartedWith<Key extends keyof SpecificationConfig> = SpecificationConfig & {
+    readonly [Started in Key]-?: NonNullable<SpecificationConfig[Started]>;
+};
