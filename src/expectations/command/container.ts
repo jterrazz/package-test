@@ -84,16 +84,16 @@ export class ContainerAccessor {
 
     /** Captured logs (stdout+stderr combined for v1). */
     get stdout(): TextAccessor {
-        this.requireExists('stdout');
-        return new TextAccessor(this.loadLogs(), 'stdout', this.testDir, {
+        const id = this.requireExists('stdout');
+        return new TextAccessor(this.loadLogs(id), 'stdout', this.testDir, {
             transform: this.transform,
         });
     }
 
     /** Captured logs (stdout+stderr combined for v1). */
     get stderr(): TextAccessor {
-        this.requireExists('stderr');
-        return new TextAccessor(this.loadLogs(), 'stderr', this.testDir, {
+        const id = this.requireExists('stderr');
+        return new TextAccessor(this.loadLogs(id), 'stderr', this.testDir, {
             transform: this.transform,
         });
     }
@@ -104,8 +104,7 @@ export class ContainerAccessor {
      * the host filesystem accessor, so tests do not need to learn a new API.
      */
     file(path: string): FileAccessor {
-        this.requireExists('file');
-        const id = this.containerId!;
+        const id = this.requireExists('file');
         const exists = execInContainer(id, ['test', '-e', path]).exitCode === 0;
         const { testDir } = this;
         const readContent = (): string => {
@@ -130,8 +129,8 @@ export class ContainerAccessor {
      * {@link CliResult} used for host-side executions.
      */
     async exec(cmd: string): Promise<CliResult> {
-        this.requireExists('exec');
-        const commandOutput = execInContainer(this.containerId!, ['sh', '-c', cmd]);
+        const id = this.requireExists('exec');
+        const commandOutput = execInContainer(id, ['sh', '-c', cmd]);
         return new CliResult({
             commandOutput,
             config: {},
@@ -141,16 +140,18 @@ export class ContainerAccessor {
         });
     }
 
-    private requireExists(member: string): void {
-        if (!this.exists) {
+    /** The captured container's id — refused when none was captured. */
+    private requireExists(member: string): string {
+        if (this.containerId === null) {
             throw new Error(
                 `ContainerAccessor.${member}: container does not exist (check .exists first)`,
             );
         }
+        return this.containerId;
     }
 
-    private loadLogs(): string {
-        this.cachedLogs ??= containerLogs(this.containerId!);
+    private loadLogs(id: string): string {
+        this.cachedLogs ??= containerLogs(id);
         return this.cachedLogs;
     }
 }

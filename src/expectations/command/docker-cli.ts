@@ -63,7 +63,9 @@ export function containerLogs(id: string): string {
             timeout: DEFAULT_TIMEOUT,
         });
     } catch (error: any) {
-        return typeof error?.stdout === 'string' ? error.stdout : String(error?.stderr ?? '');
+        return typeof error?.stdout === 'string'
+            ? String(error.stdout)
+            : String(error?.stderr ?? '');
     }
 }
 
