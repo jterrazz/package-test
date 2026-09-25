@@ -1,5 +1,6 @@
 import type { Armed } from '../../kernel/chain/capability.js';
 import { clock } from './clock.js';
+import type { ClockPort } from './clock.port.js';
 
 /** The process's `Date` pinned at `iso`, until the effect is released. */
 function pinnedAt(iso: string): Armed {
@@ -17,6 +18,6 @@ function pinnedAt(iso: string): Armed {
  * is not one is refused in its words, and released when the action settles;
  * a chain that states none leaves the process its real calendar.
  */
-export const processClock: { readonly pin: (iso: null | string) => Armed | undefined } = {
+export const processClock: ClockPort = {
     pin: (iso) => (iso === null ? undefined : pinnedAt(iso)),
 };

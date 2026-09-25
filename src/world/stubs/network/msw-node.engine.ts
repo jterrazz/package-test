@@ -1,5 +1,4 @@
-import type { Armed } from '../../../kernel/chain/capability.js';
-import type { Stub } from '../stub.js';
+import type { InterceptPort } from '../intercept/intercept.port.js';
 
 /**
  * The network of THIS process, served by msw's node interceptor. The engine
@@ -7,10 +6,7 @@ import type { Stub } from '../stub.js';
  * none never loads it; a chain with none arms nothing and is unguarded — the
  * process has real traffic of its own (CONVENTIONS D7, known scope).
  */
-export const mswNode: {
-    readonly accepts: () => void;
-    readonly arm: (stubs: readonly Stub[]) => Promise<Armed>;
-} = {
+export const mswNode: InterceptPort = {
     accepts: () => {
         // Every chain of this process may declare stubs: the process has a network.
     },

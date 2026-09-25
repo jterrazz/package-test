@@ -10,7 +10,7 @@
  * before `onUnhandledRequest` ever runs — an extension test would let a real
  * `/api/posts.json` through on the same ground.
  */
-import type { Armed } from '../../../kernel/chain/capability.js';
+import type { InterceptPort } from '../intercept/intercept.port.js';
 import type { Stub } from '../stub.js';
 import { buildStubHandlers } from './handlers.js';
 import type { StubRegistration } from './handlers.js';
@@ -96,10 +96,7 @@ export function resetWorkerStubs(): void {
  * drops them when the test ends, handed the runner's "after this test"
  * because a mounted component keeps fetching after its render resolves.
  */
-export function mswWorker(atTestEnd: (teardown: () => void) => void): {
-    readonly accepts: () => void;
-    readonly arm: (stubs: readonly Stub[]) => Promise<Armed>;
-} {
+export function mswWorker(atTestEnd: (teardown: () => void) => void): InterceptPort {
     return {
         accepts: () => {
             // Every chain of a page may declare stubs: the worker serves them all.

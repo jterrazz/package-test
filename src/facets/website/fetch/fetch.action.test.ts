@@ -6,7 +6,7 @@ import { clock } from '../../../world/clock/clock.capability.js';
 import type { StubRequest, StubResponse } from '../../../world/stubs/exchange/exchange.js';
 import { http } from '../../../world/stubs/http/http.js';
 import { interceptThrough } from '../../../world/stubs/intercept/intercept.scope.js';
-import { registerStubs, stopStubServer } from '../../../world/stubs/interceptor/server.js';
+import { registerStubs, stopStubServer } from '../../../world/stubs/network/server.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { rawFetch } from './fetch.action.js';
 import type { FetchResult } from './fetch.result.js';

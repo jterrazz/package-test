@@ -1,4 +1,4 @@
-import { registerWorkerStubs } from '../interceptor/worker.js';
+import { registerWorkerStubs } from '../network/worker.engine.js';
 import { interceptThrough } from './intercept.scope.js';
 import type { Intercept } from './intercept.scope.js';
 

@@ -36,7 +36,7 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     '@vitest/browser-playwright': ['src/facets/component/', 'src/vitest/'],
     'better-sqlite3': ['src/world/services/sqlite/'],
     hono: ['src/facets/api/'],
-    msw: ['src/world/stubs/interceptor/'],
+    msw: ['src/world/stubs/network/'],
     'oxc-parser': ['lint/module-parser.ts'],
     pg: ['src/world/services/postgres/'],
     playwright: ['src/facets/website/'],

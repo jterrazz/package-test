@@ -1,5 +1,5 @@
 import type { StubRequest, StubResponder, StubResponse } from '../exchange/exchange.js';
-import type { StubRegistration } from '../interceptor/handlers.js';
+import type { StubRegistration } from '../network/handlers.js';
 /**
  * The network double in MODULE scope — the same stubs, the same queue and
  * the same strictness as a chain's `.intercept()`, for the one kind of test

@@ -4,7 +4,7 @@ import type { ChainConfig } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
-import { mswWorker } from '../../world/stubs/interceptor/worker.js';
+import { mswWorker } from '../../world/stubs/network/worker.engine.js';
 import { pageClock } from './page/clock.engine.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';
 import { vitestBrowserPage } from './page/page.engine.js';

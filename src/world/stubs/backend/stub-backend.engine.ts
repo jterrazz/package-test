@@ -1,5 +1,4 @@
-import type { Armed } from '../../../kernel/chain/capability.js';
-import type { Stub } from '../stub.js';
+import type { InterceptPort } from '../intercept/intercept.port.js';
 import type { StubBackend } from './stub-backend.js';
 
 /**
@@ -13,10 +12,7 @@ import type { StubBackend } from './stub-backend.js';
 export function stubBackend(
     backend: StubBackend | undefined,
     facet: 'mobile' | 'website',
-): {
-    readonly accepts: () => void;
-    readonly arm: (stubs: readonly Stub[]) => Promise<Armed>;
-} {
+): InterceptPort {
     return {
         accepts: () => {
             if (backend === undefined) {

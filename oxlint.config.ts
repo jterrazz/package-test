@@ -52,7 +52,7 @@ const config: OxlintConfig = defineConfig(
                     // Test package to F2, and this adapter is its one importer.
                     'src/facets/website/browser/playwright.adapter.ts',
                     // The network double's engine, time, and the doubles.
-                    'src/world/stubs/interceptor/**',
+                    'src/world/stubs/network/**',
                     'src/world/clock/**',
                     'src/world/mocks/**',
                     // The container server's address is a provided value.

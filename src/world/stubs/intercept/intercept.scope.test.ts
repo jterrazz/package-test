@@ -1,7 +1,7 @@
 import { afterAll, describe, expect, test } from 'vitest';
 
 import { http } from '../http/http.js';
-import { registerStubs, stopStubServer } from '../interceptor/server.js';
+import { registerStubs, stopStubServer } from '../network/server.js';
 import { defineStub } from '../stub.js';
 import { interceptThrough } from './intercept.scope.js';
 
