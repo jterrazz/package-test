@@ -1,9 +1,4 @@
-/**
- * The observed outgoing request, reduced to what stub matchers inspect.
- * Built once per request by the engine (MSW on api/job, the stub backend on
- * website/mobile) and handed to {@link StubRequest.match} and to a
- * {@link StubResponder}.
- */
+/** An observed outgoing request, reduced to what stub matchers inspect. */
 export type MatchableRequest = {
     /** Parsed JSON body when the payload is JSON, the raw text otherwise, or `null` when absent. */
     body: unknown;
@@ -15,14 +10,7 @@ export type MatchableRequest = {
     url: string;
 };
 
-/**
- * The request half of a stub: which outgoing call it speaks for.
- *
- * `url` is either an absolute URL (string or RegExp), or a PATH FORM starting
- * with `/` (`/articles/{{uuid}}`) which matches any origin — the shape a
- * website/mobile app's own backend calls take. `{{token}}` segments compare
- * structurally, declared query params are a subset of the observed ones.
- */
+/** The request half of a stub: an absolute URL, or a path form (`/articles/{{uuid}}`) matching any origin. */
 export type StubRequest = {
     /** Adapter name — `http` | `openai` | `anthropic`. */
     adapter: string;
@@ -36,51 +24,23 @@ export type StubRequest = {
     wrap: (data: unknown) => StubResponse;
 };
 
-/**
- * The response half of a stub: what to reply when the request matches.
- */
+/** The response half of a stub. */
 export type StubResponse = {
     /** HTTP status code (default: 200). */
     status?: number;
-    /**
-     * Response body — an object is JSON, a string is text, `null`/`undefined`
-     * is empty, and a {@link StreamBody} (built by `http.stream()` /
-     * `http.sse()`) arrives in pieces.
-     */
+    /** Response body: an object is JSON, a string text, `null` empty, a `StreamBody` arrives in pieces. */
     body: unknown;
-    /** Response headers. */
     headers?: Record<string, string> | undefined;
     /** Delay in ms before responding (for timeout testing). */
     delay?: number | undefined;
-    /**
-     * A transport failure instead of a reply: the request never reached a
-     * server, so `fetch` rejects. `status`, `body` and `headers` say nothing
-     * here — there is no response to carry them.
-     *
-     * The one thing a status code cannot express. A component's "the server did
-     * not answer, check that it is running" branch is reached by a rejected
-     * `fetch`, and a 503 stand-in tests the other branch entirely.
-     */
+    /** A transport failure instead of a reply: `fetch` rejects, as no status code can express. */
     transport?: 'network-error' | undefined;
 };
 
-/**
- * The marker that tells a STREAMED body from a value that happens to be an
- * object. A body reaches three different engines (msw's server, msw's worker,
- * the `node:http` stub) and each of them serialises "an object" as JSON, so a
- * stream declared as a plain value arrives as `{}`. The tag is what each
- * engine recognises before it reaches for `JSON.stringify`.
- */
+/** Each engine serialises an object as JSON, so a stream declared as a plain value would arrive as `{}`: the tag tells them apart. */
 export const STREAM_BODY = '@jterrazz/test:stream';
 
-/**
- * A body that arrives in pieces — what `http.stream()` and `http.sse()` build.
- *
- * The chunks are written in order, `delayBetweenChunks` milliseconds apart,
- * and the connection closes after the last one. It is the chunks and their
- * ORDER that a streaming subject is specified against: a client that renders
- * tokens as they land, or one that reconnects on a half-read body.
- */
+/** A body that arrives in pieces, as `http.stream()` and `http.sse()` build it. */
 export type StreamBody = {
     /** The pieces, written in order. */
     chunks: readonly string[];
@@ -91,21 +51,12 @@ export type StreamBody = {
     kind: typeof STREAM_BODY;
 };
 
-/** Is this body a declared stream rather than a value to serialise? */
 export function isStreamBody(body: unknown): body is StreamBody {
     return typeof body === 'object' && body !== null && 'kind' in body && body.kind === STREAM_BODY;
 }
 
-/**
- * A dynamic response: computed from the observed request at the moment the
- * stub is served, rather than fixed ahead of time. Handed the same
- * {@link MatchableRequest} the request half matched on, so the reply can echo
- * or derive from the body/headers/url.
- */
+/** A response computed from the observed request at serve time. */
 export type StubResponder = (request: MatchableRequest) => StubResponse;
 
-/**
- * What a stub replies with: either a fixed {@link StubResponse} or a
- * {@link StubResponder} evaluated per served request.
- */
+/** A fixed `StubResponse`, or a `StubResponder` evaluated per served request. */
 export type StubResponseValue = StubResponder | StubResponse;

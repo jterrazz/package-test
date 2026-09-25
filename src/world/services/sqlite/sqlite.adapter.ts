@@ -25,19 +25,10 @@ import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';
 import type { ServiceHandle } from '../service.port.js';
 
-// The first 16 bytes of every well-formed SQLite database file (see the
-// SQLite file format spec). A crashed earlier run can leave a stale/partial
-// template behind (e.g. 0 bytes) — this is the cheap, dependency-free check
-// used to tell "real template" from "leftover from a crash".
+// The SQLite file-format header: a crash can leave a 0-byte or partial template behind.
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
-/**
- * `better-sqlite3`'s constructor, loaded the first time a database is opened.
- *
- * The binding is an OPTIONAL peer: it is a native module to compile, and a
- * repository that never declares `sqlite()` has no use for one. Loading it
- * here also puts the pnpm build note where the failure happens.
- */
+/** An optional peer, a native module to compile. */
 let databaseConstructor: null | typeof Database = null;
 
 async function loadDatabase(): Promise<typeof Database> {
@@ -46,11 +37,7 @@ async function loadDatabase(): Promise<typeof Database> {
             const betterSqlite3 = await import('better-sqlite3');
             return betterSqlite3.default;
         });
-        // The package can be installed and still not WORK: its binding is
-        // compiled by an install script that npm, pnpm and bun all withhold by
-        // default. Open one in-memory database here, where the refusal can name
-        // the peer and the command, rather than letting a `bindings` stack
-        // trace surface from whichever spec happened to seed first.
+        // Installed is not built: npm, pnpm and bun withhold install scripts. Opening one database here lets the refusal name the peer and the command.
         requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
             const Probe = constructor;
             new Probe(':memory:').close();
@@ -60,11 +47,7 @@ async function loadDatabase(): Promise<typeof Database> {
     return databaseConstructor;
 }
 
-/**
- * The constructor, once loaded. The read accessors (`seed`, `query`, `reset`)
- * are reached only AFTER `initialize()` has opened a database, so by the time
- * one of them runs the peer is in hand — which is what lets them stay sync.
- */
+/** The read accessors run only after `initialize()` opened a database, which keeps them sync. */
 function database(): typeof Database {
     if (databaseConstructor === null) {
         throw new Error(
@@ -74,12 +57,7 @@ function database(): typeof Database {
     return databaseConstructor;
 }
 
-/**
- * Whether `path` looks like a usable SQLite database file: it exists, is at
- * least as long as the format header, and begins with the SQLite magic
- * bytes. Does not validate anything beyond the header — good enough to
- * reject a 0-byte or truncated leftover without opening the file.
- */
+/** Checks the header only: enough to reject a 0-byte or truncated leftover. */
 export function isValidSqliteTemplate(path: string): boolean {
     if (!existsSync(path)) {
         return false;
@@ -103,21 +81,9 @@ export function isValidSqliteTemplate(path: string): boolean {
     }
 }
 
-/** The invocation used when no `prismaSchema` is declared — Prisma discovers its own schema. */
 const PRISMA_PUSH = 'npx prisma db push --force-reset';
 
-/**
- * The `prisma db push` command line for a `prismaSchema` option.
- *
- * The declared path is resolved against `process.cwd()` and handed to the CLI
- * as `--schema`. Without the flag Prisma falls back to its own discovery
- * (`prisma.config.ts` / `package.json#prisma` at the cwd), which silently
- * ignores the option: a repo whose config does not sit at the cwd then fails
- * with "Could not find Prisma Schema that is required for this command" — but
- * only on a machine without a cached template, so the divergence hides until CI.
- *
- * `null` (no option) keeps the bare invocation, discovery and all.
- */
+/** `--schema` is required: without it Prisma's own discovery ignores the option, and only a machine without a cached template fails. */
 export function prismaPushCommand(prismaSchema: null | string): string {
     if (!prismaSchema) {
         return PRISMA_PUSH;
@@ -126,41 +92,20 @@ export function prismaPushCommand(prismaSchema: null | string): string {
 }
 
 export type SqliteOptions = {
-    /**
-     * Path to a SQL file used to initialize the database schema.
-     * Mutually exclusive with `prismaSchema`.
-     */
+    /** Path to a SQL file initializing the schema; exclusive with `prismaSchema`. */
     init?: string;
-    /**
-     * Path to a Prisma schema directory or file, resolved against the current
-     * working directory. The adapter runs `prisma db push --schema <path>` to
-     * create the template, so the schema needs no Prisma config at the cwd.
-     * Mutually exclusive with `init`.
-     */
+    /** Path to a Prisma schema, resolved against the cwd and handed to `prisma db push --schema`; exclusive with `init`. */
     prismaSchema?: string;
 };
 
-/** Every template file this package writes carries that prefix, then its key. */
 const TEMPLATE_PREFIX = 'template';
 
-/**
- * How long a waiter tolerates a lock nobody is touching before deciding its
- * holder died mid-build and taking over. A cold `prisma db push` is the slowest
- * build there is and finishes far inside this; a crashed holder would otherwise
- * wedge the suite forever.
- */
+/** A crashed holder would wedge the suite; a cold `prisma db push` finishes far inside this. */
 const LOCK_STALE_MS = 120_000;
 
-/** How often a waiter re-checks the lock. */
 const LOCK_POLL_MS = 50;
 
-/**
- * The schema source as bytes: a file's content, or every file under a
- * directory in a stable order (a Prisma `schema/` folder is a directory). Each
- * entry carries its own path, so moving a schema changes the fingerprint.
- * Anything unreadable degrades to a marker rather than throwing — the path is
- * already in the key, so two projects still never collide.
- */
+/** Each entry carries its path, so moving a schema changes the fingerprint; unreadable degrades to a marker, the path already in the key. */
 function schemaBytes(path: string): string {
     try {
         if (statSync(path).isDirectory()) {
@@ -175,17 +120,7 @@ function schemaBytes(path: string): string {
     }
 }
 
-/**
- * The name of the template database for a set of options — `<prefix>-<sha8>`,
- * the digest taken over the schema KIND, its resolved path and its content.
- *
- * The key survives the move out of the OS tmpdir. Within one project it is what
- * makes reuse mean "the same schema": editing a schema builds a new template
- * instead of inheriting the old one — the stale file is header-valid, so the
- * validity check would accept it and the tables would never be rebuilt. It also
- * keeps two checkouts of the SAME project apart when a schema differs between
- * them, on top of the separation the per-project folder already gives.
- */
+/** Editing a schema builds a new template: the stale file is header-valid and would never be rebuilt. */
 export function sqliteTemplateName(options: SqliteOptions = {}): string {
     let fingerprint: string;
     if (options.prismaSchema) {
@@ -201,33 +136,14 @@ export function sqliteTemplateName(options: SqliteOptions = {}): string {
     return `${TEMPLATE_PREFIX}-${key}.sqlite`;
 }
 
-/**
- * The directory a project caches its schema templates in —
- * `<root>/.artifacts/vitest/sqlite/`, created on demand.
- *
- * A project, not a machine. A template in the OS tmpdir is shared, where
- * two checkouts of the same repository shared one file: whichever ran first
- * built it, the other silently inherited that schema, and a branch that changed
- * the schema poisoned the branch beside it. A path under the project root
- * cannot be reached from another checkout at all.
- */
+/** Per project, never the OS tmpdir: two checkouts sharing one template inherit each other's schema. */
 export function sqliteTemplateDir(root: string): string {
     const dir = resolve(root, SQLITE_TEMPLATE_DIR);
     mkdirSync(dir, { recursive: true });
     return dir;
 }
 
-/**
- * Take the build lock, or report that someone else holds it.
- *
- * `wx` is the whole point: the file is created and claimed in ONE syscall, so
- * two workers cannot both come out of it believing they won. The former
- * check-then-write pair could, and both then ran `prisma db push` against the
- * same file — the `database is locked` failure a consumer keeps
- * `fileParallelism: false` for.
- *
- * @internal Exported for unit tests.
- */
+/** `wx` creates and claims the file in one syscall: two workers cannot both win and run `prisma db push` on one file. */
 export function acquireTemplateLock(lockPath: string): boolean {
     let fd: number;
     try {
@@ -246,7 +162,6 @@ export function acquireTemplateLock(lockPath: string): boolean {
     return true;
 }
 
-/** Drop the build lock. A lock already gone is not an error — the goal is met. */
 export function releaseTemplateLock(lockPath: string): void {
     try {
         unlinkSync(lockPath);
@@ -255,12 +170,7 @@ export function releaseTemplateLock(lockPath: string): void {
     }
 }
 
-/**
- * Whether a lock has gone untouched long enough that its holder must be dead.
- * A lock that no longer exists is not stale — the waiter simply retries.
- *
- * @internal Exported for unit tests.
- */
+/** A lock that no longer exists is not stale: the waiter retries. */
 export function isStaleTemplateLock(lockPath: string, now: number = Date.now()): boolean {
     try {
         return now - statSync(lockPath).mtimeMs > LOCK_STALE_MS;
@@ -315,20 +225,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         // SQLite is always ready — it's a file
     }
 
-    /**
-     * Make the schema template available, building it if this worker is the one
-     * that gets to.
-     *
-     * The template is cached under the PROJECT's `.artifacts/vitest/sqlite/`,
-     * keyed by schema. `root` is the root the specification resolved (A9); a
-     * handle initialised outside an orchestrator — a unit test holding one
-     * directly — falls back to the same walk from the cwd.
-     *
-     * One worker builds, the others WAIT: the lock is taken with an exclusive
-     * create, so exactly one wins, and a loser polls until the winner is done
-     * rather than proceeding into a second concurrent `prisma db push` on the
-     * same file (which is what `database is locked` was).
-     */
+    /** One worker builds under an exclusive lock, the others wait: two concurrent `prisma db push` on one file is `database is locked`. */
     async initialize(_dockerDir?: string, root?: string): Promise<void> {
         await loadDatabase();
         const projectRoot = root ?? discoverRoot(process.cwd());
@@ -339,10 +236,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         const lockPath = `${this.templatePath}.lock`;
 
         for (;;) {
-            // A valid template is the answer, whoever built it. An invalid one
-            // (a 0-byte leftover from a crashed run) reads as absent, so the
-            // build below replaces it instead of poisoning every later run with
-            // "no such table".
+            // An invalid template (a crash's 0-byte leftover) reads as absent and is rebuilt.
             if (isValidSqliteTemplate(this.templatePath)) {
                 break;
             }
@@ -368,15 +262,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         this.started = true;
     }
 
-    /**
-     * Build the template on a private path, then rename it into place.
-     *
-     * The rename is what makes a half-built template unobservable: it is atomic
-     * within a filesystem, so a reader sees either the previous template or the
-     * finished one. Building in place could not promise that — `prisma db push`
-     * writes the SQLite header long before the tables exist, and a reader that
-     * arrived in between accepted a valid-looking file with nothing in it.
-     */
+    /** Built on a private path, then renamed into place: `prisma db push` writes the header long before the tables exist. */
     private async buildTemplate(): Promise<void> {
         const buildPath = `${this.templatePath}.${process.pid}.building`;
         removeDatabaseFiles(buildPath);
@@ -390,18 +276,16 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
                     PRISMA_USER_CONSENT_FOR_DANGEROUS_AI_ACTION: 'yes',
                 });
 
-                // Checkpoint WAL so the template is a single file (safe to copy)
+                // Checkpoint WAL so the template is a single file, safe to copy.
                 const tmpDb = new (database())(buildPath);
                 tmpDb.pragma('wal_checkpoint(TRUNCATE)');
                 tmpDb.close();
             } else if (this.initSql) {
-                // Use raw SQL to create schema
                 const sql = readFileSync(this.initSql, 'utf8');
                 const templateDb = new (database())(buildPath);
                 templateDb.exec(sql);
                 templateDb.close();
             } else {
-                // Empty database — consumer will seed
                 const templateDb = new (database())(buildPath);
                 templateDb.close();
             }
@@ -472,10 +356,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
         return {
             acquire: async (workerId: string) => {
                 this.closeDb();
-                // Per-RUN scratch, deleted on release — it stays in the OS temp
-                // dir on purpose: it is not something a project produces. The
-                // pid joins the name because a worker id is only unique inside
-                // one vitest run, and two runs share this directory.
+                // Per-run scratch in the OS temp dir; the pid joins the name because a worker id is unique only inside one vitest run.
                 this.workerDbPath = resolve(
                     tmpdir(),
                     `test-worker-${workerId}-${process.pid}-${Date.now()}.sqlite`,
@@ -500,19 +381,7 @@ export class SqliteHandle implements DatabasePort, ServiceHandle {
     }
 }
 
-/**
- * Create a SQLite service handle. Uses file-copy isolation for parallel tests.
- *
- * @example
- *   // With Prisma schema
- *   const db = sqlite({ prismaSchema: './prisma/schema' });
- *
- *   // With raw SQL init
- *   const db = sqlite({ init: './schema.sql' });
- *
- *   // Empty database
- *   const db = sqlite();
- */
+/** Create a SQLite service handle, isolated per test by file copy. */
 export function sqlite(options: SqliteOptions = {}): SqliteHandle {
     return new SqliteHandle(options);
 }

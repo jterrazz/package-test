@@ -8,14 +8,6 @@ import {
     TestcontainersAdapter,
 } from './testcontainers.adapter.js';
 
-/*
- * The adapter IS the subject here, and it is not on the public entry — which
- * is what makes this a module test beside its module rather than a spec under
- * `specs/integration/`. What it answers with no container is proven here;
- * reading a live container's logs is proven where a run reads them, by the
- * api's initiation-errors specs, on the run's own container.
- */
-
 describe('TestcontainersAdapter', () => {
     test('testcontainers adapter — degrades to an empty string when the container was never started', async () => {
         // Given - an adapter nothing ever started

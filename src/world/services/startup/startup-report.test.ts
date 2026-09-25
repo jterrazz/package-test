@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import { formatStartupReport } from './startup-report.js';
 
-/** The report as a reader sees it: its colour codes dropped, one entry per line. */
 // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: dropping it is the point
 const plain = (text: string): string[] => text.replaceAll(/\u001B\[[0-9;]*m/gu, '').split('\n');
 

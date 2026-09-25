@@ -7,8 +7,6 @@ import type { SseEvent } from '../http/http.js';
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
-// ── Chat Completions filters ──
-
 export type OpenAIChatFilter = {
     model?: TextFilter;
     system?: TextFilter;
@@ -49,8 +47,6 @@ function matchesChatFilter(body: any, filter: OpenAIChatFilter): boolean {
     return true;
 }
 
-// ── Responses API filters ──
-
 export type OpenAIResponsesFilter = {
     model?: TextFilter;
     system?: TextFilter;
@@ -83,8 +79,6 @@ function matchesResponsesFilter(body: any, filter: OpenAIResponsesFilter): boole
     return true;
 }
 
-// ── Response builders ──
-
 function buildChatReply(data: unknown): StubResponse {
     const content = typeof data === 'string' ? data : JSON.stringify(data);
     return {
@@ -100,7 +94,6 @@ function buildChatReply(data: unknown): StubResponse {
     };
 }
 
-/** A Responses API response whose one message's output text is `text`. */
 function responsesEnvelope(text: string): Record<string, unknown> {
     return {
         id: 'resp-test',
@@ -126,9 +119,6 @@ function buildResponsesReply(data: unknown): StubResponse {
     };
 }
 
-// ── Streamed replies ──
-
-/** Init options for a streamed OpenAI reply. */
 export type OpenAIStreamInit = {
     /** The API whose stream is served — Chat Completions (default) or Responses. */
     api?: 'chat' | 'responses';
@@ -136,11 +126,7 @@ export type OpenAIStreamInit = {
     delay?: number;
 };
 
-/**
- * A Chat Completions stream: one `chat.completion.chunk` per event — the
- * role first, then one content delta per piece, then the finish reason — and
- * the `[DONE]` sentinel that closes it. No event carries a name.
- */
+/** One unnamed `chat.completion.chunk` per event: role, one delta per piece, finish reason, then `[DONE]`. */
 function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
     const created = Math.floor(Date.now() / 1000);
     const chunk = (delta: object, finishReason: null | string): SseEvent => ({
@@ -160,11 +146,7 @@ function chatStreamEvents(pieces: readonly string[]): SseEvent[] {
     ];
 }
 
-/**
- * A Responses stream: named events, numbered in order — the response and its
- * one message opened, one `response.output_text.delta` per piece, then every
- * part closed with the whole text, and `response.completed` last.
- */
+/** Named, numbered events: response and message opened, one `response.output_text.delta` per piece, parts closed, `response.completed`. */
 function responsesStreamEvents(pieces: readonly string[]): SseEvent[] {
     const text = pieces.join('');
     const part = { type: 'output_text', text, annotations: [] };
@@ -195,23 +177,9 @@ function responsesStreamEvents(pieces: readonly string[]): SseEvent[] {
     }));
 }
 
-// ── Public API ──
-
-/**
- * OpenAI API intercept helpers.
- */
+/** OpenAI API stub helpers. */
 export const openai = {
-    /**
-     * Request: match Chat Completions API calls. STRING filters mean EXACT
-     * equality (pass the app's own prompt builder); loosen deliberately with a
-     * RegExp or `match.includes(...)`.
-     *
-     * @example
-     *   openai.chat()                            // any chat call
-     *   openai.chat({ model: 'gpt-4o' })         // exact model
-     *   openai.chat({ system: buildPrompt() })   // exact system prompt
-     *   openai.chat({ system: /classify/ })      // pattern
-     */
+    /** Match Chat Completions calls; a string filter is exact equality, a RegExp or `match.includes` loosens it. */
     chat(filter?: OpenAIChatFilter): StubRequest {
         return {
             adapter: 'openai',
@@ -222,18 +190,7 @@ export const openai = {
         };
     },
 
-    /**
-     * Request: match Responses API calls (AI SDK v5+) with auto-wrapping.
-     * String filters mean EXACT equality (see {@link openai.chat}).
-     * When used with a JSON file, the data is automatically wrapped in the
-     * Responses API envelope.
-     *
-     * @param filter - Optional body filters.
-     * @param url - Custom gateway URL (default: api.openai.com).
-     *
-     * @example
-     *   openai.responses({ user: /Report Ingestion/ }, GATEWAY)
-     */
+    /** Match Responses API calls; a JSON file is wrapped in the Responses envelope. */
     responses(filter?: OpenAIResponsesFilter, url?: string): StubRequest {
         return {
             adapter: 'openai',
@@ -244,27 +201,12 @@ export const openai = {
         };
     },
 
-    /**
-     * Response: wrap data in Chat Completions format.
-     *
-     * @example
-     *   openai.reply({ categories: ['TECH'] })
-     */
+    /** Response: data wrapped in the Chat Completions format. */
     reply(data: unknown): StubResponse {
         return buildChatReply(data);
     },
 
-    /**
-     * Response: the assistant's text STREAMED, as OpenAI serves it with
-     * `stream: true` — server-sent events under `text/event-stream`, one text
-     * delta per piece, in order. `api` picks the wire: Chat Completions chunks
-     * closed by `[DONE]` (default), or the Responses API's named events closed
-     * by `response.completed`.
-     *
-     * @example
-     *   defineStub({ request: openai.chat(), response: openai.stream(['Hel', 'lo']) })
-     *   defineStub({ request: openai.responses(), response: openai.stream(['Hi'], { api: 'responses' }) })
-     */
+    /** Response: the text streamed as server-sent events; `api` picks Chat Completions (default) or Responses. */
     stream(pieces: readonly string[], init?: OpenAIStreamInit): StubResponse {
         const events =
             init?.api === 'responses' ? responsesStreamEvents(pieces) : chatStreamEvents(pieces);

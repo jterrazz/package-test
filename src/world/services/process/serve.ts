@@ -11,17 +11,10 @@ const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 
-/**
- * Run `command` to completion in a shell, its output captured — a build step
- * a service needs before it serves (sqlite's `prisma db push`). The one place
- * `world/` runs a process, beside the one it serves; a non-zero exit throws,
- * naming the command and what it printed.
- */
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
 }
 
-/** Ask the OS for a free TCP port. */
 async function findFreePort(): Promise<number> {
     return await new Promise((resolve, reject) => {
         const server = createServer();
@@ -41,23 +34,11 @@ async function findFreePort(): Promise<number> {
     });
 }
 
-/**
- * Starts the site under test as a child process and waits until it answers
- * HTTP. Any HTTP status counts as ready — a 404 on the ready path is still a
- * listening server; only connection failures keep the poll going.
- *
- * The child runs through the shell in its own process group (POSIX) so
- * `stop()` can terminate the whole tree — a `next start` grandchild must not
- * outlive the spec run (same escalation as the cli exec adapter: SIGTERM,
- * then SIGKILL after a 2 s grace).
- */
+/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too. */
 export class ServedProcess {
-    /** The port the server ended up on — known only after {@link start}. */
     port: null | number = null;
     private child: ChildProcess | null = null;
-    /** Extra environment injected into the child (e.g. the stub backend URL). */
     private readonly extraEnv: Record<string, string>;
-    /** The constructor named in error messages — `website`, or `mobile` (appium server). */
     private readonly facet: string;
     private readonly options: ProcessOptions;
     private output = '';
@@ -75,12 +56,10 @@ export class ServedProcess {
         this.root = root;
     }
 
-    /** Start the server and resolve with its base URL once it is ready. */
     async start(): Promise<string> {
         this.runBefore();
         const banner = this.options.ready instanceof RegExp ? this.options.ready : null;
-        // Banner mode: the SERVER picks the port and announces it, so nothing
-        // is injected as PORT — the framework reads the capture group instead.
+        // Banner mode: the server picks and announces the port, nothing is injected as `PORT`.
         const port = banner ? null : (this.options.port ?? (await findFreePort()));
         const timeout = this.options.timeout ?? DEFAULT_READY_TIMEOUT;
 
@@ -166,18 +145,13 @@ export class ServedProcess {
         }
     }
 
-    /** Where the child runs: the stated `cwd` under the root, or the root. */
     private workingDirectory(): string {
         return this.options.cwd === undefined
             ? this.root
             : resolvePath(this.root, this.options.cwd);
     }
 
-    /**
-     * The one-shot command, run before the process is spawned. It must exit 0:
-     * a build that failed is not a spec that failed later on a missing file,
-     * and the difference is what this reports.
-     */
+    /** Must exit 0: a failed build is reported as such, not as a later missing file. */
     private runBefore(): void {
         const { before } = this.options;
         if (before === undefined) {
@@ -196,7 +170,6 @@ export class ServedProcess {
         }
     }
 
-    /** Terminate the server process group (idempotent). */
     async stop(): Promise<void> {
         const { child } = this;
         if (!child) {
@@ -225,7 +198,6 @@ export class ServedProcess {
         });
     }
 
-    /** Group-aware kill: signal the process group, fall back to the child. */
     private kill(child: ChildProcess, signal: NodeJS.Signals): void {
         if (child.pid !== undefined && process.platform !== 'win32') {
             try {

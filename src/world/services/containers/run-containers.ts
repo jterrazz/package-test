@@ -5,22 +5,10 @@ import { text } from 'node:stream/consumers';
 
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
-/**
- * The containers of one project of a run, started once and shared by every file.
- *
- * A project's global setup holds one {@link RunContainers} in the main
- * process and serves it on a loopback port; each worker's orchestrator asks it
- * for the container a handle declares, through a `RunContainer`. Two
- * requests alike — same image, port, environment and options — are answered
- * by one container, started by the first and awaited by the rest. The run
- * stops every one of them at teardown; a worker never stops what it did not
- * start.
- */
+/** Two requests alike (image, port, environment, options) share one container; the run stops them all at teardown. */
 
-/** Where a started container is reached, and the key its logs are asked by. */
 export type RunAddress = { host: string; key: string; port: number };
 
-/** A value whose objects list their keys in one order. */
 function canonical(value: unknown): unknown {
     return value !== null && typeof value === 'object' && !Array.isArray(value)
         ? Object.fromEntries(
@@ -31,7 +19,7 @@ function canonical(value: unknown): unknown {
         : value;
 }
 
-/** A request's identity: the same request spelled in any key order is one key. */
+/** The same request spelled in any key order is one key. */
 function keyOf(request: ContainerRequest): string {
     return JSON.stringify(canonical(request));
 }
@@ -41,11 +29,7 @@ export class RunContainers {
     private readonly create: (request: ContainerRequest) => ContainerPort;
     private readonly ready: () => Promise<void>;
 
-    /**
-     * @param create - builds the container a request names, not yet started
-     * @param ready - resolves once the runtime can start one; its rejection is
-     *   the one answer every request gets, and no container is created
-     */
+    /** `ready`'s rejection is the one answer every request gets, and no container is created. */
     constructor(
         create: (request: ContainerRequest) => ContainerPort,
         ready: () => Promise<void> = async () => {
@@ -76,7 +60,6 @@ export class RunContainers {
         return await container.getLogs(since);
     }
 
-    /** Stop every container the project started, whatever the others did. */
     async stop(): Promise<void> {
         const pending = [...this.started.values()];
         this.started.clear();
@@ -102,10 +85,8 @@ export class RunContainers {
     }
 }
 
-/** The project's containers, served on a loopback port. */
 export type ServedContainers = { close: () => Promise<void>; url: string };
 
-/** An object's own field, when it has one. */
 export function field(value: unknown, name: string): unknown {
     if (typeof value !== 'object' || value === null) {
         return undefined;
@@ -114,7 +95,6 @@ export function field(value: unknown, name: string): unknown {
     return entry;
 }
 
-/** A request as a worker sent it: an image and a port at least; the rest is the runtime's to read. */
 function isContainerRequest(value: unknown): value is ContainerRequest {
     return typeof field(value, 'image') === 'string' && typeof field(value, 'port') === 'number';
 }

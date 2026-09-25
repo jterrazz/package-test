@@ -4,63 +4,27 @@ import type { IsolationStrategy } from '../isolation.port.js';
 import type { ServiceHandle } from '../service.port.js';
 import { ServedProcess } from './serve.js';
 
-/**
- * The ONE shape an external process takes — the site under test, a backend a
- * page talks to, a bundler a simulator loads from. Built by `process()`
- * (chapter 17) and accepted wherever a facet starts something outside this
- * process: `website({ server })`, `services: { api: process(…) }`, and the
- * literate `serve:` registry.
- */
+/** The one shape an external process takes: `website({ server })`, `services: { api: process(…) }`, `serve:`. */
 export type ProcessOptions = {
-    /**
-     * A one-shot command run ONCE per specification, before the process is
-     * spawned, which must exit 0 — a build, a migration, a fixture load. Its
-     * failure is the specification's, and it says so.
-     */
+    /** A one-shot command run once per specification before the spawn, which must exit 0. */
     before?: string;
     /** Shell command that starts the process. Receives the chosen port as `PORT`. */
     command: string;
     /** Working directory, relative to the project root. Default: the root itself. */
     cwd?: string;
-    /**
-     * Environment for the child, on top of the runner's own. A function
-     * receives the services already started beside this one, so a process can
-     * be handed a sibling's connection string.
-     */
+    /** Environment on top of the runner's; a function receives the services already started. */
     env?:
         | ((services: Record<string, { connectionString: string }>) => Record<string, string>)
         | Record<string, string>;
     /** Fixed port. Default: an OS-assigned free port, injected as `PORT`. */
     port?: number;
-    /**
-     * How readiness is observed. Two forms:
-     *
-     * - a **path** (or nothing) — the framework picks the port, injects it as
-     *   `PORT`, and polls `<baseUrl><path>` until it answers any HTTP status
-     *   (default `/`). This is `specification.website()`'s form.
-     * - a **regex over the child's output** with ONE capture group holding the
-     *   port the server chose itself. Nothing is injected as `PORT`: the server
-     *   announces its port and the framework reads it from the banner. This is
-     *   the form a literate `serve:` registration uses.
-     */
+    /** Readiness: a path polled until any HTTP status answers (`PORT` injected), or a regex over the output whose one group captures the port. */
     ready?: RegExp | string;
     /** Readiness budget in milliseconds. Default 30 000. */
     timeout?: number;
 };
 
-/**
- * An external process, declared like any other service.
- *
- * One shape for every one of them: a site's dev server, an API behind the
- * site, the bundler a simulator loads from. Without it each is declared
- * somewhere else — a facet option, a document's `serve:` entry, a `beforeAll`
- * spawning a child and an `afterAll` that sometimes forgets to kill it — and
- * the lifetime belongs to whoever remembered. Here it is the framework's.
- *
- * It sits in a `services` record beside `postgres()`, `redis()` and
- * `sqlite()`, so it starts after them and can be handed their connection
- * strings through `env`, and it is stopped with the specification.
- */
+/** An external process declared as a service: started after its siblings, stopped with the specification. */
 export class ProcessHandle implements ServiceHandle {
     /** Embedded: nothing to pull, nothing to run in a container. */
     readonly defaultImage = '';
@@ -93,23 +57,12 @@ export class ProcessHandle implements ServiceHandle {
         await Promise.resolve();
     }
 
-    /**
-     * A process is not a container, so the orchestrator never starts it: the
-     * facet does, once its siblings are up and their connection strings are
-     * readable ({@link startProcessServices}).
-     */
+    /** Never started by the orchestrator: the facet starts it once its siblings' connection strings are readable. */
     async initialize(): Promise<void> {
         await Promise.resolve();
     }
 
-    /**
-     * Isolation is the RUN's, not the worker's — and a run here is one
-     * EVALUATION of the specification module. Under vitest's default
-     * isolation that is once per test file, so two files that import the same
-     * specification get a child each, with the id the facet minted for it.
-     * Nothing is acquired or reset between tests: the id is what tells two
-     * runs apart, never a label a spec samples.
-     */
+    /** Isolation is the run's: one child per evaluation of the specification module, told apart by the minted id. */
     isolation(): IsolationStrategy {
         return {
             acquire: async () => {
@@ -125,17 +78,11 @@ export class ProcessHandle implements ServiceHandle {
     }
 
     async reset(): Promise<void> {
-        // A process keeps its own state: resetting it between chains would
-        // mean restarting it, which is a different spec, not a cleaner one.
+        // Resetting a process between chains would mean restarting it.
         await Promise.resolve();
     }
 
-    /**
-     * Spawn it and wait until it answers. `services` is every handle declared
-     * beside this one, already started — what an `env` function reads.
-     *
-     * @internal
-     */
+    /** Spawn it and wait until it answers; `services` is every sibling, already started. */
     async spawnWith(
         root: string,
         services: Record<string, { connectionString: string }>,
@@ -145,9 +92,7 @@ export class ProcessHandle implements ServiceHandle {
             typeof this.options.env === 'function' ? this.options.env(services) : this.options.env;
         this.served = new ServedProcess(this.options, root, 'process', {
             ...stated,
-            // Every process of one run carries the same id, minted by the
-            // facet: a spec that needs a unique label reads it instead of
-            // sampling `Date.now()` into an oracle (CONVENTIONS D16).
+            // One id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (D16).
             TEST_RUN_ID: runId,
         });
         this.connectionString = await this.served.start();
@@ -178,19 +123,7 @@ export class ProcessHandle implements ServiceHandle {
     }
 }
 
-/**
- * Declare an external process the framework owns for the life of the
- * specification.
- *
- * @example
- *   const { website, cleanup } = await specification.website({
- *       services: { api: process({ command: 'bin/server web', ready: '/health' }) },
- *       server: ({ api }) => process({
- *           command: 'next dev',
- *           env: { NEXT_PUBLIC_API_URL: api.connectionString },
- *       }),
- *   });
- */
+/** Declare an external process the framework owns for the life of the specification. */
 export function processService(options: ProcessOptions): ProcessHandle {
     return new ProcessHandle(options);
 }

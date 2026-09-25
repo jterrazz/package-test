@@ -1,16 +1,3 @@
-/**
- * MSW-based stub engine for node. Registers one chain's stubs as MSW
- * handlers — built by {@link buildStubHandlers}, the shape the page's
- * worker uses too — and serves them through the shared {@link StubQueue},
- * the SAME queue the declared stub backend (website/mobile) consumes, so
- * selection semantics never diverge between engines.
- *
- * Strict by construction (CONVENTIONS D7): while a chain that declared at
- * least one stub is running, ANY outgoing HTTP request that matches no
- * stub — including one whose every matching stub is exhausted — fails
- * the spec with an explicit error. Chains with zero stubs never start MSW:
- * their network is not guarded (known scope).
- */
 import type { Stub } from '../stub.js';
 import { buildStubHandlers, NO_STUBS } from './handlers.js';
 import type { StubRegistration } from './handlers.js';
@@ -34,12 +21,7 @@ let serverInstance: any = null;
 /** The `fetch` the engine installed, which the owning wrapper sits on while it listens. */
 let engineFetch: null | typeof fetch = null;
 
-/**
- * Start the MSW server (once per process), with the body of every reply to
- * `fetch` handed to the caller as a stream this package owns
- * ({@link owningBodies}), so a subject that cancels a body sees the cancel
- * settle.
- */
+/** Once per process; reply bodies are handed over as owned streams, so a cancel settles. */
 export async function ensureStubServer(): Promise<void> {
     if (serverInstance !== null) {
         return;
@@ -51,12 +33,7 @@ export async function ensureStubServer(): Promise<void> {
     globalThis.fetch = owningBodies(engineFetch);
 }
 
-/**
- * Register a chain's stubs as MSW handlers. A trailing catch-all handler
- * records any request no stub accepted — the chain's pipeline
- * (`kernel/chain/perform.ts`) rethrows it as the spec failure (rejecting the
- * action promise, never an unhandled rejection).
- */
+/** The trailing catch-all records any request no stub accepted; the chain's pipeline rethrows it. */
 export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {
     if (stubs.length === 0) {
         return NO_STUBS;
@@ -75,9 +52,6 @@ export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistr
     };
 }
 
-/**
- * Stop the MSW server (call in afterAll).
- */
 export async function stopStubServer(): Promise<void> {
     if (serverInstance !== null) {
         if (engineFetch !== null) {

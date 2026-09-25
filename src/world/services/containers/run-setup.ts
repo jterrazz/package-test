@@ -5,29 +5,11 @@ import { RunContainers, serveContainers } from './run-containers.js';
 import { SERVICE_IMAGES } from './service-images.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
-/**
- * The global setup of a project whose specs declare services: the project's
- * containers, served to its workers — vitest runs one per project, so two
- * projects of one run hold two sets.
- *
- * Before the first file it serves an empty {@link RunContainers} and provides
- * its address; in the background it reaches Docker and pulls each default
- * image the daemon lacks, so the first file waits on a pull at most once. A
- * container is started by the first file that declares it and shared by every
- * file of the project after; when the run closes, it stops them all. A project that
- * declares no service never asks, so it needs no Docker.
- */
+/** One per vitest project. Default images are pulled in the background, so the first file waits on a pull at most once; a project declaring no service needs no Docker. */
 
-/** What every declared service is answered when no container runtime is reachable. */
 export const DOCKER_ABSENT =
     'declared services need Docker, and no Docker daemon answered — start Docker (Docker Desktop, OrbStack, colima…) and run again';
 
-/**
- * Reach the container runtime, then remove the containers dead sessions left
- * behind and pull each default image it lacks.
- * Unreachable is the one refusal: {@link DOCKER_ABSENT}, with the runtime's
- * own reason after it.
- */
 export async function prepareDocker(): Promise<void> {
     const { getContainerRuntimeClient, ImageName } = await loadPeer(
         'testcontainers',
@@ -57,16 +39,10 @@ export async function prepareDocker(): Promise<void> {
     ]);
 }
 
-/**
- * Where a project whose specs declare services finds this setup: this module
- * in a source checkout, `services-setup.js` in the built package, where the
- * bundle and its entries share one folder.
- */
 export function servicesSetup(): string {
     return setupEntry(import.meta.dirname, 'run-setup.ts', 'services-setup.js');
 }
 
-/** What the setup reads of its project: the channel to its workers. */
 type RunProject = { provide: (key: 'serviceContainers', value: string) => void };
 
 export default async function setup(

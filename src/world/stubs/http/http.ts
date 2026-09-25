@@ -16,16 +16,9 @@ const TEXT_CONTENT_TYPE = 'text/plain; charset=utf-8';
 const STREAM_CONTENT_TYPE = 'application/octet-stream';
 const SSE_CONTENT_TYPE = 'text/event-stream';
 
-/**
- * Request filters for the generic HTTP provider. Every field is a subset
- * constraint — a request matches when all provided fields match.
- */
+/** Request filters; a request matches when every provided field matches. */
 export type HttpStubFilter = {
-    /**
-     * Body constraint. An object is a deep SUBSET match (toMatchObject-style)
-     * whose leaf values may be `match.*` matchers; a string is a containment
-     * test and a RegExp a `test()` over the raw text body.
-     */
+    /** An object is a deep subset match (leaves may be `match.*`); a string is containment, a RegExp `test()`s the raw body. */
     body?: object | RegExp | string;
     /** Header subset. Names are case-insensitive; string = exact value, RegExp = `test()`. */
     headers?: Record<string, RegExp | string>;
@@ -57,7 +50,6 @@ export type SseEvent = {
     retry?: number;
 };
 
-/** The wire form of one event — the frame an `EventSource` parses. */
 function frameEvent(event: SseEvent): string {
     const lines: string[] = [];
     if (event.event !== undefined) {
@@ -70,8 +62,7 @@ function frameEvent(event: SseEvent): string {
         lines.push(`retry: ${event.retry}`);
     }
     const payload = typeof event.data === 'string' ? event.data : JSON.stringify(event.data);
-    // A multi-line payload is several `data:` lines: the parser joins them
-    // with newlines, and a raw newline inside one would end the frame.
+    // A multi-line payload is several `data:` lines: a raw newline would end the frame.
     for (const line of payload.split('\n')) {
         lines.push(`data: ${line}`);
     }
@@ -113,10 +104,6 @@ function matchesEntries(
     });
 }
 
-/**
- * Build the `match` predicate for an HTTP request filter, or `undefined` when
- * no filter is supplied (fires on any URL/method match).
- */
 function buildMatch(filter?: HttpStubFilter): StubRequest['match'] {
     if (!filter) {
         return undefined;
@@ -150,18 +137,7 @@ function declare(method: string, url: RegExp | string, filter?: HttpStubFilter):
     return { adapter: 'http', match: buildMatch(filter), method, url, wrap: wrapJson };
 }
 
-/**
- * Generic HTTP stub helpers for any URL. The url is absolute (string or
- * RegExp), or a PATH FORM starting with `/` — `http.get('/articles/{{uuid}}')`
- * matches that path on ANY origin, which is what an app calling its own
- * backend needs. An optional {@link HttpStubFilter} narrows matching by
- * body, headers, or query — a request that hits the URL/method but fails the
- * filter counts as unmatched (strict stubs, CONVENTIONS D7).
- *
- * @example
- *   defineStub({ request: http.get('/articles/{{uuid}}'), response: http.json(article) })
- *   defineStub({ request: http.post(URL, { body: { user: 'alice' } }), response: http.empty() })
- */
+/** Generic HTTP stub helpers: an absolute URL, or a path form (`/articles/{{uuid}}`) matching any origin. */
 export const http = {
     any(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('*', url, filter);
@@ -207,26 +183,12 @@ export const http = {
         };
     },
 
-    /**
-     * Response: no response at all — the request fails in transport, the way a
-     * server that is not running fails it. `fetch` rejects; no status is served.
-     */
+    /** Response: no response at all; `fetch` rejects, as when no server is running. */
     unreachable(): StubResponse {
         return { body: null, transport: 'network-error' };
     },
 
-    /**
-     * Response: a body that arrives in PIECES, written in order.
-     *
-     * A subject that reads a response as it lands — a token-by-token render, a
-     * progress bar, a reconnect on a half-read body — is specified by the
-     * chunks and their order, which a single serialised body cannot state.
-     * Honoured by all three engines: msw's server, msw's worker, and the
-     * `node:http` stub the website and mobile facets serve from.
-     *
-     * @example
-     *   http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 })
-     */
+    /** Response: a body that arrives in pieces, written in order. */
     stream(chunks: readonly string[], init?: HttpStreamInit): StubResponse {
         return {
             status: init?.status ?? 200,
@@ -240,13 +202,7 @@ export const http = {
         };
     },
 
-    /**
-     * Response: a server-sent event stream — one chunk per event, framed the
-     * way an `EventSource` reads them, served as `text/event-stream`.
-     *
-     * @example
-     *   http.sse([{ data: { token: 'Hel' } }, { data: { token: 'lo' } }, { event: 'done', data: '' }])
-     */
+    /** Response: a server-sent event stream, served as `text/event-stream`. */
     sse(events: readonly SseEvent[], init?: Omit<HttpStreamInit, 'contentType'>): StubResponse {
         return {
             status: init?.status ?? 200,

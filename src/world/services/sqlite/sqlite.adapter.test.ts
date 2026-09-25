@@ -247,7 +247,6 @@ describe('sqlite', () => {
         expect(acquireTemplateLock(lockPath)).toBeTruthy();
         expect(acquireTemplateLock(lockPath)).toBeFalsy();
 
-        // And - releasing hands it to the next caller
         releaseTemplateLock(lockPath);
         expect(acquireTemplateLock(lockPath)).toBeTruthy();
         releaseTemplateLock(lockPath);
@@ -261,8 +260,7 @@ describe('sqlite', () => {
         // Then - its holder is presumed alive, so a waiter waits
         expect(isStaleTemplateLock(lockPath)).toBeFalsy();
 
-        // And - long past the build budget, the holder is presumed dead: a
-        // crashed worker must not wedge the suite forever
+        // Long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
         expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBeTruthy();
         releaseTemplateLock(lockPath);
     });

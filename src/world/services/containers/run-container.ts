@@ -2,7 +2,6 @@ import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { field } from './run-containers.js';
 import type { RunAddress } from './run-containers.js';
 
-/** The project's answer to a request: where the container is, or why there is none. */
 function answered(value: unknown): RunAddress | { error: string } {
     const error = field(value, 'error');
     if (typeof error === 'string') {
@@ -17,10 +16,7 @@ function answered(value: unknown): RunAddress | { error: string } {
     return { error: `the run answered no container: ${JSON.stringify(value)}` };
 }
 
-/**
- * A container of the project, as a worker holds it: started by asking the
- * project's setup, never stopped by the worker, its logs read from the setup.
- */
+/** Started by asking the project's setup, never stopped by the worker. */
 export class RunContainer implements ContainerPort {
     private address: null | RunAddress = null;
     private readonly url: string;
@@ -44,7 +40,6 @@ export class RunContainer implements ContainerPort {
         this.address = answer;
     }
 
-    /** Let go of the container — the project's setup started it, and its teardown stops it. */
     async stop(): Promise<void> {
         this.address = null;
         await Promise.resolve();

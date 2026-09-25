@@ -2,37 +2,12 @@ import { vi } from 'vitest';
 
 import { instantOf } from './instant.js';
 
-/**
- * The one time primitive.
- *
- * Time is the determinism the framework owns (CONVENTIONS D16): a test that
- * samples `Date.now()` and asserts on what comes back is a test that fails on
- * the next leap second, and a test that reaches for `vi.useFakeTimers()` owns a
- * teardown it will one day forget. `clock` is both answers in one name — the
- * instant is stated, and the scope restores itself.
- *
- * ```typescript
- * using _ = clock.at('2026-03-04T09:30:00Z');   // Date is pinned until the scope ends
- * ```
- *
- * `at()` takes the CALENDAR and leaves the scheduler alone: a UI framework's
- * own loop, a `setTimeout` inside the subject and every promise still resolve
- * on their own. `run()` takes the scheduler too, for a subject whose behaviour
- * IS the passage of time — a debounce, a retry backoff, a poll.
- */
+/** The one time primitive (D16): `at()` pins the calendar, `run()` the scheduler too. */
 
 /** A pinned clock — released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
 
-/**
- * One clock per test — a second one taken inside the first is refused rather
- * than nested.
- *
- * Disposing gives the REAL clock back, which is the only thing vitest's fake
- * timers can restore: the instant, the `toFake` set and the queue a previous
- * scope held are not readable, so an inner scope that ended would silently end
- * the outer one too. A refusal says which of the two the test meant.
- */
+/** One clock per test: vitest's fake timers restore only the real clock, so a nested scope ending would end the outer one too. */
 function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): PinnedClock {
     if (vi.isFakeTimers()) {
         throw new Error(
@@ -50,13 +25,7 @@ function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): 
 }
 
 export const clock = {
-    /**
-     * Move the pinned clock forward by `ms` — and, under {@link clock.run},
-     * fire every callback that came due, awaiting what each of them started.
-     *
-     * Only a pinned clock moves: called with no clock taken, it says so rather
-     * than silently doing nothing to the real one.
-     */
+    /** Move the pinned clock forward; under `clock.run` fire what came due. Refused with no clock taken. */
     async advance(ms: number): Promise<void> {
         if (!vi.isFakeTimers()) {
             throw new Error(
@@ -67,31 +36,12 @@ export const clock = {
         await vi.advanceTimersByTimeAsync(ms);
     },
 
-    /**
-     * Pin `Date` at `iso` for the current scope. `Date` ONLY: the scheduler
-     * stays real, so a subject that awaits, renders or polls keeps running.
-     *
-     * @example
-     *   using _ = clock.at('2026-03-04T09:30:00Z');
-     *   expect(stampedAt()).toBe('2026-03-04T09:30:00.000Z');
-     */
+    /** Pin `Date` at `iso` for the current scope; the scheduler stays real. */
     at(iso: string): PinnedClock {
         return take('at', { now: instantOf('at', iso), toFake: ['Date'] });
     },
 
-    /**
-     * Take the scheduler as well as the calendar: `setTimeout`, `setInterval`
-     * and their friends queue instead of firing, and {@link clock.advance} is
-     * what makes them due. For a subject whose behaviour IS elapsed time — a
-     * debounce, a retry backoff, a poll — where waiting for real would be the
-     * arbitrary sleep J2 forbids.
-     *
-     * @example
-     *   using _ = clock.run('2026-03-04T09:30:00Z');
-     *   const pending = retrying(failsTwice);
-     *   await clock.advance(5_000);
-     *   await expect(pending).resolves.toBe('ok');
-     */
+    /** Take the scheduler as well as the calendar; `clock.advance` makes timers due. */
     run(iso?: string): PinnedClock {
         return take('run', iso === undefined ? {} : { now: instantOf('run', iso) });
     },

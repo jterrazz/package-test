@@ -4,11 +4,6 @@ import { resolveSpecPath } from '../../../kernel/files/resolve.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';
 
-/**
- * The databases a constructor declared, as a chain seeds them: every one
- * emptied, a seed file read from the test's directory, and the database a seed
- * names looked up — the only one when it names none.
- */
 export function databaseSet(config: ServicesConfig): SeedPort {
     return {
         read: (path, testDir) => readFileSync(resolveSpecPath('seed', path, testDir), 'utf8'),

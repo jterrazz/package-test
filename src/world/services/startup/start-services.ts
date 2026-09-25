@@ -6,17 +6,10 @@ import type { ServiceRecord } from '../services.js';
 import { Orchestrator } from './orchestrator.js';
 import type { AppInfo } from './startup-report.js';
 
-/*
- * Starting and stopping a services record: the containers and processes it
- * declares, brought up by the orchestrator, and each worker's slot in them.
- */
-
-/** The worker this file runs in — the slot each service isolates it by. */
 function getWorkerId(): string {
     return process.env.VITEST_POOL_ID ?? '0';
 }
 
-/** Take this worker's slot in every service of the record. */
 async function acquireIsolation(services: ServiceRecord): Promise<void> {
     const workerId = getWorkerId();
     for (const service of Object.values(services)) {
@@ -24,7 +17,6 @@ async function acquireIsolation(services: ServiceRecord): Promise<void> {
     }
 }
 
-/** Give back this worker's slot in every service of the record. */
 export async function releaseIsolation(services: ServiceRecord): Promise<void> {
     for (const service of Object.values(services)) {
         await service.isolation().release();
@@ -35,17 +27,11 @@ export type StartedServices = {
     database?: DatabasePort | undefined;
     databases?: Map<string, DatabasePort> | undefined;
     orchestrator: Orchestrator;
-    /** The id every process of this run carries — one per specification. */
     runId: string;
-    /** Terminate every process this record declared. */
     stopProcesses: () => Promise<void>;
 };
 
-/**
- * A process is not a container: the orchestrator never sees one, and the
- * facet starts it AFTER the rest, so an `env` function reads connection
- * strings that are already there.
- */
+/** The facet starts processes after the rest, so an `env` function reads connection strings that already exist. */
 function splitProcesses(services: ServiceRecord): {
     infrastructure: ServiceRecord;
     processes: [string, ProcessHandle][];
@@ -62,14 +48,7 @@ function splitProcesses(services: ServiceRecord): {
     return { infrastructure, processes };
 }
 
-/**
- * Start every declared process, in declaration order, once the infrastructure
- * is up — so `env: ({ db }) => …` reads a connection string that exists. Each
- * carries the run's id, minted here: a label a spec would otherwise sample
- * from `Date.now()` and put under an oracle (CONVENTIONS D16, P7).
- *
- * @internal
- */
+/** Each carries the run's id, minted here, so a spec never samples `Date.now()` for a label (D16). */
 export async function startProcessServices(
     services: ServiceRecord,
     root: string,
@@ -96,7 +75,6 @@ export async function startProcessServices(
     return stop;
 }
 
-/** Start a services record via testcontainers and acquire worker isolation. */
 export async function startServices(
     services: ServiceRecord,
     root: string,

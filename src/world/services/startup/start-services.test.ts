@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { processService } from '../process/process.adapter.js';
 import { startProcessServices } from './start-services.js';
 
-/** A server that binds the port the OS hands it and announces it — no spec picks a port. */
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end('ok'));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
 const READY = /listening on port (?<port>\d+)/u;
 

@@ -5,23 +5,10 @@ import { StubQueue } from '../exchange/queue.js';
 import { toReadableStream } from '../exchange/stream.js';
 import type { Stub } from '../stub.js';
 
-/**
- * One stub engine, two runtimes.
- *
- * msw runs the same handler shape in node (`setupServer`) and in a page
- * (`setupWorker`), so what a stub BECOMES — the route, the body kind, the
- * strict catch-all, the queue's selection — is stated once here and handed to
- * whichever side is starting. A second copy of this would be a second answer
- * to "which stub answers this request", and the facets would drift.
- *
- * Typed loosely on purpose: `msw` is reached through a lazy import by both
- * sides (it is a dependency, never a peer), and the namespace it returns is
- * this engine's to describe, not the kernel's.
- */
+/** msw runs one handler shape in node and in a page: what a stub becomes is stated once here. Typed loosely: msw is reached through a lazy import. */
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
-/** What a started engine hands back for the lifetime of one chain. */
 export type StubRegistration = {
     /** Remove the chain's handlers from the shared engine. */
     cleanup: () => void;
@@ -29,43 +16,26 @@ export type StubRegistration = {
     violation: () => Error | null;
 };
 
-/**
- * What a chain with zero stubs gets where the facet's scope is KNOWN but
- * not total — the node engine, which shares a process with everything else the
- * test does. Nothing was declared, so nothing is guarded and nothing has to be
- * torn down (CONVENTIONS D7, known scope).
- */
+/** Zero stubs under node: nothing is guarded, the process has traffic of its own (D7, known scope). */
 export const NO_STUBS: StubRegistration = {
     cleanup: () => {},
     violation: () => null,
 };
 
-/**
- * A stub answers the request that was made, never a copy of an earlier one.
- *
- * In a page the reply travels through a real service worker and a real HTTP
- * cache, so a second render of the same component can be served the FIRST
- * test's answer and never reach the queue at all — a stub that was
- * exhausted, or replaced, silently keeps answering. Stated as a default, so a
- * spec whose subject IS caching can still say otherwise.
- */
+/** In a page, a real service worker and HTTP cache could serve an earlier test's answer and never reach the queue. */
 const NEVER_CACHED = { 'cache-control': 'no-store' };
 
-/** Turn a stub response into the msw reply, body kind by body kind. */
 export function toMswResponse(msw: any, response: StubResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
-        // Not a reply: msw makes the request itself fail, which is what the
-        // caller's `fetch` sees when nothing is listening. Both engines honour
-        // it — `setupServer` and `setupWorker` share this response shape.
+        // Not a reply: the request fails in transport, as `fetch` sees when nothing listens.
         return msw.HttpResponse.error();
     }
     if (body === null || body === undefined) {
         return new msw.HttpResponse(null, { headers: { ...NEVER_CACHED, ...headers }, status });
     }
     if (isStreamBody(body)) {
-        // A stream is the one body the engine must NOT serialise: it is the
-        // pieces and their order that the subject reads.
+        // A stream is the one body not serialised: the pieces and their order are what the subject reads.
         return new msw.HttpResponse(toReadableStream(body), {
             headers: { ...NEVER_CACHED, 'content-type': body.contentType, ...headers },
             status,
@@ -80,16 +50,7 @@ export function toMswResponse(msw: any, response: StubResponse): unknown {
     return msw.HttpResponse.json(body, { headers: { ...NEVER_CACHED, ...headers }, status });
 }
 
-/**
- * The handlers one chain's stubs become, plus the trailing catch-all that
- * records any request no stub accepted (CONVENTIONS D7). The caller decides
- * what to do with the recorded violation — the api chain rethrows it, the
- * component chain fails the render. An EMPTY stub list is still a guard:
- * the catch-all alone says "this subject has no network".
- *
- * `bypass` names the traffic that is not the subject's: under node there is
- * none, in a page it is everything the runner fetches to BE a page.
- */
+/** An empty stub list is still a guard: the catch-all alone says the subject has no network. `bypass` is the runner's own traffic in a page. */
 export function buildStubHandlers(
     msw: any,
     stubs: readonly Stub[],
@@ -121,8 +82,6 @@ export function buildStubHandlers(
                         // Nothing matches, or everything that matches is spent (D7).
                         return recordViolation(request.method, request.url);
                     }
-                    // A dynamic response is a function evaluated against the
-                    // observed request at serve time; a fixed one is used as-is.
                     const response =
                         typeof stub.response === 'function'
                             ? stub.response(observed)
@@ -136,12 +95,7 @@ export function buildStubHandlers(
         }
     }
 
-    // Catch-all LAST: any request no specific handler claimed is a strict
-    // failure. Handlers registered in one use() call are matched in order.
-    //
-    // `bypass` is what keeps the engine from eating the RUNNER's own traffic:
-    // In a page every module is an HTTP request, the dependency cache included,
-    // and a 501 to one of those stops the run rather than failing a spec.
+    // Catch-all last: handlers of one `use()` match in order. `bypass` spares the runner's own module requests, which a 501 would stop.
     handlers.push(
         msw.http.all('*', ({ request }: { request: Request }) =>
             bypass?.(request.url) === true
@@ -153,7 +107,6 @@ export function buildStubHandlers(
     return { handlers, violation: () => violation ?? queue.requiredError() };
 }
 
-/** The request as the queue matches it — body parsed when it is JSON. */
 async function observe(request: Request): Promise<MatchableRequest> {
     let body: unknown = null;
     const rawText = await request.clone().text();

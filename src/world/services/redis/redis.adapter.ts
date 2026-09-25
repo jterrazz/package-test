@@ -10,35 +10,23 @@ export type RedisOptions = {
     image?: string;
 };
 
-/** The indexes a container serves: 0 is its own, and every other is one (worker, service) pair's. */
+/** Index 0 is the container's own; every other is one (worker, service) pair's. */
 const DATABASES = 256;
 
-/** The indexes a worker holds, one per redis service of the record it runs. */
 const SERVICES_PER_WORKER = 4;
 
-/**
- * How many workers a container serves every index of: pool ids 1 to 63. Pool
- * id `w` holds the band `4w − 3` to `4w`; worker 0, the id outside a vitest
- * pool, shares pool id 1's, since it never runs beside a pool against one
- * project's container.
- */
+/** Pool id `w` holds indexes `4w − 3` to `4w`; worker 0 (outside a pool) shares pool id 1's. */
 const WORKERS = Math.floor((DATABASES - 1) / SERVICES_PER_WORKER);
 
-/** A container with an index for every (worker, service) pair a run can hold. */
 const PAIR_INDEXES: ContainerOptions = {
     command: ['redis-server', '--databases', String(DATABASES)],
 };
 
-/** The slot a pair holds, and how many handles of this process hold it. */
 type Held = { holders: number; slot: number };
 
-/**
- * The service slot each (worker, service) pair holds in this process: one
- * worker id per process, so the pairs of every other worker are theirs.
- */
+/** One worker id per process, so the pairs of every other worker are theirs. */
 const slots = new Map<string, Map<string, Held>>();
 
-/** The slot a pair holds — the one it already had, or the lowest its worker holds free. */
 function takeSlot(worker: string, service: string): number {
     const held = slots.get(worker) ?? new Map<string, Held>();
     slots.set(worker, held);
@@ -56,7 +44,6 @@ function takeSlot(worker: string, service: string): number {
     return slot;
 }
 
-/** Let go of one handle's hold on a pair: its slot is free once no handle holds it. */
 function freeSlot(worker: string, service: string): void {
     const held = slots.get(worker);
     const own = held?.get(service);
@@ -76,7 +63,6 @@ export class RedisHandle implements ServiceHandle {
     readonly defaultImage: string;
     readonly environment: Record<string, string> = {};
 
-    /** One container for every redis service: a pair's index is what isolates it. */
     readonly containerOptions = PAIR_INDEXES;
 
     connectionString = '';
@@ -84,10 +70,8 @@ export class RedisHandle implements ServiceHandle {
 
     private dbIndex = 0;
 
-    /** The pair this handle holds an index for, while it holds one. */
     private pair: null | { service: string; worker: string } = null;
 
-    /** The container's own string, which a worker's index is appended to and restored from. */
     private sharedConnectionString = '';
 
     constructor(options: RedisOptions = {}) {
@@ -163,8 +147,7 @@ export class RedisHandle implements ServiceHandle {
                 }
                 this.pair = { service, worker: workerId };
                 this.dbIndex = 1 + SERVICES_PER_WORKER * (Math.max(worker, 1) - 1) + slot;
-                // The index is in the string the app is handed, or the app
-                // would write to the shared index 0 while reset flushes this one.
+                // The index is in the string the app is handed, or the app would write to index 0 while reset flushes this one.
                 this.sharedConnectionString = this.connectionString;
                 this.connectionString = `${this.connectionString}/${this.dbIndex}`;
                 // The container outlives the file that held this index before.
@@ -185,7 +168,6 @@ export class RedisHandle implements ServiceHandle {
         };
     }
 
-    /** Give back the pair this handle holds, and the container's own string with it. */
     private letGo(): void {
         if (this.pair === null) {
             return;
@@ -197,14 +179,7 @@ export class RedisHandle implements ServiceHandle {
     }
 }
 
-/**
- * Create a Redis service handle.
- *
- * @example
- * // The record key is the name it reports under: { cache: redis() } → "cache".
- * const cache = redis();
- * // After start: cache.connectionString is populated
- */
+/** Create a Redis service handle, reported under its record key. */
 export function redis(options: RedisOptions = {}): RedisHandle {
     return new RedisHandle(options);
 }

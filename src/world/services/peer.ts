@@ -3,35 +3,7 @@ import { resolve } from 'node:path';
 
 import { findRoot } from '../../kernel/files/resolve.js';
 
-/**
- * Loading an OPTIONAL peer, and saying the right thing when it is not there.
- *
- * Four native peers — `better-sqlite3`, `pg`, `redis`, `testcontainers` — are
- * peers rather than dependencies: a consumer that specifies a CLI has no
- * business compiling a SQLite binding, and a package carrying all four would
- * make every install pay for the services one repository happens to use.
- *
- * A peer being absent is then an ordinary state, and the message is what turns
- * it into a one-line fix. Two things make it actionable:
- *
- * - it names the FACET that asked, so the reader knows which line to look at,
- *   and the peer to install, with the command of the package manager the
- *   project's own lockfile names — `npm install -D` in a Bun workspace is a
- *   line the reader has to translate before they can use it;
- * - under pnpm it names `only-built-dependencies` as well. pnpm does not run a
- *   dependency's install script unless the manifest lists it, so a native
- *   binding installs and then fails to LOAD — the one failure where "install
- *   the package" is advice the reader has already followed.
- */
-
-/**
- * The lockfile each package manager leaves at the project root, and the
- * command a reader of this message types.
- *
- * A message that says `npm install` in a Bun workspace is a message the reader
- * has to translate before they can use it — and the translation is the only
- * part of the fix they did not already know.
- */
+/** The lockfile each package manager leaves, and the install command its user types. */
 const INSTALLERS = [
     { command: 'bun add -d', lockfile: 'bun.lock', name: 'bun' },
     { command: 'bun add -d', lockfile: 'bun.lockb', name: 'bun' },
@@ -40,16 +12,9 @@ const INSTALLERS = [
     { command: 'npm install -D', lockfile: 'package-lock.json', name: 'npm' },
 ] as const;
 
-/** What npm's absence of a lockfile still answers. */
 const DEFAULT_INSTALLER = { command: 'npm install -D', name: 'npm' } as const;
 
-/**
- * How each package manager is told to run the install script it withheld.
- *
- * Every one of them now withholds it by default — npm since 11, pnpm since 10,
- * bun since 1.2 — so "install the package" is advice the reader has already
- * followed and the binding is still not there.
- */
+/** Every manager withholds install scripts by default (npm 11, pnpm 10, bun 1.2): installing the package does not build it. */
 const BUILDERS: Record<string, (peer: string) => string> = {
     bun: (peer) => `bun pm trust ${peer}`,
     npm: (peer) => `npm install-scripts approve ${peer} && npm rebuild ${peer}`,
@@ -59,31 +24,17 @@ const BUILDERS: Record<string, (peer: string) => string> = {
     yarn: (peer) => `yarn rebuild ${peer}`,
 };
 
-/**
- * What a native module that is INSTALLED but not BUILT says when it is first
- * used. Node's own message for a missing `.node`, and the `bindings` package's
- * for the same thing, plus the two shapes a binding built elsewhere produces.
- */
+/** Node's message for a missing `.node`, the `bindings` package's, and the two shapes a binding built elsewhere produces. */
 const UNBUILT =
     /could not locate the bindings file|\.node['"]?$|invalid elf header|was compiled against a different node/iu;
 
-/** Is this failure a binding that was never built, rather than a bug in the loading module? */
 function isUnbuilt(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
     return UNBUILT.test(message);
 }
 
-/** The peers whose install script has to run for the package to load at all. */
 const NATIVE_PEERS = new Set(['better-sqlite3']);
 
-/**
- * The package manager a project is installed by, read from its lockfile.
- *
- * Exported for its own module test: the answer depends on the filesystem
- * around the caller, which a test states by building one.
- *
- * @internal
- */
 export function installerAt(from: string): { command: string; name: string } {
     const root = findRoot(from, existsSync);
     if (root === undefined) {
@@ -95,7 +46,6 @@ export function installerAt(from: string): { command: string; name: string } {
     );
 }
 
-/** The line a reader has to add, when the package manager needs one. */
 function buildNote(peer: string, manager: string): string {
     if (!NATIVE_PEERS.has(peer) || manager !== 'pnpm') {
         return '';
@@ -107,18 +57,7 @@ function buildNote(peer: string, manager: string): string {
     );
 }
 
-/**
- * Use a native peer that is already loaded, and say the right thing when its
- * BINDING was never built.
- *
- * A native peer has two ways of not being there, and only one of them is
- * "install it". The other is the package present on disk with no compiled
- * `.node` beside it, because the package manager withheld the install script —
- * which every one of them now does by default. Left alone that surfaces as a
- * `bindings` stack trace from whichever spec opened a database first: no peer
- * name, no facet, no command. This turns it into the same shaped refusal a
- * missing peer gets.
- */
+/** A binding the package manager never built surfaces as a `bindings` stack trace; this turns it into a refusal naming the peer and the command. */
 export function requireBuiltPeer(peer: string, what: string, use: () => void): void {
     try {
         use();
@@ -136,14 +75,7 @@ export function requireBuiltPeer(peer: string, what: string, use: () => void): v
     }
 }
 
-/**
- * Import an optional peer, or throw a message that names the facet, the peer
- * and the command.
- *
- * `load` is the caller's own `import('<peer>')`: a bare specifier is what the
- * bundler and the resolver both need to see, so the import stays at the call
- * site and this function owns only the failure.
- */
+/** `load` is the caller's own `import('<peer>')`: the bundler and the resolver need to see the bare specifier. */
 export async function loadPeer<T>(peer: string, what: string, load: () => Promise<T>): Promise<T> {
     try {
         return await load();

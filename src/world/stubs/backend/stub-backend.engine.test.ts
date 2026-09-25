@@ -5,7 +5,6 @@ import type { Stub } from '../stub.js';
 import { stubBackend } from './stub-backend.engine.js';
 import { StubBackend } from './stub-backend.js';
 
-/** A GET stub replying `{ n }`. */
 function get(path: string, n: number): Stub {
     return { request: http.get(path), response: http.json({ n }) };
 }

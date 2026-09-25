@@ -57,11 +57,7 @@ export type AnthropicStreamInit = {
     delay?: number;
 };
 
-/**
- * A Messages stream: named events — the message and its one text block
- * opened, a `ping`, one `text_delta` per piece, the block closed, the stop
- * reason, and `message_stop` last.
- */
+/** Named events: message and text block opened, `ping`, one `text_delta` per piece, block closed, stop reason, `message_stop`. */
 function streamEvents(pieces: readonly string[]): SseEvent[] {
     const bodies: { [field: string]: unknown; type: string }[] = [
         {
@@ -95,30 +91,16 @@ function streamEvents(pieces: readonly string[]): SseEvent[] {
     return bodies.map((data) => ({ data, event: data.type }));
 }
 
-/**
- * Anthropic API intercept helpers.
- */
+/** Anthropic API stub helpers. */
 export const anthropic = {
-    /**
-     * Request: match Messages API calls, optionally routed through a
-     * custom gateway URL. When used with a JSON fixture file, the data is
-     * returned as-is (no wrapping) because Anthropic fixtures are typically
-     * already in the Messages API response shape.
-     *
-     * @example
-     *   anthropic.messages()
-     *   anthropic.messages({ system: /classify/ })
-     *   anthropic.messages({ user: buildPrompt() })   // string = EXACT equality
-     *   anthropic.messages({ user: /classify/ }, GATEWAY)
-     */
+    /** Match Messages API calls, optionally through a gateway URL; a string filter is exact equality. */
     messages(filter?: AnthropicMessagesFilter, url?: string): StubRequest {
         return {
             adapter: 'anthropic',
             method: 'POST',
             url: url ?? ANTHROPIC_MESSAGES_URL,
             match: filter ? ({ body }) => matchesFilter(body, filter) : undefined,
-            // Fixture files are already in the messages.create response shape;
-            // pass them through verbatim. Falls back to wrapping for strings.
+            // Fixture files are already in the messages.create shape: passed through verbatim.
             wrap(data: unknown): StubResponse {
                 if (data && typeof data === 'object' && !Array.isArray(data)) {
                     return { status: 200, body: data };
@@ -128,19 +110,12 @@ export const anthropic = {
         };
     },
 
-    /** Response: wrap data in Anthropic messages format. */
+    /** Response: data wrapped in the Messages format. */
     reply(data: unknown): StubResponse {
         return buildReply(data);
     },
 
-    /**
-     * Response: the assistant's text STREAMED, as the Messages API serves it
-     * with `stream: true` — server-sent events under `text/event-stream`, one
-     * `text_delta` per piece, in order, closed by `message_stop`.
-     *
-     * @example
-     *   defineStub({ request: anthropic.messages(), response: anthropic.stream(['Hel', 'lo']) })
-     */
+    /** Response: the text streamed as server-sent events, one `text_delta` per piece. */
     stream(pieces: readonly string[], init?: AnthropicStreamInit): StubResponse {
         return http.sse(streamEvents(pieces), { delay: init?.delay ?? 0 });
     },

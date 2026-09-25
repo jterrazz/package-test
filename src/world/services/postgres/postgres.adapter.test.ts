@@ -2,12 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import { postgres } from './postgres.adapter.js';
 
-/*
- * What the handle answers BEFORE it reaches a container: the string it builds,
- * the adapter it is, and the two refusals a connection never has to exist for.
- * Everything that needs a live postgres is a spec — `specs/integration/postgres/`.
- */
-
 describe('postgres', () => {
     test('postgres.adapter — postgres handle — builds a postgresql connection string from a host and a port', () => {
         // Given - the default credentials and database name

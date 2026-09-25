@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import type { DatabasePort } from '../database.port.js';
 import { databaseSet } from './database-set.engine.js';
 
-/** A database no seed of these tests reaches. */
 function idle(): DatabasePort {
     return {
         columns: async () => await Promise.resolve([]),

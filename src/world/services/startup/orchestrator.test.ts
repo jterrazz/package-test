@@ -11,7 +11,6 @@ import { registerContainerIntegrations } from './registry.js';
 
 const elsewhere = mkdtempSync(resolve(tmpdir(), 'orchestrator-root-'));
 
-/** A container that takes ten seconds to start, recording the moment each logs request reads from. */
 function slowContainer(asked: (Date | undefined)[]): ContainerPort {
     return {
         getConnectionString: () => '127.0.0.1:1',
@@ -30,12 +29,10 @@ function slowContainer(asked: (Date | undefined)[]): ContainerPort {
     };
 }
 
-/** A step that does nothing, and settles. */
 async function settled(): Promise<void> {
     await Promise.resolve();
 }
 
-/** A container-backed service whose healthcheck always refuses. */
 function unhealthyService(): ServiceHandle {
     return {
         buildConnectionString: () => 'fake://127.0.0.1:1',

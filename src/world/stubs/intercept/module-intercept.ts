@@ -3,55 +3,16 @@ import type { StubRegistration } from '../network/handlers.js';
 import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
 
-/**
- * The network double in MODULE scope — the same stubs, the same queue and
- * the same strictness as a chain's `.intercept()`, for the one kind of test
- * that has no chain to hang them on.
- *
- * Without it, a module test whose subject reaches the network has two ways
- * out: `vi.stubGlobal('fetch')`, which replaces the platform with a
- * hand-written stand-in, or `msw/node` imported directly, which F6 refuses a
- * test and F8 refuses a consumer to declare. Both answer "what did the outside
- * world reply" in a dialect nothing else in the repository speaks.
- *
- * The scope is an `AsyncDisposable`, so the handlers come off at the end of
- * the block however the block ends — and the strict violation (an outgoing
- * request no stub accepted) is raised THERE, which is what makes the
- * double a guard rather than a convenience.
- */
-
-/**
- * One block's worth of declared network. Disposed at the end of the scope that
- * declared it: the handlers are dropped, and an unmatched request is thrown.
- */
+/** Disposed at the end of the declaring scope: handlers dropped, an unmatched request thrown. */
 export type InterceptScope = AsyncDisposable;
 
 /** What a scope may state about the network it declares. */
 export type InterceptOptions = {
-    /**
-     * The base a RELATIVE request resolves against, for the life of the scope.
-     *
-     * A module that calls `fetch('/api/posts')` is browser code: under node the
-     * URL cannot be parsed at all, so the request fails before any stub can
-     * answer it and the test's only way out was to replace `fetch` itself. With
-     * an origin stated, the relative call resolves here and the declared
-     * stubs — path form or absolute — match it as they would any other.
-     */
+    /** The base a relative request resolves against for the life of the scope; under node `fetch('/api/posts')` cannot parse. */
     origin?: string;
 };
 
-/**
- * The module-scope network double. Resolves once the engine is listening —
- * which is why it is a promise, and why the canonical form awaits it:
- *
- * ```typescript
- * await using _ = await intercept(http.get(url), http.json({ ok: true }));
- * ```
- *
- * Without that `await` the subject could reach the real network before the
- * first handler is in place, so the shape refuses the racy spelling: a promise
- * is not an `AsyncDisposable`, and the compiler says so.
- */
+/** The module-scope network double; awaited, so the engine listens before the subject runs. */
 export type Intercept = ((
     stubs: StubInput,
     options?: InterceptOptions,
@@ -62,26 +23,13 @@ export type Intercept = ((
         options?: InterceptOptions,
     ) => Promise<InterceptScope>);
 
-/** Is this argument the options object rather than a response? */
 function isOptions(value: unknown): value is InterceptOptions {
     return (
         typeof value === 'object' && value !== null && !Array.isArray(value) && 'origin' in value
     );
 }
 
-/**
- * Resolve every relative request against `origin` for the life of the scope.
- *
- * The framework owns the seam so a test never has to: the wrapper goes on for
- * the scope, `fetch` is put back when the scope ends, and what it does is the
- * one thing a page would have done for free — turn `/api/posts` into a URL.
- *
- * Validating the origin and INSTALLING the wrapper are two steps because they
- * happen at two moments: the refusal of a bad origin belongs before anything
- * starts, while the wrapper may only go on once the engine is listening — it
- * has to sit ON TOP of whatever `fetch` the engine installed, and be taken off
- * before the engine takes its own back.
- */
+/** Validated before anything starts, installed only once the engine listens: it sits on top of the engine's `fetch` and comes off first. */
 function resolveRelativeAgainst(origin: string): () => () => void {
     let base: URL;
     try {
@@ -106,13 +54,6 @@ function resolveRelativeAgainst(origin: string): () => () => void {
     };
 }
 
-/**
- * Build the module-scope double on one engine. `process-intercept.ts` hands
- * it msw's server, `page-intercept.ts` msw's worker: one shape, two transports,
- * exactly as a chain's `.intercept()` already has it.
- *
- * @internal
- */
 export function interceptThrough(
     register: (stubs: readonly Stub[]) => Promise<StubRegistration>,
 ): Intercept {

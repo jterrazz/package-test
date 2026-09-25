@@ -8,12 +8,10 @@ import { openai } from './openai.js';
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const RESPONSES_URL = 'https://api.openai.com/v1/responses';
 
-/** Does the trigger's filter let this request body through? */
 function lets(trigger: StubRequest, body: unknown, url = CHAT_URL): boolean | undefined {
     return trigger.match?.({ body, headers: {}, method: 'POST', url });
 }
 
-/** A chat body: the model, one system and one user message. */
 function chatBody(model: string, system: string, user: string): unknown {
     return {
         messages: [
@@ -24,7 +22,6 @@ function chatBody(model: string, system: string, user: string): unknown {
     };
 }
 
-/** A chat body declaring these function tools, at this temperature. */
 function toolsBody(names: string[], temperature: number): unknown {
     return {
         messages: [{ content: 'hi', role: 'user' }],
@@ -33,7 +30,6 @@ function toolsBody(names: string[], temperature: number): unknown {
     };
 }
 
-/** A Responses body whose user text spans two inputs, declaring one tool. */
 function responsesBody(tool: unknown): unknown {
     return {
         input: [
@@ -44,7 +40,6 @@ function responsesBody(tool: unknown): unknown {
     };
 }
 
-/** Each frame of a streamed reply, read the way an SSE client reads it: its event name and its data, parsed. */
 function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
     if (!isStreamBody(body)) {
         throw new Error('the reply is not a stream');
@@ -56,7 +51,6 @@ function framesOf(body: unknown): { data: unknown; event: string | undefined }[]
         return { data: JSON.parse(field('data')) as unknown, event: field('event') };
     });
 }
-/** One unnamed Chat Completions chunk, framed, created at the pinned instant. */
 function chatChunk(delta: object, finish: null | string): string {
     return `data: ${JSON.stringify({
         id: 'chatcmpl-test',
@@ -66,7 +60,6 @@ function chatChunk(delta: object, finish: null | string): string {
         choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
     })}\n\n`;
 }
-/** A Responses event that carries no text, as a client reads it: named for its type, numbered. */
 function opened(type: string, sequence: number): object {
     return { data: { sequence_number: sequence, type }, event: type };
 }

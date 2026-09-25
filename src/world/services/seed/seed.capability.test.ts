@@ -9,7 +9,6 @@ import { seed } from './seed.capability.js';
 import type { SeedMethod } from './seed.capability.js';
 import type { SeedPort } from './seed.port.js';
 
-/** A chain composed of `.seed()` alone, ending on an action that does nothing. */
 type Chain = { seed: SeedMethod<Chain, string>; settle: () => Promise<null> };
 
 const settle = defineAction({
@@ -19,7 +18,6 @@ const settle = defineAction({
     row: { group: 'Terminal action', name: '.settle()', probe: '.settle(' },
 });
 
-/** A database that logs what it is told under `name`. */
 function logging(log: string[], name: string): DatabasePort {
     return {
         columns: async () => await Promise.resolve([]),
@@ -35,7 +33,6 @@ function logging(log: string[], name: string): DatabasePort {
     };
 }
 
-/** A chain over two logged databases, reading every seed file as its own path. */
 function chainOver(log: string[], config: ServicesConfig): Chain {
     const databases: SeedPort = {
         read: (path, testDir) => `${testDir}/${path}`,

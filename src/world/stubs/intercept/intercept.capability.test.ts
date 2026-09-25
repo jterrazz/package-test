@@ -9,7 +9,6 @@ import { intercept } from './intercept.capability.js';
 import type { InterceptMethod } from './intercept.capability.js';
 import type { InterceptPort } from './intercept.port.js';
 
-/** A chain composed of `.intercept()` alone, ending on an action that does nothing. */
 type Chain = { intercept: InterceptMethod<Chain>; settle: () => Promise<null> };
 
 const settle = defineAction({
@@ -19,7 +18,6 @@ const settle = defineAction({
     row: { group: 'Terminal action', name: '.settle()', probe: '.settle(' },
 });
 
-/** A chain over an engine that records what it was armed with — or refuses to serve anything. */
 function chainOver(refusal?: Error): { armed: (readonly Stub[])[]; chain: Chain } {
     const armed: (readonly Stub[])[] = [];
     const network: InterceptPort = {
@@ -43,7 +41,6 @@ function chainOver(refusal?: Error): { armed: (readonly Stub[])[]; chain: Chain 
     return { armed, chain: facet.open({}) };
 }
 
-/** The body each armed stub replies, in queue order. */
 function replies(armed: (readonly Stub[])[]): unknown[] {
     return armed
         .flat()

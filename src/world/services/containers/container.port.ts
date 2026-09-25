@@ -1,7 +1,4 @@
-/**
- * Abstract container interface.
- * Represents a running service (database, cache, etc.)
- */
+/** A running service container (database, cache, …). */
 export type ContainerPort = {
     /** Start the container and wait until ready. */
     start: () => Promise<void>;
@@ -22,10 +19,6 @@ export type ContainerPort = {
     getLogs: (since?: Date) => Promise<string>;
 };
 
-/**
- * What a container is started from: the image, the one port a client reaches,
- * its environment, and how the service asks it to run beyond those three.
- */
 export type ContainerRequest = ContainerOptions & {
     image: string;
     port: number;

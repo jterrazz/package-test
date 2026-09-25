@@ -8,7 +8,6 @@ import { StubQueue } from './queue.js';
 const URL_A = 'https://api.example.com/a';
 const URL_B = 'https://api.example.com/b';
 
-/** An observed request — method defaults to GET, body/headers to empty. */
 function req(overrides: Partial<MatchableRequest> = {}): MatchableRequest {
     return { body: null, headers: {}, method: 'GET', url: URL_A, ...overrides };
 }
@@ -17,7 +16,6 @@ function stub(request: Stub['request'], tag: string, extra: Partial<Stub> = {}):
     return { request, response: http.json({ tag }), ...extra };
 }
 
-/** Serve one observed request and report which stub answered (or null). */
 function serve(queue: StubQueue, overrides: Partial<MatchableRequest> = {}): null | string {
     const served = queue.take(req(overrides));
     if (!served) {
@@ -97,7 +95,6 @@ describe('queue', () => {
         // Then - any origin matches, extra query params are ignored
         expect(serve(queue, { url: `${article}?locale=fr&page=2` })).toBe('article');
 
-        // And - a non-uuid segment or a missing declared param does not
         expect(serve(queue, { url: 'https://app.test/articles/nope?locale=fr' })).toBeNull();
         expect(serve(queue, { url: article })).toBeNull();
     });
@@ -199,7 +196,6 @@ describe('queue', () => {
             'declared required with times: 2 but was requested 1 time(s)',
         );
 
-        // And - the second request satisfies it
         serve(queue);
         expect(queue.requiredError()).toBeNull();
     });

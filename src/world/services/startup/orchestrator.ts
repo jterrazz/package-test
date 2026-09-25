@@ -14,48 +14,19 @@ type RunningService = {
 };
 
 export type OrchestratorOptions = {
-    /**
-     * What the subject IS — the line the startup report closes on. Defaults to
-     * the api shape, which is the only facet that serves an app in this
-     * process; a facet whose subject is a binary, a pipeline or a screen says
-     * `{ type: 'none' }` and gets no line rather than a wrong one.
-     */
+    /** Defaults to the api shape; a subject that is no app says `{ type: 'none' }` and gets no line. */
     subject?: AppInfo | undefined;
-    /**
-     * Named infrastructure record. Keys are the database vocabulary of the spec
-     * (`.seed()` / `.table()` `database` option) and the name each handle is
-     * reported and initialised under: the kebab-case form of the key is the
-     * directory its init script lives in (`analyticsDb` → `docker/analytics-db/`).
-     */
+    /** The kebab-case key names the init-script folder: `analyticsDb` → `docker/analytics-db/`. */
     services: Record<string, ServiceHandle>;
-    /**
-     * The project root, already resolved. REQUIRED: the constructors derive it
-     * by walking up from the calling specification file (CONVENTIONS A9), and
-     * the orchestrator is handed the answer. Defaulting to `process.cwd()` here
-     * meant one silent second opinion about what the project is — the runner
-     * resolving from the caller, this from wherever the runner happened to be
-     * launched, which in a workspace is rarely the same directory.
-     */
+    /** Required: resolved from the calling specification file (A9), never from `process.cwd()`. */
     root: string;
 };
 
-/** Where a service reads its init script from — `<root>/docker/<service>/`. */
 const DOCKER_DIR = 'docker';
 
 /** How far before a start its failure report reads logs, for a runtime clock behind the host's. */
 const LOG_CLOCK_MARGIN_MS = 500;
 
-/**
- * The infrastructure a specification declares, started and stopped as a unit.
- *
- * Every declared handle becomes a real thing: a container through
- * testcontainers, or an embedded service (SQLite) that needs no container. The
- * record KEY is the only name in play — it is the spec's database vocabulary,
- * the name the startup report prints, and, kebab-cased, the directory the
- * service reads its init script from.
- *
- * It is internal wiring: the constructors drive it, and no consumer names it.
- */
 export class Orchestrator {
     private readonly services: Record<string, ServiceHandle>;
     private readonly root: string;
@@ -69,11 +40,7 @@ export class Orchestrator {
         this.subject = options.subject ?? { type: 'in-process' };
     }
 
-    /**
-     * Start every declared service.
-     * Phase 1: start all containers in parallel (the slow part).
-     * Phase 2: wire connections, healthcheck, and init sequentially (fast).
-     */
+    /** Containers start in parallel (the slow part), then connections, healthchecks and inits run in order. */
     async start(): Promise<void> {
         if (this.started) {
             return;
@@ -84,13 +51,11 @@ export class Orchestrator {
             handle.serviceName = toKebabCase(key);
         }
 
-        // Separate services that need containers from embedded ones (e.g. SQLite)
         const containerServices: { container: ContainerPort; handle: ServiceHandle }[] = [];
         const embeddedServices: ServiceHandle[] = [];
 
         for (const handle of Object.values(this.services)) {
             if (handle.defaultPort === 0) {
-                // Embedded service (no container needed)
                 embeddedServices.push(handle);
                 continue;
             }
@@ -104,7 +69,6 @@ export class Orchestrator {
             containerServices.push({ container, handle });
         }
 
-        // Phase 1: start containers in parallel + initialize embedded services
         const startedAt = Date.now();
         await Promise.all([
             ...containerServices.map(async ({ container }) => {
@@ -117,7 +81,6 @@ export class Orchestrator {
             }),
         ]);
 
-        // Phase 2: wire connections, healthcheck, init (fast — containers already running)
         const reports: ServiceReport[] = [];
 
         for (const { container, handle } of containerServices) {
@@ -173,7 +136,6 @@ export class Orchestrator {
         console.log(output);
     }
 
-    /** Stop every container this stack started. */
     async stop(): Promise<void> {
         for (const { container } of this.running) {
             if (container) {
@@ -195,7 +157,6 @@ export class Orchestrator {
         return null;
     }
 
-    /** Every database service, keyed by its record key. */
     getDatabases(): Map<string, DatabasePort> {
         const map = new Map<string, DatabasePort>();
         for (const [key, handle] of Object.entries(this.services)) {

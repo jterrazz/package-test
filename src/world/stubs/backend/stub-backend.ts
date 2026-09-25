@@ -1,25 +1,4 @@
-/**
- * The declared stub backend — a small `node:http` server the website and
- * mobile runners start when their `backend` option is present. It serves the
- * stubs the CURRENT chain declared via `.intercept(...)`: one chain = one
- * terminal action, and the stub resets between chains the way databases do.
- *
- * Selection is the shared {@link StubQueue} — the same first-matching,
- * `times`-aware queue the MSW engine runs on api/job chains. A stub
- * without `times` keeps replying (re-render, retry); `times: n` is spent after
- * n serves.
- *
- * Strictness is the `external: 'block'` analog (CONVENTIONS D7 in spirit): a
- * request matching no stub is answered 501 and RECORDED; once the chain
- * declared at least one stub, the terminal action throws an error
- * enumerating every unmatched request — and every `required` stub that was
- * never requested. Chains with zero stubs leave the backend unguarded —
- * mirroring how MSW stays off without them.
- *
- * Every response (including the 501 and the OPTIONS preflight) carries
- * permissive CORS headers — a website's client-side fetches are cross-origin
- * to the stub by construction.
- */
+/** A request matching no stub gets 501 and is recorded; once the chain declared a stub, the action throws naming every unmatched request. Every response carries permissive CORS headers. */
 
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
@@ -32,30 +11,17 @@ import { StubQueue } from '../exchange/queue.js';
 import { toReadableStream } from '../exchange/stream.js';
 import type { Stub } from '../stub.js';
 
-/** Options for the stub backend server. */
 type StubBackendOptions = {
-    /**
-     * Fixed port — pins a stable stub URL across runs (a bundler that inlines
-     * the URL at serve time survives warm). Default: a free OS-assigned port.
-     */
+    /** Fixed port: a bundler inlining the URL at serve time survives warm. */
     port?: number | undefined;
 };
 
-/** What a constructor that declares a stub backend hands its chain. */
-export type StubsConfig = {
-    /**
-     * The declared stub backend (website/mobile facets) — armed with the
-     * chain's stubs before every terminal action.
-     */
+export type StubsConfig = ChainConfig & {
     backend?: StubBackend | undefined;
-    /**
-     * Base URL of the running stub backend — allow-listed through the
-     * browser's `external: 'block'` policy so client-side fetches reach it.
-     */
+    /** Allow-listed through the browser's `external: 'block'` policy. */
     backendUrl?: string | undefined;
-} & ChainConfig;
+};
 
-/** One unmatched request family recorded during a chain. */
 type UnmatchedStubRequest = {
     count: number;
     method: string;
@@ -66,7 +32,6 @@ const CORS_METHODS = 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS';
 const PREFLIGHT_MAX_AGE = '600';
 
 export class StubBackend {
-    /** Guarded once the current chain declared at least one stub. */
     private guarded = false;
     private readonly options: StubBackendOptions;
     private queue = new StubQueue([]);
@@ -78,7 +43,6 @@ export class StubBackend {
         this.options = options;
     }
 
-    /** Start the server and resolve with its base URL. */
     async start(): Promise<string> {
         const server = createServer((request, response) => {
             void this.handle(request, response);
@@ -100,7 +64,6 @@ export class StubBackend {
         return this.url;
     }
 
-    /** Stop the server (idempotent). */
     async stop(): Promise<void> {
         const { server } = this;
         if (!server) {
@@ -115,24 +78,14 @@ export class StubBackend {
         });
     }
 
-    /**
-     * Arm the stub for one chain: the declared stubs replace the previous
-     * chain's wholesale, the queue restarts, and the unmatched log clears —
-     * the reset-between-chains databases already follow.
-     */
+    /** The chain's stubs replace the previous chain's wholesale; the queue and the unmatched log restart. */
     beginChain(stubs: readonly Stub[]): void {
         this.guarded = stubs.length > 0;
         this.queue = new StubQueue(stubs);
         this.unmatchedRequests.clear();
     }
 
-    /**
-     * The strict failure for the chain, or null. Non-null when the chain
-     * declared at least one stub AND either an unmatched request was
-     * recorded, or a `required` stub was never satisfied. Enumerates every
-     * unmatched request (method, path, count) plus the declared routes, so the
-     * missing stub writes itself.
-     */
+    /** Non-null when the chain declared a stub and a request went unmatched or a `required` stub was never met. */
     violation(): Error | null {
         if (!this.guarded) {
             return null;
@@ -153,8 +106,6 @@ export class StubBackend {
                 `add a stub for it to the chain's composite.`,
         );
     }
-
-    // ── Private ──
 
     private corsHeaders(request: IncomingMessage): Record<string, string> {
         return {
@@ -178,7 +129,7 @@ export class StubBackend {
         const method = (request.method ?? 'GET').toUpperCase();
         const cors = this.corsHeaders(request);
 
-        // CORS preflight — always answered, whatever is declared.
+        // CORS preflight: always answered, whatever is declared.
         if (method === 'OPTIONS') {
             response.writeHead(204, cors);
             response.end();
@@ -192,8 +143,6 @@ export class StubBackend {
             }
         }
         const url = request.url ?? '/';
-        // The body is read off the stream so `match` predicates and body
-        // filters see the payload — the stub is a real server, not MSW.
         const observed: MatchableRequest = {
             body: await readBody(request),
             headers,
@@ -223,17 +172,12 @@ export class StubBackend {
         const status = reply.status ?? 200;
         const { body } = reply;
         if (isStreamBody(body)) {
-            // A declared stream is written piece by piece with the connection
-            // held open — the one body this server must not serialise, because
-            // what the client is specified against is the order it reads in.
+            // A declared stream is written piece by piece with the connection held open: the order is what the client is specified against.
             response.writeHead(status, {
                 ...cors,
                 'content-type': body.contentType,
                 ...reply.headers,
             });
-            // Piped rather than looped over: the stream's own plumbing writes
-            // each piece as it is produced and ends the response after the
-            // last one, which is what closes the connection.
             await toReadableStream(body).pipeTo(
                 new WritableStream<Uint8Array>({
                     close() {
@@ -273,7 +217,6 @@ export class StubBackend {
     }
 }
 
-/** Read the request body — parsed JSON when it is JSON, raw text otherwise. */
 async function readBody(request: IncomingMessage): Promise<unknown> {
     const chunks: Buffer[] = [];
     for await (const chunk of request) {

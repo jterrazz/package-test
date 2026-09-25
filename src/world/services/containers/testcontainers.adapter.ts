@@ -3,49 +3,30 @@ import { hostname } from 'node:os';
 import { loadPeer } from '../peer.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
-/** The label every container this package starts carries — what a cleanup filters on. */
 export const CONTAINER_LABEL = 'com.jterrazz.test';
 
-/** The label a reused container carries besides: it outlives the run by design. */
 export const REUSED_LABEL = 'com.jterrazz.test.reuse';
 
-/**
- * The label naming the process that started a container, `<host>:<pid>`: a
- * sweep removes the container once that process is dead, whatever reaper
- * session still holds it.
- */
+/** `<host>:<pid>`: a sweep removes the container once that process is dead, whatever reaper session holds it. */
 export const OWNER_LABEL = 'com.jterrazz.test.owner';
 
-/** This process, as an owner label names it. */
 export function processOwner(): string {
     return `${hostname()}:${process.pid}`;
 }
 
-/**
- * Whether a container is reused across runs: asked for with
- * `TESTCONTAINERS_REUSE_ENABLE=true`, and never on CI, where a run starts
- * from nothing and leaves nothing.
- */
+/** Never on CI, where a run starts from nothing and leaves nothing. */
 export function reuseEnabled(env: NodeJS.ProcessEnv): boolean {
     const onCi = env.CI !== undefined && env.CI !== '' && env.CI !== 'false';
     return env.TESTCONTAINERS_REUSE_ENABLE === 'true' && !onCi;
 }
 
-/**
- * The labels a container is started with. A reused one names no owner: it
- * outlives its process by design, and its definition hash must not change
- * with the process that asks for it.
- */
+/** A reused container names no owner: its definition hash must not change with the process asking. */
 export function containerLabels(reuse: boolean, owner: string): Record<string, string> {
     return reuse
         ? { [CONTAINER_LABEL]: 'true', [REUSED_LABEL]: 'true' }
         : { [CONTAINER_LABEL]: 'true', [OWNER_LABEL]: owner };
 }
 
-/**
- * Container adapter using testcontainers.
- * Wraps a GenericContainer for programmatic container lifecycle.
- */
 export class TestcontainersAdapter implements ContainerPort {
     private readonly image: string;
     private readonly containerPort: number;

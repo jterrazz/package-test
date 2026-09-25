@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { installerAt, loadPeer, requireBuiltPeer } from './peer.js';
 
-/** A project installed by the manager whose lockfile it carries. */
 function projectWith(lockfile: string): string {
     const directory = mkdtempSync(join(tmpdir(), 'peer-'));
     writeFileSync(join(directory, 'package.json'), '{ "name": "consumer" }');
@@ -13,7 +12,6 @@ function projectWith(lockfile: string): string {
     return directory;
 }
 
-/** `requireBuiltPeer` over a use that fails with `message`. */
 const failingWith = (message: string) => (): void => {
     requireBuiltPeer('better-sqlite3', 'sqlite()', () => {
         throw new Error(message);

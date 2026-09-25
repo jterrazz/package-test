@@ -1,8 +1,3 @@
-/**
- * The instant `iso` names, or a refusal that says what an instant looks like —
- * the one check a stated instant passes, whichever calendar pins it: this
- * process's, a mounted component's page, or a visited site's.
- */
 export function instantOf(method: string, iso: string): Date {
     const at = new Date(iso);
     if (Number.isNaN(at.getTime())) {

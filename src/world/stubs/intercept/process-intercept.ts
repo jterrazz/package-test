@@ -1,14 +1,9 @@
 import { interceptThrough } from './module-intercept.js';
 import type { Intercept } from './module-intercept.js';
 
-/**
- * The module-scope network double, on msw's node server — what a test with no
- * chain to hang stubs on reaches for (chapter 16).
- */
+/** The module-scope network double, on msw's node server. */
 export const intercept: Intercept = interceptThrough(async (stubs) => {
-    // Reached through the same lazy import the chain uses: a static one here
-    // would pull the msw engine into every node consumer's graph at load, and
-    // the engine exists to be paid for only by the specs that declare a stub.
+    // Lazy, as on the chain: a static import would load msw into every node consumer's graph.
     const { registerStubs } = await import('../network/server.js');
     return await registerStubs(stubs);
 });

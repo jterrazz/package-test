@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { orphans, ownerAlive, sweepOrphans } from './orphans.js';
 import type { ListedContainer } from './orphans.js';
 
-/** A listed container: its id, its state, and the session and reaper labels it carries. */
 function listed(
     id: string,
     state: string,
@@ -23,7 +22,7 @@ function listed(
     };
 }
 
-/** A probe answering the pids it is handed as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
+/** Answers as `kill(pid, 0)` would: 7 is gone, 8 another user's. */
 function probe(pid: number): void {
     if (pid === 7) {
         throw Object.assign(new Error('no such process'), { code: 'ESRCH' });

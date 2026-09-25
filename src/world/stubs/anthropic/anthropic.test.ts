@@ -5,7 +5,6 @@ import { anthropic } from './anthropic.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 
-/** One named server-sent event, framed the way the Messages API writes it. */
 function frame(data: { [field: string]: unknown; type: string }): string {
     return `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
 }

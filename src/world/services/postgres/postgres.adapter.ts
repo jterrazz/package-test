@@ -23,12 +23,7 @@ export type PostgresOptions = {
     env?: Record<string, string>;
 };
 
-/**
- * A test database holds nothing worth a crash: its data lives on a memory
- * disk, and postgres skips every write that only exists to survive one. Its
- * log keeps what a failed start is read for — the checkpoint a clone forces
- * is not that.
- */
+/** Data lives on a memory disk, and postgres skips every write that only exists to survive a crash. */
 const DISPOSABLE: ContainerOptions = {
     command: [
         'postgres',
@@ -58,9 +53,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     private client: Client | null = null;
     /** The container's own string, which a worker's clone replaces and is restored from. */
     private containerConnectionString = '';
-    /** The template the init script built — `null` for a service with no script. */
     private template: null | string = null;
-    /** The worker's clone, while one is acquired. */
     private database: null | string = null;
 
     constructor(options: PostgresOptions = {}) {
@@ -109,8 +102,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             return;
         }
 
-        // Its own name first, then the type's — one database in a project needs
-        // no folder of its own, and several each get one named after their key.
+        // Its own name first, then the type's.
         const initPaths = [
             resolve(dockerDir, `${this.serviceName}/init.sql`),
             resolve(dockerDir, 'postgres/init.sql'),
@@ -225,17 +217,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
     }
 }
 
-/**
- * Create a PostgreSQL service handle.
- *
- * @example
- * // The record key is the name: it is the spec's `database` vocabulary, and
- * // Kebab-cased it is the folder the init script is read from.
- * //   { db: postgres() }          → docker/db/init.sql, then docker/postgres/init.sql
- * //   { analyticsDb: postgres() } → docker/analytics-db/init.sql
- * const events = postgres();
- * // After start: events.connectionString is populated
- */
+/** Create a PostgreSQL service handle; its record key names the init script folder (`docker/<key>/init.sql`). */
 export function postgres(options: PostgresOptions = {}): PostgresHandle {
     return new PostgresHandle(options);
 }

@@ -136,7 +136,6 @@ describe('http', () => {
             ),
         ).toBeTruthy();
 
-        // And - a wrong value or a missing header fails
         expect(
             declared.match!(request({ headers: { authorization: 'Basic abc', 'x-env': 'prod' } })),
         ).toBeFalsy();
@@ -150,7 +149,6 @@ describe('http', () => {
         // Then - a URL whose params satisfy the subset matches
         expect(declared.match!(request({ url: `${URL}?tag=news&page=3&sort=desc` }))).toBeTruthy();
 
-        // And - a wrong or missing param fails
         expect(declared.match!(request({ url: `${URL}?tag=sports&page=3` }))).toBeFalsy();
         expect(declared.match!(request({ url: `${URL}?page=3` }))).toBeFalsy();
     });
@@ -183,7 +181,6 @@ describe('http', () => {
             ),
         ).toBeTruthy();
 
-        // And - a single failing facet rejects the request
         expect(
             declared.match!(
                 request({

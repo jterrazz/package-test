@@ -4,8 +4,6 @@ import { http } from '../http/http.js';
 import type { Stub } from '../stub.js';
 import { StubBackend } from './stub-backend.js';
 
-// ── Fakes — stubs built inline (mocks are code, CONVENTIONS I4) ──
-
 function get(path: string, body: unknown, extra: Partial<Stub> = {}): Stub {
     return { request: http.get(path), response: http.json(body), ...extra };
 }

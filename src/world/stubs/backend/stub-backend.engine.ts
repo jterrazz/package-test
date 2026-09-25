@@ -1,14 +1,7 @@
 import type { InterceptPort } from '../intercept/intercept.port.js';
 import type { StubBackend } from './stub-backend.js';
 
-/**
- * The network of an app running in its OWN process (a server child, a
- * simulator), served by the stub backend its runner declared: each chain's
- * stubs replace the previous chain's, even when it declares none, and the
- * strict violation is the backend's. A runner that declared no backend
- * refuses `.intercept()` when it is stated, naming the option on its own
- * constructor.
- */
+/** Each chain's stubs replace the previous chain's, even when it declares none; a runner without a backend refuses `.intercept()`. */
 export function stubBackend(
     backend: StubBackend | undefined,
     facet: 'mobile' | 'website',

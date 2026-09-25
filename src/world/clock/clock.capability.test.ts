@@ -7,7 +7,6 @@ import type { ClockMethod } from './clock.capability.js';
 import { processClock } from './clock.engine.js';
 import type { ClockPort } from './clock.port.js';
 
-/** A chain composed of `.clock()` alone, ending on an action that reads `Date`. */
 type Chain = { clock: ClockMethod<Chain>; now: () => Promise<string> };
 
 const now = defineAction({
@@ -17,7 +16,6 @@ const now = defineAction({
     row: { group: 'Terminal action', name: '.now()', probe: '.now(' },
 });
 
-/** A chain whose calendar is `engine` — this process's unless another is handed. */
 function chain(engine: ClockPort = processClock): Chain {
     return defineFacet<Chain>()({
         actions: [now],

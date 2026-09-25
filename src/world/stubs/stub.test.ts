@@ -5,7 +5,6 @@ import { http } from './http/http.js';
 import { defineStub, defineStubs } from './stub.js';
 import type { Stub } from './stub.js';
 
-/** A stub for one route, tagged by response body so order is observable. */
 function route(method: 'GET' | 'POST', url: RegExp | string, tag: string): Stub {
     return {
         request: method === 'GET' ? http.get(url) : http.post(url),

@@ -2,19 +2,12 @@ import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { RunContainer } from './run-container.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
-/**
- * The container a declared service gets: the project's, when its global
- * setup serves one — asked where it is at start, since only then does the
- * worker know — and one of its own otherwise, started and stopped with it.
- */
+/** The project's container when its setup serves one, asked for at start; its own otherwise. */
 export class ServiceContainer implements ContainerPort {
     private delegate: ContainerPort | null = null;
     private readonly request: ContainerRequest;
     private readonly locate: () => Promise<string | undefined>;
 
-    /**
-     * @param locate - where the project serves its containers, `undefined` when it serves none
-     */
     constructor(request: ContainerRequest, locate: () => Promise<string | undefined>) {
         this.request = request;
         this.locate = locate;
@@ -57,12 +50,6 @@ export class ServiceContainer implements ContainerPort {
     }
 }
 
-/**
- * Where the run serves its service containers, read on the worker's side —
- * what the global setup of a project whose specs declare services provides;
- * `undefined` for a run that serves none, where each specification starts its
- * own.
- */
 export async function serviceContainers(): Promise<string | undefined> {
     try {
         const { inject } = await import('vitest');
@@ -72,7 +59,6 @@ export async function serviceContainers(): Promise<string | undefined> {
     }
 }
 
-/** Where the project's global setup serves its containers — provided to its workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {

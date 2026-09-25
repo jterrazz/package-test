@@ -1,5 +1,3 @@
-// ── Colors ──
-
 const GREEN = '\u001B[32m';
 const RED = '\u001B[31m';
 const DIM = '\u001B[2m';
@@ -8,15 +6,10 @@ const RESET = '\u001B[0m';
 const BG_CYAN = '\u001B[46m';
 const BLACK = '\u001B[30m';
 
-// ── Symbols (vitest-native) ──
-
 const CHECK = '✓';
 const CROSS = '×';
 const ARROW = '→';
 
-// ── Types ──
-
-/** Status report for a single infrastructure service after startup. */
 export type ServiceReport = {
     name: string;
     type: string;
@@ -26,23 +19,12 @@ export type ServiceReport = {
     logs?: string;
 };
 
-/**
- * What the subject IS, for the line the startup report closes on.
- *
- * Four shapes, because there are four: an app built and served inside this
- * process (api), a child process the runner started and polls (a site's dev
- * server), a deployment already running somewhere (`url`), and a subject that
- * is not an app at all — a binary, a pipeline, a module, a screen — which gets
- * no line rather than a wrong one.
- */
 export type AppInfo = {
-    /** The command, for a child process. */
     command?: string | undefined;
     type: 'http' | 'in-process' | 'none' | 'process';
     url?: string | undefined;
 };
 
-/** The subject, in the words of the thing that started it. */
 function describeApp(app: AppInfo): string {
     if (app.type === 'in-process') {
         return 'in-process (Hono)';
@@ -53,14 +35,7 @@ function describeApp(app: AppInfo): string {
     return app.url ?? '';
 }
 
-// ── Startup report ──
-
-/**
- * The block printed while the world comes up: one line per declared service,
- * then the app the subject is. There is one shape of world to report on, so the
- * report takes no mode — the parameter that named one left with compose mode
- * (ADR-007).
- */
+/** One line per declared service, then the app the subject is. */
 export function formatStartupReport(services: ServiceReport[], app?: AppInfo): string {
     const lines: string[] = [];
 

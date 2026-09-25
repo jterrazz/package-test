@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { redis } from './redis.adapter.js';
 import type { RedisHandle } from './redis.adapter.js';
 
-/** A handle of one service, pointed at a port nothing listens on: acquire takes its index, then fails to flush it. */
 function unreachableService(service: string): RedisHandle {
     const handle = redis();
     handle.serviceName = service;
@@ -11,7 +10,6 @@ function unreachableService(service: string): RedisHandle {
     return handle;
 }
 
-/** The index a handle's connection string carries, and the refusal its acquire met, if any. */
 async function acquired(
     handle: RedisHandle,
     worker: string,
@@ -26,12 +24,6 @@ async function acquired(
         refused: reason.includes('has no database index'),
     };
 }
-
-/*
- * What the handle answers BEFORE it reaches a container: the string it builds,
- * the compose service it binds to, and the refusals a connection never has to
- * exist for. What needs a live redis is a spec — `specs/integration/redis/`.
- */
 
 describe('redis', () => {
     test('redis.adapter — redis handle — builds a redis connection string from a host and a port', () => {

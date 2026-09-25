@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 import { anthropic, http, openai } from '../../index.js';
 import { STUB_KINDS } from './kinds.js';
 
-/** The folders beside this module whose `<name>.ts` exports a builder named `<name>`. */
 async function builderFolders(): Promise<string[]> {
     const named = readdirSync(import.meta.dirname, { withFileTypes: true })
         .filter((dirent) => dirent.isDirectory())

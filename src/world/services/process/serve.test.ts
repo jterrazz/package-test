@@ -5,21 +5,14 @@ import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { runToCompletion, ServedProcess } from './serve.js';
 
-/**
- * A server that binds the port the OS hands it, announces it, and answers with
- * its own pid — no spec picks a port, so none can be taken from under it.
- */
+/** Binds the port the OS hands it and answers its own pid: no spec picks a port. */
 const SERVER = `node -e "const s=require('node:http').createServer((q,r)=>r.end(String(process.pid)));s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))"`;
 const READY = /listening on port (?<port>\d+)/u;
 
-/**
- * A child of the PORT form that never binds what it is handed: it reports the
- * port it got, as a request to that port or as a line of output, and stays up.
- */
+/** Never binds what it is handed: reports the port it got and stays up. */
 const CALLS_HANDED = `node -e "fetch('http://127.0.0.1:'+process.env.PORT+'/handed').catch(()=>{});setInterval(()=>{},1000)"`;
 const PRINTS_HANDED = `node -e "console.log('handed '+process.env.PORT);setInterval(()=>{},1000)"`;
 
-/** A server this test holds on the port the OS gave it, recording every path asked of it. */
 async function held(): Promise<{ paths: string[]; port: number; server: Server }> {
     const paths: string[] = [];
     const server = createServer((request, response) => {
@@ -35,7 +28,6 @@ async function held(): Promise<{ paths: string[]; port: number; server: Server }
     return { paths, port: address.port, server };
 }
 
-/** Is a process with this pid still alive? */
 function alive(pid: number): boolean {
     try {
         process.kill(pid, 0);

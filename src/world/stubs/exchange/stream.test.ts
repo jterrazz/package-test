@@ -4,7 +4,6 @@ import { clock } from '../../clock/clock.js';
 import { STREAM_BODY } from './exchange.js';
 import { toReadableStream } from './stream.js';
 
-/** A declared stream of `chunks`, `delay` milliseconds apart. */
 function streamOf(chunks: string[], delay: number): ReadableStreamDefaultReader<Uint8Array> {
     return toReadableStream({
         chunks,
@@ -14,7 +13,6 @@ function streamOf(chunks: string[], delay: number): ReadableStreamDefaultReader<
     }).getReader();
 }
 
-/** What one read handed back, as text — or `done` once the stream closed. */
 function textOf(read: ReadableStreamReadResult<Uint8Array> | undefined): string | undefined {
     if (read === undefined) {
         return undefined;

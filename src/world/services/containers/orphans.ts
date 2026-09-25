@@ -2,34 +2,16 @@ import { hostname } from 'node:os';
 
 import { OWNER_LABEL, REUSED_LABEL } from './testcontainers.adapter.js';
 
-/**
- * The containers nothing will ever remove but a sweep: the ones a dead
- * testcontainers session left behind, and the ones whose owning process died.
- *
- * Testcontainers labels every container it starts for a run with the session
- * of its reaper (Ryuk), which removes them once the session's last client is
- * gone — but only while the reaper itself runs. An orphan of a session belongs
- * to one, has ended, and no running reaper holds its session.
- *
- * Every process on a machine shares one reaper session while any of them holds
- * it, so a killed run's running containers outlive it as long as another run
- * lasts. The owner label names the process that started a container: one whose
- * owner is dead on this host is an orphan, whatever its state and session.
- */
+/** Ryuk removes a session's containers only while it runs, and every process shares one session while any holds it: an owner label naming a dead local process marks an orphan. */
 
-/** The label naming the reaper session a container belongs to. */
 export const SESSION_LABEL = 'org.testcontainers.session-id';
 
-/** The label a reaper carries. */
 const REAPER_LABEL = 'org.testcontainers.ryuk';
 
-/** The states a container of a live session never waits in: it ended. */
 const ENDED = new Set(['dead', 'exited']);
 
-/** A container as the runtime lists it. */
 export type ListedContainer = { Id: string; Labels: Record<string, string>; State: string };
 
-/** The runtime, as far as a sweep reads and removes. */
 export type SweptRuntime = {
     listContainers: (options: {
         all: true;
@@ -40,14 +22,9 @@ export type SweptRuntime = {
     };
 };
 
-/** Whether the process an owner label names may still run. */
 export type OwnerAlive = (owner: string) => boolean;
 
-/**
- * Whether the `<host>:<pid>` an owner label names may still run: dead only
- * when it names this host and no process answers its pid. Another host's
- * process, or a label that names none, is never taken for dead.
- */
+/** Dead only when it names this host and no process answers its pid; another host's process is never taken for dead. */
 export function ownerAlive(
     owner: string,
     host: string = hostname(),
@@ -73,7 +50,6 @@ export function ownerAlive(
     }
 }
 
-/** The ids of the containers nothing will ever remove but a sweep. */
 export function orphans(containers: ListedContainer[], alive: OwnerAlive): string[] {
     const reaped = new Set(
         containers
@@ -103,10 +79,7 @@ export function orphans(containers: ListedContainer[], alive: OwnerAlive): strin
         .map((container) => container.Id);
 }
 
-/**
- * Remove every orphan the runtime holds, and answer their ids. A removal that
- * fails is skipped: a sweep never fails the run that asked for it.
- */
+/** A removal that fails is skipped: a sweep never fails the run. */
 export async function sweepOrphans(
     runtime: SweptRuntime,
     alive: OwnerAlive = ownerAlive,
