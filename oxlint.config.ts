@@ -1,18 +1,11 @@
 import { compose, defineConfig, node } from '@jterrazz/typescript/oxlint';
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
-// Self-lint with our own plugin (the tool-facing lint layer at the root, lint/),
-// Loaded from the built bundle. Node's TS type-stripping does not resolve
-// `.js` specifiers to `.ts` sources, so `npm run build` must precede lint.
+// Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: `npm run build` precedes lint.
 import { testing } from './dist/oxlint.js';
 import { FRAMEWORK_LAYERS, selfRules } from './dist/self-oxlint.js';
 
-/**
- * The published `testing` fragment wires the plugin by its package name; this
- * repository is that package, and lints itself from the bundle it just built —
- * plus the self plugin, the rules only this package is held to, which no
- * published fragment carries (docs/03 § The package's own rules).
- */
+// This repository is the package the fragment names, so it lints itself from the bundle it just built, plus the self plugin.
 const selfTesting = {
     ...testing,
     jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js'],
@@ -23,41 +16,27 @@ const config: OxlintConfig = defineConfig(
     compose(node, selfTesting, {
         overrides: [
             {
-                // The framework's own module tests unit-test the constructors —
-                // Creating a runner outside a *.specification.ts file is their
-                // Purpose.
+                // These module tests unit-test the constructors, which is creating a runner outside a specification.
                 files: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
                 rules: { 'jterrazz/a1-specification-file': 'off' },
             },
             {
-                // The vitest layer and the modules whose engine IS a test
-                // Package are the sanctioned runner coupling (I1) — their
-                // Imports are the framework's own seam, not prod leakage.
+                // The sanctioned runner coupling (I1): the modules whose engine is a test package.
                 files: [
                     'src/vitest/**',
-                    // Each facet's project, and the run lifecycle it owns.
                     'src/facets/*/*.project.ts',
                     'src/facets/api/routes/**',
                     'src/facets/cli/documents/literate-plugin.ts',
-                    // The run's driver session, its ledger and its Appium server
-                    // Are read by the runner (global setup, provided values).
                     'src/facets/mobile/session/mobile-session.ts',
                     'src/facets/mobile/session/session-ledger.ts',
                     'src/facets/mobile/server/appium-server.ts',
-                    // The page a component renders into, and the goldens it
-                    // Serves through the runner's commands.
                     'src/facets/component/page/**',
                     'src/facets/component/golden/**',
-                    // The browser the website facet drives: `playwright` is a
-                    // Test package to F2, and this adapter is its one importer.
                     'src/facets/website/browser/playwright.adapter.ts',
-                    // The network double's engine, time, and the doubles.
                     'src/world/stubs/network/**',
                     'src/world/clock/**',
                     'src/world/mocks/**',
-                    // The container server's address is a provided value.
                     'src/world/services/containers/service-container.ts',
-                    // A scratch directory ends with the test that asked for it.
                     'src/kernel/files/scratch.ts',
                     'src/expectations/goldens/**',
                     'src/expectations/in-place/**',
@@ -66,18 +45,9 @@ const config: OxlintConfig = defineConfig(
             },
         ],
         rules: {
-            // reason: `verbatimModuleSyntax` keeps the statement of an inline
-            // Type specifier — `import { type X } from 'm'` emits `import {}
-            // From 'm'`, a runtime edge, where `import type` is erased whole.
-            // The rulebook's default (`prefer-inline`) therefore turns every
-            // Type-only import into a real one, and a type-only cycle between
-            // two modules into a load-order crash. The rule stays ON, at the
-            // Spelling the compiler erases.
+            // reason: under `verbatimModuleSyntax` an inline type specifier still emits `import {} from 'm'`, a runtime edge, so a type-only cycle becomes a load-order crash; `import type` is erased whole.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-            // THIS package's architecture (CONVENTIONS I1), stated beside the
-            // Self rules (`lint/self-layers.ts`) and wired where the package
-            // Configures itself. The rule ships inert: an architecture is the
-            // Project's to declare, not the linter's to assume.
+            // The rule ships inert: an architecture is the project's to declare.
             'jterrazz/i1-layer-boundaries': ['error', { layers: FRAMEWORK_LAYERS }],
         },
     }),
