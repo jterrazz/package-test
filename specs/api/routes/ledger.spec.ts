@@ -13,12 +13,12 @@ function ledgersIn(directory: string): string[] {
         : [];
 }
 
-describe('the route ledger', () => {
+describe('ledger', () => {
     test("a specification's cleanup writes its declared routes and the requests it sent into the run's folder", async () => {
         // Given - an app declaring one route behind a middleware, and the folder the run provides
         const app = new Hono();
-        app.use(async (_context, next) => {
-            await next();
+        app.use(async (_context, proceed) => {
+            await proceed();
         });
         app.get('/ping', (context) => context.text('pong'));
         const directory = inject('routesLedger') ?? '';
