@@ -104,6 +104,43 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
             errors: [{ messageId: 'member' }, { messageId: 'option' }],
             filename: '/repo/src/facets/jobs/jobs.facet.ts',
         },
+        // A default parameter of `engines` runs whatever it is written with, before any adapter.
+        {
+            code: COMPOSED.replace(
+                'engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
+                'engines: ({ jobs = [3, 1].sort().map((x) => x * 2) } = {}) => ({ clock: processClock, jobs }),',
+            ),
+            errors: [{ messageId: 'engines' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // What `defineFacet` is handed before the facet runs when the module loads.
+        {
+            code: COMPOSED.replace(
+                'defineFacet<JobsSpecification>()(',
+                'defineFacet<JobsSpecification>([1, 2].reduce((a, b) => a + b, 0))(',
+            ),
+            errors: [{ messageId: 'defined' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // A computed key runs its expression: an option's, a row field's, a facet member's and an adapter's.
+        {
+            code: COMPOSED.replace(
+                "options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } }",
+                "options: { [String([1].map((x) => x + 1))]: { group: 'a', name: 'b', probe: 'c' }, root: { group: 'a', [String(1)]: 'b', probe: 'c' } }",
+            )
+                .replace(
+                    'locate: getCallerDir,',
+                    "[(() => { globalThis.x = 1; return 'locate'; })()]: getCallerDir,",
+                )
+                .replace('clock: processClock,', '[[1].map(String)[0]]: processClock,'),
+            errors: [
+                { messageId: 'option' },
+                { messageId: 'option' },
+                { messageId: 'adapter' },
+                { messageId: 'inline' },
+            ],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
         // The constructor running a definition's step, and building a result.
         {
             code: `${OPENS}\nexport function seeded(state, config) {\n    return seed.reduce([], state, { config, engines: {} });\n}\nexport const empty = new BaseResult({ config: {}, testDir: '' });\n`,

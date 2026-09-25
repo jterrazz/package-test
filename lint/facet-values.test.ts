@@ -1,0 +1,56 @@
+import { describe, expect, test } from 'vitest';
+
+import { parseProgram } from '../src/seams/oxc-parser/parse.js';
+import { child, childList, isNode } from './ast.js';
+import { isAdapter, isNamedKey, isRow } from './facet-values.js';
+import type { AstNode } from './rule-shape.js';
+
+/** The expression `const value = <expression>;` declares. */
+function expressionOf(expression: string): AstNode | undefined {
+    const program = parseProgram('value.ts', `const value = ${expression};`);
+    const [statement] = isNode(program) ? childList(program, 'body') : [];
+    return child(childList(statement, 'declarations')[0], 'init');
+}
+
+/** The properties of the object `expression` writes. */
+function propertiesOf(expression: string): AstNode[] {
+    return childList(expressionOf(expression), 'properties');
+}
+
+describe('facet values', () => {
+    test('a key is named when it is written as it is, never when it is computed', () => {
+        // Given - a bare key, a string key and a computed one
+        const keys = propertiesOf("{ root: 1, 'as-written': 2, [String(3)]: 3 }");
+
+        // Then - the computed key runs an expression
+        expect(keys.map(isNamedKey)).toStrictEqual([true, true, false]);
+    });
+
+    test('a matrix row is string literals under keys written as they are', () => {
+        // Given - a row of literals, one with a computed value, one with a computed key
+        const rows = [
+            "{ group: 'a', name: 'b' } as const",
+            "{ group: 'a', name: String('b') }",
+            "{ group: 'a', [String('name')]: 'b' }",
+        ];
+
+        // Then - a computed value or a computed key is no row
+        expect(rows.map((row) => isRow(expressionOf(row)))).toStrictEqual([true, false, false]);
+    });
+
+    test("an adapter is a plain value or a seam's constructor called on plain values", () => {
+        // Given - a seam's constructor and one that is not
+        const imports = new Map([
+            ['databaseSet', '../../seams/fs/database-set.js'],
+            ['seed', '../../capabilities/seed/seed.capability.js'],
+        ]);
+
+        // Then - only the seam's builds an adapter, and only on plain values
+        expect(isAdapter(expressionOf('databaseSet(config)'), imports)).toBe(true);
+        expect(isAdapter(expressionOf('config.jobs ?? []'), imports)).toBe(true);
+        expect(isAdapter(expressionOf('seed(config)'), imports)).toBe(false);
+        expect(isAdapter(expressionOf('databaseSet(config.list.map(String))'), imports)).toBe(
+            false,
+        );
+    });
+});

@@ -152,9 +152,13 @@ export const i6FacetIsComposition: LintRule = {
                     found: 'the constructor builds a `{{built}}`, a result',
                     fix: 'let the action the chain ends on construct what it hands back; the constructor opens the facet (`<facet>Facet.open(config)`)',
                 },
+                defined: {
+                    found: '`defineFacet` is handed a {{what}}, and it takes nothing but the chain type',
+                    fix: 'write `defineFacet<Chain>()({ … })`: the facet object carries everything the facet composes',
+                },
                 engines: {
                     found: "the facet's `engines` is not an arrow handing back the object of its adapters",
-                    fix: 'write `engines: (config) => ({ <port>: <adapter>, … })`; what builds an adapter is its seam',
+                    fix: 'write `engines: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its seam',
                 },
                 inline: {
                     found: "the facet's `{{key}}` is a {{what}} written in the facet, not a reference imported from its module",

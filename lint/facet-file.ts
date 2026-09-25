@@ -6,6 +6,7 @@ import {
     propertyKeyName,
     stringValue,
 } from './ast.js';
+import { isAdapter, isNamedKey, isReference, isRow, rootOf, unwrapped } from './facet-values.js';
 import type { AstNode } from './rule-shape.js';
 
 /**
@@ -18,7 +19,15 @@ import type { AstNode } from './rule-shape.js';
 /** One thing a facet file holds that it cannot, as the rule's message names it. */
 export type FacetFinding = {
     readonly data?: Record<string, string>;
-    readonly messageId: 'adapter' | 'engines' | 'inline' | 'listed' | 'member' | 'option' | 'stray';
+    readonly messageId:
+        | 'adapter'
+        | 'defined'
+        | 'engines'
+        | 'inline'
+        | 'listed'
+        | 'member'
+        | 'option'
+        | 'stray';
     readonly node: AstNode;
 };
 
@@ -31,15 +40,6 @@ export function layerOf(source: string): 'definition' | 'facet' | 'result' | und
         return 'facet';
     }
     return /(?:^|\/)results\//u.test(source) ? 'result' : undefined;
-}
-
-/** The expression under the `as const` and `satisfies` it is written with. */
-function unwrapped(node: AstNode | undefined): AstNode | undefined {
-    return node?.type === 'TSAsExpression' ||
-        node?.type === 'TSSatisfiesExpression' ||
-        node?.type === 'ParenthesizedExpression'
-        ? unwrapped(child(node, 'expression'))
-        : node;
 }
 
 /** The one declarator of a `const` statement, or `undefined` for any other statement. */
@@ -62,8 +62,11 @@ function compositionOf(statement: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** The object `defineFacet<…>()({ … })` is handed, when the statement exports one. */
-function definedFacet(statement: AstNode): AstNode | undefined {
+/** A `defineFacet<…>(…)({ … })`: what the definer is handed, and the facet object. */
+type DefinedFacet = { readonly facet: AstNode; readonly handed: AstNode[] };
+
+/** The `defineFacet<…>(…)({ … })` the statement exports, if it exports one. */
+function definedFacet(statement: AstNode): DefinedFacet | undefined {
     const init = child(constDeclarator(child(statement, 'declaration')), 'init');
     const inner = child(init, 'callee');
     const [facet] = childList(init, 'arguments');
@@ -71,7 +74,7 @@ function definedFacet(statement: AstNode): AstNode | undefined {
         inner?.type === 'CallExpression' &&
         identifierName(child(inner, 'callee')) === 'defineFacet' &&
         facet?.type === 'ObjectExpression'
-        ? facet
+        ? { facet, handed: childList(inner, 'arguments') }
         : undefined;
 }
 
@@ -82,11 +85,16 @@ function isChainType(statement: AstNode): boolean {
     return declared?.type === 'TSInterfaceDeclaration';
 }
 
-/** The object `engines: (config) => ({ … })` hands back, when it is written so. */
+/**
+ * The object `engines: (config) => ({ … })` hands back, when it is written
+ * so: an arrow whose every parameter is a bare name, typed or not.
+ */
 function adaptersOf(facet: AstNode): AstNode | undefined {
     const engines = child(findProperty(facet, 'engines'), 'value');
     const body = unwrapped(child(engines, 'body'));
-    return engines?.type === 'ArrowFunctionExpression' && body?.type === 'ObjectExpression'
+    return engines?.type === 'ArrowFunctionExpression' &&
+        childList(engines, 'params').every((parameter) => parameter.type === 'Identifier') &&
+        body?.type === 'ObjectExpression'
         ? body
         : undefined;
 }
@@ -124,63 +132,6 @@ export function importsOf(program: AstNode): Map<string, string> {
     return sources;
 }
 
-/** An identifier, or a property read off one — a name, never logic. */
-function isReference(node: AstNode | undefined): boolean {
-    const read = unwrapped(node);
-    return (
-        read?.type === 'Identifier' ||
-        (read?.type === 'MemberExpression' &&
-            (read.computed !== true || stringValue(child(read, 'property')) !== undefined) &&
-            isReference(child(read, 'object')))
-    );
-}
-
-/** The identifier a reference is read off: `config.jobs` → `config`. */
-function rootOf(node: AstNode | undefined): string | undefined {
-    const read = unwrapped(node);
-    return read?.type === 'MemberExpression' ? rootOf(child(read, 'object')) : identifierName(read);
-}
-
-/** A reference, a literal, a list of them, or one falling back to another (`config.jobs ?? []`). */
-function isPlainValue(node: AstNode | undefined): boolean {
-    const value = unwrapped(node);
-    return (
-        isReference(value) ||
-        value?.type === 'Literal' ||
-        (value?.type === 'ArrayExpression' && childList(value, 'elements').every(isPlainValue)) ||
-        (value?.type === 'LogicalExpression' &&
-            isPlainValue(child(value, 'left')) &&
-            isPlainValue(child(value, 'right')))
-    );
-}
-
-/** An adapter: a plain value, or a seam's constructor called (or `new`ed) on plain values. */
-function isAdapter(node: AstNode | undefined, imports: ReadonlyMap<string, string>): boolean {
-    const value = unwrapped(node);
-    if (value?.type !== 'CallExpression' && value?.type !== 'NewExpression') {
-        return isPlainValue(value);
-    }
-    const built = identifierName(child(value, 'callee'));
-    return (
-        built !== undefined &&
-        /(?:^|\/)seams\//u.test(imports.get(built) ?? '') &&
-        childList(value, 'arguments').every(isPlainValue)
-    );
-}
-
-/** Is the option a matrix row written as string literals alone? */
-function isRow(node: AstNode | undefined): boolean {
-    const row = unwrapped(node);
-    return (
-        row?.type === 'ObjectExpression' &&
-        childList(row, 'properties').every(
-            (field) =>
-                field.type === 'Property' &&
-                stringValue(unwrapped(child(field, 'value'))) !== undefined,
-        )
-    );
-}
-
 /** What a `capabilities` or `actions` list holds that is no definition imported by name. */
 function unlisted(member: AstNode, imports: ReadonlyMap<string, string>): FacetFinding[] {
     const key = propertyKeyName(member) ?? '…';
@@ -203,7 +154,9 @@ function unrowed(member: AstNode): FacetFinding[] {
     const value = unwrapped(child(member, 'value'));
     const options = value?.type === 'ObjectExpression' ? childList(value, 'properties') : [member];
     return options
-        .filter((option) => option === member || !isRow(child(option, 'value')))
+        .filter(
+            (option) => option === member || !isNamedKey(option) || !isRow(child(option, 'value')),
+        )
         .map((option) => ({
             data: { name: propertyKeyName(option) ?? '…' },
             messageId: 'option',
@@ -235,18 +188,27 @@ function isNamed(property: AstNode, imports: ReadonlyMap<string, string>): boole
     const value = child(property, 'value');
     return (
         propertyKeyName(property) === 'engines' ||
-        (isReference(value) && imports.has(rootOf(value) ?? ''))
+        (isNamedKey(property) && isReference(value) && imports.has(rootOf(value) ?? ''))
     );
 }
 
-/** What the object handed to `defineFacet` writes inline rather than names. */
-function facetFindings(facet: AstNode, imports: ReadonlyMap<string, string>): FacetFinding[] {
+/** What `defineFacet` is handed, and what the facet object writes inline rather than names. */
+function facetFindings(
+    defined: DefinedFacet,
+    imports: ReadonlyMap<string, string>,
+): FacetFinding[] {
+    const { facet } = defined;
+    const handed = defined.handed.map((argument) => ({
+        data: { what: kindOf(unwrapped(argument)) },
+        messageId: 'defined' as const,
+        node: argument,
+    }));
     const adapters = adaptersOf(facet);
     if (adapters === undefined) {
-        return [{ messageId: 'engines', node: facet }];
+        return [...handed, { messageId: 'engines', node: facet }];
     }
     const unwired = childList(adapters, 'properties')
-        .filter((adapter) => !isAdapter(child(adapter, 'value'), imports))
+        .filter((adapter) => !isNamedKey(adapter) || !isAdapter(child(adapter, 'value'), imports))
         .map((adapter) => ({
             data: {
                 port: propertyKeyName(adapter) ?? '…',
@@ -265,7 +227,7 @@ function facetFindings(facet: AstNode, imports: ReadonlyMap<string, string>): Fa
             messageId: 'inline' as const,
             node: property,
         }));
-    return [...unwired, ...inline];
+    return [...handed, ...unwired, ...inline];
 }
 
 /**
@@ -276,10 +238,10 @@ function facetFindings(facet: AstNode, imports: ReadonlyMap<string, string>): Fa
 export function facetFileFindings(program: AstNode): FacetFinding[] {
     const imports = importsOf(program);
     return childList(program, 'body').flatMap((statement): FacetFinding[] => {
-        const facet = definedFacet(statement);
+        const defined = definedFacet(statement);
         const composition = compositionOf(statement);
-        if (facet !== undefined) {
-            return facetFindings(facet, imports);
+        if (defined !== undefined) {
+            return facetFindings(defined, imports);
         }
         if (composition !== undefined) {
             return compositionFindings(composition, imports);
