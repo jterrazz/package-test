@@ -1,4 +1,5 @@
 import type { ActionOption, MatrixRow, Run } from './capability.js';
+import type { ChainConfig } from './config.js';
 
 /** Read a setup's slice by its definition — the one way an action sees what the chain was told. */
 export type SliceReader = <Slice>(capability: {
@@ -8,13 +9,16 @@ export type SliceReader = <Slice>(capability: {
 
 /**
  * A terminal action a chain ends on, defined once for every facet that
- * composes it. `Needs` names the engines it performs through, by port key.
+ * composes it. `Needs` names the engines it performs through, by port key;
+ * `Config` is the configuration it reads, declared by its owner over the
+ * kernel's `ChainConfig`.
  */
 export type Action<
     Name extends string,
     Args extends readonly unknown[],
     Result,
     Needs extends object = Record<never, never>,
+    Config extends ChainConfig = ChainConfig,
 > = {
     /** The rows of the result it hands back. */
     readonly accessors: readonly MatrixRow[];
@@ -37,7 +41,7 @@ export type Action<
         read: SliceReader,
     ): Promise<{ readonly workDir: null | string }> | { readonly workDir: null | string };
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
-    perform(args: Args, read: SliceReader, engines: Needs, run: Run): Promise<Result>;
+    perform(args: Args, read: SliceReader, engines: Needs, run: Run<Config>): Promise<Result>;
 };
 
 /** Any action, whatever it takes and hands back — what a composition lists. */
@@ -49,6 +53,9 @@ export function defineAction<
     const Args extends readonly unknown[],
     Result,
     Needs extends object = Record<never, never>,
->(definition: Omit<Action<Name, Args, Result, Needs>, 'kind'>): Action<Name, Args, Result, Needs> {
+    Config extends ChainConfig = ChainConfig,
+>(
+    definition: Omit<Action<Name, Args, Result, Needs, Config>, 'kind'>,
+): Action<Name, Args, Result, Needs, Config> {
     return { ...definition, kind: 'action' };
 }

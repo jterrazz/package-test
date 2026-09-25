@@ -1,11 +1,12 @@
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
 import { mobileServer, mobileSessions } from '../../vitest/provided.js';
 import { releaseIsolation, startServices } from '../../world/services/services.js';
 import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
+import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from './device/device.port.js';
 import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
@@ -15,6 +16,14 @@ import { sessionLedger } from './session/session-ledger.js';
 import { sameRuntime } from './session/simulator.js';
 
 // ── Types ──
+
+/** What `specification.mobile()` hands its chain: the device, the app it opens, and the stub backend. */
+export type MobileConfig = {
+    /** Bundle id of the app under test — the app `.open()` relaunches. */
+    bundleId?: string | undefined;
+    /** The device, lazily: the first `.open()` loads the optional peer and creates or joins the session. */
+    device?: (() => Promise<DevicePort>) | undefined;
+} & StubsConfig;
 
 /**
  * The declared stub backend behind the app under test. The framework owns
@@ -261,7 +270,7 @@ export async function startMobile<Services extends ServiceRecord>(
         return device;
     };
 
-    const config: StartedWith<'bundleId' | 'device'> = {
+    const config: Started<MobileConfig, 'bundleId' | 'device'> = {
         backend: backend ?? undefined,
         backendUrl,
         bundleId: options.app.bundleId,

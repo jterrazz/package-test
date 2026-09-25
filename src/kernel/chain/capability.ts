@@ -1,4 +1,4 @@
-import type { SpecificationConfig } from './config.js';
+import type { ChainConfig } from './config.js';
 
 /** The sections of the capability matrix a definition can state a row in. */
 type MatrixGroup =
@@ -40,9 +40,9 @@ export type Armed = {
     readonly violation?: () => Error | null;
 };
 
-/** Where one terminal action runs. */
-export type Run = {
-    readonly config: SpecificationConfig;
+/** Where one terminal action runs, over the configuration its facet's constructor built. */
+export type Run<Config extends ChainConfig = ChainConfig> = {
+    readonly config: Config;
     /** The directory the chain's relative paths start from. */
     readonly testDir: string;
     /** The scratch directory a command runs in; `null` for an action that runs none. */
@@ -50,8 +50,8 @@ export type Run = {
 };
 
 /** What a setup is handed beside its arguments. */
-export type SetupContext<Needs> = {
-    readonly config: SpecificationConfig;
+export type SetupContext<Needs, Config extends ChainConfig = ChainConfig> = {
+    readonly config: Config;
     readonly engines: Needs;
 };
 
@@ -61,7 +61,8 @@ export type SetupContext<Needs> = {
  * `Needs` names the engines it is armed through, by port key
  * (`{ network: InterceptPort }`); the facet hands them in, so a definition knows
  * its port and never an adapter. `Context` is the `with()` key a file states it
- * by, for the three settings a file may share.
+ * by, for the three settings a file may share. `Config` is the configuration
+ * it reads, declared by its owner over the kernel's `ChainConfig`.
  */
 export type Capability<
     Name extends string,
@@ -69,6 +70,7 @@ export type Capability<
     Args extends readonly unknown[],
     Needs extends object = Record<never, never>,
     Context extends ContextKey = never,
+    Config extends ChainConfig = ChainConfig,
 > = {
     /** The `with()` key this setup answers to. */
     readonly context?: Context;
@@ -83,10 +85,14 @@ export type Capability<
      * action reads the slice instead.
      */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and engines is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
-    arm?(slice: Slice, engines: Needs, run: Run): Armed | Promise<Armed | undefined> | undefined;
+    arm?(
+        slice: Slice,
+        engines: Needs,
+        run: Run<Config>,
+    ): Armed | Promise<Armed | undefined> | undefined;
     /** Validate the arguments and fold them into the slice, throwing the setup's refusal. */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and engines is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
-    reduce(slice: Slice, args: Args, setup: SetupContext<Needs>): Slice;
+    reduce(slice: Slice, args: Args, setup: SetupContext<Needs, Config>): Slice;
 };
 
 /** Any setup, whatever it holds — what a composition lists. */
@@ -109,8 +115,9 @@ export function defineCapability<
     const Args extends readonly unknown[],
     Needs extends object = Record<never, never>,
     const Context extends ContextKey = never,
+    Config extends ChainConfig = ChainConfig,
 >(
-    definition: Omit<Capability<Name, Slice, Args, Needs, Context>, 'kind'>,
-): Capability<Name, Slice, Args, Needs, Context> {
+    definition: Omit<Capability<Name, Slice, Args, Needs, Context, Config>, 'kind'>,
+): Capability<Name, Slice, Args, Needs, Context, Config> {
     return { ...definition, kind: 'setup' };
 }

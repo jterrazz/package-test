@@ -1,6 +1,6 @@
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { headers } from '../../kernel/context/headers.capability.js';
 import { sharing } from '../../kernel/context/with.capability.js';
@@ -11,7 +11,7 @@ import { databaseSet } from '../../world/services/seed/database-set.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import { mswNode } from '../../world/stubs/interceptor/msw-node.js';
-import type { ApiSpecificationOptions } from './api.handle.js';
+import type { ApiConfig, ApiSpecificationOptions } from './api.handle.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { del, get, post, put, request } from './request/request.action.js';
 
@@ -41,9 +41,9 @@ export interface ApiSpecification<DatabaseKey extends string = string> extends C
     ApiSpecification<DatabaseKey>
 > {}
 
-export const apiFacet = defineFacet<ApiSpecification, StartedWith<'server'>>()({
+export const apiFacet = defineFacet<ApiSpecification, Started<ApiConfig, 'server'>>()({
     ...composition,
-    engines: (config: StartedWith<'server'>) => ({
+    engines: (config: Started<ApiConfig, 'server'>) => ({
         clock: processClock,
         databases: databaseSet(config),
         network: mswNode,

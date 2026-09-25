@@ -11,9 +11,9 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import { safeRealpath } from '../../../kernel/files/resolve.js';
 import { ServeAdapter } from '../../../world/services/process/serve.adapter.js';
+import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fixtures.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
@@ -54,7 +54,7 @@ export type LiterateRunFlags = {
 export type LiterateRunOptions = {
     /** Env the chain already resolved: service URLs, docker run id, `.env()`. */
     baseEnv?: CliEnv | undefined;
-    config: SpecificationConfig;
+    config: CliConfig;
     /** The path failures name — as the reader would open it. */
     displayPath: string;
     /** Absolute path of the `.spec.yaml` file. */
@@ -300,7 +300,7 @@ function updates(outcomes: RunOutcome[], scope: CaptureScope) {
  */
 async function startServers(
     document: SpecDocument,
-    config: SpecificationConfig,
+    config: CliConfig,
     displayPath: string,
     workdir: string,
 ): Promise<{ env: CliEnv; stop: () => Promise<void> }> {
@@ -349,11 +349,7 @@ async function startServers(
 // ── Environment ──
 
 /** Resolve the document's `env:` entries against the registered sets. `$WORKDIR` expands. */
-function documentEnv(
-    document: SpecDocument,
-    config: SpecificationConfig,
-    displayPath: string,
-): CliEnv {
+function documentEnv(document: SpecDocument, config: CliConfig, displayPath: string): CliEnv {
     const sets = config.envSets ?? {};
     const env: CliEnv = {};
     for (const token of document.env) {

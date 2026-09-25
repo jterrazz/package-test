@@ -1,12 +1,12 @@
 import type { AnyAction } from './action.js';
 import type { AnyCapability, Armed } from './capability.js';
-import type { SpecificationConfig } from './config.js';
+import type { ChainConfig } from './config.js';
 import { readerOf } from './state.js';
 import type { ChainState } from './state.js';
 
 /** Where the action runs, and what the chain it closes was told. */
 export type Performed = {
-    readonly config: SpecificationConfig;
+    readonly config: ChainConfig;
     readonly engines: object;
     readonly state: ChainState;
     readonly testDir: string;

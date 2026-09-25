@@ -8,6 +8,7 @@ import type {
 import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { sharing } from '../../../kernel/context/with.capability.js';
+import type { WebsiteConfig } from '../website.handle.js';
 import { visit } from './visit.action.js';
 
 /** A page with nothing rendered — what a visit hands back when only its request matters. */
@@ -42,7 +43,7 @@ function chainOver(sent: BrowserOpenOptions['headers'][]): Chain {
             return await Promise.resolve(BLANK);
         },
     };
-    return defineFacet<Chain>()({
+    return defineFacet<Chain, WebsiteConfig>()({
         actions: [visit],
         capabilities: [headers, sharing],
         engines: () => ({ browser: async () => await Promise.resolve(browser) }),

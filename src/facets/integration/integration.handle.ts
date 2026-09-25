@@ -1,5 +1,5 @@
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
 import {
@@ -10,6 +10,7 @@ import {
 import type {
     DatabaseKeys,
     ServiceRecord,
+    ServicesConfig,
     StartedServices,
 } from '../../world/services/services.js';
 import type { IntegrationSpecification } from './integration.facet.js';
@@ -75,7 +76,7 @@ export async function startIntegration<Services extends ServiceRecord>(
         started = await startServices(services, root, { type: 'none' });
     }
 
-    const config: StartedWith<'services'> = {
+    const config: Started<ServicesConfig, 'services'> = {
         database: started?.database,
         databaseKeys,
         databases: started?.databases,

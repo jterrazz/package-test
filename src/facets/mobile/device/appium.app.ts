@@ -1,4 +1,5 @@
-import type { StartedWith } from '../../../kernel/chain/config.js';
+import type { Started } from '../../../kernel/chain/config.js';
+import type { MobileConfig } from '../mobile.handle.js';
 import type { DeviceScreen, MobileScenario } from './device.port.js';
 
 /**
@@ -6,7 +7,7 @@ import type { DeviceScreen, MobileScenario } from './device.port.js';
  * its constructor reaches — reached at the first open, never before, so a
  * file that opens nothing starts no driver session.
  */
-export function appiumApp({ bundleId, device }: StartedWith<'bundleId' | 'device'>): {
+export function appiumApp({ bundleId, device }: Started<MobileConfig, 'bundleId' | 'device'>): {
     readonly open: (
         deepLink: string | undefined,
         scenario: MobileScenario | undefined,

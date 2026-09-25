@@ -1,5 +1,4 @@
 import { refusal } from '../refusals/refusal.js';
-import type { SpecificationConfig } from './config.js';
 
 /**
  * Enforce CONVENTIONS A7: with two or more databases in the services record
@@ -10,7 +9,7 @@ import type { SpecificationConfig } from './config.js';
  */
 export function validateDatabaseOption(
     method: string,
-    config: SpecificationConfig,
+    config: { readonly databaseKeys?: readonly string[] | undefined },
     database: string | undefined,
 ): void {
     const keys = config.databaseKeys;

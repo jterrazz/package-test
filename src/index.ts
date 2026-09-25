@@ -69,12 +69,10 @@ export type { MobileSpecification } from './facets/mobile/mobile.facet.js';
 export type { WebsiteSpecification } from './facets/website/website.facet.js';
 export type { ChainContext } from './kernel/context/with.capability.js';
 export type { SeedSource } from './world/services/seed/seed.capability.js';
-export type {
-    DockerSpecConfig,
-    Job,
-    LiterateServeRegistration,
-    SpecificationConfig,
-} from './kernel/chain/config.js';
+export type { DockerSpecConfig } from './expectations/command/cli.result.js';
+export type { Job } from './facets/job/job.handle.js';
+export type { LiterateServeRegistration } from './facets/cli/cli.handle.js';
+export type { SpecificationConfig } from './facets/specification.js';
 
 // Results that read a disk, a database or a container — node only.
 //

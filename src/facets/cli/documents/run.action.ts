@@ -7,6 +7,7 @@ import { resolveSpecPath, safeRealpath } from '../../../kernel/files/resolve.js'
 import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
+import type { CliConfig } from '../cli.handle.js';
 import { env as chainEnv, childEnv } from '../process/env.capability.js';
 import { runSpecDocument } from './literate.js';
 import type { LiterateRunFlags } from './literate.js';
@@ -21,7 +22,9 @@ import type { LiterateRunFlags } from './literate.js';
 export const run = defineAction<
     'run',
     [document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags],
-    CliResult
+    CliResult,
+    Record<never, never>,
+    CliConfig
 >({
     accessors: CLI_RESULT_ROWS,
     name: 'run',

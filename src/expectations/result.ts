@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { SpecificationConfig } from '../kernel/chain/config.js';
+import type { ChainConfig } from '../kernel/chain/config.js';
 import { validateDatabaseOption } from '../kernel/chain/database-option.js';
 import { safeRealpath } from '../kernel/files/resolve.js';
 import { DirectoryAccessor } from './disk/directory.js';
@@ -19,8 +19,24 @@ export type FileAccessor = {
     grep: (pattern: string) => TextAccessor;
 };
 
+/**
+ * What a result reads of the configuration its chain was opened over: the
+ * databases a `.table()` queries, which of them the services record declares
+ * (CONVENTIONS A7), and how a captured stream is normalised.
+ */
+export type ResultConfig = ChainConfig & {
+    database?: TableSource | undefined;
+    databaseKeys?: readonly string[] | undefined;
+    databases?: ReadonlyMap<string, TableSource> | undefined;
+    /**
+     * Optional normaliser applied to a captured stream before every
+     * comparison, and read by `.text`; `.raw` keeps the capture.
+     */
+    transform?: ((text: string) => string) | undefined;
+};
+
 export type BaseResultOptions = {
-    config: SpecificationConfig;
+    config: ResultConfig;
     testDir: string;
     workDir?: string | undefined;
 };
@@ -35,7 +51,7 @@ export type BaseResultOptions = {
 export class BaseResult {
     /** @internal Ref-capture scope shared by every assertion on this result. */
     readonly captures: CaptureScope;
-    protected config: SpecificationConfig;
+    protected config: ResultConfig;
     protected testDir: string;
     protected workDir?: string | undefined;
 

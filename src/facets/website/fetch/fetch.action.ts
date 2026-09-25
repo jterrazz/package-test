@@ -1,6 +1,7 @@
 import { defineAction } from '../../../kernel/chain/action.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
+import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
 
 /**
@@ -8,7 +9,13 @@ import { FetchResult } from './fetch.result.js';
  * are never followed, a 308 IS the result. It opens no page, so a chain that
  * pinned a page's clock is refused before anything is armed.
  */
-export const rawFetch = defineAction<'fetch', [path: string], FetchResult>({
+export const rawFetch = defineAction<
+    'fetch',
+    [path: string],
+    FetchResult,
+    Record<never, never>,
+    WebsiteConfig
+>({
     accessors: [
         { group: 'Result accessor', name: '.status', probe: 'result.status' },
         { group: 'Result accessor', name: '.body', probe: 'result.body' },

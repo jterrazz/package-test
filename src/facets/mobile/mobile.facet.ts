@@ -1,12 +1,12 @@
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { stubBackend } from '../../world/stubs/backend/stub-backend.engine.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import { appiumApp } from './device/appium.app.js';
-import type { MobileSpecificationOptions } from './mobile.handle.js';
+import type { MobileConfig, MobileSpecificationOptions } from './mobile.handle.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { open } from './screen/open.action.js';
 
@@ -37,9 +37,12 @@ export interface MobileSpecification extends ChainOf<
     MobileSpecification
 > {}
 
-export const mobileFacet = defineFacet<MobileSpecification, StartedWith<'bundleId' | 'device'>>()({
+export const mobileFacet = defineFacet<
+    MobileSpecification,
+    Started<MobileConfig, 'bundleId' | 'device'>
+>()({
     ...composition,
-    engines: (config: StartedWith<'bundleId' | 'device'>) => ({
+    engines: (config: Started<MobileConfig, 'bundleId' | 'device'>) => ({
         app: appiumApp(config),
         network: stubBackend(config.backend, 'mobile'),
     }),

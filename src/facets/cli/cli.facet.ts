@@ -1,12 +1,12 @@
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { sharing } from '../../kernel/context/with.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { databaseSet } from '../../world/services/seed/database-set.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
-import type { CliSpecificationOptions } from './cli.handle.js';
+import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
 import { run } from './documents/run.action.js';
 import { fixture } from './fixture/fixture.capability.js';
 import { fsFixtures } from './fixture/fixtures.js';
@@ -46,9 +46,9 @@ export interface CliSpecification<DatabaseKey extends string = string> extends C
     CliSpecification<DatabaseKey>
 > {}
 
-export const cliFacet = defineFacet<CliSpecification, StartedWith<'command'>>()({
+export const cliFacet = defineFacet<CliSpecification, Started<CliConfig, 'command'>>()({
     ...composition,
-    engines: (config: StartedWith<'command'>) => ({
+    engines: (config: Started<CliConfig, 'command'>) => ({
         command: config.command,
         databases: databaseSet(config),
         workdir: fsFixtures,

@@ -2,6 +2,7 @@ import { defineCapability } from '../../../kernel/chain/capability.js';
 import { validateDatabaseOption } from '../../../kernel/chain/database-option.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
+import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';
 
 /** What `.seed()` takes: a `.sql` file, never the statements themselves — SQL is not written in a test. */
@@ -26,7 +27,9 @@ export const seed = defineCapability<
     'seed',
     readonly QueuedSeed[],
     [source: SeedSource, options?: { database?: string }],
-    { databases: SeedPort }
+    { databases: SeedPort },
+    never,
+    ServicesConfig
 >({
     arm: async (queued, { databases }, { testDir }) => {
         await databases.reset();

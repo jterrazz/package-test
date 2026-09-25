@@ -2,7 +2,8 @@ import { randomUUID } from 'node:crypto';
 
 import type { BrowserPort } from '../../elements/browser.port.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { ResultConfig } from '../../expectations/result.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
 import { ProcessHandle } from '../../world/services/process/process.js';
@@ -12,6 +13,7 @@ import type { ServiceRecord, StartedServices } from '../../world/services/servic
 import { releaseIsolation, startServices } from '../../world/services/services.js';
 import type { AppInfo } from '../../world/services/startup/startup-report.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
+import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
 import type { WebsiteSpecification } from './website.facet.js';
 import { websiteFacet } from './website.facet.js';
 
@@ -52,6 +54,19 @@ function resolveServer<Services extends ServiceRecord>(
 }
 
 // ── Types ──
+
+/** What `specification.website()` hands its chain: the site, the browser that visits it, and the stub backend it talks to. */
+export type WebsiteConfig = Pick<ResultConfig, 'transform'> &
+    StubsConfig & {
+        /** Base URL of the website under test. */
+        baseUrl?: string | undefined;
+        /**
+         * Lazy browser accessor. The first `.visit()` launches the shared
+         * browser instance; `.fetch()`-only spec files never pay the browser
+         * cost.
+         */
+        browser?: (() => Promise<BrowserPort>) | undefined;
+    };
 
 /**
  * The declared stub backend behind the site under test — started before the
@@ -275,7 +290,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         return browser;
     };
 
-    const config: StartedWith<'browser'> = {
+    const config: Started<WebsiteConfig, 'browser'> = {
         backend: backend ?? undefined,
         backendUrl,
         baseUrl,

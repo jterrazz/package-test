@@ -1,7 +1,7 @@
 import type { MatrixRow } from '../../kernel/chain/capability.js';
-import type { DockerSpecConfig, SpecificationConfig } from '../../kernel/chain/config.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
 import { BaseResult } from '../result.js';
+import type { ResultConfig } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { ContainerAccessor } from './container.js';
@@ -17,6 +17,18 @@ export type CliOutput = {
     stdout: string;
     /** Captured standard error. */
     stderr: string;
+};
+
+/**
+ * Configuration for the docker-aware cli mode. When set on a cli
+ * specification, the runner generates a test-run id, injects it into the
+ * child env under `envVar`, then queries Docker for every container carrying
+ * `testRunLabel=<id>` after the command exits.
+ */
+export type DockerSpecConfig = {
+    envVar: string;
+    nameLabel: string;
+    testRunLabel: string;
 };
 
 /** What a command's result publishes, as the capability matrix rows it states — `.exec()`'s and `.run()`'s alike. */
@@ -66,7 +78,7 @@ export class CliResult extends BaseResult {
 
     constructor(options: {
         commandOutput: CliOutput;
-        config: SpecificationConfig;
+        config: ResultConfig;
         dockerConfig?: DockerSpecConfig | undefined;
         testDir: string;
         testRunId?: string | undefined;

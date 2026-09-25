@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
 import { defineAction } from '../../../kernel/chain/action.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import { directory, file } from '../../../kernel/files/spec-path.js';
 import type { DatabasePort } from '../database.port.js';
+import type { ServicesConfig } from '../services.js';
 import { seed } from './seed.capability.js';
 import type { SeedMethod } from './seed.capability.js';
 import type { SeedPort } from './seed.port.js';
@@ -36,7 +36,7 @@ function logging(log: string[], name: string): DatabasePort {
 }
 
 /** A chain over two logged databases, reading every seed file as its own path. */
-function chainOver(log: string[], config: SpecificationConfig): Chain {
+function chainOver(log: string[], config: ServicesConfig): Chain {
     const databases: SeedPort = {
         read: (path, testDir) => `${testDir}/${path}`,
         reset: async () => {

@@ -1,14 +1,14 @@
 import { BaseResult } from '../../../expectations/result.js';
+import type { ResultConfig } from '../../../expectations/result.js';
 import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import type { DeviceScreen } from '../device/device.port.js';
 
 /** Result from a `.open()` action — the screen as the device saw it, final state. */
 export class ScreenResult extends BaseResult {
     private readonly capturedScreen: DeviceScreen;
 
-    constructor(options: { config: SpecificationConfig; screen: DeviceScreen; testDir: string }) {
+    constructor(options: { config: ResultConfig; screen: DeviceScreen; testDir: string }) {
         super(options);
         this.capturedScreen = options.screen;
     }

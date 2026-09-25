@@ -4,10 +4,10 @@ import type {
     BrowserPage,
 } from '../../../elements/browser.port.js';
 import { BaseResult } from '../../../expectations/result.js';
+import type { ResultConfig } from '../../../expectations/result.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 
 /**
  * The head summary snapshotted by `expect(result.head).toMatch('home.head.json')`
@@ -24,7 +24,7 @@ type HeadSummary = {
 export class PageResult extends BaseResult {
     private readonly page: BrowserPage;
 
-    constructor(options: { config: SpecificationConfig; page: BrowserPage; testDir: string }) {
+    constructor(options: { config: ResultConfig; page: BrowserPage; testDir: string }) {
         super(options);
         this.page = options.page;
     }

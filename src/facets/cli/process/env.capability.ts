@@ -1,7 +1,7 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import type { ServiceHandle } from '../../../world/services/service.port.js';
 import { toConstantCase } from '../../../world/services/startup/binding.js';
+import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv } from './cli.port.js';
 
 /** `.env(record)`, handing back the chain it was called on. */
@@ -78,11 +78,7 @@ function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefine
  * `workdir` is the child's directory in its resolved form, as
  * {@link expandWorkdir} writes it.
  */
-export function childEnv(
-    config: SpecificationConfig,
-    chained: CliEnv,
-    workdir: string,
-): CliEnv | undefined {
+export function childEnv(config: CliConfig, chained: CliEnv, workdir: string): CliEnv | undefined {
     const declared = config.defaultEnv;
     const services =
         config.services === undefined || Object.keys(config.services).length === 0

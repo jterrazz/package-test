@@ -1,7 +1,7 @@
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
 import { routesLedger } from '../../vitest/provided.js';
@@ -10,13 +10,17 @@ import {
     releaseIsolation,
     startServices,
 } from '../../world/services/services.js';
-import type { DatabaseKeys, ServiceRecord } from '../../world/services/services.js';
+import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
 import { writeLedger } from './routes/routes.js';
 import { HonoAdapter } from './server/hono.adapter.js';
+import type { ServerPort } from './server/server.port.js';
 
 // ── Types ──
+
+/** What `specification.api()` hands its chain: the services record, and the app a request is sent to. */
+export type ApiConfig = ServicesConfig & { server?: ServerPort | undefined };
 
 /** Any object with a request method compatible with Hono's app.request(). */
 export type HonoApp = {
@@ -84,7 +88,7 @@ export async function startApi<Services extends ServiceRecord>(
     const app = options.server(services);
     const server = new HonoAdapter(app);
 
-    const config: StartedWith<'server'> = {
+    const config: Started<ApiConfig, 'server'> = {
         database,
         databaseKeys,
         databases,

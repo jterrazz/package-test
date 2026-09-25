@@ -1,15 +1,15 @@
 import { readFileSync } from 'node:fs';
 
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 import { resolveSpecPath } from '../../../kernel/files/resolve.js';
 import type { DatabasePort } from '../database.port.js';
+import type { ServicesConfig } from '../services.js';
 
 /**
  * The databases a constructor declared, as a chain seeds them: every one
  * emptied, a seed file read from the test's directory, and the database a seed
  * names looked up — the only one when it names none.
  */
-export function databaseSet(config: SpecificationConfig): {
+export function databaseSet(config: ServicesConfig): {
     readonly read: (path: string, testDir: string) => string;
     readonly reset: () => Promise<void>;
     readonly target: (database: string | undefined) => DatabasePort;

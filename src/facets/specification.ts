@@ -1,9 +1,21 @@
 import { startApi } from './api/api.handle.js';
+import type { ApiConfig } from './api/api.handle.js';
 import { startCli } from './cli/cli.handle.js';
+import type { CliConfig } from './cli/cli.handle.js';
 import { startIntegration } from './integration/integration.handle.js';
 import { startJob } from './job/job.handle.js';
+import type { JobConfig } from './job/job.handle.js';
 import { startMobile } from './mobile/mobile.handle.js';
+import type { MobileConfig } from './mobile/mobile.handle.js';
 import { startWebsite } from './website/website.handle.js';
+import type { WebsiteConfig } from './website/website.handle.js';
+
+/**
+ * Adapter configuration passed to the specification facets at setup time:
+ * every facet's own, as one — each field declared by the facet or the world
+ * area whose engine reads it.
+ */
+export type SpecificationConfig = ApiConfig & CliConfig & JobConfig & MobileConfig & WebsiteConfig;
 
 /**
  * The six specification constructors (CONVENTIONS A2) — created in a

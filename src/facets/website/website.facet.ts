@@ -1,6 +1,6 @@
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { StartedWith } from '../../kernel/chain/config.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { headers } from '../../kernel/context/headers.capability.js';
 import { sharing } from '../../kernel/context/with.capability.js';
@@ -12,7 +12,7 @@ import { pageClock } from './browser/page-clock.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { rawFetch } from './fetch/fetch.action.js';
 import { visit } from './visit/visit.action.js';
-import type { WebsiteSpecificationOptions } from './website.handle.js';
+import type { WebsiteConfig, WebsiteSpecificationOptions } from './website.handle.js';
 
 const composition = {
     actions: [visit, rawFetch],
@@ -42,9 +42,9 @@ export interface WebsiteSpecification extends ChainOf<
     WebsiteSpecification
 > {}
 
-export const websiteFacet = defineFacet<WebsiteSpecification, StartedWith<'browser'>>()({
+export const websiteFacet = defineFacet<WebsiteSpecification, Started<WebsiteConfig, 'browser'>>()({
     ...composition,
-    engines: (config: StartedWith<'browser'>) => ({
+    engines: (config: Started<WebsiteConfig, 'browser'>) => ({
         browser: config.browser,
         clock: pageClock,
         network: stubBackend(config.backend, 'website'),

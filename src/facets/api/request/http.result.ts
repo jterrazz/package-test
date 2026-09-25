@@ -1,17 +1,13 @@
 import { ResponseAccessor } from '../../../expectations/http/response.js';
 import { BaseResult } from '../../../expectations/result.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
+import type { ResultConfig } from '../../../expectations/result.js';
 import type { ServerResponse } from '../server/server.port.js';
 
 /** Result from an HTTP action (.request(), .get(), .post(), .put(), .delete()). */
 export class HttpResult extends BaseResult {
     private readonly responseData: ServerResponse;
 
-    constructor(options: {
-        config: SpecificationConfig;
-        response: ServerResponse;
-        testDir: string;
-    }) {
+    constructor(options: { config: ResultConfig; response: ServerResponse; testDir: string }) {
         super(options);
         this.responseData = options.response;
     }

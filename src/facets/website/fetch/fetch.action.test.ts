@@ -7,6 +7,7 @@ import type { StubRequest, StubResponse } from '../../../world/stubs/exchange/ex
 import { http } from '../../../world/stubs/http/http.js';
 import { interceptThrough } from '../../../world/stubs/intercept/intercept.scope.js';
 import { registerStubs, stopStubServer } from '../../../world/stubs/interceptor/server.js';
+import type { WebsiteConfig } from '../website.handle.js';
 import { rawFetch } from './fetch.action.js';
 import type { FetchResult } from './fetch.result.js';
 
@@ -36,7 +37,7 @@ type Chain = {
 
 /** A chain against the site at `http://site.test`, over a clock engine that logs every pin. */
 function chainOver(pinned: (null | string)[]): Chain {
-    return defineFacet<Chain>()({
+    return defineFacet<Chain, WebsiteConfig>()({
         actions: [rawFetch],
         capabilities: [clock, headers],
         engines: () => ({

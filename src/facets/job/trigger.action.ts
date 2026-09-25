@@ -1,6 +1,6 @@
 import { BaseResult } from '../../expectations/result.js';
 import { defineAction } from '../../kernel/chain/action.js';
-import type { Job } from '../../kernel/chain/config.js';
+import type { Job } from './job.handle.js';
 
 /** The jobs a chain may trigger — the `jobs` option of `specification.job()`, as started. */
 export type JobsPort = readonly Job[];

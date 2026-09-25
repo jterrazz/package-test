@@ -1,6 +1,6 @@
 import type { FacetParams, MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { SpecificationConfig } from '../../kernel/chain/config.js';
+import type { ChainConfig } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import type { FacetProjectOptions } from '../../vitest/facet-project.js';
 import { clock } from '../../world/clock/clock.capability.js';
@@ -63,7 +63,7 @@ export interface ComponentChain extends ChainOf<typeof composition, FacetParams,
  */
 export const componentFacet = defineFacet<ComponentChain>()({
     ...composition,
-    engines: (_config: SpecificationConfig) => ({
+    engines: (_config: ChainConfig) => ({
         clock: pageClock,
         network: mswWorker(afterThisTest),
         page: vitestBrowserPage,

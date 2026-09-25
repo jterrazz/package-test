@@ -24,6 +24,7 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
+import type { ChainConfig } from '../../../kernel/chain/config.js';
 import { isStreamBody } from '../exchange/exchange.js';
 import type { MatchableRequest } from '../exchange/exchange.js';
 import { StubQueue } from '../exchange/queue.js';
@@ -38,6 +39,26 @@ type StubBackendOptions = {
      */
     port?: number | undefined;
 };
+
+/** What a constructor that declares a stub backend hands its chain. */
+export type StubsConfig = {
+    /**
+     * The declared stub backend (website/mobile facets) — armed with the
+     * chain's stubs before every terminal action.
+     */
+    backend?: StubBackend | undefined;
+    /**
+     * Base URL of the running stub backend — allow-listed through the
+     * browser's `external: 'block'` policy so client-side fetches reach it.
+     */
+    backendUrl?: string | undefined;
+    /**
+     * Cross-origin request policy for visits (website facet only): `'block'`
+     * aborts requests leaving the site under test — the browser-side analog
+     * of strict intercepts.
+     */
+    external?: 'allow' | 'block' | undefined;
+} & ChainConfig;
 
 /** One unmatched request family recorded during a chain. */
 type UnmatchedStubRequest = {

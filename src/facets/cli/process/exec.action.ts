@@ -2,6 +2,7 @@ import { CLI_RESULT_ROWS, CliResult } from '../../../expectations/command/cli.re
 import { defineAction } from '../../../kernel/chain/action.js';
 import { safeRealpath } from '../../../kernel/files/resolve.js';
 import { scratchDirectory } from '../../../kernel/files/scratch.js';
+import type { CliConfig } from '../cli.handle.js';
 import type { CliOutput, CliPort, ExecOptions } from './cli.port.js';
 import { env as chainEnv, childEnv } from './env.capability.js';
 
@@ -16,7 +17,8 @@ export const exec = defineAction<
     'exec',
     [args?: string | string[], options?: ExecOptions],
     CliResult,
-    { command: CliPort }
+    { command: CliPort },
+    CliConfig
 >({
     accessors: CLI_RESULT_ROWS,
     name: 'exec',

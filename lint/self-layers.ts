@@ -54,7 +54,6 @@ export const FRAMEWORK_LAYERS = {
         // The commit that moves its type to its owner.
         seams: {
             'kernel/chain/action-signatures.ts': ['facets/', 'elements/', 'expectations/'],
-            'kernel/chain/config.ts': ['world/', 'elements/', 'facets/'],
             'kernel/chain/setup-signatures.ts': ['world/', 'facets/'],
         },
     },

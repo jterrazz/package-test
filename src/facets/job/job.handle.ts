@@ -1,5 +1,4 @@
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { Job, SpecificationConfig } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
 import {
@@ -10,6 +9,7 @@ import {
 import type {
     DatabaseKeys,
     ServiceRecord,
+    ServicesConfig,
     StartedServices,
 } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
@@ -17,6 +17,15 @@ import type { JobSpecification } from './job.facet.js';
 import { jobFacet } from './job.facet.js';
 
 // ── Types ──
+
+/** A named job that can be triggered via job.trigger(). */
+export type Job = {
+    name: string;
+    execute: () => Promise<void>;
+};
+
+/** What `specification.job()` hands its chain: the services record, and the jobs `.trigger()` runs. */
+export type JobConfig = ServicesConfig & { jobs?: Job[] | undefined };
 
 /** Options for {@link startJob | specification.job}. */
 export type JobSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
@@ -66,7 +75,7 @@ export async function startJob<Services extends ServiceRecord>(
 
     const jobHandles = typeof options.jobs === 'function' ? options.jobs(services) : options.jobs;
 
-    const config: SpecificationConfig = {
+    const config: JobConfig = {
         database: started?.database,
         databaseKeys,
         databases: started?.databases,

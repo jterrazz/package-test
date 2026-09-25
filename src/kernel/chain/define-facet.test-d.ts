@@ -1,7 +1,6 @@
-import type { ServerPort } from '../../facets/api/server/server.port.js';
 import type { Action } from './action.js';
 import type { Capability } from './capability.js';
-import type { StartedWith } from './config.js';
+import type { ChainConfig, Started } from './config.js';
 import { defineFacet } from './define-facet.js';
 
 /**
@@ -31,14 +30,17 @@ export const inventive = defineFacet<Noted & { label: () => Noted }>()(
     { ...composition, ...wiring },
 );
 
+/** A configuration that may carry a server, as a facet's owner declares one. */
+type Served = ChainConfig & { server?: undefined | { readonly url: string } };
+
 /** A facet armed through the server its constructor starts. */
-const served = defineFacet<Noted, StartedWith<'server'>>()({
+const served = defineFacet<Noted, Started<Served, 'server'>>()({
     ...composition,
-    engines: (config: StartedWith<'server'>) => ({ server: config.server }),
+    engines: (config: Started<Served, 'server'>) => ({ server: config.server }),
     locate: () => '/specs',
 });
 
-declare const server: ServerPort;
+declare const server: { readonly url: string };
 
 export const openedOnItsServer = served.open({ server });
 

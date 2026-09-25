@@ -11,6 +11,7 @@ import {
 import { defineAction } from '../../../kernel/chain/action.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
+import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';
 
 /** The worker's one browser, launched on the first visit that asks for it. */
@@ -26,7 +27,8 @@ export const visit = defineAction<
     'visit',
     [path: string, scenario?: VisitScenario],
     PageResult,
-    Needs
+    Needs,
+    WebsiteConfig
 >({
     accessors: [
         { group: 'Result accessor', name: '.status', probe: 'result.status' },

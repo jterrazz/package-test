@@ -7,7 +7,7 @@ import type {
     SetupContext,
     Sharing,
 } from './capability.js';
-import type { SpecificationConfig } from './config.js';
+import type { ChainConfig } from './config.js';
 import { perform } from './perform.js';
 import { applied, EMPTY_STATE } from './state.js';
 import type { ChainState } from './state.js';
@@ -53,7 +53,7 @@ type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberName
     : { readonly onTheChainButNotComposed: Exclude<keyof Self, MemberNames<C>> };
 
 /** What a facet adds to its composition: the engines it arms, and where its paths start. */
-type Wiring<C extends Composition, Config extends SpecificationConfig> = {
+type Wiring<C extends Composition, Config extends ChainConfig> = {
     /**
      * The adapters the constructor's configuration starts, one per port key —
      * its parameter typed as written: a parameter left to context makes the
@@ -65,18 +65,18 @@ type Wiring<C extends Composition, Config extends SpecificationConfig> = {
 };
 
 /** A facet, ready to open a chain over the configuration its constructor built. */
-type Facet<Self, Config extends SpecificationConfig> = {
+type Facet<Self, Config extends ChainConfig> = {
     readonly composition: Composition;
     readonly open: (config: Config) => Self;
 };
 
 /** The definer `defineFacet<Self, Config>()` hands back. */
-type FacetDefiner<Self, Config extends SpecificationConfig> = <const C extends Composition>(
+type FacetDefiner<Self, Config extends ChainConfig> = <const C extends Composition>(
     facet: C & SameMembers<Self, C> & Wiring<C, Config>,
 ) => Facet<Self, Config>;
 
 /** A composition and where its paths start, as the chain reads them at run time. */
-type Wired = Composition & Pick<Wiring<Composition, SpecificationConfig>, 'locate'>;
+type Wired = Composition & Pick<Wiring<Composition, ChainConfig>, 'locate'>;
 
 /** The one setup `with()` folds each contextual setup's value through. */
 function shared(
@@ -140,13 +140,13 @@ function chainOf(
  * Define a facet by what it composes. `Self` is the chain type the facet
  * publishes, computed from the same composition; the compiler refuses a
  * composition that names other members than it. `Config` is the
- * configuration it opens over — `StartedWith<…>` the engines its constructor
+ * configuration it opens over — `Started<…>` the engines its constructor
  * must start, so a facet opened without one does not compile.
  */
-export function defineFacet<
+export function defineFacet<Self, Config extends ChainConfig = ChainConfig>(): FacetDefiner<
     Self,
-    Config extends SpecificationConfig = SpecificationConfig,
->(): FacetDefiner<Self, Config> {
+    Config
+> {
     return (facet) => ({
         composition: facet,
         open: (config) =>

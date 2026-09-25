@@ -1,11 +1,9 @@
+import type { DockerSpecConfig } from '../../expectations/command/cli.result.js';
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type {
-    DockerSpecConfig,
-    LiterateServeRegistration,
-    StartedWith,
-} from '../../kernel/chain/config.js';
+import type { ResultConfig } from '../../expectations/result.js';
+import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveCommand, resolveRoot } from '../../kernel/files/resolve.js';
 import {
@@ -16,15 +14,64 @@ import {
 import type {
     DatabaseKeys,
     ServiceRecord,
+    ServicesConfig,
     StartedServices,
 } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
 import type { CliSpecification } from './cli.facet.js';
 import { cliFacet } from './cli.facet.js';
-import type { CliEnv } from './process/cli.port.js';
+import type { CliEnv, CliPort } from './process/cli.port.js';
 import { ExecAdapter } from './process/exec.adapter.js';
 
 // ── Types ──
+
+/**
+ * A server a document may start by name (`serve: mcp`), registered once per app
+ * in the `serve` option of `specification.cli()`.
+ */
+export type LiterateServeRegistration = {
+    /** Shell command that starts the server, run from the project root. */
+    command: string;
+    /** The variable the resolved URL is bound to in every run's child env. */
+    env: string;
+    /**
+     * Matched against the server's output; the FIRST capture group is the port
+     * it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
+     */
+    ready: RegExp;
+    /** Builds the URL bound to `env` from the announced port. */
+    url: (port: number) => string;
+};
+
+/** What `specification.cli()` hands its chain. */
+export type CliConfig = {
+    command?: CliPort | undefined;
+    /**
+     * Environment applied to every run of the declared binary
+     * (`specification.cli({ defaults })`) — under a chain's own `.env()` and
+     * under a document's `env:`, both of which win.
+     */
+    defaultEnv?: CliEnv | undefined;
+    dockerConfig?: DockerSpecConfig | undefined;
+    /**
+     * Unique id shared by every spec from this runner instance.
+     * Stable for the runner's lifetime so multi-step tests (spawn in
+     * one run, inspect in another) see the same container scope. The
+     * facet factories auto-populate this when `dockerConfig` is present.
+     */
+    dockerTestRunId?: string | undefined;
+    /**
+     * Named environment SETS a spec document may name by bare word
+     * (`env: frozen`). Declared once per app in `specification.cli()`.
+     */
+    envSets?: Record<string, CliEnv> | undefined;
+    /**
+     * Named servers a spec document may start (`serve: [mcp]`). Declared once
+     * per app in `specification.cli()`.
+     */
+    serveRegistry?: Record<string, LiterateServeRegistration> | undefined;
+} & Pick<ResultConfig, 'transform'> &
+    ServicesConfig;
 
 /** Options for {@link startCli | specification.cli}. */
 export type CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
@@ -140,7 +187,7 @@ export async function startCli<Services extends ServiceRecord>(
         started = await startServices(services, root, { type: 'none' });
     }
 
-    const config: StartedWith<'command'> = {
+    const config: Started<CliConfig, 'command'> = {
         command: new ExecAdapter(resolvedBin),
         database: started?.database,
         databaseKeys,

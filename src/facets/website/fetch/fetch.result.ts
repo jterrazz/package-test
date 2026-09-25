@@ -1,7 +1,7 @@
 import { BaseResult } from '../../../expectations/result.js';
+import type { ResultConfig } from '../../../expectations/result.js';
 import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
-import type { SpecificationConfig } from '../../../kernel/chain/config.js';
 
 /** A raw HTTP exchange captured by `.fetch()` — redirects are NOT followed. */
 export type FetchExchange = {
@@ -14,11 +14,7 @@ export type FetchExchange = {
 export class FetchResult extends BaseResult {
     private readonly exchange: FetchExchange;
 
-    constructor(options: {
-        config: SpecificationConfig;
-        exchange: FetchExchange;
-        testDir: string;
-    }) {
+    constructor(options: { config: ResultConfig; exchange: FetchExchange; testDir: string }) {
         super(options);
         this.exchange = options.exchange;
     }
