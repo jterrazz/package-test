@@ -1,42 +1,9 @@
-import type { ComponentScenario, RenderSubject } from '../../actions/render/scenario.js';
-import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
-import type { RenderResult } from '../../results/render.result.js';
-import type { ComponentUi } from '../../seams/vitest-browser/ui.js';
-
 /**
- * The component facet's shape, stated where BOTH runtimes can read it.
+ * The component chain's name, where BOTH runtimes can read it.
  *
  * The page gets the working chain; node gets a stub under the same name and
  * the same type, so a component test that ran in the wrong project fails on
  * the line that rendered rather than on a missing export. The published types
- * are the node build's, so this file is the one description of the facet.
+ * are the node build's, and the type is the composition's (`component.facet.ts`).
  */
-
-/**
- * The chain. Every setup returns a new one, so the handle a spec imports never
- * carries the previous test's contracts, wrapper or clock.
- */
-export type ComponentChain = {
-    /** Pin the page's `Date` for this render — the clock the component reads. */
-    clock: (iso: string) => ComponentChain;
-    /**
-     * Declare what the network replies — the same contracts, the same queue
-     * and the same strictness as every other facet (D7), served by msw's
-     * worker instead of its node interceptor.
-     */
-    intercept: InterceptMethod<ComponentChain>;
-    /** Mount the subject, run the scenario, and capture what the page shows. */
-    render: (subject: RenderSubject, scenario?: ComponentScenario) => Promise<RenderResult>;
-    /**
-     * The page size THIS render gets — the Given of a component that reads
-     * `matchMedia` or a container query. The project's size is restored when
-     * the test ends, so a narrow render never leaks into the next one.
-     */
-    viewport: (size: { height: number; width: number }) => ComponentChain;
-    /**
-     * Wrap every render of this chain — the test-local Given a router stub or
-     * a `<StrictMode>` is. The project's own `wrap` stays outermost: it is the
-     * app's frame, and one test does not get to sit outside it.
-     */
-    wrap: (wrapper: (ui: ComponentUi) => ComponentUi) => ComponentChain;
-};
+export type { ComponentChain } from './component.facet.js';

@@ -57,8 +57,8 @@ export const FRAMEWORK_LAYERS = {
     // A terminal action a chain ends on, one folder per action. The index of
     // Their signatures names every one of them. A document run starts the
     // Servers it names and lays its fixtures through the process and
-    // Filesystem seams; the types a render scenario is handed are the page
-    // Seam's.
+    // Filesystem seams; the types a render scenario is handed, and the
+    // Surface the page port mounts, are the page seam's.
     actions: {
         folders: {
             call: [],
@@ -73,6 +73,7 @@ export const FRAMEWORK_LAYERS = {
         },
         imports: ['model/', 'results/', 'capabilities/', 'stubs/', 'runner/update'],
         seams: {
+            'actions/render/page.port.ts': ['seams/vitest-browser/'],
             'actions/render/scenario.ts': ['seams/vitest-browser/'],
             'actions/run/literate.ts': ['seams/fs/', 'seams/process/'],
             'actions/signatures.ts': ['actions/'],
@@ -120,19 +121,19 @@ export const FRAMEWORK_LAYERS = {
             // A facet's composition names the adapters its engines are.
             'facets/api/api.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
             'facets/cli/cli.facet.ts': ['seams/fs/', 'seams/process/'],
-            'facets/component/component.facet.ts': ['seams/msw/', 'seams/vitest-browser/'],
+            // The component's constructor is its project: the composition
+            // States a matrix row per option the project takes.
+            'facets/component/component.facet.ts': [
+                'runner/projects/component.project',
+                'seams/msw/',
+                'seams/vitest-browser/',
+            ],
             'facets/integration/integration.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
             'facets/jobs/jobs.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
             'facets/mobile/mobile.facet.ts': ['seams/stub-backend/', 'seams/appium/'],
             'facets/website/website.facet.ts': ['seams/stub-backend/', 'seams/playwright/'],
             'facets/api/api.handle.ts': ['seams/docker/', 'seams/hono/'],
             'facets/cli/cli.handle.ts': ['seams/docker/', 'seams/process/'],
-            // The component model reaches its two seams and never the runner:
-            // "after this test", "pin the clock" and "what did the project
-            // Provide" are asked of `seams/vitest-browser/`, which owns the
-            // `vitest` import the way `src/runner/` owns the config side.
-            'facets/component/component.chain.ts': ['seams/msw/', 'seams/vitest-browser/'],
-            'facets/component/component.shape.ts': ['seams/vitest-browser/'],
             'facets/mobile/mobile.handle.ts': [
                 'seams/appium/',
                 'seams/simctl/',

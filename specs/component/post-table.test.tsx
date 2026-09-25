@@ -86,6 +86,17 @@ test('fails the render when a component with no contract at all reaches the netw
     await expect(render).rejects.toThrow(/\/api\/posts/u);
 });
 
+test('reports the undeclared request, not the scenario it made fail', async () => {
+    // Given - no contract, and a scenario that gives up once the table could not load
+    const render = component.render(<PostTable />, async (visitor) => {
+        await visitor.see(content('Could not load posts'));
+        throw new Error('the scenario expected rows');
+    });
+
+    // Then - the cause is what the render reports: the request no contract declared
+    await expect(render).rejects.toThrow(/\/api\/posts/u);
+});
+
 test('serves a transport failure the way a server that is not running does', async () => {
     // Given - the collection declared unreachable rather than answering a status
     const offline = defineContract({

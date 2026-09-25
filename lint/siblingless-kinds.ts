@@ -50,9 +50,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/capabilities/intercept/intercept.port.ts',
             'src/capabilities/seed/seed.port.ts',
             'src/capabilities/signatures.ts',
-            'src/capabilities/viewport/viewport.capability.ts',
             'src/capabilities/viewport/viewport.port.ts',
-            'src/capabilities/wrap/wrap.capability.ts',
             'src/facets/chain.ts',
             'src/model/chain/config.ts',
             'src/model/ports/browser.port.ts',
@@ -89,7 +87,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
         name: 'the facet file set, as a re-export',
-        why: 'each names the chain its constructor hands out rather than implementing it — a composition (`jobs`, `api`, `website`, `integration`, `cli`, `mobile`) — and the facet specs and `facet-matrix.test.ts` hold the thing they name',
+        why: 'each names the chain its constructor hands out rather than implementing it — a composition (`jobs`, `api`, `website`, `integration`, `cli`, `mobile`, `component`) — and the facet specs and `facet-matrix.test.ts` hold the thing they name',
     },
     {
         claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),
@@ -103,6 +101,8 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'src/actions/render/console-recorder.ts',
+            'src/actions/render/render.action.ts',
             'src/actions/run/literate.ts',
             'src/facets/api/api.facet.ts',
             'src/facets/api/api.handle.ts',
@@ -158,6 +158,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/seams/vitest-browser/clock.engine.ts',
             'src/seams/vitest-browser/commands.ts',
             'src/seams/vitest-browser/golden.ts',
+            'src/seams/vitest-browser/page.engine.ts',
             'src/seams/vitest-browser/page-runtime.ts',
             'src/seams/vitest-browser/ui.ts',
             'src/seams/vitest-browser/vitest-browser.adapter.ts',

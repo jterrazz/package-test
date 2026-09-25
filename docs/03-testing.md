@@ -258,7 +258,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.fixture()`   | —   | —    | 27  | —           | —       | —      | —         | —      |
 | `.env()`       | —   | —    | 3   | —           | —       | —      | —         | —      |
 | `.wrap()`      | —   | —    | —   | —           | —       | —      | 2         | —      |
-| `.viewport()`  | —   | —    | —   | —           | —       | —      | 1         | —      |
+| `.viewport()`  | —   | —    | —   | —           | —       | —      | 2         | —      |
 
 ### Terminal action
 
@@ -276,7 +276,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —    | —   | —           | —       | 7      | —         | —      |
-| `.render()`  | —   | —    | —   | —           | —       | —      | 21        | —      |
+| `.render()`  | —   | —    | —   | —           | —       | —      | 22        | —      |
 
 ### Route option
 
@@ -288,7 +288,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability | api | jobs | cli | integration | website | mobile | component | module |
 | ---------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —    | —   | —           | 11      | 6      | 19        | —      |
+| `see`      | —   | —    | —   | —           | 11      | 6      | 20        | —      |
 | `fill`     | —   | —    | —   | —           | 4       | 1      | 2         | —      |
 | `click`    | —   | —    | —   | —           | 3       | —      | 8         | —      |
 | `gone`     | —   | —    | —   | —           | 3       | —      | 6         | —      |
@@ -307,7 +307,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | --------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
 | `button`        | —   | —    | —   | —           | 4       | 3      | 8         | —      |
 | `field`         | —   | —    | —   | —           | 6       | 1      | 5         | —      |
-| `content`       | —   | —    | —   | —           | 7       | 6      | 13        | —      |
+| `content`       | —   | —    | —   | —           | 7       | 6      | 14        | —      |
 | `testId`        | —   | —    | —   | —           | 1       | 1      | 1         | —      |
 | `heading`       | —   | —    | —   | —           | 3       | —      | 2         | —      |
 | `link`          | —   | —    | —   | —           | 3       | —      | 3         | —      |
@@ -350,7 +350,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.value`        | —   | —    | —   | 8           | —       | —      | —         | —      |
 | `.error`        | —   | —    | —   | 5           | —       | —      | —         | —      |
 | `.tree`         | —   | —    | —   | —           | 5       | —      | 4         | —      |
-| `.content`      | —   | —    | —   | —           | 9       | 5      | 14        | —      |
+| `.content`      | —   | —    | —   | —           | 9       | 5      | 15        | —      |
 | `.console`      | —   | —    | —   | —           | 4       | —      | 4         | —      |
 | `.errors`       | —   | —    | —   | —           | 8       | —      | 8         | —      |
 | `.html`         | —   | —    | —   | —           | 2       | —      | 5         | —      |

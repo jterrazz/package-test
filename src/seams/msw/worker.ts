@@ -10,6 +10,7 @@
  * before `onUnhandledRequest` ever runs — an extension test would let a real
  * `/api/posts.json` through on the same ground.
  */
+import type { Armed } from '../../model/chain/capability.js';
 import type { Contract } from '../../stubs/contract.js';
 import { buildContractHandlers } from './handlers.js';
 import type { ContractRegistration } from './handlers.js';
@@ -89,4 +90,26 @@ export function resetWorkerContracts(): void {
     if (workerInstance !== null) {
         workerInstance.resetHandlers();
     }
+}
+
+/**
+ * The network of the PAGE, as a chain arms it: every render registers its
+ * contracts — none at all included, strictness is total here — and the page
+ * drops them when the test ends, handed the runner's "after this test"
+ * because a mounted component keeps fetching after its render resolves.
+ */
+export function mswWorker(atTestEnd: (teardown: () => void) => void): {
+    readonly accepts: () => void;
+    readonly arm: (contracts: readonly Contract[]) => Promise<Armed>;
+} {
+    return {
+        accepts: () => {
+            // Every chain of a page may declare contracts: the worker serves them all.
+        },
+        arm: async (contracts) => {
+            const registration = await registerWorkerContracts(contracts);
+            atTestEnd(resetWorkerContracts);
+            return { violation: registration.violation };
+        },
+    };
 }
