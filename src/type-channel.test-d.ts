@@ -1,6 +1,7 @@
 /* oxlint-disable jterrazz/a1-specification-file, jterrazz/a2-known-constructors, jterrazz/d2-await-io-matcher, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, marked with the `@ts-expect-error` that is the assertion: a refused call has no type, so the type-aware rules see `any` where the point is that there is nothing at all, and a refused golden is typed as the overload it failed, never awaited. The `specification.api()` calls are the same thing for A1: this file constructs no runner, it states what a construction may not say. The retired `specification.jobs` row is the same thing for A2: the compiler refuses it before the rule would. It imports vitest's `expect` because the D14 rows are about the matcher augmentation. */
 import { expect } from 'vitest';
 
+import type { ComponentChain, ComponentVisitor } from './facets/component/index.js';
 import type { MobileVisitor } from './facets/mobile/index.js';
 import type { Visitor } from './facets/website/index.js';
 import { directory, file, mockOf, postgres, specification } from './index.js';
@@ -15,9 +16,8 @@ import { directory, file, mockOf, postgres, specification } from './index.js';
  * starts compiling, which is exactly the day the convention stopped holding.
  *
  * The file is a `*.test-d.ts`: it declares no test, runs in no project, and is
- * judged by the typechecker the whole repository already runs. The W6 verb rows
- * have a fuller set of their own in `src/elements/verb-rows.test-d.ts`; one
- * row is restated here so the channel has a single entry point.
+ * judged by the typechecker the whole repository already runs, W6's verb rows
+ * included: each visitor and chain is read through its facet's face.
  *
  * W4 (an ARIA landmark handed to a mobile verb) is deliberately NOT here: the
  * two facets share one `ElementRef` on purpose, so the refusal is the runtime
@@ -34,9 +34,42 @@ type Assert<Row extends true> = Row;
 type Carries<Verbs, Verb extends string> = Verb extends keyof Verbs ? true : false;
 
 // W6 — the verb set is the boundary between the facets: a page is navigated,
-// A screen is tapped, and neither vocabulary borrows the other's word.
+// A screen is tapped, and neither vocabulary borrows the other's word. `goto`
+// Is the page's alone: a component has no address to navigate to.
 export type WebsiteGoes = Assert<Carries<Visitor, 'goto'>>;
 export type MobileNeverGoes = Assert<Carries<MobileVisitor, 'goto'> extends false ? true : false>;
+export type ComponentNeverGoes = Assert<
+    Carries<ComponentVisitor, 'goto'> extends false ? true : false
+>;
+
+// `rerender` and `unmount` are what a PARENT does to a component: swap its
+// Props, take it off the screen. Neither is anything a visitor does to a page.
+export type ComponentRerenders = Assert<Carries<ComponentVisitor, 'rerender'>>;
+export type ComponentUnmounts = Assert<Carries<ComponentVisitor, 'unmount'>>;
+export type WebsiteNeverRerenders = Assert<
+    Carries<Visitor, 'rerender'> extends false ? true : false
+>;
+export type WebsiteNeverUnmounts = Assert<Carries<Visitor, 'unmount'> extends false ? true : false>;
+export type MobileNeverRerenders = Assert<
+    Carries<MobileVisitor, 'rerender'> extends false ? true : false
+>;
+
+// `gone` is on both rendered facets — the absence primitive `see` cannot
+// State — and never on a simulator's visitor: the four states of a control are
+// Modifiers of the ONE descriptor type every facet shares, so the boundary is
+// The VERB set, not the ref.
+export type WebsiteSeesAbsence = Assert<Carries<Visitor, 'gone'>>;
+export type ComponentSeesAbsence = Assert<Carries<ComponentVisitor, 'gone'>>;
+export type MobileNeverAsksAboutAbsence = Assert<
+    Carries<MobileVisitor, 'gone'> extends false ? true : false
+>;
+
+// The setups a component test states per render. The page size is one of them:
+// A responsive component's Given is the viewport, and it belongs to ONE test.
+export type ComponentSetsViewport = Assert<Carries<ComponentChain, 'viewport'>>;
+export type ComponentSetsClock = Assert<Carries<ComponentChain, 'clock'>>;
+export type ComponentIntercepts = Assert<Carries<ComponentChain, 'intercept'>>;
+export type ComponentWraps = Assert<Carries<ComponentChain, 'wrap'>>;
 
 /** Every row of the channel, as one function the compiler reads. */
 export async function typeRows(): Promise<void> {
