@@ -2,20 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { ComponentVisitor } from '../src/actions/render/scenario.js';
 import type { RouteOptionsAny } from '../src/capabilities/params/route.js';
-import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
-import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
-import type { ComponentChain } from '../src/facets/component/component.shape.js';
-import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
-import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.handle.js';
-import type { WebsiteSpecificationOptions } from '../src/facets/website/website.handle.js';
-import type {
-    ApiSpecification,
-    CliSpecification,
-    IntegrationSpecification,
-    JobsResult,
-    MobileSpecification,
-    WebsiteSpecification,
-} from '../src/index.js';
+import type { JobsResult } from '../src/index.js';
 // oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
 import * as elements from '../src/model/elements/elements.js';
 import type { Visitor } from '../src/model/ports/browser.port.js';
@@ -27,38 +14,33 @@ import type { HttpResult } from '../src/results/http.result.js';
 import type { PageResult } from '../src/results/page.result.js';
 import type { RenderResult } from '../src/results/render.result.js';
 import type { ScreenResult } from '../src/results/screen.result.js';
-import type { ComponentProjectOptions } from '../src/runner/projects/component.project.js';
-import { CAPABILITIES, COLUMNS, memberOf, methodsByRole } from './facet-matrix.js';
-import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
+import { CAPABILITIES, COLUMNS, memberOf } from './facet-matrix.js';
+import type { CapabilityGroup, Column } from './facet-matrix.js';
 import { capabilities } from './matrix.js';
 
 /**
- * Meta-test (K1 guard) — the capability declaration IS the facet surfaces.
+ * Meta-test (K1 guard) — the rows of the capability matrix ARE the surfaces.
  *
- * The matrix and chapter 03's table are one projection of `CAPABILITIES`, and
- * a reader writes tests from the chapter. So a
- * row that names a member no interface has publishes a method that does not
- * exist (`result.json` on an api result once did), and a member with no row
- * hides one that does (`.clock()` and `.headers()` on website did).
+ * A reader writes tests from chapter 03's table. So a row that names a member
+ * no interface has publishes a method that does not exist (`result.json` on
+ * an api result once did), and a member with no row hides one that does
+ * (`.clock()` and `.headers()` on website did).
  *
- * Every record below re-encodes what one interface publishes and is pinned to
- * its real `keyof` with `satisfies`, which forces exhaustiveness in BOTH
- * directions on the object literal:
- *   - add a member to a facet interface → the record is MISSING a key      → the build fails;
- *   - remove or rename one              → the record has an EXTRANEOUS key → the build fails.
+ * A composition pins most of its rows itself: `defineFacet` refuses a
+ * composition naming other members than its chain, its options are pinned to
+ * the constructor's `keyof` where they are composed, and every definition
+ * states the row of its own member (`self/compositions.test.ts`). What a
+ * composition cannot pin is what an action states about something else — the
+ * result it hands back, the visitor it hands a scenario, the element
+ * vocabulary, the options a route takes — so every record below re-encodes
+ * one of those interfaces and is pinned to its real `keyof` with `satisfies`,
+ * which forces exhaustiveness in BOTH directions on the object literal:
+ *   - add a member to the interface → the record is MISSING a key      → the build fails;
+ *   - remove or rename one          → the record has an EXTRANEOUS key → the build fails.
  * A key's value is `true` when the matrix publishes it as a row, and the
  * SENTENCE saying why not when it does not. The runtime tests then hold the
- * declaration equal to the union of those records, column by column — so the
- * compiler catches a surface change and the suite catches a matrix that did
- * not follow it.
- *
- * Types are erased at runtime, which is exactly why both halves are needed.
- *
- * A facet written as a composition carries both halves itself: `defineFacet`
- * refuses a composition naming other members than its chain, its options are
- * pinned to the constructor's `keyof` where they are composed, and every
- * definition states the row of its own member (`self/compositions.test.ts`).
- * Its chain and its options have no record here.
+ * rows equal to those records, column by column — so the compiler catches a
+ * surface change and the suite catches rows that did not follow it.
  */
 
 /** The seven columns that are a facet — every column but the module test. */
@@ -71,18 +53,6 @@ const FACET_COLUMNS = [
     'mobile',
     'website',
 ] as const satisfies readonly Exclude<Column, 'module'>[];
-
-/** The entries of a record kept per facet column, in column order. */
-function byColumn<Value>(
-    record: Partial<Record<(typeof FACET_COLUMNS)[number], Value>>,
-): [(typeof FACET_COLUMNS)[number], Value][] {
-    return FACET_COLUMNS.flatMap((column) => {
-        const value = record[column];
-        const entry: [(typeof FACET_COLUMNS)[number], Value][] =
-            value === undefined ? [] : [[column, value]];
-        return entry;
-    });
-}
 
 /** A member the matrix publishes, or the reason it does not. */
 type Published = string | true;
@@ -112,153 +82,11 @@ const INTERNAL = 'an @internal scope the engine uses to resolve `{{type#ref}}` c
 /** Not a row on a surface that leaves no working directory behind. */
 const NO_DISK = 'inherited from BaseResult; this kind leaves no working directory to read';
 
-// ── The chains: which method is a setup, which is the one terminal action ──
-
-const apiChain = {
-    clock: 'setup',
-    headers: 'setup',
-    intercept: 'setup',
-    seed: 'setup',
-
-    delete: 'action',
-    get: 'action',
-    post: 'action',
-    put: 'action',
-    request: 'action',
-    with: 'setup',
-} satisfies Record<keyof ApiSpecification, FacetRole>;
-
-const integrationChain = {
-    clock: 'setup',
-    intercept: 'setup',
-    seed: 'setup',
-
-    call: 'action',
-    with: 'setup',
-} satisfies Record<keyof IntegrationSpecification, FacetRole>;
-
-const cliChain = {
-    env: 'setup',
-    fixture: 'setup',
-    seed: 'setup',
-
-    exec: 'action',
-    run: 'action',
-    with: 'setup',
-} satisfies Record<keyof CliSpecification, FacetRole>;
-
-const websiteChain = {
-    clock: 'setup',
-    headers: 'setup',
-    intercept: 'setup',
-
-    fetch: 'action',
-    visit: 'action',
-    with: 'setup',
-} satisfies Record<keyof WebsiteSpecification, FacetRole>;
-
-const mobileChain = {
-    intercept: 'setup',
-
-    open: 'action',
-} satisfies Record<keyof MobileSpecification, FacetRole>;
-
-const componentChain = {
-    clock: 'setup',
-    intercept: 'setup',
-    viewport: 'setup',
-    wrap: 'setup',
-
-    render: 'action',
-} satisfies Record<keyof ComponentChain, FacetRole>;
-
-/** The chain of every facet not yet written as a composition. */
-const CHAINS: Partial<Record<Exclude<Column, 'module'>, Record<string, FacetRole>>> = {
-    api: apiChain,
-    cli: cliChain,
-    component: componentChain,
-    integration: integrationChain,
-    mobile: mobileChain,
-    website: websiteChain,
-};
-
-// ── The constructor options (component's are the PROJECT's) ──
-
 /** What an api action is handed beside its route's template. */
 const routeOptions = { params: true } satisfies Record<
     KeysOf<NonNullable<RouteOptionsAny>>,
     Published
 >;
-
-const apiOptions = {
-    root: true,
-    server: true,
-    services: true,
-} satisfies Record<KeysOf<ApiSpecificationOptions>, Published>;
-
-const cliOptions = {
-    commands: true,
-    defaults: true,
-    docker: true,
-    env: true,
-    root: true,
-    serve: true,
-    services: true,
-    transform: true,
-} satisfies Record<KeysOf<CliSpecificationOptions>, Published>;
-
-const integrationOptions = {
-    root: true,
-    services: true,
-} satisfies Record<KeysOf<IntegrationSpecificationOptions>, Published>;
-
-const websiteOptions = {
-    backend: true,
-    external: true,
-    root: true,
-    server: true,
-    services: true,
-    transform: true,
-    url: true,
-} satisfies Record<KeysOf<WebsiteSpecificationOptions>, Published>;
-
-const mobileOptions = {
-    app: true,
-    appium: true,
-    backend: true,
-    device: true,
-    root: true,
-    services: true,
-    timeouts: true,
-} satisfies Record<KeysOf<MobileSpecificationOptions>, Published>;
-
-/** A knob every facet project takes, not a capability of one kind. */
-const PROJECT_KNOB =
-    'a `FacetProjectOptions` knob every facet project takes — [02 § vitest.config] owns them';
-
-const componentOptions = {
-    clock: true,
-    exclude: PROJECT_KNOB,
-    include: PROJECT_KNOB,
-    serial: PROJECT_KNOB,
-    timeout: PROJECT_KNOB,
-    locale: true,
-    root: true,
-    timezone: true,
-    viewport: true,
-    vite: true,
-    wrap: true,
-} satisfies Record<KeysOf<ComponentProjectOptions>, Published>;
-
-/** The options of every facet not yet written as a composition. */
-const OPTIONS: Partial<Record<Exclude<Column, 'module'>, Record<string, Published>>> = {
-    api: apiOptions,
-    cli: cliOptions,
-    component: componentOptions,
-    integration: integrationOptions,
-    mobile: mobileOptions,
-    website: websiteOptions,
-};
 
 // ── The results: what a terminal action hands back ──
 
@@ -406,29 +234,6 @@ const MOBILE_DESCRIPTORS: Record<MobileElementKind, string> = {
 };
 
 describe('facet capability declaration (K1 guard)', () => {
-    test('each chain declares exactly the setups and terminal actions it has', () => {
-        // Given - every chain, pinned to its own `keyof`
-        // Then - the declaration names the same members, per column
-        for (const [column, chain] of byColumn(CHAINS)) {
-            expect(declared(column, 'Setup'), `${column} setups`).toStrictEqual(
-                methodsByRole(chain, 'setup'),
-            );
-            expect(declared(column, 'Terminal action'), `${column} actions`).toStrictEqual(
-                methodsByRole(chain, 'action'),
-            );
-        }
-    });
-
-    test('each kind declares exactly the options its constructor takes', () => {
-        // Given - every options bag, pinned to its own `keyof`
-        // Then - the declaration names the same options, per column
-        for (const [column, options] of byColumn(OPTIONS)) {
-            expect(declared(column, 'Constructor option'), `${column} options`).toStrictEqual(
-                published(options),
-            );
-        }
-    });
-
     test('the api declares exactly the options a route action takes', () => {
         // Given - the options `.get()`, `.post()`, `.put()` and `.delete()` take, pinned to their own `keyof`
         // Then - the declaration names the same options

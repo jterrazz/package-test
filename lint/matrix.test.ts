@@ -3,9 +3,6 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../src/model/chain/spec-path.js';
-import { registerMatchers } from '../src/model/goldens/matchers.js';
-import { text } from '../src/results/text-subject.js';
 import { COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
@@ -206,23 +203,5 @@ describe('the capability folders — the vocabulary a spec of a specimen is file
             true,
             false,
         ]);
-    });
-});
-
-describe('the capability folders of every facet — the vocabulary the facet migration keeps', () => {
-    test('each facet column names exactly the recorded folders', async () => {
-        // Given - the folders C35 accepts under each facet, read from the matrix
-        await registerMatchers();
-        const vocabulary = COLUMNS.filter((column) => column !== 'module').map((column) =>
-            [
-                `${column}:`,
-                ...[...capabilityFolders(column)].toSorted().map((name) => `    ${name}`),
-            ].join('\n'),
-        );
-
-        // Then - a folder that appears or disappears while the facets are recomposed is a change of the vocabulary
-        expect(text(`${vocabulary.join('\n\n')}\n`)).toMatch(
-            file('./expected/matrix-vocabulary.txt'),
-        );
     });
 });

@@ -12,15 +12,12 @@ import type { Column } from '../facet-matrix.js';
 type MatrixRow = Composition['options'][string];
 
 /**
- * The facets that are a composition, by matrix column — what the capability
- * matrix reads a facet's rows from. A self module: it imports the facets
+ * Every facet's composition, by matrix column — what the capability matrix
+ * reads a facet's rows from. A self module: it imports the facets
  * themselves, so only the package's own tooling (the matrix, C35, the
  * meta-tests) loads it, never what a consumer installs.
- *
- * A facet column listed here states its rows through its composition; one
- * absent still reads them from the hand rows of `facet-matrix.ts`.
  */
-export const COMPOSITIONS: Partial<Record<Exclude<Column, 'module'>, Composition>> = {
+export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
     api: apiFacet.composition,
     cli: cliFacet.composition,
     component: componentFacet.composition,
@@ -29,11 +26,6 @@ export const COMPOSITIONS: Partial<Record<Exclude<Column, 'module'>, Composition
     mobile: mobileFacet.composition,
     website: websiteFacet.composition,
 };
-
-/** Is the column a facet listed as a composition? */
-export function isComposed(column: Column): boolean {
-    return column !== 'module' && COMPOSITIONS[column] !== undefined;
-}
 
 /** Every row one action states: itself, its options, its visitor, its result. */
 function actionRows(action: Composition['actions'][number]): MatrixRow[] {

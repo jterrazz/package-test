@@ -8,7 +8,7 @@ import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
 import { META_LAYER_ROOTS } from './meta-tests.js';
 import type { AstNode } from './rule-shape.js';
-import { composedRows, COMPOSITIONS, isComposed } from './self/compositions.js';
+import { composedRows, COMPOSITIONS } from './self/compositions.js';
 
 /**
  * The capability matrix — what the package proves about itself, per facet.
@@ -24,9 +24,8 @@ import { composedRows, COMPOSITIONS, isComposed } from './self/compositions.js';
  *
  * The rows come from four places and are authored in none: the facet
  * compositions (`self/compositions.ts`) — each facet's rows stated by the
- * definitions it composes — the hand rows of `facet-matrix.ts` for a facet
- * not yet composed and for what the engines own (goldens, doubles), the
- * `{{token}}` list the runner and the checker already share, and — for the
+ * definitions it composes — the rows of `facet-matrix.ts` for what the
+ * engines own (goldens, doubles), the `{{token}}` list the runner and the checker already share, and — for the
  * count — a static scan of the trees each column owns. `npm run docs` writes the table into `docs/03-testing.md`
  * between markers; `matrix.test.ts` refuses an empty declared cell.
  *
@@ -243,31 +242,24 @@ export type MatrixRow = {
 const TOKENS_ARE_THE_ENGINES =
     'the engine owns the family (proven in the module column); a facet uses the ones its goldens need';
 
-/** The groups a facet states about itself; the others are the engines'. */
-const FACET_GROUPS = new Set<CapabilityGroup>([
+/** The order the groups a facet states about itself are published in. */
+const FACET_GROUPS: readonly CapabilityGroup[] = [
     'Constructor option',
-    'Descriptor',
-    'Result accessor',
-    'Route option',
     'Setup',
     'Terminal action',
+    'Route option',
     'Verb',
-]);
+    'Descriptor',
+    'Result accessor',
+];
 
 /**
- * The declared rows: a composed column's facet rows are its composition's,
- * every other column's the hand rows'. A hand row keeps its place when a
- * composition states it too, so the table reads in one order whichever side
- * states a cell; a row a composition alone states closes its group.
+ * The declared rows: every facet's are its composition's, gathered column by
+ * column so a row two facets state is one row, then the rows the engines own
+ * (goldens, doubles).
  */
 function declaredCapabilities(): Capability[] {
     const rows: Capability[] = [];
-    for (const capability of CAPABILITIES) {
-        const columns = capability.columns.filter(
-            (column) => !FACET_GROUPS.has(capability.group) || !isComposed(column),
-        );
-        rows.push({ ...capability, columns });
-    }
     for (const column of COLUMNS) {
         const composition = column === 'module' ? undefined : COMPOSITIONS[column];
         for (const row of composition === undefined ? [] : composedRows(composition)) {
@@ -285,7 +277,10 @@ function declaredCapabilities(): Capability[] {
             }
         }
     }
-    return rows.filter(({ columns }) => columns.length > 0);
+    const facets = rows.toSorted(
+        (one, other) => FACET_GROUPS.indexOf(one.group) - FACET_GROUPS.indexOf(other.group),
+    );
+    return [...facets, ...CAPABILITIES];
 }
 
 /** Every capability the framework declares, plus one row per `{{token}}` family. */

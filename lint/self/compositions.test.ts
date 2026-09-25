@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import type { Composition } from '../../src/facets/define-facet.js';
 import type { MatrixRow } from '../../src/model/chain/capability.js';
-import { CAPABILITIES, COLUMNS, memberOf } from '../facet-matrix.js';
-import { composedRows, COMPOSITIONS, isComposed } from './compositions.js';
+import { memberOf } from '../facet-matrix.js';
+import { composedRows, COMPOSITIONS } from './compositions.js';
 
 /** The repository root, from this module's place inside `lint/self/`. */
 const ROOT = resolve(import.meta.dirname, '../..');
@@ -18,29 +18,6 @@ function lineOf(row: {
     readonly probe: string;
 }): string {
     return `${row.group} · ${row.name} · ${row.probe} · ${memberOf(row)}`;
-}
-
-/** The groups a facet states about itself. */
-const FACET_GROUPS = new Set<string>([
-    'Constructor option',
-    'Descriptor',
-    'Result accessor',
-    'Route option',
-    'Setup',
-    'Terminal action',
-    'Verb',
-]);
-
-/** The composed columns, each with its composition. */
-function composed(): [string, Composition][] {
-    const found: [string, Composition][] = [];
-    for (const column of COLUMNS) {
-        const composition = column === 'module' ? undefined : COMPOSITIONS[column];
-        if (composition !== undefined) {
-            found.push([column, composition]);
-        }
-    }
-    return found;
 }
 
 /** A terminal action stating the given accessors, for a composition built in a test. */
@@ -57,30 +34,6 @@ function actionStating(accessors: MatrixRow[]): Composition['actions'][number] {
 }
 
 describe('the facet compositions the capability matrix reads', () => {
-    test('a composed column states exactly the rows its hand rows declared', () => {
-        // Given - every column listed as a composition, and the hand rows kept until every facet is one
-        const differences = composed().flatMap(([column, composition]) => {
-            const hand = CAPABILITIES.filter(
-                (capability) =>
-                    FACET_GROUPS.has(capability.group) &&
-                    capability.columns.some((declared) => declared === column),
-            )
-                .map((capability) => lineOf(capability))
-                .toSorted();
-            const stated = composedRows(composition)
-                .map((row) => lineOf(row))
-                .toSorted();
-            const added = stated.filter((line) => !hand.includes(line));
-            const dropped = hand.filter((line) => !stated.includes(line));
-            return added
-                .map((line) => `${column} + ${line}`)
-                .concat(dropped.map((line) => `${column} - ${line}`));
-        });
-
-        // Then - the composition and the hand rows it replaces name the same rows, read the same way
-        expect(differences).toStrictEqual([]);
-    });
-
     test('every facet written as a composition is listed', () => {
         // Given - the `<facet>.facet.ts` files on disk, and the columns listed
         const written = readdirSync(resolve(ROOT, 'src/facets'), { withFileTypes: true })
@@ -92,13 +45,13 @@ describe('the facet compositions the capability matrix reads', () => {
             .map((entry) => entry.name)
             .toSorted();
 
-        // Then - a composition the matrix does not read would leave its column on the hand rows
-        expect(COLUMNS.filter((column) => isComposed(column)).toSorted()).toStrictEqual(written);
+        // Then - a composition the matrix does not read would leave its facet's rows out of the table
+        expect(Object.keys(COMPOSITIONS).toSorted()).toStrictEqual(written);
     });
 
     test('every definition states the row of its own member', () => {
         // Given - each option, setup and action of every composition, with the row it states
-        const strays = composed().flatMap(([column, composition]) =>
+        const strays = Object.entries(COMPOSITIONS).flatMap(([column, composition]) =>
             [
                 ...Object.entries(composition.options).map(([name, row]) => ({ name, row })),
                 ...composition.capabilities,
