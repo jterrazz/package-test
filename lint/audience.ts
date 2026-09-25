@@ -83,11 +83,14 @@ export function selfMentions(text: string, rows: SelfRow[]): string[] {
 /** The relative module a bundle imports: `from "./x.js"`, `import("./x.js")`, `require("./x.js")`. */
 const RELATIVE_IMPORT = /(?:\bfrom|\bimport\(|\brequire\()\s*["'](?<target>\.{1,2}\/[^"']+)["']/gu;
 
-/** Every `.js`/`.cjs` bundle under `dist/`, relative to the package root. */
+/** A JavaScript module node loads, whichever of its three extensions it carries. */
+export const MODULE_FILE = /\.[cm]?js$/u;
+
+/** Every JavaScript module under `dist/`, relative to the package root. */
 function bundles(root: string): string[] {
     return readdirSync(join(root, 'dist'), { recursive: true })
         .map((entry) => join('dist', String(entry)))
-        .filter((path) => /\.c?js$/u.test(path));
+        .filter((path) => MODULE_FILE.test(path));
 }
 
 /**
@@ -128,7 +131,7 @@ const BUNDLER_IMPORT =
  */
 export function danglingImports(dir: string, packed: Set<string>): string[] {
     const dangling: string[] = [];
-    for (const bundle of [...packed].filter((path) => /\.c?js$/u.test(path))) {
+    for (const bundle of [...packed].filter((path) => MODULE_FILE.test(path))) {
         const text = readFileSync(join(dir, bundle), 'utf8');
         for (const found of text.matchAll(BUNDLER_IMPORT)) {
             const target = normalize(join(dirname(bundle), found.groups?.target ?? ''));

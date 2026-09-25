@@ -10,6 +10,7 @@ import {
     danglingImports,
     extractTarball,
     filesUnder,
+    MODULE_FILE,
     selfExposures,
     selfMentions,
     selfRows,
@@ -48,14 +49,15 @@ type PublishedEntry = {
 };
 
 /**
- * Every JavaScript module the exports map resolves to, one per subpath and
- * condition — `types` is erased and a JSON schema carries no code.
+ * Every file the exports map resolves to, one per subpath and condition, but
+ * what carries no code — a `types` target and a JSON schema. What is left is
+ * a module node loads, or a target the test cannot classify.
  */
 function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
     const entries: PublishedEntry[] = [];
     const visit = (subpath: string, condition: string, node: unknown): void => {
         if (typeof node === 'string') {
-            if (condition !== 'types' && /\.c?js$/u.test(node)) {
+            if (condition !== 'types' && !node.endsWith('.json')) {
                 entries.push({ condition, subpath, target: node.replace(/^\.\//u, '') });
             }
             return;
@@ -138,7 +140,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
     });
 
     test('no module the exports map publishes exposes a self rule, at any depth', () => {
-        // Given - every published entry of the extracted package, loaded by node itself as an install loads it — `require` takes a CommonJS build and an ES module alike
+        // Given - every published entry of the extracted package, loaded by node itself as an install loads it — `require` takes a CommonJS build and an ES module alike, `.js`, `.cjs` or `.mjs`; a target of any other kind fails before a load
         const entries = publishedEntries(manifestOf(installed).exports);
         expect(entries.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
             expect.arrayContaining([
@@ -149,6 +151,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
                 './oxlint:require',
             ]),
         );
+        expect(entries.filter(({ target }) => !MODULE_FILE.test(target))).toStrictEqual([]);
         const load = createRequire(join(installed, 'package.json'));
         const exposures = entries
             .filter(({ condition }) => condition !== 'browser')
@@ -157,7 +160,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
                 return selfExposures(loaded, self, `${subpath} (${condition})`);
             });
 
-        // Then - every entry is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's — the browser build, which loads only inside Browser Mode, is held by the text above
+        // Then - every entry is a module node loads and is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's — the browser build, which loads only inside Browser Mode, is held by the text above
         expect(entries.filter(({ target }) => !packed.has(target))).toStrictEqual([]);
         expect(exposures.flat()).toStrictEqual([]);
     });
