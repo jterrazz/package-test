@@ -33,7 +33,7 @@ import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browse
 
 type MatcherResult = { message: () => string; pass: boolean };
 
-/** Update mode crosses the seam as a provided value, never as an env read. */
+/** Update mode crosses into the page as a provided value, never as an env read. */
 function updating(): boolean {
     return inject('update') === true;
 }

@@ -3,12 +3,10 @@ import { inject, onTestFinished, vi } from 'vitest';
 import { instantOf } from '../../../world/clock/instant.js';
 
 /**
- * The runner, as the page reaches it.
- *
- * `vitest` is the framework's one sanctioned coupling and it lives in the
- * layers that own a runner — `src/vitest/` for the config side, this seam for
- * the page's. The component model asks for "after this test", "pin the clock"
- * and "what did the project provide" and never learns which runner answers.
+ * The runner, as the page reaches it: the after-test hook, the clock and
+ * viewport the project provided, the page's resize. The component facet's
+ * engines ask for "after this test", "pin the clock" and "what did the
+ * project provide" through this module, and never call the runner themselves.
  */
 
 /**

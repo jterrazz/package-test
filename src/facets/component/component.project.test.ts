@@ -57,7 +57,7 @@ describe('component() — the browser project', () => {
         ]);
     });
 
-    test('pre-bundles the seam so a cold cache never reloads the tester mid-run', async () => {
+    test('pre-bundles the page runtime so a cold cache never reloads the tester mid-run', async () => {
         // Given - the canonical browser project on this install
         const project = await component();
 
@@ -67,8 +67,8 @@ describe('component() — the browser project', () => {
         expect(project.optimizeDeps?.include).toContain('vitest-mock-extended');
     });
 
-    test("pre-bundles what the app's own Vite config declares, beside the seam's", async () => {
-        // Given - an app whose components import a dependency the seam knows nothing of
+    test("pre-bundles what the app's own Vite config declares, beside the page's own", async () => {
+        // Given - an app whose components import a dependency the page runtime knows nothing of
         const project = await component({ vite: { optimizeDeps: { include: ['react-router'] } } });
 
         // Then - both are declared up front: a dependency found mid-run reloads the tester
@@ -170,11 +170,11 @@ describe('component() — the browser project', () => {
         expect('esbuild' in project && 'oxc' in project).toBeFalsy();
     });
 
-    test('concatenates a consumer plugin after the worker the seam serves', async () => {
+    test('concatenates a consumer plugin after the worker the project serves', async () => {
         // Given - an app config carrying a plugin of its own
         const project = await component({ vite: { plugins: [{ name: 'app:svg' }] } });
 
-        // Then - the seam's plugin is kept and the consumer's joins it
+        // Then - the project's plugin is kept and the consumer's joins it
         expect(pluginNames(project)).toStrictEqual(['@jterrazz/test:msw-worker', 'app:svg']);
     });
 });

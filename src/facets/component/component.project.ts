@@ -62,7 +62,7 @@ const PIPELINE_KEYS = [
 ] as const;
 
 /**
- * The seam's own runtime, pre-bundled so a cold cache never reloads mid-run:
+ * The page's own runtime, pre-bundled so a cold cache never reloads mid-run:
  * react and its adapter, and what the package's browser entry imports
  * (`vitest-mock-extended`, through the doubles it publishes).
  *
@@ -71,7 +71,7 @@ const PIPELINE_KEYS = [
  * entry that is both included and excluded as fatal — dependency optimisation
  * throws before a single test runs.
  */
-const SEAM_DEPENDENCIES = [
+const PAGE_DEPENDENCIES = [
     'react',
     'react-dom/client',
     'react/jsx-dev-runtime',
@@ -202,7 +202,7 @@ function mswWorkerPlugin(): Plugin {
  * framework has never heard of — `environments`, `ssr`, `appType`, `publicDir`
  * — and one of them re-roots the run and the project collects nothing. Naming
  * what the pipeline IS keeps an unknown key from leaking in. The consumer's
- * `plugins` are CONCATENATED after the seam's, never assigned over them.
+ * `plugins` are CONCATENATED after the project's, never assigned over them.
  */
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
@@ -239,7 +239,7 @@ async function reroot(
 }
 
 /**
- * The app's own `optimizeDeps`, its `include` joined by the seam's: a
+ * The app's own `optimizeDeps`, its `include` joined by the page's own: a
  * dependency Vite finds only when a test first imports it is optimised then,
  * and the reload that follows fails the tests already loading.
  */
@@ -250,7 +250,7 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
         ...own,
         include: [
             ...new Set([
-                ...SEAM_DEPENDENCIES.filter(resolves),
+                ...PAGE_DEPENDENCIES.filter(resolves),
                 ...listed.filter((entry): entry is string => typeof entry === 'string'),
             ]),
         ],
@@ -289,7 +289,7 @@ function transformKey(): 'esbuild' | 'oxc' {
 /**
  * The JSX default, on the key the running Vite reads, yielding to the
  * consumer's own: a `jsxImportSource` or a classic runtime is the app's
- * statement, not the seam's to overwrite.
+ * statement, not the project's to overwrite.
  */
 function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown> {
     const key = transformKey();
@@ -413,7 +413,7 @@ export async function component(
         ...jsxPipeline(pipeline),
         // A cold Vite cache optimises dependencies DURING the first run and
         // Reloads the tester mid-flight ("Vitest failed to find the runner").
-        // A fresh CI checkout is exactly that state, so the seam's own runtime
+        // A fresh CI checkout is exactly that state, so the page's own runtime
         // Is declared up front. An optional peer that is absent is skipped.
         optimizeDeps: optimizeDepsOf(pipeline.optimizeDeps),
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
@@ -443,7 +443,7 @@ export async function component(
             name: 'component',
             // `shouldUpdateSnapshots()` reads process.env/argv, which a page
             // Does not have, and a wrap module is imported by URL there: both
-            // Cross the seam as provided values.
+            // Cross into the page as provided values.
             provide: providedToPage(options),
             ...(options.wrap === undefined
                 ? {}
