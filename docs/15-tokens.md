@@ -119,13 +119,14 @@ await expect(result.table('orders', { database: 'db' })).toMatch([
 ]);
 ```
 
-`match.uuid()`, `match.ulid()`, `match.iso8601()`, `match.date()`, `match.time()`, `match.duration()`, `match.number()`, `match.int()`, `match.float()`, `match.semver()`, `match.sha()`, `match.hex()`, `match.base64()`, `match.port()`, `match.ip()`, `match.url()`, `match.email()`, `match.path()`, `match.workdir()`, `match.string()`, `match.any()` — plus three code-only forms:
+`match.uuid()`, `match.ulid()`, `match.iso8601()`, `match.date()`, `match.time()`, `match.duration()`, `match.number()`, `match.int()`, `match.float()`, `match.semver()`, `match.sha()`, `match.hex()`, `match.base64()`, `match.port()`, `match.ip()`, `match.url()`, `match.email()`, `match.path()`, `match.workdir()`, `match.string()`, `match.any()` — plus four code-only forms:
 
 | Code-only                         | Meaning                                                                                     |
 | --------------------------------- | ------------------------------------------------------------------------------------------- |
 | `match.regex(/…/)`                | Arbitrary pattern — the escape hatch when no token fits                                     |
 | `match.ref(name)`                 | Capture on first use, require equality afterwards (same namespace as `{{token#name}}` refs) |
 | `match.ref(name, { not: other })` | Additionally require **inequality** with another captured ref                               |
+| `match.includes(substring)`       | Containment — the value holds the substring; used mostly in a stub's request filter         |
 
 ```typescript
 // intent.order_id === orders.id, but intent.id ≠ orders.id
@@ -167,7 +168,7 @@ The same preservation and `{{workdir}}` substitution apply identically across ev
 
 A `toMatch(<value>)` is rewritten where it stands, in the test file, the gesture vitest's `toMatchInlineSnapshot` makes: the call is found from the stack of the assertion, and its argument — up to its comma or its closing parenthesis, whatever template, string or nested call it holds — is replaced by the actual result, merged with the tokens the old value had where the result still matches them. A text is written as a template literal indented one level deeper than its call, a json as its JSON, a table one row per line. An empty value — `toMatch('')` — is the one an author leaves to be recorded: outside update mode it fails naming the run that fills it. A value that matches is never touched, and neither is a `{ frozen: true }` one or a `.not` — a negation asserts a mismatch, and records nothing. Every rewrite of one file during a run is laid on the source the run loaded, so a second rewrite lands where its stack says even when a first one moved the lines below it. Under the preset the test file is written when the run ENDS, after its report: vitest frames a failure by reading the file on disk at the line the run loaded, so a file rewritten mid-run would frame a later failure at another test's code. The preset's global setup hands each project a pending folder under `.artifacts/vitest/in-place/` and writes what waits there once the report is printed — in watch mode, when the watcher exits; a run outside the preset writes each file at once. A component's value is rewritten the same way through a server command, the page's stack mapped back to the test's source by the browser server. What update mode writes is code the formatter has not seen: `make fix` gives it the repository's quotes.
 
-This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is a future lint warning.
+This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is warned by D6w ([d6w-transform-token-equivalent](19-linting.md#d6w-transform-token-equivalent)).
 
 ### Frozen fixtures — opting a negative fixture out of the rewrite
 
@@ -209,7 +210,7 @@ The grammar is deliberately small; three edges are worth knowing:
 ## Appendix — canonical accepted forms (normative, as implemented)
 
 The exact grammar of each token, one tested regular expression per token
-(defined in the package's match module). In embedded positions the pattern is
+(defined in `src/expectations/tokens/structural.ts`, the vocabulary list in `match.ts`). In embedded positions the pattern is
 anchored to its surroundings; as a whole JSON value, numeric tokens also
 accept native JSON numbers.
 
@@ -245,7 +246,7 @@ accept native JSON numbers.
 - **Using `{{any}}` where a precise token exists.** `{{any}}` matches garbage too; every widening of a fixture weakens the spec.
 - **Reading "always-true" as unframed.** `{{any}}` is only unconditional as the _whole_ value. Embedded (`A {{any}} Z`), the frame around it must still match — and a non-string/number actual cannot satisfy an embedded token at all.
 - **Hand-writing values that update mode would tokenize.** Run `TEST_UPDATE=1` first, then tighten: placeholders you wrote once are preserved forever after.
-- **Escaping into `transform` for tokenizable noise.** Only application noise _not_ covered by the grammar justifies a transform (rule D6).
+- **Escaping into `transform` for tokenizable noise.** Only application noise _not_ covered by the grammar justifies a transform (rule D6); one a token already names is D6w's warning.
 - **Leaving a deliberately-wrong fixture unfrozen.** A negative test whose golden matcher asserts a mismatch (wrapped in `expect(() => …).toThrow()` / `.rejects`) must pass `{ frozen: true }` — otherwise `TEST_UPDATE=1` overwrites the wrong fixture with the real output and the assertion silently stops testing anything (rule `d13w-unfrozen-negative-fixture`).
 
 ## Related
