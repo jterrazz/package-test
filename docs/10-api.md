@@ -213,7 +213,7 @@ Location: /orders/{{uuid#order}}
 ```typescript
 // specs/api/orders/create/analytics.spec.ts — POST /orders, what it writes where
 import { describe, expect, test } from 'vitest';
-import { match } from '@jterrazz/test';
+import { file, match } from '@jterrazz/test';
 import { api } from '../../api.specification.js';
 
 describe('analytics', () => {
@@ -288,13 +288,37 @@ A journey — a request carrying what an earlier response returned — is code: 
 
 ### Route coverage
 
-Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The table is the app's own — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it. An entry whose handler takes `next` is a middleware, left out by Hono's own rule; a route `app.all()` declares is judged like any other, reached by a request of any method. A path parameter (`:id`) takes any one segment, a `*` tail the rest of the path. A request written as a template is matched by its template: a parameter where the route declares one, each literal segment as itself — so `.get('/users/:id', { params: { id: 'me' } })` reaches `GET /users/:id` and never a `GET /users/me` the filled path also fits.
+Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The measure is the `api()` project's global setup; a project written by hand measures nothing.
 
 ```
 api routes: all 12 declared routes reached
 ```
 
-A route no test reached fails the run, each one named; the count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached` — `TEST_UPDATE=1` records where the run stands, and the checker's own recordings keep that key. It judges and records a green run only: when a file of the run failed, since a failed file may not have sent its requests, the run prints `api routes: not judged` with the count of failed files and no route, and `TEST_UPDATE=1` refuses and keeps the entry. The entry is exact: a run that reaches more routes than it held fails too, the debt fell, until `TEST_UPDATE=1` records the lower count. An app with no table the facet reads — a `server` that returns anything but the Hono app itself — fails the run, since a measure against no table would read as every route reached; it states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
+#### What is measured
+
+- **The table is the app's own** — Hono's `app.routes`, read from the app each `specification.api()` started — so it is the table that served the tests, never a copy that can drift from it.
+- **A middleware is left out.** An entry whose handler takes `next` is one, by Hono's own rule. A route `app.all()` declares is judged like any other, reached by a request of any method.
+- **A path parameter** (`:id`) takes any one segment, a `*` tail the rest of the path.
+- **A request written as a template is matched by its template**: a parameter where the route declares one, each literal segment as itself — so `.get('/users/:id', { params: { id: 'me' } })` reaches `GET /users/:id` and never a `GET /users/me` the filled path also fits.
+
+#### The ratchet
+
+A route no test reached fails the run, each one named. The count is a ratchet, held under `jterrazz.baseline.json › test › routes/unreached`: `TEST_UPDATE=1` records where the run stands, and the checker's own recordings keep that key. The entry is exact in both directions — a run that reaches more routes than it held fails too, since the debt fell, until `TEST_UPDATE=1` records the lower count.
+
+#### When a run is not judged
+
+A run is judged, and `TEST_UPDATE=1` records, only when it is green and whole. Otherwise it prints a line and records nothing:
+
+| The run                                                                       | Prints                                                   | Why                                                                                                                                                                              |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a file of it failed                                                           | `api routes: not judged`, with the count of failed files | a failed file may not have sent its requests; `TEST_UPDATE=1` refuses and keeps the entry                                                                                        |
+| a shard (`vitest --shard`)                                                    | `api routes: not judged`                                 | its requests are a part of the run's; it writes its ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/`                                                                 |
+| a merge (`vitest --merge-reports`)                                            | nothing                                                  | a merge runs no global setup; this package's own split judges its routes after the merge, over every shard's ledgers ([03 — Testing § What CI runs](03-testing.md#what-ci-runs)) |
+| partial — some test files (`vitest --changed`, a file filter) or tests (`-t`) | `api routes: not judged — a partial run …`               | it reached only some routes; a shard that `-t` filters marks its ledger folder partial, so its split is not judged at the merge                                                  |
+
+#### An app that is not Hono
+
+A `server` that returns anything but the Hono app itself exposes no table the facet reads, and fails the run, since a measure against no table would read as every route reached. It states its routes instead, as an OpenAPI document (JSON or YAML) named in `jterrazz.config.ts`:
 
 ```typescript
 // jterrazz.config.ts
@@ -303,13 +327,14 @@ import { defineConfig } from '@jterrazz/typescript/config';
 export default defineConfig({ test: { routes: './openapi.yaml' } });
 ```
 
-A route the app takes on any method — `app.all('/mcp', …)` — is one the member names in `jterrazz.config.ts`, `test: { methodless: ['/mcp'] }`, so the checker files its specs under its path whatever verb they send ([18 — Conventions § The subject, and its standard name](18-conventions.md#the-subject-and-its-standard-name)). The run holds that list to the app's own table: a route the table takes on any method that the list misses, or a path the list names that the table takes on its own methods only or holds nowhere, fails the run naming each — under `TEST_UPDATE=1` too, since the list is written by hand and nothing records it. The list is judged whenever the app exposes a route table of its own, an OpenAPI document declared or not; a `server` that is not the Hono app exposes none, and leaves the list unjudged.
+#### A route taken on any method
 
-The measure is the `api()` project's global setup; a project written by hand measures nothing.
+A route the app takes on any method — `app.all('/mcp', …)` — is one the member names in `jterrazz.config.ts`, `test: { methodless: ['/mcp'] }`, so the checker files its specs under its path whatever verb they send ([18 — Conventions § The subject, and its standard name](18-conventions.md#the-subject-and-its-standard-name)). The run holds that list to the app's own table, and fails naming each mismatch — under `TEST_UPDATE=1` too, since the list is written by hand and nothing records it:
 
-A shard of a split run (`vitest --shard`) judges nothing: its requests are a part of the run's, so it writes its ledgers to a folder of its own, `.artifacts/vitest/routes/shard-<index>-<count>/`, and prints `api routes: not judged`. `vitest --merge-reports` runs no global setup, so the merge judges no routes either; this package's own split judges them after its merge, over every shard's ledgers ([03 — Testing § What CI runs](03-testing.md#what-ci-runs)).
+- a route the table takes on any method that the list misses;
+- a path the list names that the table takes on its own methods only, or holds nowhere.
 
-Nor is any other partial run judged: one that ran some of the project's test files — `vitest --changed`, a file filter — or some of its tests, `-t`, reached only some routes, so it prints `api routes: not judged — a partial run …`, and `TEST_UPDATE=1` records nothing. A shard that `-t` filters marks its ledger folder partial, so the split it belongs to is not judged at its merge either.
+The list is judged whenever the app exposes a route table of its own, an OpenAPI document declared or not; a `server` that is not the Hono app exposes none, and leaves the list unjudged.
 
 The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
 
