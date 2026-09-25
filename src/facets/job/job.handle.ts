@@ -9,8 +9,6 @@ import type { StartedServices } from '../../world/services/startup/start-service
 import type { JobSpecification } from './job.facet.js';
 import { jobFacet } from './job.facet.js';
 
-// ── Types ──
-
 /** A named job that can be triggered via job.trigger(). */
 export type Job = {
     name: string;
@@ -47,8 +45,6 @@ export type JobHandle<DatabaseKey extends string = string> = {
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: null | Orchestrator;
 };
-
-// ── Constructor ──
 
 export async function startJob<Services extends ServiceRecord>(
     options: JobSpecificationOptions<Services>,

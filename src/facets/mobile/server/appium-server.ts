@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { MobileDevice } from '../device/device.port.js';
-import { ensureBooted, resolveSimulatorUdid } from './simulator.js';
+import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js';
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
 
@@ -73,13 +73,89 @@ export async function serveAppium(
  * `mobile({ device })` project's global setup spawned and provides;
  * `undefined` when each runner reaches its own.
  */
-export async function mobileServer(): Promise<RunServer | undefined> {
+async function mobileServer(): Promise<RunServer | undefined> {
     try {
         const { inject } = await import('vitest');
         return inject('mobileServer');
     } catch {
         return undefined;
     }
+}
+
+/** A server this runner did not start, and so never stops. */
+function notOurs(url: string): AppiumServer {
+    return {
+        stop: async () => {
+            await Promise.resolve();
+        },
+        url,
+    };
+}
+
+/** A device as a refusal names it. */
+function named({ name, os, udid }: MobileDevice): string {
+    return [
+        `'${name}'`,
+        os === undefined ? '' : ` (${os})`,
+        udid === undefined ? '' : ` [${udid}]`,
+    ].join('');
+}
+
+/**
+ * The device a runner asks the run's server for: the one the project declared
+ * and the setup booted. A specification leaves it out or restates it, and
+ * never names another — no other simulator was booted for the run.
+ */
+export function runDevice(device: MobileDevice | undefined, run: RunServer): MobileDevice {
+    if (device === undefined) {
+        return { ...run.device, udid: run.udid };
+    }
+    const agrees =
+        device.name === run.device.name &&
+        (device.os === undefined ||
+            (run.device.os !== undefined && sameRuntime(device.os, run.device.os))) &&
+        (device.udid === undefined || device.udid === run.udid);
+    if (!agrees) {
+        throw new Error(
+            `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares — name that device, or declare no device on mobile() so each file serves its own`,
+        );
+    }
+    return { ...run.device, udid: run.udid };
+}
+
+/**
+ * The Appium server the runner drives, the simulator it asks it for, and
+ * whether that server outlives the file. A declared server owns its devices:
+ * the runner neither resolves nor boots one. The run's server, spawned by a
+ * `mobile({ device })` project's global setup, drives the device that setup
+ * booted, whether the runner restates it or leaves it to the project.
+ * Otherwise the simulator is resolved and booted here, and the project's own
+ * server spawned beside it, for this file alone. A runner with no device and
+ * no run's server to lend one is refused.
+ */
+export async function reachAppium(
+    { appium: declared, device }: { appium?: { url: string }; device?: MobileDevice },
+    root: string,
+): Promise<{ appium: AppiumServer; device: MobileDevice; outlivesFile: boolean }> {
+    if (declared !== undefined) {
+        if (device === undefined) {
+            throw new Error(
+                `specification.mobile() names no device to ask the Appium server at ${declared.url} for — a declared server is handed its device by capabilities: name the simulator with \`device: { name }\``,
+            );
+        }
+        return { appium: notOurs(declared.url), device, outlivesFile: true };
+    }
+    const run = await mobileServer();
+    if (run !== undefined) {
+        return { appium: notOurs(run.url), device: runDevice(device, run), outlivesFile: true };
+    }
+    if (device === undefined) {
+        throw new Error(
+            "specification.mobile() names no device, and no mobile({ device }) project serves one — name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
+        );
+    }
+    const { server, udid } = await serveAppium(device, root);
+    return { appium: server, device: { ...device, udid }, outlivesFile: false };
 }
 
 /** What a `mobile()` project hands its global setup, and what that setup hands the workers. */

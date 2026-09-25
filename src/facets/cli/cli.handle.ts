@@ -17,8 +17,6 @@ import type { CliEnv, CliPort } from './process/cli.port.js';
 import { resolveCommand } from './process/command.js';
 import { ExecAdapter } from './process/exec.adapter.js';
 
-// ── Types ──
-
 /**
  * A server a document may start by name (`serve: mcp`), registered once per app
  * in the `serve` option of `specification.cli()`.
@@ -150,8 +148,6 @@ export type CliHandle<DatabaseKey extends string = string> = {
     /** The orchestrator managing the test infrastructure lifecycle. */
     orchestrator: null | Orchestrator;
 };
-
-// ── Constructor ──
 
 /**
  * The id every container a run of this runner starts is labelled with. One

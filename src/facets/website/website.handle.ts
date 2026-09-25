@@ -54,8 +54,6 @@ function resolveServer<Services extends ServiceRecord>(
     return { ...spec, env: spec.env(services) };
 }
 
-// ── Types ──
-
 /** What `specification.website()` hands its chain: the site, the browser that visits it, and the stub backend it talks to. */
 export type WebsiteConfig = Pick<ResultConfig, 'transform'> &
     StubsConfig & {
@@ -233,8 +231,6 @@ export type WebsiteHandle = {
     url: string;
     website: WebsiteSpecification;
 };
-
-// ── Constructor ──
 
 export async function startWebsite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,

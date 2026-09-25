@@ -14,8 +14,6 @@ import { HonoAdapter } from './server/hono.adapter.js';
 import type { HonoApp } from './server/hono.adapter.js';
 import type { ServerPort } from './server/server.port.js';
 
-// ── Types ──
-
 /** What `specification.api()` hands its chain: the services record, and the app a request is sent to. */
 export type ApiConfig = ServicesConfig & { server?: ServerPort | undefined };
 
@@ -57,8 +55,6 @@ export type ApiHandle<DatabaseKey extends string = string> = {
      */
     docker: (containerId: string) => ContainerAccessor;
 };
-
-// ── Constructor ──
 
 export async function startApi<Services extends ServiceRecord>(
     options: ApiSpecificationOptions<Services>,

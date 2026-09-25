@@ -9,8 +9,6 @@ import type { StartedServices } from '../../world/services/startup/start-service
 import type { IntegrationSpecification } from './integration.facet.js';
 import { integrationFacet } from './integration.facet.js';
 
-// ── Types ──
-
 /** Options for {@link startIntegration | specification.integration}. */
 export type IntegrationSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** Project-root override — see the `root` option of `specification.api()`. */
@@ -37,8 +35,6 @@ export type IntegrationHandle<
     cleanup: () => Promise<void>;
     integration: IntegrationSpecification<Services, DatabaseKey>;
 };
-
-// ── Constructor ──
 
 /**
  * Specify a module the way the assembled product is specified: against real
