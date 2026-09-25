@@ -43,7 +43,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                         |
 | A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                       |
 
-**`vite` as a framework function is BACKLOG, not a shape to reach for.** `component({ vite })` accepts the function a framework exports, and Astro's `getViteConfig()` is one — but no spike has yet proven that pipeline under this facet: the cross-repo probe that suggested it was confounded by two Vite versions, and the proof owed is an in-repo spike inside a `jterrazz-web` worktree. Until it lands, state the app's own `vite.config.ts` and let the allow-list take the pipeline from it.
+**Point `vite` at the app's own `vite.config.ts`.** A framework's config function — Astro's `getViteConfig()` among them — is not yet a supported shape: the allow-list takes the pipeline from the app's own config.
 
 ## The constructor: there is none
 
@@ -86,16 +86,16 @@ export default defineSpecConfig({
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                |
 | `serial`              | `fileParallelism: false` — the project's renders run one file at a time                                                  |
 
-**Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`, `optimizeDeps`), and the consumer's `plugins` are concatenated after the seam's, never assigned over them. So is its `optimizeDeps.include`, joined to the seam's own: every dependency a component imports belongs there, since one Vite first finds when a test imports it is optimised mid-run, and the reload fails the tests already loading.
+**Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`, `optimizeDeps`), and the consumer's `plugins` are concatenated after `component()`'s own, never assigned over them. So is its `optimizeDeps.include`, joined to the project's own: every dependency a component imports belongs there, since one Vite first finds when a test imports it is optimised mid-run, and the reload fails the tests already loading.
 
-**One transformer key, chosen from the installed Vite.** Vite 8 compiles with oxc and warns for every `esbuild` option handed to it beside an `oxc` one; Vite 6 and 7 compile with esbuild and have no `oxc` key at all. `component()` reads the installed major, states the JSX default on the key that Vite actually reads, and drops the other from the adopted pipeline — and the one it states yields to yours: a `jsxImportSource` or a classic runtime is the app's statement, not the seam's to overwrite.
+**One transformer key, chosen from the installed Vite.** Vite 8 compiles with oxc and warns for every `esbuild` option handed to it beside an `oxc` one; Vite 6 and 7 compile with esbuild and have no `oxc` key at all. `component()` reads the installed major, states the JSX default on the key that Vite actually reads, and drops the other from the adopted pipeline — and the one it states yields to yours: a `jsxImportSource` or a classic runtime is the app's statement, not the project's to overwrite.
 
 **A `resolve.alias` is an unlisted dependency.** An alias tells the bundler where a specifier resolves; it tells knip nothing, so a package reached only through an alias reads as undeclared, and a `paths`-less `tsconfig` makes the compiler disagree with the bundler besides. Mirror the alias in the `tsconfig`'s `paths` (the compiler and the bundler then answer alike), or name the package in `knip.ignoreDependencies` with the alias as the reason.
 
 ## The chain
 
 ```tsx
-import { button, component, content, defineStub, http, status } from '@jterrazz/test';
+import { button, component, content, defineStub, file, http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
@@ -138,19 +138,19 @@ The scenario is the When, and assertions stay in the Then (rule W1). Its verbs a
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included: `see(focused(button('Open')))` asks where the keyboard is, `see(disabled(button('Publish')))` whether a control takes input, `see(selected(option('LinkedIn')))` which option a select is on, and `see(valued(field('Title'), 'Launch teaser'))` what a field holds. An option is asserted by PRESENCE — a collapsed select draws none of them — and [13 — Elements](13-elements.md) owns them all, including the W3 refusal and the exact-name rule.
+`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included — [13 — Elements § Modifiers](13-elements.md#modifiers) owns them all, with the W3 refusal and the exact-name rule.
 
 ## The result
 
 | Member           | Type           | Description                                                                                                                                            |
 | ---------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `result.tree`    | `TextAccessor` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                     |
-| `result.content` | `TextAccessor` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
-| `result.html`    | `TextAccessor` | The mounted markup — the escape hatch for a class or an attribute                                                                                      |
-| `result.console` | `TextAccessor` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                               |
-| `result.errors`  | `TextAccessor` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                          |
+| `result.tree`    | `RenderedText` | The ARIA snapshot of the rendered body — the outline a golden pins                                                                                     |
+| `result.content` | `RenderedText` | The RENDERED text of the document body (`innerText`) — what a reader sees, so a stylesheet's source and a node the page does not display are not in it |
+| `result.html`    | `RenderedText` | The mounted markup — the escape hatch for a class or an attribute                                                                                      |
+| `result.console` | `RenderedText` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                               |
+| `result.errors`  | `RenderedText` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                          |
 
-`toMatch(file(…))` is **awaited** on all five: a golden captured inside a page is read back through a server command, so the file crosses the browser seam. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
+`toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
 await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
@@ -225,7 +225,7 @@ const result = await component.render((container) => {
 });
 ```
 
-- **A router is a test's Given.** cap01's and the console's screens render `<Link>` and read `useParams()`; without a router they throw. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
+- **A router is a test's Given.** A screen that renders `<Link>` or reads `useParams()` throws without a router. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
 - **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-stubs.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
@@ -235,7 +235,7 @@ const result = await component.render((container) => {
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
 - **Hand-rolling `browser:` in a config.** Rule E6 refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule G4 refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
-- **Asserting focus with a golden.** The accessibility tree carries no focus state, so a tree snapshot proves nothing about the keyboard. `see(focused(x))` / `gone(focused(x))` are the verbs that do.
+- **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-elements.md#modifiers) says what asserts it.
 - **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
 - **Reading the W3 refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.

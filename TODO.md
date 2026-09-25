@@ -54,7 +54,15 @@ and it waits on the surface.
   "the call never happened". `http.never(request)` — or `required: false` with
   `times: 0` — states it, and fails at chain end if the subject reached the route.
 
-## 4. Asks of `@jterrazz/typescript`
+## 4. A framework's Vite config function under `component()`
+
+`component({ vite })` accepts the function a framework exports — Astro's `getViteConfig()`
+is one — but no spike has proven that pipeline under the component facet: the cross-repo
+probe that suggested it was confounded by two Vite versions. The proof owed is an in-repo
+spike inside a `jterrazz-web` worktree; until it lands, chapter 07 sends a consumer to the
+app's own `vite.config.ts`.
+
+## 5. Asks of `@jterrazz/typescript`
 
 - **The member walk misses a `specs/`-rooted member.** `discover_specs_roots`, in the toolchain's check command, looks for a CHILD directory named `specs` and never considers the
   member directory itself, so a workspace declaring `packages: ['specs']` (spwn's shape)
