@@ -2,7 +2,7 @@
     "typescript": {
         "eslint/class-methods-use-this": 12,
         "eslint/complexity": 28,
-        "eslint/max-classes-per-file": 2,
+        "eslint/max-classes-per-file": 1,
         "eslint/max-depth": 5,
         "eslint/max-lines": 43,
         "eslint/max-lines-per-function": 25,

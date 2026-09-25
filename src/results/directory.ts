@@ -2,8 +2,8 @@ import { readFileSync, statSync } from 'node:fs';
 import { readdir } from 'node:fs/promises';
 import { relative, resolve, sep } from 'node:path';
 
-import { CaptureScope } from '../matching/match.js';
-import { textEquals } from '../matching/structural.js';
+import { CaptureScope } from '../model/matching/match.js';
+import { textEquals } from '../model/matching/structural.js';
 
 // ── Directory walk + diff (internal helpers) ──
 

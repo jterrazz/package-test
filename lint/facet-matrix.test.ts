@@ -1,19 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
 import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
-import type { HttpResult } from '../src/facets/api/api.result.js';
 import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
-import type { CliResult } from '../src/facets/cli/cli.result.js';
 import type { ComponentProjectOptions } from '../src/facets/component/component.project.js';
-import type { RenderResult } from '../src/facets/component/component.result.js';
 import type { ComponentChain, ComponentVisitor } from '../src/facets/component/component.shape.js';
 import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
-import type { CallResult } from '../src/facets/integration/integration.result.js';
 import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.handle.js';
 import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.handle.js';
-import type { ScreenResult } from '../src/facets/mobile/mobile.result.js';
 import type { WebsiteSpecificationOptions } from '../src/facets/website/website.handle.js';
-import type { FetchResult, PageResult } from '../src/facets/website/website.result.js';
 import type {
     ApiSpecification,
     CliSpecification,
@@ -28,6 +22,13 @@ import type { RouteOptionsAny } from '../src/model/chain/route.js';
 import * as elements from '../src/model/elements/elements.js';
 import type { Visitor } from '../src/model/ports/browser.port.js';
 import type { MobileElementKind, MobileVisitor } from '../src/model/ports/device.port.js';
+import type { CallResult } from '../src/results/call.result.js';
+import type { CliResult } from '../src/results/cli.result.js';
+import type { FetchResult } from '../src/results/fetch.result.js';
+import type { HttpResult } from '../src/results/http.result.js';
+import type { PageResult } from '../src/results/page.result.js';
+import type { RenderResult } from '../src/results/render.result.js';
+import type { ScreenResult } from '../src/results/screen.result.js';
 import { CAPABILITIES, COLUMNS, memberOf, methodsByRole } from './facet-matrix.js';
 import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
 

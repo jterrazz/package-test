@@ -1,9 +1,9 @@
 import { describe, expect, expectTypeOf, test } from 'vitest';
 
-import { JsonAccessor } from '../../model/result/json.js';
-import { TextAccessor } from '../../model/result/text.js';
-import { CallResult } from './integration.result.js';
-import type { CallValue } from './integration.result.js';
+import { CallResult } from './call.result.js';
+import type { CallValue } from './call.result.js';
+import { JsonAccessor } from './json.js';
+import { TextAccessor } from './text.js';
 
 /** A result carrying one outcome — every field of the config is optional. */
 function resultOf<Returned>(value: unknown): CallResult<Returned> {

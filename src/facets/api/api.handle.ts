@@ -1,6 +1,5 @@
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
-import { createDockerReader } from '../../model/chain/docker-reader.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
 import {
     declaredDatabaseKeys,
@@ -10,8 +9,9 @@ import {
 import type { DatabaseKeys, ServiceRecord } from '../../model/chain/services.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import { writeLedger } from '../../model/routes/routes.js';
+import { createDockerReader } from '../../results/container.js';
+import type { ContainerAccessor } from '../../results/container.js';
 import { routesLedger } from '../../runner/provided.js';
-import type { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
 import { createApiFacet } from './api.chain.js';
 import type { ApiSpecification } from './api.chain.js';

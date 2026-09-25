@@ -18,17 +18,17 @@ import type {
     DiskDirectory as DiskDirectoryType,
     DiskFile as DiskFileType,
 } from './model/chain/spec-path.js';
-import type { DirectoryAccessor as DirectoryAccessorType } from './model/result/directory.js';
-import type { FilesystemAccessor as FilesystemAccessorType } from './model/result/filesystem.js';
-import type { JsonAccessor as JsonAccessorType } from './model/result/json.js';
 import type {
     MatchFixtureOptions as MatchFixtureOptionsType,
     TableMatchOptions as TableMatchOptionsType,
-} from './model/result/match-options.js';
-import type { ResponseAccessor as ResponseAccessorType } from './model/result/response.js';
-import type { TableAccessor as TableAccessorType } from './model/result/table.js';
-import type { TextAccessor as TextAccessorType } from './model/result/text.js';
-import type { ContainerAccessor as ContainerAccessorType } from './seams/docker/container-accessor.js';
+} from './model/goldens/match-options.js';
+import type { ContainerAccessor as ContainerAccessorType } from './results/container.js';
+import type { DirectoryAccessor as DirectoryAccessorType } from './results/directory.js';
+import type { FilesystemAccessor as FilesystemAccessorType } from './results/filesystem.js';
+import type { JsonAccessor as JsonAccessorType } from './results/json.js';
+import type { ResponseAccessor as ResponseAccessorType } from './results/response.js';
+import type { TableAccessor as TableAccessorType } from './results/table.js';
+import type { TextAccessor as TextAccessorType } from './results/text.js';
 
 // The component facet — the chain lives in whichever build can run it (the
 // Page's), and the SHAPE is stated once so both entries publish the same one.
@@ -38,8 +38,8 @@ export type {
     ComponentVisitor,
     RenderSubject,
 } from './facets/component/component.shape.js';
-export type { RenderResult } from './facets/component/component.result.js';
-export type { RenderedText } from './facets/component/rendered-text.js';
+export type { RenderResult } from './results/render.result.js';
+export type { RenderedText } from './results/rendered-text.js';
 export type { ComponentUi, DomMount } from './seams/vitest-browser/ui.js';
 
 // Match — dynamic values in assertions and fixtures
@@ -47,9 +47,9 @@ export { type CaptureScope, match, Matcher, type MatcherKind } from './model/mat
 
 // Accessors a page can build: pure projections over a captured value. TYPES,
 // Like every other accessor — `text()` is the one that HANDS one out.
-export type { JsonAccessor } from './model/result/json.js';
-export type { TableAccessor } from './model/result/table.js';
-export type { TextAccessor } from './model/result/text.js';
+export type { JsonAccessor } from './results/json.js';
+export type { TableAccessor } from './results/table.js';
+export type { TextAccessor } from './results/text.js';
 
 // Ports — the shapes the element vocabulary and the visitors speak
 export type {
@@ -166,10 +166,10 @@ export {
 } from './model/chain/spec-path.js';
 
 // A linter's report as a golden keeps it — the transform a rule's specs share
-export { lintReport } from './model/result/lint-report.js';
+export { lintReport } from './model/goldens/lint-report.js';
 
 // Matcher options (per-call `toMatch(file(…), { frozen })`)
-export type { MatchFixtureOptions } from './model/result/match-options.js';
+export type { MatchFixtureOptions } from './model/goldens/match-options.js';
 
 /** A table's rows as a test writes them in place: one array of cells per row, every column — or `''`, nothing recorded yet. */
 type TableRows = readonly (readonly unknown[])[];

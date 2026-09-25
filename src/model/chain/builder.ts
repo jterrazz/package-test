@@ -1,13 +1,16 @@
 import { cpSync, readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 
-import { HttpResult } from '../../facets/api/api.result.js';
-import { CliResult } from '../../facets/cli/cli.result.js';
 import { runSpecDocument } from '../../facets/cli/literate.js';
 import type { LiterateRunFlags, LiterateServeRegistration } from '../../facets/cli/literate.js';
-import { CallResult } from '../../facets/integration/integration.result.js';
-import { ScreenResult } from '../../facets/mobile/mobile.result.js';
-import { FetchResult, PageResult } from '../../facets/website/website.result.js';
+import { CallResult } from '../../results/call.result.js';
+import { CliResult } from '../../results/cli.result.js';
+import { FetchResult } from '../../results/fetch.result.js';
+import { HttpResult } from '../../results/http.result.js';
+import type { JobsResult } from '../../results/jobs.result.js';
+import { PageResult } from '../../results/page.result.js';
+import { BaseResult, validateDatabaseOption } from '../../results/result.js';
+import { ScreenResult } from '../../results/screen.result.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
 import { clock as timeClock } from '../clock/clock.js';
@@ -26,7 +29,6 @@ import type { DatabasePort } from '../ports/database.port.js';
 import type { DevicePort, MobileScenario } from '../ports/device.port.js';
 import type { ServerPort } from '../ports/server.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
-import { BaseResult, validateDatabaseOption } from '../result/result.js';
 import { toConstantCase } from './binding.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
@@ -247,17 +249,6 @@ export type ApiSpecification<DatabaseKey extends string = string> = {
  * The `jobs` facet — job chain entry handed out by `specification.jobs()`.
  * Jobs run in-process by definition (CONVENTIONS A8).
  */
-/**
- * What a triggered job HANDS BACK.
- *
- * A job writes to a database, a cache, a queue — never to a working directory
- * the spec then walks, because a job has none: it runs in this process, where
- * the only filesystem is the repository's. So the two accessors that read one
- * (`file()`, `directory()`) are not on this result. A pipeline that really
- * produces files is a binary, and `specification.cli()` is its facet.
- */
-export type JobsResult = Omit<BaseResult, 'directory' | 'file'>;
-
 export type JobsSpecification<DatabaseKey extends string = string> = {
     /** Pin the job's `Date` at `iso` for this chain — the calendar the job reads. */
     clock: (iso: string) => JobsSpecification<DatabaseKey>;

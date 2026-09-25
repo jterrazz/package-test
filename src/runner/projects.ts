@@ -15,8 +15,8 @@ import { onProjectDefaults } from './preset.js';
  * states only what is theirs.
  */
 
-// Every facet's helper is the FACET's, beside its constructor, its chain and
-// Its result — one folder per facet, the same four files in each. This module
+// Every facet's helper is the FACET's, beside its constructor and its chain —
+// One folder per facet. This module
 // Is their index: the one import `@jterrazz/test/vitest` re-exports, plus the
 // One project that is not a facet's.
 export { api, type ApiProjectOptions } from '../facets/api/api.project.js';

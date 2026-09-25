@@ -18,7 +18,7 @@ import type {
 } from '../model/chain/process.js';
 import { interceptThrough } from '../model/contracts/intercept.js';
 import type { Intercept } from '../model/contracts/intercept.js';
-import { TextAccessor } from '../model/result/text.js';
+import { TextAccessor } from '../results/text.js';
 import { registerWorkerContracts } from '../seams/msw/worker.js';
 import type { postgres as postgresFn } from '../seams/postgres/postgres.js';
 import type { redis as redisFn } from '../seams/redis/redis.js';

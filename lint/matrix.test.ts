@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
 
 import { file } from '../src/model/chain/spec-path.js';
 import { registerMatchers } from '../src/model/goldens/matchers.js';
-import { text } from '../src/model/result/text-subject.js';
+import { text } from '../src/results/text-subject.js';
 import { COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,

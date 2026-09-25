@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { SpecificationConfig } from '../chain/builder.js';
-import { safeRealpath } from '../chain/resolve.js';
-import { refusal } from '../lesson/refusal.js';
-import { CaptureScope } from '../matching/match.js';
-import type { DatabasePort } from '../ports/database.port.js';
+import type { SpecificationConfig } from '../model/chain/builder.js';
+import { safeRealpath } from '../model/chain/resolve.js';
+import { refusal } from '../model/lesson/refusal.js';
+import { CaptureScope } from '../model/matching/match.js';
+import type { DatabasePort } from '../model/ports/database.port.js';
 import { DirectoryAccessor } from './directory.js';
 import { TableAccessor } from './table.js';
 import { TextAccessor } from './text.js';

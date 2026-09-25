@@ -13,16 +13,16 @@ import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js'
  * spec's import of its own app (`server: () => createApp()` importing
  * `../../src/app.js`) names none of them, and stays allowed.
  */
-const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams']);
+const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'results', 'runner', 'seams']);
 
 /**
  * CONVENTIONS F7 — from `specs/`, a relative import resolving inside the
- * framework repo's `src/{model,facets,seams,runner,lint}/` is forbidden: a
+ * framework repo's `src/{model,results,facets,seams,runner,lint}/` is forbidden: a
  * spec of the framework reaches it through the public entry, as a consumer
  * does. A consumer's imports of its OWN app source are always allowed — that
  * is the pattern.
  *
- * A `self` rule: those five folder names mean the framework's layers only in
+ * A `self` rule: those folder names mean the framework's layers only in
  * this repository, so the rule ships in the self plugin alone. A
  * `@jterrazz/test/<subpath>` import is F1's, from any file.
  */

@@ -1,4 +1,4 @@
-import { getCallerDir } from '../chain/caller.js';
+import { getCallerDir } from '../model/chain/caller.js';
 import { TextAccessor } from './text.js';
 
 /**

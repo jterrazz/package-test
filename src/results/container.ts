@@ -1,10 +1,11 @@
 import { execSync } from 'node:child_process';
 
-import { CliResult } from '../../facets/cli/cli.result.js';
-import type { CliOutput } from '../../model/ports/cli.port.js';
-import { JsonAccessor } from '../../model/result/json.js';
-import type { FileAccessor } from '../../model/result/result.js';
-import { TextAccessor } from '../../model/result/text.js';
+import type { CliOutput } from '../model/ports/cli.port.js';
+import { inspectContainer } from '../seams/docker/docker-lookup.js';
+import { CliResult } from './cli.result.js';
+import { JsonAccessor } from './json.js';
+import type { FileAccessor } from './result.js';
+import { TextAccessor } from './text.js';
 
 const EXEC_TIMEOUT = 10_000;
 
@@ -188,4 +189,19 @@ export class ContainerAccessor {
             };
         }
     }
+}
+
+/**
+ * Build the `docker(containerId)` reader handed out by `specification.api()`
+ * and `specification.cli()` — a lazy accessor over `docker inspect`.
+ */
+export function createDockerReader(testDir: string): (containerId: string) => ContainerAccessor {
+    return (containerId: string): ContainerAccessor => {
+        try {
+            const inspect = inspectContainer(containerId);
+            return new ContainerAccessor(containerId, inspect, testDir);
+        } catch {
+            return new ContainerAccessor(null, null, testDir);
+        }
+    };
 }

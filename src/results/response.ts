@@ -1,5 +1,5 @@
-import { CaptureScope } from '../matching/match.js';
-import type { ServerResponse } from '../ports/server.port.js';
+import { CaptureScope } from '../model/matching/match.js';
+import type { ServerResponse } from '../model/ports/server.port.js';
 
 /**
  * Read-only accessor for an HTTP response.

@@ -1,15 +1,15 @@
-import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/builder.js';
-import type { CliOutput } from '../../model/ports/cli.port.js';
-import { FilesystemAccessor } from '../../model/result/filesystem.js';
-import { JsonAccessor } from '../../model/result/json.js';
-import { BaseResult } from '../../model/result/result.js';
-import { TextAccessor } from '../../model/result/text.js';
-import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
+import type { DockerSpecConfig, SpecificationConfig } from '../model/chain/builder.js';
+import type { CliOutput } from '../model/ports/cli.port.js';
 import {
     findContainersByLabel,
     inspectContainer,
     removeContainers,
-} from '../../seams/docker/docker-lookup.js';
+} from '../seams/docker/docker-lookup.js';
+import { ContainerAccessor } from './container.js';
+import { FilesystemAccessor } from './filesystem.js';
+import { JsonAccessor } from './json.js';
+import { BaseResult } from './result.js';
+import { TextAccessor } from './text.js';
 
 type CapturedContainer = {
     id: string;

@@ -1,7 +1,7 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { file } from '../chain/spec-path.js';
-import { registerMatchers } from '../goldens/matchers.js';
+import { file } from '../model/chain/spec-path.js';
+import { registerMatchers } from '../model/goldens/matchers.js';
 import { text } from './text-subject.js';
 import { TextAccessor } from './text.js';
 

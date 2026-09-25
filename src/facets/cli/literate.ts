@@ -23,10 +23,10 @@ import {
     textEquals,
 } from '../../model/matching/structural.js';
 import type { CliEnv, CliOutput } from '../../model/ports/cli.port.js';
-import { stripAnsiCodes } from '../../model/result/text.js';
+import { CliResult } from '../../results/cli.result.js';
+import { stripAnsiCodes } from '../../results/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
-import { CliResult } from './cli.result.js';
 
 /**
  * Running a `<case>.spec.yaml` document: one scenario, one working directory,

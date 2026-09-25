@@ -1,6 +1,5 @@
 import type { DockerSpecConfig, SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
-import { createDockerReader } from '../../model/chain/docker-reader.js';
 import type { Orchestrator } from '../../model/chain/orchestrator.js';
 import { resolveCommand, resolveRoot } from '../../model/chain/resolve.js';
 import {
@@ -11,7 +10,8 @@ import {
 import type { DatabaseKeys, ServiceRecord, StartedServices } from '../../model/chain/services.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { CliEnv } from '../../model/ports/cli.port.js';
-import type { ContainerAccessor } from '../../seams/docker/container-accessor.js';
+import { createDockerReader } from '../../results/container.js';
+import type { ContainerAccessor } from '../../results/container.js';
 import { createCliFacet } from './cli.chain.js';
 import type { CliSpecification } from './cli.chain.js';
 import { ExecAdapter } from './exec.adapter.js';

@@ -8,23 +8,25 @@ import { testing } from './dist/oxlint.js';
 import { selfRules } from './dist/self-oxlint.js';
 
 /**
- * The five trees of this package and their sanctioned edges (CONVENTIONS I1).
+ * The trees of this package and their sanctioned edges (CONVENTIONS I1).
  *
- * - `model/` — the chain, the results, the elements (the descriptors, and the
- *   ambiguity and substring readings every surface shares), the contracts and
- *   the intercept, the goldens, the clock and the doubles: what every facet is
+ * - `model/` — the chain, the elements (the descriptors, and the ambiguity
+ *   and substring readings every surface shares), the contracts and the
+ *   intercept, the goldens, the clock and the doubles: what every facet is
  *   made of. It reaches the three seams that carry no engine of their own
  *   (docker, process, yaml), the msw engine through the one lazy import each
  *   of its two openers owns, and — to CONSTRUCT what a terminal action hands
- *   back — the facet module that declares that result.
- * - `facets/<facet>/` — the same four files in every folder
- *   (`<facet>.handle.ts`, `.chain.ts`, `.result.ts`, `.project.ts`)
- *   plus what is unique to the facet. It reaches `model/` freely, and each
+ *   back, and to compare a golden through its accessor — `results/`.
+ * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
+ *   per result, and the accessors they compose.
+ * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`), the chain
+ *   (`.chain.ts`) and the vitest project (`.project.ts`), plus what is
+ *   unique to the facet. It reaches `model/` and `results/` freely, and each
  *   constructor opens the one seam its runtime needs.
  * - `seams/<dep>/` — one folder = one external dependency (or one node
- *   builtin, as `process/` is), plus `model/` and the facet vocabulary an
- *   adapter projects into (the device's ambiguity reading, the cli result a
- *   container exec produces).
+ *   builtin, as `process/` is), plus `model/`, the facet vocabulary an
+ *   adapter projects into (the device's ambiguity reading), and the text
+ *   accessor a page's golden answers through.
  * - `runner/` — the config surface: the preset, the project index, update
  *   mode, the literate plugin. It couples to `vite`/`vitest` by design.
  * - `lint/` — no external package of its own but oxlint's plugin types
@@ -45,6 +47,7 @@ const FRAMEWORK_LAYERS = {
         imports: [
             'facets/',
             'model/',
+            'results/',
             'runner/facet-project',
             'runner/preset',
             'runner/provided',
@@ -53,7 +56,6 @@ const FRAMEWORK_LAYERS = {
         packages: ['vite', 'vitest', 'vitest/config', '@vitest/browser-playwright'],
         seams: {
             'facets/api/api.handle.ts': ['seams/docker/', 'seams/hono/'],
-            'facets/cli/cli.result.ts': ['seams/docker/'],
             'facets/cli/cli.handle.ts': ['seams/docker/'],
             // The component model reaches its two seams and never the runner:
             // "after this test", "pin the clock" and "what did the project
@@ -110,18 +112,14 @@ const FRAMEWORK_LAYERS = {
     model: {
         imports: [
             'model/',
-            // A terminal action CONSTRUCTS the facet's result — `new
-            // HttpResult(…)`, `new PageResult(…)` — and the facet folder is
-            // where that class lives (`<facet>.result.ts`). It is a value
-            // edge, by design: one builder, seven results it names.
-            'facets/api/api.result',
-            'facets/cli/cli.result',
+            // A terminal action CONSTRUCTS its result — `new HttpResult(…)`,
+            // `new PageResult(…)` — and a golden is compared through the
+            // accessor it is handed: the builder and the matchers both reach
+            // `results/`, a value edge by design.
+            'results/',
             // And a document run is the cli's own engine, called by the
             // Builder's `run` the way its terminal actions are.
             'facets/cli/literate',
-            'facets/integration/integration.result',
-            'facets/mobile/mobile.result',
-            'facets/website/website.result',
             // The four seams that carry no engine of their own: a docker
             // Lookup is a shell read, the tree git does not ignore is one
             // `git ls-files`, a yaml document is a parse, a process is
@@ -140,6 +138,16 @@ const FRAMEWORK_LAYERS = {
             // Opener: the chain's `.intercept()` and the module-scope one.
             'model/chain/builder.ts': ['seams/msw/'],
             'model/contracts/intercept.ts': ['seams/msw/'],
+        },
+    },
+    // What a terminal action hands back: the result classes and the accessors
+    // they compose, over the model's bricks. A container's accessor and the
+    // cli result read `docker` through the seam that carries no engine.
+    results: {
+        imports: ['model/', 'results/'],
+        seams: {
+            'results/cli.result.ts': ['seams/docker/'],
+            'results/container.ts': ['seams/docker/'],
         },
     },
     runner: {
@@ -171,11 +179,13 @@ const FRAMEWORK_LAYERS = {
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
             'seams/peer',
+            // The page's golden commands answer through the text accessor
+            // every stream is compared by, one `TextAccessor` for both builds.
+            'results/text',
             // What an adapter PROJECTS into: the device's own reading of an
-            // Ambiguity and the result a container exec produces are the
-            // Facet's vocabulary, and a seam that copied them would answer in
-            // A second dialect. The SHARED readings are `model/elements/`.
-            'facets/cli/cli.result',
+            // Ambiguity is the facet's vocabulary, and a seam that copied it
+            // Would answer in a second dialect. The SHARED readings are
+            // `model/elements/`.
             'facets/mobile/ambiguity',
             'facets/mobile/projection',
         ],

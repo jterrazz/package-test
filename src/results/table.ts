@@ -1,5 +1,5 @@
-import { CaptureScope } from '../matching/match.js';
-import type { DatabasePort } from '../ports/database.port.js';
+import { CaptureScope } from '../model/matching/match.js';
+import type { DatabasePort } from '../model/ports/database.port.js';
 
 /** A table as a whole-table comparison reads it: every column, in the table's order, and every row. */
 export type TableContent = { columns: string[]; rows: unknown[][] };

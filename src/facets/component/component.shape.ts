@@ -4,9 +4,9 @@ import type {
     ContractResponder,
     ContractResponse,
 } from '../../model/contracts/exchange.js';
+import type { RenderResult } from '../../results/render.result.js';
 import type { ComponentUi, DomMount } from '../../seams/vitest-browser/ui.js';
 import type { componentVerbs } from '../../seams/vitest-browser/vitest-browser.adapter.js';
-import type { RenderResult } from './component.result.js';
 
 /**
  * The component facet's shape, stated where BOTH runtimes can read it.

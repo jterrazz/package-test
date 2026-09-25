@@ -1,7 +1,7 @@
-import { JsonAccessor } from '../../model/result/json.js';
-import { BaseResult } from '../../model/result/result.js';
-import type { BaseResultOptions } from '../../model/result/result.js';
-import { TextAccessor } from '../../model/result/text.js';
+import { JsonAccessor } from './json.js';
+import { BaseResult } from './result.js';
+import type { BaseResultOptions } from './result.js';
+import { TextAccessor } from './text.js';
 
 /** What `.call()` produced: the value it returned, or the error it threw. */
 export type CallOutcome = {

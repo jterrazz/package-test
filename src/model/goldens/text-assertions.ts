@@ -1,3 +1,4 @@
+import { TextAccessor } from '../../results/text.js';
 import { formatStdoutDiff } from '../chain/reporter.js';
 import { isDiskTarget } from '../chain/spec-path.js';
 import { refusal } from '../lesson/refusal.js';
@@ -5,7 +6,6 @@ import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
 import type { TableMatchOptions } from './match-options.js';
-import { TextAccessor } from './text.js';
 
 /**
  * What a stream assertion DECIDES, with no idea of where the fixture came from.

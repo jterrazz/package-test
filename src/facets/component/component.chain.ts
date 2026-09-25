@@ -5,6 +5,7 @@ import type {
     ContractResponder,
     ContractResponse,
 } from '../../model/contracts/exchange.js';
+import { RenderResult } from '../../results/render.result.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
     afterThisTest,
@@ -23,7 +24,6 @@ import {
     mountReact,
 } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { MountedSurface } from '../../seams/vitest-browser/vitest-browser.adapter.js';
-import { RenderResult } from './component.result.js';
 import type { ComponentChain, ComponentScenario, RenderSubject } from './component.shape.js';
 
 /**

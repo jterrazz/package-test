@@ -39,6 +39,12 @@ ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
+        // What a terminal action hands back is internal: a spec reads it off the result.
+        {
+            code: 'import { TextAccessor } from "../../src/results/text.js";',
+            errors: 1,
+            filename: '/repo/specs/cli/tokens/tokens.test.ts',
+        },
     ],
     valid: [
         // The public entry (composition root).

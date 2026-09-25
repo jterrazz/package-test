@@ -13,20 +13,20 @@ import {
     vi,
 } from 'vitest';
 
-import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
+import { ContainerAccessor } from '../../results/container.js';
+import { DirectoryAccessor } from '../../results/directory.js';
+import { FilesystemAccessor } from '../../results/filesystem.js';
+import { JsonAccessor } from '../../results/json.js';
+import { ResponseAccessor } from '../../results/response.js';
+import { TableAccessor } from '../../results/table.js';
+import { TextAccessor } from '../../results/text.js';
 import { directory, file } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
 import { CaptureScope } from '../matching/match.js';
 import type { DatabasePort } from '../ports/database.port.js';
-import { DirectoryAccessor } from '../result/directory.js';
-import { FilesystemAccessor } from '../result/filesystem.js';
-import { JsonAccessor } from '../result/json.js';
-import { ResponseAccessor } from '../result/response.js';
-import { TableAccessor } from '../result/table.js';
-import { WHOLE_MATCHER } from '../result/text-assertions.js';
-import { TextAccessor } from '../result/text.js';
 import { deferRewritesTo } from './in-place.js';
 import { buildUpdatedResponse, compareResponse, registerMatchers } from './matchers.js';
+import { WHOLE_MATCHER } from './text-assertions.js';
 
 const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 

@@ -16,9 +16,8 @@ import { cell, table } from './catalog.js';
  * one line that says where its proof is. A module that matches none of them
  * fails `siblings.test.ts`: write the test, or write the kind and defend it.
  *
- * The kinds are ORDERED — the first match wins — because a facet's
- * `<facet>.result.ts` is both a facet file and a re-export, and the narrower
- * reading is the true one.
+ * The kinds are ORDERED — the first match wins — so a path two kinds could
+ * claim is read by the narrower one, listed first.
  */
 
 /** One reason a module needs no sibling test, and the paths it covers. */
@@ -124,7 +123,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests)',
     },
     {
-        claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.(?:chain|result)\.ts$/u.test(path),
+        claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
         name: 'the facet file set, as a re-export',
         why: 'the six node facets share one builder, so these name it rather than implement it — `builder.test.ts` and `facet-matrix.test.ts` hold the thing they name',
     },
@@ -144,7 +143,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/cli/cli.handle.ts',
             'src/facets/cli/literate.ts',
             'src/facets/component/component.handle.ts',
-            'src/facets/component/rendered-text.ts',
             'src/facets/integration/integration.handle.ts',
             'src/facets/jobs/jobs.handle.ts',
             'src/facets/website/website.handle.ts',
@@ -154,20 +152,27 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/model/result/directory.ts',
-            'src/model/result/filesystem.ts',
-            'src/model/result/json.ts',
-            'src/model/result/match-options.ts',
-            'src/model/result/response.ts',
-            'src/model/result/table.ts',
-            'src/model/result/text.ts',
+            'src/model/goldens/match-options.ts',
+            'src/results/container.ts',
+            'src/results/directory.ts',
+            'src/results/fetch.result.ts',
+            'src/results/filesystem.ts',
+            'src/results/http.result.ts',
+            'src/results/jobs.result.ts',
+            'src/results/json.ts',
+            'src/results/page.result.ts',
+            'src/results/render.result.ts',
+            'src/results/rendered-text.ts',
+            'src/results/response.ts',
+            'src/results/screen.result.ts',
+            'src/results/table.ts',
+            'src/results/text.ts',
         ),
         name: 'a result accessor',
         why: 'an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base',
     },
     {
         claims: oneOf(
-            'src/seams/docker/container-accessor.ts',
             'src/seams/docker/docker-lookup.ts',
             'src/seams/hono/hono.adapter.ts',
             'src/seams/msw/handlers.ts',
@@ -209,7 +214,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/model/chain/docker-reader.ts',
             'src/model/chain/ground.ts',
             'src/model/chain/registry.ts',
             'src/model/chain/services.ts',

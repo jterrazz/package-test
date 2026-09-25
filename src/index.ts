@@ -59,12 +59,12 @@ export { processService as process, ProcessHandle } from './model/chain/process.
 export { type DatabaseKeys, type ServiceRecord } from './model/chain/services.js';
 
 // Facets — each chain is named in its own folder, beside the constructor that
-// Builds it and the result it hands back (the four files every facet carries).
+// Builds it.
 export type { ApiSpecification } from './facets/api/api.chain.js';
 export type { CliSpecification } from './facets/cli/cli.chain.js';
 export type { IntegrationSpecification } from './facets/integration/integration.chain.js';
 export type { JobsSpecification } from './facets/jobs/jobs.chain.js';
-export type { JobsResult } from './facets/jobs/jobs.result.js';
+export type { JobsResult } from './results/jobs.result.js';
 export type { MobileSpecification } from './facets/mobile/mobile.chain.js';
 export type { WebsiteSpecification } from './facets/website/website.chain.js';
 export type {
@@ -82,19 +82,20 @@ export type {
 // thing a consumer needs the name for is annotating a helper that takes one.
 // Publishing the classes exported a constructor nobody may call and a
 // prototype chain the package is then not free to change.
-export type { FileAccessor } from './model/result/result.js';
+export type { FileAccessor } from './results/result.js';
 export type { TestSettings } from './settings.js';
-export type { BaseResult } from './model/result/result.js';
-export type { CliResult } from './facets/cli/cli.result.js';
-export type { ContainerAccessor } from './seams/docker/container-accessor.js';
-export type { CallResult } from './facets/integration/integration.result.js';
-export type { HttpResult } from './facets/api/api.result.js';
-export type { ScreenResult } from './facets/mobile/mobile.result.js';
-export type { FetchResult, PageResult } from './facets/website/website.result.js';
-export type { DirectoryAccessor } from './model/result/directory.js';
-export type { FilesystemAccessor } from './model/result/filesystem.js';
-export type { ResponseAccessor } from './model/result/response.js';
-export { text } from './model/result/text-subject.js';
+export type { BaseResult } from './results/result.js';
+export type { CliResult } from './results/cli.result.js';
+export type { ContainerAccessor } from './results/container.js';
+export type { CallResult } from './results/call.result.js';
+export type { HttpResult } from './results/http.result.js';
+export type { ScreenResult } from './results/screen.result.js';
+export type { FetchResult } from './results/fetch.result.js';
+export type { PageResult } from './results/page.result.js';
+export type { DirectoryAccessor } from './results/directory.js';
+export type { FilesystemAccessor } from './results/filesystem.js';
+export type { ResponseAccessor } from './results/response.js';
+export { text } from './results/text-subject.js';
 
 // Ports
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './model/ports/cli.port.js';

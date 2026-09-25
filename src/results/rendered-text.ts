@@ -1,4 +1,4 @@
-import { TextAccessor } from '../../model/result/text.js';
+import { TextAccessor } from './text.js';
 
 /**
  * A stream captured INSIDE the page.

@@ -1,10 +1,7 @@
 import { chai, expect, inject } from 'vitest';
 
 import { isDiskFile } from '../../model/chain/spec-path.js';
-import { refusal } from '../../model/lesson/refusal.js';
-import { dedent } from '../../model/matching/dedent.js';
-import { mergeTextPreservingPlaceholders } from '../../model/matching/structural.js';
-import type { MatchFixtureOptions } from '../../model/result/match-options.js';
+import type { MatchFixtureOptions } from '../../model/goldens/match-options.js';
 import {
     compareStreamInPlace,
     compareStreamText,
@@ -14,9 +11,12 @@ import {
     requireExtension,
     streamValueRoute,
     WHOLE_MATCHER,
-} from '../../model/result/text-assertions.js';
-import type { WholeCall } from '../../model/result/text-assertions.js';
-import { TextAccessor } from '../../model/result/text.js';
+} from '../../model/goldens/text-assertions.js';
+import type { WholeCall } from '../../model/goldens/text-assertions.js';
+import { refusal } from '../../model/lesson/refusal.js';
+import { dedent } from '../../model/matching/dedent.js';
+import { mergeTextPreservingPlaceholders } from '../../model/matching/structural.js';
+import { TextAccessor } from '../../results/text.js';
 import { readGolden, writeGolden, writeInPlaceText } from './vitest-browser.adapter.js';
 
 /**
@@ -26,7 +26,7 @@ import { readGolden, writeGolden, writeInPlaceText } from './vitest-browser.adap
  * `process.env`/`process.argv`; a page has neither. Everything ELSE is the same
  * assertion — the name-with-extension contract, the `{{token}}` grammar, the
  * diff, the "does not exist" refusal, the update hint, `{ frozen: true }` —
- * because the comparison lives in `result/text-assertions.ts` and both builds
+ * because the comparison lives in `goldens/text-assertions.ts` and both builds
  * call it. Only the transport differs: two server commands and one `provide`.
  */
 

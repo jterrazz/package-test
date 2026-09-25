@@ -13,8 +13,14 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
+import { ContainerAccessor } from '../../results/container.js';
+import { diffDirectories, DirectoryAccessor, walkDirectory } from '../../results/directory.js';
+import { FilesystemAccessor } from '../../results/filesystem.js';
+import { JsonAccessor } from '../../results/json.js';
+import { ResponseAccessor } from '../../results/response.js';
+import { TableAccessor } from '../../results/table.js';
+import { TextAccessor } from '../../results/text.js';
 import { missingHint, shouldUpdateSnapshots } from '../../runner/update.js';
-import { ContainerAccessor } from '../../seams/docker/container-accessor.js';
 import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from '../chain/reporter.js';
 import { resolveSpecPath } from '../chain/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../chain/spec-path.js';
@@ -30,12 +36,17 @@ import {
     renderExpected,
     structuralEquals,
 } from '../matching/structural.js';
-import { diffDirectories, DirectoryAccessor, walkDirectory } from '../result/directory.js';
-import { FilesystemAccessor } from '../result/filesystem.js';
-import { JsonAccessor } from '../result/json.js';
-import type { MatchFixtureOptions, TableMatchOptions } from '../result/match-options.js';
-import { ResponseAccessor } from '../result/response.js';
-import { TableAccessor } from '../result/table.js';
+import {
+    callSiteOf,
+    deferRewritesTo,
+    renderRows,
+    renderText,
+    renderValue,
+    writeInPlace,
+} from './in-place.js';
+import type { MatchFixtureOptions, TableMatchOptions } from './match-options.js';
+import { pairRows } from './rows.js';
+import type { Rows } from './rows.js';
 import {
     compareStreamInPlace,
     compareStreamText,
@@ -46,19 +57,8 @@ import {
     requireExtension,
     streamValueRoute,
     WHOLE_MATCHER,
-} from '../result/text-assertions.js';
-import type { ValueRoute, WholeCall } from '../result/text-assertions.js';
-import { TextAccessor } from '../result/text.js';
-import {
-    callSiteOf,
-    deferRewritesTo,
-    renderRows,
-    renderText,
-    renderValue,
-    writeInPlace,
-} from './in-place.js';
-import { pairRows } from './rows.js';
-import type { Rows } from './rows.js';
+} from './text-assertions.js';
+import type { ValueRoute, WholeCall } from './text-assertions.js';
 
 type MatcherResult = {
     message: () => string;

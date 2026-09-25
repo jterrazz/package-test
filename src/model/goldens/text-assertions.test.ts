@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
+import { TextAccessor } from '../../results/text.js';
 import { file } from '../chain/spec-path.js';
 import {
     cutFramesUnder,
@@ -8,7 +9,6 @@ import {
     streamValueRoute,
     WHOLE_MATCHER,
 } from './text-assertions.js';
-import { TextAccessor } from './text.js';
 
 /**
  * The framework routes `toMatch`'s disk arguments to the golden and leaves every

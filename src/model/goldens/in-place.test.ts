@@ -39,7 +39,7 @@ describe('callSiteOf — the frame of the test that called toMatch', () => {
         // Given - a stack through the framework's router, vitest, then the test
         const stack = [
             'Error: toMatch call site',
-            `    at Proxy.toMatch (${join(import.meta.dirname, '../result/text-assertions.ts')}:163:34)`,
+            `    at Proxy.toMatch (${join(import.meta.dirname, 'text-assertions.ts')}:163:34)`,
             '    at file:///repo/node_modules/@vitest/expect/dist/index.js:1:2',
             '    at /work/specs/api/users/users.spec.ts:12:33',
         ].join('\n');

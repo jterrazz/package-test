@@ -1,4 +1,4 @@
-import { CaptureScope } from '../matching/match.js';
+import { CaptureScope } from '../model/matching/match.js';
 import { stripAnsiCodes } from './text.js';
 
 /**

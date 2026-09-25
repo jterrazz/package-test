@@ -1,4 +1,4 @@
-import { CaptureScope } from '../matching/match.js';
+import { CaptureScope } from '../model/matching/match.js';
 import { grep as grepBlocks } from './grep.js';
 
 // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
