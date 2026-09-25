@@ -36,8 +36,10 @@ test('ranks a fresher post above an older one of equal score', () => {
 
 ```typescript
 // specs/integration/posts/find.spec.ts
+import { file } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
+import { findPost } from '../../../src/posts/find-post.js';
 import { integration } from '../integration.specification.js';
 
 test('finds the post the migration wrote', async () => {
@@ -55,10 +57,15 @@ test('finds the post the migration wrote', async () => {
 
 ```tsx
 // src/presentation/post-table.test.tsx
-import { component, content } from '@jterrazz/test';
+import { component, content, defineStub, file, http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { PostTable } from './post-table.js';
+
+const listing = defineStub({
+    request: http.get('/api/posts'),
+    response: http.json({ posts: [{ id: 1, title: 'A first post' }], total: 200 }),
+});
 
 test('says how much of the collection the table is showing', async () => {
     // Given - a page of one row answering for a collection of two hundred
@@ -119,6 +126,11 @@ test('bookmarks an event from its detail screen', async () => {
 **An API** — the assembled app, met through a complete HTTP exchange, the whole response written where the test reads it ([docs/10](docs/10-api.md)):
 
 ```typescript
+// specs/api/users/create.spec.ts
+import { expect, test } from 'vitest';
+
+import { api } from '../api.specification.js';
+
 test('creates a user and answers with it', async () => {
     // Given - the complete request
     const result = await api.post('/users', { name: 'Alice' });
@@ -137,6 +149,12 @@ test('creates a user and answers with it', async () => {
 **A job** — what a name triggers, in-process ([docs/11](docs/11-job.md)):
 
 ```typescript
+// specs/job/digest/daily-digest.spec.ts
+import { file } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+import { job } from '../job.specification.js';
+
 test('writes one digest row per active subscriber', async () => {
     // Given - two subscribers, from the seed beside the test
     const result = await job.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
@@ -173,7 +191,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | What the framework is, its trees, its channels, its four entries | [docs/01](docs/01-architecture.md)                               |
 | Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
 | What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)       |
-| Each kind of test, one chapter, the same seven sections          | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
+| Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
 | A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                  |
 | Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
 | Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
