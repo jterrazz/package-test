@@ -19,7 +19,7 @@ The repository answers six `make` targets, the same six every repository of the 
 
 Three targets stand beside them, and no flow speaks them. `make test-mobile` runs the mobile specs on a real iOS simulator, which no CI job provisions — [03 — Testing](03-testing.md) says when it is owed. `make test-changed` runs only the tests the uncommitted changes reach (`vitest --changed`): the local loop, never a verdict — like any partial run, it judges no route ratchet ([10 — API](10-api.md)). `make test-merge` reads back the blob reports of a sharded run as one, then judges the coverage floor and the route ratchet on it — [03 — Testing](03-testing.md#what-ci-runs) says how a run is split. Every target installs first. CI calls `build`, `lint` and `test` — [03 — Testing](03-testing.md) § What CI runs. Two gestures sit below the six, for the loop: `npx vitest --run --project unit` runs the fast suite with no infrastructure, and `npm run docs` regenerates the generated tables.
 
-`better-sqlite3` is a native dependency, and this repository runs its 13 line, which ships its binding prebuilt for every platform it supports: an npm that withholds install scripts leaves nothing unbuilt, so the `sqlite()` specs of the `unit` project need no rebuild after `npm ci`.
+The `sqlite()` specs of the `unit` project need no rebuild after `npm ci`: this repository runs the `better-sqlite3` line whose native binding ships prebuilt — [04 § What a consumer must bring](04-operating.md#what-a-consumer-must-bring) says which line that is, and what an older one costs.
 
 ### The build comes first
 
@@ -50,8 +50,7 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 Four things land in the SAME commit as the change that makes them true.
 
 - **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. It is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
-- **The regenerated tables.** `npm run docs` rewrites them all at once — the rule catalogue spliced into [19 — Linting](19-linting.md), the capability matrix, the siblingless table and the package's own rules in [03 — Testing](03-testing.md), the fork in [18 — Conventions](18-conventions.md), and `schema/spec.schema.json`. Never edit one by hand: the freshness meta-tests fail on a hand edit.
-
+- **The regenerated tables.** `npm run docs` rewrites every `GENERATED` block at once — in [03 — Testing](03-testing.md) the layered reading (`layers`), the siblingless table (`siblings`), the capability matrix (`matrix`), the meta-test channel (`meta-tests`) and the package's own rules (`self-rules`); the rule catalogue in [19 — Linting](19-linting.md) (`catalog`); the fork in [18 — Conventions](18-conventions.md) (`fork`) — and `schema/spec.schema.json`. Never edit one by hand: the freshness meta-tests fail on a hand edit.
 - **The chapter the behaviour falsified.** A page that still describes the old behaviour is a defect that ships. The corpus is mapped by [`docs/README.md`](README.md).
 - **The skill, when the public surface moved.** `skills/jterrazz-test/SKILL.md` is hand-written and short — which kind, the pitfalls, the chapter to read next — and a meta-test fails when it names a symbol the entries do not export or a chapter that is not on disk; `README.md` is the vitrine and moves with a public API change too.
 
@@ -65,16 +64,9 @@ The rest of this chapter takes a consuming project from `npm install` to two pas
 npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
-Peer dependencies:
-
-| Package                | Required | Needed for                                                                    |
-| ---------------------- | -------- | ----------------------------------------------------------------------------- |
-| `vitest`               | yes      | Everything — the framework registers its matchers into vitest                 |
-| `@jterrazz/typescript` | yes      | The published types — they add the `test` section to its `jterrazz.config.ts` |
+Those two are the required peers; every other peer is optional, loaded the first time a spec needs it. Which one each facet and service needs, and when Docker must be running, is [04 — Operating § What a consumer must bring](04-operating.md#what-a-consumer-must-bring).
 
 `msw` (outgoing HTTP interception for `.intercept()`) ships as a direct dependency — no separate install. API specs pass your web app to `server`; the adapter only needs an object with a `request()` method, so bring your own web framework (e.g. `hono`) in your project.
-
-**Docker** must be running for container-backed services (`postgres()`, `redis()`). `sqlite()` and plain CLI specs need no Docker.
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch(file(…))` types on one subject and not on another.
 
@@ -143,6 +135,7 @@ Content-Type: application/json
 
 ```typescript
 // specs/api/users/create/shape.spec.ts — POST /users, the whole response of the ordinary case
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 import { api } from '../../api.specification.js';
 
@@ -177,6 +170,7 @@ afterAll(cleanup);
 
 ```typescript
 // specs/cli/help/usage.spec.ts — the `help` command, its usage banner
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 import { cli } from '../cli.specification.js';
 
@@ -229,7 +223,7 @@ What every helper accepts, on top of the project it already is:
 | `timeout`             | Raise (or lower) the preset's 30 s for this project alone                                                                              |
 | `serial`              | `fileParallelism: false` — the project's files run one at a time, for a facet whose files share one server, one database file, one app |
 
-`component()` takes four more that are the APP's — `vite`, `wrap`, `viewport`, `timezone`/`locale`, and the `root` its relative paths are read against — and [07 — Component specs](07-component.md) owns them; `unit()` takes `roots`, and `isolate`.
+`component()` takes more that are the APP's — `vite`, `wrap`, `viewport`, `clock`, `timezone`/`locale`, and the `root` its relative paths are read against — and [07 — Component specs](07-component.md) owns them; `unit()` takes `roots`, and `isolate`.
 
 `unit({ isolate: false })` runs every file of a worker in one module graph instead of a fresh one per file, so a worker imports each module once. It is for a PURE project: a test that leaves state in a module — a registry, a globally registered matcher, a cache — reaches the next file of its worker, and fails there. Absent, vitest isolates each file. This package's own `unit` project is not pure — its matcher and update-mode modules keep state across a file — so it stays isolated.
 
@@ -257,7 +251,7 @@ It deliberately sets **nothing else**. `fileParallelism` is a per-project truth 
 
 **Why the artefact paths are the preset's.** Every one of them is a path the TOOL pins and a consumer never writes: a repository does not choose where `context.annotate()` lands, it discovers it one CI run later, as an untracked `.vitest/` beside `.artifacts/`. Moving them here is the same rule the estate applies to every tool — what a tool generates lives at `.artifacts/<tool>/` — applied once instead of in fourteen configs.
 
-Two behaviours worth knowing:
+Three behaviours worth knowing:
 
 - **Projects inherit the defaults too.** Vitest resolves each project as its own config and it inherits nothing from the root, so the preset merges the budgets, the exclusions and the cache dir into every inline project. A project declared as a glob string, a promise or a function is handed back untouched.
 - **Each glob is stated once.** A project's `exclude` REPLACES vitest's own defaults, so every project carries the preset's list in full; the root's list, which vitest concatenates into each project on top of that, then holds only what YOU stated there. The no-tests banner is the one place a consumer ever reads that list, and it read as three merges of the same three globs.
@@ -359,7 +353,7 @@ specs/
 
 ## Pitfalls
 
-- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `job`, `cli`, `website`, `mobile` are enforced (rule A3).
+- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `job`, `cli`, `integration`, `website`, `mobile` are enforced (rule A3).
 - **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
 - **Importing from a subpath the `exports` map does not publish** (`@jterrazz/test/services`). Everything a spec needs comes from `@jterrazz/test` (rule F1).
 - **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule B4); `// When` only when the action is not obvious — the chain _is_ the when.
