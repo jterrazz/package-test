@@ -665,7 +665,7 @@ describe('the 16 → 17 mover — the oxlint config', () => {
         expect(again).toStrictEqual([]);
     });
 
-    test('an override of F3, a rule 17 keeps home as a self rule, leaves too', () => {
+    test('an override of F3, a rule 17 retired, leaves too', () => {
         // Given - a member that turned 16's F3 off for its specs
         const member = tree16(
             {

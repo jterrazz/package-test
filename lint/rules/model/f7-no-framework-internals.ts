@@ -16,7 +16,7 @@ import type { LintRule, Visitor } from '../../rule-shape.js';
 const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams']);
 
 /**
- * CONVENTIONS F3 — from `specs/`, a relative import resolving inside the
+ * CONVENTIONS F7 — from `specs/`, a relative import resolving inside the
  * framework repo's `src/{model,facets,seams,runner,lint}/` is forbidden: a
  * spec of the framework reaches it through the public entry, as a consumer
  * does. A consumer's imports of its OWN app source are always allowed — that
@@ -26,7 +26,7 @@ const FRAMEWORK_LAYERS = new Set(['facets', 'lint', 'model', 'runner', 'seams'])
  * this repository, so the rule ships in the self plugin alone. A
  * `@jterrazz/test/<subpath>` import is F1's, from any file.
  */
-export const f3SpecsPublicEntry: LintRule = {
+export const f7NoFrameworkInternals: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => specsAnchorOf(context) !== undefined,
@@ -50,8 +50,8 @@ export const f3SpecsPublicEntry: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['f3-specs-public-entry'],
-        messages: lessons('f3-specs-public-entry', {
+        docs: RULE_DOCS['f7-no-framework-internals'],
+        messages: lessons('f7-no-framework-internals', {
             deepImport: {
                 found: 'a spec deep-imports "{{source}}", a framework internal',
                 fix: 'import it from `@jterrazz/test` (`src/index.js` in this repository); a probe of what the entry does not publish is a module test beside its module',

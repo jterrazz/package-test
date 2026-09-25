@@ -738,7 +738,7 @@ export const RULE_DOCS = {
             "Keeping test artefacts out of production protects the consumer's application bundle.",
         reach: 'all',
     },
-    'f3-specs-public-entry': {
+    'f7-no-framework-internals': {
         audience: 'self',
         channel: 'statique',
         convention:
@@ -746,7 +746,7 @@ export const RULE_DOCS = {
         facet: 'model',
         family: 'F',
         fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',
-        id: 'F3',
+        id: 'F7',
         rationale:
             'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; the five folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
         reach: 'specs',
@@ -1578,7 +1578,7 @@ export const META_ROWS: CatalogEntry[] = [
         id: 'K12',
         name: 'k12-rule-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 refused a consumer’s own `src/model/`.',
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 (whose self half is F7) refused a consumer’s own `src/model/`.',
         reach: 'all',
     },
     {

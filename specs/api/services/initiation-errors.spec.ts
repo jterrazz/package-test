@@ -7,7 +7,7 @@ import { beforeAll, describe, expect, test, vi } from 'vitest';
 
 // Import via the package entry point — it wires the integration registry the
 // Constructors consume, and it is the door a spec reaches the framework
-// Through (rule F3).
+// Through (rule F7).
 import { postgres, redis, specification } from '../../../src/index.js';
 
 const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '');

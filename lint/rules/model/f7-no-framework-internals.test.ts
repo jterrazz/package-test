@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { f3SpecsPublicEntry } from './f3-specs-public-entry.js';
+import { f7NoFrameworkInternals } from './f7-no-framework-internals.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintRule, {
+ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as OxlintRule, {
     invalid: [
         // Deep specification-layer import from a spec.
         {
@@ -63,7 +63,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             code: 'import { redis } from "../../index.js";',
             filename: '/repo/specs/integration/redis/redis.test.ts',
         },
-        // An unpublished subpath is F1's, from any file: F3 does not report it twice.
+        // An unpublished subpath is F1's, from any file: F7 does not report it twice.
         {
             code: 'import { match } from "@jterrazz/test/core";',
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
@@ -88,7 +88,7 @@ ruleTester.run('f3-specs-public-entry', f3SpecsPublicEntry as unknown as OxlintR
             code: 'import { match } from "../matching/match.js";',
             filename: '/repo/src/model/goldens/matchers.ts',
         },
-        // Consumer form — the ROOT entry is what F3 points a spec at.
+        // Consumer form — the ROOT entry is what F7 points a spec at.
         {
             code: 'import { specification } from "@jterrazz/test";',
             filename: '/repo/specs/setup/api.specification.ts',

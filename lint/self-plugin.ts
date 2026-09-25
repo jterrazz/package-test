@@ -1,5 +1,5 @@
 import type { LintPlugin } from './rule-shape.js';
-import { f3SpecsPublicEntry } from './rules/model/f3-specs-public-entry.js';
+import { f7NoFrameworkInternals } from './rules/model/f7-no-framework-internals.js';
 
 /**
  * The self plugin — the static rules whose audience is `self`: this
@@ -15,7 +15,7 @@ import { f3SpecsPublicEntry } from './rules/model/f3-specs-public-entry.js';
 const selfPlugin: LintPlugin = {
     meta: { name: 'jterrazz-self' },
     rules: {
-        'f3-specs-public-entry': f3SpecsPublicEntry,
+        'f7-no-framework-internals': f7NoFrameworkInternals,
     },
 };
 

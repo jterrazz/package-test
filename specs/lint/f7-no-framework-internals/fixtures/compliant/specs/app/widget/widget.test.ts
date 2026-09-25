@@ -1,6 +1,6 @@
 import { expect, test } from 'vitest';
 
-// Own-app source import — the documented pattern (F3 allows a consumer spec to
+// Own-app source import — the documented pattern (F7 allows a consumer spec to
 // reach its OWN app's src/, e.g. `server: () => createApp()`). Not a framework
 // internal, so no diagnostic.
 import { createApp } from '../../../src/app.js';

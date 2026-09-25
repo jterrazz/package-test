@@ -9,7 +9,7 @@ import { cli as dockerCli } from '../docker-cli.specification.js';
  * It is asked of `docker` directly, not of the framework: the container
  * lifecycle is what is under test here, so the oracle has to be a SECOND
  * opinion. Reading it through the same helper the dispose path uses would make
- * the assertion agree with the code by construction — and F3 has a spec reach
+ * the assertion agree with the code by construction — and F7 has a spec reach
  * the framework through its public entry, which this is not part of.
  */
 function containersLabelled(key: string, value: string): string[] {

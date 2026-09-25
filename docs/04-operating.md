@@ -136,7 +136,7 @@ has run. What it leaves to the reader:
   `.oxlintrc.json`): an override of a renamed rule names its 17 id, and an
   override of a static rule 17 retired is removed with the comment lines
   directly above it —
-  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist, and `f3-specs-public-entry` is no longer published — it holds this package alone ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
+  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist, and neither does `f3-specs-public-entry`: its subpath half is F1's, and the rest holds this package alone.
   What a removed override tuned is not carried over: the rule that replaced
   it, if any, is judged at its own defaults.
 - **A computed name is out of its reach.** A template or a variable naming a

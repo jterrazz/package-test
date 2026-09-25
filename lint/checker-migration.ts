@@ -223,8 +223,8 @@ const QUOTES = new Set(["'", '"', '`']);
 /**
  * The static rules 16 published and 17's published plugin no longer defines
  * — an override of one in an oxlint config stops oxlint from starting. F3 is
- * one: 17 keeps it home, a rule of the self plugin. A rule 17 renamed is in
- * {@link RENAMED_RULES} instead.
+ * one: its subpath half is F1's, and the rest holds this package alone.
+ * A rule 17 renamed is in {@link RENAMED_RULES} instead.
  */
 const RETIRED_RULES: readonly string[] = [
     'b2-known-fixture-marker',

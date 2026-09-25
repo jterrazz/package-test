@@ -91,7 +91,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         const fragment = {
             testing: {
                 jsPlugins: ['jterrazz-self/plugin'],
-                overrides: [{ rules: { 'jterrazz/f3-specs-public-entry': 'off' } }],
+                overrides: [{ rules: { 'jterrazz/f7-no-framework-internals': 'off' } }],
             },
             nested: [{ meta: { docs: { audience: 'self' } } }],
         };
@@ -99,7 +99,7 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         // Then - each is answered at the path it was found
         expect(selfExposures(fragment, self, 'x')).toStrictEqual([
             'x.testing.jsPlugins.0 = jterrazz-self/plugin',
-            'x.testing.overrides.0.rules.jterrazz/f3-specs-public-entry',
+            'x.testing.overrides.0.rules.jterrazz/f7-no-framework-internals',
             'x.nested.0 (meta.docs.audience: self)',
         ]);
     });
