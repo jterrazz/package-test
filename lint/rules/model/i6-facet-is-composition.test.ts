@@ -5,6 +5,8 @@ import { i6FacetIsComposition } from './i6-facet-is-composition.js';
 const COMPOSED = `
 import { trigger } from '../../actions/trigger/trigger.action.js';
 import { clock } from '../../capabilities/clock/clock.capability.js';
+import { getCallerDir } from '../../model/chain/caller.js';
+import { databaseSet } from '../../seams/fs/database-set.js';
 import { processClock } from '../../seams/vitest/clock.engine.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
@@ -20,8 +22,8 @@ export interface JobsSpecification extends ChainOf<typeof composition, never, Jo
 
 export const jobsFacet = defineFacet<JobsSpecification>()({
     ...composition,
-    engines: (config) => ({ clock: processClock, jobs: config.jobs ?? [] }),
-    locate: () => '',
+    engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),
+    locate: getCallerDir,
 });
 `;
 
@@ -60,10 +62,46 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
         // Engines built in a block of statements, rather than handed back as the adapters.
         {
             code: COMPOSED.replace(
-                'engines: (config) => ({ clock: processClock, jobs: config.jobs ?? [] }),',
+                'engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
                 'engines: (config) => {\n        const jobs = config.jobs ?? [];\n        return { clock: processClock, jobs };\n    },',
             ),
             errors: [{ messageId: 'engines' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // A setup defined inside the composition, its reduce and all, rather than imported from its folder.
+        {
+            code: COMPOSED.replace(
+                'capabilities: [clock],',
+                "capabilities: [defineSetup({ name: 'clock', row: {}, reduce: (args, state) => ({ ...state, clock: new Date(String(args[0])).toISOString() }) })],",
+            ),
+            errors: [{ messageId: 'listed' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // An adapter written inline, however it is nested, and a builder no seam exports.
+        {
+            code: COMPOSED.replace(
+                'clock: processClock,',
+                'clock: { pin: (iso) => { const at = new Date(iso); vi.setSystemTime(at); return at; } }, network: clock.build(config),',
+            ),
+            errors: [{ messageId: 'adapter' }, { messageId: 'adapter' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // Where the facet's paths start, computed in the facet.
+        {
+            code: COMPOSED.replace(
+                'locate: getCallerDir,',
+                "locate: () => {\n        const stack = new Error().stack ?? '';\n        return stack.split('\\n')[3] ?? '';\n    },",
+            ),
+            errors: [{ messageId: 'inline' }],
+            filename: '/repo/src/facets/jobs/jobs.facet.ts',
+        },
+        // An option whose row is computed, and a member no composition holds.
+        {
+            code: COMPOSED.replace(
+                "options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } }",
+                "options: { root: { group: 'Constructor option', name: 'root', probe: String('root:') } }",
+            ).replace('actions: [trigger],', 'actions: [trigger],\n    kernel: clock.reduce,'),
+            errors: [{ messageId: 'member' }, { messageId: 'option' }],
             filename: '/repo/src/facets/jobs/jobs.facet.ts',
         },
         // The constructor running a definition's step, and building a result.

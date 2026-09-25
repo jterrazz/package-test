@@ -1,15 +1,9 @@
 import type { Context } from '@oxlint/plugins';
 
-import {
-    child,
-    childList,
-    findProperty,
-    identifierName,
-    segments,
-    stringValue,
-} from '../../ast.js';
+import { child, childList, identifierName, segments, stringValue } from '../../ast.js';
+import { facetFileFindings, layerOf } from '../../facet-file.js';
 import { lessonsAt } from '../../lesson.js';
-import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js';
 
 /** What a facet's folder file is: its composition, its constructor, or neither. */
@@ -25,103 +19,6 @@ function facetFileOf(filename: string): FacetFile {
         return 'composition';
     }
     return file === `${facet}.handle.ts` ? 'constructor' : undefined;
-}
-
-/** The expression under the `as const` and `satisfies` it is written with. */
-function unwrapped(node: AstNode | undefined): AstNode | undefined {
-    return node?.type === 'TSAsExpression' ||
-        node?.type === 'TSSatisfiesExpression' ||
-        node?.type === 'ParenthesizedExpression'
-        ? unwrapped(child(node, 'expression'))
-        : node;
-}
-
-/** The one declarator of a `const` statement, or `undefined` for any other statement. */
-function constDeclarator(statement: AstNode | undefined): AstNode | undefined {
-    const declarators = childList(statement, 'declarations');
-    return statement?.type === 'VariableDeclaration' &&
-        statement.kind === 'const' &&
-        declarators.length === 1
-        ? declarators[0]
-        : undefined;
-}
-
-/** `const composition = { … }`, written with `as const` or a `satisfies`. */
-function isComposition(statement: AstNode): boolean {
-    const declarator = constDeclarator(statement);
-    return (
-        identifierName(child(declarator, 'id')) === 'composition' &&
-        unwrapped(child(declarator, 'init'))?.type === 'ObjectExpression'
-    );
-}
-
-/** The object `defineFacet<…>()({ … })` is handed, when the statement exports one. */
-function definedFacet(statement: AstNode): AstNode | undefined {
-    const init = child(constDeclarator(child(statement, 'declaration')), 'init');
-    const inner = child(init, 'callee');
-    const [facet] = childList(init, 'arguments');
-    return init?.type === 'CallExpression' &&
-        inner?.type === 'CallExpression' &&
-        identifierName(child(inner, 'callee')) === 'defineFacet' &&
-        facet?.type === 'ObjectExpression'
-        ? facet
-        : undefined;
-}
-
-/** Is the statement an interface — the chain type the facet names? */
-function isChainType(statement: AstNode): boolean {
-    const declared =
-        statement.type === 'ExportNamedDeclaration' ? child(statement, 'declaration') : statement;
-    return declared?.type === 'TSInterfaceDeclaration';
-}
-
-/** `engines: (config) => ({ … })` — an arrow handing back the object of the adapters. */
-function wiresAdapters(facet: AstNode): boolean {
-    const engines = child(findProperty(facet, 'engines'), 'value');
-    return (
-        engines?.type === 'ArrowFunctionExpression' &&
-        unwrapped(child(engines, 'body'))?.type === 'ObjectExpression'
-    );
-}
-
-/** What a statement a composition cannot hold is, as a finding names it. */
-function strayOf(statement: AstNode): string {
-    const declared =
-        statement.type === 'ExportNamedDeclaration' || statement.type === 'ExportDefaultDeclaration'
-            ? (child(statement, 'declaration') ?? statement)
-            : statement;
-    return declared.type
-        .replaceAll(/(?<lower>[a-z])(?<upper>[A-Z])/gu, '$<lower> $<upper>')
-        .toLowerCase();
-}
-
-/** The layer an import source names inside `src/`, when it is one a definition or a result lives in. */
-function layerOf(source: string): 'definition' | 'result' | undefined {
-    if (/(?:^|\/)(?:capabilities|actions)\//u.test(source)) {
-        return 'definition';
-    }
-    return /(?:^|\/)results\//u.test(source) ? 'result' : undefined;
-}
-
-/** Report every statement of a facet file that is not its composition, and engines that are not adapters. */
-function judgeComposition(context: Context, program: AstNode): void {
-    for (const statement of childList(program, 'body')) {
-        const facet = definedFacet(statement);
-        if (facet !== undefined && !wiresAdapters(facet)) {
-            context.report({ messageId: 'engines', node: statement });
-        } else if (
-            facet === undefined &&
-            statement.type !== 'ImportDeclaration' &&
-            !isComposition(statement) &&
-            !isChainType(statement)
-        ) {
-            context.report({
-                data: { stray: strayOf(statement) },
-                messageId: 'stray',
-                node: statement,
-            });
-        }
-    }
 }
 
 /** A definition's own steps — what the chain runs, never its constructor. */
@@ -181,7 +78,9 @@ export const i6FacetIsComposition: LintRule = {
             },
             Program: (node) => {
                 if (file === 'composition') {
-                    judgeComposition(context, node);
+                    for (const finding of facetFileFindings(node)) {
+                        context.report(finding);
+                    }
                 }
             },
         };
@@ -191,6 +90,10 @@ export const i6FacetIsComposition: LintRule = {
         messages: lessonsAt(
             selfRowOf('i6-facet-is-composition'),
             {
+                adapter: {
+                    found: 'the engine `{{port}}` is a {{what}} written in the facet, not an adapter a seam builds',
+                    fix: 'name the adapter, or call the constructor its seam under `src/seams/` exports, on the config alone',
+                },
                 buildsResult: {
                     found: 'the constructor builds a `{{built}}`, a result',
                     fix: 'let the action the chain ends on construct what it hands back; the constructor opens the facet (`<facet>Facet.open(config)`)',
@@ -198,6 +101,22 @@ export const i6FacetIsComposition: LintRule = {
                 engines: {
                     found: "the facet's `engines` is not an arrow handing back the object of its adapters",
                     fix: 'write `engines: (config) => ({ <port>: <adapter>, … })`; what builds an adapter is its seam',
+                },
+                inline: {
+                    found: "the facet's `{{key}}` is a {{what}} written in the facet, not a reference imported from its module",
+                    fix: 'import what the facet hands the kernel from the module that owns it, and name it here',
+                },
+                listed: {
+                    found: '`{{key}}` lists a {{what}}, not a definition imported from `capabilities/` or `actions/`',
+                    fix: 'define the setup or the action in its own folder, import it, and list it by its name',
+                },
+                member: {
+                    found: 'the composition holds `{{key}}`, which is none of its `capabilities`, `actions` or `options`',
+                    fix: 'a composition lists definitions and the matrix rows of its options; move the rest to the module that owns it',
+                },
+                option: {
+                    found: 'the option `{{name}}` is not a matrix row written as string literals',
+                    fix: 'write the option as `{ group: …, name: …, probe: … }`, each a string literal',
                 },
                 runsStep: {
                     found: 'the constructor calls `{{owner}}.{{step}}()`, a step of a definition',

@@ -4,6 +4,7 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          src/facets/jobs/jobs.facet.ts:17:1  jterrazz-self(i6-facet-is-composition)
+          src/facets/jobs/jobs.facet.ts:18:1  jterrazz-self(i6-facet-is-composition)
+          src/facets/jobs/jobs.facet.ts:24:71  jterrazz-self(i6-facet-is-composition)
           src/facets/jobs/jobs.handle.ts:7:11  jterrazz-self(i6-facet-is-composition)
           src/facets/jobs/jobs.handle.ts:8:20  jterrazz-self(i6-facet-is-composition)
