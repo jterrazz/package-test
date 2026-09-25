@@ -26,7 +26,7 @@ function facetWiring(engines: string): string {
     return `
 import { seed } from '../../world/services/seed/seed.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { databaseSet } from '../../world/services/seed/database-set.js';
+import { databaseSet } from '../../world/services/seed/database-set.engine.js';
 import { defineFacet } from '../define-facet.js';
 
 const composition = {

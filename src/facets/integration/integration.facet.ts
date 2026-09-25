@@ -6,7 +6,7 @@ import { sharing } from '../../kernel/context/with.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { processClock } from '../../world/clock/clock.engine.js';
-import { databaseSet } from '../../world/services/seed/database-set.js';
+import { databaseSet } from '../../world/services/seed/database-set.engine.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
 import type { ServicesConfig } from '../../world/services/services.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';

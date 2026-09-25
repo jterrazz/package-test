@@ -41,7 +41,7 @@ describe('facet values', () => {
     test("an adapter is a plain value or an engine's constructor called on plain values", () => {
         // Given - an engine's constructor and a definition
         const imports = new Map([
-            ['databaseSet', '../../world/services/seed/database-set.js'],
+            ['databaseSet', '../../world/services/seed/database-set.engine.js'],
             ['seed', '../../world/services/seed/seed.capability.js'],
         ]);
 

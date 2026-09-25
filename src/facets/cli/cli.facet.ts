@@ -4,7 +4,7 @@ import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { sharing } from '../../kernel/context/with.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { databaseSet } from '../../world/services/seed/database-set.js';
+import { databaseSet } from '../../world/services/seed/database-set.engine.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
 import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
 import { run } from './documents/run.action.js';

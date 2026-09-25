@@ -6,7 +6,7 @@ const COMPOSED = `
 import { trigger } from './trigger.action.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { databaseSet } from '../../world/services/seed/database-set.js';
+import { databaseSet } from '../../world/services/seed/database-set.engine.js';
 import { processClock } from '../../world/clock/clock.engine.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
