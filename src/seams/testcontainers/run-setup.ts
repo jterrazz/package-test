@@ -4,14 +4,15 @@ import { RunContainers, serveContainers } from './run-containers.js';
 import { TestcontainersAdapter } from './testcontainers.js';
 
 /**
- * The global setup of a project whose specs declare services: the run's
- * containers, served to its workers.
+ * The global setup of a project whose specs declare services: the project's
+ * containers, served to its workers — vitest runs one per project, so two
+ * projects of one run hold two sets.
  *
  * Before the first file it serves an empty {@link RunContainers} and provides
  * its address; in the background it reaches Docker and pulls each default
  * image the daemon lacks, so the first file waits on a pull at most once. A
  * container is started by the first file that declares it and shared by every
- * file after; after the last file, the run stops them all. A project that
+ * file of the project after; when the run closes, it stops them all. A project that
  * declares no service never asks, so it needs no Docker.
  */
 

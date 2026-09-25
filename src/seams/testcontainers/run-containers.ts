@@ -6,7 +6,7 @@ import { text } from 'node:stream/consumers';
 import type { ContainerPort, ContainerRequest } from '../../model/ports/container.port.js';
 
 /**
- * The containers of one run, started once and shared by every file.
+ * The containers of one project of a run, started once and shared by every file.
  *
  * A project's global setup holds one {@link RunContainers} in the main
  * process and serves it on a loopback port; each worker's orchestrator asks it
