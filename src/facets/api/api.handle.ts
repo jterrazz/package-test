@@ -14,19 +14,13 @@ import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
 import { routesLedger, writeLedger } from './routes/ledger.js';
 import { HonoAdapter } from './server/hono.adapter.js';
+import type { HonoApp } from './server/hono.adapter.js';
 import type { ServerPort } from './server/server.port.js';
 
 // ── Types ──
 
 /** What `specification.api()` hands its chain: the services record, and the app a request is sent to. */
 export type ApiConfig = ServicesConfig & { server?: ServerPort | undefined };
-
-/** Any object with a request method compatible with Hono's app.request(). */
-export type HonoApp = {
-    request: (path: string, init?: RequestInit) => Promise<Response> | Response;
-    /** The route table a Hono app carries — what route coverage measures the run against. */
-    routes?: readonly { method: string; path: string }[];
-};
 
 /** Options for {@link startApi | specification.api}. */
 export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {

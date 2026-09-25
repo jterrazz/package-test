@@ -5,8 +5,12 @@ import type { ServerPort, ServerRequestOptions, ServerResponse } from './server.
 /** One entry of an app's route table: a method, a path, and — a Hono app's — the handler it runs. */
 type TableEntry = { handler?: unknown; method: string; path: string };
 
-/** The app, as the adapter reaches it: a request, and — a Hono app's — its route table. */
-type InProcessApp = {
+/**
+ * The app `specification.api()` sends requests to — any object with a request
+ * method compatible with Hono's `app.request()`, and, a Hono app's, its route
+ * table: what route coverage measures the run against.
+ */
+export type HonoApp = {
     request: (path: string, init?: RequestInit) => Promise<Response> | Response;
     routes?: readonly TableEntry[];
 };
@@ -37,11 +41,11 @@ function isMiddleware(entry: TableEntry): boolean {
  * measure route coverage is taken against.
  */
 export class HonoAdapter implements ServerPort {
-    private readonly app: InProcessApp;
+    private readonly app: HonoApp;
     /** Every request sent through this adapter, in the order it was sent. */
     readonly reached: SentRequest[] = [];
 
-    constructor(app: InProcessApp) {
+    constructor(app: HonoApp) {
         this.app = app;
     }
 
