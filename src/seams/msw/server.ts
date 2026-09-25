@@ -18,8 +18,6 @@ import { owningBodies } from './owned-body.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import */
 
-export type { ContractRegistration } from './handlers.js';
-
 let mswModule: any = null;
 let mswHttp: any = null;
 
@@ -55,8 +53,9 @@ export async function ensureContractServer(): Promise<void> {
 
 /**
  * Register a chain's contracts as MSW handlers. A trailing catch-all handler
- * records any request no contract accepted — the builder rethrows it as the
- * spec failure (rejecting the action promise, never an unhandled rejection).
+ * records any request no contract accepted — the chain's pipeline
+ * (`model/chain/perform.ts`) rethrows it as the spec failure (rejecting the
+ * action promise, never an unhandled rejection).
  */
 export async function registerContracts(
     contracts: readonly Contract[],

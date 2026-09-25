@@ -8,10 +8,9 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *
  * - `model/` — the chain, the elements (the descriptors, and the ambiguity
  *   and substring readings every surface shares), the goldens, the clock and
- *   the doubles: what every facet is made of. It reaches the three seams that
- *   carry no engine of their own (docker, process, yaml), the msw engine
- *   through the chain's one lazy import, the contracts in `stubs/`, and — to
- *   compare a golden through its accessor — `results/`. A constructor's configuration names
+ *   the doubles: what every facet is made of. It reaches the seams that
+ *   carry no engine of their own (docker, git, process, yaml), the contracts
+ *   in `stubs/`, and — to compare a golden through its accessor — `results/`. A constructor's configuration names
  *   the servers a document may start.
  * - `capabilities/<name>/` — a setup a chain offers, one folder each, owning
  *   only itself (`signatures.ts` indexes them all); among them the
@@ -210,14 +209,6 @@ export const FRAMEWORK_LAYERS = {
         ],
         packages: ['vitest', 'vitest-mock-extended'],
         seams: {
-            // The contract engine is reached through a lazy import by the
-            // Chain's `.intercept()`.
-            'model/chain/builder.ts': [
-                'capabilities/intercept/',
-                'capabilities/seed/',
-                'capabilities/with/',
-                'seams/msw/',
-            ],
             // What a constructor hands its chain names the stub backend a
             // Website or mobile constructor started.
             'model/chain/config.ts': ['seams/stub-backend/'],
