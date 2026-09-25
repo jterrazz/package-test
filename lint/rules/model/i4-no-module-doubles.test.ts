@@ -90,12 +90,9 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
             code: 'import data from "./payload.json";',
             filename: '/repo/src/specification/config.ts',
         },
-        // A spec under specs/ reads real files by design — the asset clause is
-        // the module role's alone.
+        // A spec under specs/ reads real files by design: the asset clause is the module role's alone.
         { code: 'import seed from "./seeds/users.sql";', filename: SPEC },
-        // The allow-list clears the native module in BOTH spellings: the
-        // String one, and the dynamic import `vitest/prefer-import-in-mock`
-        // asks for — an allow-listed module has a green spelling under both.
+        // The allow-list clears the native module in both spellings, string and dynamic import.
         {
             code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
             filename: SRC_TEST,

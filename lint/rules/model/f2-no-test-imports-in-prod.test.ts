@@ -143,8 +143,7 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
         { code: 'import { other } from "#domain/other.js";', filename: PROD },
         // A folder named `stubs/` with no facade is not a stubs folder.
         { code: 'import { engine } from "../model/stubs/engine.js";', filename: PROD },
-        // A production module on the way is judged for itself: the barrel is
-        // clean, the helper that imports the fixtures is where the finding is.
+        // The barrel is clean: the finding is on the helper that imports the fixtures.
         { code: 'export * from "./domain/helpers.js";', filename: BARREL },
         // A module that is not production and reaches nothing.
         { code: 'export * from "../tests/format.js";', filename: BARREL },
@@ -169,8 +168,7 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
             filename: join(ROOT, 'vitest.config.ts'),
         },
         { code: 'import { expect } from "vitest";', filename: join(ROOT, 'tests/helpers.ts') },
-        // The tool-facing, zero-runtime lint entry is exempt even from prod code
-        // (a shared oxlint preset imports it to wire the plugin — F1/F2).
+        // The lint entry is exempt: a shared oxlint preset imports it.
         { code: 'import { testing } from "@jterrazz/test/oxlint";', filename: PROD },
     ],
 });

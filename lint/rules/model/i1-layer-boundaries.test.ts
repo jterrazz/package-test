@@ -199,10 +199,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
 ruleTester.run('i1-layer-boundaries (no map)', rule, {
     invalid: [],
     valid: [
-        // Given no declared architecture, the rule says nothing: an
-        // architecture is the project's to state, not the linter's to assume.
-        // A consumer whose directories HAPPEN to be named like the framework's
-        // was judged against a map describing a different package.
+        // No declared architecture: the rule is silent.
         { code: 'import { Client } from "pg";', filename: '/app/src/model/orders/order.ts' },
         {
             code: 'import { stripe } from "stripe";',

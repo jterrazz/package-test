@@ -72,9 +72,7 @@ ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
             code: 'await cli.exec("serve", { waitFor: /listening/ });',
             filename: SPEC_FILE,
         },
-        // A timer inside a test DOUBLE stages the world — a clone that settles
-        // late, so the results come back out of order — and the test is not the
-        // one waiting.
+        // A timer inside a test double stages the world: the test is not the one waiting.
         {
             code: 'const clone = vi.fn(() => new Promise((resolve) => setTimeout(resolve, 5)));',
             filename: SPEC_FILE,

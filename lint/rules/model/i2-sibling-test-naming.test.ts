@@ -14,11 +14,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-// The fs-anchored cases run against the E2E fixture trees. Each one
-// carries its own package.json: that is what makes its `src/` tree sit OUTSIDE
-// a specs tree, which is the half of I2's orphan clause that reads `inSpecs`.
-// The guard on the `tests/` clause — a `tests` segment with no package above it
-// is an ordinary folder name — is `roleOf`'s, and `role.test.ts` holds it.
+// Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.
 const FIXTURES = resolve(
     import.meta.dirname,
     '../../../specs/lint/i2-sibling-test-naming/fixtures',

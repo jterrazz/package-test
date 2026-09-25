@@ -13,10 +13,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-// D9 aggregates capture-ref uses across code (`match.ref`) AND the `{{kind#ref}}`
-// tokens of the `expected/` fixtures a test references — so the cases need a
-// real feature dir with real fixtures on disk. Built once at module load (before
-// Vitest executes the collected cases) so the rule can read them.
+// Built at module load: the rule reads the fixtures on disk before the cases run.
 const featureDir = mkdtempSync(join(tmpdir(), 'd9w-'));
 const specsFeatureDir = join(featureDir, 'specs', 'app', 'widget');
 const expectedDir = join(specsFeatureDir, 'expected');
