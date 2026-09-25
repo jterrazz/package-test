@@ -1,10 +1,4 @@
-/*
- * The config type is oxlint's own, reached through `@jterrazz/typescript` —
- * the one devDependency a consumer of this toolchain declares. Stating it here
- * is what makes `compose(<profile>, testing)` type-check with no assertion: an
- * inferred `rules` widens every severity to `string`, which oxlint's closed
- * union refuses.
- */
+/* Typed as oxlint's own config, so `compose(<profile>, testing)` type-checks: an inferred `rules` widens every severity to `string`. */
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 import type { LintPlugin } from './rule-shape.js';
@@ -71,32 +65,11 @@ import { w1ScenarioPure } from './rules/model/w1-scenario-pure.js';
 import { w2TestIdStatesWhatIsMissing } from './rules/model/w2-testid-states-what-is-missing.js';
 import { w5wScenarioSettles } from './rules/model/w5w-scenario-settles.js';
 
-/**
- * What test material is, published for a build guard: `materialAt(path)`
- * names what a local module id is (a test file, ground, the specs tree, a
- * stub) or answers `undefined`, and `testPackageOf(specifier)` names the
- * test package a bare specifier belongs to (`vitest/config` → `vitest`),
- * `@jterrazz/test/oxlint` aside. This package is the one owner of the
- * answer, for every guard that asks it.
- */
+/** What test material is, for a build guard: `materialAt(path)` and `testPackageOf(specifier)`. */
 export { materialAt, testPackageOf } from './production.js';
 export type { MaterialKind } from './production.js';
 
-/**
- * The `@jterrazz/test` oxlint plugin — the tool-facing lint layer that enforces
- * the statically-checkable CONVENTIONS rules (the `Lint(statique)` catalogue)
- * whose audience is `consumer`. A `self` rule is `self-plugin.ts`'s.
- *
- * Registered in a consumer's (or this repo's own) `oxlint.config.ts` via
- * `jsPlugins: ['@jterrazz/test/oxlint']` and referenced as `jterrazz/<rule>` in
- * the `rules` map, e.g. `'jterrazz/j2-no-sleep': 'error'` — or enabled
- * wholesale by spreading {@link recommendedRules}.
- *
- * This entry is bundled by tsdown (`dist/oxlint.js`); rules import nothing from
- * the framework runtime (only pure model helpers: the token list, the case
- * conversions, the fixture-marker list), so the bundle stays free of the heavy
- * adapters (msw, pg, testcontainers, …) that the main entry pulls in.
- */
+/** The `@jterrazz/test` oxlint plugin: `jsPlugins: ['@jterrazz/test/oxlint']`, rules as `jterrazz/<rule>`. Rules import nothing of the runtime, so the bundle stays free of msw, pg and testcontainers. */
 const plugin: LintPlugin = {
     meta: { name: 'jterrazz' },
     rules: {
@@ -165,15 +138,7 @@ const plugin: LintPlugin = {
     },
 };
 
-/**
- * The full catalogue at its intended severities — spread into an oxlint
- * `rules` map to enable everything in one line:
- *
- *     rules: { ...recommendedRules }
- *
- * Hard conventions are errors; redundancy heuristics (`<id>w-*` rule ids) are
- * warnings.
- */
+/** Every rule at its intended severity: `rules: { ...recommendedRules }`. */
 export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
     Object.keys(plugin.rules).map((rule) => [
         `jterrazz/${rule}`,
@@ -181,52 +146,11 @@ export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEnt
     ]),
 );
 
-/**
- * The composable testing fragment — wire the plugin, enable the whole
- * catalogue, and ship the one override every strict consumer needs. Designed
- * to be composed with a base preset (e.g. `@jterrazz/typescript/oxlint`):
- *
- *     import { compose, node } from '@jterrazz/typescript/oxlint';
- *     import { testing } from '@jterrazz/test/oxlint';
- *     export default compose(node, testing);
- *
- * `jsPlugins` registers the tool-facing entry; `rules` is {@link recommendedRules}
- * plus the UPSTREAM options this vocabulary owns; `overrides` relaxes
- * `import/exports-last` for `*.specification.ts` — the A4 idiom
- * (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec
- * file on a non-export statement, so the relaxation ships here rather than being
- * hand-rolled in every consumer.
- *
- * An upstream rule that can carry a convention as an OPTION is set here rather
- * than duplicated as a `jterrazz/*` rule: one owner per convention. The file
- * naming is the first of them — the fork spends two suffixes (`.test.ts(x)`
- * beside the code, `.spec.ts` under `specs/`), and the plugin's default pattern
- * knows only the first, so a facet spec would be refused for wearing the word
- * C12 requires of it. The pattern names those two and no more: a `.spec.tsx`
- * is a suffix `roleOf` has no role for, and one the runner would collect all
- * the same.
- *
- * It is set in an OVERRIDE, not in `rules`, because that is where the option
- * survives: a base profile turns the vitest plugin on inside an override over
- * the test globs, and an override's entry REPLACES a top-level one rather than
- * merging with it. A fragment that wrote the option at the top level would be
- * silently overruled by whichever profile it was composed with.
- */
+/** The testing fragment: `compose(node, testing)`. Upstream options are set in an override because a base profile turns the vitest plugin on in an override over the test globs, and an override's entry replaces a top-level one. */
 
-/** The globs an upstream test rule is set over — the three suffixes, and a specs tree. */
 const TEST_GLOBS = ['**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}', '**/specs/**/*.{ts,tsx}'];
 
-/**
- * D20 — the seven matchers vitest offers for snapshots, each pointed back at
- * the one golden mechanism this vocabulary has.
- *
- * A snapshot is written by the run that was supposed to be judged by it: the
- * file lands beside the test, nobody reads the diff, and a wrong answer becomes
- * the expectation the moment someone re-records. `toMatch(file('./expected/<name>.<ext>'))`
- * is the same convenience with the file where a reviewer
- * looks, tokens for what legitimately moves, and `TEST_UPDATE=1` as the one
- * door that rewrites it.
- */
+/** D20 — every snapshot matcher points back at `toMatch(file('./expected/<name>.<ext>'))`. */
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
         "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./expected/<case>.aria.yaml'))`.",
@@ -244,17 +168,7 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
 };
 
-/**
- * M3 — the four `vi` methods that take a seam this vocabulary owns.
- *
- * `stubGlobal` replaces the network with a function the test wrote; the three
- * timer methods take the clock without giving it back at the end of the scope.
- * The one case that had no answer — a subject fetching a relative URL under
- * node — is `intercept`'s `origin` option, which the message names.
- * `stubEnv` is NOT here: it restores itself and is the sanctioned way to state
- * an env a module reads. `vi.mock`/`vi.doMock` stay on I4, whose allow-list the
- * option cannot express.
- */
+/** M3 — `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express. */
 const RESTRICTED_VI_METHODS: Record<string, string> = {
     setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
     stubGlobal:
@@ -277,14 +191,11 @@ export const testing: OxlintConfig = {
                     'error',
                     { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
                 ],
-                // J10 — one level of `describe` groups a file; a second is a
-                // tree of contexts a reader has to hold in their head, and the
-                // name of the test stops being the sentence it was.
+                // J10 — one level of `describe`.
                 'vitest/max-nested-describe': ['error', { max: 1 }],
                 'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
                 'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
-                // C31 — the file's one describe is titled with its subject, the
-                // Symbol a colocated test is about: `LocaleNote` keeps its case.
+                // C31 — the describe is titled with its subject: `LocaleNote` keeps its case.
                 'vitest/prefer-lowercase-title': ['error', { ignoreTopLevelDescribe: true }],
             },
         },

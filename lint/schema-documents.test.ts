@@ -13,13 +13,10 @@ import {
     specDocuments,
 } from './schema-documents.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The schema `npm run docs` commits and the package publishes. */
 const SCHEMA = resolve(ROOT, 'schema/spec.schema.json');
 
-/** The committed schema, compiled once: a data value in, its errors out. */
 function schemaValidator(): (data: unknown) => string[] {
     const validate = new Ajv2020({ allErrors: true }).compile(
         JSON.parse(readFileSync(SCHEMA, 'utf8')) as object,
@@ -32,26 +29,17 @@ function schemaValidator(): (data: unknown) => string[] {
               );
 }
 
-/**
- * The refusals a schema cannot state, each with the reason: the parser holds
- * them, and an editor validating against the schema does not see them.
- */
+/** The parser holds these; an editor validating against the schema does not see them. */
 const BEYOND_A_SCHEMA = new Map<string, string>();
 
 const validate = schemaValidator();
 
-/** A mapping of the grammar, as data. */
 type Mapping = Record<string, unknown>;
 
-/** What a value of each key a presence law names may be, when a case adds it. */
 const SAMPLES: Mapping = {
     waitFor: 'ready',
 };
 
-/**
- * Each shape a presence law governs: well-formed instances of it, the
- * document one is set in, and the name a refusal calls it by.
- */
 const SHAPES: Record<
     PresenceShape,
     { embed: (mapping: Mapping) => Mapping; instances: Mapping[]; subject?: string }
@@ -77,15 +65,12 @@ const SHAPES: Record<
     },
 };
 
-/** One mapping that breaks a law: what it is, and the refusal the parser must give. */
 type Breach = { case: string; mapping: Mapping; refusal: string };
 
-/** The mapping, less `keys`. */
 function without(mapping: Mapping, keys: readonly string[]): Mapping {
     return Object.fromEntries(Object.entries(mapping).filter(([key]) => !keys.includes(key)));
 }
 
-/** Every breach of a law the instances of its shape can be turned into. */
 function breachesOf(shape: PresenceShape, lawIndex: number): Breach[] {
     const law = PRESENCE[shape][lawIndex];
     const { instances, subject = '' } = SHAPES[shape];
@@ -121,7 +106,6 @@ function breachesOf(shape: PresenceShape, lawIndex: number): Breach[] {
     });
 }
 
-/** The shapes, each with its laws by index — what `test.each` walks. */
 const LAWS = (Object.keys(PRESENCE) as PresenceShape[]).flatMap((shape) =>
     PRESENCE[shape].map((law, index) => [shape, law.law, index] as const),
 );

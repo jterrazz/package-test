@@ -19,51 +19,17 @@ import type { AstNode } from './rule-shape.js';
 import { withoutComments } from './subject.js';
 import { testSettingsAt } from './test-settings.js';
 
-/**
- * Production, and the test material it must never reach — ONE reader, for
- * every guard that keeps the two apart (F2, F5, I1).
- *
- * A **production module** is every source module that is not test material
- * itself — `src/`, `lint/`, `bin/`, `scripts/` and the modules at a project's
- * root alike — except a tool's config (`*.config.*`) and a module under a
- * retired test root (`__tests__/`, a root `test/` or `tests/`), which I2
- * refuses on its own.
- *
- * **Test material** is what a test is made of or stands on:
- *
- * - a test, a spec, a type test, a specification or a fixtures module, by
- *   its suffix;
- * - anything under a ground folder (`fixtures/`, `expected/`, `requests/`,
- *   `seeds/`) or under `specs/`;
- * - a stub: a `*.stubs.ts` facade, or anything under a `stubs/`
- *   folder that holds one;
- * - a test package: `@jterrazz/test` (its `/oxlint` tool entry aside),
- *   `vitest`, `@vitest/*`, `msw`, `@testing-library/*`, playwright.
- *
- * A module REFERENCES what it names in any of the forms {@link
- * moduleReferenceVisitor} reads; a reference REACHES test material when the
- * specifier is a test package, when it resolves — relatively, through a
- * tsconfig `paths` alias (its `extends` chain followed) or through the
- * package's `imports` map — to test material, or when it resolves to a local
- * module that is neither production nor test material and reaches some in
- * turn — that module parsed, so every form it names a module or a path in is
- * read as F2 reads a production one. A production module on the way ends the
- * walk: it is judged for its own references.
- */
+/** One reader for F2, F5 and I1. A local module that is neither production nor test material is parsed and walked through; a production module on the way ends the walk, since it is judged for its own references. */
 
-/** A source module, whatever its dialect. */
 const SOURCE = /\.[cm]?[jt]sx?$/u;
 
-/** The suffixes that make a module part of a test. */
 const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?[jt]sx?$/u;
 
-/** A stub facade — the file that makes its folder a stubs folder. */
 const STUBS_FACADE = /\.stubs\.[cm]?[jt]sx?$/u;
 
-/** A tool's config — `vitest.config.ts`, `oxlint.config.ts`: the toolchain's, never shipped. */
+/** The toolchain's, never shipped. */
 const TOOL_CONFIG = /\.config\.[cm]?[jt]sx?$/u;
 
-/** The test packages, by whole name. */
 const TEST_PACKAGES = new Set([
     '@jterrazz/test',
     '@playwright/test',
@@ -74,13 +40,11 @@ const TEST_PACKAGES = new Set([
     'vitest-mock-extended',
 ]);
 
-/** The test packages, by scope or by name prefix. */
 const TEST_PACKAGE_PREFIXES = ['@testing-library/', '@vitest/', 'vitest-browser-'];
 
-/** The one entry of a test package production may name: zero-runtime, tool-facing (F1). */
+/** Zero-runtime and tool-facing (F1). */
 const TOOL_ENTRY = '@jterrazz/test/oxlint';
 
-/** What a piece of test material is, as a message names it. */
 export type MaterialKind =
     | 'a stub'
     | 'a test file'
@@ -88,25 +52,17 @@ export type MaterialKind =
     | 'ground'
     | 'the specs tree';
 
-/** Test material a reference reaches, and the modules it passed through to get there. */
 export type Reach = {
     kind: MaterialKind;
-    /** The local modules between the reference and the material, in order. */
     through: string[];
-    /** The package name, or the path of the material. */
     what: string;
 };
 
-/** Does this folder hold a stub facade? */
 function holdsFacade(directory: string): boolean {
     return (listDirectory(directory) ?? []).some((name) => STUBS_FACADE.test(name));
 }
 
-/**
- * What test material this path is, read below its project root — `undefined`
- * for anything else. A `directory` path is judged as a folder: every segment
- * of it a folder, none of it a file name.
- */
+/** Read below the project root; a `directory` path is judged as a folder, none of it a file name. */
 export function materialAt(path: string, directory = false): MaterialKind | undefined {
     const parts = projectSegments(path);
     const folders = directory ? parts : parts.slice(0, -1);
@@ -126,7 +82,6 @@ export function materialAt(path: string, directory = false): MaterialKind | unde
     return inStubsFolder(directory ? path : dirname(path), folders);
 }
 
-/** Is a folder on this path a stubs folder — one holding a facade? */
 function inStubsFolder(directory: string, folders: string[]): MaterialKind | undefined {
     const depth = folders.indexOf('stubs');
     if (depth === -1) {
@@ -136,12 +91,10 @@ function inStubsFolder(directory: string, folders: string[]): MaterialKind | und
     return holdsFacade(join(root, ...folders.slice(0, depth + 1))) ? 'a stub' : undefined;
 }
 
-/** What test material a path a module builds names, read as a file or as a folder. */
 export function materialNamed(path: string): MaterialKind | undefined {
     return materialAt(path) ?? materialAt(path, true);
 }
 
-/** Is this file a production module — a source module that is no test material, no config and under no retired test root? */
 export function isProductionModule(filename: string): boolean {
     if (!SOURCE.test(filename) || materialAt(filename) !== undefined) {
         return false;
@@ -149,7 +102,6 @@ export function isProductionModule(filename: string): boolean {
     return !TOOL_CONFIG.test(basename(filename)) && roleOf(filename).legacyDir === null;
 }
 
-/** The test package a bare specifier names, when it names one. */
 export function testPackageOf(specifier: string): string | undefined {
     if (specifier === TOOL_ENTRY) {
         return undefined;
@@ -165,10 +117,10 @@ export function testPackageOf(specifier: string): string | undefined {
     return TEST_PACKAGE_PREFIXES.some((prefix) => name.startsWith(prefix)) ? name : undefined;
 }
 
-/** The extensions a specifier may leave out, in the order a resolver tries them. */
+/** In the order a resolver tries them. */
 const EXTENSIONS = ['.ts', '.tsx', '.mts', '.cts', '.js', '.jsx', '.mjs', '.cjs', '.json'];
 
-/** The source a compiled specifier names (`./x.js` → `./x.ts`). */
+/** `./x.js` → `./x.ts`. */
 const COMPILED: Record<string, string[]> = {
     '.cjs': ['.cts'],
     '.js': ['.ts', '.tsx'],
@@ -176,7 +128,6 @@ const COMPILED: Record<string, string[]> = {
     '.mjs': ['.mts'],
 };
 
-/** The file a module path names on disk, or the path itself when none does. */
 function onDisk(path: string): string {
     if (isFile(path)) {
         return path;
@@ -192,7 +143,6 @@ function onDisk(path: string): string {
     return candidates.find((candidate) => isFile(candidate)) ?? path;
 }
 
-/** A JSON file with comments and trailing commas, as a value — `undefined` when it reads as none. */
 function readJsonc(path: string): unknown {
     const text = readFileCached(path);
     if (text === null) {
@@ -205,7 +155,6 @@ function readJsonc(path: string): unknown {
     }
 }
 
-/** A record, or nothing. */
 function recordOf(value: unknown): Record<string, unknown> | undefined {
     if (typeof value !== 'object' || value === null || Array.isArray(value)) {
         return undefined;
@@ -213,7 +162,6 @@ function recordOf(value: unknown): Record<string, unknown> | undefined {
     return Object.fromEntries(Object.entries(value));
 }
 
-/** Every string a map target holds — a string, a condition object, an array of either. */
 function targetsOf(value: unknown): string[] {
     if (typeof value === 'string') {
         return [value];
@@ -224,7 +172,6 @@ function targetsOf(value: unknown): string[] {
     return Object.values(recordOf(value) ?? {}).flatMap((entry) => targetsOf(entry));
 }
 
-/** What a map's key substitutes for a specifier — the one `*` it may carry — or `undefined`. */
 function substitution(key: string, specifier: string): string | undefined {
     const star = key.indexOf('*');
     if (star === -1) {
@@ -239,7 +186,6 @@ function substitution(key: string, specifier: string): string | undefined {
         : undefined;
 }
 
-/** The paths a map sends a specifier to, each resolved against `base`. */
 function mapped(map: Record<string, unknown>, specifier: string, base: string): string[] {
     for (const [key, value] of Object.entries(map)) {
         const star = substitution(key, specifier);
@@ -250,7 +196,6 @@ function mapped(map: Record<string, unknown>, specifier: string, base: string): 
     return [];
 }
 
-/** The nearest `tsconfig.json` at or above a directory, below the project root. */
 function tsconfigOf(directory: string): string | undefined {
     const root = projectRootOf(directory);
     let current = directory;
@@ -267,18 +212,15 @@ function tsconfigOf(directory: string): string | undefined {
     }
 }
 
-/** The `paths` a tsconfig resolves a specifier through, and the folder its targets are read from. */
 type PathsMap = { base: string; paths: Record<string, unknown> };
 
-/** What a tsconfig states of module resolution, its `extends` chain folded in. */
 type Resolution = { baseUrl?: string; paths?: PathsMap };
 
-/** The files an `extends` entry may name at a base path, in the compiler's order. */
+/** In the compiler's order. */
 function configCandidates(base: string): string[] {
     return [base, `${base}.json`, join(base, 'tsconfig.json')];
 }
 
-/** The config an `extends` entry names: a relative or absolute file, or a package's. */
 function extendedConfig(from: string, entry: string): string | undefined {
     const directory = dirname(from);
     if (entry.startsWith('.') || entry.startsWith('/')) {
@@ -294,12 +236,7 @@ function extendedConfig(from: string, entry: string): string | undefined {
     }
 }
 
-/**
- * A tsconfig's resolution, its `extends` chain folded in the compiler's way:
- * a later base overrides an earlier one, the config itself overrides them
- * all, and `baseUrl` and `paths` are each read relative to the file that
- * states them.
- */
+/** Folded the compiler's way: a later base overrides an earlier one, and `baseUrl` and `paths` resolve relative to the file stating them. */
 function resolutionOf(tsconfig: string, seen: Set<string>): Resolution {
     if (seen.has(tsconfig)) {
         return {};
@@ -327,7 +264,6 @@ function resolutionOf(tsconfig: string, seen: Set<string>): Resolution {
     return resolution;
 }
 
-/** Where the tsconfig's `paths`, through its `extends` chain, send a bare specifier. */
 function throughPaths(directory: string, specifier: string): string[] {
     const tsconfig = tsconfigOf(directory);
     if (tsconfig === undefined) {
@@ -340,7 +276,6 @@ function throughPaths(directory: string, specifier: string): string[] {
     return mapped(paths.paths, specifier, baseUrl ?? paths.base);
 }
 
-/** Where the package's `imports` map sends a `#…` specifier. */
 function throughImports(directory: string, specifier: string): string[] {
     const root = packageRootOf(directory);
     if (root === undefined) {
@@ -351,10 +286,6 @@ function throughImports(directory: string, specifier: string): string[] {
     return imports === undefined ? [] : mapped(imports, specifier, root);
 }
 
-/**
- * The local files a specifier written in `from` names — one for a relative
- * specifier, the targets of the alias for an aliased one, none for a package.
- */
 export function resolveSpecifier(from: string, specifier: string): string[] {
     const directory = dirname(from);
     if (specifier === '.' || specifier === '..' || /^\.\.?\//u.test(specifier)) {
@@ -369,13 +300,11 @@ export function resolveSpecifier(from: string, specifier: string): string[] {
     return targets.map((target) => onDisk(target));
 }
 
-/** What a module names: the specifiers of its references, and the paths it builds or reads. */
 type Named = { paths: string[]; specifiers: string[] };
 
-/** What each module walked names, kept while its text is the one it was parsed from. */
+/** Kept while its text is the one it was parsed from. */
 const parsed = new Map<string, { named: Named; text: string }>();
 
-/** What a module names, read from its parsed program — nothing when it does not parse. */
 function namedIn(module: string, text: string): Named {
     const cached = parsed.get(module);
     if (cached?.text === text) {
@@ -402,7 +331,6 @@ function namedIn(module: string, text: string): Named {
     return named;
 }
 
-/** What a module that is neither production nor test material reaches, if anything. */
 function reachThrough(
     module: string,
     seen: Set<string>,
@@ -432,11 +360,7 @@ function reachThrough(
     return undefined;
 }
 
-/**
- * What one specifier written in `from` reaches, walking what `seen` has not. A
- * test package in `allowed` is one the unit's production runs by design, and
- * reaches nothing.
- */
+/** A test package in `allowed` is one the unit's production runs by design. */
 function reachFrom(
     from: string,
     specifier: string,
@@ -464,45 +388,19 @@ function reachFrom(
     return undefined;
 }
 
-/**
- * The test packages the unit holding `filename` lets its production run — the
- * names under `test.production.allow` of its `jterrazz.config.ts`.
- */
 export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
     const root = packageRootOf(dirname(filename));
     const allow = root === undefined ? undefined : testSettingsAt(root).production?.allow;
     return new Set(Object.keys(allow ?? {}));
 }
 
-/**
- * What each specifier reached in this run, by the folder it is written in —
- * the walk from one folder is the same whichever production module of it
- * asks, since a production module on the way ends the walk.
- *
- * A run is every lint until a file is linted a second time, until a module a
- * walk passed through is linted, or until a folder already asked about
- * answers a tree listing it did not before: a CLI run lints each file once,
- * and the editor's host lints again the file that changed — or creates one
- * beside a file it never touches, which only the tree listing sees. Only a
- * walk's middle can move its answer — the tree it resolves in and the
- * modules that are neither production nor test material — and a change there
- * reaches this cache through the file linted next, or the folder it is kept
- * for read again.
- */
+/** Per folder: a production module on the way ends the walk, so any module of one folder gets the same answer. A run ends when a file is linted again, a walked module is linted, or a folder's tree listing changes: that is how the editor's host is seen. */
 const reaches = new Map<string, Reach | undefined>();
 
-/** The files linted in this run. */
 const linted = new Set<string>();
 
-/** The modules this run's walks passed through. */
 const walked = new Set<string>();
 
-/**
- * A file's lint begins: when it was linted in this run already, a walk
- * passed through it, or its folder's tree listing answers differently than
- * it did the last time this run asked, a new run begins and every reach is
- * walked again.
- */
 export function lintBegins(filename: string): void {
     if (linted.has(filename) || walked.has(filename) || folderChanged(dirname(filename))) {
         reaches.clear();
@@ -512,11 +410,6 @@ export function lintBegins(filename: string): void {
     linted.add(filename);
 }
 
-/**
- * The test material a specifier written in `from` — a production module —
- * reaches, if it reaches any, the test packages in `allowed` aside; walked
- * once per folder and specifier in a run.
- */
 export function reachOf(
     from: string,
     specifier: string,
@@ -536,19 +429,16 @@ export function reachOf(
     return reach;
 }
 
-/** The first string argument of a call, with the node that carries it. */
 function firstString(node: AstNode): ImportSource | undefined {
     const [first] = childList(node, 'arguments');
     const source = stringValue(first);
     return first === undefined || source === undefined ? undefined : { node: first, source };
 }
 
-/** Is this `import.meta`? */
 function isImportMeta(node: AstNode | undefined): boolean {
     return node?.type === 'MetaProperty';
 }
 
-/** Is this call's callee a `require`, a `require.resolve` or an `import.meta.resolve`? */
 function isRequireLike(callee: AstNode | undefined): boolean {
     if (callee?.type === 'Identifier') {
         return identifierName(callee) === 'require';
@@ -560,12 +450,7 @@ function isRequireLike(callee: AstNode | undefined): boolean {
     return identifierName(object) === 'require' || isImportMeta(object);
 }
 
-/**
- * Visitor fragment for every form a module names another in: a static import
- * or re-export (`import type` and `export *` included), `import()`, a type's
- * `import('…')`, `import x = require('…')`, `require()`, `require.resolve()`
- * and `import.meta.resolve()`.
- */
+/** `import type`, `export *`, a type's `import('…')`, `import x = require('…')`, `require.resolve()` and `import.meta.resolve()` included. */
 export function moduleReferenceVisitor(
     onReference: (entry: ImportSource) => void,
 ): Record<string, (node: AstNode) => void> {

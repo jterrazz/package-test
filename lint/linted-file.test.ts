@@ -6,7 +6,6 @@ import type { LintedFile } from './linted-file.js';
 import { isProductionModule } from './production.js';
 import { projectSegments, roleOf } from './role.js';
 
-/** A file as a rule's context hands it: its name, and the source object of its lint. */
 const linted = (physicalFilename: string, sourceCode: object = {}): LintedFile => ({
     physicalFilename,
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the answers key on the object's identity and read nothing of it

@@ -2,28 +2,8 @@ import { isNode, walk } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * The capability matrix's CALLS, read from the syntax tree.
- *
- * A row whose probe is a call — `button(`, `.seed(file(`, `.get('/`,
- * `result.table(` — is counted from the calls a file's program holds, never
- * from its letters: a formatter that breaks `.toMatch(\n directory(` across
- * lines, or a path that grows until it does, leaves the call what it was.
- * The probe is still written as the call reads, and this module reads it as
- * a SHAPE, in a closed grammar:
- *
- * - `name(` — a call of the bare identifier; `.name(` — of that method on any
- *   object; `object.name(` — of that method on that identifier;
- * - after the paren, what the first argument is: `inner(` a call of that
- *   identifier, `'` a string (`'/` one opening on `/`), `{` an object, `[` an
- *   array — nothing, any argument or none;
- * - a leading `))`: the method's object is a call whose last argument is a
- *   call — `expect(result.table('users')).toMatch([`.
- *
- * A probe outside the grammar is a declaration error, thrown where it is read.
- */
+/** A call probe is read as a shape in a closed grammar — `name(`, `.name(`, `object.name(`, then what the first argument opens on (`inner(`, `'`, `'/`, `{`, `[`), and a leading `))` for a call whose object ends on a call — so a formatter splitting a call changes nothing. A probe outside the grammar throws where it is read. */
 
-/** What a call probe asks of the first argument. */
 type Argument =
     | { callee: string; kind: 'call' }
     | { kind: 'any' }
@@ -31,12 +11,10 @@ type Argument =
     | { kind: 'object' }
     | { kind: 'string'; prefix: string };
 
-/** A call, as a probe describes it. */
 export type CallShape = {
     argument: Argument;
-    /** The method's object, when the probe names one (`result.`); any object when `.`; none for a bare call. */
+    /** Any object when `.`, none for a bare call. */
     callee: { kind: 'bare'; name: string } | { kind: 'method'; name: string; object?: string };
-    /** `))` — the method's object is a call whose last argument is a call. */
     onACall: boolean;
 };
 
@@ -45,7 +23,6 @@ const CALL_PROBE =
 
 const INNER_CALL = /^(?<callee>[$A-Z_a-z][\w$]*)\($/u;
 
-/** The first argument a probe's text after the paren asks for. */
 function argumentOf(text: string, probe: string): Argument {
     if (text === '') {
         return { kind: 'any' };
@@ -66,7 +43,7 @@ function argumentOf(text: string, probe: string): Argument {
     throw new Error(`capability probe ${probe}: no call shape reads the argument \`${text}\``);
 }
 
-/** The call a probe describes — `undefined` when the probe is no call (a key, an accessor, a text). */
+/** `undefined` when the probe is no call (a key, an accessor, a text). */
 export function callShapeOf(probe: string): CallShape | undefined {
     if (!probe.includes('(')) {
         return undefined;
@@ -90,7 +67,6 @@ export function callShapeOf(probe: string): CallShape | undefined {
     };
 }
 
-/** Every call of a source, in the order its program holds them — none when it does not parse. */
 export function callsOf(filename: string, source: string): AstNode[] {
     const program = parseProgram(filename, source);
     const calls: AstNode[] = [];
@@ -104,17 +80,14 @@ export function callsOf(filename: string, source: string): AstNode[] {
     return calls;
 }
 
-/** The name a node spells, when it is an identifier. */
 function identifier(node: unknown): string | undefined {
     return isNode(node) && node.type === 'Identifier' ? String(node.name) : undefined;
 }
 
-/** A non-computed member's property name. */
 function propertyOf(member: AstNode): string | undefined {
     return member.computed === true ? undefined : identifier(member.property);
 }
 
-/** The text a string argument opens on: a literal's value, a template's first stretch. */
 function stringOf(node: AstNode): string | undefined {
     if (node.type === 'Literal' && typeof node.value === 'string') {
         return node.value;
@@ -132,7 +105,6 @@ function stringOf(node: AstNode): string | undefined {
     return undefined;
 }
 
-/** The wrappers a type or a paren puts around an expression, which change no call. */
 const TRANSPARENT = new Set([
     'ParenthesizedExpression',
     'TSAsExpression',
@@ -141,7 +113,7 @@ const TRANSPARENT = new Set([
     'TSTypeAssertion',
 ]);
 
-/** The expression under its type assertions and parentheses — `file('x') as never` is `file('x')`. */
+/** `file('x') as never` is `file('x')`. */
 function unwrapped(node: unknown): unknown {
     let current = node;
     while (isNode(current) && TRANSPARENT.has(current.type)) {
@@ -150,7 +122,6 @@ function unwrapped(node: unknown): unknown {
     return current;
 }
 
-/** Does the call's first argument answer what the shape asks? */
 function argumentMatches(call: AstNode, argument: Argument): boolean {
     if (argument.kind === 'any') {
         return true;
@@ -170,7 +141,6 @@ function argumentMatches(call: AstNode, argument: Argument): boolean {
     return first.type === (argument.kind === 'array' ? 'ArrayExpression' : 'ObjectExpression');
 }
 
-/** Is `node` a call whose last argument is a call? */
 function wrapsACall(node: unknown): boolean {
     if (!isNode(node) || node.type !== 'CallExpression' || !Array.isArray(node.arguments)) {
         return false;
@@ -179,7 +149,6 @@ function wrapsACall(node: unknown): boolean {
     return isNode(last) && last.type === 'CallExpression';
 }
 
-/** Is this call the one the shape describes? */
 export function isCallOf(call: AstNode, shape: CallShape): boolean {
     const { callee } = call;
     if (!isNode(callee)) {

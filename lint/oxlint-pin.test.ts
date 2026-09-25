@@ -5,10 +5,8 @@ import { describe, expect, test } from 'vitest';
 
 import { declaredRange, toolchainRange } from './oxlint-pin.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** A throwaway install whose two manifests state the ranges a case needs. */
 function installWith(own: string, toolchain: string): string {
     const root = mkdtempSync(resolve(tmpdir(), 'oxlint-pin-'));
     writeFileSync(

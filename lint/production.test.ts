@@ -34,7 +34,6 @@ const ROOT = packageWith({
     'tsconfig.json': '{ "compilerOptions": { "baseUrl": "./src", "paths": { "@/*": ["*"] } } }',
 });
 
-/** A workspace whose app's tsconfig states no `paths` of its own and inherits them. */
 const EXTENDED = packageWith({
     'apps/web/package.json': '{}',
     'apps/web/tsconfig.json': JSON.stringify({
@@ -57,7 +56,6 @@ const EXTENDED = packageWith({
     }),
     'tsconfig.json': JSON.stringify({ extends: './tsconfig.base.json' }),
 });
-/** A package whose production imports a module under a retired test root that reaches nothing yet. */
 function helperPackage(): { from: (name: string) => string; later: () => void } {
     const root = packageWith({ 'tests/helper.ts': 'export const helper = 1;\n' });
     return {

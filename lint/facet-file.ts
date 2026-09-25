@@ -9,14 +9,6 @@ import {
 import { isAdapter, isNamedKey, isReference, isRow, rootOf, unwrapped } from './facet-values.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * What a facet file — `src/facets/<facet>/<facet>.facet.ts` — writes that a
- * composition cannot hold, read off its program: a statement beside the
- * composition, or logic written inline in the composition or in the facet it
- * defines. The self rule I6 reports each finding as it is returned.
- */
-
-/** One thing a facet file holds that it cannot, as the rule's message names it. */
 export type FacetFinding = {
     readonly data?: Record<string, string>;
     readonly messageId:
@@ -31,11 +23,6 @@ export type FacetFinding = {
     readonly node: AstNode;
 };
 
-/**
- * What an import source names inside `src/`, by the role its file carries: a
- * definition (`*.capability.js`, `*.action.js`), a facet (`*.facet.js`) or a
- * result (`*.result.js`, or an accessor of `expectations/`).
- */
 export function layerOf(source: string): 'definition' | 'facet' | 'result' | undefined {
     if (/\.(?:capability|action)\.js$/u.test(source)) {
         return 'definition';
@@ -48,7 +35,6 @@ export function layerOf(source: string): 'definition' | 'facet' | 'result' | und
         : undefined;
 }
 
-/** The one declarator of a `const` statement, or `undefined` for any other statement. */
 function constDeclarator(statement: AstNode | undefined): AstNode | undefined {
     const declarators = childList(statement, 'declarations');
     return statement?.type === 'VariableDeclaration' &&
@@ -58,7 +44,6 @@ function constDeclarator(statement: AstNode | undefined): AstNode | undefined {
         : undefined;
 }
 
-/** The object of `const composition = { … }`, written with `as const` or a `satisfies`. */
 function compositionOf(statement: AstNode): AstNode | undefined {
     const declarator = constDeclarator(statement);
     const init = unwrapped(child(declarator, 'init'));
@@ -68,10 +53,8 @@ function compositionOf(statement: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** A `defineFacet<…>(…)({ … })`: what the definer is handed, and the facet object. */
 type DefinedFacet = { readonly facet: AstNode; readonly handed: AstNode[] };
 
-/** The `defineFacet<…>(…)({ … })` the statement exports, if it exports one. */
 function definedFacet(statement: AstNode): DefinedFacet | undefined {
     const init = child(constDeclarator(child(statement, 'declaration')), 'init');
     const inner = child(init, 'callee');
@@ -84,17 +67,13 @@ function definedFacet(statement: AstNode): DefinedFacet | undefined {
         : undefined;
 }
 
-/** Is the statement an interface — the chain type the facet names? */
 function isChainType(statement: AstNode): boolean {
     const declared =
         statement.type === 'ExportNamedDeclaration' ? child(statement, 'declaration') : statement;
     return declared?.type === 'TSInterfaceDeclaration';
 }
 
-/**
- * The object `engines: (config) => ({ … })` hands back, when it is written
- * so: an arrow whose every parameter is a bare name, typed or not.
- */
+/** Only when written as an arrow whose every parameter is a bare name, typed or not. */
 function adaptersOf(facet: AstNode): AstNode | undefined {
     const engines = child(findProperty(facet, 'engines'), 'value');
     const body = unwrapped(child(engines, 'body'));
@@ -105,14 +84,13 @@ function adaptersOf(facet: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** A node's kind as a finding names it: `FunctionDeclaration` → `function declaration`. */
+/** `FunctionDeclaration` → `function declaration`. */
 function kindOf(node: AstNode | undefined): string {
     return (node?.type ?? 'nothing')
         .replaceAll(/(?<lower>[a-z])(?<upper>[A-Z])/gu, '$<lower> $<upper>')
         .toLowerCase();
 }
 
-/** What a statement a composition cannot hold is, as a finding names it. */
 function strayOf(statement: AstNode): string {
     return kindOf(
         statement.type === 'ExportNamedDeclaration' || statement.type === 'ExportDefaultDeclaration'
@@ -121,7 +99,6 @@ function strayOf(statement: AstNode): string {
     );
 }
 
-/** Every name a program imports, with the source it is imported from. */
 export function importsOf(program: AstNode): Map<string, string> {
     const sources = new Map<string, string>();
     for (const statement of childList(program, 'body')) {
@@ -138,7 +115,6 @@ export function importsOf(program: AstNode): Map<string, string> {
     return sources;
 }
 
-/** What a `capabilities` or `actions` list holds that is no definition imported by name. */
 function unlisted(member: AstNode, imports: ReadonlyMap<string, string>): FacetFinding[] {
     const key = propertyKeyName(member) ?? '…';
     const value = unwrapped(child(member, 'value'));
@@ -155,7 +131,6 @@ function unlisted(member: AstNode, imports: ReadonlyMap<string, string>): FacetF
         }));
 }
 
-/** The options that are not a matrix row written as string literals. */
 function unrowed(member: AstNode): FacetFinding[] {
     const value = unwrapped(child(member, 'value'));
     const options = value?.type === 'ObjectExpression' ? childList(value, 'properties') : [member];
@@ -170,7 +145,6 @@ function unrowed(member: AstNode): FacetFinding[] {
         }));
 }
 
-/** What the composition's own members hold that no composition may. */
 function compositionFindings(
     composition: AstNode,
     imports: ReadonlyMap<string, string>,
@@ -186,7 +160,6 @@ function compositionFindings(
     });
 }
 
-/** Is the facet's member one it names — the composition spread, or a reference imported? */
 function isNamed(property: AstNode, imports: ReadonlyMap<string, string>): boolean {
     if (property.type === 'SpreadElement') {
         return identifierName(child(property, 'argument')) === 'composition';
@@ -198,7 +171,6 @@ function isNamed(property: AstNode, imports: ReadonlyMap<string, string>): boole
     );
 }
 
-/** What `defineFacet` is handed, and what the facet object writes inline rather than names. */
 function facetFindings(
     defined: DefinedFacet,
     imports: ReadonlyMap<string, string>,
@@ -236,11 +208,6 @@ function facetFindings(
     return [...handed, ...unwired, ...inline];
 }
 
-/**
- * Every finding of a facet file: a statement that is none of its imports,
- * its composition, its chain interface and its `defineFacet(…)`; and what the
- * composition or the facet writes inline rather than names.
- */
 export function facetFileFindings(program: AstNode): FacetFinding[] {
     const imports = importsOf(program);
     return childList(program, 'body').flatMap((statement): FacetFinding[] => {

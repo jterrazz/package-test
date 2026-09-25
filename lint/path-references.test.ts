@@ -14,7 +14,6 @@ import { packageWith } from './rule-tester.fixtures.js';
 
 const ROOT = packageWith({ 'src/a.ts': '' });
 
-/** The paths a module at `src/a.ts` names, in the order they are written. */
 function pathsIn(source: string): string[] {
     const file = join(ROOT, 'src/a.ts');
     const program = parseProgram(file, source);
@@ -33,7 +32,6 @@ function pathsIn(source: string): string[] {
     return paths;
 }
 
-/** The literal pieces of each path a module resolves from its own directory, in the order they are written. */
 function literalPathsIn(source: string): string[][] {
     const program = parseProgram(join(ROOT, 'src/a.ts'), source);
     const paths: string[][] = [];

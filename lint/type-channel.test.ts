@@ -8,7 +8,6 @@ const ROOT = resolve(import.meta.dirname, '..');
 const CHANNEL = resolve(ROOT, 'src/type-channel.test-d.ts');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 
-/** What the compiler says on each line of a source whose markers are gone. */
 function refusalsByLine(source: string): Map<number, string[]> {
     mkdirSync(CACHE, { recursive: true });
     const byLine = new Map<number, string[]>();

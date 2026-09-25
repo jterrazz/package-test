@@ -7,26 +7,11 @@ import {
     ARCHITECTURE_RULE_DOCS,
 } from './self/architecture-rows.js';
 
-/**
- * The `self` rows — the rules only this package is held to: its own suite,
- * its catalogue, its capability matrix, its specimens, its own sources.
- *
- * No published entry imports this module. The rules they describe run in
- * `dist/self-oxlint.js`, `dist/self-checker.js` and this repository's
- * meta-tests, which `files` leaves out of the tarball; the published bundles
- * read `consumerCatalog` alone, so none of them carries a row of this module.
- */
+/** No published entry imports this module: the published bundles read `consumerCatalog` alone. */
 
-/**
- * The chapter a `self` row is read at, where the package says how it tests
- * itself: a self rule has no row in the public catalogue, so its message routes here.
- */
+/** A self rule has no row in the public catalogue, so its message routes here. */
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
-/**
- * The **statique** `self` rows — each the `meta.docs` of a rule of the
- * `jterrazz-self` plugin (`self-plugin.ts`).
- */
 export const SELF_RULE_DOCS = {
     'f7-no-framework-internals': {
         audience: 'self',
@@ -44,7 +29,6 @@ export const SELF_RULE_DOCS = {
     ...ARCHITECTURE_RULE_DOCS,
 } satisfies Record<string, RuleDoc>;
 
-/** The **checker** `self` rows — each a pass `dist/self-checker.js` runs (`self-checker.ts`). */
 export const SELF_CHECKER_PASSES: CatalogEntry[] = [
     {
         audience: 'self',
@@ -63,17 +47,7 @@ export const SELF_CHECKER_PASSES: CatalogEntry[] = [
     ...ARCHITECTURE_PASSES,
 ];
 
-/**
- * The **meta** channel — what the package's own tests hold about the catalogue
- * and about itself.
- *
- * These rows never reach a consumer: they are the guards that keep the other
- * six channels honest. A rule with no fixture, a message linking to a heading
- * that moved, an id cited in a chapter that resolves to nothing, a reach a
- * reader could only learn by reading the implementation — each is a way the
- * catalogue stops being true without anything failing, and each has a test
- * here that fails instead.
- */
+/** The guards that keep the other six channels honest; none reaches a consumer. */
 export const META_ROWS: CatalogEntry[] = [
     {
         audience: 'self',
@@ -260,7 +234,6 @@ export const META_ROWS: CatalogEntry[] = [
     },
 ];
 
-/** The **process** `self` rows — the review discipline of this package's own catalogue. */
 export const SELF_PROCESS_RULES: CatalogEntry[] = [
     {
         audience: 'self',
@@ -277,7 +250,6 @@ export const SELF_PROCESS_RULES: CatalogEntry[] = [
     },
 ];
 
-/** The `self` catalogue, in catalogue order. */
 export const selfCatalog: CatalogEntry[] = ordered([
     ...statiqueRows(SELF_RULE_DOCS),
     ...SELF_CHECKER_PASSES,
@@ -285,7 +257,6 @@ export const selfCatalog: CatalogEntry[] = ordered([
     ...SELF_PROCESS_RULES,
 ]);
 
-/** The `self` row a name designates. */
 export function selfRowOf(name: string): CatalogEntry {
     const row = selfCatalog.find((entry) => entry.name === name);
     if (row === undefined) {
@@ -294,5 +265,4 @@ export function selfRowOf(name: string): CatalogEntry {
     return row;
 }
 
-/** Every row of both audiences, in catalogue order: what the generator and meta-tests read. */
 export const catalog: CatalogEntry[] = ordered([...consumerCatalog, ...selfCatalog]);

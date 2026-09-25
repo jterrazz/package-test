@@ -5,14 +5,12 @@ import { isAdapter, isNamedKey, isRow } from './facet-values.js';
 import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
-/** The expression `const value = <expression>;` declares. */
 function expressionOf(expression: string): AstNode | undefined {
     const program = parseProgram('value.ts', `const value = ${expression};`);
     const [statement] = isNode(program) ? childList(program, 'body') : [];
     return child(childList(statement, 'declarations')[0], 'init');
 }
 
-/** The properties of the object `expression` writes. */
 function propertiesOf(expression: string): AstNode[] {
     return childList(expressionOf(expression), 'properties');
 }

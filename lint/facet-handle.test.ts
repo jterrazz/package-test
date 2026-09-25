@@ -4,7 +4,6 @@ import { isNode } from './ast.js';
 import { handleFileFindings } from './facet-handle.js';
 import { parseProgram } from './module-parser.js';
 
-/** What each finding of a constructor says, as `<messageId> <data values>`. */
 function findingsOf(body: string): string[] {
     const program = parseProgram(
         'job.handle.ts',

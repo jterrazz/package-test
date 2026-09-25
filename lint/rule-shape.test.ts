@@ -11,7 +11,6 @@ import selfPlugin from './self-plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The options the E2E config hands each rule, by rule id. */
 function e2eOptions(): Map<string, unknown[]> {
     const config: unknown = JSON.parse(
         readFileSync(join(ROOT, 'specs/shared/fixtures/lint-cli/oxlint.e2e.json'), 'utf8'),
@@ -26,7 +25,6 @@ function e2eOptions(): Map<string, unknown[]> {
 
 const E2E_OPTIONS = e2eOptions();
 
-/** The source files of a rule's E2E fixture trees, in a stable order. */
 function corpusOf(rule: string): string[] {
     const fixtures = join(ROOT, 'specs/lint', rule, 'fixtures');
     let entries: string[];
@@ -41,10 +39,8 @@ function corpusOf(rule: string): string[] {
         .toSorted();
 }
 
-/** One report, reduced to what a verdict is: where, which message, with what. */
 type Verdict = { data: unknown; end: number; messageId: unknown; start: number };
 
-/** The children of a parsed node, the way a visitor walks them. */
 function childrenOf(node: AstNode): AstNode[] {
     const found: AstNode[] = [];
     for (const [key, value] of Object.entries(node)) {
@@ -60,7 +56,6 @@ function childrenOf(node: AstNode): AstNode[] {
     return found;
 }
 
-/** Enter and leave every node, parent first, the way oxlint hands them to a visitor. */
 function visit(node: AstNode, parent: AstNode | null, handlers: Visitor): void {
     node.parent = parent;
     handlers[node.type]?.(node);
@@ -70,11 +65,7 @@ function visit(node: AstNode, parent: AstNode | null, handlers: Visitor): void {
     handlers[`${node.type}:exit`]?.(node);
 }
 
-/**
- * A lint session in this process: ONE visitor per rule, built once, handed
- * file after file — what oxlint does with a `createOnce` rule — and what each
- * file drew from it.
- */
+/** One visitor per rule, handed file after file, as oxlint does with a `createOnce` rule. */
 function session(rule: LintRule, id: string): (file: string) => Verdict[] {
     const state: { file: string; source: object; verdicts: Verdict[] } = {
         file: '',
@@ -130,7 +121,6 @@ function session(rule: LintRule, id: string): (file: string) => Verdict[] {
     };
 }
 
-/** Every rule module, by path. */
 function ruleSources(): string[] {
     return readdirSync(join(ROOT, 'lint/rules'), { recursive: true })
         .map(String)
@@ -139,12 +129,10 @@ function ruleSources(): string[] {
         .toSorted();
 }
 
-/** The name of an object member, when it is written as one. */
 function memberName(node: AstNode): string | undefined {
     return identifierName(child(node, 'key'));
 }
 
-/** Every name an assignment writes, anywhere under `node`. */
 function assignedUnder(node: AstNode): string[] {
     const names: string[] = [];
     walk(node, (write) => {
@@ -156,11 +144,7 @@ function assignedUnder(node: AstNode): string[] {
     return names;
 }
 
-/**
- * What a `createOnce` keeps across files and never resets when one opens: each
- * `let` its body declares that neither `before` nor the `Program` handler
- * assigns.
- */
+/** Each `let` its body declares that neither `before` nor the `Program` handler assigns. */
 function unresetState(source: string): string[] {
     const program: unknown = parseSync(source, readFileSync(source, 'utf8')).program;
     if (!isNode(program)) {

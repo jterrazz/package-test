@@ -4,22 +4,12 @@ import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry, RULE_DOCS } from './manifest.js';
 import { CATALOGUE_CHAPTER } from './rule-code.js';
 
-/**
- * The two parts of a lesson a message writes for its case — what it found, and
- * the gesture that fixes it. The other two are the row's: `why` is its
- * convention's first sentence and `read` its heading, so a message and the
- * catalogue can never say two things.
- */
+/** `why` and `read` come from the row, so a message and the catalogue never say two things. */
 export type Teaching = Pick<Lesson, 'fix' | 'found'>;
 
-/** Abbreviations whose period ends no sentence. */
 const ABBREVIATIONS = ['e.g', 'i.e', 'vs', 'etc'];
 
-/**
- * The first sentence of a convention: up to the first `.`, `!` or `?` that is
- * followed by the end or by a space and a new sentence — never one inside a
- * code span (`*.spec.ts`), nor an abbreviation's.
- */
+/** Never a period inside a code span (`*.spec.ts`), nor an abbreviation's. */
 export function whyOf(convention: string): string {
     let inCode = false;
     for (let index = 0; index < convention.length; index += 1) {
@@ -43,12 +33,7 @@ export function whyOf(convention: string): string {
     return convention;
 }
 
-/**
- * The `consumer` row a name designates — a static rule, a checker pass. A
- * `self` row is not found here: the published code reads the consumer
- * catalogue alone, and a self rule hands its own row, and its own chapter, to
- * {@link lessonsAt}.
- */
+/** The published code reads the consumer catalogue alone; a self rule hands its own row to {@link lessonsAt}. */
 export function rowOf(name: string): CatalogEntry {
     const row = consumerCatalog.find((entry) => entry.name === name);
     if (row === undefined) {
@@ -57,21 +42,14 @@ export function rowOf(name: string): CatalogEntry {
     return row;
 }
 
-/**
- * The heading a row is read at, in the chapter its audience lists it in: the
- * catalogue, `docs/19-linting.md#<row>`, unless a self row's caller names its
- * own.
- */
 export function readAt(row: CatalogEntry, chapter = CATALOGUE_CHAPTER): string {
     return `${chapter}#${row.name}`;
 }
 
-/** The heading a consumer row is read at. */
 export function readOf(name: string): string {
     return readAt(rowOf(name));
 }
 
-/** One finding of a row as the line a reader acts on, read in `chapter`. */
 export function lessonAt(
     row: CatalogEntry,
     teaching: Teaching,
@@ -80,17 +58,11 @@ export function lessonAt(
     return lessonLine({ ...teaching, read: readAt(row, chapter), why: whyOf(row.convention) });
 }
 
-/** One finding of a consumer row as the line a reader acts on. */
 export function lessonOf(name: string, teaching: Teaching): string {
     return lessonAt(rowOf(name), teaching);
 }
 
-/**
- * A static rule's `meta.messages`, from its row: each message keyed as the
- * rule reports it, rendered whole. A `{{data}}` placeholder in `found` or
- * `fix` is oxlint's, and filled at report time with the case's values. Each
- * is read in `chapter`.
- */
+/** A `{{data}}` placeholder is oxlint's, filled at report time. */
 export function lessonsAt<Key extends string>(
     row: CatalogEntry,
     messages: Record<Key, Teaching>,
@@ -104,7 +76,6 @@ export function lessonsAt<Key extends string>(
     ) as Record<Key, string>;
 }
 
-/** A consumer rule's `meta.messages`. */
 export function lessons<Key extends string>(
     rule: keyof typeof RULE_DOCS,
     messages: Record<Key, Teaching>,

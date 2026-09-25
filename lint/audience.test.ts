@@ -21,38 +21,26 @@ import { RUNTIME_RULES } from './manifest.js';
 import { CATALOGUE_CHAPTER, codeOf } from './rule-code.js';
 import { catalog, SELF_CHECKER_PASSES } from './self-manifest.js';
 
-/**
- * K12 (meta-test) — a rule only this package is held to never reaches a
- * consumer. The tarball is packed and extracted as an install holds it (`npm
- * run build` first); its text is read whole, and every entry a consumer runs
- * is loaded, or run, from there.
- */
+/** K12 (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The fields of a manifest this reads: what a consumer's install loads and runs. */
 type Manifest = {
     bin?: Record<string, string>;
     exports: Record<string, unknown>;
 };
 
-/** A package's manifest, as its install reads it. */
 function manifestOf(dir: string): Manifest {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `bin` and `exports` are the fields this reads
     return JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as Manifest;
 }
 
-/** One module the exports map publishes, and the condition that loads it. */
 type PublishedEntry = {
     condition: string;
     subpath: string;
     target: string;
 };
 
-/**
- * Every file the exports map resolves to, one per subpath and condition, but
- * what carries no code — a `types` target and a JSON schema. What is left is
- * a module node loads, or a target the test cannot classify.
- */
+/** Every file the exports map resolves to, less what carries no code (a `types` target, a JSON schema). */
 function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
     const entries: PublishedEntry[] = [];
     const visit = (subpath: string, condition: string, node: unknown): void => {
@@ -74,11 +62,9 @@ function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
     return entries;
 }
 
-/** The channels whose every row is something the published surface does to a consumer. */
 const PUBLISHED_CHANNELS = new Set(['runtime', 'type', 'upstream']);
 
 describe('audience', () => {
-    // Under the run's temp root, which the run removes whole
     const scratch = mkdtempSync(join(tmpdir(), 'k12-tarball-'));
     const installed = extractTarball(ROOT, scratch);
     const packed = new Set(filesUnder(installed));

@@ -11,13 +11,6 @@ import {
 import { importsOf, layerOf } from './facet-file.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * What a facet's constructor — `src/facets/<facet>/<facet>.handle.ts` — does
- * that the chain owns, read off its program: a definition's step it runs, a
- * result it builds. The self rule I6 reports each finding as it is returned.
- */
-
-/** One thing a constructor does that the chain owns, as the rule's message names it. */
 export type HandleFinding =
     | {
           readonly data: { readonly built: string };
@@ -30,22 +23,17 @@ export type HandleFinding =
           readonly node: AstNode;
       };
 
-/** A definition's own steps — what the chain runs, never its constructor. */
 const STEPS = new Set(['arm', 'perform', 'reduce']);
 
-/** What calls a function a step names without naming the step itself. */
 const INVOKERS = new Set(['apply', 'call']);
 
-/** A step of a definition, and what it is read off. */
 type Step = { owner: string; step: string };
 
-/** The names a constructor binds: the layer each is read off, and the steps it holds. */
 type Bindings = {
     readonly layers: Map<string, 'definition' | 'facet' | 'result'>;
     readonly steps: Map<string, Step>;
 };
 
-/** The expression under a cast, a non-null assertion or parentheses. */
 function bare(node: AstNode | undefined): AstNode | undefined {
     return node?.type === 'TSAsExpression' ||
         node?.type === 'TSSatisfiesExpression' ||
@@ -55,12 +43,11 @@ function bare(node: AstNode | undefined): AstNode | undefined {
         : node;
 }
 
-/** The name a member reads, by a written key or a string one: `seed.reduce`, `seed['reduce']`. */
+/** `seed.reduce`, `seed['reduce']`. */
 function readName(member: AstNode): string | undefined {
     return memberPropertyName(member) ?? stringValue(child(member, 'property'));
 }
 
-/** The identifier a chain of reads and calls starts from, through its casts. */
 function rootName(node: AstNode | undefined): string | undefined {
     const read = bare(node);
     if (read?.type === 'MemberExpression') {
@@ -74,7 +61,7 @@ function rootName(node: AstNode | undefined): string | undefined {
         : identifierName(read);
 }
 
-/** What a value is read off, when that is a definition or a facet: `seed`, `jobFacet.composition`. */
+/** `seed`, `jobFacet.composition`. */
 function ownerOf(node: AstNode | undefined, bindings: Bindings): string | undefined {
     const root = rootName(node);
     const layer = root === undefined ? undefined : bindings.layers.get(root);
@@ -83,7 +70,6 @@ function ownerOf(node: AstNode | undefined, bindings: Bindings): string | undefi
         : undefined;
 }
 
-/** The step a value is, when it names one: a step read off a definition, or a name bound to one. */
 function stepOf(node: AstNode | undefined, bindings: Bindings): Step | undefined {
     const read = bare(node);
     if (read?.type === 'Identifier') {
@@ -96,7 +82,6 @@ function stepOf(node: AstNode | undefined, bindings: Bindings): Step | undefined
         : undefined;
 }
 
-/** The step a call runs: the callee's, or the one it runs through `call`/`apply`. */
 function stepRun(callee: AstNode | undefined, bindings: Bindings): Step | undefined {
     const read = bare(callee);
     const invoked =
@@ -106,7 +91,6 @@ function stepRun(callee: AstNode | undefined, bindings: Bindings): Step | undefi
     return stepOf(read, bindings) ?? invoked;
 }
 
-/** Is the value a name or a read off one — no call a binding would stand for? */
 function isRead(node: AstNode | undefined): boolean {
     const read = bare(node);
     return (
@@ -115,7 +99,7 @@ function isRead(node: AstNode | undefined): boolean {
     );
 }
 
-/** The locals a pattern binds from its object's keys: `{ reduce: run = undefined }` → reduce, run. */
+/** `{ reduce: run = undefined }` → reduce, run. */
 function destructured(pattern: AstNode): [string, string][] {
     return childList(pattern, 'properties').flatMap((property): [string, string][] => {
         const key = propertyKeyName(property) ?? stringValue(child(property, 'key'));
@@ -126,7 +110,6 @@ function destructured(pattern: AstNode): [string, string][] {
     });
 }
 
-/** Binds what a declarator names: a step, an alias of what a layer holds, or steps destructured. */
 function bind(declarator: AstNode, bindings: Bindings): void {
     const id = child(declarator, 'id');
     const init = child(declarator, 'init');
@@ -149,7 +132,6 @@ function bind(declarator: AstNode, bindings: Bindings): void {
     }
 }
 
-/** Every name the program binds, wherever it is declared, bound to a fixed point. */
 function bindingsOf(program: AstNode): Bindings {
     const bindings: Bindings = { layers: new Map(), steps: new Map() };
     for (const [local, source] of importsOf(program)) {
@@ -173,11 +155,6 @@ function bindingsOf(program: AstNode): Bindings {
     return bindings;
 }
 
-/**
- * Every finding of a constructor: a call that runs a definition's step —
- * read off it, off an alias of it, through `call`/`apply`, or bound to a name
- * wherever the binding is written — and a result it builds with `new`.
- */
 export function handleFileFindings(program: AstNode): HandleFinding[] {
     const bindings = bindingsOf(program);
     const findings: HandleFinding[] = [];

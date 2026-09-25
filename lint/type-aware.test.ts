@@ -9,7 +9,6 @@ const ROOT = resolve(import.meta.dirname, '..');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 const FLOATING = 'typescript/no-floating-promises';
 
-/** The lines of `source` that end on `// refused`. */
 function refusedLines(source: string): number[] {
     return source
         .split('\n')

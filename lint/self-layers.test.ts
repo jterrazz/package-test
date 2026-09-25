@@ -4,13 +4,8 @@ import { asOxlintRule, ruleTester } from './rule-tester.fixtures.js';
 import { i1LayerBoundaries } from './rules/model/i1-layer-boundaries.js';
 import { FRAMEWORK_LAYERS } from './self-layers.js';
 
-/*
- * Lock 2 — the direction `kernel ← world · elements · expectations ← facets ←
- * vitest` — proven on the map itself: an edit that opens a reverse edge fails
- * here, even while no module uses it yet.
- */
+/* Lock 2: a reverse edge fails here even while no module uses it yet. */
 
-/** The package's own map, as `oxlint.config.ts` hands it to the rule. */
 const own = [{ layers: FRAMEWORK_LAYERS }];
 
 describe('FRAMEWORK_LAYERS', () => {

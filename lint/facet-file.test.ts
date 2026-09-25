@@ -5,7 +5,6 @@ import { facetFileFindings, importsOf } from './facet-file.js';
 import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
-/** The program a facet file's source parses to. */
 function programOf(source: string): AstNode {
     const program = parseProgram('job.facet.ts', source);
     if (!isNode(program)) {
@@ -14,14 +13,12 @@ function programOf(source: string): AstNode {
     return program;
 }
 
-/** What each finding says, as `<messageId> <data values>`. */
 function findingsOf(source: string): string[] {
     return facetFileFindings(programOf(source)).map((finding) =>
         [finding.messageId, ...Object.values(finding.data ?? {})].join(' '),
     );
 }
 
-/** A facet whose adapters are written with `engines`. */
 function facetWiring(engines: string): string {
     return `
 import { seed } from '../../world/services/seed/seed.capability.js';

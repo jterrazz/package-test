@@ -4,10 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import { META_TESTS_END, META_TESTS_START, metaTests, spliceMetaTests } from './meta-tests.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** Chapter 03, which carries the generated table. */
 const CHAPTER = 'docs/03-testing.md';
 
 describe('metaTests', () => {

@@ -5,13 +5,9 @@ import { describe, expect, test } from 'vitest';
 
 import { definitionsIn, modulesOf, outsideLoadsReached, straysOf } from './architecture.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/**
- * The setups a chain can offer, each defined in its own `<name>.capability.ts`
- * (`with` is the sharing every contextual setup answers through).
- */
+/** The setups a chain can offer, each in its own `<name>.capability.ts`. */
 const SETUPS = [
     'clock',
     'env',
@@ -24,7 +20,6 @@ const SETUPS = [
     'wrap',
 ];
 
-/** The module each terminal action is defined in — the request family shares one. */
 const ACTION_MODULES = {
     call: 'call',
     delete: 'request',
@@ -41,14 +36,7 @@ const ACTION_MODULES = {
     visit: 'visit',
 };
 
-/**
- * Meta-tests I7 (`i7-kernel-loads-in-a-page`) and I8
- * (`i8-definition-is-its-folder`) — the architecture a facet is composed in.
- *
- * A setup is defined once, in its own folder, and composed by every facet
- * that offers it; the component facet composes it inside a PAGE, so what the
- * kernel and a setup load must load there too.
- */
+/** Meta-tests I7 (`i7-kernel-loads-in-a-page`) and I8 (`i8-definition-is-its-folder`): the component facet composes a setup inside a page, so what the kernel and a setup load must load there too. */
 describe('architecture', () => {
     test('the architecture a facet is composed in (meta-tests I7, I8) — i7 — the kernel and every setup load no node builtin and no package, at any depth', () => {
         // Given - every module of the chain kernel, and every setup module

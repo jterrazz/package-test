@@ -14,32 +14,8 @@ import { CAPABILITIES, COLUMNS, memberOf } from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
 import { capabilities } from './matrix.js';
 
-/**
- * Meta-test (K1 guard) — the rows of the capability matrix ARE the surfaces.
- *
- * A reader writes tests from chapter 03's table. So a row that names a member
- * no interface has publishes a method that does not exist (`result.json` on
- * an api result once did), and a member with no row hides one that does
- * (`.clock()` and `.headers()` on website did).
- *
- * A composition pins most of its rows itself: `defineFacet` refuses a
- * composition naming other members than its chain, its options are pinned to
- * the constructor's `keyof` where they are composed, and every definition
- * states the row of its own member (`self/compositions.test.ts`). What a
- * composition cannot pin is what an action states about something else — the
- * result it hands back, the visitor it hands a scenario, the element
- * vocabulary, the options a route takes — so every record below re-encodes
- * one of those interfaces and is pinned to its real `keyof` with `satisfies`,
- * which forces exhaustiveness in BOTH directions on the object literal:
- *   - add a member to the interface → the record is MISSING a key      → the build fails;
- *   - remove or rename one          → the record has an EXTRANEOUS key → the build fails.
- * A key's value is `true` when the matrix publishes it as a row, and the
- * SENTENCE saying why not when it does not. The runtime tests then hold the
- * rows equal to those records, column by column — so the compiler catches a
- * surface change and the suite catches rows that did not follow it.
- */
+/** Each record is pinned to its interface's `keyof` with `satisfies`: a member added or removed fails the build, and the tests below hold the matrix rows equal to the records. */
 
-/** The seven columns that are a facet — every column but the module test. */
 const FACET_COLUMNS = [
     'api',
     'cli',
@@ -50,13 +26,11 @@ const FACET_COLUMNS = [
     'website',
 ] as const satisfies readonly Exclude<Column, 'module'>[];
 
-/** A member the matrix publishes, or the reason it does not. */
 type Published = string | true;
 
-/** Every key of a union type, branch by branch — an XOR option bag keeps its keys. */
+/** An XOR option bag keeps its keys. */
 type KeysOf<T> = T extends unknown ? keyof T : never;
 
-/** The keys of a record whose value says "published". */
 function published(record: Record<string, Published>): string[] {
     return Object.entries(record)
         .filter(([, value]) => value === true)
@@ -64,7 +38,6 @@ function published(record: Record<string, Published>): string[] {
         .toSorted();
 }
 
-/** What the matrix says a column publishes, for one group. */
 function declared(column: Column, group: CapabilityGroup): string[] {
     return capabilities()
         .filter((capability) => capability.group === group && capability.columns.includes(column))
@@ -72,19 +45,14 @@ function declared(column: Column, group: CapabilityGroup): string[] {
         .toSorted();
 }
 
-/** Not a row of the matrix: the ref-capture scope every result carries for the engine. */
 const INTERNAL = 'an @internal scope the engine uses to resolve `{{type#ref}}` captures';
 
-/** Not a row on a surface that leaves no working directory behind. */
 const NO_DISK = 'inherited from BaseResult; this kind leaves no working directory to read';
 
-/** What an api action is handed beside its route's template. */
 const routeOptions = { params: true } satisfies Record<
     KeysOf<NonNullable<RouteOptionsAny>>,
     Published
 >;
-
-// ── The results: what a terminal action hands back ──
 
 const apiResult = {
     captures: INTERNAL,
@@ -174,7 +142,7 @@ const componentResult = {
     tree: true,
 } satisfies Record<keyof RenderResult, Published>;
 
-/** A column's result surface — website answers through two results, so both. */
+/** Website answers through two results. */
 const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = {
     api: [apiResult],
     cli: [cliResult],
@@ -184,8 +152,6 @@ const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = 
     mobile: [mobileResult],
     website: [websiteResult, fetchResult],
 };
-
-// ── The visitors: the verbs a scenario drives ──
 
 const websiteVisitor = {
     check: true,
@@ -218,10 +184,10 @@ const componentVisitor = {
     unmount: true,
 } satisfies Record<keyof ComponentVisitor, Published>;
 
-/** What scopes a descriptor on a device rather than naming an element: no kind of its own, translated by the appium adapter — `appium.adapter.test.ts` taps through one. */
+/** No kind of its own: the appium adapter translates it. */
 const MOBILE_SCOPES = ['within'];
 
-/** The mobile element kinds, as the vocabulary spells them (`text` is `content()`). */
+/** `text` is `content()`. */
 const MOBILE_DESCRIPTORS: Record<MobileElementKind, string> = {
     button: 'button',
     field: 'field',

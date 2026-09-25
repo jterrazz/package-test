@@ -3,20 +3,10 @@ import { describe, expect, test } from 'vitest';
 
 import { findEnvOffenders, findUnsanctionedDynamicReads, sourceFiles } from './env-allowlist.js';
 
-/**
- * CONVENTIONS E1 (meta-test) — the framework reads only its own generic-prefixed
- * env vars. Any `process.env.<NAME>` read in non-test `src/` must be in the
- * allowlist; a dynamic read (`process.env[expr]`) must carry an `env-sanction`
- * comment. New env coupling cannot slip in unnoticed.
- */
+/** CONVENTIONS E1 (meta-test) — the framework reads only its own generic-prefixed env vars. */
 const files = sourceFiles(resolve(import.meta.dirname, '../src'));
 
-/**
- * A scanner-input fixture (a `.txt`, so it never enters {@link sourceFiles} nor
- * the real sweep) carrying the three offences the scanner must catch: an
- * out-of-allowlist dot read, an out-of-allowlist string-bracket read, and an
- * unsanctioned dynamic read — plus one `env-sanction`ed dynamic read it spares.
- */
+/** A `.txt`, so it never enters the real sweep. */
 const OFFENDER_FIXTURE = resolve(import.meta.dirname, 'env-allowlist.offenders.txt');
 
 describe('env-allowlist', () => {

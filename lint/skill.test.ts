@@ -9,7 +9,7 @@ import { SKILL_MAX_LINES, skillFindings } from './skill.js';
 const ROOT = resolve(import.meta.dirname, '..');
 const SKILL = resolve(ROOT, 'skills/jterrazz-test/SKILL.md');
 
-/** One answer of the skill's fork: `N. <question> → **<kind>**, `<path>``. */
+/** `N. <question> → **<kind>**, `<path>``. */
 const SKILL_FORK_LINE = /^\d+\. .*→ \*\*(?<kind>[^*]+)\*\*, `(?<path>[^`]+)`/gmu;
 describe('skill', () => {
     test(`the skill names only what exists (meta-test) — stays under ${SKILL_MAX_LINES} lines`, () => {

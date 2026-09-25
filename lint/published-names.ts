@@ -5,18 +5,10 @@ import { isNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * The names the package publishes, read from the built entries a consumer
- * imports: the node types, the page bundle, and the types of the vitest
- * subpath. A name is what a consumer's import statement spells, so the
- * surface is recorded by name, whatever the build does with the declarations
- * behind it.
- */
+/** A name is what a consumer's import spells, so the surface is recorded by name, whatever the build does behind it. */
 
-/** The built entries whose names are the published surface, from the package root. */
 export const PUBLISHED_ENTRIES = ['dist/index.d.ts', 'dist/browser/index.js', 'dist/vitest.d.ts'];
 
-/** The name a declaration or a specifier binds: an identifier's, or a string literal's. */
 function nameOf(node: unknown): string | undefined {
     if (!isNode(node)) {
         return undefined;
@@ -27,7 +19,6 @@ function nameOf(node: unknown): string | undefined {
     return typeof node.value === 'string' ? node.value : undefined;
 }
 
-/** The names one `export …` statement publishes. */
 function exportsOf(statement: AstNode): string[] {
     if (statement.type === 'ExportDefaultDeclaration') {
         return ['default'];
@@ -55,7 +46,6 @@ function exportsOf(statement: AstNode): string[] {
     return [...named, ...declared].filter((name) => name !== undefined);
 }
 
-/** Every name a built module exports, once each, sorted. */
 export function exportedNames(root: string, path: string): string[] {
     const program = parseProgram(path, readFileSync(resolve(root, path), 'utf8'));
     if (!isNode(program) || !Array.isArray(program.body)) {
@@ -65,7 +55,6 @@ export function exportedNames(root: string, path: string): string[] {
     return [...names].toSorted();
 }
 
-/** The published surface, one entry per block: its path, then its names indented under it. */
 export function renderPublishedNames(root: string): string {
     const blocks = PUBLISHED_ENTRIES.map((path) =>
         [`${path}:`, ...exportedNames(root, path).map((name) => `    ${name}`)].join('\n'),

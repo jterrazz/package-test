@@ -3,36 +3,15 @@ import { resolve } from 'node:path';
 
 import { cell, table } from './catalog.js';
 
-/**
- * The meta-test channel, read off the test files themselves.
- *
- * Several truths about this package cannot be asserted from outside it, so they
- * are asserted by running it on itself: the catalogue's freshness, the reach of
- * every rule, the capability matrix, the skill, the coverage floor. Chapter 03
- * owns the channel — and the table it published was written by hand, so it
- * named eight families while the channel had grown past a dozen files. A page
- * that lags the channel it owns is the defect this generator removes: the rows
- * come from the files, and a meta-test that lands is a row the next
- * `npm run docs` writes.
- *
- * What a row SAYS is the file's own top-level `describe` titles — the sentence
- * its author already wrote — rather than a second description kept beside them.
- */
+/** A row says what the file's own top-level `describe` titles say, never a second description kept beside them. */
 
-/** One meta-test file: where it lives, what it declares, how many tests it runs. */
 export type MetaTest = { file: string; holds: string[]; tests: number };
 
-/**
- * Where the channel lives. `lint/*.test.ts` and `lint/self/*.test.ts` are the
- * meta LAYER (the layered reading counts them); `specs/lint/meta/` is the part
- * that has to run the real binary, so it sits with the end-to-end suite instead.
- */
+/** `specs/lint/meta/` runs the real binary, so it sits with the end-to-end suite. */
 export const META_LAYER_ROOTS = ['lint', 'lint/self'];
 
-/** Every tree the channel reads. */
 const ROOTS = [...META_LAYER_ROOTS, 'specs/lint/meta'];
 
-/** `*.test.ts` files directly inside `dir`, sorted, as repo-relative paths. */
 function testFilesIn(root: string, relative: string): string[] {
     try {
         return readdirSync(resolve(root, relative), { withFileTypes: true })
@@ -44,25 +23,17 @@ function testFilesIn(root: string, relative: string): string[] {
     }
 }
 
-/** The top-level `describe('…')` titles of a file, in source order. */
 function describesOf(source: string): string[] {
     return [...source.matchAll(/^describe\(\s*(?<quote>['"`])(?<title>[^'"`]*)\k<quote>/gmu)].map(
         (hit) => hit.groups?.title ?? '',
     );
 }
 
-/**
- * How many tests a file DECLARES — `test('…')` and `test.each(…)('…')` alike.
- *
- * Anchored on the line's indentation, because `.test(` is also a regular
- * expression's own method and a count that swallowed four of those would be a
- * generated number nobody can reproduce by running the file.
- */
+/** Anchored on the line's indentation: `.test(` is also a regular expression's method. */
 function testCountOf(source: string): number {
     return [...source.matchAll(/^[^\S\n]*test(?:\.each)?[\s(]/gmu)].length;
 }
 
-/** Every meta-test file, with what it declares. */
 export function metaTests(root: string): MetaTest[] {
     return ROOTS.flatMap((relative) => testFilesIn(root, relative)).map((file) => {
         const source = readFileSync(resolve(root, file), 'utf8');
@@ -74,7 +45,6 @@ export const META_TESTS_START =
     '<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/meta-tests.ts -->';
 export const META_TESTS_END = '<!-- /GENERATED:meta-tests -->';
 
-/** The meta-test table, generated: one row per file, its describes, its count. */
 export function renderMetaTests(root: string): string {
     const rows = metaTests(root).map((entry) => [
         `\`${entry.file}\``,
@@ -89,7 +59,6 @@ export function renderMetaTests(root: string): string {
     ].join('\n');
 }
 
-/** Replace the region between the GENERATED:meta-tests markers of chapter 03. */
 export function spliceMetaTests(existing: string, root: string): string {
     const start = existing.indexOf(META_TESTS_START);
     const end = existing.indexOf(META_TESTS_END);

@@ -5,10 +5,8 @@ import { describe, expect, test } from 'vitest';
 
 import { portReaders } from './port-readers.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** A tree holding `files`, each with its content. */
 function tree(files: Record<string, string>): string {
     const root = mkdtempSync(join(tmpdir(), 'port-readers-'));
     for (const [path, content] of Object.entries(files)) {

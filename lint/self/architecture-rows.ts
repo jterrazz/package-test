@@ -1,13 +1,6 @@
 import type { CatalogEntry } from '../manifest.js';
 import type { RuleDoc } from '../rule-shape.js';
 
-/**
- * The `self` rows that lock the architecture a facet is composed in — part of
- * the self catalogue (`self-manifest.ts` spreads them), kept beside the other
- * self tooling of that architecture, the compositions the matrix reads.
- */
-
-/** The **statique** row: a rule of the `jterrazz-self` plugin. */
 export const ARCHITECTURE_RULE_DOCS = {
     'i6-facet-is-composition': {
         audience: 'self',
@@ -24,7 +17,6 @@ export const ARCHITECTURE_RULE_DOCS = {
     },
 } satisfies Record<string, RuleDoc>;
 
-/** The **meta** rows: what `lint/architecture.test.ts` holds. */
 export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     {
         audience: 'self',
@@ -56,12 +48,6 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     },
 ];
 
-/**
- * The **checker** rows: the passes `dist/self-checker.js` runs over this
- * package's source tree (`lint/checker-source-tree.ts`,
- * `lint/checker-source-imports.ts`) — the shape of `src/`
- * beyond the direction I1 holds between its layers.
- */
 export const ARCHITECTURE_PASSES: CatalogEntry[] = [
     {
         audience: 'self',

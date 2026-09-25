@@ -1,58 +1,14 @@
 import { REFUSAL_WHY } from '../src/kernel/refusals/refusal.js';
 import type { RuleDoc } from './rule-shape.js';
 
-/**
- * The rule manifest — the single source of truth for the mechanized conventions
- * catalogue (docs-as-code inversion, phase 2).
- *
- * The constitution (`docs/18-conventions.md`) holds only principles, the
- * enforcement channels, process rules and design rationales. Every per-rule
- * normative sentence lives HERE, next to (or on) the code that enforces it.
- * This module holds the `consumer` rows, one list per channel, assembled into
- * {@link consumerCatalog}; the `self` rows are `self-manifest.ts`'s:
- *
- * - **statique** — the `jterrazz/*` oxlint rules (`RULE_DOCS`, attached to each
- *   rule's `meta.docs`);
- * - **upstream** — the options this vocabulary sets on rules the `vitest`
- *   plugin owns (`UPSTREAM_RULES`, ADR-005);
- * - **checker** — the non-oxlint static passes bundled as `dist/checker.js`
- *   (`CHECKER_PASSES`);
- * - **runtime** — refusals/behaviours the framework enforces at execution time
- *   (`RUNTIME_RULES`);
- * - **type** — what the compiler refuses, proven by `src/type-channel.test-d.ts`
- *   (`TYPE_ROWS`);
- * - **process** — review-borne rules no channel can fully mechanize
- *   (`PROCESS_RULES`).
- *
- * The published code — the plugin's messages, the checker's findings — reads
- * this module and never `self-manifest.ts`, so no bundle the tarball carries
- * holds a `self` row. The catalogue generator (`catalog.ts` /
- * `dist/catalog.js`) reads both, through `self-manifest.ts`'s `catalog`, to
- * (re)write the `consumer` rows in `docs/19-linting.md` and the `self` rows in
- * `docs/03-testing.md`. `plugin.test.ts` guards freshness and completeness.
- *
- * This module is pure data — it imports a type and the sentences the runtime's
- * refusals open on (`REFUSAL_WHY`, whose rows begin with them), so the lint
- * layer stays free of the framework runtime (CONVENTIONS I1) and the oxlint
- * bundle stays light.
- */
+/** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self-manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (I1). */
 
-/** A catalogue row: a {@link RuleDoc} plus the implementation name it maps to. */
-export type CatalogEntry = {
-    /** The rule id, checker-pass id, or process id — unique across the catalogue. */
+export type CatalogEntry = RuleDoc & {
+    /** Unique across the catalogue. */
     name: string;
-} & RuleDoc;
+};
 
-/**
- * Family letter → its section title.
- *
- * English, like every sentence the catalogue publishes. The rows were written
- * in French while the catalogue had one reader; a message a consumer's CI
- * prints, and a chapter their agent reads, are not that — and a half-French
- * catalogue is worse than either, because a reader cannot tell which half they
- * are in. A meta-test holds the line with a deny-list of the tokens that were
- * here.
- */
+/** English, like every sentence the catalogue publishes: a meta-test holds the line with a deny-list. */
 export const FAMILIES: Record<string, string> = {
     A: 'Creating runners',
     B: 'Spec chains',
@@ -68,33 +24,7 @@ export const FAMILIES: Record<string, string> = {
     M: 'Doubles, time & the proof of a seam',
 };
 
-/**
- * The **statique** channel — one entry per rule of the published `jterrazz`
- * plugin (`plugin.ts`); the rules of the plugin this repository alone loads
- * have theirs in `self-manifest.ts`. Each rule
- * file attaches its entry as `meta.docs`, so a rule and its normative text can
- * never drift (the completeness meta-test asserts every rule carries one).
- *
- * **What this channel does NOT own.** A convention oxlint's own `vitest` plugin
- * already enforces belongs to that plugin, not here — `@jterrazz/typescript` v10
- * turns the plugin on over the test globs in every profile, so a consumer of the
- * preset gets it without wiring. Four hygiene rules left the channel on that
- * ground (J1, J3, J4, J5 → `vitest/no-focused-tests` + `vitest/no-disabled-tests`,
- * `vitest/expect-expect`, `vitest/no-identical-title`, `vitest/prefer-lowercase-title`).
- * `prefer-lowercase-title` is stricter than J5 was: a title opening on an all-caps
- * identifier (`HTTP 404 …`, `DI …`) now fails, and the rulebook carries no
- * `allowedPrefixes` — a title starts lowercase, whatever its first word. The
- * rest are behaviour-identical on this package's own fixtures. Only J2 (the
- * arbitrary-sleep ban, which has no upstream counterpart) stays statique.
- *
- * **Severity.** The estate's rulebook has no warn tier: a rule is on at `error`
- * or off with a recorded reason, and that law binds `@jterrazz/typescript`'s
- * rulebook. This channel is its one documented exception, and it is narrow — an
- * id shaped `<family><n>w-…` is a REDUNDANCY heuristic (a `root` the walk would
- * have found, a probe cluster that wants a golden), a reading of taste that
- * would block a legitimate shape if it failed the build. Every hard convention
- * here is an `error`; `plugin.test.ts` holds the split.
- */
+/** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. The one warn tier is an id shaped `<family><n>w-…`, a redundancy heuristic; every hard convention is `error`, and `plugin.test.ts` holds the split. */
 export const RULE_DOCS = {
     'a1-specification-file': {
         audience: 'consumer',
@@ -895,11 +825,7 @@ export const RULE_DOCS = {
     },
 } satisfies Record<string, RuleDoc>;
 
-/**
- * The **checker** channel — the non-oxlint static passes bundled as
- * `dist/checker.js` (token/HTTP grammar + cross-file analyses). Oxlint never
- * visits data fixtures nor reads two files at once, so these ship separately.
- */
+/** Oxlint never visits data fixtures nor reads two files at once. */
 export const CHECKER_PASSES: CatalogEntry[] = [
     {
         audience: 'consumer',
@@ -1376,18 +1302,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
     },
 ];
 
-/**
- * The **type** channel — what the COMPILER refuses.
- *
- * No rule sees these and no pass walks them: the call they describe does not
- * compile, so the framework never gets the chance to refuse it at run time.
- * Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`
- * (the W6 verb rows have a fuller set in the component facet's own type test),
- * which `typescript check` runs over the whole repository — the assertion fails
- * the day the line it marks starts compiling — and each marker names the words
- * of the error it is written for, which `lint/type-channel.test.ts` holds it
- * to: a line refused for another reason fails too.
- */
+/** Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`, naming the words of its error, which `lint/type-channel.test.ts` holds it to. */
 export const TYPE_ROWS: CatalogEntry[] = [
     {
         audience: 'consumer',
@@ -1514,17 +1429,7 @@ export const TYPE_ROWS: CatalogEntry[] = [
     },
 ];
 
-/**
- * The **upstream** channel — a convention an oxlint plugin rule ALREADY knows
- * how to enforce, turned on with the option that states it (ADR-005).
- *
- * One owner per convention: a ban a `vitest/*` rule can carry as an option is
- * set from the `testing` fragment rather than rewritten as a `jterrazz/*` rule,
- * and the fragment is where a reader finds the option. A core rule whose
- * options OTHER owners already set (`no-restricted-imports`,
- * `no-restricted-globals`) is the exception: an override replaces options
- * rather than merging them, so F6 and G4 are this plugin's own.
- */
+/** One owner per convention (ADR-005); a core rule whose options other owners already set is the exception, since an override replaces options rather than merging them. */
 export const UPSTREAM_RULES: CatalogEntry[] = [
     {
         audience: 'consumer',
@@ -1573,11 +1478,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
     },
 ];
 
-/**
- * The **runtime** channel — refusals and behaviours the framework enforces at
- * execution time, where static analysis abstains (non-literal arguments) or
- * cannot reach (network, container lifecycle). Several double a static pass.
- */
+/** Where static analysis abstains (non-literal arguments) or cannot reach (network, container lifecycle). */
 export const RUNTIME_RULES: CatalogEntry[] = [
     {
         audience: 'consumer',
@@ -1767,11 +1668,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
     },
 ];
 
-/**
- * The **process** channel — rules no channel can fully mechanize: they are a
- * matter of review judgement. Listed here so the catalogue is complete across
- * all four faces; the constitution keeps their full rationale.
- */
+/** Review-borne; listed so the catalogue is complete, the constitution keeps their rationale. */
 export const PROCESS_RULES: CatalogEntry[] = [
     {
         audience: 'consumer',
@@ -1803,7 +1700,6 @@ export const PROCESS_RULES: CatalogEntry[] = [
     },
 ];
 
-/** Split an id into (family letter, numeric, variant) for natural ordering. */
 function sortKey(entry: CatalogEntry): [string, number, string] {
     const match = /^(?<letter>[A-Z]+)(?<number>\d+)(?<variant>.*)$/u.exec(entry.id);
     return [
@@ -1813,11 +1709,7 @@ function sortKey(entry: CatalogEntry): [string, number, string] {
     ];
 }
 
-/**
- * Rows in catalogue order — by family, then convention number, then
- * variant/name — so a chapter generated from them is byte-identical from one
- * run to the next.
- */
+/** Sorted so a generated chapter is byte-identical from one run to the next. */
 export function ordered(rows: CatalogEntry[]): CatalogEntry[] {
     return rows.toSorted((a, b) => {
         const [al, an, av] = sortKey(a);
@@ -1832,7 +1724,6 @@ export function ordered(rows: CatalogEntry[]): CatalogEntry[] {
     });
 }
 
-/** Statique docs as rows, each named by the rule it is attached to. */
 export function statiqueRows(docs: Record<string, RuleDoc>): CatalogEntry[] {
     const rows: CatalogEntry[] = [];
     for (const [name, doc] of Object.entries(docs)) {
@@ -1841,11 +1732,6 @@ export function statiqueRows(docs: Record<string, RuleDoc>): CatalogEntry[] {
     return rows;
 }
 
-/**
- * The `consumer` catalogue, in catalogue order: every row of this module, and
- * the only rows the published code reads. The `self` rows are
- * `self-manifest.ts`'s, which no published entry imports.
- */
 export const consumerCatalog: CatalogEntry[] = ordered([
     ...statiqueRows(RULE_DOCS),
     ...UPSTREAM_RULES,

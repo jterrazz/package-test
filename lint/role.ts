@@ -4,26 +4,8 @@ import { GROUND_DIRS } from '../src/kernel/files/ground.js';
 import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
 import { folderChanged, isFile } from './fs-cache.js';
 
-/**
- * What KIND of file a rule is looking at, decided from its path alone.
- *
- * One answer, read from one place: it is what lets a rule say "this is mine" in
- * a line, and what makes a rendered component reachable by the rules that should
- * see it and invisible to the ones that should not.
- *
- * The SUFFIX decides the kind, and nothing else: `.test.ts` beside a module,
- * `.test.tsx` beside a component, `.spec.ts` under `specs/`, `.spec.yaml` for a
- * document, `.specification.ts(x)` for the file that builds a runner. A rule
- * reads the three fields this module returns and NOTHING else of the path: a
- * gate probing for a `src` or a `specs` segment answers about the machine the
- * checkout sits on, not about the project that runs the file.
- *
- * A folder the path names is read BELOW the project root that holds the file
- * ({@link projectSegments}): a checkout under a folder named `fixtures/`,
- * `stubs/` or `__tests__/` is the machine's business, never the project's.
- */
+/** The suffix decides the kind, and folders are read below the project root: a checkout under `fixtures/` or `__tests__/` is the machine's business. */
 
-/** The kinds the catalogue tells apart. */
 export type FileRole =
     | 'component'
     | 'config'
@@ -35,36 +17,19 @@ export type FileRole =
     | 'specification'
     | 'stub';
 
-/** A test root the conventions retired — `roleOf` names it so I2 can refuse it. */
 export type LegacyDir = '__tests__' | 'test' | 'tests' | null;
 
-/** What a rule reads about the file it was handed. */
 export type FileIdentity = {
-    /** Is an ancestor directory named `specs`? */
     inSpecs: boolean;
-    /** The retired test root this path sits under, when it does. */
     legacyDir: LegacyDir;
-    /** The kind the path states. */
     role: FileRole;
 };
 
-/** The four ground names — what the specs of a row stand ON, never a spec. */
 const GROUND = new Set<string>(GROUND_DIRS);
 
-/** A vitest config, whatever extension the project writes it in. */
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 
-/**
- * The retired test root this path sits under.
- *
- * `__tests__/` is retired wherever it appears in the project. A `tests/` or
- * `test/` directory is only the retired ROOT when it sits directly under the
- * project root — a `test` segment deeper in a tree is an ordinary domain name.
- *
- * Both spellings, because both exist: hoverfly-lsp keeps thirteen corpus tests
- * under `packages/*\/test/`, and a rule that named only the plural told it
- * nothing.
- */
+/** `__tests__/` anywhere; `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
 function legacyDirOf(filename: string): LegacyDir {
     const parts = projectSegments(filename);
     if (parts.slice(0, -1).includes('__tests__')) {
@@ -77,16 +42,7 @@ function legacyDirOf(filename: string): LegacyDir {
     return null;
 }
 
-/**
- * The kind of file this path names.
- *
- * The suffix decides, and the order matters: a `*.specification.ts` is a
- * specification wherever it sits, `.spec.*` is the assembled product's word and
- * `.test.*` the unit's, `.tsx` versus `.ts` is what tells a RENDERED unit from a
- * plain one — the same distinction the two project helpers collect on, so a file
- * is judged by the rules of the project that actually runs it. Ground swallows
- * only what carries no suffix of its own.
- */
+/** The order matters: a `*.specification.ts` is one wherever it sits, and `.tsx` versus `.ts` tells a rendered unit apart as the two project helpers do. Ground swallows only what carries no suffix of its own. */
 export function roleOf(filename: string): FileIdentity {
     const parts = projectSegments(filename);
     const base = parts.at(-1) ?? '';
@@ -119,42 +75,31 @@ export function roleOf(filename: string): FileIdentity {
     return { ...identity, role: 'other' };
 }
 
-/** The roles that ARE a test — what a rule reaching "every test file" means. */
 const TEST_ROLES = new Set<FileRole>(['component', 'module', 'spec']);
 
-/**
- * The three suffixes that DECLARE tests, as a name-level predicate.
- *
- * `roleOf` is the answer for a rule handed a file; the passes that WALK a tree
- * only ever hold a name, and this is the same vocabulary for them — one place
- * to read, so a tree walk and a rule never disagree on what a test is.
- */
+/** For the passes that walk a tree and hold only a name: one vocabulary with `roleOf`. */
 export function isTestFileName(name: string): boolean {
     return name.endsWith('.test.ts') || name.endsWith('.test.tsx') || name.endsWith('.spec.ts');
 }
 
-/** A test that runs under node's project — a `.test.tsx` renders and is not one. */
+/** A `.test.tsx` renders and is not one. */
 export function isNodeTestFileName(name: string): boolean {
     return name.endsWith('.test.ts') || name.endsWith('.spec.ts');
 }
 
-/** Is this one of the three files that DECLARE tests? */
 export function isTestRole(role: FileRole): boolean {
     return TEST_ROLES.has(role);
 }
 
-/** Is this a file the test conventions reach — a test, or anything under `specs/`? */
 export function isTestFile(filename: string): boolean {
     const { inSpecs, role } = roleOf(filename);
     return isTestRole(role) || role === 'specification' || role === 'document' || inSpecs;
 }
 
-/** The directory the file sits in — what a layout pass walks from. */
 export function directoryOf(filename: string): string {
     return dirname(filename);
 }
 
-/** The nearest package root at or above a directory, when there is one. */
 export function packageRootOf(directory: string): string | undefined {
     let current = directory;
     for (;;) {
@@ -169,21 +114,9 @@ export function packageRootOf(directory: string): string | undefined {
     }
 }
 
-/** The project root a directory answered with, the last time this run walked up for it. */
 const projectRoots = new Map<string, string | undefined>();
 
-/**
- * The nearest project root at or above a directory: a package root, or — for a
- * tree no nearer package holds — the repository root ({@link isProjectRoot}).
- *
- * Remembered per folder — the segments, the role and the material every
- * production module's path is read through all walk up from here, so the
- * same folder asks this dozens of times in one run. Forgotten, for a
- * directory alone, once its own tree listing answers differently than it did
- * the last time this asked: a package a directory holds is a directory
- * entry, so a `package.json` written or removed AT it is what the memo has
- * to see, never a directory above or below it.
- */
+/** Remembered per folder, and forgotten for one directory once its own tree listing changes: a `package.json` written or removed there is what the memo must see. */
 export function projectRootOf(directory: string): string | undefined {
     if (!folderChanged(directory) && projectRoots.has(directory)) {
         return projectRoots.get(directory);
@@ -203,18 +136,12 @@ export function projectRootOf(directory: string): string | undefined {
     }
 }
 
-/**
- * The segments of a path below the project root that holds it — what a rule
- * reads of a path, so a folder above the project never answers for it. A path
- * no package and no repository holds (a rule's test case, written against
- * `/repo/…`) is read whole.
- */
+/** A path no package and no repository holds (a rule's test case, `/repo/…`) is read whole. */
 export function projectSegments(filename: string): string[] {
     const root = projectRootOf(dirname(filename));
     return segments(root === undefined ? filename : relative(root, filename));
 }
 
-/** The basename, for the one message that names the neighbour a test wants. */
 export function baseNameOf(filename: string): string {
     return basename(filename);
 }

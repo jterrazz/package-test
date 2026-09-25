@@ -7,20 +7,9 @@ import { describe, expect, test } from 'vitest';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import { classified, siblingless, spliceSiblings } from './siblings.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/**
- * Meta-test K7 (`k7-siblingless-module-declared`) — no module is uncovered by
- * accident.
- *
- * I2 says a module test lives beside its module; it never said every module has
- * one, and it cannot. What it can say is that the modules WITHOUT one are known:
- * each falls into a declared kind carrying the line that says where its proof
- * is. A new module with real behaviour and no sibling test matches no kind and
- * fails here — which is the moment to write the test, not six months later when
- * a coverage number moved.
- */
+/** Meta-test K7 (`k7-siblingless-module-declared`) — a module with behaviour and no sibling test matches no declared kind and fails here. */
 describe('siblings', () => {
     test('modules with no sibling test (meta-test K7) — reads the tree git does not ignore: a new module counts, an ignored one does not', () => {
         // Given - a checkout holding a new module and an ignored one, neither with a test

@@ -5,35 +5,20 @@ import { parseSpecDocument, SPEC_EXTENSION } from '../src/facets/cli/documents/s
 import { treeEntries } from '../src/kernel/files/git-tree.js';
 import { parseYamlSource } from '../src/kernel/yaml/document.js';
 
-/**
- * The published schema, run against the documents it describes.
- *
- * `schema/spec.schema.json` is what an editor validates a `<case>.spec.yaml`
- * with; the runner validates with its own parser. Two readers of one format
- * agree only if something runs both on the same files: this module walks
- * the documents and reads the parser's verdict; the validator is the meta-test's,
- * since the layer ships and imports no package.
- */
+/** Two readers of one format agree only if something runs both on the same files; the validator is the meta-test's, since this layer imports no package. */
 
-/** Directories no document of the repository lives in. */
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
-/** Is this document an input a negative spec runs — under a `fixtures/` folder? */
 export function isFixture(file: string): boolean {
     return file.split('/').includes('fixtures');
 }
 
-/** One document: where it sits, and what the parser and the schema said. */
 export type SchemaVerdict = {
-    /** Repository-relative path. */
     file: string;
-    /** The parser's refusal, or `null` when it reads the document. */
     parser: null | string;
-    /** The schema's errors, empty when the document validates. */
     schema: string[];
 };
 
-/** Every `*.spec.yaml` git does not ignore under `root`, repository-relative and sorted. */
 export function specDocuments(root: string): string[] {
     const found: string[] = [];
     const visit = (dir: string): void => {
@@ -50,12 +35,10 @@ export function specDocuments(root: string): string[] {
     return found.toSorted();
 }
 
-/** A document's data, as a JSON Schema validator reads it. */
 export function documentData(text: string): unknown {
     return parseYamlSource(text).document.toJS();
 }
 
-/** The parser's refusal of a document, or `null` when it reads it. */
 export function parserRefusal(text: string, file: string): null | string {
     try {
         parseSpecDocument(text, file);
@@ -65,10 +48,6 @@ export function parserRefusal(text: string, file: string): null | string {
     }
 }
 
-/**
- * What the parser and `validate` — the schema, compiled by the caller — say of
- * every document under `root`.
- */
 export function schemaVerdicts(
     root: string,
     validate: (data: unknown) => string[],

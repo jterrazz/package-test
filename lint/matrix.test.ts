@@ -14,23 +14,11 @@ import {
 } from './matrix.js';
 import { metaTests } from './meta-tests.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
 const read = (relative: string): string => readFileSync(resolve(ROOT, relative), 'utf8');
 
-/**
- * Meta-test K6 (`k6-matrix-no-empty-cell`) — the matrix has no silent hole.
- *
- * A facet can grow a method and never be specified on it, and no amount of
- * green tests says so: the suite proves what it runs, never what it does not.
- * The matrix is the projection that makes that visible, and this test is what
- * makes it a gate rather than a poster — a capability a facet DECLARES with no
- * test file exercising it fails here, unless the row names the reason (a
- * golden kind a facet's result cannot produce, a token family the engine
- * owns). No row excuses a hole as owed: the last of those
- * became specs.
- */
+/** Meta-test K6 (`k6-matrix-no-empty-cell`) — a capability a facet declares with no test file exercising it fails, unless its row names the reason. */
 describe('matrix', () => {
     test('capability matrix (meta-test K6) — every declared capability is exercised, or says why it is not', () => {
         // Given - the matrix derived from the declaration and the package's own trees

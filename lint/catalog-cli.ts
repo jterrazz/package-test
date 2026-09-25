@@ -9,28 +9,7 @@ import { spliceLayers, spliceMatrix } from './matrix.js';
 import { spliceMetaTests } from './meta-tests.js';
 import { spliceSiblings } from './siblings.js';
 
-/**
- * CLI entry for the conventions-catalogue generator (bundled as
- * `dist/catalog.js`, what `npm run docs` runs after the build).
- *
- *     node dist/catalog.js [repoRoot]     # default: cwd
- *
- * Regenerates the tables the manual carries between GENERATED markers, and the
- * published schema — each from the code that owns its facts:
- *
- * - the catalogue of the `consumer` rules inside `docs/19-linting.md`, and
- *   the table of the `self` rules inside `docs/03-testing.md`, from
- *   `lint/manifest.ts`;
- * - `schema/spec.schema.json`, the published JSON Schema of the `<case>.spec.yaml`
- *   document, from the grammar's own constants;
- * - the layered reading, the capability matrix, the meta-test channel and
- *   the siblingless-module table inside `docs/03-testing.md`, from the facet
- *   declaration and a scan of the package's own trees;
- * - the fork inside `docs/18-conventions.md`, from `lint/fork.ts`.
- *
- * Deterministic — re-running with no source change is a no-op. `plugin.test.ts`
- * guards freshness.
- */
+/** `node dist/catalog.js [repoRoot]` (what `npm run docs` runs): regenerates every GENERATED table and the published schema; deterministic, and `plugin.test.ts` guards freshness. */
 const root = resolve(process.argv[2] ?? '.');
 
 const docsPath = resolve(root, 'docs/19-linting.md');

@@ -2,7 +2,6 @@ import { describe, expect, test } from 'vitest';
 
 import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
 
-/** How many calls of `source` the probe's shape describes. */
 function count(probe: string, source: string): number {
     const shape = callShapeOf(probe);
     if (shape === undefined) {

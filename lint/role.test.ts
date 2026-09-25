@@ -6,10 +6,8 @@ import type { FileRole, LegacyDir } from './role.js';
 import { isTestFile, isTestRole, projectRootOf, projectSegments, roleOf } from './role.js';
 import { checkoutUnder, repositoryUnder } from './rule-tester.fixtures.js';
 
-/** This package's own root — the one `tests/` guard reads a real package.json at. */
 const REPO_ROOT = resolve(import.meta.dirname, '..');
 
-/** The retired root a path sits under, as the field a rule reads. */
 const legacyOf = (path: string): LegacyDir => roleOf(path).legacyDir;
 
 describe('role', () => {

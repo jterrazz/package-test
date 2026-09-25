@@ -6,16 +6,10 @@ import { describe, expect, test } from 'vitest';
 
 import { MAKE_TARGETS, makefileAt, makeTargets } from './makefile.js';
 
-/** The mobile specs on a real simulator — a target beside the six, which no flow speaks. */
 const MOBILE_TARGET = 'test-mobile';
 
-/**
- * The targets beside the six: the simulator run, the local run of what changed,
- * and the merge of a sharded run's reports.
- */
 const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge'];
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
 describe('makefile', () => {

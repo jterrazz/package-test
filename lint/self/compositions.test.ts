@@ -7,10 +7,8 @@ import type { Composition } from '../../src/kernel/chain/define-facet.js';
 import { memberOf } from '../facet-matrix.js';
 import { composedRows, COMPOSITIONS } from './compositions.js';
 
-/** The repository root, from this module's place inside `lint/self/`. */
 const ROOT = resolve(import.meta.dirname, '../..');
 
-/** A row as one line: where it sits, how it is read, the member it answers for. */
 function lineOf(row: {
     readonly group: string;
     readonly member?: string;
@@ -20,7 +18,6 @@ function lineOf(row: {
     return `${row.group} · ${row.name} · ${row.probe} · ${memberOf(row)}`;
 }
 
-/** A terminal action stating the given accessors, for a composition built in a test. */
 function actionStating(accessors: MatrixRow[]): Composition['actions'][number] {
     return {
         accessors,

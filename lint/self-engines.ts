@@ -1,12 +1,4 @@
-/**
- * The one slice each third-party engine is imported from, by the specifier's
- * prefix: a path prefix, or one exact module. `world/services/peer.ts` loads
- * the optional peers by name for their owners, and carries none of its own.
- *
- * A self module, and the one statement of engine ownership: I11
- * (`checker-source-imports.ts`) holds every import to it, and the layer map
- * (`self-layers.ts`) grants each folder the engines it lists here.
- */
+/** The one statement of engine ownership: I11 holds every import to it, and the layer map grants each folder the engines listed here. */
 export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
     '@vitest/browser-playwright': ['src/facets/component/'],
@@ -28,7 +20,6 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     yaml: ['src/kernel/yaml/document.ts'],
 };
 
-/** The engines owned at or below `tree` (`src/world/services/`), for the layer map's folder of it. */
 export function enginesOwnedIn(tree: string): string[] {
     return Object.entries(ENGINE_OWNERS)
         .filter(([, owners]) => owners.some((owner) => owner.startsWith(tree)))

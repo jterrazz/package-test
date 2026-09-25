@@ -5,17 +5,11 @@ import { afterAll, describe, expect, test } from 'vitest';
 
 import { isUnderSpecs, specsAnchor } from './ast.js';
 
-/**
- * The anchor probes the real filesystem for `package.json`, so the fixtures are
- * real directories, laid out once for every case below.
- */
+/** The anchor probes the real filesystem for `package.json`, so the fixtures are real directories. */
 const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
 
-/** `<root>/project/` — an ordinary package with a specs tree. */
 const project = join(root, 'project');
-/** `<root>/specs/project/` — the same package, checked out under a `specs/` dir. */
 const underSpecs = join(root, 'specs', 'project');
-/** `<root>/project/specs/fixtures/lint-violations/case/specs/` — a nested tree. */
 const nested = join(project, 'specs', 'fixtures', 'lint-violations', 'case', 'specs');
 
 for (const dir of [

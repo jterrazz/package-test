@@ -1,33 +1,17 @@
-/**
- * The declared kinds of module that need no sibling test — the table
- * `siblings.ts` classifies every siblingless module by, and chapter 03
- * publishes. Each kind carries the one line that says where its proof is.
- */
-
-/** One reason a module needs no sibling test, and the paths it covers. */
 export type SiblinglessKind = {
-    /** A path (relative to the repository root, `/`-separated) this kind claims. */
+    /** Relative to the repository root, `/`-separated. */
     claims: (path: string) => boolean;
-    /** What this kind is called in the chapter. */
     name: string;
-    /** One line: where the proof is instead. */
     why: string;
 };
 
-/** A kind whose paths are LISTED: adding a module never joins it by accident. */
+/** Listed, so adding a module never joins it by accident. */
 const oneOf =
     (...paths: string[]) =>
     (path: string): boolean =>
         paths.includes(path);
 
-/**
- * The declared kinds, first match wins.
- *
- * Every kind names its paths, or matches a shape the tree enforces
- * (`<facet>.project.ts`). None of them is a prefix: a
- * kind claiming `src/world/` would claim every module written there next
- * year too, and K7 would be a poster rather than a gate.
- */
+/** First match wins. None is a prefix: a kind claiming `src/world/` would claim next year's modules too. */
 export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(

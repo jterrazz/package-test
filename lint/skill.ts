@@ -1,17 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-/**
- * What a hand-written skill may NAME. The skill owns what is decided before a
- * test is written; the types own the API and the chapters own the prose — so
- * what keeps the page honest is that it can only cite what exists: a symbol an
- * entry publishes, or vitest provides, and a chapter on disk.
- */
+/** The skill can only cite what exists: a symbol an entry publishes or vitest provides, and a chapter on disk. */
 
-/** The cap: past it, the skill is restating a chapter. */
+/** Past it, the skill is restating a chapter. */
 export const SKILL_MAX_LINES = 120;
 
-/** What vitest itself provides a test — `toMatch` included, the matcher the golden rides on. */
+/** `toMatch` included: the golden rides on it. */
 const VITEST = [
     'afterAll',
     'afterEach',
@@ -33,7 +28,6 @@ const SAMPLE_IMPORT = /import\s+\{(?<names>[^}]*)\}\s+from\s+'(?<from>@jterrazz\
 const PROSE_CALL = /`(?<name>[A-Za-z_$][\w$]*)[(<.]/gu;
 const CHAPTER_LINK = /\]\((?<target>[^)#]+\.md)(?:#[^)]*)?\)/gu;
 
-/** The names of one `{ a, type B, c as d }` list, as exported. */
 function namesOf(list: string): string[] {
     return list
         .split(',')
@@ -47,7 +41,7 @@ function namesOf(list: string): string[] {
         .filter((name): name is string => name !== undefined && name !== '');
 }
 
-/** Every name a module exports, following its `export * from` lines. */
+/** Following its `export * from` lines. */
 export function exportedNames(file: string): Set<string> {
     const text = readFileSync(file, 'utf8');
     const names = new Set<string>();
@@ -68,17 +62,12 @@ export function exportedNames(file: string): Set<string> {
     return names;
 }
 
-/** What a skill cites that does not exist — each list empty for an honest page. */
 export type SkillFindings = {
-    /** Chapter links that resolve to nothing, from the skill's own folder. */
     missingChapters: string[];
-    /** Names a sample imports that its entry does not publish. */
     unknownImports: string[];
-    /** Calls the prose writes that nothing publishes. */
     unknownCalls: string[];
 };
 
-/** Judge one skill against the entries of the package at `root`. */
 export function skillFindings(skillPath: string, root: string): SkillFindings {
     const skill = readFileSync(skillPath, 'utf8');
     const published: Record<string, Set<string>> = {

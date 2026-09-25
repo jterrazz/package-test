@@ -16,7 +16,6 @@ import selfPlugin from './self-plugin.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The row of either audience a name designates. */
 function rowNamed(name: string): (typeof catalog)[number] {
     const row = catalog.find((entry) => entry.name === name);
     if (row === undefined) {
@@ -25,15 +24,12 @@ function rowNamed(name: string): (typeof catalog)[number] {
     return row;
 }
 
-/** The chapter a row's audience lists it in. */
 function chapterOf(name: string): string {
     return rowNamed(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
 }
 
-/** A checker line as the report prints it: the lesson after the code. */
 const CHECKER_LINE = /^\S+:\d+:\d+: (?:error|warning) jterrazz-check\([\w-]+\): (?<message>.*)$/u;
 
-/** Every checker finding a spec of `specs/lint/checker/` goldens whole. */
 function goldenCheckerLines(): string[] {
     const dir = resolve(ROOT, 'specs/lint/checker');
     const lines: string[] = [];
@@ -52,7 +48,6 @@ function goldenCheckerLines(): string[] {
     return lines;
 }
 
-/** Every module under `dir`, concatenated — where a refusal is thrown. */
 function sourcesUnder(dir: string): string {
     return readdirSync(dir, { recursive: true })
         .map(String)

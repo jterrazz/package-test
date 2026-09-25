@@ -2,52 +2,25 @@ import { FAMILIES } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
 import { catalog } from './self-manifest.js';
 
-/**
- * The conventions-catalogue generator — renders the mechanized rule catalogue
- * FROM `manifest.ts` (the source of truth) inside `docs/19-linting.md`, spliced
- * between GENERATED markers ({@link spliceCatalog}) — grouped by convention
- * family, each row anchored by its implementation name so a rule MESSAGE can
- * link straight to it, and carrying what it REACHES and the one imperative line
- * that FIXES it where the row states them (a ban with no destination is an
- * argument, not a rule).
- *
- * The catalogue lists the `consumer` rows — what a project using the package
- * meets. The `self` rows, this package's own suite discipline, are rendered
- * into `docs/03-testing.md` instead ({@link spliceSelfRules}).
- *
- * Output is deterministic (the manifest is pre-sorted), so `plugin.test.ts` can
- * assert freshness: running the generator must reproduce the committed chapter
- * byte-for-byte. `catalog-cli.ts` (bundled as `dist/catalog.js`) writes it.
- */
+/** Rendered from `manifest.ts` and deterministic: `plugin.test.ts` asserts the committed chapters are reproduced byte for byte. */
 
-/** Markers delimiting the generated catalogue inside `docs/19-linting.md`. */
 export const DOCS_START =
     '<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->';
 export const DOCS_END = '<!-- /GENERATED:catalog -->';
 
-/** Markers delimiting the `self` rows inside `docs/03-testing.md`. */
 export const SELF_START =
     '<!-- GENERATED:self-rules — do not edit by hand; run `npm run docs`. Source: lint/self-manifest.ts -->';
 export const SELF_END = '<!-- /GENERATED:self-rules -->';
 
-/** The rows a project using the package meets — the public catalogue's. */
 const published = catalog.filter((entry) => entry.audience === 'consumer');
 
-/** The rows only this package is held to. */
 const own = catalog.filter((entry) => entry.audience === 'self');
 
-/** Escape a markdown table cell (pipes would split the row). */
 export function cell(text: string): string {
     return text.replaceAll('|', String.raw`\|`);
 }
 
-/**
- * Render a GitHub-flavoured markdown table the way oxfmt (prettier) canonicalizes
- * one: each column padded to its widest cell (min 3). Emitting this form keeps the
- * generated files format-clean, so the freshness meta-test and the formatter agree.
- * All cell characters are BMP width-1 (Latin, arrows, curly quotes), so
- * `String.length` equals the display width.
- */
+/** Padded the way oxfmt canonicalizes a table, so the generated chapter is format-clean; every cell character is BMP width-1, so `String.length` is the display width. */
 export function table(headers: string[], rows: string[][]): string[] {
     const widths = headers.map((header, index) =>
         Math.max(header.length, 3, ...rows.map((row) => (row[index] ?? '').length)),
@@ -58,10 +31,6 @@ export function table(headers: string[], rows: string[][]): string[] {
     return [line(headers), separator, ...rows.map(line)];
 }
 
-/**
- * How the channels are ordered inside a family's table: the ones a reader can
- * run first, then the ones the framework raises, then the judgement.
- */
 const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
     statique: 0,
     upstream: 1,
@@ -72,42 +41,23 @@ const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
     process: 6,
 };
 
-/**
- * The landing spot a rule MESSAGE links to.
- *
- * A message ending in `docs/19-linting.md#<implementation>` is only a route if
- * something in the file answers to that fragment, and a table row is not a
- * heading. The anchor rides inside the Implementation cell, where it renders as
- * nothing and resolves as the row.
- */
+/** A table row is not a heading: the anchor rides inside the Implementation cell, so `docs/19-linting.md#<implementation>` in a rule message resolves to the row. */
 export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }
 
-/** The catalogue families of a set of rows, deterministically ordered. */
 function families(rows: CatalogEntry[]): string[] {
     return [...new Set(rows.map((entry) => entry.family))].sort((a, b) => a.localeCompare(b));
 }
 
-/**
- * How the catalogue is grouped: `model` first — the rules that reach every
- * facet, which is what a reader adopting ANY facet owes — then one section per
- * facet, alphabetically.
- *
- * A reader adopting one constructor should be able to stop reading at the end
- * of two sections. Grouping by family alone could not say that: a family is a
- * kind of convention, not an audience, and `C — Files & folders` mixes a rule
- * every facet obeys with one only the literate door can break.
- */
+/** `model` first, then one section per facet: a reader adopting one constructor stops after two sections. */
 const FACET_ORDER = ['model', 'api', 'cli', 'component', 'integration', 'job', 'mobile', 'website'];
 
-/** The facet sections present in the catalogue, model first. */
 function facets(): string[] {
     const present = new Set<string>(published.map((entry) => entry.facet));
     return FACET_ORDER.filter((facet) => present.has(facet));
 }
 
-/** What a facet section is titled — the tree, and what it is the tree of. */
 const FACET_TITLES: Record<string, string> = {
     api: 'the HTTP app, met through its entry',
     cli: 'the command binary and its literate documents',
@@ -119,7 +69,6 @@ const FACET_TITLES: Record<string, string> = {
     website: 'the served site, driven in a browser',
 };
 
-/** Per-channel row counts, for the generated intro line. */
 function counts(): Record<CatalogEntry['channel'], number> {
     const tally: Record<CatalogEntry['channel'], number> = {
         checker: 0,
@@ -136,10 +85,8 @@ function counts(): Record<CatalogEntry['channel'], number> {
     return tally;
 }
 
-/** The columns every catalogue table has. */
 const COLUMNS = ['Code', 'Implementation', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
-/** Rows as a catalogue table, each anchored by its implementation name. */
 function rowTable(rows: CatalogEntry[]): string[] {
     return table(
         COLUMNS,
@@ -155,11 +102,6 @@ function rowTable(rows: CatalogEntry[]): string[] {
     );
 }
 
-/**
- * The catalogue's sections: `## <facet>` — model first — each holding one
- * `### <family> — <title>` table (Code · Implementation · Channel · Reach ·
- * Convention · Fix · Rationale) sorted by channel then id.
- */
 function catalogueSections(): string[] {
     return facets().flatMap((facet) => {
         const owned = published.filter((entry) => entry.facet === facet);
@@ -176,15 +118,9 @@ function catalogueSections(): string[] {
     });
 }
 
-/**
- * The consumer catalogue spliced into `docs/19-linting.md` between the
- * GENERATED markers — a counts line, then every family section. The surrounding
- * chapter prose is hand-maintained; only this region is generated.
- */
 function renderDocsCatalog(): string {
     const c = counts();
-    // The channels with rows are the ones named; one that has none yet is not
-    // announced with a zero, because a reader would go looking for it.
+    // A channel with no rows yet is not announced with a zero: a reader would go looking for it.
     const named = [
         [c.statique, '**statique** (oxlint rules)'],
         [c.upstream, '**upstream** (options set on an upstream rule)'],
@@ -203,7 +139,6 @@ function renderDocsCatalog(): string {
     return `${DOCS_START}\n\n${inner}\n\n${DOCS_END}`;
 }
 
-/** Replace the region between the GENERATED markers of `docs/10` with a fresh catalogue. */
 export function spliceCatalog(existing: string): string {
     const start = existing.indexOf(DOCS_START);
     const end = existing.indexOf(DOCS_END);
@@ -215,7 +150,6 @@ export function spliceCatalog(existing: string): string {
     return existing.slice(0, start) + renderDocsCatalog() + existing.slice(end + DOCS_END.length);
 }
 
-/** Replace the region between the GENERATED markers of `docs/03` with a fresh table of the `self` rows. */
 export function spliceSelfRules(existing: string): string {
     const start = existing.indexOf(SELF_START);
     const end = existing.indexOf(SELF_END);

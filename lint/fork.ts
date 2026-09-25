@@ -1,18 +1,11 @@
 import { cell, table } from './catalog.js';
 
-/**
- * The fork — the nine questions a test answers before it is written, in the
- * order they are asked, and everything the first yes fixes: the kind, where the
- * file lives, the constructor, the project. Generated into chapter 18, the
- * constitution, which is the one page that states it.
- */
+/** Generated into chapter 18, the one page that states it. */
 
-/** Markers delimiting the generated fork table inside `docs/18-conventions.md`. */
 export const FORK_START =
     '<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/fork.ts -->';
 export const FORK_END = '<!-- /GENERATED:fork -->';
 
-/** One row of the fork: the question, and everything its answer fixes. */
 type ForkRow = {
     constructor: string;
     kind: string;
@@ -21,11 +14,7 @@ type ForkRow = {
     question: string;
 };
 
-/**
- * The fork, in the order the questions are asked. The order is the decision:
- * a rendered page is a website spec even though it also answers HTTP, and a
- * module alone is the last row because every other question failed.
- */
+/** The order is the decision: a rendered page is a website spec though it also answers HTTP. */
 export const FORK: ForkRow[] = [
     {
         constructor: '`specification.website()`',
@@ -92,7 +81,6 @@ export const FORK: ForkRow[] = [
     },
 ];
 
-/** The fork table itself. */
 function forkTable(): string[] {
     return table(
         ['Question', 'Kind', 'Lives at', 'Constructor', 'Project'],
@@ -106,7 +94,6 @@ function forkTable(): string[] {
     );
 }
 
-/** Replace the region between the GENERATED markers of chapter 18 with a fresh fork table. */
 export function spliceFork(existing: string): string {
     const start = existing.indexOf(FORK_START);
     const end = existing.indexOf(FORK_END);

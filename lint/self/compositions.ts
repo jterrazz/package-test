@@ -8,15 +8,9 @@ import { websiteFacet } from '../../src/facets/website/website.facet.js';
 import type { Composition } from '../../src/kernel/chain/define-facet.js';
 import type { Column } from '../facet-matrix.js';
 
-/** A row a definition states about itself. */
 type MatrixRow = Composition['options'][string];
 
-/**
- * Every facet's composition, by matrix column — what the capability matrix
- * reads a facet's rows from. A self module: it imports the facets
- * themselves, so only the package's own tooling (the matrix, C35, the
- * meta-tests) loads it, never what a consumer installs.
- */
+/** It imports the facets themselves, so only this package's own tooling loads it. */
 export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
     api: apiFacet.composition,
     cli: cliFacet.composition,
@@ -27,7 +21,6 @@ export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
     website: websiteFacet.composition,
 };
 
-/** Every row one action states: itself, its options, its visitor, its result. */
 function actionRows(action: Composition['actions'][number]): MatrixRow[] {
     return [
         action.row,
@@ -38,18 +31,11 @@ function actionRows(action: Composition['actions'][number]): MatrixRow[] {
     ];
 }
 
-/** Where a row sits in the matrix: its group and its name. */
 function keyOf(row: MatrixRow): string {
     return `${row.group} · ${row.name}`;
 }
 
-/**
- * Every matrix row a composition states, each once: its constructor's
- * options, its setups, its actions with what each takes and hands back. Two
- * definitions stating one row (two actions whose results share an accessor)
- * state it once; stating it with two probes is refused, since a row counts by
- * one probe.
- */
+/** A row stated by two definitions counts once; stated with two probes it is refused, since a row counts by one probe. */
 export function composedRows(composition: Composition): MatrixRow[] {
     const rows = new Map<string, MatrixRow>();
     for (const row of [

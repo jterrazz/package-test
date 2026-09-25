@@ -9,7 +9,6 @@ import { text } from '../src/expectations/text/text-subject.js';
 import { file } from '../src/kernel/files/spec-path.js';
 import { exportedNames, renderPublishedNames } from './published-names.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
 describe('published-names', () => {

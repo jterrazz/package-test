@@ -4,29 +4,14 @@ import { child, childList, identifierName, memberPropertyName, stringValue, walk
 import { projectRootOf } from './role.js';
 import type { AstNode, Visitor } from './rule-shape.js';
 
-/**
- * The paths a module names in its own tree — what it builds from where it
- * sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a
- * template opening on `__dirname`) or reads by a relative literal
- * (`readFileSync('./…')`). F2 judges each for the module oxlint hands it,
- * and the walk through a module that is not production judges the same
- * forms in the module it parses; C8 reads the ones built from literals alone,
- * whole, for existence.
- */
-
-/** A path a module names, and the node that names it. */
 export type PathReference = { node: AstNode; path: string };
 
-/** The calls that read a file or a folder by its path. */
 const FS_READ = /^(?:createReadStream|opendir(?:Sync)?|read\w*)$/u;
 
-/** The calls that build a path from pieces. */
 const PATH_BUILDERS = new Set(['join', 'resolve']);
 
-/** The names a CommonJS module is handed for where it sits. */
 const COMMONJS_ANCHORS = new Set(['__dirname', '__filename']);
 
-/** The names the directory a module sits in goes by, spelled as itself. */
 function isOwnDirectory(node: AstNode | undefined): boolean {
     return (
         identifierName(node) === '__dirname' ||
@@ -36,7 +21,6 @@ function isOwnDirectory(node: AstNode | undefined): boolean {
     );
 }
 
-/** The name a call's callee goes by — `readFileSync`, `fs.readFileSync`, `path.join`. */
 function calleeName(node: AstNode): string | undefined {
     const callee = child(node, 'callee');
     return (
@@ -44,12 +28,10 @@ function calleeName(node: AstNode): string | undefined {
     );
 }
 
-/** The arguments of a call or a `new`. */
 function argumentsOf(node: AstNode): AstNode[] {
     return childList(node, 'arguments');
 }
 
-/** Is this `import.meta.url` — what a `new URL(…)` resolves against? */
 function isImportMetaUrl(node: AstNode | undefined): boolean {
     return (
         node?.type === 'MemberExpression' &&
@@ -58,10 +40,6 @@ function isImportMetaUrl(node: AstNode | undefined): boolean {
     );
 }
 
-/**
- * Does this expression name where the module sits — `import.meta.*`,
- * `__dirname`, `__filename`, or a module-scope binding made of one?
- */
 function isAnchor(node: AstNode | undefined, anchors: Set<string>): boolean {
     if (node === undefined) {
         return false;
@@ -78,7 +56,6 @@ function isAnchor(node: AstNode | undefined, anchors: Set<string>): boolean {
     return found;
 }
 
-/** The module-scope bindings initialised from where the module sits. */
 function anchorsOf(program: AstNode): Set<string> {
     const anchors = new Set<string>();
     for (const statement of childList(program, 'body')) {
@@ -96,7 +73,6 @@ function anchorsOf(program: AstNode): Set<string> {
     return anchors;
 }
 
-/** The literal pieces a path builder is handed after its anchor, up to the first that is not one. */
 function literalTail(pieces: AstNode[]): string[] {
     const tail: string[] = [];
     for (const piece of pieces) {
@@ -109,11 +85,7 @@ function literalTail(pieces: AstNode[]): string[] {
     return tail;
 }
 
-/**
- * The path an anchored expression names in the module's own tree, up to its
- * first piece that is not a literal: `join(import.meta.dirname, 'fixtures',
- * name)` names `<here>/fixtures`, `` `${__dirname}/seeds/rows.sql` `` the file.
- */
+/** `join(import.meta.dirname, 'fixtures', name)` names `<here>/fixtures`. */
 function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string | undefined {
     if (node.type === 'CallExpression' && PATH_BUILDERS.has(calleeName(node) ?? '')) {
         const [first, ...rest] = argumentsOf(node);
@@ -142,7 +114,6 @@ function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string
     return undefined;
 }
 
-/** The literal a `new URL('…', import.meta.url)` resolves, and its node. */
 function urlLiteral(node: AstNode): undefined | { literal: string; target: AstNode } {
     const [target, base] = argumentsOf(node);
     const literal = stringValue(target);
@@ -154,13 +125,7 @@ function urlLiteral(node: AstNode): undefined | { literal: string; target: AstNo
         : undefined;
 }
 
-/**
- * Visitor fragment for every path a module names in its own tree — the module
- * `file()` returns, asked when its program is entered, so one fragment serves
- * every file of a run. Its `Program` handler reads where the module sits and
- * its module-scope anchors first, so it is handed the program before any node
- * inside it.
- */
+/** Its `Program` handler reads the module's place and anchors first, so it must see the program before any node inside it. */
 export function pathReferenceVisitor(
     file: () => string,
     onPath: (entry: PathReference) => void,
@@ -201,17 +166,9 @@ export function pathReferenceVisitor(
     };
 }
 
-/** A path a module resolves from its own directory with literals alone: each piece, and the node of the first. */
 export type LiteralPath = { node: AstNode; pieces: string[] };
 
-/**
- * Visitor fragment for every path a module resolves from its own directory
- * with nothing but literals — `resolve`/`join` handed `import.meta.dirname`
- * or `__dirname` and then literal pieces only, `new URL('…',
- * import.meta.url)` — the forms {@link pathReferenceVisitor} reads, held to
- * the path they name whole: a piece that is not a literal leaves the call
- * out, and an anchor made of anything else than the directory itself too.
- */
+/** A piece that is not a literal leaves the call out. */
 export function literalPathVisitor(onPath: (entry: LiteralPath) => void): Visitor {
     return {
         CallExpression(node: AstNode) {
@@ -234,7 +191,6 @@ export function literalPathVisitor(onPath: (entry: LiteralPath) => void): Visito
     };
 }
 
-/** Visitors run together: each node type calls every fragment that handles it, in order. */
 export function mergeVisitors(...fragments: Visitor[]): Visitor {
     const merged: Visitor = {};
     for (const fragment of fragments) {
@@ -252,7 +208,6 @@ export function mergeVisitors(...fragments: Visitor[]): Visitor {
     return merged;
 }
 
-/** Run a visitor over a whole program, the way oxlint would, entering each node once. */
 export function visitProgram(program: AstNode, visitor: Visitor): void {
     walk(program, (node) => {
         visitor[node.type]?.(node);

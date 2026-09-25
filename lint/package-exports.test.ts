@@ -14,10 +14,8 @@ import { describe, expect, test } from 'vitest';
 import { declaredSubpaths } from './package-exports.js';
 import { materialAt } from './production.js';
 
-/** The repository root, from this module's place inside `lint/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The package's own manifest, as the published contract states it. */
 function ownManifest(): { exports: Record<string, Record<string, string> | string> } {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: the shape asserted here is the one the assertions below read, and a wrong one fails them
     return JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
@@ -25,7 +23,6 @@ function ownManifest(): { exports: Record<string, Record<string, string> | strin
     };
 }
 
-/** Every name a bundle exports, read from its trailing `export { … }` list. */
 function exportedNames(bundle: string): string[] {
     const names: string[] = [];
     for (const group of bundle.matchAll(/export\s*\{(?<names>[^}]*)\}\s*;/gu)) {
@@ -42,17 +39,12 @@ function exportedNames(bundle: string): string[] {
     return names;
 }
 
-/**
- * A built entry, by its path in `dist/`. The specifier is computed, so the
- * import is `any` by construction — and the shape it resolves to is exactly
- * what the tests below are here to compare.
- */
 async function builtEntry(path: string): Promise<Record<string, unknown>> {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed specifier resolves to `any`: naming the module's shape is exactly what these tests compare
     return (await import(resolve(ROOT, path))) as Record<string, unknown>;
 }
 
-/** Every top-level path `files` publishes; a negation withdraws nothing at that level. */
+/** A negation withdraws nothing at that level. */
 function publishedRoots(): Set<string> {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `files` is the array this reads
     const { files } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
@@ -61,7 +53,6 @@ function publishedRoots(): Set<string> {
     return new Set(files.filter((entry) => !entry.startsWith('!')));
 }
 
-/** Every `docs/…` FILE a text cites — a chapter, or the reference folder's index. */
 function citedDocPaths(text: string): string[] {
     const cited = [...text.matchAll(/docs\/[\w./-]*\.md|docs\/reference\//gu)].map(
         (match) => match[0],
@@ -69,7 +60,6 @@ function citedDocPaths(text: string): string[] {
     return [...new Set(cited)];
 }
 
-/** What the built bundle says to a consumer, gathered from the sources it is built from. */
 function sourceCitations(): string[] {
     const cited: string[] = [];
     for (const entry of readdirSync(resolve(ROOT, 'src'), { recursive: true })) {
@@ -82,7 +72,6 @@ function sourceCitations(): string[] {
     return [...new Set(cited)];
 }
 
-/** The cited paths the tarball does NOT carry — either unpublished, or absent. */
 function unpublished(paths: string[]): string[] {
     const published = publishedRoots();
     return paths.filter((path) => {
@@ -97,12 +86,11 @@ function manifestAt(dir: string, manifest: unknown): void {
     writeFileSync(resolve(dir, 'package.json'), JSON.stringify(manifest));
 }
 
-/** The package a module specifier belongs to: `@scope/name` or `name`, its subpath dropped. */
+/** Its subpath dropped. */
 function packageOf(specifier: string): string {
     const parts = specifier.split('/');
     return (specifier.startsWith('@') ? parts.slice(0, 2) : parts.slice(0, 1)).join('/');
 }
-/** Every package a published declaration file augments with `declare module`. */
 function augmentedPackages(): string[] {
     const augmented = new Set<string>();
     for (const name of readdirSync(resolve(ROOT, 'dist'))) {
@@ -115,7 +103,6 @@ function augmentedPackages(): string[] {
     }
     return [...augmented].toSorted();
 }
-/** What an install of this package makes a consumer have: its dependencies and its required peers. */
 function requiredOfAConsumer(): Set<string> {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: these are the three blocks this reads
     const manifest = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
@@ -128,7 +115,6 @@ function requiredOfAConsumer(): Set<string> {
     );
     return new Set([...Object.keys(manifest.dependencies ?? {}), ...peers]);
 }
-/** Every source module a build's maps say it was compiled from, by its path in the repository. */
 function compiledSources(): string[] {
     const sources = new Set<string>();
     for (const entry of readdirSync(resolve(ROOT, 'dist'), { recursive: true })) {
