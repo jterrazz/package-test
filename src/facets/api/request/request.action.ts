@@ -1,6 +1,5 @@
 import { readFileSync } from 'node:fs';
 
-import { parseRequestFile } from '../../../expectations/http/http-file.js';
 import { dedent } from '../../../expectations/text/dedent.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { SliceReader } from '../../../kernel/chain/action.js';
@@ -11,6 +10,7 @@ import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../kernel/fi
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
 import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';
+import { parseRequestFile } from './request-file.js';
 import { params, routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
 

@@ -89,7 +89,7 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 111   |
+| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 112   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 161   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
@@ -384,7 +384,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(file())`      | 1   | —   | 6   | 4           | 0       | —      | 0         | 3      |
 | `toMatch(directory())` | 1   | —   | 5   | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 3   | —   | —   | —           | —       | —      | —         | 4      |
+| `.http exchange`       | 3   | —   | —   | —           | —       | —      | —         | 5      |
 | `.aria.yaml tree`      | —   | —   | —   | —           | 0       | —      | 0         | —      |
 | `.json body`           | 2   | —   | 2   | 3           | 0       | —      | —         | 12     |
 | `.txt stream`          | 1   | —   | 7   | 1           | 1       | —      | —         | 11     |

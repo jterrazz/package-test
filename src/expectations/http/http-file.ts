@@ -1,12 +1,7 @@
 /**
- * Parser / serializer for `.http` fixture files.
- *
- * Requests (`requests/*.http`) hold a COMPLETE request:
- *
- *     POST /users
- *     content-type: application/json
- *
- *     { "name": "Charlie" }
+ * The `.http` grammar — a start line, headers, a blank line, a body — and the
+ * response files the goldens judge by. The request files the api facet sends
+ * are parsed by `facets/api/request/request-file.ts` on the same sections.
  *
  * Responses (`expected/*.http`) hold the expected status, a SUBSET of
  * headers, and the expected JSON body. Status, headers, and body support
@@ -18,14 +13,6 @@
  *     { "id": "{{uuid#user}}" }
  */
 
-export type ParsedRequestFile = {
-    /** Raw body text (already serialized), or undefined when absent. */
-    body?: string | undefined;
-    headers: Record<string, string>;
-    method: string;
-    path: string;
-};
-
 export type ParsedResponseFile = {
     /** Parsed JSON body — or the raw text when the body is not valid JSON. */
     body: unknown;
@@ -36,7 +23,8 @@ export type ParsedResponseFile = {
     status: string;
 };
 
-function splitSections(content: string): {
+/** A message's three sections: its start line, its header lines, its body. */
+export function splitSections(content: string): {
     body: string;
     headerLines: string[];
     startLine: string;
@@ -66,7 +54,8 @@ function splitSections(content: string): {
     return { body, headerLines, startLine };
 }
 
-function parseHeaders(headerLines: string[], fileName: string): Record<string, string> {
+/** The header lines as a record — each `Name: value`, refused otherwise. */
+export function parseHeaders(headerLines: string[], fileName: string): Record<string, string> {
     const headers: Record<string, string> = {};
     for (const line of headerLines) {
         const separator = line.indexOf(':');
@@ -76,27 +65,6 @@ function parseHeaders(headerLines: string[], fileName: string): Record<string, s
         headers[line.slice(0, separator).trim()] = line.slice(separator + 1).trim();
     }
     return headers;
-}
-
-/** Parse a `requests/*.http` file. First line must be `METHOD /path`. */
-export function parseRequestFile(content: string, fileName: string): ParsedRequestFile {
-    const { body, headerLines, startLine } = splitSections(content);
-
-    const start = /^(?<method>[A-Z]+)\s+(?<path>\S+)$/u.exec(startLine.trim());
-    const method = start?.groups?.method;
-    const path = start?.groups?.path;
-    if (method === undefined || path === undefined) {
-        throw new Error(
-            `${fileName}: first line must be "METHOD /path" (e.g. "POST /users"), got "${startLine}"`,
-        );
-    }
-
-    return {
-        body: body.length > 0 ? body : undefined,
-        headers: parseHeaders(headerLines, fileName),
-        method,
-        path,
-    };
 }
 
 /** How a body is read, by the media type that labels it. */

@@ -1,0 +1,39 @@
+import { parseHeaders, splitSections } from '../../../expectations/http/http-file.js';
+
+/**
+ * A `requests/*.http` file: a COMPLETE request, the one the api facet sends.
+ *
+ *     POST /users
+ *     content-type: application/json
+ *
+ *     { "name": "Charlie" }
+ */
+
+export type ParsedRequestFile = {
+    /** Raw body text (already serialized), or undefined when absent. */
+    body?: string | undefined;
+    headers: Record<string, string>;
+    method: string;
+    path: string;
+};
+
+/** Parse a `requests/*.http` file. First line must be `METHOD /path`. */
+export function parseRequestFile(content: string, fileName: string): ParsedRequestFile {
+    const { body, headerLines, startLine } = splitSections(content);
+
+    const start = /^(?<method>[A-Z]+)\s+(?<path>\S+)$/u.exec(startLine.trim());
+    const method = start?.groups?.method;
+    const path = start?.groups?.path;
+    if (method === undefined || path === undefined) {
+        throw new Error(
+            `${fileName}: first line must be "METHOD /path" (e.g. "POST /users"), got "${startLine}"`,
+        );
+    }
+
+    return {
+        body: body.length > 0 ? body : undefined,
+        headers: parseHeaders(headerLines, fileName),
+        method,
+        path,
+    };
+}
