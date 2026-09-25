@@ -1,12 +1,8 @@
-import type { ContractInput } from '../../model/contracts/contract.js';
-import type {
-    ContractRequest,
-    ContractResponder,
-    ContractResponse,
-} from '../../model/contracts/exchange.js';
 import type { RenderResult } from '../../results/render.result.js';
 import type { ComponentUi, DomMount } from '../../seams/vitest-browser/ui.js';
 import type { componentVerbs } from '../../seams/vitest-browser/vitest-browser.adapter.js';
+import type { ContractInput } from '../../stubs/contract.js';
+import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 
 /**
  * The component facet's shape, stated where BOTH runtimes can read it.

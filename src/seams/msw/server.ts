@@ -11,7 +11,7 @@
  * the spec with an explicit error. Chains with zero contracts never start MSW:
  * their network is not guarded (known scope).
  */
-import type { Contract } from '../../model/contracts/contract.js';
+import type { Contract } from '../../stubs/contract.js';
 import { buildContractHandlers, NO_CONTRACTS } from './handlers.js';
 import type { ContractRegistration } from './handlers.js';
 import { owningBodies } from './owned-body.js';

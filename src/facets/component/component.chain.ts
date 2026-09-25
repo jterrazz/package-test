@@ -1,10 +1,3 @@
-import { contractsOf, isContract, isContracts } from '../../model/contracts/contract.js';
-import type { Contract, ContractInput } from '../../model/contracts/contract.js';
-import type {
-    ContractRequest,
-    ContractResponder,
-    ContractResponse,
-} from '../../model/contracts/exchange.js';
 import { RenderResult } from '../../results/render.result.js';
 import { registerWorkerContracts, resetWorkerContracts } from '../../seams/msw/worker.js';
 import {
@@ -24,6 +17,9 @@ import {
     mountReact,
 } from '../../seams/vitest-browser/vitest-browser.adapter.js';
 import type { MountedSurface } from '../../seams/vitest-browser/vitest-browser.adapter.js';
+import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
+import type { Contract, ContractInput } from '../../stubs/contract.js';
+import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import type { ComponentChain, ComponentScenario, RenderSubject } from './component.shape.js';
 
 /**

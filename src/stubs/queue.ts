@@ -15,9 +15,13 @@
  * declared zero contracts is not guarded at all (unchanged boundary).
  */
 
-import { refusal } from '../lesson/refusal.js';
-import { CaptureScope } from '../matching/match.js';
-import { hasPlaceholders, placeholderPatternSource, textEquals } from '../matching/structural.js';
+import { refusal } from '../model/lesson/refusal.js';
+import { CaptureScope } from '../model/matching/match.js';
+import {
+    hasPlaceholders,
+    placeholderPatternSource,
+    textEquals,
+} from '../model/matching/structural.js';
 import { describeRoute } from './contract.js';
 import type { Contract } from './contract.js';
 import type { MatchableRequest } from './exchange.js';

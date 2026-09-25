@@ -1,9 +1,9 @@
 import { afterAll, describe, expect, test } from 'vitest';
 
 import { registerContracts, stopContractServer } from '../../seams/msw/server.js';
-import { defineContract } from './contract.js';
-import { http } from './http.js';
-import { declared, interceptThrough } from './intercept.js';
+import { defineContract } from '../../stubs/contract.js';
+import { http } from '../../stubs/http/http.js';
+import { declared, interceptThrough } from './intercept.scope.js';
 
 /** The module-scope double as the node entry publishes it. */
 const intercept = interceptThrough(registerContracts);

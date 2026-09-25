@@ -1,6 +1,6 @@
+import { interceptThrough } from './capabilities/intercept/intercept.scope.js';
+import type { Intercept } from './capabilities/intercept/intercept.scope.js';
 import { registerContainerIntegrations } from './model/chain/registry.js';
-import { interceptThrough } from './model/contracts/intercept.js';
-import type { Intercept } from './model/contracts/intercept.js';
 import { serviceContainers } from './runner/provided.js';
 import { ServiceContainer } from './seams/testcontainers/service-container.js';
 

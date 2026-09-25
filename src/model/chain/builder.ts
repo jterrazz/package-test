@@ -13,14 +13,10 @@ import { BaseResult, validateDatabaseOption } from '../../results/result.js';
 import { ScreenResult } from '../../results/screen.result.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
+import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
+import type { Contract, ContractInput } from '../../stubs/contract.js';
+import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
-import { contractsOf, isContract, isContracts } from '../contracts/contract.js';
-import type { Contract, ContractInput } from '../contracts/contract.js';
-import type {
-    ContractRequest,
-    ContractResponder,
-    ContractResponse,
-} from '../contracts/exchange.js';
 import { parseRequestFile } from '../http-files/http-file.js';
 import { dedent } from '../matching/dedent.js';
 import type { BrowserPort, VisitScenario } from '../ports/browser.port.js';

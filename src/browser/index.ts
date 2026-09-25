@@ -11,13 +11,13 @@
  * side only.
  */
 
+import { interceptThrough } from '../capabilities/intercept/intercept.scope.js';
+import type { Intercept } from '../capabilities/intercept/intercept.scope.js';
 import type { Specification } from '../facets/specification.js';
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
 } from '../model/chain/process.js';
-import { interceptThrough } from '../model/contracts/intercept.js';
-import type { Intercept } from '../model/contracts/intercept.js';
 import { TextAccessor } from '../results/text.js';
 import { registerWorkerContracts } from '../seams/msw/worker.js';
 import type { postgres as postgresFn } from '../seams/postgres/postgres.js';

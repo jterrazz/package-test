@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, test } from 'vitest';
 
-import type { Contract } from '../contracts/contract.js';
-import { http } from '../contracts/http.js';
+import type { Contract } from '../../stubs/contract.js';
+import { http } from '../../stubs/http/http.js';
 import { StubBackend } from './stub-backend.js';
 
 // ── Fakes — contracts built inline (mocks are code, CONVENTIONS I4) ──

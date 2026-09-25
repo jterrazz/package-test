@@ -11,12 +11,17 @@ import { selfRules } from './dist/self-oxlint.js';
  * The trees of this package and their sanctioned edges (CONVENTIONS I1).
  *
  * - `model/` — the chain, the elements (the descriptors, and the ambiguity
- *   and substring readings every surface shares), the contracts and the
- *   intercept, the goldens, the clock and the doubles: what every facet is
- *   made of. It reaches the three seams that carry no engine of their own
- *   (docker, process, yaml), the msw engine through the one lazy import each
- *   of its two openers owns, and — to CONSTRUCT what a terminal action hands
- *   back, and to compare a golden through its accessor — `results/`.
+ *   and substring readings every surface shares), the goldens, the clock and
+ *   the doubles: what every facet is made of. It reaches the three seams that
+ *   carry no engine of their own (docker, process, yaml), the msw engine
+ *   through the chain's one lazy import, the contracts in `stubs/`, and — to
+ *   CONSTRUCT what a terminal action hands back, and to compare a golden
+ *   through its accessor — `results/`.
+ * - `capabilities/<name>/` — a setup a chain offers, one folder each; today
+ *   the module-scope `intercept()`, which names its engine's registration.
+ * - `stubs/` — the contract, its exchange, the queue that serves it, and the
+ *   user-facing builders, one folder per kind (`http/`, `openai/`,
+ *   `anthropic/`).
  * - `results/` — what a terminal action hands back: one `<kind>.result.ts`
  *   per result, and the accessors they compose.
  * - `facets/<facet>/` — the constructor (`<facet>.handle.ts`), the chain
@@ -43,11 +48,20 @@ import { selfRules } from './dist/self-oxlint.js';
  * files are governed by F2/I4.
  */
 const FRAMEWORK_LAYERS = {
+    // A setup a chain offers, one folder per capability, each owning only
+    // Itself. The module-scope `intercept()` names the msw registration it
+    // Hands its engine, a type the seam declares.
+    capabilities: {
+        folders: { intercept: [] },
+        imports: ['model/', 'stubs/'],
+        seams: { 'capabilities/intercept/intercept.scope.ts': ['seams/msw/'] },
+    },
     facets: {
         imports: [
             'facets/',
             'model/',
             'results/',
+            'stubs/',
             'runner/facet-project',
             'runner/preset',
             'runner/provided',
@@ -117,6 +131,8 @@ const FRAMEWORK_LAYERS = {
             // accessor it is handed: the builder and the matchers both reach
             // `results/`, a value edge by design.
             'results/',
+            // The contracts a chain declares, and the queue that serves them.
+            'stubs/',
             // And a document run is the cli's own engine, called by the
             // Builder's `run` the way its terminal actions are.
             'facets/cli/literate',
@@ -134,10 +150,9 @@ const FRAMEWORK_LAYERS = {
         ],
         packages: ['vitest', 'vitest-mock-extended'],
         seams: {
-            // The contract engine is reached through a lazy import, once per
-            // Opener: the chain's `.intercept()` and the module-scope one.
+            // The contract engine is reached through a lazy import by the
+            // Chain's `.intercept()`.
             'model/chain/builder.ts': ['seams/msw/'],
-            'model/contracts/intercept.ts': ['seams/msw/'],
         },
     },
     // What a terminal action hands back: the result classes and the accessors
@@ -150,19 +165,20 @@ const FRAMEWORK_LAYERS = {
             'results/container.ts': ['seams/docker/'],
         },
     },
+    // The user-facing stub builders — `http`, `openai`, `anthropic`, one folder
+    // per kind — over the contract, its exchange and the queue that serves it.
+    stubs: { imports: ['model/', 'stubs/'] },
     runner: {
         imports: ['runner/', 'model/', 'facets/'],
         packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
     },
     seams: {
         folders: {
-            anthropic: ['@anthropic-ai/sdk'],
             appium: ['webdriverio'],
             docker: [],
             git: [],
             hono: ['hono', '@hono/node-server'],
             msw: ['msw'],
-            openai: ['openai'],
             'oxc-parser': ['oxc-parser'],
             playwright: ['playwright'],
             postgres: ['pg'],
@@ -179,6 +195,8 @@ const FRAMEWORK_LAYERS = {
             // Message a MISSING optional peer produces, and a copy of that
             // Message per folder is how the four of them would have drifted.
             'seams/peer',
+            // The engines serve the contracts a chain declares.
+            'stubs/',
             // The page's golden commands answer through the text accessor
             // every stream is compared by, one `TextAccessor` for both builds.
             'results/text',

@@ -1,9 +1,9 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { defineContracts } from '../contracts/contract.js';
-import type { Contract } from '../contracts/contract.js';
-import { http } from '../contracts/http.js';
+import { defineContracts } from '../../stubs/contract.js';
+import type { Contract } from '../../stubs/contract.js';
+import { http } from '../../stubs/http/http.js';
 import type { BrowserOpenOptions, BrowserPage, BrowserPort } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, CliPort } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';

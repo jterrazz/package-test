@@ -1,6 +1,6 @@
-import { CaptureScope } from '../matching/match.js';
-import type { Matcher } from '../matching/match.js';
-import { structuralEquals } from '../matching/structural.js';
+import { CaptureScope } from '../model/matching/match.js';
+import type { Matcher } from '../model/matching/match.js';
+import { structuralEquals } from '../model/matching/structural.js';
 
 /**
  * A text filter on a provider request builder (`openai.chat({ user })`,

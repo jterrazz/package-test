@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { Contract } from './contract.js';
 import type { MatchableRequest } from './exchange.js';
-import { http } from './http.js';
+import { http } from './http/http.js';
 import { ContractQueue } from './queue.js';
 
 const URL_A = 'https://api.example.com/a';

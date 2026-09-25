@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { match } from '../matching/match.js';
+import { match } from '../model/matching/match.js';
 import { matchesText } from './filters.js';
 
 describe('matchesText', () => {

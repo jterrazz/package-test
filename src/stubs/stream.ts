@@ -1,4 +1,4 @@
-import { pause } from '../timing/pause.js';
+import { pause } from '../model/timing/pause.js';
 import type { StreamBody } from './exchange.js';
 
 /**

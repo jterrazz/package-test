@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import type { ContractRequest } from '../../model/contracts/exchange.js';
+import type { ContractRequest } from '../exchange.js';
 import { openai } from './openai.js';
 
 const CHAT_URL = 'https://api.openai.com/v1/chat/completions';

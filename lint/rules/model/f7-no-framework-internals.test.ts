@@ -39,6 +39,17 @@ ruleTester.run('f7-no-framework-internals', f7NoFrameworkInternals as unknown as
             errors: 1,
             filename: '/repo/specs/cli/tokens/tokens.test.ts',
         },
+        // A capability's module and a stub builder's are internal: a spec reaches both through the entry.
+        {
+            code: 'import { interceptThrough } from "../../src/capabilities/intercept/intercept.scope.js";',
+            errors: 1,
+            filename: '/repo/specs/api/intercept/exhausted.spec.ts',
+        },
+        {
+            code: 'import { http } from "../../src/stubs/http/http.js";',
+            errors: 1,
+            filename: '/repo/specs/api/intercept/exhausted.spec.ts',
+        },
         // What a terminal action hands back is internal: a spec reads it off the result.
         {
             code: 'import { TextAccessor } from "../../src/results/text.js";',

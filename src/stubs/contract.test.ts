@@ -1,9 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { anthropic } from '../../seams/anthropic/anthropic.js';
+import { anthropic } from './anthropic/anthropic.js';
 import { defineContract, defineContracts } from './contract.js';
 import type { Contract } from './contract.js';
-import { http } from './http.js';
+import { http } from './http/http.js';
 
 /** A contract for one route, tagged by response body so order is observable. */
 function route(method: 'GET' | 'POST', url: RegExp | string, tag: string): Contract {
@@ -48,7 +48,7 @@ describe('contracts — defineContract', () => {
 
     test('builder .intercept() accepts a contract as a single argument', async () => {
         // Given - a facet with no adapters and a declared contract
-        const { createApiFacet } = await import('../chain/builder.js');
+        const { createApiFacet } = await import('../model/chain/builder.js');
         const api = createApiFacet({});
 
         const contract = defineContract({

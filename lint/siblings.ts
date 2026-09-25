@@ -96,7 +96,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'src/model/contracts/exchange.ts',
             'src/model/ports/browser.port.ts',
             'src/model/ports/cli.port.ts',
             'src/model/ports/container.port.ts',
@@ -106,6 +105,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/ports/server.port.ts',
             'src/model/ports/service.port.ts',
             'src/settings.ts',
+            'src/stubs/exchange.ts',
             'lint/config-shape.ts',
         ),
         name: 'type-only declaration',
@@ -217,9 +217,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/model/chain/ground.ts',
             'src/model/chain/registry.ts',
             'src/model/chain/services.ts',
-            'src/model/contracts/stream.ts',
             'src/model/timing/pause.ts',
             'src/runner/facet-project.ts',
+            'src/stubs/stream.ts',
         ),
         name: 'a chain or runner internal',
         why: 'it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to',

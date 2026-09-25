@@ -113,23 +113,23 @@ export {
 } from './model/elements/elements.js';
 
 // Contracts — the ONE way to declare what the outside world replies
-export { anthropic } from './seams/anthropic/anthropic.js';
+export { anthropic } from './stubs/anthropic/anthropic.js';
 export {
     http,
     type HttpContractFilter,
     type HttpResponseInit,
     type HttpStreamInit,
     type SseEvent,
-} from './model/contracts/http.js';
-export { type TextFilter } from './model/contracts/filters.js';
-export { openai } from './seams/openai/openai.js';
+} from './stubs/http/http.js';
+export { type TextFilter } from './stubs/filters.js';
+export { openai } from './stubs/openai/openai.js';
 export {
     type Contract,
     type ContractInput,
     type Contracts,
     defineContract,
     defineContracts,
-} from './model/contracts/contract.js';
+} from './stubs/contract.js';
 export type {
     ContractRequest,
     ContractResponder,
@@ -137,10 +137,14 @@ export type {
     ContractResponseValue,
     MatchableRequest,
     StreamBody,
-} from './model/contracts/exchange.js';
+} from './stubs/exchange.js';
 // The module-scope double — the VALUE is each entry's (one engine per runtime);
 // The shape is stated here so the two surfaces can only publish the same one.
-export type { Intercept, InterceptOptions, InterceptScope } from './model/contracts/intercept.js';
+export type {
+    Intercept,
+    InterceptOptions,
+    InterceptScope,
+} from './capabilities/intercept/intercept.scope.js';
 
 // Mock
 export { mockOf, type MockOfOptions, type MockPort } from './model/doubles/mock-of.js';

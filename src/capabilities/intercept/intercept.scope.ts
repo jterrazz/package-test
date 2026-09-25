@@ -15,9 +15,9 @@ import type { ContractRegistration } from '../../seams/msw/handlers.js';
  * request no contract accepted) is raised THERE, which is what makes the
  * double a guard rather than a convenience.
  */
-import { contractsOf, isContract, isContracts } from './contract.js';
-import type { Contract, ContractInput } from './contract.js';
-import type { ContractRequest, ContractResponder, ContractResponse } from './exchange.js';
+import { contractsOf, isContract, isContracts } from '../../stubs/contract.js';
+import type { Contract, ContractInput } from '../../stubs/contract.js';
+import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 
 /**
  * One block's worth of declared network. Disposed at the end of the scope that
