@@ -3,7 +3,6 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { cli } from './cli.project.js';
 
-/** The plugins a project carries, by name — a plugin with no name is not one. */
 function pluginNames(project: TestProjectInlineConfiguration): string[] {
     const plugins: unknown[] = Array.isArray(project.plugins) ? project.plugins : [];
     return plugins.flatMap((plugin) =>

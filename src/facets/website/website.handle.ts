@@ -18,13 +18,7 @@ import type { BrowserPort } from './browser/browser.port.js';
 import type { WebsiteSpecification } from './website.facet.js';
 import { websiteFacet } from './website.facet.js';
 
-/**
- * The command a `server` states, where it states one.
- *
- * A factory is a function of services that have not started yet, so calling it
- * to read a command would start the world twice. The SHAPE is known either
- * way, and the shape is all the startup report names.
- */
+/** Calling a factory would start the services twice: its shape is all the report needs. */
 function commandOf(server: unknown): string | undefined {
     return typeof server === 'object' && server !== null && 'command' in server
         ? String(server.command)
@@ -37,11 +31,7 @@ export type ServerSpec<Services extends ServiceRecord> =
     | ProcessHandle
     | ProcessOptions;
 
-/**
- * The declared shape, whichever of the three forms stated it — with an `env`
- * function resolved against the services that are already up, so the site is
- * handed the URL of the API it was started beside.
- */
+/** An `env` function is resolved against the services already up. */
 function resolveServer<Services extends ServiceRecord>(
     server: ServerSpec<Services>,
     services: Services,
@@ -54,31 +44,15 @@ function resolveServer<Services extends ServiceRecord>(
     return { ...spec, env: spec.env(services) };
 }
 
-/** What `specification.website()` hands its chain: the site, the browser that visits it, and the stub backend it talks to. */
-export type WebsiteConfig = {
-    /** Base URL of the website under test. */
-    baseUrl?: string | undefined;
-    /**
-     * Lazy browser accessor. The first `.visit()` launches the shared
-     * browser instance; `.fetch()`-only spec files never pay the browser
-     * cost.
-     */
-    browser?: (() => Promise<BrowserPort>) | undefined;
-    /**
-     * Cross-origin request policy for visits: `'block'` aborts requests
-     * leaving the site under test — the browser-side analog of strict
-     * intercepts.
-     */
-    external?: 'allow' | 'block' | undefined;
-} & Pick<ResultConfig, 'transform'> &
-    StubsConfig;
+export type WebsiteConfig = Pick<ResultConfig, 'transform'> &
+    StubsConfig & {
+        baseUrl?: string | undefined;
+        /** Launched by the first `.visit()`: `.fetch()`-only files never pay for a browser. */
+        browser?: (() => Promise<BrowserPort>) | undefined;
+        external?: 'allow' | 'block' | undefined;
+    };
 
-/**
- * The declared stub backend behind the site under test — started before the
- * server command, torn down with the runner. Its URL is injected into the
- * server child's environment under `env`; the stubs each chain declares
- * via `.intercept(...)` are what it serves.
- */
+/** The stub backend: started before the server, its URL injected under `env`. */
 export type WebsiteBackendOptions = {
     /** Env var receiving the stub's URL in the server child (e.g. `'API_URL'`). */
     env: string;
@@ -86,55 +60,21 @@ export type WebsiteBackendOptions = {
     port?: number;
 };
 
-/**
- * Options for {@link startWebsite | specification.website}. `server` (start
- * the site locally) and `url` (target a running site) are mutually
- * exclusive BY TYPE — the union makes the invalid combinations
- * inexpressible rather than runtime-checked. `backend` requires `server`
- * mode for the same reason: a deployed site cannot be pointed at a local
- * stub.
- */
+/** `server` and `url` are exclusive by type; `backend` requires `server`. */
 export type WebsiteSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /**
-     * Cross-origin request policy for visits. Default: `'block'` with a
-     * local `server` (deterministic — analytics and CDNs never leave the
-     * machine), `'allow'` with a deployed `url`.
-     */
+    /** Default `'block'` with a local `server`, `'allow'` with a deployed `url`. */
     external?: 'allow' | 'block';
-    /**
-     * Project-root override (CONVENTIONS A9): the working directory of the
-     * `server` command. Auto-discovered from the calling file when absent.
-     */
+    /** Project-root override (A9): the working directory of the `server` command. */
     root?: string;
-    /**
-     * Named services started with the runner, before the site is: a database
-     * the site reads, a `process()` backend it calls. They are started in
-     * declaration order and stopped with the specification, and `server` may
-     * be a function of them — which is how a site is handed the URL of the
-     * API it was started beside.
-     */
+    /** Services started before the site; `server` may be a function of them. */
     services?: Services;
-    /**
-     * Escape hatch: normaliser applied to every compared reading of a result
-     * — the head projection and the json-ld among them — before the
-     * comparison (CONVENTIONS D6), and read by `.text`; `.raw` keeps the capture.
-     * Prefer `{{token}}` placeholders in fixtures; this is for what a token
-     * cannot name, a meta a FRAMEWORK owns and the page never asked for.
-     */
+    /** Normaliser applied to every compared reading (D6); prefer `{{token}}` placeholders. */
     transform?: ((text: string) => string) | undefined;
 } & (
     | {
-          /**
-           * Declared stub backend: started BEFORE the server command, its
-           * URL injected into the child env under `backend.env`. Serves the
-           * stubs each chain declares via `.intercept(...)`.
-           */
+          /** Stub backend, started before the server; its URL injected under `backend.env`. */
           backend?: WebsiteBackendOptions;
-          /**
-           * Start the site locally: a `process()` — a shell command receiving
-           * a free port as `PORT`, polled on `ready` (default `/`) until it
-           * answers — or a function of the started services returning one.
-           */
+          /** Start the site locally: a `process()`, or a function of the started services returning one. */
           server: ServerSpec<Services>;
           url?: never;
       }
@@ -146,7 +86,6 @@ export type WebsiteSpecificationOptions<Services extends ServiceRecord = Service
       }
 );
 
-/** What the site is started with, once everything before it is up. */
 type SiteContext<Services extends ServiceRecord> = {
     backend: null | StubBackend;
     backendUrl: string | undefined;
@@ -155,10 +94,7 @@ type SiteContext<Services extends ServiceRecord> = {
     started: null | StartedServices;
 };
 
-/**
- * Start the declared record, if there is one. A record that fails to come up
- * must not orphan the stub that was started before it.
- */
+/** A record that fails to come up must not orphan the stub started before it. */
 async function startDeclared(
     services: ServiceRecord,
     root: string,
@@ -176,10 +112,7 @@ async function startDeclared(
     }
 }
 
-/**
- * Start the site, or take the URL of a deployed one. A server that never came
- * up must not orphan the stub, nor the services it was started beside.
- */
+/** A server that never came up must not orphan the stub nor its services. */
 async function startSite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
     context: SiteContext<Services>,
@@ -192,8 +125,7 @@ async function startSite<Services extends ServiceRecord>(
         context.root,
         'website',
         {
-            // Every process of one run carries the same id, minted by the
-            // facet — never sampled by a spec (CONVENTIONS D16, P7).
+            // One id per run, minted by the facet, never sampled by a spec (D16).
             TEST_RUN_ID: context.started?.runId ?? randomUUID(),
             ...serverBackendEnv(options.backend, context.backendUrl),
         },
@@ -208,7 +140,6 @@ async function startSite<Services extends ServiceRecord>(
     }
 }
 
-/** The stub's URL in the child's environment, under the name the caller chose. */
 function serverBackendEnv(
     backend: undefined | WebsiteBackendOptions,
     backendUrl: string | undefined,
@@ -216,7 +147,6 @@ function serverBackendEnv(
     return backend && backendUrl !== undefined ? { [backend.env]: backendUrl } : {};
 }
 
-/** The declared record, or the empty one — a website may have no services. */
 function servicesOf<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
 ): Services {
@@ -224,12 +154,7 @@ function servicesOf<Services extends ServiceRecord>(
     return (options.services ?? {}) as Services;
 }
 
-/**
- * The record returned by {@link startWebsite | specification.website}.
- * Destructure with the canonical names (CONVENTIONS A3):
- *
- *     const { website, cleanup } = await specification.website(…);
- */
+/** What `specification.website()` returns: `const { website, cleanup } = …` (A3). */
 export type WebsiteHandle = {
     /** Stop the server process and the shared browser instance. */
     cleanup: () => Promise<void>;
@@ -241,21 +166,18 @@ export type WebsiteHandle = {
 export async function startWebsite<Services extends ServiceRecord>(
     options: WebsiteSpecificationOptions<Services>,
 ): Promise<WebsiteHandle> {
-    // Caller detection must run before any await — async resumption drops
-    // the calling file's frames from the stack.
+    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
 
-    // The type already forbids `backend` with `url`; the runtime check covers
-    // untyped callers with the same sentence.
+    // The type already forbids it; this covers untyped callers.
     if (options.backend && !options.server) {
         throw new Error(
             'specification.website(): `backend` requires `server` mode — a deployed `url` cannot be pointed at a local stub.',
         );
     }
 
-    // The stub starts BEFORE the server command, so the child finds its URL
-    // in the environment from the very first request it makes.
+    // Started before the server, so the child finds its URL from the first request.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -265,9 +187,6 @@ export async function startWebsite<Services extends ServiceRecord>(
 
     const services = servicesOf(options);
     const root = resolveRoot(options.root, callerDir);
-    // The site is a child process the runner starts and polls, or a
-    // deployment already running — never an app inside this process, so the
-    // startup report names it as a process or an http subject.
     const subject: AppInfo = options.server
         ? { command: commandOf(options.server), type: 'process' }
         : { type: 'http', url: options.url };
@@ -280,10 +199,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // The worker's one browser, launched lazily on the first `.visit()` so
-    // `.fetch()`-only spec files never pay the browser cost. The playwright
-    // integration stays a lazy import (CONVENTIONS I1) — the dependency is
-    // optional and only loaded when a spec actually renders a page.
+    // Launched lazily on the first `.visit()`; playwright is an optional peer (I1).
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {

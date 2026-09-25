@@ -7,29 +7,15 @@ import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { serveAppium } from '../server/appium-server.js';
 import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
 
-/** What the setup reads of the project: its root, what it declared, and the channel to its workers. */
 type SessionProject = Pick<TestProject, 'provide'> & {
     config: { provide?: Partial<ProvidedContext>; root: string };
 };
 
-/** Where the mobile project finds this setup: this module, or `mobile-session.js` in the built package. */
 export function mobileSessionSetup(): string {
     return setupEntry(import.meta.dirname, 'mobile-session.ts', 'mobile-session.js');
 }
 
-/**
- * The mobile project's global setup: one driver session per run.
- *
- * Before the first file it hands the workers an empty folder of its own —
- * one per project and per run. The first runner that opens the app records
- * its session there and every later file attaches to it. After the last
- * file, it ends every session recorded.
- *
- * A project that declares its device (`mobile({ device, root })`) has this
- * setup own the server too: it boots the simulator, spawns the project's
- * Appium server once for the run and provides both to the workers, and it
- * stops the server after the sessions are ended.
- */
+/** One driver session per run: the first runner records it in the provided folder, later files attach, the teardown ends them. With `mobile({ device, root })` it also owns the Appium server. */
 export default async function setup(project: SessionProject): Promise<() => Promise<void>> {
     const directory = join(project.config.root, MOBILE_SESSIONS_DIR, randomUUID());
     project.provide('mobileSessions', directory);

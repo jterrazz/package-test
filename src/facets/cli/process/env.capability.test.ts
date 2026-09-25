@@ -9,7 +9,6 @@ import type { CliEnv } from './cli.port.js';
 import { childEnv, env } from './env.capability.js';
 import type { EnvMethod } from './env.capability.js';
 
-/** Where the child runs, in the resolved form `$WORKDIR` expands to. */
 const WORKDIR = import.meta.dirname;
 
 function fakeDatabase(): DatabasePort {
@@ -25,7 +24,6 @@ function fakeDatabase(): DatabasePort {
     };
 }
 
-/** A started service of `type`, a SQL database when `isDatabase`. */
 function fakeService(options: {
     connectionString: string;
     isDatabase: boolean;
@@ -69,7 +67,6 @@ const postgres = (connectionString: string): ServiceHandle =>
 const redis = (connectionString: string): ServiceHandle =>
     fakeService({ connectionString, isDatabase: false, type: 'redis' });
 
-/** A chain composed of `.env()` and `with()`, ending on what a child would be handed. */
 type Chain = {
     env: EnvMethod<Chain>;
     handed: () => Promise<CliEnv | undefined>;

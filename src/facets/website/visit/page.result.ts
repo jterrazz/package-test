@@ -9,10 +9,6 @@ import type {
     BrowserPage,
 } from '../browser/browser.port.js';
 
-/**
- * The head summary snapshotted by `expect(result.head).toMatch('home.head.json')`
- * — the stable, assertion-friendly projection of the document head.
- */
 type HeadSummary = {
     alternates: Record<string, string>;
     canonical: null | string;
@@ -45,12 +41,7 @@ export class PageResult extends BaseResult {
         return this.page.links.find((link) => link.rel === 'canonical')?.href ?? null;
     }
 
-    /**
-     * The browser console as a stream — one message per line, prefixed by
-     * its type — same shape as `stdout` on a cli result. Assert emptiness
-     * with `expect(result.console.text).toBe('')`, or snapshot it with
-     * `toMatch(file('./expected/home.console.txt'))`.
-     */
+    /** The browser console as a stream, one `[type] message` per line. */
     get console(): TextAccessor {
         return new TextAccessor(consoleOf(this.page.consoleMessages), 'console', this.testDir, {
             captures: this.captures,
@@ -58,12 +49,7 @@ export class PageResult extends BaseResult {
         });
     }
 
-    /**
-     * Console messages of type `error` only, an uncaught exception of the
-     * page among them (`Uncaught Error: …`) — the stream you usually want
-     * empty: `expect(result.errors.text).toBe('')`. Same shape as `stderr` on
-     * a cli result.
-     */
+    /** Console errors and uncaught exceptions, the stream usually expected empty. */
     get errors(): TextAccessor {
         return new TextAccessor(errorsOf(this.page.consoleMessages), 'errors', this.testDir, {
             captures: this.captures,
@@ -71,11 +57,7 @@ export class PageResult extends BaseResult {
         });
     }
 
-    /**
-     * The document-head projection as a JSON accessor — title, canonical,
-     * hreflang alternates, and named metas — for one golden per page:
-     * `expect(result.head).toMatch('home.head.json')`.
-     */
+    /** The head projection (title, canonical, alternates, named metas), one golden per page. */
     get head(): JsonAccessor {
         const summary: HeadSummary = {
             alternates: this.alternates,
@@ -97,10 +79,7 @@ export class PageResult extends BaseResult {
         });
     }
 
-    /**
-     * Every `application/ld+json` block of the page, parsed, as one JSON
-     * array — `expect(result.jsonLd).toMatch('article.jsonld.json')`.
-     */
+    /** Every `application/ld+json` block, parsed, as one JSON array. */
     get jsonLd(): JsonAccessor {
         const combined = `[${this.page.jsonLdBlocks.join(',')}]`;
         return new JsonAccessor(combined, 'jsonLd', this.testDir, {
@@ -132,12 +111,7 @@ export class PageResult extends BaseResult {
         });
     }
 
-    /**
-     * The ARIA snapshot of the rendered `<body>` — the page's outline, as the
-     * accessibility tree draws it, and the one golden a rendered surface pins.
-     * Deterministic where a screenshot is not, and the SAME dialect a component
-     * spec asserts, so a page and the components inside it read alike.
-     */
+    /** The ARIA snapshot of the rendered `<body>`, the same dialect a component spec asserts. */
     get tree(): TextAccessor {
         return new TextAccessor(this.page.tree, 'tree', this.testDir, {
             captures: this.captures,
@@ -159,7 +133,7 @@ export class PageResult extends BaseResult {
     }
 }
 
-/** Collapse meta elements into a flat name → content map (property wins the key). */
+/** Property wins the key. */
 function namedMetas(metas: BrowserMetaElement[]): Record<string, string> {
     const named: Record<string, string> = {};
     for (const meta of metas) {

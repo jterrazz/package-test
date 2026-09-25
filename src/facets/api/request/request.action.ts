@@ -14,25 +14,17 @@ import { parseRequestFile } from './request-file.js';
 import { params, routeRequest } from './route.js';
 import type { RouteArguments, RouteOptionsAny } from './route.js';
 
-/** The app a request is sent to — the one its constructor was handed. */
 type Needs = { server: ServerPort };
 
-/** One request, as the chain sends it. */
 type Sent = {
-    /**
-     * The body: a value (objects JSON-serialised, strings sent raw), or a
-     * `file()` whose content is sent — parsed first when it is `.json`.
-     */
+    /** A value (objects JSON-serialised, strings raw), or a `file()` whose content is sent. */
     body?: unknown;
     method: string;
     path: string;
-    /** A complete request to send: a `.http` file, or its text written in the test. */
     request?: DiskFile | string | undefined;
-    /** The route template the path was written as, when the test wrote one. */
     template?: string | undefined;
 };
 
-/** What every request hands back: the exchange, and the databases it left. */
 const ACCESSORS: readonly MatrixRow[] = [
     { group: 'Result accessor', name: '.response', probe: 'result.response' },
     { group: 'Result accessor', name: '.status', probe: 'result.status' },
@@ -41,13 +33,8 @@ const ACCESSORS: readonly MatrixRow[] = [
     { group: 'Result accessor', member: 'directory', name: '.directory()', probe: '.directory(' },
 ];
 
-/** Nothing a request runs in: the app answers in this process. */
 const NO_WORKDIR = { workDir: null } as const;
 
-/**
- * Send one request to the app: a `file()` body read, a complete request
- * parsed, the chain's headers merged over the request's own — the chain wins.
- */
 async function send(
     sent: Sent,
     read: SliceReader,
@@ -84,7 +71,6 @@ async function send(
     return new HttpResult({ config, response, testDir });
 }
 
-/** What the request family puts on a chain: one HTTP exchange each. */
 export type RequestSignature = ChainSignature & {
     readonly chain: {
         /** Send a DELETE request to a route — `(template, { params })` — and resolve with the result. */
@@ -114,11 +100,7 @@ export type RequestSignature = ChainSignature & {
     };
 };
 
-/**
- * `.request(source)`: send a complete request — first line `METHOD /path`,
- * then headers until a blank line, then the body — written in the test
- * (dedented, as a value in place is), or in a `.http` file several tests share.
- */
+/** First line `METHOD /path`, then headers until a blank line, then the body. */
 export const request = defineAction<
     'request',
     [source: DiskFile<'.http'> | string],
@@ -151,7 +133,6 @@ export const request = defineAction<
     row: { group: 'Terminal action', name: '.request()', probe: '.request(file(' },
 });
 
-/** `.get(template, { params })`: send a GET to the route, its parameters filled. */
 export const get = defineAction<
     'get',
     [path: string, options?: RouteOptionsAny],
@@ -171,7 +152,6 @@ export const get = defineAction<
     row: { group: 'Terminal action', name: '.get()', probe: ".get('/" },
 });
 
-/** `.post(template, body, { params })`: send a POST — the body a value or a `file()`. */
 export const post = defineAction<
     'post',
     [path: string, body?: unknown, options?: RouteOptionsAny],
@@ -196,7 +176,6 @@ export const post = defineAction<
     row: { group: 'Terminal action', name: '.post()', probe: ".post('" },
 });
 
-/** `.put(template, body, { params })`: send a PUT — the body a value or a `file()`. */
 export const put = defineAction<
     'put',
     [path: string, body?: unknown, options?: RouteOptionsAny],
@@ -221,7 +200,6 @@ export const put = defineAction<
     row: { group: 'Terminal action', name: '.put()', probe: ".put('" },
 });
 
-/** `.delete(template, { params })`: send a DELETE to the route, its parameters filled. */
 export const del = defineAction<
     'delete',
     [path: string, options?: RouteOptionsAny],

@@ -7,27 +7,14 @@ import type { CliConfig } from '../cli.handle.js';
 import type { CliOutput, CliPort, ExecOptions } from './cli.port.js';
 import { env as chainEnv, childEnv } from './env.capability.js';
 
-/** What `.exec()` puts on a chain. */
 export type ExecSignature = ChainSignature & {
     readonly chain: {
-        /**
-         * Execute the command (or sequence of commands) and resolve with the
-         * result. Called with no arguments (`cli.exec()`), the binary runs bare —
-         * no CLI arguments. With `{ waitFor, timeout }`, the process is
-         * long-running: it resolves when the pattern appears and is killed at the
-         * timeout.
-         */
+        /** Run the binary and resolve with the result; with `{ waitFor, timeout }` the process is long-running. */
         exec: (args?: string | string[], options?: ExecOptions) => Promise<CliResult>;
     };
 };
 
-/**
- * `.exec(args?, options?)`: run the binary — bare, one command, or a sequence
- * stopping at the first non-zero exit — in a fresh, empty working directory,
- * and resolve with the result. With `{ waitFor, timeout }` the process is
- * long-running: it resolves when the pattern appears and is killed at the
- * timeout. The one execution method (CONVENTIONS B2).
- */
+/** A sequence stops at the first non-zero exit. The one execution method (B2). */
 export const exec = defineAction<
     'exec',
     [args?: string | string[], options?: ExecOptions],

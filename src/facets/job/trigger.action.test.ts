@@ -2,10 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { trigger } from './trigger.action.js';
 
-/** Where the action runs: no databases, no working directory. */
 const RUN = { config: {}, testDir: '/specs/job', workDir: null };
 
-/** A reader no setup of these runs is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
 describe('trigger', () => {

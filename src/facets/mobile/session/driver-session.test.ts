@@ -8,18 +8,13 @@ import { sessionLedger } from './session-ledger.js';
 
 const SERVER_URL = 'http://127.0.0.1:4723';
 
-/** What the stub server was asked: the sessions it created, and the ones attached to. */
 type Calls = { attached: string[]; created: number };
 
-/** A stub session: its id, and the capabilities the server answered. */
 function session(sessionId: string): { capabilities: Record<string, unknown>; sessionId: string } {
     return { capabilities: { platformName: 'iOS' }, sessionId };
 }
 
-/**
- * webdriverio's two factories over a stub server. Cast at the seam: a stub
- * session carries its id and capabilities, not webdriverio's whole type.
- */
+/** Cast at the seam: a stub session carries only id and capabilities. */
 function stubFactories(): { attach: never; calls: Calls; remote: never } {
     const calls: Calls = { attached: [], created: 0 };
     const remote = async () => {
@@ -34,7 +29,6 @@ function stubFactories(): { attach: never; calls: Calls; remote: never } {
     return { attach: attach as never, calls, remote: remote as never };
 }
 
-/** A request for Specimen on an iPhone, over the stub factories and the given ledger. */
 function request(
     factories: { attach: never; remote: never },
     ledger?: ReturnType<typeof sessionLedger>,

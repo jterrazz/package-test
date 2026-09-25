@@ -3,7 +3,6 @@ import { join } from 'node:path';
 
 import { VITEST_ARTIFACTS_DIR } from '../../../kernel/files/artifacts.js';
 
-/** A driver session the run recorded: where it lives, and what the server answered for it. */
 type RecordedSession = {
     /** The capabilities the server answered with — what a runner attaching to it hands the driver. */
     capabilities: Record<string, unknown>;
@@ -13,38 +12,18 @@ type RecordedSession = {
     sessionId: string;
 };
 
-/**
- * The run's driver sessions: the one a runner attaches to, found by the
- * server and the capabilities it asks for, and the one it records when it
- * had to create it. A recorded session is the run's to end, not the runner's.
- */
+/** A recorded session is the run's to end, not the runner's. */
 export type SessionLedger = {
-    /** The session recorded for this server and these capabilities, if the run opened one. */
     lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession | undefined;
-    /** Record the session a runner created for these capabilities. */
     record: (requested: Record<string, unknown>, session: RecordedSession) => void;
 };
 
-/**
- * The run's driver sessions, kept on disk so every file of a `mobile()` run
- * drives the ONE session the first file opened.
- *
- * The project's global setup hands the workers an empty folder. The first
- * runner to open the app creates its session and records it there; every
- * later runner asking the same server for the same capabilities attaches to
- * it instead of creating one. The setup's teardown ends every recorded
- * session once the last file has run. A session is recorded under its own
- * id, so two runners that open one each (files run in parallel) leave two
- * records, and both are ended — none leaks.
- */
+/** Recorded under each session's own id: two runners opening one each in parallel leave two records, both ended. */
 
-/** Where the session folders of a run sit, below the project root. */
 export const MOBILE_SESSIONS_DIR = `${VITEST_ARTIFACTS_DIR}/mobile-sessions`;
 
-/** A recorded session, with the key a later runner must match to attach to it. */
 type LedgerEntry = RecordedSession & { key: string };
 
-/** The key a session is matched on: the same server, asked for the same capabilities. */
 function keyOf(serverUrl: string, requested: Record<string, unknown>): string {
     const sorted = Object.entries(requested).toSorted(([a], [b]) => (a < b ? -1 : 1));
     return JSON.stringify([serverUrl, sorted]);
@@ -65,7 +44,6 @@ function isEntry(value: unknown): value is LedgerEntry {
     );
 }
 
-/** Every session the run recorded into `directory`. */
 function entries(directory: string): LedgerEntry[] {
     if (!existsSync(directory)) {
         return [];
@@ -76,7 +54,6 @@ function entries(directory: string): LedgerEntry[] {
         .filter((entry) => isEntry(entry));
 }
 
-/** The ledger a runner reads and writes, kept in the folder the global setup provided. */
 export function sessionLedger(directory: string): SessionLedger {
     return {
         lookup: (serverUrl, requested) => {
@@ -101,11 +78,7 @@ export function sessionLedger(directory: string): SessionLedger {
     };
 }
 
-/**
- * End every session the run recorded, then remove the folder. A server that
- * no longer answers has taken its sessions with it: its refusal is not the
- * run's failure.
- */
+/** A server that no longer answers has taken its sessions with it. */
 export async function endSessions(directory: string): Promise<void> {
     await Promise.all(
         entries(directory).map(async (entry) => {
@@ -119,11 +92,6 @@ export async function endSessions(directory: string): Promise<void> {
     rmSync(directory, { force: true, recursive: true });
 }
 
-/**
- * Where the run records its driver sessions, read on the worker's side — what
- * the mobile project's global setup provides; `undefined` for a run that
- * shares no session, where each runner opens and ends its own.
- */
 export async function mobileSessions(): Promise<string | undefined> {
     try {
         const { inject } = await import('vitest');
@@ -133,7 +101,6 @@ export async function mobileSessions(): Promise<string | undefined> {
     }
 }
 
-/** Where the run records its driver sessions — what the mobile project's global setup provides to its workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {

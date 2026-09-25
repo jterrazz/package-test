@@ -6,14 +6,12 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import { component } from './component.project.js';
 import nestedApp from './fixtures/nested-app/vitest.config.js';
 
-/** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
     project: TestProjectInlineConfiguration,
 ): NonNullable<TestProjectInlineConfiguration['test']> {
     return project.test ?? {};
 }
 
-/** The plugins a project carries, by name — a plugin with no name is not one. */
 function pluginNames(project: TestProjectInlineConfiguration): string[] {
     const plugins: unknown[] = Array.isArray(project.plugins) ? project.plugins : [];
     return plugins.flatMap((plugin) =>

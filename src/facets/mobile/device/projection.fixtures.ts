@@ -1,11 +1,4 @@
-/**
- * A condensed excerpt of a REAL XCUITest page source, captured from an Expo
- * app on the iOS simulator (the `specification.mobile()` design spike). It
- * keeps every noise pattern the projection exists to collapse: the
- * `AppiumAUT` envelope, unlabeled `Other` wrapper towers, a StaticText
- * repeated as its own child, a bare Button wrapping an invisible empty
- * StaticText, and off-screen rows with `visible="false"`.
- */
+/** A condensed real XCUITest page source (an Expo app), keeping every noise pattern the projection collapses. */
 export const EVENTS_SCREEN_SOURCE = `<?xml version="1.0" encoding="UTF-8"?>
 <AppiumAUT>
   <XCUIElementTypeApplication type="XCUIElementTypeApplication" name="SigNews" label="SigNews" enabled="true" visible="true" accessible="false" x="0" y="0" width="402" height="874" index="0" traits="" processId="79757" bundleId="com.jterrazz.fakenews">
@@ -38,7 +31,6 @@ export const EVENTS_SCREEN_SOURCE = `<?xml version="1.0" encoding="UTF-8"?>
   </XCUIElementTypeApplication>
 </AppiumAUT>`;
 
-/** A minimal source exercising entity decoding and a `name` ≠ `label` identifier. */
 export const FORM_SCREEN_SOURCE = `<?xml version="1.0" encoding="UTF-8"?>
 <AppiumAUT>
   <XCUIElementTypeApplication type="XCUIElementTypeApplication" name="SigNews" label="SigNews" enabled="true" visible="true" x="0" y="0" width="402" height="874" index="0">

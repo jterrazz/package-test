@@ -13,20 +13,14 @@ export class ScreenResult extends BaseResult {
         this.capturedScreen = options.screen;
     }
 
-    /**
-     * The visible screen texts as one stream, in reading order — the scalpel
-     * for a targeted probe: `expect(result.content.text).toContain('Bookmarked')`.
-     */
+    /** The visible texts as one stream, in reading order. */
     get content(): TextAccessor {
         return new TextAccessor(this.capturedScreen.texts.join('\n'), 'content', this.testDir, {
             captures: this.captures,
         });
     }
 
-    /**
-     * The projected accessibility tree as a JSON accessor — the one golden
-     * per screen: `expect(result.screen).toMatch('events.screen.json')`.
-     */
+    /** The projected accessibility tree, the one golden per screen. */
     get screen(): JsonAccessor {
         return new JsonAccessor(JSON.stringify(this.capturedScreen.tree), 'screen', this.testDir, {
             captures: this.captures,

@@ -6,12 +6,7 @@ const DEFAULT_WATCH_TIMEOUT = 10_000;
 /** Grace period between SIGTERM and the SIGKILL escalation. */
 const KILL_GRACE_MS = 2000;
 
-/**
- * Build a child-process env from the parent env plus user overrides.
- * `null` overrides delete keys (e.g. `INIT_CWD: null`).
- *
- * @internal Exported for unit tests.
- */
+/** `null` overrides delete keys (`INIT_CWD: null`). */
 export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
     const env: NodeJS.ProcessEnv = { ...process.env, INIT_CWD: undefined };
     if (extra) {
@@ -26,7 +21,6 @@ export function buildEnv(extra?: CliEnv): NodeJS.ProcessEnv {
     return env;
 }
 
-/** The minimal child-process surface {@link observeProcess} drives. */
 export type ObservableProcess = {
     kill: (signal?: NodeJS.Signals | number) => boolean;
     on: (event: 'exit', listener: (code: null | number) => void) => unknown;
@@ -34,16 +28,7 @@ export type ObservableProcess = {
     stdout: null | { on: (event: 'data', listener: (data: Buffer | string) => void) => unknown };
 };
 
-/**
- * Observe a long-running child (`.exec(args, { waitFor, timeout })`):
- * resolve with exit code 0 as soon as `waitFor` appears in stdout/stderr,
- * with the process's own code when it exits first, and with 124 at the
- * timeout. On resolution the child is terminated with SIGTERM, escalating
- * to SIGKILL after a 2 s grace period; all timers are cleared on exit and
- * the timeout timer is unref'd so it never holds the runner open.
- *
- * @internal Exported for unit tests (driven with a fake child).
- */
+/** Resolves 0 when `waitFor` appears, the exit code when the process ends first, 124 at the timeout; the timeout timer is unref'd. */
 export async function observeProcess(
     child: ObservableProcess,
     options: ExecOptions,
@@ -108,8 +93,7 @@ export async function observeProcess(
             checkPattern();
         });
 
-        // Process exited before the pattern matched. Without a pattern,
-        // a clean exit within the timeout is a success.
+        // Exited before the pattern matched: without a pattern a clean exit is a success.
         child.on('exit', (code) => {
             exited = true;
             if (killTimer) {
@@ -122,26 +106,13 @@ export async function observeProcess(
                 finish(code ?? 1);
                 return;
             }
-            // A pattern was expected but never appeared — even a clean
-            // exit is a failure.
+            // A pattern was expected: even a clean exit is a failure.
             finish(code === 0 ? 1 : (code ?? 1));
         });
     });
 }
 
-/**
- * Executes commands via Node.js child_process.
- * Uses `spawnSync` for one-shot commands and `spawn` for long-running
- * processes (`.exec(args, { waitFor, timeout })`).
- *
- * Both paths run the full command line through the shell — quoting behaves
- * identically whether or not `waitFor` is used.
- *
- * `spawnSync` is used (over the simpler `execSync`) so stdout AND stderr are
- * captured regardless of exit code. Many CLIs follow the Unix convention of
- * writing status banners to stderr on success — `execSync` would silently
- * discard them, leaving snapshot tests with no output to assert on.
- */
+/** `spawnSync` over `execSync`: stdout and stderr are captured whatever the exit code, and many CLIs write banners to stderr. */
 export class ExecAdapter implements CliPort {
     private readonly command: string;
 
@@ -155,15 +126,13 @@ export class ExecAdapter implements CliPort {
             cwd,
             encoding: 'utf8',
             env,
-            // Absent `input` still closes stdin immediately — the child reads
-            // EOF rather than blocking, and never sees a TTY.
+            // Absent `input` still closes stdin: the child reads EOF, never a TTY.
             input: input?.stdin,
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
             timeout: input?.timeout,
         });
-        // A killed run reports 124, the same code the long-running path uses
-        // for a timeout — one answer to "the command ran out of time".
+        // A killed run reports 124, as the long-running path does for a timeout.
         // oxlint-disable-next-line typescript/no-unnecessary-type-assertion -- `spawnSync` types `error` as `Error`, which carries no `code`; the assertion is what reaches it
         const timedOut = (result.error as NodeJS.ErrnoException | undefined)?.code === 'ETIMEDOUT';
         return {
@@ -180,14 +149,7 @@ export class ExecAdapter implements CliPort {
         extraEnv?: CliEnv,
     ): Promise<CliOutput> {
         const env = buildEnv(extraEnv);
-        // Same shell invocation as the one-shot path — no naive whitespace
-        // split, so quoted arguments behave identically in both forms.
-        //
-        // `detached` puts the child in its OWN process group (POSIX), so
-        // termination can target the whole group: killing only the direct
-        // shell child would orphan its descendants (a `tsdown --watch`
-        // grandchild survives the spec and leaks). No effect sought on
-        // Windows — the group kill below degrades to a direct kill there.
+        // `detached` gives the child its own process group, so a `tsdown --watch` grandchild dies with it.
         const child = spawn(`${this.command} ${args}`, [], {
             cwd,
             detached: process.platform !== 'win32',
@@ -195,9 +157,7 @@ export class ExecAdapter implements CliPort {
             shell: true,
             stdio: ['pipe', 'pipe', 'pipe'],
         });
-        // Group-aware kill: signal the process GROUP (negative pid) so every
-        // descendant gets SIGTERM/SIGKILL too; fall back to the direct child
-        // kill when groups are unsupported (Windows) or the group is gone.
+        // Signal the process group (negative pid); fall back to the child where groups are unsupported.
         const kill = (signal?: NodeJS.Signals | number): boolean => {
             if (child.pid !== undefined && process.platform !== 'win32') {
                 try {

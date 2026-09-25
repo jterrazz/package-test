@@ -1,4 +1,3 @@
-// The cli facet's face: the names it contributes to `@jterrazz/test`.
 export type { CliSpecification } from './cli.facet.js';
 export type {
     CliHandle,
@@ -16,5 +15,4 @@ export type {
     SpecStream,
 } from './documents/spec-document.js';
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';
-// A linter's report as a golden keeps it — the transform a rule's cli specs share.
 export { lintReport } from './process/lint-report.js';

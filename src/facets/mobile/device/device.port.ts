@@ -1,6 +1,5 @@
 import type { ElementRef } from '../../../elements/descriptor.js';
 
-/** The simulator a runner drives: by name (and OS), or by its UDID. */
 export type MobileDevice = {
     /** Simulator name, matched exactly (`iPhone 17`). */
     name: string;
@@ -10,35 +9,13 @@ export type MobileDevice = {
     udid?: string;
 };
 
-/**
- * The element kinds a mobile screen can designate — the structural subset of
- * {@link ElementRef} kinds that map onto the XCUITest accessibility tree.
- * There is ONE element vocabulary across facets: `button('Bookmark')` works
- * in a visit scenario and a mobile scenario alike. Landmarks have no iOS
- * analog — passing one to a mobile verb refuses at runtime.
- */
+/** The element kinds a mobile screen designates; landmarks have no iOS analog and are refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
 
-/**
- * A user-facing element descriptor for mobile scenarios — pure data, built by
- * the shared element vocabulary (`button()`, `field()`, `content()`,
- * `testId()`, `within()`) and translated into iOS predicate strings by the
- * device integration. Structurally the same ref type as the browser's, so the
- * vocabulary stays single; kinds outside {@link MobileElementKind} (the ARIA
- * landmarks) are refused at runtime with a message naming the boundary.
- *
- * A descriptor must designate exactly ONE element when a verb ACTS on it
- * (`tap`, `fill`) — see {@link MobileElementMatch} and CONVENTIONS W3.
- * `see()` acts on nothing, so any visible match satisfies it: XCUITest trees
- * legitimately duplicate a label across container and child.
- */
+/** The shared element descriptor, translated to iOS predicates; exactly one match when a verb acts on it (W3). */
 export type MobileElementRef = ElementRef;
 
-/**
- * One candidate captured when a descriptor matched more than one element —
- * the evidence the ambiguity error enumerates so the author can disambiguate
- * without opening the simulator.
- */
+/** One candidate of an ambiguous descriptor, as the refusal lists it. */
 export type MobileElementMatch = {
     /** The accessibility identifier (`testId()` target), when one is set. */
     identifier?: string;
@@ -50,31 +27,19 @@ export type MobileElementMatch = {
     value?: string;
 };
 
-/**
- * The visitor — the interaction vocabulary handed to a mobile scenario.
- * Every verb auto-waits by polling until a visible match exists; acting
- * verbs then enforce exactly-one (W3), while `see()` — the single
- * synchronization primitive — is satisfied by any visible match. There is
- * no sleep and no conditional helper.
- */
+/** The verbs a mobile scenario is handed; each polls until a visible match exists. */
 export type MobileVisitor = {
     /** Fill a text field with a value. */
     fill: (element: MobileElementRef, value: string) => Promise<void>;
     /** Wait until the element is visible — the only synchronization primitive. */
     see: (element: MobileElementRef) => Promise<void>;
-    /** Tap the element. */
     tap: (element: MobileElementRef) => Promise<void>;
 };
 
 /** The behavior of an open — the When of the spec; assertions stay in the Then. */
 export type MobileScenario = (visitor: MobileVisitor) => Promise<void>;
 
-/**
- * One node of the projected accessibility tree — the XCUITest page source
- * with its noise collapsed: unlabeled, identifier-less, valueless wrapper
- * nodes are dropped and their children hoisted, so the projection stays
- * stable and golden-friendly. Type names lose the `XCUIElementType` prefix.
- */
+/** One node of the projected accessibility tree: noise wrappers dropped, `XCUIElementType` prefix removed. */
 export type ScreenNode = {
     children?: ScreenNode[];
     /** The accessibility identifier, only when it differs from the label. */
@@ -85,11 +50,7 @@ export type ScreenNode = {
     value?: string;
 };
 
-/**
- * The screen captured by a device open — the FINAL state when a scenario
- * ran. The tree is the projected page source; `texts` are the visible
- * labels/values in document order, consecutive duplicates collapsed.
- */
+/** The screen captured by an open, final state: the projected tree and the visible texts. */
 export type DeviceScreen = {
     texts: string[];
     tree: ScreenNode;
@@ -105,32 +66,15 @@ export type DeviceOpenOptions = {
     scenario?: MobileScenario | undefined;
 };
 
-/**
- * How long a device session waits, in milliseconds. Every field is optional
- * and falls back to the framework's own default, so a runner states only the
- * wait it needs to move — the defaults suit a release build, and a project
- * that drives a DEV build pays for its bundler's cold boot.
- */
+/** How long a device session waits, in milliseconds; each field falls back to the default. */
 export type DeviceTimeouts = {
-    /**
-     * How long every verb polls for a visible match before refusing.
-     * Default: `30_000` — enough for a cold app boot on a release bundle.
-     */
+    /** How long every verb polls for a visible match. Default `30_000`. */
     action?: number | undefined;
-    /**
-     * How long the FIRST session waits for WebDriverAgent to build and
-     * launch on the simulator. Default: `240_000`.
-     */
+    /** How long the first session waits for WebDriverAgent to build and launch. Default `240_000`. */
     launch?: number | undefined;
 };
 
-/**
- * Abstract device interface for the mobile specification runner.
- * One implementation, `appium.adapter.ts` beside this port — a single driver session per
- * runner, or per run under the run's session ledger, opened on the first
- * `open()` and reused; each open terminates and relaunches the app for a
- * deterministic fresh state.
- */
+/** The device a mobile runner drives: one driver session, each open relaunching the app. */
 export type DevicePort = {
     /** End the driver session, unless it is the run's (idempotent). */
     close: () => Promise<void>;

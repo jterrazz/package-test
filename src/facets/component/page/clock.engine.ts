@@ -1,13 +1,7 @@
 import type { ClockPort } from '../../../world/clock/clock.port.js';
 import { afterThisTest, pinClock, providedClock, releaseClock } from './page-runtime.js';
 
-/**
- * The calendar of the PAGE — what a mounted component reads. The chain's
- * instant wins over the one `component({ clock })` provides; `Date` stays
- * pinned for the rest of the test, because a mounted component keeps running
- * after its render resolves, and the page gets its real clock back when the
- * test ends. An instant that is not one is refused when the chain is armed.
- */
+/** The chain's instant wins over `component({ clock })`'s; `Date` stays pinned for the rest of the test, since a mounted component keeps running. */
 export const pageClock: ClockPort = {
     pin: (iso) => {
         const instant = iso ?? providedClock();

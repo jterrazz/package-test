@@ -14,27 +14,14 @@ import { reachAppium } from './server/appium-server.js';
 import type { SessionLedger } from './session/session-ledger.js';
 import { mobileSessions, sessionLedger } from './session/session-ledger.js';
 
-/** What `specification.mobile()` hands its chain: the device, the app it opens, and the stub backend. */
-export type MobileConfig = {
-    /** Bundle id of the app under test — the app `.open()` relaunches. */
+export type MobileConfig = StubsConfig & {
     bundleId?: string | undefined;
-    /** The device, lazily: the first `.open()` loads the optional peer and creates or joins the session. */
     device?: (() => Promise<DevicePort>) | undefined;
-} & StubsConfig;
+};
 
-/**
- * The declared stub backend behind the app under test. The framework owns
- * the simulator and appium but NOT the JS bundler (Metro belongs to the
- * caller's repo, like `next build` belongs to a website's) — so nothing is
- * injected: the handle exposes `backendUrl` and the CALLER wires it into its
- * own bundler env.
- */
+/** The stub backend behind the app; nothing is injected: wire `backendUrl` into your own bundler env. */
 export type MobileBackendOptions = {
-    /**
-     * Fixed port — pins a stable stub URL across runs. Metro inlines
-     * `EXPO_PUBLIC_*` values at bundle-serve time; a stable port lets a warm
-     * Metro survive between runs. Default: a free OS-assigned port.
-     */
+    /** Fixed port: Metro inlines `EXPO_PUBLIC_*` at serve time, so a stable port keeps a warm Metro valid. */
     port?: number;
 };
 
@@ -42,91 +29,35 @@ export type MobileBackendOptions = {
 export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** The app under test — terminated and relaunched by every `.open()`. */
     app: {
-        /** Bundle id of the installed app (`com.example.app`). */
         bundleId: string;
     };
-    /**
-     * An Appium server already running — a device farm, a server another
-     * machine owns, a protocol double. The runner connects to it instead of
-     * spawning the project's own, and hands it the device by capabilities
-     * (`appium:deviceName`, `appium:platformVersion`, `appium:udid` when
-     * declared) instead of resolving and booting it through `simctl`: the
-     * machine the server runs on owns its simulators.
-     */
+    /** An Appium server already running; it owns its simulators, handed the device by capabilities. */
     appium?: {
-        /** The server's base URL (`http://127.0.0.1:4723`). */
         url: string;
     };
-    /**
-     * Declared stub backend: started with the runner, serving the stubs
-     * each chain declares via `.intercept(...)`. The handle gains
-     * `backendUrl` — inject it into your bundler env yourself.
-     */
+    /** Stub backend serving each chain's `.intercept(...)`; the handle gains `backendUrl`. */
     backend?: MobileBackendOptions;
-    /**
-     * The simulator to run on — resolved through `xcrun simctl`, or asked of
-     * a declared `appium` server. Under a `mobile({ device })` project the
-     * run's server already drives one, and the project owns it: left out
-     * here, the runner drives the project's; stated, it restates that device,
-     * never another, and the booted UDID stands for a device that declares
-     * none. Anywhere else a runner with no device is refused.
-     */
+    /** The simulator to run on; under a `mobile({ device })` project it restates the project's, never another. */
     device?: MobileDevice;
-    /**
-     * Project-root override (CONVENTIONS A9): where the appium binary is
-     * resolved from (`node_modules/.bin`). Auto-discovered from the calling
-     * file when absent.
-     */
+    /** Project-root override (A9): where the appium binary is resolved from. */
     root?: string;
-    /**
-     * Named services started with the runner and stopped with it — a
-     * `process()` for the bundler the app loads from, a database a dev build
-     * reads. Metro stops being a `beforeAll` the repository maintains: it is
-     * `process({ command: 'expo start', ready: /Metro waiting on .*:(\\d+)/ })`
-     * like every other external process the framework owns.
-     */
+    /** Services started and stopped with the runner, such as a `process()` for the bundler. */
     services?: Services;
-    /**
-     * How long this runner's session waits, in milliseconds — every field
-     * optional, each falling back to the framework's default. A project
-     * driving a DEV build states the wait its bundler's cold boot needs
-     * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
-     */
+    /** How long this runner's session waits; a dev build states what its bundler's cold boot needs. */
     timeouts?: DeviceTimeouts;
 };
 
-/**
- * The record returned by {@link startMobile | specification.mobile}.
- * Destructure with the canonical names (CONVENTIONS A3):
- *
- *     const { mobile, cleanup, udid } = await specification.mobile(…);
- */
+/** What `specification.mobile()` returns: `const { mobile, cleanup, udid } = …` (A3). */
 export type MobileHandle = {
-    /**
-     * Base URL of the declared stub backend — present only with the
-     * `backend` option. The caller injects it into its own bundler env
-     * (e.g. `EXPO_PUBLIC_API_URL`); the framework never touches the bundler.
-     */
+    /** Base URL of the stub backend, with the `backend` option; inject it into your bundler env. */
     backendUrl?: string | undefined;
-    /**
-     * End the driver session — unless it is the run's, which the project's
-     * global setup ends — and stop the appium server this runner spawned and
-     * the stub backend.
-     */
+    /** End the driver session (unless it is the run's), the appium server this runner spawned, and the stub backend. */
     cleanup: () => Promise<void>;
     mobile: MobileSpecification;
-    /**
-     * The simulator UDID the specs run against — resolved by the runner, or
-     * the declared one. Absent when a declared `appium` server owns the
-     * device and none was named.
-     */
+    /** The simulator UDID; absent when a declared `appium` server owns an unnamed device. */
     udid: string | undefined;
 };
 
-/**
- * The run's session ledger, when the runner may share the run's session: its
- * server outlives the file, and a `mobile()` project provided the ledger.
- */
 async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefined> {
     const directory = outlivesFile ? await mobileSessions() : undefined;
     return directory === undefined ? undefined : sessionLedger(directory);
@@ -135,16 +66,14 @@ async function runLedger(outlivesFile: boolean): Promise<SessionLedger | undefin
 export async function startMobile<Services extends ServiceRecord>(
     options: MobileSpecificationOptions<Services>,
 ): Promise<MobileHandle> {
-    // Caller detection must run before any await — async resumption drops
-    // the calling file's frames from the stack.
+    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
 
     const root = resolveRoot(options.root, callerDir);
     const { appium, device: driven, outlivesFile } = await reachAppium(options, root);
 
-    // The declared services come up before the app is ever launched: a dev
-    // build reaches its bundler on the first frame it renders.
+    // Services come up before the app launches: a dev build reaches its bundler on its first frame.
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the empty record stands for an absent one, and every facet states the default the same way
     const services = (options.services ?? {}) as Services;
     let started: null | StartedServices = null;
@@ -157,8 +86,7 @@ export async function startMobile<Services extends ServiceRecord>(
         }
     }
 
-    // The stub starts last (nothing can fail after it), so a constructor
-    // refusal never leaves an orphaned server keeping the process alive.
+    // The stub starts last, so a constructor refusal never orphans a server.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;
     if (options.backend) {
@@ -166,14 +94,7 @@ export async function startMobile<Services extends ServiceRecord>(
         backendUrl = await backend.start();
     }
 
-    // One driver session per runner, opened lazily on the first `.open()` —
-    // or, under a server that outlives the file (a declared one, or the run's
-    // own) in a `mobile()` project, one per RUN: the project's global setup
-    // provides the ledger the session is recorded in. A server this runner
-    // spawned stops with it, so its session cannot outlive the file. The
-    // Appium/webdriverio integration stays a lazy import
-    // (CONVENTIONS I1) — the dependency is optional and only loaded when a
-    // spec actually opens the app.
+    // One session per runner; per run under a server that outlives the file. A server this runner spawned stops with it.
     let device: DevicePort | null = null;
     const getDevice = async (): Promise<DevicePort> => {
         if (!device) {

@@ -5,15 +5,7 @@ import { resolve } from 'node:path';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { judgeSplit } from './route-split.js';
 
-/**
- * CLI for the route ratchet of a split run (bundled as `dist/route-split.js`).
- *
- *     node dist/route-split.js    # judge every shard's ledgers as one run's
- *
- * It runs after `vitest --merge-reports`, which runs no global setup: a merge
- * that failed stops before it, so the run it judges is green. `TEST_UPDATE=1`
- * records where the split stands, as a whole run's teardown does.
- */
+/** Runs after `vitest --merge-reports`, which runs no global setup; a failed merge stops before it. */
 const { failure, line } = await judgeSplit(resolve('.'), {
     failed: 0,
     update: shouldUpdateSnapshots(),

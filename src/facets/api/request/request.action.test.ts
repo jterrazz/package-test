@@ -6,7 +6,6 @@ import { headers } from '../../../kernel/context/headers.capability.js';
 import type { ServerPort, ServerRequestOptions } from '../server/server.port.js';
 import { get } from './request.action.js';
 
-/** A setup whose only effect is to say, when the chain is armed, that it was. */
 const armed = defineCapability({
     arm: (_slice: null, engines: { log: string[] }) => {
         engines.log.push('armed');
@@ -19,14 +18,12 @@ const armed = defineCapability({
     row: { group: 'Setup', name: '.armed()', probe: '.armed(' },
 });
 
-/** A chain of `.headers()` and a setup that logs its arming, ending on `.get()`. */
 type Chain = {
     armed: () => Chain;
     get: (path: string, options?: { params?: Record<string, number | string> }) => Promise<unknown>;
     headers: (headers: Record<string, string>) => Chain;
 };
 
-/** A chain over an app that logs every request it is sent. */
 function chainOver(log: string[]): Chain {
     const server: ServerPort = {
         request: async (method, path, body, options?: ServerRequestOptions) => {

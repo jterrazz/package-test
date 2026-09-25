@@ -13,27 +13,14 @@ import { env as chainEnv, childEnv } from '../process/env.capability.js';
 import { runSpecDocument } from './literate.js';
 import type { LiterateRunFlags } from './literate.js';
 
-/** What `.run()` puts on a chain. */
 export type RunSignature = ChainSignature & {
     readonly chain: {
-        /**
-         * Run a `<case>.spec.yaml` document — its ground (fixtures, env sets,
-         * servers) and every run, each asserted — and resolve with the LAST run's
-         * result, so a `.test.ts` can add an assertion the document cannot express
-         * (a directory golden, a grep). The document is named with `file()`, from
-         * the test file beside it.
-         */
+        /** Run a `<case>.spec.yaml` document and resolve with the last run's result. */
         run: (document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags) => Promise<CliResult>;
     };
 };
 
-/**
- * `.run(file('./<case>.spec.yaml'))`: run a document — its ground and every
- * run, each asserted, in ONE working directory — and resolve with the LAST
- * run's result. What the chain states lies underneath the document's own
- * ground: a chained fixture is laid first, the document's `fixture:` over it,
- * and its `env:` wins over a chained `.env()`.
- */
+/** The chain's fixture is laid first, the document's `fixture:` over it; its `env:` wins over a chained `.env()`. */
 export const run = defineAction<
     'run',
     [document: DiskFile<'.spec.yaml'>, options?: LiterateRunFlags],

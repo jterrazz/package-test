@@ -29,17 +29,7 @@ const composition = {
     } satisfies Record<keyof CliSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `cli` facet — the chain `specification.cli()` hands out. The subject
- * is a binary run in a fresh, empty working directory, in its own process:
- * its clock and its network are its own, so the chain states the ground it
- * stands on — files, environment, seeded databases — and `.exec()` is the
- * one way to run it (CONVENTIONS B2), `.run()` the document that runs it
- * several times over one directory.
- *
- * The `DatabaseKey` parameter is the typed vocabulary of `.seed()`: the keys
- * of the declared services record that are databases.
- */
+/** The chain `specification.cli()` hands out: a binary run in a fresh, empty working directory, in its own process. */
 export interface CliSpecification<DatabaseKey extends string = string> extends ChainOf<
     typeof composition,
     { databaseKey: DatabaseKey; services: Record<string, unknown> },

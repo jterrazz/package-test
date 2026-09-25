@@ -14,53 +14,31 @@ import { HonoAdapter } from './server/hono.adapter.js';
 import type { HonoApp } from './server/hono.adapter.js';
 import type { ServerPort } from './server/server.port.js';
 
-/** What `specification.api()` hands its chain: the services record, and the app a request is sent to. */
 export type ApiConfig = ServicesConfig & { server?: ServerPort | undefined };
 
 /** Options for {@link startApi | specification.api}. */
 export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /**
-     * Project root override for init scripts and artefact paths. When absent,
-     * the root is auto-discovered by walking up from the calling specification
-     * file to the first directory containing `package.json` (CONVENTIONS A9).
-     */
+    /** Project root override; by default the nearest `package.json` above the specification file (A9). */
     root?: string;
-    /**
-     * The app factory — receives the started services record (fully typed)
-     * and returns the Hono app.
-     */
+    /** The app factory: receives the started services record, returns the Hono app. */
     server: (services: Services) => HonoApp;
-    /**
-     * Named infrastructure record. Keys become the `database` vocabulary of
-     * `.seed()` / `.table()`, and, kebab-cased, the folder each service reads
-     * its init script from (`{ analyticsDb: postgres() }` →
-     * `docker/analytics-db/init.sql`).
-     */
+    /** Named infrastructure record: the keys are the `database` vocabulary, and name the init-script folder. */
     services?: Services;
 };
 
-/**
- * The record returned by {@link startApi | specification.api}. Destructure
- * with the canonical names (CONVENTIONS A3):
- *
- *     const { api, cleanup, docker } = await specification.api(…);
- */
+/** What `specification.api()` returns: `const { api, cleanup, docker } = …` (A3). */
 export type ApiHandle<DatabaseKey extends string = string> = {
     api: ApiSpecification<DatabaseKey>;
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;
-    /**
-     * Read a running container by id — returns a {@link ContainerAccessor}
-     * usable with `await expect(...).toBeRunning()` and read accessors.
-     */
+    /** Read a running container by id. */
     docker: (containerId: string) => ContainerAccessor;
 };
 
 export async function startApi<Services extends ServiceRecord>(
     options: ApiSpecificationOptions<Services>,
 ): Promise<ApiHandle<DatabaseKeys<Services>>> {
-    // Caller detection must run before any await — async resumption drops
-    // the calling file's frames from the stack.
+    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

@@ -5,26 +5,15 @@ import type { MobileScenario } from '../device/device.port.js';
 import type { AppPort } from './app.port.js';
 import { ScreenResult } from './screen.result.js';
 
-/** The verb only a device's visitor hands out. */
 const TAP: MatrixRow = { group: 'Verb', name: 'tap', probe: '.tap(' };
 
-/** What `.open()` puts on a chain. */
 export type OpenSignature = ChainSignature & {
     readonly chain: {
-        /**
-         * Relaunch the app and resolve with the captured screen. With a deep
-         * link, the app opens on it; with a scenario, the visitor interacts
-         * first (the When) and the capture reflects the FINAL screen state.
-         */
+        /** Relaunch the app and resolve with the final screen; a scenario runs first. */
         open: (deepLink?: string, scenario?: MobileScenario) => Promise<ScreenResult>;
     };
 };
 
-/**
- * `.open(deepLink?, scenario?)`: relaunch the app from a fresh state, apply
- * the deep link, run the scenario (the When), and resolve with the FINAL
- * screen — its projected tree and its visible texts.
- */
 export const open = defineAction<
     'open',
     [deepLink?: string, scenario?: MobileScenario],

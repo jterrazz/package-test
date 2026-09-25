@@ -6,12 +6,7 @@ import { onProjectDefaults } from '../../vitest/project-kit.js';
 /** `website()` — the assembled product, met through a served page. */
 export type WebsiteProjectOptions = FacetProjectOptions;
 
-/**
- * A website spec meets the assembled product through a served page, in the
- * Chromium playwright drives. It opens a browser, so it is scheduled before the
- * component project and never beside it: two Chromiums must not share a slot on
- * a 2-vCPU runner.
- */
+/** A website project: scheduled before the component project, never beside it. */
 export function website(options: WebsiteProjectOptions = {}): TestProjectInlineConfiguration {
     return onProjectDefaults({
         test: {

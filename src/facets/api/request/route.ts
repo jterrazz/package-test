@@ -1,29 +1,14 @@
 import type { ActionOption } from '../../../kernel/chain/capability.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 
-/**
- * A request's route, written as the app declares it: the template, with its
- * parameters handed beside it —
- * `api.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`.
- *
- * The template is what a reader of the test, the subject reader (C29, C30)
- * and route coverage all read; the path the app is sent is the template
- * filled, each value URI-encoded. A path with no `:name` segment is sent as
- * written, and handing it `{ params: {} }` states that it IS the route.
- */
+/** A path with no `:name` segment is sent as written; `{ params: {} }` states that it is the route. */
 
-/**
- * `{ params }`: the values of a route template's parameters, handed to a
- * request beside the template it names — the option the request actions
- * declare, filled and refused below.
- */
 export const params: ActionOption<'params'> = {
     kind: 'option',
     name: 'params',
     row: { group: 'Route option', member: 'params', name: '{ params }', probe: 'params:' },
 };
 
-/** The parameter names a route template holds: `/events/:id/timeline?x=1` → `'id'`. */
 export type RouteParamNames<Path extends string> = Path extends `${infer Route}?${string}`
     ? RouteParamNames<Route>
     : Path extends `${string}/:${infer Rest}`
@@ -32,37 +17,27 @@ export type RouteParamNames<Path extends string> = Path extends `${infer Route}?
           : Rest
       : never;
 
-/** What a request to `Path` is handed beside it: the values of its parameters, every one of them. */
 export type RouteOptions<Path extends string> = [RouteParamNames<Path>] extends [never]
     ? { params?: Record<never, never> }
     : { params: Record<RouteParamNames<Path>, number | string> };
 
-/** The options argument of a request to `Path`: required exactly when the template holds a parameter. */
 export type RouteArguments<Path extends string> = [RouteParamNames<Path>] extends [never]
     ? [options?: RouteOptions<Path>]
     : [options: RouteOptions<Path>];
 
-/** The options as the runtime reads them, whatever the compiler was told. */
 export type RouteOptionsAny = undefined | { params?: Record<string, number | string> };
 
-/** A request, as the chain sends it: the path filled, and the template it was written as. */
 export type RouteRequest = { path: string; template?: string | undefined };
 
-/** A template segment that is a parameter: `:name`. */
 const PARAMETER = /^:(?<name>[A-Za-z_$][\w$]*)$/u;
 
-/** The call a refusal tells the test to write: the template, handed a value per parameter. */
 function callWith(method: string, template: string, names: readonly string[]): string {
     const values =
         names.length === 0 ? '{}' : `{ ${names.map((name) => `${name}: …`).join(', ')} }`;
     return `.${method.toLowerCase()}(${JSON.stringify(template)}, { params: ${values} })`;
 }
 
-/**
- * The request a chain sends for `template` and its options: the template
- * filled with the params, or the path as written when it is handed none.
- * A parameter with no value, and a value no parameter takes, are refused.
- */
+/** A parameter with no value, and a value no parameter takes, are refused. */
 export function routeRequest(
     method: string,
     template: string,

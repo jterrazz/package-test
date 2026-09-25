@@ -100,10 +100,6 @@ describe('setup', () => {
     });
 });
 
-/**
- * A stub api project of two test files, `a.spec.ts` and `b.spec.ts`, of which
- * the run ran those named, with the run's shard and test name filter.
- */
 function stubProject({
     ran,
     shard,
@@ -146,7 +142,6 @@ function stubProject({
     return { project, provided, root };
 }
 
-/** One specification's ledger in `directory`: a table of three routes, one reached. */
 function writeOneOfThree(directory: string): void {
     writeLedger(directory, {
         declared: [
@@ -158,7 +153,6 @@ function writeOneOfThree(directory: string): void {
     });
 }
 
-/** The lines the teardown writes to stdout, from now until the test ends. */
 function recordedLines(): string[] {
     const lines: string[] = [];
     const write = vi.spyOn(process.stdout, 'write').mockImplementation((chunk) => {

@@ -10,37 +10,10 @@ import type { MobileConfig } from './mobile/mobile.handle.js';
 import { startWebsite } from './website/website.handle.js';
 import type { WebsiteConfig } from './website/website.handle.js';
 
-/**
- * Adapter configuration passed to the specification facets at setup time:
- * every facet's own, as one — each field declared by the facet or the world
- * area whose engine reads it.
- */
+/** Every facet's configuration, as one. */
 export type SpecificationConfig = ApiConfig & CliConfig & JobConfig & MobileConfig & WebsiteConfig;
 
-/**
- * The six specification constructors (CONVENTIONS A2) — created in a
- * `*.specification.ts` file under `specs/`, destructured with canonical
- * names, and cleaned up via `afterAll(cleanup)` (A1/A3/A4).
- *
- * @example
- *   // specs/api/api.specification.ts
- *   export const { api, cleanup } = await specification.api({
- *       services: { db: postgres() },
- *       server: ({ db }) => createApp({ databaseUrl: db.connectionString }),
- *   });
- *   afterAll(cleanup);
- *
- *   // specs/job/job.specification.ts
- *   export const { job, cleanup } = await specification.job({
- *       services: { db: postgres() },
- *       jobs: ({ db }) => [nightlyReport(db)],
- *   });
- *   afterAll(cleanup);
- *
- *   // specs/setup/cli.specification.ts
- *   export const { cli, cleanup } = await specification.cli('my-cli');
- *   afterAll(cleanup);
- */
+/** Created in a `*.specification.ts` under `specs/`, destructured with canonical names, cleaned up via `afterAll(cleanup)` (A1/A3/A4). */
 /** The six constructors, and only six — the framework's whole entry surface. */
 export type Specification = {
     api: typeof startApi;
@@ -52,44 +25,16 @@ export type Specification = {
 };
 
 export const specification: Specification = {
-    /**
-     * Test an HTTP app. The declared `services` are started via testcontainers
-     * and the app `server` builds runs in-process, so an outgoing call passes
-     * through this process and `.intercept()` can answer it. There is one
-     * shape of world — the record key is the service's only name.
-     */
+    /** Test an HTTP app: services via testcontainers, the app in this process. */
     api: startApi,
-    /**
-     * Test a command binary. Each spec runs in a fresh temp directory.
-     *
-     * @param bin - Path to the binary (resolved from node_modules/.bin or PATH).
-     */
+    /** Test a command binary, each spec in a fresh temp directory. */
     cli: startCli,
-    /**
-     * Specify a module against the real thing: a database, a cache, a
-     * `process()` it talks to — or nothing at all, when its oracle is a
-     * golden. `.call((services) => …)` is the terminal action, and what it
-     * produced is read as `result.value` or, when it refused, `result.error`.
-     */
+    /** Specify a module against real services, or against a golden; `.call()` ends the chain. */
     integration: startIntegration,
-    /**
-     * Test background jobs. Jobs run in-process by definition — no HTTP
-     * server, no mode. `.trigger(name)` is the terminal action.
-     */
+    /** Test background jobs, in this process; `.trigger(name)` ends the chain. */
     job: startJob,
-    /**
-     * Test a native app on the iOS simulator. `device` names the simulator
-     * (resolved and booted via `simctl`); `app` names the bundle under
-     * test. `.open(deepLink?, scenario?)` relaunches the app fresh, runs
-     * the scenario, and captures the final screen.
-     */
+    /** Test a native app on the iOS simulator; `.open(deepLink?, scenario?)` ends the chain. */
     mobile: startMobile,
-    /**
-     * Test a deployed or locally-served website. `server` starts the site
-     * (a shell command receiving `PORT`); `url` targets a running one.
-     * `.visit(path)` renders the page in a single shared browser instance;
-     * `.fetch(path)` performs one raw HTTP exchange (redirects never
-     * followed).
-     */
+    /** Test a served or deployed website: `.visit(path)` renders it, `.fetch(path)` is one raw exchange. */
     website: startWebsite,
 };

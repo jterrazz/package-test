@@ -10,11 +10,6 @@ import {
 } from './spec-document.js';
 import type { SpecSyntaxError } from './spec-document.js';
 
-/**
- * The grammar, read on its own — no runner, no filesystem. Everything here is
- * text in, structure out (or a refusal naming a key and a line).
- */
-
 const MINIMAL = [
     'description: does the thing',
     'runs:',
@@ -23,7 +18,6 @@ const MINIMAL = [
     '',
 ].join('\n');
 
-/** The same scenario at each of the two steps a formatter writes YAML with. */
 const TWO_SPACE_DOCUMENT = [
     'description: reads back as it was written',
     'runs:',
@@ -40,7 +34,6 @@ const FOUR_SPACE_DOCUMENT = [
     '',
 ].join('\n');
 
-/** The text a rewritten document gives back when it is read again. */
 function streamOf(written: string, key: 'stderr' | 'stdout'): string {
     return parseSpecDocument(written, 'case.spec.yaml').runs[0]?.[key]?.text ?? '';
 }

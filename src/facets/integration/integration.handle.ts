@@ -13,20 +13,11 @@ import { integrationFacet } from './integration.facet.js';
 export type IntegrationSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** Project-root override — see the `root` option of `specification.api()`. */
     root?: string;
-    /**
-     * Named infrastructure the module is specified AGAINST — a real database,
-     * a real cache, a `process()` it talks to. Omit it for the other half of
-     * the facet: a pure module whose oracle is a golden.
-     */
+    /** Services the module is specified against; omit for a pure module whose oracle is a golden. */
     services?: Services;
 };
 
-/**
- * The record returned by {@link startIntegration | specification.integration}.
- * Destructure with the canonical names (CONVENTIONS A3):
- *
- *     const { integration, cleanup } = await specification.integration(…);
- */
+/** What `specification.integration()` returns: `const { integration, cleanup } = …` (A3). */
 export type IntegrationHandle<
     Services extends ServiceRecord = ServiceRecord,
     DatabaseKey extends string = string,
@@ -36,23 +27,10 @@ export type IntegrationHandle<
     integration: IntegrationSpecification<Services, DatabaseKey>;
 };
 
-/**
- * Specify a module the way the assembled product is specified: against real
- * services and declared stubs, with the golden mechanism on what it
- * produces.
- *
- * The fork is the SUBJECT. A module alone is a module test, beside its code,
- * with no runner at all. A module that needs a real database, or whose oracle
- * is a golden file, is this one — which is what spares it the shape it would
- * otherwise take: plain vitest under a `specs/` folder, a hand-built sqlite
- * template, a `beforeAll` starting a container, and a `toMatchSnapshot` beside
- * a framework that owns a golden engine.
- */
 export async function startIntegration<Services extends ServiceRecord>(
     options: IntegrationSpecificationOptions<Services> = {},
 ): Promise<IntegrationHandle<Services, DatabaseKeys<Services>>> {
-    // Caller detection must run before any await — async resumption drops
-    // the calling file's frames from the stack.
+    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

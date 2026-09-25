@@ -5,7 +5,6 @@ import { clock } from '../../../world/clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
 
-/** What `.fetch()` puts on a chain. */
 export type FetchSignature = ChainSignature & {
     readonly chain: {
         /** Perform one raw HTTP GET — redirects surface as 3xx results, never followed. */
@@ -13,11 +12,7 @@ export type FetchSignature = ChainSignature & {
     };
 };
 
-/**
- * `.fetch(path)`: one raw HTTP GET against the site under test — redirects
- * are never followed, a 308 IS the result. It opens no page, so a chain that
- * pinned a page's clock is refused before anything is armed.
- */
+/** Redirects are never followed; it opens no page, so a chain that pinned a page's clock is refused. */
 export const rawFetch = defineAction<
     'fetch',
     [path: string],

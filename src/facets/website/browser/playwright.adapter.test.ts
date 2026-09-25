@@ -5,11 +5,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 import { EVIDENCE_DIR } from '../../../kernel/files/artifacts.js';
 import { createSharedBrowser, PlaywrightAdapter } from './playwright.adapter.js';
 
-/**
- * The worker's browser, driven over a STUB launcher: no chromium starts. The
- * stub hands out numbered browsers and can disconnect one, which is all the
- * sharing reads of a browser.
- */
+/** A stub launcher: no chromium starts. */
 
 type StubBrowser = {
     disconnect: () => void;
@@ -51,23 +47,15 @@ function stubLauncher(failures = 0): {
     return { launch, launched };
 }
 
-/** What the adapter launches: the browser its `launch` seam resolves to. */
 type Browser = Awaited<
     ReturnType<
         NonNullable<NonNullable<ConstructorParameters<typeof PlaywrightAdapter>[0]>['launch']>
     >
 >;
-/** Does the stub carry what the adapter reads of a browser? */
 function isBrowser(value: object): value is Browser {
     return 'newContext' in value && 'on' in value;
 }
-/**
- * A stub chromium for the adapter: each context it hands out records whether
- * it was closed, and its page either answers a plain visit or, when `hold` is
- * set, never finishes loading — a visit still open. `loading(n)` resolves once
- * n held visits have started loading; `shots` holds the path of every
- * screenshot the page was asked for, none written.
- */
+/** `hold` makes a visit that never finishes loading; `shots` records every screenshot path asked for. */
 type StubContext = { closed: boolean };
 function stubChromium(hold = false): {
     browser: { closed: boolean; contexts: StubContext[] };
@@ -151,7 +139,6 @@ function stubChromium(hold = false): {
     return { browser: state, launch, launches: () => launches, loading, shots };
 }
 const VISIT = { baseUrl: 'http://site.test', external: 'allow' } as const;
-/** A scenario that fails before it touches the page. */
 async function failingScenario(): Promise<void> {
     await Promise.reject(new Error('the button is gone'));
 }

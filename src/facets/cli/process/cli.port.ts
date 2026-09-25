@@ -3,12 +3,7 @@ import type { EnvRecord } from '../../../kernel/context/with.capability.js';
 
 export type { CliOutput } from '../../../expectations/command/cli.result.js';
 
-/**
- * Options for the long-running form of `.exec()` (CONVENTIONS B2). When
- * either option is present the process is spawned and observed: it resolves
- * as soon as `waitFor` appears in stdout/stderr, and is killed when `timeout`
- * elapses (exit code 124).
- */
+/** The long-running form of `.exec()` (B2): resolves when `waitFor` appears, killed at `timeout` (exit 124). */
 export type ExecOptions = {
     /** Resolve (exit code 0) when stdout/stderr contains this string. */
     waitFor?: string | undefined;
@@ -19,11 +14,7 @@ export type ExecOptions = {
 /** Extra environment variables to set for the child process — the record `.env()` and `with({ env })` state. */
 export type CliEnv = EnvRecord;
 
-/**
- * What one invocation is handed beyond its arguments — the two per-run inputs a
- * spec document may state. Both are absent by default: the child gets an
- * immediately-closed stdin (never a TTY) and the adapter's own timeout.
- */
+/** Per-run inputs; absent, the child gets an immediately-closed stdin (never a TTY). */
 export type CliInput = {
     /** Written to the child's stdin, which is then closed. */
     stdin?: string | undefined;

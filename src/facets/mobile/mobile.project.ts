@@ -6,24 +6,11 @@ import type { FacetProjectOptions } from '../../vitest/project-kit.js';
 import type { MobileDevice } from './device/device.port.js';
 import { mobileSessionSetup } from './session/mobile-session.js';
 
-/**
- * What `mobile()` accepts: the common options, and — for a run whose specs
- * spawn no server of their own — the device its one Appium server drives and
- * the root its binary is resolved from, relative to the config's root.
- */
+/** The common options; for a run whose specs spawn no server, the device its one Appium server drives. */
 export type MobileProjectOptions = FacetProjectOptions &
     ({ device: MobileDevice; root?: string } | { device?: never; root?: never });
 
-/**
- * `mobile()` — the app on a simulator. A simulator is the one thing that
- * cannot share a machine with itself, so it runs last and alone (group 3)
- * AND serial: the files take turns on the one simulator, so
- * `fileParallelism: false` is this project's own default — `serial` needs
- * no passing. A global setup holds one driver session for the whole run:
- * the first file opens it, every later file drives it, and the setup ends it
- * after the last. With a `device`, that setup also boots the simulator and
- * spawns the project's Appium server once for the run, and stops it after.
- */
+/** A simulator cannot share a machine with itself: last (group 3) and serial. A global setup holds one driver session for the run. */
 export function mobile(options: MobileProjectOptions = {}): TestProjectInlineConfiguration {
     const { device, root, ...common } = options;
     return mergeConfig(facetProject('mobile', common), {

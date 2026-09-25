@@ -2,15 +2,12 @@ import { describe, expect, test } from 'vitest';
 
 import { call } from './call.action.js';
 
-/** Where the action runs: no databases, no working directory. */
 const RUN = { config: {}, testDir: '/specs/orders', workDir: null };
 
-/** A module that refuses whatever it is handed. */
 function refuse(): never {
     throw new Error('order 42 is closed');
 }
 
-/** A reader no setup of these calls is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
 describe('call', () => {

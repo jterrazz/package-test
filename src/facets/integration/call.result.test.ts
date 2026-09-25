@@ -5,7 +5,6 @@ import { TextAccessor } from '../../expectations/text/text.js';
 import { CallResult } from './call.result.js';
 import type { CallValue } from './call.result.js';
 
-/** A result carrying one outcome — every field of the config is optional. */
 function resultOf<Returned>(value: unknown): CallResult<Returned> {
     return new CallResult<Returned>({
         config: {},

@@ -25,16 +25,7 @@ const composition = {
     } satisfies Record<keyof ApiSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `api` facet — HTTP chain entry handed out by `specification.api()`.
- * Setup methods chain; action methods are terminal: they execute the spec
- * and resolve to the result. The app answers in this process (CONVENTIONS
- * A8): the clock pinned is this process's, the network intercepted is this
- * process's.
- *
- * The `DatabaseKey` parameter is the typed vocabulary of `.seed()`: the keys
- * of the declared services record that are databases.
- */
+/** The chain `specification.api()` hands out; the app answers in this process (A8). */
 export interface ApiSpecification<DatabaseKey extends string = string> extends ChainOf<
     typeof composition,
     { databaseKey: DatabaseKey; services: Record<string, unknown> },

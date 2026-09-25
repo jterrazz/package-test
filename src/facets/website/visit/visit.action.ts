@@ -14,30 +14,17 @@ import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';
 
-/** The verb only a page's visitor hands out: a page has an address to go to. */
 const GOTO: MatrixRow = { group: 'Verb', name: 'goto', probe: '.goto(' };
 
-/** The worker's one browser, launched on the first visit that asks for it. */
 type Needs = { browser: () => Promise<BrowserPort> };
 
-/** What `.visit()` puts on a chain. */
 export type VisitSignature = ChainSignature & {
     readonly chain: {
-        /**
-         * Render the page in the shared browser and resolve with the captured
-         * document. With a scenario, the visitor interacts first (the When) and
-         * the capture reflects the FINAL page state.
-         */
+        /** Render the page in the shared browser and resolve with the final captured document. */
         visit: (path: string, scenario?: VisitScenario) => Promise<PageResult>;
     };
 };
 
-/**
- * `.visit(path, scenario)`: render the page in the shared browser and resolve
- * with the captured document — the FINAL state when a scenario ran. The
- * chain's headers ride every request of the visit, and its clock is the
- * page's own calendar.
- */
 export const visit = defineAction<
     'visit',
     [path: string, scenario?: VisitScenario],

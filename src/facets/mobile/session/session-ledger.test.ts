@@ -7,13 +7,11 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { endSessions, sessionLedger } from './session-ledger.js';
 
-/** An empty ledger folder of the test's own — not yet created, as the global setup hands it. */
 function ledgerFolder(): string {
     const scratch = mkdtempSync(join(tmpdir(), 'session-ledger-'));
     return join(scratch, 'run');
 }
 
-/** A server that records every request it is sent, answering each with an empty W3C value. */
 async function recordingServer(): Promise<{ requests: string[]; url: string }> {
     const requests: string[] = [];
     const server = createServer((request, response) => {

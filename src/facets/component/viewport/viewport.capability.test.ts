@@ -6,7 +6,6 @@ import { viewport } from './viewport.capability.js';
 import type { ViewportMethod } from './viewport.capability.js';
 import type { ViewportPort } from './viewport.port.js';
 
-/** A chain composed of `.viewport()` alone, ending on an action that does nothing. */
 type Chain = { settle: () => Promise<null>; viewport: ViewportMethod<Chain> };
 
 const settle = defineAction({
@@ -16,7 +15,6 @@ const settle = defineAction({
     row: { group: 'Terminal action', name: '.settle()', probe: '.settle(' },
 });
 
-/** A chain over a page that records every size it was resized to. */
 function chainOver(): { chain: Chain; resized: { height: number; width: number }[] } {
     const resized: { height: number; width: number }[] = [];
     const page: ViewportPort = {

@@ -7,13 +7,10 @@ import { heldUnreached } from './baseline.js';
 import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
 
-/** A green run, judged. */
 const GREEN = { failed: 0, scope: 'whole', update: false } as const;
 
-/** A green run, recorded with TEST_UPDATE=1. */
 const RECORDING = { failed: 0, scope: 'whole', update: true } as const;
 
-/** A project root holding one run's ledgers: two specifications of one table of three routes, one request. */
 function runWithOneRouteReached(): { directory: string; root: string } {
     const root = mkdtempSync(join(tmpdir(), 'route-judge-'));
     onTestFinished(() => {
@@ -253,11 +250,6 @@ describe('route-judge', () => {
     });
 });
 
-/**
- * A run over an app taking `any` (`/mcp` unless named) on any method and
- * `/health` on GET, both reached, whose `jterrazz.config.ts` names
- * `methodless` routes.
- */
 function methodlessRun(
     methodless: readonly string[],
     any = '/mcp',

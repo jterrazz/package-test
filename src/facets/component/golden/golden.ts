@@ -20,20 +20,10 @@ import { isDiskFile } from '../../../kernel/files/spec-path.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browser.adapter.js';
 
-/**
- * The matchers, as a page can serve them.
- *
- * The node build reads a golden with `node:fs` and decides update mode from
- * `process.env`/`process.argv`; a page has neither. Everything ELSE is the same
- * assertion — the name-with-extension contract, the `{{token}}` grammar, the
- * diff, the "does not exist" refusal, the update hint, `{ frozen: true }` —
- * because the comparison lives in `goldens/text-assertions.ts` and both builds
- * call it. Only the transport differs: two server commands and one `provide`.
- */
+/** The comparison is `goldens/text-assertions.ts`'s in both builds; only the transport differs: two server commands and one `provide`. */
 
 type MatcherResult = { message: () => string; pass: boolean };
 
-/** Update mode crosses into the page as a provided value, never as an env read. */
 function updating(): boolean {
     return inject('update') === true;
 }
@@ -69,7 +59,6 @@ async function matchGolden(
     return comparison;
 }
 
-/** `toMatch(file())` in a page — a golden file against a captured text; a directory golden is node's. */
 async function toMatchGolden(
     received: unknown,
     expected: unknown,
@@ -94,11 +83,6 @@ async function toMatchGolden(
     return await matchGolden(received, expected.path, options?.frozen === true);
 }
 
-/**
- * `toMatch(<text>)` in a page — a captured text against the text written in
- * place, rewritten in the test's source by update mode through a server
- * command. Awaited, as every comparison a page makes is.
- */
 async function toMatchWhole(
     this: { isNot?: boolean },
     received: unknown,
@@ -128,7 +112,6 @@ async function toMatchWhole(
     return { message: () => `updated the value in place at ${where}`, pass: true };
 }
 
-/** A page holds no table: `toBeEmpty` is registered to refuse a stream with the form to write. */
 async function toBeEmpty(received: unknown): Promise<MatcherResult> {
     return await Promise.reject(
         received instanceof TextAccessor
@@ -144,11 +127,7 @@ async function toBeEmpty(received: unknown): Promise<MatcherResult> {
 
 let registered = false;
 
-/**
- * Register the page's matchers with vitest's `expect`. Idempotent, and called
- * from the browser entry itself: a component test imports `@jterrazz/test` to
- * get `component`, and that import IS the registration.
- */
+/** Idempotent; the browser entry's import is the registration. */
 export function registerBrowserMatchers(): void {
     if (registered) {
         return;

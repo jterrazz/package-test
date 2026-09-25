@@ -7,30 +7,17 @@ import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js'
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
 
-/**
- * The guidance thrown when the optional peers are missing — the exact fix,
- * mirroring the playwright message on `.visit()`.
- */
 const APPIUM_INSTALL_HINT =
     'specification.mobile() requires appium and webdriverio (optional peer dependencies): npm install -D appium webdriverio && npx appium driver install xcuitest';
 
-/** The run's Appium server as a worker reads it: where it answers, the device the project declared, and the simulator booted for it. */
 export type RunServer = { device: MobileDevice; udid: string; url: string };
 
-/** A running appium server: its base URL and a group-killing stop. */
 export type AppiumServer = {
     stop: () => Promise<void>;
     url: string;
 };
 
-/**
- * Start the caller project's appium server as a child process on a free port
- * and wait until `/status` answers. The binary is resolved from the project
- * root's `node_modules/.bin` — appium is an optional peer, so its absence
- * refuses with the exact install command. Process lifecycle (free port via
- * `PORT`, readiness poll, SIGTERM→SIGKILL group escalation on stop) is the
- * served process's — one implementation for every child the framework spawns.
- */
+/** Appium is an optional peer resolved from `node_modules/.bin`; the served process owns port, readiness and the group kill. */
 export async function startAppiumServer(root: string): Promise<AppiumServer> {
     const bin = resolve(root, 'node_modules', '.bin', 'appium');
     if (!existsSync(bin)) {
@@ -38,8 +25,7 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
     }
 
     const serve = new ServedProcess(
-        // The served process injects its free port as `PORT`; appium only
-        // reads a flag, so the shell forwards one into the other.
+        // The served process injects `PORT`; appium reads only a flag.
         { command: `"${bin}" --port "$PORT"`, ready: '/status', timeout: APPIUM_READY_TIMEOUT_MS },
         root,
         'mobile',
@@ -53,12 +39,7 @@ export async function startAppiumServer(root: string): Promise<AppiumServer> {
     };
 }
 
-/**
- * The project's own server for one simulator: the device resolved through
- * `simctl` (unless its UDID is declared) and booted, then the server spawned
- * from `root`. What the server's stop does not end — the booted simulator —
- * is the machine's, and outlives it.
- */
+/** The booted simulator is the machine's and outlives the server. */
 export async function serveAppium(
     device: MobileDevice,
     root: string,
@@ -68,11 +49,6 @@ export async function serveAppium(
     return { server: await startAppiumServer(root), udid };
 }
 
-/**
- * The run's Appium server, read on the worker's side — what a
- * `mobile({ device })` project's global setup spawned and provides;
- * `undefined` when each runner reaches its own.
- */
 async function mobileServer(): Promise<RunServer | undefined> {
     try {
         const { inject } = await import('vitest');
@@ -82,7 +58,6 @@ async function mobileServer(): Promise<RunServer | undefined> {
     }
 }
 
-/** A server this runner did not start, and so never stops. */
 function notOurs(url: string): AppiumServer {
     return {
         stop: async () => {
@@ -92,7 +67,6 @@ function notOurs(url: string): AppiumServer {
     };
 }
 
-/** A device as a refusal names it. */
 function named({ name, os, udid }: MobileDevice): string {
     return [
         `'${name}'`,
@@ -101,11 +75,7 @@ function named({ name, os, udid }: MobileDevice): string {
     ].join('');
 }
 
-/**
- * The device a runner asks the run's server for: the one the project declared
- * and the setup booted. A specification leaves it out or restates it, and
- * never names another — no other simulator was booted for the run.
- */
+/** Never another device: no other simulator was booted for the run. */
 export function runDevice(device: MobileDevice | undefined, run: RunServer): MobileDevice {
     if (device === undefined) {
         return { ...run.device, udid: run.udid };
@@ -123,16 +93,7 @@ export function runDevice(device: MobileDevice | undefined, run: RunServer): Mob
     return { ...run.device, udid: run.udid };
 }
 
-/**
- * The Appium server the runner drives, the simulator it asks it for, and
- * whether that server outlives the file. A declared server owns its devices:
- * the runner neither resolves nor boots one. The run's server, spawned by a
- * `mobile({ device })` project's global setup, drives the device that setup
- * booted, whether the runner restates it or leaves it to the project.
- * Otherwise the simulator is resolved and booted here, and the project's own
- * server spawned beside it, for this file alone. A runner with no device and
- * no run's server to lend one is refused.
- */
+/** A declared server owns its devices; the run's server drives the one its setup booted; otherwise resolved, booted and spawned here for this file. */
 export async function reachAppium(
     { appium: declared, device }: { appium?: { url: string }; device?: MobileDevice },
     root: string,
@@ -158,7 +119,6 @@ export async function reachAppium(
     return { appium: server, device: { ...device, udid }, outlivesFile: false };
 }
 
-/** What a `mobile()` project hands its global setup, and what that setup hands the workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {

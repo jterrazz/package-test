@@ -3,7 +3,6 @@ import type { ResultConfig } from '../../../expectations/result.js';
 import { JsonAccessor } from '../../../expectations/text/json.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
 
-/** A raw HTTP exchange captured by `.fetch()` — redirects are NOT followed. */
 export type FetchExchange = {
     body: string;
     headers: Record<string, string>;

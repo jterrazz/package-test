@@ -1,4 +1,3 @@
-// The mobile facet's face: the names it contributes to `@jterrazz/test`.
 export type {
     DeviceOpenOptions,
     DevicePort,

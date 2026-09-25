@@ -6,7 +6,6 @@ import type { FacetProjectOptions } from '../../vitest/project-kit.js';
 import { literate } from './documents/literate-plugin.js';
 import type { LiterateOptions } from './documents/literate-plugin.js';
 
-// The literate door is the one vite plugin a facet owns; the runner config reaches it through this face.
 export {
     literate,
     type LiterateOptions,
@@ -15,22 +14,11 @@ export {
 
 /** The literate door of the facet that reads documents — the cli. */
 export type LiterateDoor = {
-    /**
-     * The door, wired by default: every `specs/<facet>/**\/*.spec.yaml` becomes
-     * a test file bound to `specs/<facet>/<facet>.specification.ts`. State
-     * `specification` to name another runner, `include` to narrow the glob, or
-     * `false` to collect no documents at all.
-     */
+    /** Every `specs/<facet>/` `.spec.yaml` becomes a test bound to `specs/<facet>/<facet>.specification.ts`; `false` collects none. */
     literate?: false | Partial<LiterateOptions>;
 };
 
-/**
- * A facet project that collects its documents too: a `<case>.spec.yaml` is a
- * test file of its own, so the plugin's glob has to join the include of the
- * project that collects them — never the root config. Called bare, the path
- * convention is assumed: `specs/<facet>/**\/*.spec.yaml`, bound to
- * `./specs/<facet>/<facet>.specification.ts`.
- */
+/** The plugin's glob joins the include of the collecting project, never the root config. */
 function documentProject(
     facet: string,
     options: FacetProjectOptions & LiterateDoor,
@@ -53,11 +41,7 @@ function documentProject(
 /** `cli()` — a binary, and the documents that specify it. */
 export type CliProjectOptions = FacetProjectOptions & LiterateDoor;
 
-/**
- * A cli project collects the facet's `.spec.ts` files AND its documents:
- * `specs/cli/**\/*.spec.yaml`, bound to `specs/cli/cli.specification.ts`
- * unless `literate` says otherwise (docs/20 § The three doors, one engine).
- */
+/** A cli project: the facet's `.spec.ts` files and its documents (docs/20). */
 export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
     return documentProject('cli', options);
 }

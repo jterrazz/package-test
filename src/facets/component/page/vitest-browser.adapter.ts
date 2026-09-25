@@ -9,38 +9,11 @@ import { formatElement } from '../../../elements/spelling.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
-/**
- * The browser-mode adapter — the component facet's half of the one element
- * vocabulary.
- *
- * Its translation table is the playwright adapter's, descriptor for
- * descriptor: a `button('Save')` means `getByRole('button', { name })` whether
- * the surface is a served page or a mounted component, and the W3 refusal
- * enumerates candidates in the same words. Two adapters, one dialect — which
- * is the whole reason a page spec and a component spec read alike.
- *
- * What differs is where the code runs. Playwright drives a page from the
- * outside and reads it through `evaluate`; here the test IS in the page, so a
- * candidate is described from the live element and the ARIA tree is the one
- * thing that has to go back out (`server.commands`, the provider's own frame).
- */
+/** The playwright adapter's translation table, descriptor for descriptor; here the test is in the page, so candidates are read from live elements. */
 
-/** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
 
-/**
- * The roles a FIELD can carry — what `field('Name')` designates.
- *
- * A field is named by its ACCESSIBLE name, not by the text of the label
- * element that happens to wrap it: `<label><span>Channel</span><select>…` has
- * a label whose text carries every option of the select, while the control's
- * accessible name is `Channel` — which is what the ARIA tree shows and what a
- * screen reader reads. Resolving by label text alone made the ordinary
- * wrapping-label form unreachable under the whole-name default.
- *
- * The label-text locator stays in the union for the controls ARIA gives no
- * role at all (a date or colour input), which nothing else would find.
- */
+/** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
 const FIELD_ROLES = [
     'checkbox',
     'combobox',
@@ -52,16 +25,9 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/**
- * The `<search>` element, where no explicit role overrides the one it carries.
- *
- * Browser Mode's role engine predates the element and gives it no role, while
- * the ARIA tree — and playwright on a served page — call it `search`; this
- * selector is how `search()` finds it here as it does there.
- */
+/** Browser Mode's role engine gives `<search>` no role, while the ARIA tree and playwright call it `search`. */
 const SEARCH_ELEMENT = 'css=search:not([role])';
 
-/** A scope that answers the `<search>` elements it holds with no explicit role. */
 type SearchScope = LocatorSelectors & { getBySearchElement: () => Locator };
 
 const SEARCH_METHODS: Parameters<typeof locators.extend>[0] & {
@@ -69,15 +35,11 @@ const SEARCH_METHODS: Parameters<typeof locators.extend>[0] & {
 } = { getBySearchElement: () => SEARCH_ELEMENT };
 locators.extend(SEARCH_METHODS);
 
-/** Every scope answers it once the methods above are registered, the page and each locator. */
 function answersSearch(scope: LocatorSelectors): scope is SearchScope {
     return 'getBySearchElement' in scope;
 }
 
-/**
- * The search landmark: the role, or the element. A `<search>` takes its
- * accessible name from its author alone, so a name is its label.
- */
+/** A `<search>` takes its accessible name from its author alone. */
 function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boolean): Locator {
     const byRole =
         element.name === undefined
@@ -94,17 +56,10 @@ function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boole
     );
 }
 
-/**
- * Translate a user-facing descriptor into a Browser Mode locator, resolving
- * `scope` outside-in so `within(navigation(), link('X'))` searches the nav
- * subtree. No `.first()` anywhere: designating exactly one element is
- * CONVENTIONS W3, and taking the first match is the silent wrong-element bug
- * the rule exists to prevent.
- */
+/** No `.first()`: taking the first match is the silent wrong-element bug W3 prevents. */
 export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
-    // A name designates the accessible name WHOLE; `{ exact: false }` is the
-    // opt-out, and an ABSENT option is the default rather than a choice.
+    // An absent `exact` is the default, not a choice.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -123,19 +78,13 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     if (element.kind === 'search') {
         return locateSearch(scope, element, exact);
     }
-    // Every other kind IS an ARIA role — landmark or not — and the vocabulary
-    // names them after the role they locate, so one branch answers for all of
-    // them and a descriptor added to the vocabulary needs nothing here.
+    // Every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
         element.kind,
         element.name === undefined ? { exact } : { exact, name: element.name },
     );
 }
 
-/**
- * A landmark's accessible name, as the role engine reads it: its label, else
- * the text of what its `aria-labelledby` names; none when it has neither.
- */
 function nameOf(landmark: Element | null | undefined): string | undefined {
     const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
         .split(/\s+/u)
@@ -148,7 +97,6 @@ function nameOf(landmark: Element | null | undefined): string | undefined {
     return name === '' ? undefined : name;
 }
 
-/** Describe the live candidates — the evidence the W3 refusal enumerates. */
 function candidates(locator: Locator): ElementMatch[] {
     return locator
         .elements()
@@ -160,10 +108,7 @@ function candidates(locator: Locator): ElementMatch[] {
             const text = (node.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);
             const label = node.getAttribute('aria-label')?.trim();
             return {
-                // A role descriptor matches on the ACCESSIBLE name, so a
-                // candidate whose label is not its text has to say the label:
-                // Naming only the text sends the author after something that
-                // never matched.
+                // A role descriptor matches on the accessible name: a candidate whose label differs from its text must say the label.
                 accessibleName: label !== undefined && label !== text ? label : undefined,
                 context: context ?? undefined,
                 contextName: nameOf(landmark),
@@ -174,7 +119,6 @@ function candidates(locator: Locator): ElementMatch[] {
         });
 }
 
-/** Walk the scope chain outside-in; the outermost ambiguous level is the fault. */
 function ambiguousLevel(element: ElementRef): ElementRef {
     const chain: ElementRef[] = [];
     for (let current: ElementRef | undefined = element; current; current = current.scope) {
@@ -188,12 +132,7 @@ function ambiguousLevel(element: ElementRef): ElementRef {
     return element;
 }
 
-/**
- * Run one visitor action, turning "more than one match" into the W3 refusal.
- * The ambiguous LEVEL is identified first: a scope matching several landmarks
- * is the real fault, and naming the target would send the author to fix the
- * wrong descriptor.
- */
+/** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 export async function act<T>(
     element: ElementRef,
     action: (locator: Locator) => Promise<T>,
@@ -212,19 +151,11 @@ export async function act<T>(
     }
 }
 
-/**
- * Is this descriptor answered by PRESENCE rather than by visibility?
- *
- * The options of a collapsed `<select>` are in the document and in the
- * accessibility tree, and not one of them has a box on the screen — asking
- * whether an option is visible would answer "no" for every select a visitor
- * never opened.
- */
+/** A collapsed select's options have no box: visibility would answer "no" for every one. */
 function byPresence(element: ElementRef): boolean {
     return element.kind === 'option';
 }
 
-/** A control's live value — the property, never the attribute. */
 function valueOf(node: Element | null): string | undefined {
     return node instanceof HTMLInputElement ||
         node instanceof HTMLSelectElement ||
@@ -233,11 +164,6 @@ function valueOf(node: Element | null): string | undefined {
         : undefined;
 }
 
-/**
- * Is the element gone — or, with a state modifier, no longer in that state? A
- * node that left the document and one that is still there but not rendered are
- * the same answer to a spec.
- */
 function isGone(locator: Locator, element: ElementRef): boolean {
     const node = locator.query();
     if (element.focused === true) {
@@ -255,18 +181,7 @@ function isGone(locator: Locator, element: ElementRef): boolean {
     return node === null || (byPresence(element) ? false : !node.checkVisibility());
 }
 
-/**
- * How long `gone()` waits — what is LEFT of the running test's budget.
- *
- * Every other verb gets it: a locator action and `expect.element` default
- * their timeout to the remaining budget, while a bare `expect.poll` falls back
- * to vitest's one second. Handing `gone()` the budget keeps it on the same
- * clock as every verb, so an element a slow answer takes off the screen is
- * waited for as long as any other.
- *
- * The 100ms margin is vitest's own: the poll has to give up just BEFORE the
- * test does, or the failure is a bare timeout naming no element.
- */
+/** What is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. */
 function remainingBudget(): number | undefined {
     const current = TestRunner.getCurrentTest();
     const started = current?.result?.startTime;
@@ -276,18 +191,15 @@ function remainingBudget(): number | undefined {
     return Math.max(current.timeout - (Date.now() - started) - 100, 0);
 }
 
-/** `expect.poll` over that budget — the retry the matchers get for free. */
 function polling<T>(probe: () => T, message: string): ReturnType<typeof expect.poll<T>> {
     const timeout = remainingBudget();
     return expect.poll(probe, { message, ...(timeout === undefined ? {} : { timeout }) });
 }
 
-/** A key name is a key; a single character is typed as itself. */
 function keystroke(key: string): string {
     return key.length > 1 ? `{${key}}` : key;
 }
 
-/** The verbs a rendered surface shares with a page, plus the two a parent owns. */
 export function componentVerbs(surface: MountedSurface): ComponentVisitor {
     return {
         check: async (element) => {
@@ -310,11 +222,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
         },
         gone: async (element) => {
             await act(element, async (locator) => {
-                // Polled rather than asserted through `expect.element`: that
-                // helper REFUSES a locator matching nothing, and "nothing
-                // matches" is the commonest way for a thing to be gone. Absence
-                // is one question — removed, or still there and not shown — and
-                // the poll retries it the same way every other verb retries.
+                // Polled: `expect.element` refuses a locator matching nothing, the commonest way to be gone.
                 await polling(
                     () => isGone(locator, element),
                     `${formatElement(element)} is still on the screen`,
@@ -345,9 +253,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                     return;
                 }
                 if (element.selected !== undefined) {
-                    // No matcher answers for an `<option>`: `toBeChecked` is
-                    // the checkbox/radio/aria-checked one. `:checked` is what
-                    // CSS gives a selected option, and `gone()` reads it too.
+                    // No matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
                     await polling(
                         () => locator.query()?.matches(':checked') === true,
                         `${formatElement(element)} is not the selected one`,
@@ -374,27 +280,22 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
     };
 }
 
-/** The ARIA snapshot of the rendered `<body>` — the golden a tree is asserted as. */
 export async function ariaTree(): Promise<string> {
     return await commands.ariaTree();
 }
 
-/** A golden's content, read server-side from `expected/` beside the test. */
 export async function readGolden(name: string): Promise<null | string> {
     return await commands.goldenRead(name);
 }
 
-/** Write a golden server-side, and say where — update mode's half. */
 export async function writeGolden(name: string, content: string): Promise<string> {
     return await commands.goldenWrite(name, content);
 }
 
-/** Write a text over the value in place the stack's `toMatch` holds, and say where — update mode's half. */
 export async function writeInPlaceText(stack: string, text: string): Promise<string> {
     return await commands.inPlaceWrite(stack, text);
 }
 
-/** Mount a React subject through the optional `vitest-browser-react` adapter. */
 export async function mountReact(ui: ComponentUi): Promise<MountedSurface> {
     let render;
     try {
@@ -414,11 +315,7 @@ export async function mountReact(ui: ComponentUi): Promise<MountedSurface> {
     };
 }
 
-/**
- * Mount a vanilla DOM subject: the function is handed a fresh container and
- * may return its own teardown — the shape a DOM library states one in. There
- * is no react here, and no react is loaded.
- */
+/** The function may return its own teardown; no react is loaded. */
 export function mountDom(mount: DomMount): MountedSurface {
     const container = document.createElement('div');
     document.body.append(container);

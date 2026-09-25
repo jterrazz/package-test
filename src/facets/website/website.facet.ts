@@ -28,14 +28,7 @@ const composition = {
     } satisfies Record<keyof WebsiteSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `website` facet — page chain entry handed out by
- * `specification.website()`. Setup methods chain; action methods are
- * terminal. `.visit()` renders the page in the shared browser; `.fetch()`
- * performs one raw HTTP exchange and never follows redirects. The site runs
- * in its own process: the clock pinned is the PAGE's, and the stubs are
- * served by the declared stub backend.
- */
+/** The chain `specification.website()` hands out; the site runs in its own process, its stubs served by the stub backend. */
 export interface WebsiteSpecification extends ChainOf<
     typeof composition,
     { databaseKey: string; services: Record<string, unknown> },

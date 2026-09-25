@@ -12,7 +12,6 @@ export type AttachFn = typeof attach;
 /** The driver session type, derived so webdriverio stays a type-only import. */
 export type Driver = Awaited<ReturnType<RemoteFn>>;
 
-/** What opening a session needs: the server, the app and device, and the factories when injected. */
 type SessionRequest = {
     /** Injected with `remote` by the adapter's own test; loaded from webdriverio otherwise. */
     attach?: AttachFn | undefined;
@@ -25,16 +24,11 @@ type SessionRequest = {
     serverUrl: string;
 };
 
-/** `'iOS 26.5'` or `'26.5'` → the `appium:platformVersion` XCUITest reads, `'26.5'`. */
 function platformVersion(os: string): string {
     return os.replace(/^ios\s+/iu, '');
 }
 
-/**
- * Load webdriverio's session factories, naming the install when the optional
- * peer dependency is absent. Lazy: the dependency is only required by a spec
- * that actually opens the app.
- */
+/** Lazy: only a spec that opens the app requires the optional peer. */
 async function loadWebdriverio(): Promise<{ attach: AttachFn; remote: RemoteFn }> {
     try {
         const { attach: attachFn, remote: remoteFn } = await import('webdriverio');
@@ -46,7 +40,6 @@ async function loadWebdriverio(): Promise<{ attach: AttachFn; remote: RemoteFn }
     }
 }
 
-/** The capabilities an XCUITest session is asked for. */
 function capabilitiesOf(request: SessionRequest): Record<string, unknown> {
     const { name, os, udid } = request.device;
     return {
@@ -61,12 +54,7 @@ function capabilitiesOf(request: SessionRequest): Record<string, unknown> {
     };
 }
 
-/**
- * Open the driver session a runner drives: attached to the one the run
- * recorded for this server and these capabilities, or created — and then
- * recorded, when the run keeps a ledger. `shared` says the session is the
- * run's, to be ended by the run and never by the runner.
- */
+/** Attached to the session the run recorded for this server and capabilities, or created and recorded; `shared` sessions are the run's to end. */
 export async function openSession(
     request: SessionRequest,
 ): Promise<{ driver: Driver; shared: boolean }> {

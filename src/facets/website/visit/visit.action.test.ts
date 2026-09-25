@@ -7,7 +7,6 @@ import type { BrowserOpenOptions, BrowserPage, BrowserPort } from '../browser/br
 import type { WebsiteConfig } from '../website.handle.js';
 import { visit } from './visit.action.js';
 
-/** A page with nothing rendered — what a visit hands back when only its request matters. */
 const BLANK: BrowserPage = {
     consoleMessages: [],
     html: '',
@@ -21,14 +20,12 @@ const BLANK: BrowserPage = {
     url: 'http://127.0.0.1:9/',
 };
 
-/** A chain of `.headers()` and `with()`, ending on `.visit()`. */
 type Chain = {
     headers: (headers: Record<string, string>) => Chain;
     visit: (path: string) => Promise<unknown>;
     with: (context: { headers?: Record<string, string> }) => Chain;
 };
 
-/** A chain over a browser that records the headers of every visit it opens. */
 function chainOver(sent: BrowserOpenOptions['headers'][]): Chain {
     const browser: BrowserPort = {
         close: async () => {

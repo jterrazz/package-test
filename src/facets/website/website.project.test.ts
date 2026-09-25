@@ -3,7 +3,6 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { website } from './website.project.js';
 
-/** The `test` block of a project, whatever the helper wrapped around it. */
 function testOf(
     project: TestProjectInlineConfiguration,
 ): NonNullable<TestProjectInlineConfiguration['test']> {

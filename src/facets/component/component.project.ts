@@ -12,43 +12,26 @@ import { onProjectDefaults } from '../../vitest/project-kit.js';
 import { mswWorkerScript } from '../../world/stubs/network/worker-script.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
 
-/**
- * What `component()` states for every render of its project — the facet's
- * own constructor options, beside the ones every project shares.
- */
 export type ComponentOptions = {
     /** Freeze the page's `Date` for every render of the project. */
     clock?: string;
     /** `Accept-Language` and `Intl` locale of the page. Default `'en-US'`. */
     locale?: string;
-    /**
-     * The directory `vite` and `wrap` are resolved against. Default: the
-     * directory of the file that CALLED the helper (`callerDirectory` in
-     * `component.project.ts`). State it when the call is not written in the
-     * config it configures (a shared config factory).
-     */
+    /** The directory `vite` and `wrap` resolve against; defaults to the calling file's. */
     root?: string;
     /** IANA zone the page's `Date` reports in. Default `'UTC'`. */
     timezone?: string;
-    /**
-     * The app's own Vite pipeline: a config path, the object, or the function
-     * a framework exports. Only the PIPELINE is adopted (`reroot` in `component.project.ts`).
-     */
+    /** The app's Vite pipeline: a config path, the object, or a framework's function. Only the pipeline is adopted. */
     vite?: Promise<UserConfig> | string | UserConfig | UserConfigFn;
     /** The page size every render gets. Default 1280×720. */
     viewport?: { height: number; width: number };
-    /**
-     * A module whose default export is `(ui) => ReactNode` — the providers
-     * every render of this project is dressed in (a theme, a store, an intl
-     * provider). A router belongs on the chain instead: it is a test's Given.
-     */
+    /** A module whose default export `(ui) => ReactNode` wraps every render; a router is a test's Given, on the chain. */
     wrap?: string;
 };
 
 /** `component()` — rendered units, beside the components they cover. */
 export type ComponentProjectOptions = ComponentOptions & FacetProjectOptions;
 
-/** The pipeline keys a consumer's Vite config contributes, and nothing else. */
 const PIPELINE_KEYS = [
     'assetsInclude',
     'css',
@@ -62,16 +45,7 @@ const PIPELINE_KEYS = [
     'resolve',
 ] as const;
 
-/**
- * The page's own runtime, pre-bundled so a cold cache never reloads mid-run:
- * react and its adapter, and what the package's browser entry imports
- * (`vitest-mock-extended`, through the doubles it publishes).
- *
- * `msw` and `msw/browser` are NOT here: `@vitest/browser` already puts both in
- * `optimizeDeps.exclude`, and Vite's esbuild optimizer (6 and 7) treats an
- * entry that is both included and excluded as fatal — dependency optimisation
- * throws before a single test runs.
- */
+/** Pre-bundled so a cold cache never reloads mid-run. `msw` is left out: `@vitest/browser` already excludes it, and an entry both included and excluded is fatal to Vite's optimizer. */
 const PAGE_DEPENDENCIES = [
     'react',
     'react-dom/client',
@@ -83,18 +57,15 @@ const PAGE_DEPENDENCIES = [
 
 const requireFrom = createRequire(import.meta.url);
 
-/** This module's own file — the frames the caller search walks past. */
 const HELPERS_FILE = import.meta.filename;
 
 /** A config vite bundled before importing it — `<its name>.timestamp-<hash>.mjs`. */
 const BUNDLED_CONFIG = /^(?<name>.+)\.timestamp-[^.]+\.mjs$/u;
 
-/** The file of the first frame below this module — who called the helper. */
 function callerFile(): string | undefined {
     return callerFrames().find(({ file }) => file !== HELPERS_FILE)?.file;
 }
 
-/** The nearest directory at or above the cwd holding a file of this name. */
 function nearestHolding(name: string): string | undefined {
     let directory = process.cwd();
     for (;;) {
@@ -109,27 +80,7 @@ function nearestHolding(name: string): string | undefined {
     }
 }
 
-/**
- * The directory of the CONFIG that called a helper — what the relative paths
- * it was handed mean.
- *
- * Not `process.cwd()`: a `vitest.config.ts` is read by more tools than the
- * runner, and knip and `typescript check` load every config of a repository
- * from the repository ROOT, while `component({ vite: './web/vite.config.ts' })`
- * written beside an app means the app's tree whoever loads the config.
- * `import.meta` cannot answer either: it describes THIS
- * module. And vitest hands a project neither its root nor its config file — a
- * project function is called with `{ command, mode, isPreview, isSsrBuild }`
- * and nothing else.
- *
- * So the call site is read off the stack, where a loader that keeps a config's
- * identity (node, tsx, jiti — what those tools use) names the file itself.
- * Vite's own loader does not: it BUNDLES the config into
- * `node_modules/.vite-temp/` and only the config's NAME survives the move. The
- * name is what is then looked for upward from the cwd, because that loader is
- * the runner's and a runner is started in the tree it tests. A config loaded
- * by the runner from another tree entirely states `root` itself.
- */
+/** Never `process.cwd()`: knip and `typescript check` load configs from the repository root. Read off the stack; Vite's own loader bundles the config into `node_modules/.vite-temp/`, keeping only its name, looked for upward from the cwd. */
 function callerDirectory(): string {
     const file = callerFile();
     if (file === undefined) {
@@ -137,14 +88,13 @@ function callerDirectory(): string {
     }
     const bundled = BUNDLED_CONFIG.exec(basename(file))?.groups?.name;
     if (bundled === undefined || basename(dirname(file)) !== '.vite-temp') {
-        // Bundled beside the config (no node_modules above it) or not bundled
-        // at all: either way the frame sits in the config's own directory.
+        // Bundled beside the config or not bundled: either way the frame sits in the config's own directory.
         return dirname(file);
     }
     return nearestHolding(bundled) ?? process.cwd();
 }
 
-/** Is this specifier installed here? An absent optional peer is simply not pre-bundled. */
+/** An absent optional peer is simply not pre-bundled. */
 function resolves(specifier: string): boolean {
     try {
         requireFrom.resolve(specifier);
@@ -154,11 +104,7 @@ function resolves(specifier: string): boolean {
     }
 }
 
-/**
- * Serve the page's service worker script — where it is installed is the
- * stubs area's ({@link mswWorkerScript}) — at the path the worker asks for,
- * with the scope header a worker registered at `/` needs.
- */
+/** With the scope header a worker registered at `/` needs. */
 function mswWorkerPlugin(): Plugin {
     return {
         configureServer(server) {
@@ -173,16 +119,7 @@ function mswWorkerPlugin(): Plugin {
     };
 }
 
-/**
- * Keep an app's Vite PIPELINE and drop everything that says where the app
- * lives.
- *
- * An allow-list, not a drop-list: a consumer's config carries keys the
- * framework has never heard of — `environments`, `ssr`, `appType`, `publicDir`
- * — and one of them re-roots the run and the project collects nothing. Naming
- * what the pipeline IS keeps an unknown key from leaking in. The consumer's
- * `plugins` are CONCATENATED after the project's, never assigned over them.
- */
+/** An allow-list: an unknown key (`environments`, `ssr`, …) could re-root the run. The consumer's `plugins` are concatenated after the project's. */
 async function reroot(
     source: NonNullable<ComponentProjectOptions['vite']>,
     root: string,
@@ -192,8 +129,7 @@ async function reroot(
     let from = 'the value it was given';
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
-        // Absolute before it is handed over: `loadConfigFromFile` resolves a
-        // relative path against the CWD, which is the tool's, not the config's.
+        // `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
         from = isAbsolute(source) ? source : resolve(root, source);
         const file = await loadConfigFromFile(environment, from);
         loaded = file?.config;
@@ -217,11 +153,7 @@ async function reroot(
     return kept;
 }
 
-/**
- * The app's own `optimizeDeps`, its `include` joined by the page's own: a
- * dependency Vite finds only when a test first imports it is optimised then,
- * and the reload that follows fails the tests already loading.
- */
+/** A dependency Vite finds only when a test imports it is optimised then, and the reload fails the loading tests. */
 function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include: string[] } {
     const own = typeof declared === 'object' && declared !== null ? { ...declared } : {};
     const listed = 'include' in own && Array.isArray(own.include) ? own.include : [];
@@ -236,12 +168,10 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
     };
 }
 
-/** What a missing optional peer costs, said once rather than as a resolver stack. */
 const PROVIDER_MISSING =
     'component(): @vitest/browser-playwright is an optional peer — install it beside the runner ' +
     'it pins (npm i -D @vitest/browser-playwright@<the installed vitest version> playwright).';
 
-/** The installed version of a package, read from its own manifest. */
 function versionOf(specifier: string): string {
     const manifest: unknown = JSON.parse(
         readFileSync(requireFrom.resolve(`${specifier}/package.json`), 'utf8'),
@@ -252,24 +182,12 @@ function versionOf(specifier: string): string {
     throw new Error(`component(): ${specifier} is installed without a version.`);
 }
 
-/**
- * Which of the two transformer keys the INSTALLED Vite actually reads.
- *
- * Vite 8 transforms with oxc and prints a warning for every `esbuild` option it
- * is handed; Vite 6 and 7 transform with esbuild and have no `oxc` key at all.
- * The inactive one is dropped rather than carried as a second, ignored
- * statement — a config that says the same thing twice is a config that will one
- * day say two different things.
- */
+/** Vite 8 transforms with oxc and warns on every `esbuild` option; Vite 6 and 7 have no `oxc` key. */
 function transformKey(): 'esbuild' | 'oxc' {
     return Number.parseInt(versionOf('vite').split('.')[0] ?? '', 10) >= 8 ? 'oxc' : 'esbuild';
 }
 
-/**
- * The JSX default, on the key the running Vite reads, yielding to the
- * consumer's own: a `jsxImportSource` or a classic runtime is the app's
- * statement, not the project's to overwrite.
- */
+/** A consumer's `jsxImportSource` or classic runtime wins. */
 function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown> {
     const key = transformKey();
     const stated = pipeline[key];
@@ -279,12 +197,7 @@ function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown>
     return { esbuild: stated ?? { jsx: 'automatic' } };
 }
 
-/**
- * `@vitest/browser-playwright` peers vitest on an EXACT version: 4.1.10 wants
- * 4.1.10, not `^4.1`. A mismatch fails deep inside the tester with a message
- * about a missing runner, so the pair is checked where the project is built
- * and both versions are named.
- */
+/** `@vitest/browser-playwright` peers vitest on an exact version; a mismatch fails deep in the tester naming neither. */
 function assertProviderPin(): void {
     const runner = versionOf('vitest');
     let provider: string;
@@ -301,24 +214,7 @@ function assertProviderPin(): void {
     }
 }
 
-/**
- * Hand the project's `wrap` to the page as a STATIC import.
- *
- * The page could fetch the module by URL when the first render needs it, and
- * that is what breaks: a dependency Vite never scanned is discovered mid-run,
- * the optimizer rewrites its cache, and every module the page is holding —
- * the test's own included — 404s behind a stale `?v=` hash. A setup file is in
- * the graph before the first test runs, so the wrap and everything it imports
- * are scanned, pre-bundled, and never re-optimised under the run.
- *
- * It is written into `.artifacts/` rather than served from memory because
- * vitest resolves `setupFiles` as paths on disk; it is generated, so it belongs
- * with everything else a tool generates, and never on the row.
- *
- * The wrapper lands on `globalThis` under a shared symbol rather than an
- * export: the setup module and the package's browser build are separate graphs
- * in the page and share no module instance.
- */
+/** A static import: a dependency discovered mid-run makes the optimizer rewrite its cache and every held module 404s. Written to disk because vitest resolves `setupFiles` as paths; handed over on a shared `globalThis` symbol, the two graphs sharing no module. */
 function writeSetupFile(wrap: string, root: string): string {
     const absolute = resolve(root, wrap);
     const path = resolve(root, VITEST_ARTIFACTS_DIR, 'component-setup.mjs');
@@ -336,10 +232,7 @@ function writeSetupFile(wrap: string, root: string): string {
     return path;
 }
 
-/**
- * What the page cannot read for itself: update mode is a `process.env`/`argv`
- * read, and the project's clock is stated where `process` exists.
- */
+/** Update mode is a `process.env`/`argv` read the page cannot make. */
 function providedToPage(options: ComponentProjectOptions): {
     componentClock?: string;
     componentViewport: { height: number; width: number };
@@ -352,12 +245,10 @@ function providedToPage(options: ComponentProjectOptions): {
     };
 }
 
-/** The page size every render of the project starts at. */
 function viewportOf(options: ComponentProjectOptions): { height: number; width: number } {
     return options.viewport ?? { height: 720, width: 1280 };
 }
 
-/** The globs a component project collects, and the ones it stays out of. */
 function componentGlobs(options: ComponentProjectOptions): {
     exclude: string[];
     include: string[];
@@ -368,19 +259,11 @@ function componentGlobs(options: ComponentProjectOptions): {
     };
 }
 
-/**
- * A component test renders in a real Chromium — the browser the website facet
- * already drives through the same `playwright` peer.
- *
- * The default `include` reaches the whole project, so the default `exclude`
- * keeps it out of `specs/`, where the assembled product is specified. State
- * your own `include` and the exclusion is yours to state too.
- */
+/** A component project: renders in a real Chromium; the default `exclude` keeps it out of `specs/`. */
 export async function component(
     options: ComponentProjectOptions = {},
 ): Promise<TestProjectInlineConfiguration> {
-    // Read before the first `await`: the caller's frame is only on the stack
-    // while the helper's own synchronous body is running.
+    // Read before the first `await`: the caller's frame is on the stack only during the synchronous body.
     const root = options.root ?? callerDirectory();
     assertProviderPin();
     const { playwright } = await import('@vitest/browser-playwright');
@@ -390,19 +273,14 @@ export async function component(
     const project = {
         ...pipeline,
         ...jsxPipeline(pipeline),
-        // A cold Vite cache optimises dependencies DURING the first run and
-        // reloads the tester mid-flight ("Vitest failed to find the runner").
-        // A fresh CI checkout is exactly that state, so the page's own runtime
-        // is declared up front. An optional peer that is absent is skipped.
+        // A cold Vite cache optimises during the first run and reloads the tester mid-flight: a fresh CI checkout is that state.
         optimizeDeps: optimizeDepsOf(pipeline.optimizeDeps),
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
         test: {
             browser: {
                 commands: COMPONENT_COMMANDS,
                 enabled: true,
-                // A reference screenshot is a golden, and it has its own option
-                // in Vitest 5 — separate from the failure screenshot below,
-                // which is a diagnostic. Both are artefacts, so both are moved.
+                // A reference screenshot is a golden with its own Vitest 5 option, apart from the failure screenshot.
                 expect: { toMatchScreenshot: { screenshotDirectory: SCREENSHOTS_DIR } },
                 headless: true,
                 instances: [{ browser: 'chromium' as const }],
@@ -412,23 +290,18 @@ export async function component(
                         timezoneId: options.timezone ?? 'UTC',
                     },
                 }),
-                // Browser Mode drops a failure screenshot beside the test by
-                // default; it is an artefact and belongs under `.artifacts/<tool>/`.
                 screenshotDirectory: SCREENSHOTS_DIR,
                 viewport: viewportOf(options),
             },
             ...componentGlobs(options),
             ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'component',
-            // `shouldUpdateSnapshots()` reads process.env/argv, which a page
-            // does not have, and a wrap module is imported by URL there: both
-            // cross into the page as provided values.
+            // The page has no `process.env`/`argv`, and imports the wrap by URL: both cross as provided values.
             provide: providedToPage(options),
             ...(options.wrap === undefined
                 ? {}
                 : { setupFiles: [writeSetupFile(options.wrap, root)] }),
-            // Two Chromiums must never share a slot on a 2-vCPU runner: node
-            // projects run first (0), the website facet next (1), this one last.
+            // Two Chromiums never share a slot on a 2-vCPU runner: node projects (0), website (1), component (2).
             sequence: { groupOrder: 2 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },

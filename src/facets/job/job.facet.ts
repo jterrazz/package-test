@@ -23,14 +23,7 @@ const composition = {
     } satisfies Record<keyof JobSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `job` facet — the chain `specification.job()` hands out. Jobs run in
- * this process by definition (CONVENTIONS A8): the clock pinned is this
- * process's, the network intercepted is this process's.
- *
- * The `DatabaseKey` parameter is the typed vocabulary of `.seed()`: the keys
- * of the declared services record that are databases.
- */
+/** The chain `specification.job()` hands out; jobs run in this process (A8). */
 export interface JobSpecification<DatabaseKey extends string = string> extends ChainOf<
     typeof composition,
     { databaseKey: DatabaseKey; services: Record<string, unknown> },

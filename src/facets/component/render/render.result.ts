@@ -1,14 +1,6 @@
 import { RenderedText } from './rendered-text.js';
 
-/**
- * What a render resolves to — the component as the page saw it, after the
- * scenario ran.
- *
- * Five accessors and no more: the ARIA outline a golden pins, the two
- * renderings a probe reads, and the two streams a spec wants silent. Nothing
- * here reaches back into React — a spec that needs the component's internals
- * is asserting the implementation, not the surface a user meets.
- */
+/** What a render resolves to: the component as the page saw it after the scenario. */
 export class RenderResult {
     /** The browser console as a stream — one `[type] text` line per message. */
     readonly console: RenderedText;
@@ -28,9 +20,7 @@ export class RenderResult {
         html: string;
         tree: string;
     }) {
-        // The test's own directory is resolved SERVER-side by the golden
-        // commands (`context.testPath`), so a page-captured accessor carries no
-        // directory of its own — there is no disk here to resolve one against.
+        // The golden commands resolve the test's directory server-side: a page-captured accessor carries none.
         this.console = new RenderedText(streams.console, 'console', '');
         this.content = new RenderedText(streams.content, 'content', '');
         this.errors = new RenderedText(streams.errors, 'errors', '');

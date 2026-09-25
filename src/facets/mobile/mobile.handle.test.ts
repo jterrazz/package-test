@@ -5,15 +5,9 @@ import { describe, expect, test } from 'vitest';
 
 import { startMobile } from './mobile.handle.js';
 
-/**
- * The constructor under a declared `appium` server. The device named here
- * exists on no machine, and the root holds no appium binary: a runner that
- * resolved the simulator through `simctl`, or spawned the project's own
- * server, refuses — so a handle coming back IS the proof that it did neither.
- */
+/** Names a device no machine has, with no appium binary in the root: a handle coming back proves neither `simctl` nor a spawn ran. */
 const ABSENT_DEVICE = { name: 'No Such Phone', os: '1.0' };
 
-/** A project root with no `node_modules/.bin/appium` in it. */
 const bareRoot = (): string => mkdtempSync(join(tmpdir(), 'mobile-root-'));
 
 describe('startMobile', () => {

@@ -4,7 +4,6 @@ import { afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import { buildEnv, observeProcess } from './exec.adapter.js';
 import type { ObservableProcess } from './exec.adapter.js';
 
-/** In-code fake child (CONVENTIONS I4) — emits scripted output and records kills. */
 class FakeChild implements ObservableProcess {
     exitListeners: ((code: null | number) => void)[] = [];
     killed: (NodeJS.Signals | number | undefined)[] = [];

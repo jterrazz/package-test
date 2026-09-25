@@ -1,4 +1,3 @@
-// The website facet's face: the names it contributes to `@jterrazz/test`.
 export type {
     BrowserConsoleMessage,
     BrowserLinkElement,

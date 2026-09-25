@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { file } from '../../../kernel/files/spec-path.js';
 import { run } from './run.action.js';
 
-/** A reader no setup of these runs is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
 describe('run', () => {

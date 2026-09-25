@@ -15,34 +15,20 @@ import { RenderResult } from './render.result.js';
 import type { ComponentScenario, RenderSubject } from './scenario.js';
 import { wrap } from './wrap.capability.js';
 
-/** The verbs only a component's visitor hands out: what a parent does to it. */
 const PARENT_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'rerender', probe: '.rerender(' },
     { group: 'Verb', name: 'unmount', probe: '.unmount(' },
 ];
 
-/** What a mounted subject offers the render, React or vanilla DOM alike. */
 type MountedSurface = Awaited<ReturnType<PagePort['mountDom']>>;
 
-/** A React tree's wrapper, as the chain states it. */
 type Wrapper = NonNullable<ReturnType<PagePort['projectWrapper']>>;
 
-/** A React tree, as a wrapper takes and hands it back. */
 type Ui = Parameters<Wrapper>[0];
 
-/**
- * What the page is still holding, and the teardown that lets it go.
- *
- * The React adapter's own auto-cleanup is a `beforeEach` registered when its
- * module loads — and this package loads it lazily, INSIDE the first render, so
- * that hook never covers the test that triggered it. The render does the
- * unmount itself, on the test that rendered: two renders' markup sharing one
- * document is how a second `button('Open')` appears and a descriptor that
- * named exactly one element starts refusing.
- */
+/** The React adapter's auto-cleanup `beforeEach` is registered at load, inside the first render, so never covers it: the render unmounts itself. */
 let mounted: MountedSurface | null = null;
 
-/** Take down whatever is still mounted, and hold nothing afterwards. */
 async function unmountHeld(): Promise<void> {
     const surface = mounted;
     mounted = null;
@@ -50,19 +36,15 @@ async function unmountHeld(): Promise<void> {
         try {
             await surface.unmount();
         } catch {
-            // A scenario that already called `visitor.unmount()` has nothing
-            // left to take down, and taking it down twice is not a failure
-            // worth raising from a teardown that has done its job.
+            // A scenario that called `visitor.unmount()` already took it down.
         }
     }
 }
 
-/** Is the subject a function that fills a container, rather than a React tree? */
 function isDomMount(subject: RenderSubject): subject is Parameters<PagePort['mountDom']>[0] {
     return typeof subject === 'function';
 }
 
-/** Mount the subject, dressing a React tree in the chain's wrapper and the project's. */
 async function mount(
     page: PagePort,
     chained: null | Wrapper,
@@ -85,7 +67,6 @@ async function mount(
     };
 }
 
-/** What `.render()` puts on a chain. */
 export type RenderSignature = ChainSignature & {
     readonly chain: {
         /** Mount the subject, run the scenario, and capture what the page shows. */
@@ -93,15 +74,7 @@ export type RenderSignature = ChainSignature & {
     };
 };
 
-/**
- * `.render(subject, scenario?)`: mount the subject, run the scenario (the
- * When), and capture what the page shows. A second render in one test
- * replaces the first: two mounts sharing one document is how a descriptor
- * that named exactly one element starts refusing, and the teardown only ever
- * sees the last surface. The first surface is taken down before the second
- * render arms anything, so what it does as it leaves meets the page it lived
- * on, not the next render's viewport, stubs or clock.
- */
+/** A second render replaces the first, taken down before the second arms anything. */
 export const render = defineAction<
     'render',
     [subject: RenderSubject, scenario?: ComponentScenario],

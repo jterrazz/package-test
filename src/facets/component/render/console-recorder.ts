@@ -1,17 +1,10 @@
-/**
- * One console line, as the page emitted it. `raised` is the message of the one
- * `Error` a call logged alone — how vitest's browser client relays a window
- * `error` event it leaves to a listener the page holds.
- */
+/** `raised` is the message of an `Error` logged alone: how vitest's browser client relays a window `error` event. */
 type ConsoleEntry = { raised?: string; text: string; type: string };
 
-/** The console methods a render records; everything else is left alone. */
 const CONSOLE_METHODS = ['debug', 'error', 'info', 'log', 'warn'] as const;
 
-/** One of the five, as a type — what the restore map is keyed by. */
 type ConsoleMethod = (typeof CONSOLE_METHODS)[number];
 
-/** Record what the page writes to the console for the length of the render. */
 export function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
     const entries: ConsoleEntry[] = [];
     const originals = new Map<ConsoleMethod, typeof console.log>();
@@ -29,9 +22,7 @@ export function recordConsole(): { entries: ConsoleEntry[]; stop: () => void } {
             original(...args);
         };
     }
-    // Vitest's own `error` listener runs first and, since this one exists, logs
-    // the event as `console.error(new Error(message))` in the same dispatch: that
-    // relay is the entry just pushed, and one exception is one line.
+    // Vitest's own listener relays the event as `console.error(new Error(message))` in the same dispatch: one exception is one line.
     const onError = (event: ErrorEvent): void => {
         const last = entries.at(-1);
         if (last?.type === 'error' && last.raised === event.message) {

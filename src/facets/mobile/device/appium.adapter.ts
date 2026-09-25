@@ -21,55 +21,34 @@ import type {
 } from './device.port.js';
 import { projectScreen } from './projection.js';
 
-/** The element list a predicate search resolves to. */
 type ElementList = Awaited<ReturnType<Driver['$$']>>;
 
-/** One element resolved by a predicate search. */
 type DriverElement = ElementList[number];
 
-/**
- * Anything a predicate can search from — the session root, or a resolved
- * element when a descriptor carries a scope. Structural, so the resolution
- * loop recurses without caring which one it holds.
- */
 type MatchScope = Driver | DriverElement;
 
-/*
- * How long every verb polls for at least one visible match. 30s absorbs a
- * cold app boot (first launch after an install or a state wipe) — the same
- * default playwright chose for its actionability timeout. A project whose
- * app boots slower than that (a dev bundle building on demand) raises it
- * with the runner's `timeouts` option rather than sleeping in its specs.
- */
+/* 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
 const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
-/** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
-/** WebDriverAgent builds once per simulator — the first session is the slow one. */
+/** WebDriverAgent builds once per simulator: the first session is the slow one. */
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 
 const delay = async (ms: number): Promise<void> => {
     await new Promise((resolveDelay) => setTimeout(resolveDelay, ms));
 };
 
-/** Escape a name for an NSPredicate single-quoted string literal. */
 function escapePredicate(value: string): string {
     return value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`);
 }
 
-/**
- * Translate a user-facing descriptor into an iOS predicate string. Landmarks
- * have no XCUITest analog — the shared vocabulary is wider than a screen,
- * and the boundary is named rather than silently approximated.
- */
+/** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
 function compilePredicate(
     element: MobileElementRef,
     options?: { anyVisibility?: boolean },
 ): string {
     const name = escapePredicate(element.name ?? '');
-    // A label designates the WHOLE label — the same default as the
-    // web vocabulary, compiled to equality; `{ exact: false }` is the opt-out
-    // and compiles to `CONTAINS`.
+    // A label designates the whole label, compiled to equality; `{ exact: false }` compiles to `CONTAINS`.
     const contains = (attribute: string): string =>
         element.exact === false ? `${attribute} CONTAINS '${name}'` : `${attribute} == '${name}'`;
     const visible = options?.anyVisibility ? '1 == 1' : 'visible == 1';
@@ -101,13 +80,7 @@ function compilePredicate(
     }
 }
 
-/**
- * Every element a predicate designates under `scope`.
- *
- * ONE place awaits webdriverio's query: `$$` answers a chainable typed as the
- * array it resolves to, so the await that makes the array real reads to the
- * typechecker as an await of a non-promise.
- */
+/** `$$` answers a chainable typed as its array: the one await of it lives here. */
 async function matching(
     scope: MatchScope,
     element: MobileElementRef,
@@ -120,7 +93,6 @@ async function matching(
     /* oxlint-enable typescript/await-thenable */
 }
 
-/** The outside-in scope chain of a descriptor, ending on the target itself. */
 function scopeChain(element: MobileElementRef): MobileElementRef[] {
     const chain: MobileElementRef[] = [];
     for (let current: MobileElementRef | undefined = element; current; current = current.scope) {
@@ -129,7 +101,6 @@ function scopeChain(element: MobileElementRef): MobileElementRef[] {
     return chain;
 }
 
-/** Capture one candidate's evidence for the ambiguity refusal. */
 async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {
     const [type, label, value, identifier] = await Promise.all([
         element.getAttribute('type'),
@@ -146,37 +117,16 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     };
 }
 
-/**
- * Device adapter backed by appium's XCUITest driver over webdriverio.
- *
- * ONE driver session per adapter, opened lazily on the first `open()` and
- * reused — WebDriverAgent startup is the expensive part, not the app
- * relaunch. Under the run's {@link SessionLedger} it is the run's session,
- * which `close()` leaves to the run to end. Every `open()` terminates and
- * relaunches the app, so each spec starts from a deterministic fresh state.
- *
- * Webdriverio is an optional peer dependency: it is only imported here, and
- * this module is only loaded when a spec calls `.open()`.
- */
+/** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */
 export class AppiumAdapter implements DevicePort {
-    /** The verb poll budget — the runner's `timeouts.action`, or the default. */
     private readonly actionTimeoutMs: number;
-    /** The injected `attach`, beside {@link remote}. */
     private readonly attach?: AttachFn | undefined;
     private driver: Driver | null = null;
-    /** The WebDriverAgent launch budget — the runner's `timeouts.launch`, or the default. */
     private readonly launchTimeoutMs: number;
-    /** The run's session ledger — absent when the run shares no session. */
     private readonly ledger?: SessionLedger | undefined;
     private readonly options: { device: MobileDevice; serverUrl: string };
-    /**
-     * The session factory. Absent in production — webdriverio is then loaded
-     * lazily on the first `open()`. Injected by this module's own unit test,
-     * which drives the waits over a stub driver with no simulator in reach
-     * (mocks are CODE here, CONVENTIONS I4).
-     */
+    /** Injected by the unit test; production loads webdriverio lazily. */
     private readonly remote?: RemoteFn | undefined;
-    /** Whether the driver is the run's session rather than this adapter's. */
     private shared = false;
 
     constructor(options: {
@@ -205,8 +155,7 @@ export class AppiumAdapter implements DevicePort {
     async open(options: DeviceOpenOptions): Promise<DeviceScreen> {
         const driver = await this.session(options.bundleId);
 
-        // Deterministic fresh state: every open terminates the app first,
-        // then relaunches it — plainly, or straight onto the deep link.
+        // Every open terminates the app first, then relaunches it.
         try {
             await driver.executeScript('mobile: terminateApp', [{ bundleId: options.bundleId }]);
         } catch {
@@ -222,13 +171,9 @@ export class AppiumAdapter implements DevicePort {
             try {
                 await options.scenario(this.createVisitor(driver));
             } catch (error) {
-                // Evidence on failure: a screenshot of the state the
-                // scenario died in, referenced from the error itself.
                 const evidence = await this.captureEvidence(driver);
                 const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                // A W3 refusal is already a complete, self-explaining
-                // message — re-wrapping it would print the whole thing
-                // twice (once inline, once as the cause).
+                // A W3 refusal is already complete: re-wrapping would print it twice.
                 if (error instanceof AmbiguousElementError) {
                     error.message += suffix;
                     throw error;
@@ -243,13 +188,7 @@ export class AppiumAdapter implements DevicePort {
         return projectScreen(await driver.getPageSource());
     }
 
-    /**
-     * The visitor implementation. Acting verbs (tap/fill) poll until exactly
-     * one visible match exists (CONVENTIONS W3); `see()` acts on nothing, so
-     * ANY visible match satisfies it — XCUITest trees legitimately expose the
-     * same text more than once (container/child label duplication), and a
-     * synchronization primitive refusing on that would punish honest screens.
-     */
+    /** `see()` acts on nothing, so any visible match satisfies it: XCUITest trees duplicate labels across container and child. */
     private createVisitor(driver: Driver): MobileVisitor {
         return {
             fill: async (element, value) => {
@@ -266,15 +205,7 @@ export class AppiumAdapter implements DevicePort {
         };
     }
 
-    /**
-     * Resolve a descriptor: poll until at least one visible match exists,
-     * then enforce the verb's cardinality — `'one'` refuses ambiguity
-     * (CONVENTIONS W3), `'any'` settles for the first match. Scopes stay
-     * strict in BOTH modes: "within one of several containers" designates
-     * nothing, whatever the verb. The chain resolves outside-in, so an
-     * ambiguous scope names ITSELF as the fault rather than sending the
-     * author to fix the target.
-     */
+    /** Scopes stay strict in both modes; the chain resolves outside-in, so an ambiguous scope names itself. */
     private async resolveOne(
         driver: Driver,
         element: MobileElementRef,
@@ -284,11 +215,7 @@ export class AppiumAdapter implements DevicePort {
         const chain = scopeChain(element);
         const deadline = Date.now() + this.actionTimeoutMs;
 
-        /*
-         * The scroll-into-view fallback queries the tree WITHOUT the
-         * visibility filter — an expensive full snapshot on busy screens —
-         * so it runs once, on the first miss, not on every poll.
-         */
+        /* The scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
         let scrollAttempted = false;
         for (;;) {
             const resolved = await this.resolveChain(driver, chain, cardinality, {
@@ -305,7 +232,6 @@ export class AppiumAdapter implements DevicePort {
         }
     }
 
-    /** One resolution pass over the chain — `null` means "nothing yet, keep polling". */
     private async resolveChain(
         driver: Driver,
         chain: MobileElementRef[],
@@ -317,19 +243,13 @@ export class AppiumAdapter implements DevicePort {
             const matches = await matching(scope, level);
             const count = await matches.length;
             if (count === 0) {
-                /*
-                 * Actionability includes scroll-into-view: an element that
-                 * exists below the fold is brought on screen, and the outer
-                 * poll re-resolves it as visible on the next pass.
-                 */
+                /* Actionability includes scroll-into-view: the next pass re-resolves the element as visible. */
                 if (options?.tryScroll) {
                     const offscreen = await matching(scope, level, { anyVisibility: true });
                     const first = offscreen[0];
                     if (first !== undefined) {
                         try {
-                            // The FOUND element is scrolled into view by id,
-                            // whatever its container; `mobile: scroll`'s
-                            // `toVisible` is for table and collection views.
+                            // `mobile: scroll`'s `toVisible` is for table and collection views: scroll the found element by id.
                             await driver.executeScript('mobile: scrollToElement', [
                                 { elementId: first.elementId },
                             ]);
@@ -358,7 +278,6 @@ export class AppiumAdapter implements DevicePort {
         return scope as DriverElement;
     }
 
-    /** Enumerate the candidates' evidence, truncated. */
     private async captureMatches(matches: ElementList): Promise<MobileElementMatch[]> {
         const count = Math.min(await matches.length, MAX_REPORTED_MATCHES);
         const evidence: MobileElementMatch[] = [];
@@ -383,7 +302,6 @@ export class AppiumAdapter implements DevicePort {
         }
     }
 
-    /** The timeout refusal, with a compact excerpt of what IS on screen to aid diagnosis. */
     private async timeoutError(
         driver: Driver,
         element: MobileElementRef,
@@ -410,7 +328,6 @@ export class AppiumAdapter implements DevicePort {
         );
     }
 
-    /** The driver session, opened once — with an actionable error when webdriverio is absent. */
     private async session(bundleId: string): Promise<Driver> {
         if (this.driver) {
             return this.driver;

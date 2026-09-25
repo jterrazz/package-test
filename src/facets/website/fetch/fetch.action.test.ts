@@ -11,10 +11,8 @@ import type { WebsiteConfig } from '../website.handle.js';
 import { rawFetch } from './fetch.action.js';
 import type { FetchResult } from './fetch.result.js';
 
-/** The module-scope double as the node entry publishes it. */
 const intercept = interceptThrough(registerStubs);
 
-/** One stub for the scope of a test, on an engine that stops when the scope ends. */
 async function stubbed(request: StubRequest, response: StubResponse): Promise<AsyncDisposable> {
     const scope = await intercept(request, response);
     return {
@@ -28,14 +26,12 @@ async function stubbed(request: StubRequest, response: StubResponse): Promise<As
     };
 }
 
-/** A chain of `.clock()` and `.headers()`, ending on `.fetch()`. */
 type Chain = {
     clock: (iso: string) => Chain;
     fetch: (path: string) => Promise<FetchResult>;
     headers: (headers: Record<string, string>) => Chain;
 };
 
-/** A chain against the site at `http://site.test`, over a clock engine that logs every pin. */
 function chainOver(pinned: (null | string)[]): Chain {
     return defineFacet<Chain, WebsiteConfig>()({
         actions: [rawFetch],

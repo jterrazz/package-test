@@ -1,19 +1,11 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
-/**
- * Simulator resolution — `device: { name, os? }` → one booted UDID.
- *
- * The selection logic is pure (`simctl list` JSON in, one device out) so the
- * refusals are unit-testable; only the thin wrappers below shell out to
- * `xcrun`. Zero matches and several matches both refuse with the full device
- * listing — the framework never guesses which simulator a spec meant.
- */
+/** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
 
 const run = promisify(execFile);
 const BOOT_TIMEOUT_MS = 120_000;
 
-/** One simulator known to `simctl`, flattened out of the per-runtime listing. */
 export type SimulatorDevice = {
     name: string;
     /** Human OS label derived from the runtime key — `iOS 26.5`. */
@@ -22,12 +14,10 @@ export type SimulatorDevice = {
     udid: string;
 };
 
-/** The shape of `xcrun simctl list devices --json` this module reads. */
 type SimctlList = {
     devices: Record<string, { isAvailable?: boolean; name: string; state: string; udid: string }[]>;
 };
 
-/** `com.apple.CoreSimulator.SimRuntime.iOS-26-5` → `iOS 26.5`. */
 function runtimeLabel(runtime: string): string {
     const match = /SimRuntime\.(?<platform>[A-Za-z]+)-(?<version>[\d-]+)$/u.exec(runtime);
     const platform = match?.groups?.platform;
@@ -37,7 +27,6 @@ function runtimeLabel(runtime: string): string {
         : `${platform} ${version.replaceAll('-', '.')}`;
 }
 
-/** Flatten the per-runtime record into one available-device list. */
 export function listSimulators(listJson: string): SimulatorDevice[] {
     const parsed = JSON.parse(listJson) as SimctlList;
     return Object.entries(parsed.devices).flatMap(([runtime, devices]) =>
@@ -52,7 +41,6 @@ export function listSimulators(listJson: string): SimulatorDevice[] {
     );
 }
 
-/** `'iOS 26.5'` → `{ platform: 'ios', version: '26.5' }`; a bare `'26.5'` names no platform. */
 function runtimeOf(os: string): { platform: string | undefined; version: string } {
     const [first = '', second] = os.trim().toLowerCase().split(/\s+/u);
     return second === undefined
@@ -60,11 +48,7 @@ function runtimeOf(os: string): { platform: string | undefined; version: string 
         : { platform: first, version: second };
 }
 
-/**
- * Do two `os` spellings name one runtime? `'iOS 26.5'` and the bare version
- * `'26.5'` do, case-insensitive; two that both name a platform must name the
- * same one.
- */
+/** `'iOS 26.5'` and `'26.5'` name one runtime; two naming platforms must name the same one. */
 export function sameRuntime(one: string, other: string): boolean {
     const [a, b] = [runtimeOf(one), runtimeOf(other)];
     return (
@@ -79,11 +63,6 @@ function formatListing(devices: SimulatorDevice[]): string {
         .join('\n');
 }
 
-/**
- * Pick exactly one simulator by name (and OS when given). Zero or several
- * matches refuse with the listing needed to fix the options without opening
- * Xcode.
- */
 export function selectSimulator(
     listJson: string,
     criteria: { name: string; os?: string },
@@ -111,7 +90,6 @@ export function selectSimulator(
     return only;
 }
 
-/** Resolve `device: { name, os? }` to a UDID via `xcrun simctl`. */
 export async function resolveSimulatorUdid(criteria: {
     name: string;
     os?: string;
@@ -122,11 +100,7 @@ export async function resolveSimulatorUdid(criteria: {
     return selectSimulator(stdout, criteria).udid;
 }
 
-/**
- * Boot the simulator when it is shut down and wait until it reports Booted.
- * Idempotent: booting an already-booted device is tolerated, and
- * `bootstatus -b` returns immediately when the device is up.
- */
+/** Idempotent: an already-booted device is tolerated. */
 export async function ensureBooted(udid: string): Promise<void> {
     try {
         await run('xcrun', ['simctl', 'boot', udid]);

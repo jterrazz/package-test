@@ -8,7 +8,6 @@ import { env } from './env.capability.js';
 import type { EnvMethod } from './env.capability.js';
 import { exec } from './exec.action.js';
 
-/** A command adapter that records what its last run was handed — mocks are code (CONVENTIONS I4). */
 class RecordingCommand implements CliPort {
     lastArgs: string | undefined;
     lastCwd: string | undefined;
@@ -26,13 +25,11 @@ class RecordingCommand implements CliPort {
     }
 }
 
-/** A chain composed of `.env()`, ending on `.exec()`. */
 type Chain = {
     env: EnvMethod<Chain>;
     exec: (args?: string | string[], options?: ExecOptions) => Promise<CliResult>;
 };
 
-/** A chain running its commands through `command`. */
 function chainOver(command: CliPort): Chain {
     return defineFacet<Chain>()({
         actions: [exec],

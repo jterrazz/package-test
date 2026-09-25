@@ -1,19 +1,7 @@
 import type { DeviceScreen, ScreenNode } from './device.port.js';
 
-/**
- * The screen projection — XCUITest page source → {@link ScreenNode} tree.
- *
- * A raw page source is deep and noisy: React Native wraps every view in
- * layers of unlabeled `XCUIElementTypeOther` nodes, and accessibility
- * elements repeat themselves as their own children. The projection collapses
- * that noise into the tree a golden can carry: nodes with no label, no value
- * and no identifier are dropped and their children hoisted; a child that
- * merely repeats its parent disappears; type names lose the
- * `XCUIElementType` prefix. Pure string-in/data-out, so the shape is
- * unit-testable and the device integration stays a thin adapter.
- */
+/** React Native wraps views in unlabeled `Other` nodes and elements repeat as their own children: nodes with no label, value or identifier are dropped and their children hoisted. */
 
-/** One parsed XML element — tag, attributes, children (page sources carry no text nodes). */
 type RawNode = {
     attributes: Record<string, string>;
     children: RawNode[];
@@ -32,7 +20,6 @@ const NAMED_ENTITIES: Record<string, string> = {
     '&quot;': '"',
 };
 
-/** Decode the XML entities an attribute value can carry. */
 function decodeEntities(value: string): string {
     return value.replaceAll(
         /&(?:#x(?<hex>[\dA-Fa-f]+)|#(?<decimal>\d+)|(?<named>amp|apos|gt|lt|quot));/gu,
@@ -48,7 +35,6 @@ function decodeEntities(value: string): string {
     );
 }
 
-/** Parse the page source into a raw element tree (strict, attribute-only XML). */
 function parsePageSource(xml: string): RawNode {
     const stack: RawNode[] = [];
     let root: null | RawNode = null;
@@ -84,7 +70,6 @@ function parsePageSource(xml: string): RawNode {
     return root;
 }
 
-/** The substance of a node — what survives projection, or nothing. */
 function substance(node: RawNode): Omit<ScreenNode, 'children'> {
     const label = node.attributes.label || undefined;
     const value = node.attributes.value || undefined;
@@ -92,7 +77,7 @@ function substance(node: RawNode): Omit<ScreenNode, 'children'> {
     return {
         type: node.tag.replace(/^XCUIElementType/u, ''),
         ...(label === undefined ? {} : { label }),
-        // A value or identifier merely echoing the label is XCUITest noise.
+        // A value or identifier echoing the label is XCUITest noise.
         ...(value === undefined || value === label ? {} : { value }),
         ...(identifier === undefined || identifier === label ? {} : { identifier }),
     };
@@ -102,7 +87,6 @@ function hasSubstance(node: Omit<ScreenNode, 'children'>): boolean {
     return node.label !== undefined || node.value !== undefined || node.identifier !== undefined;
 }
 
-/** A childless child that repeats its parent is the same accessibility element twice. */
 function repeatsParent(child: ScreenNode, parent: Omit<ScreenNode, 'children'>): boolean {
     return (
         child.children === undefined &&
@@ -113,7 +97,6 @@ function repeatsParent(child: ScreenNode, parent: Omit<ScreenNode, 'children'>):
     );
 }
 
-/** Project one raw node: a kept node, or (hoisting) the projections of its children. */
 function projectNode(node: RawNode): ScreenNode[] {
     const own = substance(node);
     const children = node.children
@@ -126,7 +109,6 @@ function projectNode(node: RawNode): ScreenNode[] {
     return [{ ...own, ...(children.length > 0 ? { children } : {}) }];
 }
 
-/** Collect the visible texts in document order, collapsing consecutive repeats. */
 function collectTexts(node: RawNode, texts: string[]): void {
     if (node.attributes.visible === 'true') {
         const text = node.attributes.label || node.attributes.value || undefined;
@@ -139,11 +121,6 @@ function collectTexts(node: RawNode, texts: string[]): void {
     }
 }
 
-/**
- * Project a raw XCUITest page source into the captured screen: the collapsed
- * tree (rooted at the application node, which is always kept) and the
- * visible texts in document order.
- */
 export function projectScreen(xml: string): DeviceScreen {
     let root = parsePageSource(xml);
     // The page source wraps the application in an `AppiumAUT` envelope.
@@ -152,8 +129,7 @@ export function projectScreen(xml: string): DeviceScreen {
         root = onlyChild;
     }
 
-    // Texts start below the application node — the app's own label is chrome,
-    // not screen content.
+    // The app's own label is chrome, not screen content.
     const texts: string[] = [];
     for (const child of root.children) {
         collectTexts(child, texts);

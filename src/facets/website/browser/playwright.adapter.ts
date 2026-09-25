@@ -18,14 +18,8 @@ import type {
     Visitor,
 } from './browser.port.js';
 
-/**
- * Anything a locator can be built from — the page root, or another locator
- * when a descriptor carries a scope. Structural, so `locate()` recurses
- * without caring which one it holds.
- */
 type MatchScope = Locator | Page;
 
-/** The head/body extraction evaluated in-page — the browser IS the parser. */
 type PageExtraction = {
     html: string;
     jsonLdBlocks: string[];
@@ -35,31 +29,13 @@ type PageExtraction = {
     title: string;
 };
 
-/** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
 
-/*
- * How long a value assertion retries, and how often it looks. The budget is
- * playwright's own actionability default, so `see(valued(…))` waits exactly as
- * long as the `see()` beside it; the interval is short because the answer
- * usually arrives on the first re-render after a fill.
- */
+/* Playwright's actionability default, so `see(valued(…))` waits as long as `see()`. */
 const VALUE_TIMEOUT_MS = 30_000;
 const VALUE_POLL_MS = 100;
 
-/**
- * The roles a FIELD can carry — what `field('Name')` designates.
- *
- * A field is named by its ACCESSIBLE name, not by the text of the label
- * element that happens to wrap it: `<label><span>Channel</span><select>…` has
- * a label whose text carries every option of the select, while the control's
- * accessible name is `Channel` — which is what the ARIA tree shows and what a
- * screen reader reads. Resolving by label text alone made the ordinary
- * wrapping-label form unreachable under the whole-name default.
- *
- * The label-text locator stays in the union for the controls ARIA gives no
- * role at all (a date or colour input), which nothing else would find.
- */
+/** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
 const FIELD_ROLES = [
     'checkbox',
     'combobox',
@@ -71,19 +47,10 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/**
- * Translate a user-facing descriptor into a playwright locator, resolving
- * `scope` outside-in so `within(navigation(), link('X'))` searches the nav
- * subtree. No `.first()` anywhere: playwright's strict mode is the mechanism
- * behind CONVENTIONS W3, and swallowing it would reintroduce the silent
- * wrong-element bug the rule exists to prevent.
- */
+/** No `.first()`: playwright's strict mode is the mechanism behind W3. */
 function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
-    // Playwright's own option bags are exact-optional: an absent `name` is no
-    // name filter at all. `exact` is the framework's default, not playwright's
-    // — a name designates the accessible name WHOLE, and `{ exact: false }` is
-    // the opt-out.
+    // `exact` is the framework's default, not playwright's.
     const exact = element.exact ?? true;
     const name = element.name ?? '';
     if (element.kind === 'field') {
@@ -99,9 +66,7 @@ function locate(root: MatchScope, element: ElementRef): Locator {
     if (element.kind === 'text') {
         return scope.getByText(name, { exact });
     }
-    // Every other kind IS an ARIA role — landmark or not — and the vocabulary
-    // names each after the role it locates, so one branch answers for all of
-    // them and a descriptor added to the vocabulary needs nothing here.
+    // Every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
         element.kind,
         element.name === undefined ? { exact } : { exact, name: element.name },
@@ -113,12 +78,10 @@ function isStrictViolation(error: unknown): boolean {
     return error instanceof Error && error.message.includes('strict mode violation');
 }
 
-/** Capture the candidates in-page — the evidence the refusal enumerates. */
 async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
     return await locator.evaluateAll(
         (nodes, { landmarks, limit }) => {
-            // The landmark's accessible name, as the role engine reads it: its
-            // label, else the text of what its `aria-labelledby` names.
+            // Its label, else the text of what its `aria-labelledby` names.
             // oxlint-disable-next-line unicorn/consistent-function-scoping -- this function is serialized into the page: a helper at module scope never reaches it
             const nameOf = (landmark: Element | null | undefined): string | undefined => {
                 const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
@@ -157,12 +120,7 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
     );
 }
 
-/**
- * Run one visitor action, converting a strict-mode violation into the W3
- * refusal. The ambiguous level is identified before reporting: a scope that
- * matches several landmarks is the real fault, and naming the target instead
- * would send the author to fix the wrong descriptor.
- */
+/** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 async function act<T>(
     page: Page,
     element: ElementRef,
@@ -182,7 +140,6 @@ async function act<T>(
     }
 }
 
-/** Walk the scope chain outside-in; the outermost ambiguous level is the fault. */
 async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<ElementRef> {
     const chain: ElementRef[] = [];
     for (let current: ElementRef | undefined = element; current; current = current.scope) {
@@ -196,16 +153,7 @@ async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<Elem
     return element;
 }
 
-/**
- * The same element, narrowed by whatever STATE the descriptor carries — focus,
- * or accepting input — or `null` when it carries none.
- *
- * A second condition on the locator rather than a one-shot probe: the locator
- * keeps playwright's own retry, so `see(focused(x))` waits for the keyboard to
- * arrive instead of asking once and failing on a frame of animation. It also
- * needs nothing but `playwright` — `expect(...).toBeFocused()` lives in
- * `@playwright/test`, which this package deliberately does not carry.
- */
+/** A second locator condition keeps playwright's retry; `toBeFocused()` lives in `@playwright/test`, which this package does not carry. */
 function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator | null {
     if (element.focused === true) {
         return locator.and(page.locator(':focus'));
@@ -219,22 +167,16 @@ function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator |
     return null;
 }
 
-/**
- * Is this descriptor answered by PRESENCE rather than by visibility? The
- * options of a collapsed `<select>` are in the document and in the tree, and
- * none of them has a box on the screen until a visitor opens it.
- */
+/** A collapsed select's options have no box until opened. */
 function byPresence(element: ElementRef): boolean {
     return element.kind === 'option';
 }
 
-/** The field's live value, or `null` when nothing (unambiguous) is there yet. */
 async function currentValue(locator: Locator): Promise<null | string> {
     try {
         return await locator.inputValue({ timeout: VALUE_POLL_MS });
     } catch (error) {
-        // A strict-mode violation is the W3 refusal and belongs to `act()`;
-        // anything else means the field is not on the page (yet).
+        // A strict-mode violation is `act()`'s W3 refusal; anything else means the field is not there yet.
         if (isStrictViolation(error)) {
             throw error;
         }
@@ -242,16 +184,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
     }
 }
 
-/**
- * Wait until the field holds the value the descriptor carries — or, for
- * `gone()`, until it no longer does.
- *
- * A poll rather than a narrowed locator: a value is a PROPERTY of the node,
- * and the CSS a locator narrows with reads ATTRIBUTES — a controlled input
- * whose `value` attribute never moves would answer for a value it no longer
- * holds. The locator is re-read every round, so a re-rendered field is read
- * again rather than held as a stale handle.
- */
+/** A poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves. */
 async function waitForValue(locator: Locator, element: ElementRef, wanted: boolean): Promise<void> {
     const value = element.value ?? '';
     const deadline = Date.now() + VALUE_TIMEOUT_MS;
@@ -271,7 +204,6 @@ async function waitForValue(locator: Locator, element: ElementRef, wanted: boole
     }
 }
 
-/** The visitor implementation — every action auto-waits via playwright actionability. */
 function createVisitor(page: Page, baseUrl: string): Visitor {
     return {
         check: async (element) => {
@@ -334,14 +266,9 @@ function createVisitor(page: Page, baseUrl: string): Visitor {
     };
 }
 
-/**
- * How the worker's chromium is launched: the headless shell, named rather than
- * left to playwright's default, so the lighter binary is what every visit
- * gets whatever that default becomes.
- */
+/** The headless shell, named so the lighter binary is used whatever playwright's default becomes. */
 const LAUNCH_OPTIONS = { channel: 'chromium-headless-shell', headless: true } as const;
 
-/** Launch chromium, with an actionable error when playwright is absent. */
 async function launchChromium(): Promise<Browser> {
     let chromium: BrowserType;
     try {
@@ -354,14 +281,9 @@ async function launchChromium(): Promise<Browser> {
     return await chromium.launch(LAUNCH_OPTIONS);
 }
 
-/** What the sharing reads of a browser: the moment it is lost. */
 type Disconnectable = { on: (event: 'disconnected', listener: () => void) => unknown };
 
-/**
- * One browser for everyone who asks: launched on the first ask, handed to
- * every later one, and launched again once it has disconnected. A launch that
- * failed is not kept, so the next ask tries again.
- */
+/** Launched on the first ask, again once disconnected; a failed launch is not kept. */
 export function createSharedBrowser<T extends Disconnectable>(
     launch: () => Promise<T>,
 ): () => Promise<T> {
@@ -384,14 +306,9 @@ export function createSharedBrowser<T extends Disconnectable>(
     };
 }
 
-/**
- * The worker's browser of each launcher, shared by every runner the worker
- * hosts and kept until the worker exits — playwright ends the browsers it
- * launched with the process.
- */
+/** Kept until the worker exits: playwright ends the browsers it launched with the process. */
 const workerBrowsers = new Map<() => Promise<Browser>, () => Promise<Browser>>();
 
-/** The one browser the worker holds for `launch`, created on the first ask. */
 function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {
     let shared = workerBrowsers.get(launch);
     if (shared === undefined) {
@@ -401,18 +318,7 @@ function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {
     return shared;
 }
 
-/**
- * Browser adapter backed by playwright chromium.
- *
- * ONE browser process per vitest worker, launched lazily on the first
- * `open()` of any runner the worker hosts. Each visit gets a fresh
- * `BrowserContext` — isolation without paying a browser launch per spec or per
- * runner. A visit records no video and no trace; a scenario that fails leaves
- * one screenshot.
- *
- * Playwright is an optional peer dependency: it is only imported here, and
- * this module is only loaded when a spec calls `.visit()`.
- */
+/** One browser per worker, launched lazily; each visit gets a fresh `BrowserContext`. */
 export class PlaywrightAdapter implements BrowserPort {
     private readonly browser: () => Promise<Browser>;
     private readonly contexts = new Set<BrowserContext>();
@@ -421,7 +327,6 @@ export class PlaywrightAdapter implements BrowserPort {
         this.browser = workerBrowser(options.launch ?? launchChromium);
     }
 
-    /** Close what the runner's visits still hold open; the worker's browser outlives the runner. */
     async close(): Promise<void> {
         const open = [...this.contexts];
         this.contexts.clear();
@@ -439,11 +344,7 @@ export class PlaywrightAdapter implements BrowserPort {
         });
         this.contexts.add(context);
 
-        // Cross-origin policy: with 'block', any request leaving the site
-        // under test is aborted — analytics and CDNs never make the visit
-        // non-deterministic (the browser-side analog of strict intercepts).
-        // The declared stub backend is a legitimate cross-origin target and
-        // stays reachable through `allowedOrigins`.
+        // With `'block'`, requests leaving the site are aborted; the stub backend stays reachable through `allowedOrigins`.
         if (options.external === 'block') {
             const allowed = new Set([
                 new URL(options.baseUrl).origin,
@@ -460,9 +361,7 @@ export class PlaywrightAdapter implements BrowserPort {
 
         try {
             const page = await context.newPage();
-            // The page's own calendar, pinned before the first byte is parsed:
-            // A script reading `Date.now()` on load must see the stated instant,
-            // not the moment the navigation happened to start.
+            // Pinned before the first byte: a script reading `Date.now()` on load must see the stated instant.
             if (options.clock !== undefined) {
                 await page.clock.setFixedTime(new Date(options.clock));
             }
@@ -470,9 +369,7 @@ export class PlaywrightAdapter implements BrowserPort {
             page.on('console', (message) => {
                 consoleMessages.push({ text: message.text(), type: message.type() });
             });
-            // An exception nothing in the page caught is an error of the
-            // visit, spelled as the browser's own `ErrorEvent` spells it — the
-            // line a mounted component's error stream carries.
+            // An uncaught exception is an error of the visit, spelled as the browser's `ErrorEvent` spells it.
             page.on('pageerror', (error) => {
                 consoleMessages.push({
                     text: `Uncaught ${error.name}: ${error.message}`,
@@ -486,13 +383,9 @@ export class PlaywrightAdapter implements BrowserPort {
                 try {
                     await options.scenario(createVisitor(page, options.baseUrl));
                 } catch (error) {
-                    // Evidence on failure: a screenshot of the state the
-                    // scenario died in, referenced from the error itself.
                     const evidence = await this.captureEvidence(page);
                     const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                    // A W3 refusal is already a complete, self-explaining
-                    // message — re-wrapping it would print the whole thing
-                    // twice (once inline, once as the cause).
+                    // A W3 refusal is already complete: re-wrapping would print it twice.
                     if (error instanceof AmbiguousElementError) {
                         error.message += suffix;
                         throw error;
@@ -530,9 +423,7 @@ export class PlaywrightAdapter implements BrowserPort {
                 };
             });
 
-            // The ARIA snapshot comes from the same Playwright method the
-            // component facet's server command calls, so both facets speak ONE
-            // dialect and a page tree and a component tree are comparable.
+            // The same Playwright method the component facet's command calls: one dialect for both trees.
             const tree = await page.locator('body').ariaSnapshot();
 
             return {

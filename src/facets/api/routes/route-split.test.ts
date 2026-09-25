@@ -7,14 +7,8 @@ import { ROUTES_DIR, shardLedgersDir, writeLedger } from './ledger.js';
 import { judgeSplit, NO_SHARD_LEDGERS } from './route-split.js';
 import type { Route } from './routes.js';
 
-/** A green merge, judged. */
 const GREEN = { failed: 0, update: false };
 
-/**
- * A project root whose split run's shards each reached the routes listed, the
- * three of `/users` declared by every shard, beside a whole run's ledger that
- * reached `DELETE /users/:id`.
- */
 function splitRun(...shards: Route[][]): string {
     const root = mkdtempSync(join(tmpdir(), 'route-split-'));
     onTestFinished(() => {

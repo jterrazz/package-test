@@ -3,7 +3,6 @@ import type { ComponentUi } from '../render/scenario.js';
 import { afterThisTest, projectWrapper } from './page-runtime.js';
 import type { ariaTree, componentVerbs, mountDom, mountReact } from './vitest-browser.adapter.js';
 
-/** What a render reaches through the adapter. */
 type Adapter = {
     readonly ariaTree: typeof ariaTree;
     readonly componentVerbs: typeof componentVerbs;
@@ -11,12 +10,10 @@ type Adapter = {
     readonly mountReact: typeof mountReact;
 };
 
-/** The adapter, loaded by the first render: it reaches `vitest/browser`, which only a page can load. */
 async function adapter(): Promise<Adapter> {
     return await import('./vitest-browser.adapter.js');
 }
 
-/** The page under Vitest Browser Mode, as a render reaches it: the document, the adapter, the runner. */
 export const vitestBrowserPage: PagePort = {
     afterThisTest,
     ariaTree: async () => {

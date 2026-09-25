@@ -17,7 +17,6 @@ export class HttpResult extends BaseResult {
         return new ResponseAccessor(this.responseData, this.testDir, this.captures);
     }
 
-    /** The HTTP response status code. */
     get status(): number {
         return this.responseData.status;
     }

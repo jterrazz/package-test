@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { runDevice, startAppiumServer } from './appium-server.js';
 
-/** The run's server, booted for an iPhone 17 on iOS 26.5. */
 const run = {
     device: { name: 'iPhone 17', os: '26.5' },
     udid: 'SIM-17',

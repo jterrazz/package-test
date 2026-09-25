@@ -29,34 +29,9 @@ const composition = {
     } satisfies Record<keyof ComponentOptions, MatrixRow>,
 } as const;
 
-/**
- * `component` — the chain a rendered unit is specified through. Every setup
- * returns a new chain, so the handle a spec imports never carries the
- * previous test's stubs, wrapper or clock.
- *
- * It is the one facet with no constructor. A component is a UNIT, like a
- * module: there is no server to start, no database to isolate, no binary to
- * find, so there is nothing for a `*.specification.ts` to hold. What such a
- * file WOULD have held — the providers every render needs, the Vite pipeline,
- * the clock, the viewport — belongs to the PROJECT (`component()` in
- * `vitest.config.ts`); what belongs to one test is said on the chain.
- *
- * ```tsx
- * const result = await component
- *     .intercept(listing)
- *     .render(<PostTable />, async (visitor) => {
- *         await visitor.see(content('Showing 2 of 200 posts'));
- *     });
- *
- * await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
- * ```
- */
+/** The chain a rendered unit is specified through; the one facet with no constructor, its shared setup the project's. */
 export interface ComponentChain extends ChainOf<typeof composition, FacetParams, ComponentChain> {}
 
-/**
- * The composition in a page: the page's calendar, msw's worker, the mounted
- * document and its size, and the page's directory, which is none.
- */
 export const componentFacet = defineFacet<ComponentChain>()({
     ...composition,
     engines: (_config: ChainConfig) => ({

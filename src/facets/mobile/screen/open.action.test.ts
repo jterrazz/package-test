@@ -3,13 +3,10 @@ import { describe, expect, test } from 'vitest';
 import type { DeviceScreen, MobileScenario } from '../device/device.port.js';
 import { open } from './open.action.js';
 
-/** Where the action runs: no databases, no working directory. */
 const RUN = { config: {}, testDir: '/specs/mobile', workDir: null };
 
-/** A reader no setup of these runs is asked through. */
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;
 
-/** The screen the app double captures, whatever it is asked. */
 const SCREEN: DeviceScreen = {
     texts: ['Notes', 'Water the plants'],
     tree: {
@@ -19,7 +16,6 @@ const SCREEN: DeviceScreen = {
     },
 };
 
-/** A scenario the app is handed, and does nothing. */
 const scenario: MobileScenario = async () => {
     await Promise.resolve();
 };

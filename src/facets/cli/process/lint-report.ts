@@ -1,28 +1,4 @@
-/**
- * What a linter's report proves, normalised for a golden: one line per
- * diagnostic, `<file>:<line>:<column>  <plugin>(<rule>)` — where the rule fired
- * and which rule it was, never its wording.
- *
- * It reads the two lines the family's linters print. oxlint's `unix` rendering,
- * `<file>:<line>:<column>: <message> [<Severity>/<plugin>(<rule>)]`, and the
- * conventions checker's report line, the compiler convention every editor's
- * problem matcher parses: `<file>:<line>:<column>: <severity>
- * <plugin>(<rule>): <message>`. Every other line — a tally, a summary, a blank
- * line, a notice — is dropped, so a reworded message or summary moves no
- * golden, and a run with no diagnostic normalises to the empty text. The lines
- * are ordered by file, line and column: oxlint lints on several threads and
- * prints files in the order they finish, so its own order is no fact a golden
- * may hold.
- *
- * It is a `transform`: `specification.cli(bin, { transform: lintReport })`
- * applies it to both streams before every comparison.
- *
- * The runner states oxlint's format — `--format=unix`, or `agent`, whose line
- * is the checker's. Without it oxlint picks its renderer off the environment:
- * one line per diagnostic in a shell that advertises an AI agent, graphical
- * frames everywhere else, CI included. A frame is refused rather than dropped,
- * because dropping it would read as a clean run.
- */
+/** Keeps `<file>:<line>:<column>  <plugin>(<rule>)` per diagnostic, sorted: oxlint prints files as its threads finish. A graphical frame is refused, since dropping it would read as a clean run. */
 
 /** oxlint's `unix` line. */
 const OXLINT_LINE = /^(?<at>\S+?:\d+:\d+): .* \[(?:Error|Warning)\/(?<rule>[\w-]+\([^)\]]+\))\]$/u;
@@ -33,7 +9,6 @@ const REPORT_LINE = /^(?<at>\S+?:\d+:\d+): (?:error|warning) (?<rule>[\w-]+\([^)
 /** The head of a diagnostic in oxlint's graphical rendering: `  x <plugin>(<rule>): …`, `!` for a warning. */
 const GRAPHICAL_LINE = /^\s+[!x] [\w-]+\([^)]+\): /u;
 
-/** One diagnostic, normalised — or `undefined` for a line that is not one. */
 function diagnosticOf(line: string): string | undefined {
     const found = (OXLINT_LINE.exec(line) ?? REPORT_LINE.exec(line))?.groups;
     return found === undefined ? undefined : `${found.at}  ${found.rule}`;
@@ -55,14 +30,12 @@ export function lintReport(text: string): string {
     return lines.length === 0 ? '' : `${lines.join('\n')}\n`;
 }
 
-/** A normalised line's file, line and column, for ordering. */
 function positionOf(line: string): [string, number, number] {
     const [at = ''] = line.split('  ');
     const [column = '0', row = '0', ...file] = at.split(':').toReversed();
     return [file.toReversed().join(':'), Number(row), Number(column)];
 }
 
-/** By file, then line, then column, then rule: the order a reader walks a tree in. */
 function byPosition(a: string, b: string): number {
     const [fileA, rowA, columnA] = positionOf(a);
     const [fileB, rowB, columnB] = positionOf(b);

@@ -9,7 +9,6 @@ import { fixture } from './fixture.capability.js';
 import type { FixtureMethod } from './fixture.capability.js';
 import { fsFixtures } from './fixtures.engine.js';
 
-/** A chain composed of `.fixture()` alone, ending on what its working directory holds. */
 type Chain = { fixture: FixtureMethod<Chain>; list: () => Promise<string[]> };
 
 const list = defineAction({
@@ -21,7 +20,6 @@ const list = defineAction({
     row: { group: 'Terminal action', name: '.list()', probe: '.list(' },
 });
 
-/** A chain whose fixtures are laid on this disk, its paths read from this folder. */
 function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [list],

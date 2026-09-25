@@ -5,7 +5,6 @@ import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import { wrap } from './wrap.capability.js';
 import type { WrapMethod } from './wrap.capability.js';
 
-/** A chain composed of `.wrap()` alone, ending on an action that dresses a subject as the render would. */
 type Chain = { dress: (ui: string) => Promise<unknown>; wrap: WrapMethod<Chain> };
 
 const dress = defineAction({
@@ -18,7 +17,6 @@ const dress = defineAction({
     row: { group: 'Terminal action', name: '.dress()', probe: '.dress(' },
 });
 
-/** A chain nobody has wrapped yet. */
 function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [dress],

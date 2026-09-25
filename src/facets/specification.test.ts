@@ -5,7 +5,6 @@ import { afterEach, beforeEach, describe, expect, test } from 'vitest';
 
 import { specification } from '../index.js';
 
-/** A minimal Hono-compatible app — no infra needed. */
 const tinyApp = {
     request: () => Response.json({ ok: true }, { status: 200 }),
 };

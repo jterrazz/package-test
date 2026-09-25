@@ -3,34 +3,21 @@ import type { ChainSignature, FacetParams } from '../../kernel/chain/capability.
 import { CallResult } from './call.result.js';
 import type { CallOutcome } from './call.result.js';
 
-/** The services a module is constructed against — the record the constructor started. */
 type Needs = { services: Readonly<Record<string, unknown>> };
 
-/** The module under test, handed the started services. */
 type Subject = (services: never) => unknown;
 
-/** What `.call()` puts on a chain: the subject is handed the services the facet declares. */
 export type CallChain<P extends FacetParams> = {
-    /**
-     * Call the module and resolve with what it produced. The started services
-     * record is handed in, so the subject is constructed with the real
-     * connection strings rather than with a double.
-     */
+    /** Call the module with the started services and resolve with what it produced. */
     call: <T>(subject: (services: P['services']) => Promise<T> | T) => Promise<CallResult<T>>;
 };
 
-/** The signature `ChainOf` reads off `call`. */
 // oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface CallSignature extends ChainSignature {
     readonly chain: CallChain<this['params']>;
 }
 
-/**
- * `.call(subject)`: call the module with the started services and resolve
- * with what it produced — the value it returned, or the error it threw. A
- * refusal is a reading, never a rejection: `result.error` carries it, so a
- * spec of a module that says no needs no `try`/`catch`.
- */
+/** A refusal is a reading, never a rejection: `result.error` carries it. */
 export const call = defineAction<'call', [subject: Subject], CallResult, CallSignature, Needs>({
     accessors: [
         { group: 'Result accessor', name: '.value', probe: 'result.value' },

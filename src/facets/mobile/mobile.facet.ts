@@ -24,13 +24,7 @@ const composition = {
     } satisfies Record<keyof MobileSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `mobile` facet — the chain `specification.mobile()` hands out. The app
- * runs on a device, in its own process: its clock is not this chain's to pin,
- * and its network is the declared stub backend. `.open()` is the one terminal
- * action: it relaunches the app (a deterministic fresh state), applies the
- * deep link, runs the scenario, and captures the final screen.
- */
+/** The chain `specification.mobile()` hands out: the app runs on a device, its network the declared stub backend. */
 export interface MobileSpecification extends ChainOf<
     typeof composition,
     { databaseKey: string; services: Record<string, unknown> },

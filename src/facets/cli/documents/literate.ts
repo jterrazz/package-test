@@ -20,52 +20,23 @@ import { expandWorkdir } from '../process/env.capability.js';
 import { readSpecFile, SpecSyntaxError, updateSpecFile } from './spec-document.js';
 import type { SpecDocument, SpecFile, SpecFileAssertion, SpecRun } from './spec-document.js';
 
-/**
- * Running a `<case>.spec.yaml` document: one scenario, one working directory,
- * one set of servers, every run executed and asserted.
- *
- * The engine composes pieces that already exist rather than adding a second of
- * anything — {@link fsFixtures} for `fixture:`, the copy `.fixture()` lays
- * through; the runner's own command adapter for each run, {@link ServedProcess}
- * for `serve:`, the `{{token}}` engine for every comparison, and
- * {@link mergeTextPreservingPlaceholders} for the rewrite. What is new here
- * is only the ORCHESTRATION the chain cannot express: several commands
- * sharing one working directory, each judged the moment it ends — so what
- * a run states about that directory is what IT left there, and the first run
- * to disagree is the one the failure names.
- */
-
-// ── Types ──
+/** Runs a `<case>.spec.yaml`: several commands in one working directory, each judged the moment it ends. */
 
 /** Per-call options for {@link runSpecDocument} / `cli.run()`. */
 export type LiterateRunFlags = {
-    /**
-     * Opt this document OUT of the update-mode rewrite. A frozen document is
-     * NEVER written under `TEST_UPDATE=1`: its mismatch still throws its diff.
-     * That is what makes a DELIBERATELY-WRONG `.spec.yaml` — one whose failure
-     * rendering is the subject of a negative test — survive an update run
-     * instead of being silently corrected into a passing file. The document's
-     * mirror of `toMatch(name, { frozen: true })`.
-     */
+    /** Opt this document out of the update-mode rewrite: a deliberately-wrong `.spec.yaml` survives update runs. */
     frozen?: boolean | undefined;
 };
 
-/** Everything the engine needs to run one document. Assembled by the chain. */
-export type LiterateRunOptions = {
-    /** Env the chain already resolved: service URLs, docker run id, `.env()`. */
+export type LiterateRunOptions = LiterateRunFlags & {
     baseEnv?: CliEnv | undefined;
     config: CliConfig;
-    /** The path failures name — as the reader would open it. */
     displayPath: string;
-    /** Absolute path of the `.spec.yaml` file. */
     filePath: string;
-    /** Directory `expected/` fixtures of follow-up assertions resolve against. */
     testDir: string;
-    /** The shared working directory every run executes in. */
     workDir: string;
-} & LiterateRunFlags;
+};
 
-/** One run's outcome, kept for the failure rendering and the rewrite. */
 type RunOutcome = {
     actual: CliOutput;
     run: SpecRun;
@@ -74,38 +45,22 @@ type RunOutcome = {
     stdout: string;
 };
 
-/** Where a failure is rendered against — the two forms of the same path. */
 type FailureContext = {
     displayPath: string;
     filePath: string;
 };
 
-// ── Comparison ──
-
-/**
- * The form a stream is compared in: ANSI stripped (rule D6) and the runner's
- * `transform` applied. Nothing else — a block scalar states its own final
- * newline (`|` keeps it, `|-` drops it), so the comparison is byte-exact and
- * has no normalisation to hide behind.
- */
+/** ANSI stripped (D6) and `transform` applied, nothing else: a block scalar states its own final newline. */
 function comparable(raw: string, transform?: (text: string) => string): string {
     const stripped = stripAnsiCodes(raw);
     return transform ? transform(stripped) : stripped;
 }
 
-/**
- * Line equality AS THE COMPARISON JUDGED IT — a `{{url}}` line that matched is
- * equal, whatever port the run picked. Each line is judged on its own fresh
- * scope: this is a rendering, and a ref captured by an earlier line must not
- * decide how a later one is displayed.
- */
+/** Each line on a fresh scope: a ref captured by an earlier line must not decide how a later one displays. */
 function tokenAwareEquals(scope: CaptureScope): (expected: string, actual: string) => boolean {
     return (expected, actual) => textEquals(expected, actual, new CaptureScope(scope.workdir));
 }
 
-// ── Files ──
-
-/** A path under the working directory, refusing anything that would escape it. */
 function resolveUnderWorkDir(path: string, workDir: string, context: FailureContext): string {
     const target = resolve(workDir, path);
     const inside = relative(workDir, target);
@@ -117,7 +72,6 @@ function resolveUnderWorkDir(path: string, workDir: string, context: FailureCont
     return target;
 }
 
-/** A one-line preview of a file's content for the failure rendering. */
 function preview(text: string): string {
     const flat = JSON.stringify(text.length > 160 ? `${text.slice(0, 160)}…` : text);
     return flat;
@@ -131,7 +85,6 @@ function readIfPresent(path: string): null | string {
     }
 }
 
-/** Check one `files:` entry and render its failure, or `null` when it holds. */
 function checkFile(
     assertion: SpecFileAssertion,
     workDir: string,
@@ -169,19 +122,7 @@ function checkFile(
     return null;
 }
 
-// ── Failure ──
-
-/**
- * The failure a mismatching run throws: the description, the command that ran,
- * every detail the comparison rejected, and where to open the document. The
- * update hint names exactly what a rewrite touches, so it cannot be read as
- * "this will re-generate my `files:`".
- *
- * The stack is REPLACED by the run's own line. Left alone it would carry the
- * engine's frames and end inside the module the plugin generates — pointing the
- * reader at a line of a file they never wrote. One frame, on the `command:` key,
- * is the whole truth here.
- */
+/** The stack is replaced by the run's own line: the engine's frames end in the plugin's generated module. */
 function failure(
     document: SpecDocument,
     run: SpecRun,
@@ -205,21 +146,11 @@ function failure(
     return atLine(error, context.filePath, run.commandLine);
 }
 
-/**
- * Point an error's stack at one frame: the line of the `.spec.yaml` that owns
- * the failure. The framework's own frames carry nothing a reader of a spec
- * document can act on, and the generated module's frame actively misleads.
- */
 function atLine(error: Error, filePath: string, line: number): Error {
     error.stack = `${error.name}: ${error.message}\n    at ${filePath}:${line}:1`;
     return error;
 }
 
-/**
- * Compare one run against what the command actually did — its exit code, its
- * streams and its `files:`, all read at the same instant: the moment that
- * command returned.
- */
 function assertRun(
     document: SpecDocument,
     outcome: RunOutcome,
@@ -228,16 +159,14 @@ function assertRun(
     scope: CaptureScope,
 ): void {
     const { actual, run } = outcome;
-    // An exit-code mismatch is reported ALONE: when the command did something
-    // else entirely, its stream diffs are consequences, not causes.
+    // An exit-code mismatch is reported alone: the stream diffs are its consequences.
     if (actual.exitCode !== run.exitCode) {
         throw failure(document, run, context, [
             [
                 'exit code mismatch',
                 `  expected: ${run.exitCode}`,
                 `  received: ${actual.exitCode}`,
-                // The stream is byte-exact, so it carries its own final
-                // newline; the joiner adds the separator, not the stream.
+                // The stream carries its own final newline; the joiner adds the separator.
                 ...(outcome.stderr.length > 0
                     ? ['', 'stderr was:', outcome.stderr.replace(/\n$/u, '')]
                     : []),
@@ -268,13 +197,7 @@ function assertRun(
     }
 }
 
-// ── Update ──
-
-/**
- * The rewritten runs: exit codes and streams from the run, placeholders of the
- * previous golden preserved by pattern (rule D5). A stream that ends up empty
- * loses its key, so a rewritten document passes the next run.
- */
+/** Placeholders of the previous golden preserved by pattern (D5); an emptied stream loses its key. */
 function updates(outcomes: RunOutcome[], scope: CaptureScope) {
     return outcomes.map(({ actual, run, stderr, stdout }) => ({
         exitCode: actual.exitCode,
@@ -283,21 +206,7 @@ function updates(outcomes: RunOutcome[], scope: CaptureScope) {
     }));
 }
 
-// ── Servers ──
-
-/**
- * Start every server the document names, in declaration order, after `fixture:`
- * has been copied and before the first run. They all stay live for the whole
- * file and are stopped together — one document is one scenario, and its servers
- * are part of its ground.
- *
- * Every child is seeded with `TEST_WORKDIR`, the resolved working directory the
- * `{{workdir}}` token holds and `$WORKDIR` expands to. The fixtures are already
- * on disk when the child starts, so a served stub reads the world the document
- * laid down exactly as a stub binary reads its own fixture tree: a scenario is
- * a layer of files, never a flag threaded through the server. A document's
- * mapping-form env wins over it, key by key.
- */
+/** Every child gets `TEST_WORKDIR`, the resolved working directory, with the fixtures already on disk; the document's own env wins. */
 async function startServers(
     document: SpecDocument,
     config: CliConfig,
@@ -346,9 +255,6 @@ async function startServers(
     return { env, stop };
 }
 
-// ── Environment ──
-
-/** Resolve the document's `env:` entries against the registered sets. `$WORKDIR` expands. */
 function documentEnv(document: SpecDocument, config: CliConfig, displayPath: string): CliEnv {
     const sets = config.envSets ?? {};
     const env: CliEnv = {};
@@ -373,17 +279,7 @@ function documentEnv(document: SpecDocument, config: CliConfig, displayPath: str
     return env;
 }
 
-// ── Engine ──
-
-/**
- * Run one spec document end to end and resolve with the LAST run's result —
- * the handle a `.test.ts` adds its own assertion to (a directory golden, a
- * grep) after `cli.run('<case>.spec.yaml')`.
- *
- * Under `TEST_UPDATE=1` nothing is asserted: every run executes, and each one's
- * exit code and streams are rewritten from the actual output with the previous
- * golden's placeholders preserved.
- */
+/** Resolves with the last run's result. Under `TEST_UPDATE=1` nothing is asserted: every run executes and is rewritten. */
 export async function runSpecDocument(options: LiterateRunOptions): Promise<CliResult> {
     const { config, displayPath, filePath, testDir, workDir } = options;
     if (!config.command) {
@@ -396,22 +292,18 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
     try {
         file = readSpecFile(readFileSync(filePath, 'utf8'), displayPath);
     } catch (error) {
-        // A grammar refusal is about the FILE, not about the engine that read
-        // it: the message already names the line, so the stack says the same.
+        // A grammar refusal is about the file: the stack names the line the message does.
         throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
     }
     const { document } = file;
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');
 
-    // `fixture:` layers on top of whatever the chain already copied, in
-    // declaration order — identical semantics to chained `.fixture()` calls.
+    // Layered over what the chain copied, in declaration order, as chained `.fixture()` calls are.
     for (const fixture of document.fixtures) {
         fsFixtures.layer(fixture.path, fileDir, workDir);
     }
 
-    // One resolved spelling of the working directory, read by everything that
-    // names it: `{{workdir}}` in a golden, `$WORKDIR` in an env value, and
-    // `TEST_WORKDIR` in a served stub's environment.
+    // One resolved spelling of the working directory for `{{workdir}}`, `$WORKDIR` and `TEST_WORKDIR`.
     const workdir = safeRealpath(workDir);
     const servers = await startServers(document, config, displayPath, workdir);
     const scope = new CaptureScope(workdir);
@@ -424,8 +316,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
         workdir,
     );
 
-    // A rewrite states what the runs DID, so it asserts nothing and needs every
-    // run to have executed; a normal session judges each run where it stands.
+    // A rewrite needs every run executed; a normal session judges each run where it stands.
     const rewriting = shouldUpdateSnapshots() && options.frozen !== true;
     const outcomes: RunOutcome[] = [];
     try {
@@ -449,11 +340,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
                 stdout: comparable(actual.stdout, config.transform),
             };
             outcomes.push(outcome);
-            // HERE, before the next command runs. A run's `files:` describes
-            // the working directory as THIS run left it — a lock file the next
-            // command creates, a build output the next one removes — and a
-            // working directory only ever holds its latest state. Judging the
-            // whole session at the end would ask every run about the same tree.
+            // Judged here, before the next command: a run's `files:` describes the directory as this run left it.
             if (!rewriting) {
                 assertRun(document, outcome, { displayPath, filePath }, workDir, scope);
             }

@@ -15,16 +15,11 @@ export type Job = {
     execute: () => Promise<void>;
 };
 
-/** What `specification.job()` hands its chain: the services record, and the jobs `.trigger()` runs. */
 export type JobConfig = ServicesConfig & { jobs?: Job[] | undefined };
 
 /** Options for {@link startJob | specification.job}. */
 export type JobSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /**
-     * Named jobs triggerable via `job.trigger(name)` — a factory receiving
-     * the started services record, or a static array. Jobs run in-process by
-     * definition (CONVENTIONS A8).
-     */
+    /** Named jobs `job.trigger(name)` runs: a factory of the started services, or an array. */
     jobs: ((services: Services) => Job[]) | Job[];
     /** Project root override — see the `root` option of `specification.api()`. */
     root?: string;
@@ -32,12 +27,7 @@ export type JobSpecificationOptions<Services extends ServiceRecord = ServiceReco
     services?: Services;
 };
 
-/**
- * The record returned by {@link startJob | specification.job}. Destructure
- * with the canonical names (CONVENTIONS A3):
- *
- *     const { job, cleanup } = await specification.job(…);
- */
+/** What `specification.job()` returns: `const { job, cleanup } = …` (A3). */
 export type JobHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;
@@ -49,8 +39,7 @@ export type JobHandle<DatabaseKey extends string = string> = {
 export async function startJob<Services extends ServiceRecord>(
     options: JobSpecificationOptions<Services>,
 ): Promise<JobHandle<DatabaseKeys<Services>>> {
-    // Caller detection must run before any await — async resumption drops
-    // the calling file's frames from the stack.
+    // Caller detection runs before any await: async resumption drops the calling file's frames.
     const callerDir = getCallerDir();
     await registerMatchers();
     const root = resolveRoot(options.root, callerDir);

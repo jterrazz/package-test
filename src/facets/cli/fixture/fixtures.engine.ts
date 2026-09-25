@@ -5,35 +5,12 @@ import { resolveSpecPath } from '../../../kernel/files/resolve.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 import type { FixturePort } from './fixture.port.js';
 
-/**
- * Copy semantics for the file-state a command spec stands on — the chain's
- * `.fixture(file(…))` / `.fixture(directory(…))` and a document's `fixture:`.
- *
- * The source is a path relative to the spec (or document) naming it, and the
- * shared pool is reached the same way, by the path that climbs to it
- * (`../../shared/fixtures/shop/`). The trailing `/` is what says which of the two a
- * path is, in both doors (see {@link copyPlan}).
- */
-
-/** A resolved copy operation: where to read from, where to write to. */
 type FixtureCopyPlan = {
     dest: string;
     src: string;
 };
 
-/**
- * Compute the source + destination for copying a fixture into the working
- * directory:
- *
- *  - `./dir/` (trailing slash) — a directory, its CONTENTS spread into the cwd;
- *  - `./file` — one file, copied as `<cwd>/<basename>`.
- *
- * A path that says one and names the other on disk is refused, and so is a
- * path that names nothing: the refusal carries the resolved path.
- *
- * Chained fixtures layer in order: a later one overwrites files written by an
- * earlier one.
- */
+/** `./dir/` spreads a directory's contents, `./file` copies one file; a path naming the other kind, or nothing, is refused. */
 export function copyPlan(path: string, specDir: string, workDir: string): FixtureCopyPlan {
     const src = resolveSpecPath('fixture', path, specDir);
     if (!existsSync(src)) {
@@ -66,10 +43,6 @@ export function copyPlan(path: string, specDir: string, workDir: string): Fixtur
     return { dest, src };
 }
 
-/**
- * The fixtures a chain lays, copied onto this machine's disk by
- * {@link copyPlan}: its refusals are the copy's.
- */
 export const fsFixtures: FixturePort = {
     layer: (path, testDir, workDir) => {
         const { dest, src } = copyPlan(path, testDir, workDir);

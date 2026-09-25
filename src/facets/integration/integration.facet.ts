@@ -24,18 +24,7 @@ const composition = {
     } satisfies Record<keyof IntegrationSpecificationOptions, MatrixRow>,
 } as const;
 
-/**
- * The `integration` facet — the chain `specification.integration()` hands
- * out. The subject is a MODULE, not an entry: no HTTP, no binary, no page.
- * What makes it a spec rather than a module test is what it stands on — real
- * services, declared stubs, a golden — so it takes the same setups as
- * every other facet and ends on the one action a module has: being called.
- * It runs in this process: the clock pinned is this process's, the network
- * intercepted is this process's.
- *
- * `Services` is the declared record `.call()` hands the module; `DatabaseKey`
- * the typed vocabulary of `.seed()`, its keys that are databases.
- */
+/** The chain `specification.integration()` hands out: the subject is a module, run in this process. */
 export interface IntegrationSpecification<
     Services extends Record<string, unknown> = Record<string, unknown>,
     DatabaseKey extends string = string,

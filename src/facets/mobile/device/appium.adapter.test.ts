@@ -4,23 +4,14 @@ import { describe, expect, test, vi } from 'vitest';
 import { button, testId, within } from '../../../elements/elements.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
-/**
- * The declared waits (`specification.mobile({ timeouts })`), driven over a
- * STUB driver: no simulator, no appium server. The stub resolves no element
- * ever, so every verb runs to its deadline — which is the value under test.
- */
+/** A stub driver that resolves no element: every verb runs to its deadline, the value under test. */
 
 const BUNDLE_ID = 'com.example.app';
 const SERVER_URL = 'http://127.0.0.1:4723';
 
-/** Capabilities of every session opened, in order — what the launch budget rides in. */
 type Session = { capabilities: Record<string, unknown> };
 
-/**
- * A driver that shows nothing and records the session it was created for.
- * Cast at the seam: the port surface exercised here is the handful of calls
- * below, not webdriverio's full session type.
- */
+/** Cast at the seam: only the handful of calls below are exercised. */
 function asRemote(stub: unknown): never {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a stub implements the handful of calls these tests drive, never webdriverio's whole session type
     return stub as never;
@@ -31,7 +22,6 @@ function stubDriver(): { remote: never; sessions: Session[] } {
     const remote = async (options: Session) => {
         sessions.push(options);
         return {
-            // Nothing ever matches — the polling loop always reaches its deadline.
             $$: async () => await Promise.resolve([]),
             deleteSession: async () => {
                 await Promise.resolve();
@@ -41,7 +31,6 @@ function stubDriver(): { remote: never; sessions: Session[] } {
             },
             getPageSource: async () =>
                 await Promise.resolve('<XCUIElementTypeApplication name="App" />'),
-            // Evidence capture is best-effort — refusing it keeps the refusal clean.
             takeScreenshot: async () =>
                 await Promise.reject(new Error('no screenshots in the stub')),
         };
@@ -49,10 +38,7 @@ function stubDriver(): { remote: never; sessions: Session[] } {
     return { remote: asRemote(remote), sessions };
 }
 
-/**
- * An adapter whose session is already open, so the stub is in hand before a
- * fake clock takes over — a faked timer cannot advance a real await.
- */
+/** Opened before a fake clock takes over: a faked timer cannot advance a real await. */
 async function openedAdapter(timeouts?: { action?: number; launch?: number }): Promise<{
     adapter: AppiumAdapter;
     sessions: Session[];
@@ -68,7 +54,6 @@ async function openedAdapter(timeouts?: { action?: number; launch?: number }): P
     return { adapter, sessions };
 }
 
-/** Tap something the stub will never show, capturing the eventual refusal. */
 function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise<void> } {
     const outcome: { error?: Error; settled: Promise<void> } = { settled: Promise.resolve() };
     outcome.settled = adapter
@@ -89,11 +74,7 @@ function tapTheAbsent(adapter: AppiumAdapter): { error?: Error; settled: Promise
     return outcome;
 }
 
-/**
- * A driver whose one button is labelled "Continue to payment" — it answers a
- * `CONTAINS` predicate and refuses an `==` one: a name that only begins the
- * label designates nothing.
- */
+/** It answers `CONTAINS` and refuses `==`: a name that only begins the label designates nothing. */
 function partialLabelDriver(): { remote: never; state: { taps: number } } {
     const state = { taps: 0 };
     const element = {
@@ -127,10 +108,6 @@ function partialLabelDriver(): { remote: never; state: { taps: number } } {
         });
     return { remote: asRemote(remote), state };
 }
-/**
- * A screen with two "Buy" buttons, one inside the `card` container: the
- * screen answers both, the card only its own. Records which one is tapped.
- */
 function scopedDriver(): { remote: never; tapped: string[] } {
     const tapped: string[] = [];
     const buy = (id: string) => ({

@@ -26,7 +26,6 @@ describe('fixtures.engine', () => {
         mkdirSync(resolve(specsRoot, 'fixtures/cli-app'), { recursive: true });
         mkdirSync(resolve(testDir, 'fixtures'), { recursive: true });
         writeFileSync(resolve(testDir, 'fixtures/local.txt'), 'local\n');
-        // And a second tree, holding a directory fixture and a single file
         copyBase = mkdtempSync(resolve(tmpdir(), 'fixtures-copy-'));
         copyDir = resolve(copyBase, 'specs/cli/feature');
         mkdirSync(resolve(copyDir, 'fixtures/proj/nested'), { recursive: true });

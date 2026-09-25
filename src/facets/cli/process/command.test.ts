@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { resolveCommand } from './command.js';
 
-/** A project root whose `node_modules/.bin` holds `mytool`. */
 function rootWithTool(): string {
     const root = scratchDirectory('command-resolution-');
     mkdirSync(resolve(root, 'node_modules/.bin'), { recursive: true });

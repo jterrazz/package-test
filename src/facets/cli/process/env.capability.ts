@@ -5,27 +5,19 @@ import type { ServiceHandle } from '../../../world/services/service.port.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv } from './cli.port.js';
 
-/** `.env(record)`, handing back the chain it was called on. */
 export type EnvMethod<Self> = (env: CliEnv) => Self;
 
-/** What `.env()` puts on a chain, handing back the chain it was called on. */
 export type EnvChain<Self> = {
     /** Set environment variables on the child process. `$WORKDIR` expands; `null` unsets. */
     env: EnvMethod<Self>;
 };
 
-/** The signature `ChainOf` reads off `env`. */
 // oxlint-disable-next-line typescript/consistent-type-definitions -- a signature is read through `this`, which only an interface can name
 export interface EnvSignature extends ChainSignature {
     readonly chain: EnvChain<this['self']>;
 }
 
-/**
- * `.env(record)`: the variables every child of the chain starts with, on top
- * of `process.env` — `null` unsets one, `$WORKDIR` expands to the working
- * directory in its resolved form. Chained calls merge, a later one winning.
- * Read by the actions that start a child; there is nothing to arm.
- */
+/** Chained calls merge, a later one winning; nothing to arm. */
 export const env = defineCapability<
     'env',
     CliEnv,
@@ -42,17 +34,7 @@ export const env = defineCapability<
     row: { group: 'Setup', name: '.env()', probe: '.env(' },
 });
 
-/**
- * Expand the `$WORKDIR` token in every string value of a child environment —
- * the one place the token is spelled out, for both doors (`.env()` on the
- * chain, `env:` in a `<case>.spec.yaml`).
- *
- * `workdir` is the RESOLVED directory (its realpath), never the raw temp
- * path: a value the child receives comes back in its output, and it must come
- * back spelled the way `{{workdir}}` holds it (CONVENTIONS D4). Expanding the
- * raw path made `HOME=$WORKDIR` on macOS echo `/var/folders/…` against a
- * `{{workdir}}` holding `/private/var/folders/…` — a golden no run could match.
- */
+/** The resolved directory, never the raw temp path: on macOS `/var/folders/…` would never match `{{workdir}}`'s `/private/var/folders/…`. */
 export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     const expanded: CliEnv = {};
     for (const [key, value] of Object.entries(variables)) {
@@ -61,11 +43,7 @@ export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     return expanded;
 }
 
-/**
- * The connection URLs a child is handed for the declared services
- * (CONVENTIONS B6): `<KEY>_URL` for each, plus `DATABASE_URL` when exactly
- * one of them is a SQL database and `REDIS_URL` when exactly one is a redis.
- */
+/** B6: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind. */
 function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefined): CliEnv {
     const injected: CliEnv = {};
     const sql: ServiceHandle[] = [];
@@ -90,14 +68,7 @@ function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefine
     return injected;
 }
 
-/**
- * The environment a child of the chain starts with, in merge order: the
- * constructor's `defaults`, the declared services' URLs, the docker run id,
- * then the chain's own `.env()` — which always wins, `null` unsetting.
- * `undefined` when nothing at all is set, so the child inherits as it is.
- * `workdir` is the child's directory in its resolved form, as
- * {@link expandWorkdir} writes it.
- */
+/** Merge order: `defaults`, services' URLs, docker run id, then the chain's `.env()`; `undefined` when nothing is set. */
 export function childEnv(config: CliConfig, chained: CliEnv, workdir: string): CliEnv | undefined {
     const declared = config.defaultEnv;
     const services =

@@ -11,46 +11,13 @@ import {
 } from '../../../kernel/yaml/document.js';
 import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../../kernel/yaml/document.js';
 
-/**
- * The `<case>.spec.yaml` document — one scenario, written as data.
- *
- * A spec document states the ground a session stands on (`fixture:`, `env:`,
- * `serve:`) and then the session itself (`runs:`), each run carrying its
- * command, its exit code, its streams and what it left on disk:
- *
- *     description: removes a post and names what is gone
- *     fixture: ../../shared/fixtures/posts-stub/
- *     env:
- *       - frozen
- *     runs:
- *       - command: posts rm post-recap --yes
- *         exit: 0
- *         stdout: |
- *           Removed post-recap.
- *
- * A document is a cli case alone: an api or a job case is a TypeScript spec,
- * its whole result written in place.
- *
- * This module owns the grammar and NOTHING else: it resolves no path, runs no
- * command, and knows no filesystem. It is read by the runner and by the lint
- * checker alike, so the document the lint accepts is exactly the document the
- * runner executes. The JSON Schema editors validate against is built from the
- * same constants, a few lines down — one vocabulary, three readers.
- */
+/** The grammar alone: no path resolution, no command, no filesystem. The runner, the lint checker and the JSON Schema read the same constants. */
 
-// ── Grammar ──
-
-/** The extension that makes a file a spec document. */
 export const SPEC_EXTENSION = '.spec.yaml';
 
-/**
- * The keys of a document, IN THE ORDER it is written in: what the case stands
- * on first, then what it does. The order is the canonical one the
- * `d4b-spec-key-order` lint pass enforces and rewrites.
- */
+/** The canonical order, enforced and rewritten by `d4b-spec-key-order`. */
 export const DOCUMENT_KEYS = ['description', 'fixture', 'env', 'serve', 'runs'] as const;
 
-/** The keys of one run, in the canonical order: what is given, then what came back. */
 export const RUN_KEYS = [
     'command',
     'stdin',
@@ -62,23 +29,11 @@ export const RUN_KEYS = [
     'files',
 ] as const;
 
-/** The keys of a `files:` content assertion. */
 const FILE_CONTENT_KEYS = ['contains', 'equals'] as const;
 
-/** The bare states a `files:` entry may name instead of a content assertion. */
 const FILE_STATES = ['absent', 'exists'] as const;
 
-// ── Presence ──
-
-/**
- * A law on which keys a mapping of the grammar holds, read by BOTH readers:
- * the parser refuses a mapping that breaks one with its sentence, and the
- * schema states it — `each` as `required`, `some` as an `anyOf` of them,
- * `apart` as a `not` of the pair — so an editor refuses what the runner does.
- * `subject` is what the refusal names the mapping by: a table's name, a
- * `files:` path; `key` is the key missing, or the one that may not stand
- * beside `with`.
- */
+/** Read by the parser and stated by the schema, so an editor refuses what the runner does. */
 export type PresenceLaw =
     | {
           keys: readonly string[];
@@ -97,10 +52,8 @@ export type PresenceLaw =
           refusal: (subject: string) => string;
       };
 
-/** The mappings a presence law governs: a document, a run, and a `files:` assertion. */
 export type PresenceShape = 'document' | 'files' | 'run';
 
-/** Every presence law of the grammar, per shape, in the order the parser checks them. */
 export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> = {
     document: [
         {
@@ -138,8 +91,6 @@ export const PRESENCE: Readonly<Record<PresenceShape, readonly PresenceLaw[]>> =
         },
     ],
 };
-
-// ── Types ──
 
 /** One `env:` entry — a bare word naming a registered set, or a `KEY=value` pair. */
 export type SpecEnvToken =
@@ -191,11 +142,10 @@ export type SpecRun = {
     stdin: null | string;
     stdout: null | SpecStream;
     timeout: null | number;
-    /** Only ever on the LAST run — a long-running command ends the session. */
+    /** Only on the last run: a long-running command ends the session. */
     waitFor: null | string;
 };
 
-/** A path a document names, with the line it names it on. */
 type SpecPath = {
     line: number;
     path: string;
@@ -213,25 +163,19 @@ export type SpecDocument = {
     serve: SpecServeEntry[];
 };
 
-/** A document plus the YAML source it was read from — what update mode rewrites. */
 export type SpecFile = {
     document: SpecDocument;
     source: YamlSource;
 };
 
-/** The three fields update mode refreshes on one run. */
 export type SpecRunUpdate = {
     exitCode: number;
     stderr: string;
     stdout: string;
 };
 
-// ── Refusals ──
-
-/** A refusal from the grammar, carrying the line it happened on. */
 export class SpecSyntaxError extends Error {
     readonly line: number;
-    /** The refusal alone, without the position the message leads with. */
     readonly reason: string;
 
     constructor(fileName: string, line: number, message: string) {
@@ -242,9 +186,6 @@ export class SpecSyntaxError extends Error {
     }
 }
 
-// ── Reading ──
-
-/** The reading context threaded through the walk: where we are, and what to call it. */
 type Context = {
     fileName: string;
     source: YamlSource;
@@ -269,7 +210,6 @@ function nodeRange(node: Node | Pair): [number, number, number] | undefined {
         : undefined;
 }
 
-/** The line a scalar's CONTENT starts on — one past the `|` for a block scalar. */
 function contentLine(context: Context, node: Node | null): number {
     const start = lineOf(context, node);
     return isScalar(node) && String(node.type ?? '').startsWith('BLOCK') ? start + 1 : start;
@@ -282,7 +222,6 @@ function requireMap(context: Context, node: Node | null, what: string): YAMLMap 
     return node;
 }
 
-/** The pairs of a mapping, refusing any key outside the closed set. */
 function closedPairs(
     context: Context,
     map: YAMLMap,
@@ -310,26 +249,19 @@ function closedPairs(
     return pairs;
 }
 
-/** The pairs of a mapping — the YAML library types them loosely, so the one cast lives here. */
+/** The YAML library types pairs loosely: the one cast lives here. */
 function pairsIn(map: YAMLMap): Pair<Node, Node>[] {
     return map.items as Pair<Node, Node>[];
 }
 
-/** The items of a sequence — the one cast, as for {@link pairsIn}. */
 function itemsIn(seq: YAMLSeq): Node[] {
     return seq.items as Node[];
 }
 
-/** Pairs keyed by the plain word each is written under. */
 function keyed(pairs: readonly Pair<Node, Node>[]): Map<string, Pair<Node, Node>> {
     return new Map(pairs.map((pair) => [scalarString(pair.key) ?? '', pair]));
 }
 
-/**
- * Refuse a mapping that breaks a presence law of its shape — at `line`, the
- * mapping's, for a key it lacks; at the pair, for a key that may not stand
- * where it does.
- */
 function holdPresence(
     context: Context,
     found: ReadonlyMap<string, Pair<Node, Node>>,
@@ -357,7 +289,6 @@ function holdPresence(
     }
 }
 
-/** A pair a presence law has already required of `found`. */
 function held(found: ReadonlyMap<string, Pair<Node, Node>>, key: string): Pair<Node, Node> {
     const pair = found.get(key);
     if (pair === undefined) {
@@ -385,7 +316,6 @@ function requireInteger(context: Context, node: Node | null, what: string): numb
     return node.value;
 }
 
-/** A `string | list of strings` field, flattened to its entries with their lines. */
 function stringList(
     context: Context,
     node: Node | null,
@@ -403,8 +333,6 @@ function stringList(
 function readStream(context: Context, node: Node | null, what: string): SpecStream {
     return { line: contentLine(context, node), text: requireString(context, node, what) };
 }
-
-// ── Fields ──
 
 function readEnv(context: Context, node: Node | null): SpecEnvToken[] {
     return stringList(context, node, 'env:').map(({ line, value }) => {
@@ -537,31 +465,18 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
     };
 }
 
-// ── Paths ──
-
-/** The first ground folder a path passes through, if any — C24's reading. */
 function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundName(segment));
 }
 
-/** Where a path key reads, and what it may name there. */
 type PathRole = {
-    /** May the path name a directory — a trailing `/`? Only `fixture:` spreads one. */
     directories: boolean;
-    /** The extensions the file may carry; empty takes any. */
     extensions: readonly string[];
-    /** The ground folder the key reads. */
     folder: string;
     key: string;
 };
 
-/**
- * A path a key names, judged by the same law as the chain's `file()` and
- * `directory()`: relative to this document, one file — a directory only where
- * the key spreads one — in the folder its key reads, the first ground folder
- * the path passes through (C24); a stub module under `stubs/`, which
- * is no ground.
- */
+/** Judged by the law of `file()` and `directory()`: relative, in the folder its key reads (C24). */
 function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {
     const at = (message: string): never => {
         throw new SpecSyntaxError(context.fileName, line, message);
@@ -590,7 +505,6 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
     return { line, path: value };
 }
 
-/** A key holding one path or a list of them, each judged on its own line. */
 function readPaths(context: Context, node: Node | null, role: PathRole): SpecPath[] {
     return stringList(context, node, `${role.key}:`).map(({ line, value }) =>
         readPath(context, line, value, role),
@@ -603,18 +517,11 @@ const FIXTURE_ROLE: PathRole = {
     folder: GROUND_FIXTURES,
     key: 'fixture',
 };
-/** `fixture:` — paths of file state, each judged by its first ground folder like every path key. */
 function readFixtures(context: Context, node: Node | null): SpecFixture[] {
     return readPaths(context, node, FIXTURE_ROLE);
 }
 
-// ── Entry ──
-
-/**
- * Read a `<case>.spec.yaml`. `fileName` is used verbatim in refusals, so pass
- * the path a reader would open. The YAML source comes back beside the document:
- * update mode rewrites THAT, never a re-serialisation of this structure.
- */
+/** `fileName` is used verbatim in refusals. Update mode rewrites the returned YAML source, never a re-serialisation. */
 export function readSpecFile(content: string, fileName: string): SpecFile {
     const source = parseYamlSource(content);
     const [syntax] = yamlSyntaxErrors(source);
@@ -637,7 +544,6 @@ export function readSpecFile(content: string, fileName: string): SpecFile {
     return { document, source };
 }
 
-/** What a cli document says: its session, run after run. */
 function readCliFields(
     context: Context,
     found: ReadonlyMap<string, Pair<Node, Node>>,
@@ -658,12 +564,7 @@ function readCliFields(
     };
 }
 
-/**
- * Every text of a document the `{{token}}` grammar governs: the streams a
- * comparison judges, and the `files:` texts it judges them with. `stdin:` is
- * an INPUT — like a fixture, never matched — and a description or a command
- * is prose, so none of them appears here.
- */
+/** `stdin:` is an input and a description or command is prose: none appears here. */
 export function assertedStreams(document: SpecDocument): SpecStream[] {
     const streams: SpecStream[] = [];
     for (const run of document.runs) {
@@ -686,21 +587,13 @@ export function assertedStreams(document: SpecDocument): SpecStream[] {
     return streams;
 }
 
-/** One path a document names — the entry the path passes read it through. */
 export type DocumentPath = {
-    /** The key that names it — the role C24 read it for. */
     key: 'fixture';
-    /** What the path names: a `fixture:` with a trailing `/` spreads a directory, every other key one file. */
     kind: 'directory' | 'file';
     line: number;
     path: string;
 };
 
-/**
- * Every path a document names, in the order it names them — what the checker's
- * existence (C8), locality (C15) and liveness (C9, C14) passes read, exactly as
- * they read a `file()` or a `directory()`.
- */
 export function documentPaths(document: SpecDocument): DocumentPath[] {
     return document.fixtures.map(({ line, path }) => ({
         key: 'fixture',
@@ -710,14 +603,10 @@ export function documentPaths(document: SpecDocument): DocumentPath[] {
     }));
 }
 
-/** Read a `<case>.spec.yaml` for its content alone — the shape passes and C9's scan. */
 export function parseSpecDocument(content: string, fileName: string): SpecDocument {
     return readSpecFile(content, fileName).document;
 }
 
-// ── Update ──
-
-/** Insert (or replace) a key at its canonical position in a mapping. */
 function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly string[]): void {
     const items = map.items as Pair<Node, Node>[];
     const existing = items.findIndex((pair) => scalarString(pair.key) === key);
@@ -732,21 +621,13 @@ function setOrdered(map: YAMLMap, key: string, value: unknown, order: readonly s
     });
     map.set(key, value);
     if (at !== -1) {
-        // `set` appended; move the new pair to where the canonical order puts it.
+        // `set` appended: move the new pair to its canonical place.
         const added = (map.items as Pair<Node, Node>[]).pop()!;
         map.items.splice(at, 0, added);
     }
 }
 
-/**
- * Rewrite the runs of a spec file from what the commands actually did — exit
- * code and both streams, and nothing else. `files:`, the commands and the
- * header come back byte-identical, comments and key order included, because
- * the YAML DOCUMENT is edited rather than re-emitted from the parsed shape.
- *
- * An empty stream removes its key: absence already asserts emptiness, so a
- * rewritten document says the same thing in fewer words and still passes.
- */
+/** The YAML document is edited, not re-emitted, so everything but exit codes and streams comes back byte-identical. */
 export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string {
     const runs = (file.source.document.contents as YAMLMap).get('runs', true);
     if (!isSeq(runs)) {
@@ -772,20 +653,12 @@ export function updateSpecFile(file: SpecFile, updates: SpecRunUpdate[]): string
     return renderYamlSource(file.source);
 }
 
-// ── Schema ──
-
 const STRING_OR_LIST = {
     oneOf: [{ type: 'string' }, { items: { type: 'string' }, minItems: 1, type: 'array' }],
 };
 
-/** A folder segment that is not ground — what a path may pass through before the folder it reads. */
 const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_DIRS.join('|')})/)[^/]+/`;
 
-/**
- * A relative path whose FIRST ground folder is `fixtures/`, as a pattern — C24's
- * reading, for an editor. It may end on the folder: `fixture:` spreads a
- * directory whole.
- */
 function fixturePath(): SchemaNode {
     return {
         pattern: String.raw`^\.\.?/(?:${NOT_GROUND_SEGMENT})*?${GROUND_FIXTURES}/.*$`,
@@ -793,12 +666,10 @@ function fixturePath(): SchemaNode {
     };
 }
 
-/** One path, or a list of them. */
 function oneOrMany(item: SchemaNode): SchemaNode {
     return { oneOf: [item, { items: item, minItems: 1, type: 'array' }] };
 }
 
-/** The presence laws of a shape, as JSON Schema states them — {@link PRESENCE}'s, never restated. */
 function presenceOf(shape: PresenceShape): SchemaNode {
     const required: string[] = [];
     const allOf: SchemaNode[] = [];
@@ -817,23 +688,9 @@ function presenceOf(shape: PresenceShape): SchemaNode {
     };
 }
 
-/**
- * The JSON Schema editors validate a `<case>.spec.yaml` against, built from the
- * constants above so it cannot describe a grammar the parser does not read. It
- * is committed as `schema/spec.schema.json` by `npm run docs` and published as
- * the `@jterrazz/test/schema` export.
- *
- * A schema states which keys exist, not which ORDER they come in — JSON Schema
- * has no vocabulary for the sequence of an object's members. The canonical
- * order is the `d4b-spec-key-order` lint pass's, which also rewrites it.
- */
-/**
- * A JSON Schema subtree — the vocabulary is JSON Schema's, not this package's,
- * so the shape is stated only where a reader of {@link SPEC_SCHEMA} navigates it.
- */
+/** Built from the constants above; committed as `schema/spec.schema.json` by `npm run docs`. Key order is `d4b-spec-key-order`'s, which JSON Schema cannot state. */
 type SchemaNode = Record<string, unknown>;
 
-/** The document schema, as far as its own freshness test walks it. */
 export type SpecSchema = {
     $defs: SchemaNode & {
         run: SchemaNode & { additionalProperties: boolean; properties: SchemaNode };
@@ -950,7 +807,6 @@ export const SPEC_SCHEMA: SpecSchema = {
     type: 'object',
 } as const;
 
-/** {@link SPEC_SCHEMA} in the exact form `schema/spec.schema.json` is committed in. */
 export function renderSchema(): string {
     return `${JSON.stringify(SPEC_SCHEMA, null, 4)}\n`;
 }

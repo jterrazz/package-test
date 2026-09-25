@@ -5,7 +5,6 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { heldUnreached, recordUnreached } from './baseline.js';
 
-/** A scratch directory, removed when the test ends. */
 function scratch(): string {
     const directory = mkdtempSync(join(tmpdir(), 'baseline-'));
     onTestFinished(() => {
