@@ -2,7 +2,7 @@ import { relative } from 'node:path';
 
 import { env as chainEnv, childEnv } from '../../capabilities/env/env.capability.js';
 import { defineAction } from '../../model/chain/action.js';
-import { resolveSpecPath } from '../../model/chain/resolve.js';
+import { resolveSpecPath, safeRealpath } from '../../model/chain/resolve.js';
 import { scratchDirectory } from '../../model/chain/scratch.js';
 import { requireDiskFile } from '../../model/chain/spec-path.js';
 import type { DiskFile } from '../../model/chain/spec-path.js';
@@ -30,7 +30,7 @@ export const run = defineAction<
         const cwd = workDir!;
         const filePath = resolveSpecPath('run', document.path, testDir);
         return await runSpecDocument({
-            baseEnv: childEnv(config, read(chainEnv), cwd),
+            baseEnv: childEnv(config, read(chainEnv), safeRealpath(cwd)),
             config,
             displayPath: relative(process.cwd(), filePath) || document.path,
             filePath,

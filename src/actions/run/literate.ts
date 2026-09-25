@@ -1,8 +1,9 @@
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
+import { expandWorkdir } from '../../capabilities/env/env.capability.js';
 import type { SpecificationConfig } from '../../model/chain/config.js';
-import { expandWorkdir, safeRealpath } from '../../model/chain/resolve.js';
+import { safeRealpath } from '../../model/chain/resolve.js';
 import {
     readSpecFile,
     SpecSyntaxError,
@@ -451,7 +452,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
             ...servers.env,
             ...documentEnv(document, config, displayPath),
         },
-        workDir,
+        workdir,
     );
 
     // A rewrite states what the runs DID, so it asserts nothing and needs every

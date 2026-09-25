@@ -1,5 +1,6 @@
 import { env as chainEnv, childEnv } from '../../capabilities/env/env.capability.js';
 import { defineAction } from '../../model/chain/action.js';
+import { safeRealpath } from '../../model/chain/resolve.js';
 import { scratchDirectory } from '../../model/chain/scratch.js';
 import type { CliOutput, CliPort, ExecOptions } from '../../model/ports/cli.port.js';
 import { CLI_RESULT_ROWS, CliResult } from '../../results/cli.result.js';
@@ -22,7 +23,7 @@ export const exec = defineAction<
     perform: async ([args = '', options], read, { command }, { config, testDir, workDir }) => {
         // oxlint-disable-next-line typescript/no-non-null-assertion -- `prepare` always answers a directory: a command never runs in the source tree
         const cwd = workDir!;
-        const env = childEnv(config, read(chainEnv), cwd);
+        const env = childEnv(config, read(chainEnv), safeRealpath(cwd));
         let output: CliOutput;
         if (options) {
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `prepare` refused a sequence with options: one command is what reaches here

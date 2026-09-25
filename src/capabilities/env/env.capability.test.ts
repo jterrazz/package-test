@@ -9,7 +9,7 @@ import { sharing } from '../with/with.capability.js';
 import { childEnv, env } from './env.capability.js';
 import type { EnvMethod } from './env.capability.js';
 
-/** Where the child runs: a directory that exists, so `$WORKDIR` resolves. */
+/** Where the child runs, in the resolved form `$WORKDIR` expands to. */
 const WORKDIR = import.meta.dirname;
 
 function fakeDatabase(): DatabasePort {
