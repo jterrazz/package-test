@@ -6,7 +6,7 @@ import { afterThisTest, pinClock, providedClock, releaseClock } from './page-run
  * instant wins over the one `component({ clock })` provides; `Date` stays
  * pinned for the rest of the test, because a mounted component keeps running
  * after its render resolves, and the page gets its real clock back when the
- * test ends.
+ * test ends. An instant that is not one is refused when the chain is armed.
  */
 export const pageClock: { readonly pin: (iso: null | string) => Armed } = {
     pin: (iso) => {

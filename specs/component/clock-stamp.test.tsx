@@ -15,6 +15,16 @@ test('reads the instant the chain pinned, not the machine clock', async () => {
     expect(result.content.text).toContain('Rendered at 2026-03-04T09:30:00.000Z');
 });
 
+test('refuses a clock that is not an instant, in the words a node chain uses', async () => {
+    // Given - a chain stated with something that is not an instant
+    const stated = component.clock('soon');
+
+    // Then - the render is refused before anything mounts, naming what an instant looks like
+    await expect(stated.render(<ClockStamp />)).rejects.toThrow(
+        `clock.at(): "soon" is not an instant — pass an ISO-8601 string (e.g. '2026-03-04T09:30:00Z').`,
+    );
+});
+
 test('asks an iterable for membership, the way the node build does', async () => {
     // Given - a render, which is what registers the page's own matchers
     const result = await component.clock('2026-03-04T09:30:00.000Z').render(<ClockStamp />);

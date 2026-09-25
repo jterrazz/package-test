@@ -22,8 +22,12 @@ import { vi } from 'vitest';
 /** A pinned clock — released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
 
-/** The instant `iso` names, or a refusal that says what an instant looks like. */
-function instantOf(method: string, iso: string): Date {
+/**
+ * The instant `iso` names, or a refusal that says what an instant looks like —
+ * the one check every engine that pins a calendar applies, in this process or
+ * in a page.
+ */
+export function instantOf(method: string, iso: string): Date {
     const at = new Date(iso);
     if (Number.isNaN(at.getTime())) {
         throw new TypeError(

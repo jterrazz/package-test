@@ -1,5 +1,7 @@
 import { inject, onTestFinished, vi } from 'vitest';
 
+import { instantOf } from '../../model/clock/clock.js';
+
 /**
  * The runner, as the page reaches it.
  *
@@ -23,11 +25,12 @@ export function afterThisTest(teardown: () => Promise<void> | void): void {
 }
 
 /**
- * Freeze the page's `Date` at `iso`. `Date` ONLY: faking the page's timers
+ * Freeze the page's `Date` at `iso`, refusing what is not an instant in the
+ * words the process's calendar uses. `Date` ONLY: faking the page's timers
  * would stop React's scheduler and nothing would ever render.
  */
 export function pinClock(iso: string): void {
-    vi.useFakeTimers({ now: new Date(iso), toFake: ['Date'] });
+    vi.useFakeTimers({ now: instantOf('at', iso), toFake: ['Date'] });
 }
 
 /** Give the page its real clock back. */
