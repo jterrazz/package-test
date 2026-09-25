@@ -53,6 +53,7 @@ describe('the disk — file() and directory()', () => {
         expect(() => file('./fixtures/shop/' as never)).toThrow(
             /fix: name the directory with directory\("\.\/fixtures\/shop\/"\)/u,
         );
+        // checker-disable-next-line c8 -- the wrapper's own brand and refusal are under test: nothing reads the disk
         expect(() => directory('./fixtures/shop' as never)).toThrow(
             /fix: end it in \/: directory\("\.\/fixtures\/shop\/"\)/u,
         );

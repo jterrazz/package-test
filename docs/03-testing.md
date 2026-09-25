@@ -170,7 +170,7 @@ suite on the day it lands.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **107 modules** have no sibling test, and every one of them is claimed:
+Today **106 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                    | Proven instead by                                                                                                                                                                                                                                                                                       |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -235,7 +235,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `timeouts`  | —   | —    | —   | —           | —       | 1      | —         | —      |
 | `commands`  | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `defaults`  | —   | —    | 1   | —           | —       | —      | —         | —      |
-| `env`       | —   | —    | 4   | —           | —       | —      | —         | —      |
+| `env`       | —   | —    | 5   | —           | —       | —      | —         | —      |
 | `docker`    | —   | —    | 1   | —           | —       | —      | —         | —      |
 | `serve`     | —   | —    | 3   | —           | —       | —      | —         | —      |
 | `transform` | —   | —    | 2   | —           | 1       | —      | —         | —      |
@@ -271,7 +271,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.request()` | 2   | —    | —   | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7    | —   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —    | —   | 9           | —       | —      | —         | —      |
-| `.exec()`    | —   | —    | 33  | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —    | 34  | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —    | 4   | —           | —       | —      | —         | —      |
 | `.visit()`   | —   | —    | —   | —           | 20      | —      | —         | —      |
 | `.fetch()`   | —   | —    | —   | —           | 3       | —      | —         | —      |
@@ -341,7 +341,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.table()`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —    | 9   | 1           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —    | 4   | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —    | 16  | —           | —       | —      | —         | —      |
+| `.stdout`       | —   | —    | 17  | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —    | 7   | —           | —       | —      | —         | —      |
 | `.exitCode`     | —   | —    | 24  | —           | —       | —      | —         | —      |
 | `.filesystem`   | —   | —    | 1   | —           | —       | —      | —         | —      |
@@ -377,8 +377,8 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 4    | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —    | —   | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —    | —   | —           | 0       | —      | 0         | —      |
-| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 10     |
-| `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 10     |
+| `.json body`           | 2   | —    | 2   | 3           | 0       | —      | —         | 11     |
+| `.txt stream`          | 1   | —    | 7   | 1           | 1       | —      | —         | 11     |
 | `{ frozen }`           | 2   | —    | 11  | —           | —       | —      | 1         | 3      |
 
 ### Time & doubles
@@ -394,7 +394,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability     | api | jobs | cli | integration | website | mobile | component | module |
 | -------------- | --- | ---- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | —    | 2   | 0           | 0       | —      | —         | 2      |
+| `{{any}}`      | 0   | —    | 3   | 0           | 0       | —      | —         | 2      |
 | `{{base64}}`   | 0   | —    | 0   | 0           | 0       | —      | —         | 2      |
 | `{{date}}`     | 0   | —    | 0   | 0           | 0       | —      | —         | 1      |
 | `{{duration}}` | 0   | —    | 1   | 0           | 0       | —      | —         | 2      |

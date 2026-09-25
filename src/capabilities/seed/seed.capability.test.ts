@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { defineFacet } from '../../facets/define-facet.js';
 import { defineAction } from '../../model/chain/action.js';
 import type { SpecificationConfig } from '../../model/chain/config.js';
-import { file } from '../../model/chain/spec-path.js';
+import { directory, file } from '../../model/chain/spec-path.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import { seed } from './seed.capability.js';
 import type { SeedMethod } from './seed.capability.js';
@@ -94,5 +94,26 @@ describe('.seed() — the SQL files a chain runs first', () => {
         // Then - the seed is refused before any chain is armed
         // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => chain.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
+    });
+
+    test('refuses what is not one .sql file, naming file()', () => {
+        // Given - a caller the compiler does not see
+        const chain = chainOver([], {});
+
+        // Then - a path or a statement as a value, a directory and another extension are each refused as stated
+        expect(() => chain.seed('./seeds/rows.sql' as never)).toThrow(
+            /^found: seed\("\.\/seeds\/rows\.sql"\), a value where a file is read\n.*\nfix: name one file: seed\(file\(/u,
+        );
+        expect(() => chain.seed("INSERT INTO users (name) VALUES ('Ada');" as never)).toThrow(
+            /^found: seed\("INSERT INTO users \(name\) VALUES \('Ada'\);"\), a value where a file is read\n.*\nfix: name one file: seed\(file\('\.\/seeds\/rows\.sql'\)\)\n/u,
+        );
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        expect(() => chain.seed(directory('./seeds/') as never)).toThrow(
+            /a directory where one file is read/u,
+        );
+        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        expect(() => chain.seed(file('./seeds/rows.json') as never)).toThrow(
+            /a file not ending in \.sql/u,
+        );
     });
 });

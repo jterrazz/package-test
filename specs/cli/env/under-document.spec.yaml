@@ -1,0 +1,12 @@
+description: a chained environment lies under the document's own env
+env: MY_VAR=from-the-document
+runs:
+    - command: env
+      exit: 0
+      stdout: |
+          MY_VAR=from-the-document
+          HOME={{any}}
+          EXTRA=from-the-chain
+          DB_URL=unset
+          DATABASE_URL=unset
+          REDIS_URL=unset

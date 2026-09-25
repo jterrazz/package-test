@@ -117,6 +117,16 @@ describe('env', () => {
         expect(result.exitCode).toBe(0);
     });
 
+    test("a chained .env() lies under a document's env:", async () => {
+        // Given - a chain stating two variables, and a document stating one of them again
+        const result = await cli
+            .env({ EXTRA: 'from-the-chain', MY_VAR: 'from-the-chain' })
+            .run(file('./under-document.spec.yaml'));
+
+        // Then - the document's run saw the chain's variable, and the document's own value where both state one
+        expect(result.exitCode).toBe(0);
+    });
+
     test('null value unsets a variable', async () => {
         // Given - set then unset (HOME is set on the host)
         const result = await cli

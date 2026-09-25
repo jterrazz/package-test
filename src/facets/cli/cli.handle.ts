@@ -18,8 +18,8 @@ import type {
 import { createDockerReader } from '../../results/container.js';
 import type { ContainerAccessor } from '../../results/container.js';
 import { ExecAdapter } from '../../seams/process/exec.adapter.js';
-import { createCliFacet } from './cli.chain.js';
 import type { CliSpecification } from './cli.chain.js';
+import { cliFacet } from './cli.facet.js';
 
 // ── Types ──
 
@@ -109,6 +109,16 @@ export type CliHandle<DatabaseKey extends string = string> = {
 
 // ── Constructor ──
 
+/**
+ * The id every container a run of this runner starts is labelled with. One
+ * per runner, never per spec: a test that spawns a world in one chain and
+ * inspects or destroys it in the next sees its own containers, not a ghost;
+ * each test file loads its own runner, so two files never share one.
+ */
+function dockerTestRunId(): string {
+    return `t-${Math.random().toString(36).slice(2, 10)}-${Date.now().toString(36)}`;
+}
+
 export async function startCli<Services extends ServiceRecord>(
     bin: string,
     options: CliSpecificationOptions<Services> = {},
@@ -133,6 +143,7 @@ export async function startCli<Services extends ServiceRecord>(
         databaseKeys,
         databases: started?.databases,
         dockerConfig: options.docker,
+        dockerTestRunId: options.docker === undefined ? undefined : dockerTestRunId(),
         defaultEnv: options.defaults,
         envSets: options.env,
         root,
@@ -149,7 +160,7 @@ export async function startCli<Services extends ServiceRecord>(
                 await started.orchestrator.stop();
             }
         },
-        cli: createCliFacet(config),
+        cli: cliFacet.open(config),
         docker: createDockerReader(callerDir),
         orchestrator: started?.orchestrator ?? null,
     };

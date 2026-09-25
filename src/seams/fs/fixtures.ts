@@ -1,4 +1,4 @@
-import { existsSync, statSync } from 'node:fs';
+import { cpSync, existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
 import { resolveSpecPath } from '../../model/chain/resolve.js';
@@ -64,3 +64,16 @@ export function copyPlan(path: string, specDir: string, workDir: string): Fixtur
     const dest = spread ? workDir : resolve(workDir, basename(src));
     return { dest, src };
 }
+
+/**
+ * The fixtures a chain lays, copied onto this machine's disk by
+ * {@link copyPlan}: its refusals are the copy's.
+ */
+export const fsFixtures: {
+    readonly layer: (path: string, testDir: string, workDir: string) => void;
+} = {
+    layer: (path, testDir, workDir) => {
+        const { dest, src } = copyPlan(path, testDir, workDir);
+        cpSync(src, dest, { recursive: true });
+    },
+};

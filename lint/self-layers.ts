@@ -13,8 +13,8 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   through the chain's one lazy import, the contracts in `stubs/`, and — to
  *   CONSTRUCT what a terminal action hands back, and to compare a golden
  *   through its accessor — `results/`. The builder also names what it runs
- *   through until the facets are recomposed: the document engine, the
- *   fixture copy and the stub backend.
+ *   through until the facets are recomposed: the stub backend; and a
+ *   constructor's configuration names the servers a document may start.
  * - `capabilities/<name>/` — a setup a chain offers, one folder each, owning
  *   only itself (`signatures.ts` indexes them all); among them the
  *   module-scope `intercept()`, which names its engine's registration, and
@@ -197,8 +197,8 @@ export const FRAMEWORK_LAYERS = {
             'results/',
             // The contracts a chain declares, and the queue that serves them.
             'stubs/',
-            // And a document run is the cli's own engine, called by the
-            // Builder's `run` the way its terminal actions are.
+            // What a constructor hands its chain names the servers a cli
+            // Document may start, a shape the document engine declares.
             'actions/run/literate',
             // The four seams that carry no engine of their own: a docker
             // Lookup is a shell read, the tree git does not ignore is one
@@ -215,14 +215,12 @@ export const FRAMEWORK_LAYERS = {
         packages: ['vitest', 'vitest-mock-extended'],
         seams: {
             // The contract engine is reached through a lazy import by the
-            // Chain's `.intercept()`; a fixture is laid by the copy plan of
-            // the filesystem seam; a website or mobile chain arms the stub
+            // Chain's `.intercept()`; a website or mobile chain arms the stub
             // Backend its constructor started.
             'model/chain/builder.ts': [
                 'capabilities/intercept/',
                 'capabilities/seed/',
                 'capabilities/with/',
-                'seams/fs/',
                 'seams/msw/',
                 'seams/stub-backend/',
             ],

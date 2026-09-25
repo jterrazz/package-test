@@ -1,3 +1,4 @@
+import type { MatrixRow } from '../model/chain/capability.js';
 import type { DockerSpecConfig, SpecificationConfig } from '../model/chain/config.js';
 import type { CliOutput } from '../model/ports/cli.port.js';
 import {
@@ -10,6 +11,25 @@ import { FilesystemAccessor } from './filesystem.js';
 import { JsonAccessor } from './json.js';
 import { BaseResult } from './result.js';
 import { TextAccessor } from './text.js';
+
+/** What a command's result publishes, as the capability matrix rows it states — `.exec()`'s and `.run()`'s alike. */
+export const CLI_RESULT_ROWS: readonly MatrixRow[] = [
+    { group: 'Result accessor', name: '.stdout', probe: 'result.stdout' },
+    { group: 'Result accessor', name: '.stderr', probe: 'result.stderr' },
+    { group: 'Result accessor', name: '.exitCode', probe: 'result.exitCode' },
+    { group: 'Result accessor', name: '.json', probe: 'result.json' },
+    { group: 'Result accessor', name: '.filesystem', probe: 'result.filesystem' },
+    {
+        group: 'Result accessor',
+        member: 'container',
+        name: '.container()',
+        probe: 'result.container(',
+    },
+    { group: 'Result accessor', name: '.containerIds', probe: 'result.containerIds' },
+    { group: 'Result accessor', member: 'table', name: '.table()', probe: 'result.table(' },
+    { group: 'Result accessor', member: 'file', name: '.file()', probe: '.file(' },
+    { group: 'Result accessor', member: 'directory', name: '.directory()', probe: '.directory(' },
+];
 
 type CapturedContainer = {
     id: string;

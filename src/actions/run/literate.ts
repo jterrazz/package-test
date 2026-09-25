@@ -1,4 +1,4 @@
-import { cpSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
 import type { SpecificationConfig } from '../../model/chain/config.js';
@@ -25,7 +25,7 @@ import { formatStdoutDiff } from '../../model/services/reporter.js';
 import { CliResult } from '../../results/cli.result.js';
 import { stripAnsiCodes } from '../../results/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';
-import { copyPlan } from '../../seams/fs/fixtures.js';
+import { fsFixtures } from '../../seams/fs/fixtures.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 
 /**
@@ -33,13 +33,14 @@ import { ServeAdapter } from '../../seams/process/serve.adapter.js';
  * one set of servers, every run executed and asserted.
  *
  * The engine composes pieces that already exist rather than adding a second of
- * anything — {@link copyPlan} for `fixture:`, the runner's own command adapter
- * for each run, {@link ServeAdapter} for `serve:`, the `{{token}}` engine for
- * every comparison, and {@link mergeTextPreservingPlaceholders} for the
- * rewrite. What is new here is only the ORCHESTRATION the chain cannot express:
- * several commands sharing one working directory, each judged the moment it
- * ends — so what a run states about that directory is what IT left there, and
- * the first run to disagree is the one the failure names.
+ * anything — {@link fsFixtures} for `fixture:`, the copy `.fixture()` lays
+ * through; the runner's own command adapter for each run, {@link ServeAdapter}
+ * for `serve:`, the `{{token}}` engine for every comparison, and
+ * {@link mergeTextPreservingPlaceholders} for the rewrite. What is new here
+ * is only the ORCHESTRATION the chain cannot express: several commands
+ * sharing one working directory, each judged the moment it ends — so what
+ * a run states about that directory is what IT left there, and the first run
+ * to disagree is the one the failure names.
  */
 
 // ── Types ──
@@ -435,8 +436,7 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
     // `fixture:` layers on top of whatever the chain already copied, in
     // Declaration order — identical semantics to chained `.fixture()` calls.
     for (const fixture of document.fixtures) {
-        const { dest, src } = copyPlan(fixture.path, fileDir, workDir);
-        cpSync(src, dest, { recursive: true });
+        fsFixtures.layer(fixture.path, fileDir, workDir);
     }
 
     // One resolved spelling of the working directory, read by everything that
