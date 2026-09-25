@@ -3,13 +3,10 @@ import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
-import {
-    AmbiguousElementError,
-    describeAmbiguity,
-    formatElement,
-    LANDMARK_SELECTOR,
-} from '../../../elements/ambiguity.js';
+import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
+import { LANDMARK_SELECTOR } from '../../../elements/landmarks.js';
+import { formatElement } from '../../../elements/spelling.js';
 import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
 import type {
     BrowserConsoleMessage,

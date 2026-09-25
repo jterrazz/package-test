@@ -2,13 +2,10 @@ import { expect, TestRunner } from 'vitest';
 import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
-import {
-    AmbiguousElementError,
-    describeAmbiguity,
-    formatElement,
-    LANDMARK_SELECTOR,
-} from '../../../elements/ambiguity.js';
+import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
+import { LANDMARK_SELECTOR } from '../../../elements/landmarks.js';
+import { formatElement } from '../../../elements/spelling.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 

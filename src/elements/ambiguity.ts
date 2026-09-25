@@ -1,5 +1,7 @@
 import { refusal } from '../kernel/refusals/refusal.js';
-import type { ElementMatch, ElementRef, LandmarkKind } from './descriptor.js';
+import type { ElementMatch, ElementRef } from './descriptor.js';
+import { CONTEXT_LANDMARKS } from './landmarks.js';
+import { CONSTRUCTORS, formatBare, formatElement } from './spelling.js';
 
 /**
  * The ambiguity refusal — CONVENTIONS W3.
@@ -16,65 +18,6 @@ import type { ElementMatch, ElementRef, LandmarkKind } from './descriptor.js';
  * wording is unit-testable and the browser integration stays a thin adapter.
  */
 
-/** `kind` → the constructor that builds it, so errors echo the caller's source. */
-const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
-    banner: 'banner',
-    button: 'button',
-    complementary: 'complementary',
-    contentinfo: 'contentinfo',
-    dialog: 'dialog',
-    field: 'field',
-    form: 'form',
-    heading: 'heading',
-    link: 'link',
-    listitem: 'listitem',
-    main: 'main',
-    navigation: 'navigation',
-    option: 'option',
-    region: 'region',
-    row: 'row',
-    search: 'search',
-    status: 'status',
-    table: 'table',
-    testId: 'testId',
-    text: 'content',
-};
-
-/** The HTML element that carries each landmark of the vocabulary without a `role`. */
-const LANDMARK_ELEMENTS: Record<LandmarkKind, string> = {
-    banner: 'header',
-    complementary: 'aside',
-    contentinfo: 'footer',
-    form: 'form',
-    main: 'main',
-    navigation: 'nav',
-    region: 'section',
-    search: 'search',
-};
-
-/**
- * The ancestors a candidate's evidence names as its landmark, in both
- * adapters: every landmark's element, and any element that spells a role.
- */
-export const LANDMARK_SELECTOR = [...Object.values(LANDMARK_ELEMENTS), '[role]'].join(', ');
-
-/** The landmark a context string — an element or a role — maps back to. */
-const CONTEXT_LANDMARKS: Record<string, LandmarkKind> = {
-    aside: 'complementary',
-    banner: 'banner',
-    complementary: 'complementary',
-    contentinfo: 'contentinfo',
-    footer: 'contentinfo',
-    form: 'form',
-    header: 'banner',
-    main: 'main',
-    nav: 'navigation',
-    navigation: 'navigation',
-    region: 'region',
-    search: 'search',
-    section: 'region',
-};
-
 /**
  * The copy-pasteable scope a candidate's landmark offers, or none. A region
  * is a landmark only when it is named — an unnamed `<section>` has no role to
@@ -88,28 +31,6 @@ function landmarkOf(match: ElementMatch): string | undefined {
     return match.contextName === undefined
         ? undefined
         : `${CONSTRUCTORS.region}(${JSON.stringify(match.contextName)})`;
-}
-
-/**
- * Render a descriptor as the source that would build it — `link('Articles')`,
- * `within(navigation(), link('Articles', { exact: false }))`. The error speaks
- * the vocabulary the author wrote, never playwright's — so the option appears
- * only when the AUTHOR stated one, whichever way.
- */
-export function formatElement(element: ElementRef): string {
-    const bare = formatBare(element);
-    return element.scope ? `within(${formatElement(element.scope)}, ${bare})` : bare;
-}
-
-function formatBare(element: ElementRef): string {
-    const args: string[] = [];
-    if (element.name !== undefined) {
-        args.push(JSON.stringify(element.name));
-    }
-    if (element.exact !== undefined) {
-        args.push(`{ exact: ${String(element.exact)} }`);
-    }
-    return `${CONSTRUCTORS[element.kind]}(${args.join(', ')})`;
 }
 
 /** `1. <a href="/articles">Articles</a>  in <nav>` — one evidence line per candidate. */

@@ -1,4 +1,4 @@
-import { formatElement } from '../../../elements/ambiguity.js';
+import { formatElement } from '../../../elements/spelling.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
 import type { MobileElementMatch, MobileElementRef } from './device.port.js';
 
