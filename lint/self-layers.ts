@@ -102,6 +102,9 @@ export const FRAMEWORK_LAYERS = {
             'capabilities/wrap/wrap.capability.ts': ['seams/vitest-browser/ui'],
         },
     },
+    // A constructor and the composition its chain is computed from. The api
+    // And cli constructors hand back `docker(id)`, whose answer is a
+    // Container accessor: `results/`, a value edge by design.
     facets: {
         imports: [
             'actions/',
