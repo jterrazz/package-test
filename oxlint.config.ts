@@ -56,9 +56,9 @@ const config: OxlintConfig = defineConfig(
             // Type specifier — `import { type X } from 'm'` emits `import {}
             // From 'm'`, a runtime edge, where `import type` is erased whole.
             // The rulebook's default (`prefer-inline`) therefore turns every
-            // Type-only import into a real one, and turned this package's
-            // Builder/result type cycle into a load-order crash. The rule stays
-            // ON, at the spelling the compiler erases.
+            // Type-only import into a real one, and a type-only cycle between
+            // two modules into a load-order crash. The rule stays ON, at the
+            // Spelling the compiler erases.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
             // THIS package's architecture (CONVENTIONS I1), stated beside the
             // Self rules (`lint/self-layers.ts`) and wired where the package

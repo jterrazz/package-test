@@ -46,24 +46,6 @@ import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 
 // ── Types ──
 
-/**
- * A server a document may start by name (`serve: mcp`), registered once per app
- * in the `serve` option of `specification.cli()`.
- */
-export type LiterateServeRegistration = {
-    /** Shell command that starts the server, run from the project root. */
-    command: string;
-    /** The variable the resolved URL is bound to in every run's child env. */
-    env: string;
-    /**
-     * Matched against the server's output; the FIRST capture group is the port
-     * it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
-     */
-    ready: RegExp;
-    /** Builds the URL bound to {@link env} from the announced port. */
-    url: (port: number) => string;
-};
-
 /** Per-call options for {@link runSpecDocument} / `cli.run()`. */
 export type LiterateRunFlags = {
     /**

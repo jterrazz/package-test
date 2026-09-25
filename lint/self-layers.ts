@@ -9,9 +9,9 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * - `model/` — the chain, the elements (the descriptors, and the ambiguity
  *   and substring readings every surface shares), the goldens, the clock and
  *   the doubles: what every facet is made of. It reaches the seams that
- *   carry no engine of their own (docker, git, process, yaml), the contracts
- *   in `stubs/`, and — to compare a golden through its accessor — `results/`. A constructor's configuration names
- *   the servers a document may start.
+ *   carry no engine of their own (git, process, yaml) and — to compare a
+ *   golden through its accessor — `results/`. A constructor's configuration
+ *   names the stub backend a website or mobile constructor started.
  * - `capabilities/<name>/` — a setup a chain offers, one folder each, owning
  *   only itself (`signatures.ts` indexes them all); among them the
  *   module-scope `intercept()`, which names its engine's registration, and
@@ -111,11 +111,8 @@ export const FRAMEWORK_LAYERS = {
             'results/',
             'stubs/',
             'runner/facet-project',
-            'runner/preset',
             'runner/provided',
-            'runner/update',
         ],
-        packages: ['vite', 'vitest', 'vitest/config', '@vitest/browser-playwright'],
         seams: {
             // A facet's composition names the adapters its engines are.
             'facets/api/api.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
@@ -131,8 +128,8 @@ export const FRAMEWORK_LAYERS = {
             'facets/jobs/jobs.facet.ts': ['seams/msw/', 'seams/vitest/', 'seams/fs/'],
             'facets/mobile/mobile.facet.ts': ['seams/stub-backend/', 'seams/appium/'],
             'facets/website/website.facet.ts': ['seams/stub-backend/', 'seams/playwright/'],
-            'facets/api/api.handle.ts': ['seams/docker/', 'seams/hono/'],
-            'facets/cli/cli.handle.ts': ['seams/docker/', 'seams/process/'],
+            'facets/api/api.handle.ts': ['seams/hono/'],
+            'facets/cli/cli.handle.ts': ['seams/process/'],
             'facets/mobile/mobile.handle.ts': [
                 'seams/appium/',
                 'seams/simctl/',
@@ -190,16 +187,9 @@ export const FRAMEWORK_LAYERS = {
             // A golden is compared through the accessor it is handed: the
             // Matchers reach `results/`, a value edge by design.
             'results/',
-            // The contracts a chain declares, and the queue that serves them.
-            'stubs/',
-            // What a constructor hands its chain names the servers a cli
-            // Document may start, a shape the document engine declares.
-            'actions/run/literate',
-            // The four seams that carry no engine of their own: a docker
-            // Lookup is a shell read, the tree git does not ignore is one
-            // `git ls-files`, a yaml document is a parse, a process is
-            // `node:child_process`.
-            'seams/docker/',
+            // The three seams that carry no engine of their own: the tree git
+            // Does not ignore is one `git ls-files`, a yaml document is a
+            // Parse, a process is `node:child_process`.
             'seams/git/',
             'seams/process/',
             'seams/yaml/document',
@@ -228,8 +218,8 @@ export const FRAMEWORK_LAYERS = {
     // per kind — over the contract, its exchange and the queue that serves it.
     stubs: { imports: ['model/', 'stubs/'] },
     runner: {
-        imports: ['runner/', 'model/', 'facets/'],
-        packages: ['vite', 'vitest', 'vitest-mock-extended', '@vitest/browser-playwright'],
+        imports: ['runner/', 'model/'],
+        packages: ['vite', 'vitest', '@vitest/browser-playwright'],
         // The component project serves the page's golden commands; the run's
         // Mobile session, what it provides and the device a mobile project
         // Declares reach the Appium seam.

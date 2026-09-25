@@ -91,9 +91,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
     },
     {
-        claims: oneOf('src/facets/mobile/mobile.handle.ts', 'src/seams/appium/appium-server.ts'),
+        claims: oneOf('src/seams/appium/appium-server.ts'),
         name: 'a mobile module that needs a device',
-        why: 'the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and these two are the rest',
+        why: 'the mobile facet has no tree under `specs/` and cannot have one here (M1); what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and the Appium server is the rest',
     },
     {
         claims: oneOf(
@@ -141,17 +141,14 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/seams/docker/docker-lookup.ts',
-            'src/seams/hono/hono.adapter.ts',
             'src/seams/msw/handlers.ts',
             'src/seams/msw/msw-node.ts',
             'src/seams/msw/server.ts',
             'src/seams/msw/worker.ts',
             'src/seams/playwright/page-clock.ts',
-            'src/seams/playwright/playwright.adapter.ts',
             'src/seams/postgres/template.ts',
             'src/seams/vitest/clock.engine.ts',
             'src/seams/vitest-browser/clock.engine.ts',
-            'src/seams/vitest-browser/commands.ts',
             'src/seams/vitest-browser/golden.ts',
             'src/seams/vitest-browser/page.engine.ts',
             'src/seams/vitest-browser/page-runtime.ts',

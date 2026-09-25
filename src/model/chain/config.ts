@@ -1,4 +1,3 @@
-import type { LiterateServeRegistration } from '../../actions/run/literate.js';
 import type { StubBackend } from '../../seams/stub-backend/stub-backend.js';
 import type { BrowserPort } from '../ports/browser.port.js';
 import type { CliEnv, CliPort } from '../ports/cli.port.js';
@@ -6,6 +5,24 @@ import type { DatabasePort } from '../ports/database.port.js';
 import type { DevicePort } from '../ports/device.port.js';
 import type { ServerPort } from '../ports/server.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
+
+/**
+ * A server a document may start by name (`serve: mcp`), registered once per app
+ * in the `serve` option of `specification.cli()`.
+ */
+export type LiterateServeRegistration = {
+    /** Shell command that starts the server, run from the project root. */
+    command: string;
+    /** The variable the resolved URL is bound to in every run's child env. */
+    env: string;
+    /**
+     * Matched against the server's output; the FIRST capture group is the port
+     * it chose — named (`(?<port>\d+)`) or not, it is group 1 either way.
+     */
+    ready: RegExp;
+    /** Builds the URL bound to `env` from the announced port. */
+    url: (port: number) => string;
+};
 
 /** A named job that can be triggered via jobs.trigger(). */
 export type JobHandle = {

@@ -28,7 +28,7 @@ export {
     type HonoApp,
 } from './facets/api/api.handle.js';
 export { type CliHandle, type CliSpecificationOptions } from './facets/cli/cli.handle.js';
-export { type LiterateRunFlags, type LiterateServeRegistration } from './actions/run/literate.js';
+export type { LiterateRunFlags } from './actions/run/literate.js';
 export {
     type SpecDocument,
     type SpecEnvToken,
@@ -69,7 +69,12 @@ export type { MobileSpecification } from './facets/mobile/mobile.facet.js';
 export type { WebsiteSpecification } from './facets/website/website.facet.js';
 export type { ChainContext } from './capabilities/with/with.capability.js';
 export type { SeedSource } from './capabilities/seed/seed.capability.js';
-export type { DockerSpecConfig, JobHandle, SpecificationConfig } from './model/chain/config.js';
+export type {
+    DockerSpecConfig,
+    JobHandle,
+    LiterateServeRegistration,
+    SpecificationConfig,
+} from './model/chain/config.js';
 
 // Results that read a disk, a database or a container — node only.
 //
