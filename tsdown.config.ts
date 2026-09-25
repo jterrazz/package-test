@@ -9,7 +9,7 @@ import { defineConfig } from 'tsdown';
  *   ESM configs load. None has a CommonJS
  *   consumer, so a `require` build would be dead weight.
  * - **Browser** — `browser/index`, what the `browser` condition of `exports["."]`
- *   resolves to. Built for a page (`platform: 'browser'`), with the four seams
+ *   resolves to. Built for a page (`platform: 'browser'`), with the four modules
  *   a page resolves itself left external. No `dts`: the published `types`
  *   entry is the node build's, so there is ONE type surface and a name cannot
  *   exist on one side only. The setup file the page loads is not built here:

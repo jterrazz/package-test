@@ -15,9 +15,10 @@ export type Performed = {
 /**
  * The one pipeline every terminal action runs through: its preparation first
  * — its refusals, what an earlier action left standing, its directory — then
- * every setup armed through its engine in phase order, then the action. An engine's recorded violation is the failure the action
- * reports — over the error the action met, and over a success — and every
- * armed effect is released, in reverse, however the action ends.
+ * every setup armed through its engine in phase order, then the action. An
+ * engine's recorded violation is the failure the action reports — over the
+ * error the action met, and over a success — and every armed effect is
+ * released, in reverse, however the action ends.
  */
 export async function perform(
     setups: readonly AnyCapability[],

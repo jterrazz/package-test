@@ -1,12 +1,15 @@
 import type { StubRequest, StubResponder, StubResponse } from '../exchange/exchange.js';
 import type { StubRegistration } from '../network/handlers.js';
+import type { Stub, StubInput } from '../stub.js';
+import { declared } from './declared.js';
+
 /**
  * The network double in MODULE scope — the same stubs, the same queue and
  * the same strictness as a chain's `.intercept()`, for the one kind of test
  * that has no chain to hang them on.
  *
- * A module test whose subject reaches the network had exactly two ways out
- * before this: `vi.stubGlobal('fetch')`, which replaces the platform with a
+ * Without it, a module test whose subject reaches the network has two ways
+ * out: `vi.stubGlobal('fetch')`, which replaces the platform with a
  * hand-written stand-in, or `msw/node` imported directly, which F6 refuses a
  * test and F8 refuses a consumer to declare. Both answer "what did the outside
  * world reply" in a dialect nothing else in the repository speaks.
@@ -16,8 +19,6 @@ import type { StubRegistration } from '../network/handlers.js';
  * request no stub accepted) is raised THERE, which is what makes the
  * double a guard rather than a convenience.
  */
-import type { Stub, StubInput } from '../stub.js';
-import { declared } from './declared.js';
 
 /**
  * One block's worth of declared network. Disposed at the end of the scope that

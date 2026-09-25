@@ -3,6 +3,8 @@ import { isStreamBody } from '../exchange/exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange/exchange.js';
 import { StubQueue } from '../exchange/queue.js';
 import { toReadableStream } from '../exchange/stream.js';
+import type { Stub } from '../stub.js';
+
 /**
  * One stub engine, two runtimes.
  *
@@ -16,7 +18,6 @@ import { toReadableStream } from '../exchange/stream.js';
  * sides (it is a dependency, never a peer), and the namespace it returns is
  * this engine's to describe, not the kernel's.
  */
-import type { Stub } from '../stub.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 

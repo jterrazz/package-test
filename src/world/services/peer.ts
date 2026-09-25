@@ -6,7 +6,7 @@ import { findRoot } from '../../kernel/files/resolve.js';
 /**
  * Loading an OPTIONAL peer, and saying the right thing when it is not there.
  *
- * Four native seams — `better-sqlite3`, `pg`, `redis`, `testcontainers` — are
+ * Four native peers — `better-sqlite3`, `pg`, `redis`, `testcontainers` — are
  * peers rather than dependencies: a consumer that specifies a CLI has no
  * business compiling a SQLite binding, and a package carrying all four would
  * make every install pay for the services one repository happens to use.
@@ -67,7 +67,7 @@ const BUILDERS: Record<string, (peer: string) => string> = {
 const UNBUILT =
     /could not locate the bindings file|\.node['"]?$|invalid elf header|was compiled against a different node/iu;
 
-/** Is this failure a binding that was never built, rather than a bug in the seam? */
+/** Is this failure a binding that was never built, rather than a bug in the loading module? */
 function isUnbuilt(error: unknown): boolean {
     const message = error instanceof Error ? error.message : String(error);
     return UNBUILT.test(message);

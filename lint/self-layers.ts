@@ -12,8 +12,10 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  * - `kernel/` — the machinery that builds a facet and knows none: the chain
  *   (`defineFacet`, the setup and action contracts, the computed chain type),
  *   what a file shares (`context/`), the disk a spec names (`files/`), the
- *   four-part refusal (`refusals/`) and the `test` section of the config
- *   (`config/`). It imports nothing else from `src/`.
+ *   four-part refusal (`refusals/`), the `test` section of the config
+ *   (`config/`), the one yaml engine (`yaml/`), and at its root the one timed
+ *   wait (`pause.ts`) and the `database` option's check (`database-option.ts`).
+ *   It imports nothing else from `src/`.
  * - `world/` — what surrounds the subject, controlled by the test: the network
  *   outside (`stubs/`), the real databases and their containers (`services/`),
  *   time (`clock/`) and the in-memory collaborators of a module test

@@ -28,10 +28,10 @@ let workerInstance: any = null;
 /**
  * Is this the runner's own traffic rather than the subject's?
  *
- * In a page EVERY module is an HTTP request: the test file, the seam, the
- * dependency cache Vite optimised, the runner's own channel. None of them is
- * the component's network, and none of them can be declared by a stub, so
- * they are recognised by PREFIX — never by extension, because msw bypasses a
+ * In a page EVERY module is an HTTP request: the test file, the page's
+ * modules, the dependency cache Vite optimised, the runner's own channel.
+ * None of them is the component's network, and none of them can be declared
+ * by a stub, so they are recognised by PREFIX — never by extension, because msw bypasses a
  * "common asset" path before `onUnhandledRequest` ever runs and an extension
  * test would let a real `/api/posts.json` through on the same ground.
  */

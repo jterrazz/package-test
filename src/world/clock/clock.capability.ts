@@ -26,9 +26,9 @@ export interface ClockSignature extends ChainSignature {
  * instant is taken as written and judged here when the chain is armed, before
  * any engine sees it, so every calendar refuses what is not an instant in the
  * same words; the engine pins it, and it is released when the action settles,
- * so a chain never leaks its instant into the next one (CONVENTIONS D16). A chain that states
- * none hands the engine `null`: the engine pins the default its subject has,
- * or nothing.
+ * so a chain never leaks its instant into the next one (CONVENTIONS D16). A
+ * chain that states none hands the engine `null`: the engine pins the default
+ * its subject has, or nothing.
  */
 export const clock = defineCapability<
     'clock',

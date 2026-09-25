@@ -27,16 +27,10 @@ import type { ServiceHandle } from '../service.port.js';
 
 // The first 16 bytes of every well-formed SQLite database file (see the
 // SQLite file format spec). A crashed earlier run can leave a stale/partial
-// Template behind (e.g. 0 bytes) — this is the cheap, dependency-free check
-// Used to tell "real template" from "leftover from a crash".
+// template behind (e.g. 0 bytes) — this is the cheap, dependency-free check
+// used to tell "real template" from "leftover from a crash".
 const SQLITE_FILE_HEADER = Buffer.from('SQLite format 3\0');
 
-/**
- * Whether `path` looks like a usable SQLite database file: it exists, is at
- * least as long as the format header, and begins with the SQLite magic
- * bytes. Does not validate anything beyond the header — good enough to
- * reject a 0-byte or truncated leftover without opening the file.
- */
 /**
  * `better-sqlite3`'s constructor, loaded the first time a database is opened.
  *
@@ -80,6 +74,12 @@ function database(): typeof Database {
     return databaseConstructor;
 }
 
+/**
+ * Whether `path` looks like a usable SQLite database file: it exists, is at
+ * least as long as the format header, and begins with the SQLite magic
+ * bytes. Does not validate anything beyond the header — good enough to
+ * reject a 0-byte or truncated leftover without opening the file.
+ */
 export function isValidSqliteTemplate(path: string): boolean {
     if (!existsSync(path)) {
         return false;
