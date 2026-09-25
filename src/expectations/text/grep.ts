@@ -1,15 +1,15 @@
+import { stripAnsiCodes } from './ansi.js';
+
 /**
- * Extract text blocks from output that contain a pattern.
- * Splits by blank lines (how linter/compiler output is structured),
- * returns only blocks matching the pattern.
+ * The blocks of an output that contain a pattern: split by blank lines (how
+ * linter and compiler output is structured), ANSI stripped, only the blocks
+ * holding the pattern kept. Reached as `TextAccessor.grep`.
  *
  * @example
- * expect(grep(result.stdout, "unused-var.ts")).toContain("no-unused-vars")
- * expect(grep(result.stdout, "valid/sorted.ts")).not.toContain("sort-imports")
+ *   expect(result.stdout.grep('unused-var.ts').text).toContain('no-unused-vars');
  */
 export function grep(output: string, pattern: string): string {
-    // oxlint-disable-next-line no-control-regex -- the ANSI escape IS the control character: stripping it is the point
-    const clean = output.replaceAll(/\u001B\[[0-9;]*m/gu, '');
+    const clean = stripAnsiCodes(output);
     const blocks = clean.split(/\n\s*\n/u);
     return blocks.filter((block) => block.includes(pattern)).join('\n\n');
 }

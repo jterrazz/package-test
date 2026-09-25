@@ -1,5 +1,5 @@
 import { CaptureScope } from '../tokens/match.js';
-import { stripAnsiCodes } from './text.js';
+import { stripAnsiCodes } from './ansi.js';
 
 /**
  * Read-only accessor for a JSON payload parsed from a text stream — stdout,

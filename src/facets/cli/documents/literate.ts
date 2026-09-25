@@ -4,7 +4,7 @@ import { isAbsolute, relative, resolve } from 'node:path';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
-import { stripAnsiCodes } from '../../../expectations/text/text.js';
+import { stripAnsiCodes } from '../../../expectations/text/ansi.js';
 import { CaptureScope } from '../../../expectations/tokens/match.js';
 import {
     mergeTextPreservingPlaceholders,
