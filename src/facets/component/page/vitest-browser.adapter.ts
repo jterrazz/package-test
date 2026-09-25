@@ -261,11 +261,11 @@ function isGone(locator: Locator, element: ElementRef): boolean {
 /**
  * How long `gone()` waits — what is LEFT of the running test's budget.
  *
- * Every other verb already gets it: a locator action and `expect.element`
- * default their timeout to the remaining budget, and only a bare
- * `expect.poll` falls back to vitest's one second. That second made `gone()`
- * the one verb that could not outlast a slow answer — a button taken off the
- * screen when a two-second request returns was "still on the screen".
+ * Every other verb gets it: a locator action and `expect.element` default
+ * their timeout to the remaining budget, while a bare `expect.poll` falls back
+ * to vitest's one second. Handing `gone()` the budget keeps it on the same
+ * clock as every verb, so an element a slow answer takes off the screen is
+ * waited for as long as any other.
  *
  * The 100ms margin is vitest's own: the poll has to give up just BEFORE the
  * test does, or the failure is a bare timeout naming no element.

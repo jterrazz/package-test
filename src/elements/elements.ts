@@ -18,8 +18,8 @@ export type ElementOptions = {
      * Match the accessible name as a whole string. `true` by default.
      *
      * A substring match is what a person does NOT mean: `link('Articles')`
-     * designated "Read Articles" as readily as "Articles", so a test could pass
-     * for years against the element beside the one it named. `{ exact: false }`
+     * would designate "Read Articles" as readily as "Articles", and a test
+     * would pass against the element beside the one it named. `{ exact: false }`
      * is the opt-out, for a name that genuinely carries a variable part the
      * test does not control.
      */

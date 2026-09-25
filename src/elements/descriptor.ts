@@ -18,8 +18,8 @@ export type LandmarkKind =
  *
  * `dialog`, `status`, `table`, `row`, `listitem` and `option` are ARIA roles
  * like the landmarks, but they are not CONTAINERS of a page: they are things a
- * visitor reads and acts on, and they are the roles the estate's UI specs were
- * already reaching for through `getByRole` or, worse, through `.first()`.
+ * visitor reads and acts on, so each is designated by its role and name rather
+ * than through `getByRole` or `.first()`.
  */
 export type ElementKind =
     | 'button'

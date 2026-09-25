@@ -131,9 +131,9 @@ function nearestHolding(name: string): string | undefined {
  *
  * Not `process.cwd()`: a `vitest.config.ts` is read by more tools than the
  * runner, and knip and `typescript check` load every config of a repository
- * from the repository ROOT — `component({ vite: './web/vite.config.ts' })`
- * written beside an app resolved against the wrong tree and threw before a
- * single test ran. `import.meta` cannot answer either: it describes THIS
+ * from the repository ROOT, while `component({ vite: './web/vite.config.ts' })`
+ * written beside an app means the app's tree whoever loads the config.
+ * `import.meta` cannot answer either: it describes THIS
  * module. And vitest hands a project neither its root nor its config file — a
  * project function is called with `{ command, mode, isPreview, isSsrBuild }`
  * and nothing else.

@@ -169,8 +169,8 @@ export const match: MatchFactories = {
     /**
      * Matches a string CONTAINING the given substring. Code-only, like
      * {@link match.regex} — the `{{token}}` fixture vocabulary does not grow.
-     * The explicit escape hatch now that stub string filters
-     * (`openai.chat({ user })`) mean exact equality.
+     * The explicit way to match part of a string where a stub string filter
+     * (`openai.chat({ user })`) means exact equality.
      */
     includes: (substring: string): Matcher => new Matcher('includes', { includes: substring }),
     /** Matches an integer (or an integer string in text contexts). */

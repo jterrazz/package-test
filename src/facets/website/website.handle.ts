@@ -23,7 +23,7 @@ import { websiteFacet } from './website.facet.js';
  *
  * A factory is a function of services that have not started yet, so calling it
  * to read a command would start the world twice. The SHAPE is known either
- * way, and the shape is the part the startup report was getting wrong.
+ * way, and the shape is all the startup report names.
  */
 function commandOf(server: unknown): string | undefined {
     return typeof server === 'object' && server !== null && 'command' in server
@@ -264,8 +264,8 @@ export async function startWebsite<Services extends ServiceRecord>(
     const services = servicesOf(options);
     const root = resolveRoot(options.root, callerDir);
     // The site is a child process the runner starts and polls, or a
-    // Deployment already running; it is never an app inside this process,
-    // Which is what the report used to say of it.
+    // deployment already running — never an app inside this process, so the
+    // startup report names it as a process or an http subject.
     const subject: AppInfo = options.server
         ? { command: commandOf(options.server), type: 'process' }
         : { type: 'http', url: options.url };

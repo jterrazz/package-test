@@ -23,11 +23,10 @@ export type CallResultOptions = BaseResultOptions & {
  *
  * - EXACTLY a string — a `TextAccessor`, and nothing to narrow;
  * - it MAY be a string (`string | undefined`, `string | number`, `any`) — the
- *   UNION, which the test narrows. The type used to read the static type only
- *   while the accessor was built from the RUNTIME value, so a subject typed
- *   `string | undefined` was handed back as a `JsonAccessor`: `.value.value`
- *   compiled, the runtime had built a `TextAccessor`, and the read silently
- *   answered `undefined`;
+ *   UNION, which the test narrows. The accessor is built from the RUNTIME
+ *   value, so a type that only might be a string cannot promise either
+ *   accessor: naming one would let a read compile that the runtime answers
+ *   with `undefined`;
  * - never a string — a `JsonAccessor<Returned>`.
  *
  * `Returned` there is what the value CLAIMS, not what survived the crossing:

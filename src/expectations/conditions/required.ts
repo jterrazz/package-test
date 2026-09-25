@@ -5,8 +5,7 @@
  * element of a list — meets `T | undefined` and has to do something about it.
  * The two things it usually does are both wrong: `!` erases the question, and
  * an `if (!x) throw new Error('missing')` re-states the same three lines in
- * every repository (the estate had two hand-written copies of exactly this).
- * `required` is that gesture with the reason attached, so the failure reads as
+ * every repository. `required` is that gesture with the reason attached, so the failure reads as
  * a sentence rather than as a `TypeError` two frames further down.
  *
  * @example
