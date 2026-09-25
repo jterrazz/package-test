@@ -3835,7 +3835,7 @@ Facet `jobs` renamed `job` — every facet name is singular.
 ## `src/` reads the sentence of a test (2026-09-25): test
 
 The owner approved this structure decision, and it is now in force.
-`src/` holds `index.ts`, `index.browser.ts`, `vitest/` and six trees:
+`src/` holds `index.ts`, `index.browser.ts`, `vitest/` and five trees:
 
 - `facets/<facet>/`, what is tested, one slice per constructor.
 - `world/`, what surrounds the subject: stubs, services, clock, mocks.
@@ -3898,6 +3898,20 @@ Where the work deviated from the inventory:
 - The locks first landed as meta-tests. They are now self checker
   passes, run by `make lint`: each finding names its place (the entry,
   the import, the folder) and teaches in the four K11 parts.
+
+Carried from the architecture wave, read against the new tree:
+
+- **Retired by the move**: the F2 exemption of `src/seams/vitest/**`.
+  `seams/` is gone; the clock sits in `src/world/clock/`, exempted whole
+  because `clock.ts` imports vitest's `vi`, which is live.
+- **Restated with their new paths**: the three results edges plan §4.4
+  was to record. `model→results` has no successor, since `kernel/`
+  imports nothing else from `src/`; the handles' `createDockerReader` is
+  now the declared `facets → expectations` edge (`api.handle.ts` and
+  `cli.handle.ts` into `expectations/command/container.ts`); and
+  `seams→results/text` is now `facets/component/golden/` into
+  `expectations/goldens/` and `expectations/in-place/`, both declared by
+  the map.
 
 Open, **for the owner**:
 
