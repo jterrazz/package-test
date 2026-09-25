@@ -1,4 +1,4 @@
-import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
+import { SERVICE_IMAGES } from '../../model/services/service-images.js';
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';

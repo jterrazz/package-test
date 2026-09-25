@@ -2,14 +2,14 @@ import { randomUUID } from 'node:crypto';
 
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
-import { ProcessHandle } from '../../model/chain/process.js';
-import type { AppInfo } from '../../model/chain/reporter.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
-import type { ServiceRecord, StartedServices } from '../../model/chain/services.js';
-import { releaseIsolation, startServices } from '../../model/chain/services.js';
 import { StubBackend } from '../../model/chain/stub-backend.js';
 import { registerMatchers } from '../../model/goldens/matchers.js';
 import type { BrowserPort } from '../../model/ports/browser.port.js';
+import { ProcessHandle } from '../../model/services/process.js';
+import type { AppInfo } from '../../model/services/reporter.js';
+import type { ServiceRecord, StartedServices } from '../../model/services/services.js';
+import { releaseIsolation, startServices } from '../../model/services/services.js';
 import { ServeAdapter } from '../../seams/process/serve.adapter.js';
 import type { ProcessOptions } from '../../seams/process/serve.adapter.js';
 import { createWebsiteFacet } from './website.chain.js';

@@ -21,7 +21,6 @@ import { ResponseAccessor } from '../../results/response.js';
 import { TableAccessor } from '../../results/table.js';
 import { TextAccessor } from '../../results/text.js';
 import { missingHint, shouldUpdateSnapshots } from '../../runner/update.js';
-import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from '../chain/reporter.js';
 import { resolveSpecPath } from '../chain/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../chain/spec-path.js';
 import { parseResponseFile, serializeResponseFile } from '../http-files/http-file.js';
@@ -36,6 +35,7 @@ import {
     renderExpected,
     structuralEquals,
 } from '../matching/structural.js';
+import { formatDirectoryDiff, formatResponseDiff, formatTableDiff } from '../services/reporter.js';
 import {
     callSiteOf,
     deferRewritesTo,

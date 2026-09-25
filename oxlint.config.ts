@@ -99,7 +99,7 @@ const FRAMEWORK_LAYERS = {
             // dedent is what reads it back, so the fixer proves its guess
             // against it rather than reimplementing the indentation rule.
             'model/matching/dedent',
-            'model/chain/binding',
+            'model/services/binding',
             // The path law the runner refuses by is the one the rules read by.
             'model/chain/spec-path',
             // The four ground names have ONE home; a rule that probed for its

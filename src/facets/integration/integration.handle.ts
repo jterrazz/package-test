@@ -1,13 +1,17 @@
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { getCallerDir } from '../../model/chain/caller.js';
 import { resolveRoot } from '../../model/chain/resolve.js';
+import { registerMatchers } from '../../model/goldens/matchers.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
     startServices,
-} from '../../model/chain/services.js';
-import type { DatabaseKeys, ServiceRecord, StartedServices } from '../../model/chain/services.js';
-import { registerMatchers } from '../../model/goldens/matchers.js';
+} from '../../model/services/services.js';
+import type {
+    DatabaseKeys,
+    ServiceRecord,
+    StartedServices,
+} from '../../model/services/services.js';
 import { createIntegrationFacet } from './integration.chain.js';
 import type { IntegrationSpecification } from './integration.chain.js';
 

@@ -9,7 +9,7 @@ import { FetchResult } from '../../results/fetch.result.js';
 import { HttpResult } from '../../results/http.result.js';
 import type { JobsResult } from '../../results/jobs.result.js';
 import { PageResult } from '../../results/page.result.js';
-import { BaseResult, validateDatabaseOption } from '../../results/result.js';
+import { BaseResult } from '../../results/result.js';
 import { ScreenResult } from '../../results/screen.result.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
@@ -25,7 +25,8 @@ import type { DatabasePort } from '../ports/database.port.js';
 import type { DevicePort, MobileScenario } from '../ports/device.port.js';
 import type { ServerPort } from '../ports/server.port.js';
 import type { ServiceHandle } from '../ports/service.port.js';
-import { toConstantCase } from './binding.js';
+import { toConstantCase } from '../services/binding.js';
+import { validateDatabaseOption } from '../services/database-option.js';
 import { getCallerDir } from './caller.js';
 import { copyPlan } from './fixtures.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';

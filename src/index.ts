@@ -1,6 +1,6 @@
 import { interceptThrough } from './capabilities/intercept/intercept.scope.js';
 import type { Intercept } from './capabilities/intercept/intercept.scope.js';
-import { registerContainerIntegrations } from './model/chain/registry.js';
+import { registerContainerIntegrations } from './model/services/registry.js';
 import { serviceContainers } from './runner/provided.js';
 import { ServiceContainer } from './seams/testcontainers/service-container.js';
 
@@ -55,8 +55,8 @@ export {
 } from './facets/website/website.handle.js';
 export { type ProcessOptions } from './seams/process/serve.adapter.js';
 export { type ServerSpec } from './facets/website/website.handle.js';
-export { processService as process, ProcessHandle } from './model/chain/process.js';
-export { type DatabaseKeys, type ServiceRecord } from './model/chain/services.js';
+export { processService as process, ProcessHandle } from './model/services/process.js';
+export { type DatabaseKeys, type ServiceRecord } from './model/services/services.js';
 
 // Facets — each chain is named in its own folder, beside the constructor that
 // Builds it.

@@ -17,7 +17,7 @@ import type { Specification } from '../facets/specification.js';
 import type {
     processService as processFn,
     ProcessHandle as ProcessHandleClass,
-} from '../model/chain/process.js';
+} from '../model/services/process.js';
 import { TextAccessor } from '../results/text.js';
 import { registerWorkerContracts } from '../seams/msw/worker.js';
 import type { postgres as postgresFn } from '../seams/postgres/postgres.js';

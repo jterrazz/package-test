@@ -1,10 +1,10 @@
 import { TextAccessor } from '../../results/text.js';
-import { formatStdoutDiff } from '../chain/reporter.js';
 import { isDiskTarget } from '../chain/spec-path.js';
 import { refusal } from '../lesson/refusal.js';
 import { dedent } from '../matching/dedent.js';
 import { CaptureScope } from '../matching/match.js';
 import { textEquals } from '../matching/structural.js';
+import { formatStdoutDiff } from '../services/reporter.js';
 import type { TableMatchOptions } from './match-options.js';
 
 /**

@@ -2,11 +2,11 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Client } from 'pg';
 
-import { SERVICE_IMAGES } from '../../model/chain/service-images.js';
 import type { ContainerOptions } from '../../model/ports/container.port.js';
 import type { DatabasePort } from '../../model/ports/database.port.js';
 import type { IsolationStrategy } from '../../model/ports/isolation.port.js';
 import type { ServiceHandle } from '../../model/ports/service.port.js';
+import { SERVICE_IMAGES } from '../../model/services/service-images.js';
 import {
     buildTemplate,
     clientConstructor,

@@ -3,9 +3,9 @@ import { resolve } from 'node:path';
 
 import type { SpecificationConfig } from '../model/chain/builder.js';
 import { safeRealpath } from '../model/chain/resolve.js';
-import { refusal } from '../model/lesson/refusal.js';
 import { CaptureScope } from '../model/matching/match.js';
 import type { DatabasePort } from '../model/ports/database.port.js';
+import { validateDatabaseOption } from '../model/services/database-option.js';
 import { DirectoryAccessor } from './directory.js';
 import { TableAccessor } from './table.js';
 import { TextAccessor } from './text.js';
@@ -102,39 +102,5 @@ export class BaseResult {
             return this.config.databases.get(databaseKey);
         }
         return this.config.database;
-    }
-}
-
-/**
- * Enforce CONVENTIONS A7: with two or more databases in the services record
- * the `database` option is mandatory on `.seed()` / `.table()`; with exactly
- * one it is forbidden (redundant).
- *
- * @internal
- */
-export function validateDatabaseOption(
-    method: string,
-    config: SpecificationConfig,
-    database: string | undefined,
-): void {
-    const keys = config.databaseKeys;
-    if (!keys) {
-        return;
-    }
-    if (keys.length >= 2 && !database) {
-        throw new Error(
-            refusal('a7-database-runtime', {
-                fix: `pass the database it reads: { database: '${keys[0]}' }, or another declared key`,
-                found: `${method}() names no database, and ${keys.length} databases are declared (${keys.map((k) => `"${k}"`).join(', ')})`,
-            }),
-        );
-    }
-    if (keys.length === 1 && database) {
-        throw new Error(
-            refusal('a7-database-runtime', {
-                fix: `delete { database: '${database}' }`,
-                found: `${method}() names a database, and "${keys[0]}" is the only one declared`,
-            }),
-        );
     }
 }

@@ -3,7 +3,6 @@ import { isAbsolute, relative, resolve } from 'node:path';
 
 import type { SpecificationConfig } from '../../model/chain/builder.js';
 import { copyPlan } from '../../model/chain/fixtures.js';
-import { formatStdoutDiff } from '../../model/chain/reporter.js';
 import { expandWorkdir, safeRealpath } from '../../model/chain/resolve.js';
 import {
     readSpecFile,
@@ -23,6 +22,7 @@ import {
     textEquals,
 } from '../../model/matching/structural.js';
 import type { CliEnv, CliOutput } from '../../model/ports/cli.port.js';
+import { formatStdoutDiff } from '../../model/services/reporter.js';
 import { CliResult } from '../../results/cli.result.js';
 import { stripAnsiCodes } from '../../results/text.js';
 import { shouldUpdateSnapshots } from '../../runner/update.js';

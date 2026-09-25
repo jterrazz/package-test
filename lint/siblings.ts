@@ -114,7 +114,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/model/artifacts/artifacts.ts',
-            'src/model/chain/service-images.ts',
+            'src/model/services/service-images.ts',
             'lint/manifest.ts',
             'lint/rule-code.ts',
             'lint/self-manifest.ts',
@@ -215,8 +215,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/model/chain/ground.ts',
-            'src/model/chain/registry.ts',
-            'src/model/chain/services.ts',
+            'src/model/services/database-option.ts',
+            'src/model/services/registry.ts',
+            'src/model/services/services.ts',
             'src/model/timing/pause.ts',
             'src/runner/facet-project.ts',
             'src/stubs/stream.ts',
