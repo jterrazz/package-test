@@ -10,8 +10,6 @@ import type { TokenViolation } from './checker.js';
 import { moduleTestsOf } from './module-tests.js';
 import { isTestFileName } from './role.js';
 
-/** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
-
 /** The toolchain's bound, to the segment. */
 const MEMBER_DEPTH = 6;
 
@@ -378,6 +376,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     return found;
 }
 
+/** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
 export function checkMember(memberDir: string, rootDir: string): TokenViolation[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {

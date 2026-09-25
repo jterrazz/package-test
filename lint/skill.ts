@@ -1,8 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-/** The skill can only cite what exists: a symbol an entry publishes or vitest provides, and a chapter on disk. */
-
 /** Past it, the skill is restating a chapter. */
 export const SKILL_MAX_LINES = 120;
 
@@ -68,6 +66,7 @@ export type SkillFindings = {
     unknownCalls: string[];
 };
 
+/** The skill can only cite what exists: a symbol an entry publishes or vitest provides, and a chapter on disk. */
 export function skillFindings(skillPath: string, root: string): SkillFindings {
     const skill = readFileSync(skillPath, 'utf8');
     const published: Record<string, Set<string>> = {

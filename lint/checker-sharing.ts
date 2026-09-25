@@ -22,8 +22,6 @@ import { isInside, literalSpans, nameAround } from './spec-values.js';
 import type { Span } from './spec-values.js';
 import { closingOf, literalEnd, withoutComments } from './subject.js';
 
-/** A reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers. */
-
 /** A role absent here is never written in place. */
 export const INLINE_CAPS: Readonly<Record<string, number>> = {
     [GROUND_EXPECTED]: 150,
@@ -142,6 +140,7 @@ function staysAFile(path: string, cap: number): boolean {
 
 type SingleUse = { reference: Reference; references: number; target: string };
 
+/** A reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers. */
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
     const [only] = named;
     const tests = new Set(named.map((reference) => reference.test));

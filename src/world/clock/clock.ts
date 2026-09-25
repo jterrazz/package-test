@@ -2,8 +2,6 @@ import { vi } from 'vitest';
 
 import { instantOf } from './instant.js';
 
-/** The one time primitive (D16): `at()` pins the calendar, `run()` the scheduler too. */
-
 /** A pinned clock — released when the `using` scope that declared it ends. */
 export type PinnedClock = Disposable;
 
@@ -24,6 +22,7 @@ function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): 
     };
 }
 
+/** The one time primitive (D16): `at()` pins the calendar, `run()` the scheduler too. */
 export const clock = {
     /** Move the pinned clock forward; under `clock.run` fire what came due. Refused with no clock taken. */
     async advance(ms: number): Promise<void> {
