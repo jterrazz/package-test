@@ -18,7 +18,7 @@ import { TextAccessor } from '../../../expectations/text/text.js';
 import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/structural.js';
 import { isDiskFile } from '../../../kernel/files/spec-path.js';
 import { refusal } from '../../../kernel/refusals/refusal.js';
-import { readGolden, writeGolden, writeInPlaceText } from './vitest-browser.adapter.js';
+import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browser.adapter.js';
 
 /**
  * The matchers, as a page can serve them.

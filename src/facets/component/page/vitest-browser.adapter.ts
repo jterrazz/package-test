@@ -9,6 +9,8 @@ import {
     LANDMARK_SELECTOR,
 } from '../../../elements/ambiguity.js';
 import type { ElementMatch, ElementRef } from '../../../elements/element.port.js';
+import type { MountedSurface } from '../render/page.port.js';
+import type { ComponentVisitor } from '../render/scenario.js';
 import type { ComponentUi, DomMount } from './ui.js';
 
 /**
@@ -29,16 +31,6 @@ import type { ComponentUi, DomMount } from './ui.js';
 
 /** How many candidates the ambiguity error enumerates before truncating. */
 const MAX_REPORTED_MATCHES = 10;
-
-/** What a mounted subject offers the chain, React or vanilla DOM alike. */
-export type MountedSurface = {
-    /** The element the subject was mounted into. */
-    container: HTMLElement;
-    /** Replace the rendered tree — a prop change, as a parent makes one. */
-    rerender: (ui: ComponentUi) => Promise<void>;
-    /** Take it off the screen, as a parent does. */
-    unmount: () => Promise<void>;
-};
 
 /**
  * The roles a FIELD can carry — what `field('Name')` designates.
@@ -300,18 +292,7 @@ function keystroke(key: string): string {
 }
 
 /** The verbs a rendered surface shares with a page, plus the two a parent owns. */
-export function componentVerbs(surface: MountedSurface): {
-    check: (element: ElementRef) => Promise<void>;
-    click: (element: ElementRef) => Promise<void>;
-    fill: (element: ElementRef, value: string) => Promise<void>;
-    gone: (element: ElementRef) => Promise<void>;
-    hover: (element: ElementRef) => Promise<void>;
-    press: (key: string) => Promise<void>;
-    rerender: (ui: ComponentUi) => Promise<void>;
-    see: (element: ElementRef) => Promise<void>;
-    select: (element: ElementRef, option: string) => Promise<void>;
-    unmount: () => Promise<void>;
-} {
+export function componentVerbs(surface: MountedSurface): ComponentVisitor {
     return {
         check: async (element) => {
             await act(element, async (locator) => {

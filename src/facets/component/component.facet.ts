@@ -8,10 +8,10 @@ import { mswWorker } from '../../world/stubs/interceptor/worker.js';
 import { pageClock } from './page/clock.engine.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';
 import { vitestBrowserPage } from './page/page.engine.js';
-import { wrap } from './page/wrap.capability.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import type { ComponentOptions } from './render/options.js';
 import { render } from './render/render.action.js';
+import { wrap } from './render/wrap.capability.js';
 import { viewport } from './viewport/viewport.capability.js';
 import { pageViewport } from './viewport/viewport.engine.js';
 

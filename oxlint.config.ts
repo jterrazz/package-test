@@ -40,9 +40,10 @@ const config: OxlintConfig = defineConfig(
                     'src/facets/api/routes/**',
                     'src/facets/cli/documents/literate-plugin.ts',
                     'src/facets/mobile/session/**',
-                    // The page a component renders into, and the browser the
-                    // Website facet drives.
+                    // The page a component renders into, and the goldens it
+                    // Serves through the runner's commands.
                     'src/facets/component/page/**',
+                    'src/facets/component/golden/**',
                     'src/facets/website/browser/**',
                     // The network double's engine, time, and the doubles.
                     'src/world/stubs/interceptor/**',

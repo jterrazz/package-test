@@ -162,7 +162,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/services/postgres/template.ts',
             'src/world/clock/clock.engine.ts',
             'src/facets/component/page/clock.engine.ts',
-            'src/facets/component/page/golden.ts',
+            'src/facets/component/golden/golden.ts',
             'src/facets/component/page/page.engine.ts',
             'src/facets/component/page/page-runtime.ts',
             'src/facets/component/page/ui.ts',

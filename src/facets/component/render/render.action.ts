@@ -10,11 +10,11 @@ import {
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { wrap } from '../page/wrap.capability.js';
 import { recordConsole } from './console-recorder.js';
 import type { PagePort } from './page.port.js';
 import { RenderResult } from './render.result.js';
 import type { ComponentScenario, RenderSubject } from './scenario.js';
+import { wrap } from './wrap.capability.js';
 
 /** What a mounted subject offers the render, React or vanilla DOM alike. */
 type MountedSurface = Awaited<ReturnType<PagePort['mountDom']>>;

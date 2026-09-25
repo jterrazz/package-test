@@ -1,12 +1,7 @@
+import type { PagePort } from '../render/page.port.js';
 import { afterThisTest, projectWrapper } from './page-runtime.js';
-import type { ComponentUi, DomMount } from './ui.js';
-import type {
-    ariaTree,
-    componentVerbs,
-    mountDom,
-    MountedSurface,
-    mountReact,
-} from './vitest-browser.adapter.js';
+import type { ComponentUi } from './ui.js';
+import type { ariaTree, componentVerbs, mountDom, mountReact } from './vitest-browser.adapter.js';
 
 /** What a render reaches through the adapter. */
 type Adapter = {
@@ -22,14 +17,7 @@ async function adapter(): Promise<Adapter> {
 }
 
 /** The page under Vitest Browser Mode, as a render reaches it: the document, the adapter, the runner. */
-export const vitestBrowserPage: {
-    readonly afterThisTest: typeof afterThisTest;
-    readonly ariaTree: () => Promise<string>;
-    readonly mountDom: (mount: DomMount) => Promise<MountedSurface>;
-    readonly mountReact: (ui: ComponentUi) => Promise<MountedSurface>;
-    readonly projectWrapper: () => ((ui: ComponentUi) => ComponentUi) | undefined;
-    readonly visitor: (surface: MountedSurface) => Promise<ReturnType<typeof componentVerbs>>;
-} = {
+export const vitestBrowserPage: PagePort = {
     afterThisTest,
     ariaTree: async () => {
         const loaded = await adapter();

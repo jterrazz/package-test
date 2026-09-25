@@ -1,6 +1,15 @@
 import type { ComponentUi, DomMount } from '../page/ui.js';
-import type { MountedSurface } from '../page/vitest-browser.adapter.js';
 import type { ComponentVisitor } from './scenario.js';
+
+/** What a mounted subject offers the chain, React or vanilla DOM alike. */
+export type MountedSurface = {
+    /** The element the subject was mounted into. */
+    container: HTMLElement;
+    /** Replace the rendered tree — a prop change, as a parent makes one. */
+    rerender: (ui: ComponentUi) => Promise<void>;
+    /** Take it off the screen, as a parent does. */
+    unmount: () => Promise<void>;
+};
 
 /** The page a render mounts into — the only way `.render()` reaches the document and the runner. */
 export type PagePort = {
