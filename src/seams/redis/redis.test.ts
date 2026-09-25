@@ -200,4 +200,45 @@ describe('redis handle', () => {
             later: { index: '/198', refused: false },
         });
     });
+
+    test('gives its pair back on release even when the flush fails', async () => {
+        // Given - worker 40's cache acquired and released against a container nothing answers on, so both flushes fail
+        const cache = unreachableService('cache');
+        const held = await acquired(cache, '40');
+        const release = await cache
+            .isolation()
+            .release()
+            .then(() => 'flushed')
+            .catch(() => 'refused');
+
+        // When - worker 40's queue acquires
+        const later = await acquired(unreachableService('queue'), '40');
+
+        // Then - the release was refused, and still handed back the index and the container's own string
+        expect({ held, later, release, string: cache.connectionString }).toStrictEqual({
+            held: { index: '/157', refused: false },
+            later: { index: '/157', refused: false },
+            release: 'refused',
+            string: 'redis://localhost:1',
+        });
+    });
+
+    test('gives its pair back before it acquires again', async () => {
+        // Given - worker 30's cache acquired twice with no release between, then released once
+        const cache = unreachableService('cache');
+        const first = await acquired(cache, '30');
+        const again = await acquired(cache, '30');
+        await Promise.allSettled([cache.isolation().release()]);
+
+        // When - worker 30's queue acquires
+        const later = await acquired(unreachableService('queue'), '30');
+
+        // Then - one index held once, on the container's own string, and free after the one release
+        expect({ again, first, later, string: cache.connectionString }).toStrictEqual({
+            again: { index: '/117', refused: false },
+            first: { index: '/117', refused: false },
+            later: { index: '/117', refused: false },
+            string: 'redis://localhost:1',
+        });
+    });
 });
