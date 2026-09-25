@@ -1,4 +1,4 @@
-import { component, heading } from '@jterrazz/test';
+import { component, file, heading } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { ReleaseNote } from './release-note.js';
@@ -30,4 +30,16 @@ test('never rewrites a frozen golden, and throws its diff instead', async () => 
     const second = await refusalOf(expect(result.tree).toMatch(wrong, { frozen: true }));
     expect(first).toContain('Mobile runs on a double');
     expect(second).toBe(first);
+});
+
+test('refuses a missing frozen golden, and sends its author to write it by hand', async () => {
+    // Given - a note rendered, and a frozen golden nobody has written yet
+    const result = await component.render(<ReleaseNote />, async (visitor) => {
+        await visitor.see(heading('Release 17'));
+    });
+
+    // Then - it fails rather than passes, and never sends the author to TEST_UPDATE=1, a run that writes nothing for a frozen golden
+    await expect(
+        expect(result.tree).toMatch(file('./expected/absent.aria.yaml'), { frozen: true }),
+    ).rejects.toThrow(/does not exist beside this test\.\nThis golden is `\{ frozen \}`/u);
 });

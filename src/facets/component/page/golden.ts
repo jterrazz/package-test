@@ -12,6 +12,7 @@ import {
     WHOLE_MATCHER,
 } from '../../../expectations/goldens/text-assertions.js';
 import type { WholeCall } from '../../../expectations/goldens/text-assertions.js';
+import { missingHint } from '../../../expectations/in-place/update.js';
 import { dedent } from '../../../expectations/text/dedent.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
 import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/structural.js';
@@ -53,8 +54,9 @@ async function matchGolden(
         }
         return {
             message: () =>
-                `${accessor.streamName} fixture "${name}" does not exist beside this test.\n` +
-                'Run with TEST_UPDATE=1 (or vitest -u) to create it.',
+                `${accessor.streamName} fixture "${name}" does not exist beside this test.\n${missingHint(
+                    frozen,
+                )}`,
             pass: false,
         };
     }

@@ -381,11 +381,11 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability             | api | job | cli | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —   | 6   | 4           | 0       | —      | 0         | 3      |
+| `toMatch(file())`      | 1   | —   | 6   | 4           | 0       | —      | 1         | 3      |
 | `toMatch(directory())` | 1   | —   | 5   | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —           | —       | —      | —         | 5      |
-| `.aria.yaml tree`      | —   | —   | —   | —           | 0       | —      | 0         | —      |
+| `.aria.yaml tree`      | —   | —   | —   | —           | 0       | —      | 1         | —      |
 | `.json body`           | 2   | —   | 2   | 3           | 0       | —      | —         | 12     |
 | `.txt stream`          | 1   | —   | 7   | 1           | 1       | —      | —         | 11     |
 | `{ frozen }`           | 2   | —   | 11  | —           | —       | —      | 1         | 3      |
@@ -427,7 +427,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 ### Exemptions
 
-- every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared — `toMatch(file())`·website, `toMatch(file())`·component, `.aria.yaml tree`·website, `.aria.yaml tree`·component, `.json body`·website
+- every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared — `toMatch(file())`·website, `.aria.yaml tree`·website, `.json body`·website
 - the engine owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{iso8601}}`·website, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->

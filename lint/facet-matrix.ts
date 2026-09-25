@@ -96,7 +96,7 @@ export const CAPABILITIES: Capability[] = [
     // ── Goldens ──
     {
         columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
-        exempt: { component: IN_PLACE, website: IN_PLACE },
+        exempt: { website: IN_PLACE },
         group: 'Golden',
         name: 'toMatch(file())',
         probe: '.toMatch(file(',
@@ -121,7 +121,7 @@ export const CAPABILITIES: Capability[] = [
     },
     {
         columns: ['website', 'component'],
-        exempt: { component: IN_PLACE, website: IN_PLACE },
+        exempt: { website: IN_PLACE },
         group: 'Golden',
         name: '.aria.yaml tree',
         probe: ".aria.yaml'",
