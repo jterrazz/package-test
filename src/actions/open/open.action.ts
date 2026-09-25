@@ -1,4 +1,5 @@
 import { defineAction } from '../../model/chain/action.js';
+import { DRAWN_DESCRIPTORS, DRAWN_VERBS, OWN_VERBS, WITHIN } from '../../model/elements/rows.js';
 import type { MobileScenario } from '../../model/ports/device.port.js';
 import { ScreenResult } from '../../results/screen.result.js';
 import type { AppPort } from './open.port.js';
@@ -18,8 +19,10 @@ export const open = defineAction<
         { group: 'Result accessor', name: '.content', probe: 'result.content' },
         { group: 'Result accessor', name: '.screen', probe: 'result.screen' },
     ],
+    descriptors: [...DRAWN_DESCRIPTORS, WITHIN],
     name: 'open',
     perform: async ([deepLink, scenario], _read, { app }, { config, testDir }) =>
         new ScreenResult({ config, screen: await app.open(deepLink, scenario), testDir }),
     row: { group: 'Terminal action', name: '.open()', probe: '.open(' },
+    verbs: [...DRAWN_VERBS, OWN_VERBS.tap],
 });

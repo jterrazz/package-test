@@ -18,11 +18,15 @@ export type Action<
 > = {
     /** The rows of the result it hands back. */
     readonly accessors: readonly MatrixRow[];
+    /** The rows of the descriptors the surface it drives resolves, for an action handing a scenario a visitor. */
+    readonly descriptors?: readonly MatrixRow[];
     readonly kind: 'action';
     readonly name: Name;
     /** The arguments it takes beside its subject, each the matrix row it states. */
     readonly options?: readonly ActionOption<string>[];
     readonly row: MatrixRow;
+    /** The rows of the verbs its visitor hands a scenario, for an action that drives one. */
+    readonly verbs?: readonly MatrixRow[];
     /**
      * What the action owes before any setup is armed: its refusals, what an
      * earlier action left standing taken down, and the directory it runs in.

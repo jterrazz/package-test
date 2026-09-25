@@ -73,6 +73,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/capabilities/params/params.capability.ts',
             'src/capabilities/with/with.capability.ts',
             'src/model/artifacts/artifacts.ts',
+            'src/model/elements/rows.ts',
             'src/model/services/service-images.ts',
             'lint/manifest.ts',
             'lint/rule-code.ts',
@@ -82,7 +83,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),

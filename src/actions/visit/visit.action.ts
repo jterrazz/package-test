@@ -1,6 +1,15 @@
 import { clock } from '../../capabilities/clock/clock.capability.js';
 import { headers } from '../../capabilities/headers/headers.capability.js';
 import { defineAction } from '../../model/chain/action.js';
+import {
+    BROWSER_DESCRIPTORS,
+    BROWSER_STATES,
+    BROWSER_VERBS,
+    DRAWN_DESCRIPTORS,
+    DRAWN_VERBS,
+    OWN_VERBS,
+    WITHIN,
+} from '../../model/elements/rows.js';
 import type { BrowserPort, VisitScenario } from '../../model/ports/browser.port.js';
 import { PageResult } from '../../results/page.result.js';
 
@@ -35,6 +44,7 @@ export const visit = defineAction<
         { group: 'Result accessor', name: '.links', probe: 'result.links' },
         { group: 'Result accessor', member: 'meta', name: '.meta()', probe: 'result.meta' },
     ],
+    descriptors: [...DRAWN_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
     name: 'visit',
     perform: async ([path, scenario], read, { browser }, { config, testDir }) => {
         const { backendUrl, baseUrl } = config;
@@ -55,4 +65,5 @@ export const visit = defineAction<
         return new PageResult({ config, page, testDir });
     },
     row: { group: 'Terminal action', name: '.visit()', probe: ".visit('" },
+    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, OWN_VERBS.goto],
 });

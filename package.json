@@ -35,6 +35,7 @@
         "!dist/matrix.*",
         "!dist/route-split.*",
         "!dist/self-*",
+        "!dist/vitest-browser.adapter.*",
         "!dist/**/*.map",
         "docs",
         "!docs/03-testing.md",

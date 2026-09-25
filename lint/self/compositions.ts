@@ -1,5 +1,11 @@
+import { apiFacet } from '../../src/facets/api/api.facet.js';
+import { cliFacet } from '../../src/facets/cli/cli.facet.js';
+import { componentFacet } from '../../src/facets/component/component.facet.js';
 import type { Composition } from '../../src/facets/define-facet.js';
+import { integrationFacet } from '../../src/facets/integration/integration.facet.js';
 import { jobsFacet } from '../../src/facets/jobs/jobs.facet.js';
+import { mobileFacet } from '../../src/facets/mobile/mobile.facet.js';
+import { websiteFacet } from '../../src/facets/website/website.facet.js';
 import type { Column } from '../facet-matrix.js';
 
 /** A row a definition states about itself. */
@@ -15,7 +21,13 @@ type MatrixRow = Composition['options'][string];
  * absent still reads them from the hand rows of `facet-matrix.ts`.
  */
 export const COMPOSITIONS: Partial<Record<Exclude<Column, 'module'>, Composition>> = {
+    api: apiFacet.composition,
+    cli: cliFacet.composition,
+    component: componentFacet.composition,
+    integration: integrationFacet.composition,
     jobs: jobsFacet.composition,
+    mobile: mobileFacet.composition,
+    website: websiteFacet.composition,
 };
 
 /** Is the column a facet listed as a composition? */
@@ -23,19 +35,8 @@ export function isComposed(column: Column): boolean {
     return column !== 'module' && COMPOSITIONS[column] !== undefined;
 }
 
-/**
- * The rows an action states beyond its own and its result's: the options it
- * takes beside its arguments, and — for an action that drives a scenario — the
- * verbs and descriptors its visitor hands out.
- */
-type StatedRows = {
-    readonly descriptors?: readonly MatrixRow[];
-    readonly options?: readonly { readonly row: MatrixRow }[];
-    readonly verbs?: readonly MatrixRow[];
-};
-
 /** Every row one action states: itself, its options, its visitor, its result. */
-function actionRows(action: Composition['actions'][number] & StatedRows): MatrixRow[] {
+function actionRows(action: Composition['actions'][number]): MatrixRow[] {
     return [
         action.row,
         ...(action.options ?? []).map((option) => option.row),

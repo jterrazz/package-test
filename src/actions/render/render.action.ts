@@ -1,5 +1,14 @@
 import { wrap } from '../../capabilities/wrap/wrap.capability.js';
 import { defineAction } from '../../model/chain/action.js';
+import {
+    BROWSER_DESCRIPTORS,
+    BROWSER_STATES,
+    BROWSER_VERBS,
+    DRAWN_DESCRIPTORS,
+    DRAWN_VERBS,
+    OWN_VERBS,
+    WITHIN,
+} from '../../model/elements/rows.js';
 import { consoleOf, errorsOf } from '../../results/console.js';
 import { RenderResult } from '../../results/render.result.js';
 import { recordConsole } from './console-recorder.js';
@@ -92,6 +101,7 @@ export const render = defineAction<
         { group: 'Result accessor', name: '.errors', probe: 'result.errors' },
         { group: 'Result accessor', name: '.html', probe: 'result.html' },
     ],
+    descriptors: [...DRAWN_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
     name: 'render',
     perform: async ([subject, scenario], read, { page }) => {
         const recorder = recordConsole();
@@ -126,4 +136,5 @@ export const render = defineAction<
         return { workDir: null };
     },
     row: { group: 'Terminal action', name: '.render()', probe: '.render(' },
+    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, OWN_VERBS.rerender, OWN_VERBS.unmount],
 });
