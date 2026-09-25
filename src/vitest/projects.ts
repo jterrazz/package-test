@@ -22,7 +22,10 @@ import { onProjectDefaults } from './preset.js';
 export { api, type ApiProjectOptions } from '../facets/api/api.project.js';
 export { cli, type CliProjectOptions } from '../facets/cli/cli.project.js';
 export { component, type ComponentProjectOptions } from '../facets/component/component.project.js';
-export { integration } from '../facets/integration/integration.project.js';
+export {
+    integration,
+    type IntegrationProjectOptions,
+} from '../facets/integration/integration.project.js';
 export { job, type JobProjectOptions } from '../facets/job/job.project.js';
 export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
