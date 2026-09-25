@@ -10,7 +10,7 @@ import type { FacetProjectOptions } from '../../runner/facet-project.js';
 import type { ComponentProjectOptions } from '../../runner/projects/component.project.js';
 import { mswWorker } from '../../seams/msw/worker.js';
 import { pageClock } from '../../seams/vitest-browser/clock.engine.js';
-import { afterThisTest } from '../../seams/vitest-browser/page-runtime.js';
+import { afterThisTest, pageDirectory } from '../../seams/vitest-browser/page-runtime.js';
 import { vitestBrowserPage } from '../../seams/vitest-browser/page.engine.js';
 import { pageViewport } from '../../seams/vitest-browser/viewport.engine.js';
 import type { ChainOf } from '../chain.js';
@@ -59,8 +59,7 @@ export interface ComponentChain extends ChainOf<typeof composition, FacetParams,
 
 /**
  * The composition in a page: the page's calendar, msw's worker, the mounted
- * document and its size. A chain's relative paths start nowhere — the golden
- * commands resolve the test's own directory server-side.
+ * document and its size, and the page's directory, which is none.
  */
 export const componentFacet = defineFacet<ComponentChain>()({
     ...composition,
@@ -70,5 +69,5 @@ export const componentFacet = defineFacet<ComponentChain>()({
         page: vitestBrowserPage,
         viewport: pageViewport,
     }),
-    locate: () => '',
+    locate: pageDirectory,
 });

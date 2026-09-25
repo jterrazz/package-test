@@ -9,6 +9,14 @@ import { inject, onTestFinished, vi } from 'vitest';
  * and "what did the project provide" and never learns which runner answers.
  */
 
+/**
+ * Where a chain's relative paths start in a page: nowhere. A page reads no
+ * disk; the golden commands resolve the test's own directory server-side.
+ */
+export function pageDirectory(): string {
+    return '';
+}
+
 /** Run `teardown` when the current test ends, however it ends. No hook in the spec. */
 export function afterThisTest(teardown: () => Promise<void> | void): void {
     onTestFinished(teardown);
