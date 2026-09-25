@@ -8,7 +8,7 @@ const DOCKER_CLI_BIN = resolve(
     '../shared/fixtures/specimen-cli-docker/cli.sh',
 );
 
-export const { cleanup, cli } = await specification.cli(DOCKER_CLI_BIN, {
+export const { cleanup, cli, docker } = await specification.cli(DOCKER_CLI_BIN, {
     docker: {
         envVar: 'FAKE_TEST_LABEL',
         nameLabel: 'fake.world.name',

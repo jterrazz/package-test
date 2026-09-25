@@ -91,7 +91,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 115   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 161   |
+| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 162   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 172   |
 | Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 56    |
 
@@ -279,7 +279,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.put()`     | 1   | —   | —   | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 34  | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 35  | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | 9           | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —           | 21      | —      | —         | —      |
@@ -352,10 +352,10 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.directory()`  | 1   | —   | 4   | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —   | 17  | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 7   | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —   | 25  | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 26  | —           | —       | —      | —         | —      |
 | `.json`         | —   | —   | 5   | —           | 2       | —      | —         | —      |
 | `.filesystem`   | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `.container()`  | —   | —   | 2   | —           | —       | —      | —         | —      |
+| `.container()`  | —   | —   | 3   | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —   | 1   | —           | —       | —      | —         | —      |
 | `.value`        | —   | —   | —   | 8           | —       | —      | —         | —      |
 | `.error`        | —   | —   | —   | 5           | —       | —      | —         | —      |
