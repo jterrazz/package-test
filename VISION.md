@@ -3545,6 +3545,7 @@ branches are KEPT until the owner settles the conflict below.
 
 **Open, for the owner:** U5's gates were reviewed against a tree where only
 `jobs` was composed. They judge U1–U4 on the integrated tree and fail:
+
 - I6 (`i6-facet-is-composition`) flags five engines written in a facet.
   In api, website and cli, the engine is `required(config.<engine>, …)`,
   the Q11/R-6 guards. In integration it is `config.services ?? {}`. In
@@ -3563,6 +3564,7 @@ Decide whether the units conform to the gates (a reconciliation step) or
 the gates change. Until then, `vision/17` is red.
 
 Minors carried from the reviews:
+
 - The U2 cast in integration.handle.ts goes to the S6 `open<Self>`
   decision.
 - Nothing pins "one docker run id per runner". Add a follow-up spec.
