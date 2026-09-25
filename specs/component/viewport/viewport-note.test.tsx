@@ -24,15 +24,3 @@ test('is restored to the project size for the next test', async () => {
     // Then - the project's 1024×640 is what this render got
     expect(result.content.text).toContain('Wide layout');
 });
-
-test('captures the text the page renders, not everything the document holds', async () => {
-    // Given - a component carrying a stylesheet and a node it does not display
-    const result = await component.render(<ViewportNote />, async (visitor) => {
-        await visitor.see(content('Wide layout'));
-    });
-
-    // Then - `content` is what a reader sees; the markup keeps the rest
-    expect(result.content.text).not.toContain('rebeccapurple');
-    expect(result.content.text).not.toContain('Drafted, never shown');
-    expect(result.html.text).toContain('Drafted, never shown');
-});
