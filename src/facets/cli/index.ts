@@ -16,3 +16,5 @@ export type {
     SpecStream,
 } from './documents/spec-document.js';
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';
+// A linter's report as a golden keeps it — the transform a rule's cli specs share.
+export { lintReport } from './report/lint-report.js';

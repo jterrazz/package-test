@@ -114,4 +114,4 @@ export {
 export { match, Matcher } from './expectations/tokens/match.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil } from './expectations/conditions/wait-until.js';
-export { lintReport } from './expectations/goldens/lint-report.js';
+export { lintReport } from './facets/cli/index.js';

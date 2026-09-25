@@ -147,7 +147,7 @@ export { text } from './expectations/text/text-subject.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
 // A linter's report as a golden keeps it — the transform a rule's specs share.
-export { lintReport } from './expectations/goldens/lint-report.js';
+export { lintReport } from './facets/cli/index.js';
 // Per-call `toMatch(file(…), { frozen })` — and, beside it, the matchers
 // Vitest's `Assertion` gains, carried by the one `types` entry.
 export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';
