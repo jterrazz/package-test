@@ -11,10 +11,8 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   the doubles: what every facet is made of. It reaches the three seams that
  *   carry no engine of their own (docker, process, yaml), the msw engine
  *   through the chain's one lazy import, the contracts in `stubs/`, and — to
- *   CONSTRUCT what a terminal action hands back, and to compare a golden
- *   through its accessor — `results/`. The builder also names what it runs
- *   through until the facets are recomposed: the stub backend; and a
- *   constructor's configuration names the servers a document may start.
+ *   compare a golden through its accessor — `results/`. A constructor's configuration names
+ *   the servers a document may start.
  * - `capabilities/<name>/` — a setup a chain offers, one folder each, owning
  *   only itself (`signatures.ts` indexes them all); among them the
  *   module-scope `intercept()`, which names its engine's registration, and
@@ -189,10 +187,8 @@ export const FRAMEWORK_LAYERS = {
     model: {
         imports: [
             'model/',
-            // A terminal action CONSTRUCTS its result — `new HttpResult(…)`,
-            // `new PageResult(…)` — and a golden is compared through the
-            // accessor it is handed: the builder and the matchers both reach
-            // `results/`, a value edge by design.
+            // A golden is compared through the accessor it is handed: the
+            // Matchers reach `results/`, a value edge by design.
             'results/',
             // The contracts a chain declares, and the queue that serves them.
             'stubs/',
@@ -214,14 +210,12 @@ export const FRAMEWORK_LAYERS = {
         packages: ['vitest', 'vitest-mock-extended'],
         seams: {
             // The contract engine is reached through a lazy import by the
-            // Chain's `.intercept()`; a website or mobile chain arms the stub
-            // Backend its constructor started.
+            // Chain's `.intercept()`.
             'model/chain/builder.ts': [
                 'capabilities/intercept/',
                 'capabilities/seed/',
                 'capabilities/with/',
                 'seams/msw/',
-                'seams/stub-backend/',
             ],
             // What a constructor hands its chain names the stub backend a
             // Website or mobile constructor started.

@@ -9,7 +9,7 @@ import { getCallerDir } from '../../model/chain/caller.js';
 import type { MatrixRow } from '../../model/chain/capability.js';
 import type { SpecificationConfig } from '../../model/chain/config.js';
 import { pageClock } from '../../seams/playwright/page-clock.js';
-import { stubBackend } from '../../seams/stub-backend/stub-network.js';
+import { stubBackend } from '../../seams/stub-backend/stub-backend.engine.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet, required } from '../define-facet.js';
 import type { WebsiteSpecificationOptions } from './website.handle.js';

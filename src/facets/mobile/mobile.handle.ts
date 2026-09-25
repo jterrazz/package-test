@@ -11,8 +11,8 @@ import type { AppiumServer, MobileDevice, RunServer } from '../../seams/appium/a
 import { sessionLedger } from '../../seams/appium/session-ledger.js';
 import { sameRuntime } from '../../seams/simctl/simulator.js';
 import { StubBackend } from '../../seams/stub-backend/stub-backend.js';
-import { createMobileFacet } from './mobile.chain.js';
 import type { MobileSpecification } from './mobile.chain.js';
+import { mobileFacet } from './mobile.facet.js';
 
 // ── Types ──
 
@@ -285,7 +285,7 @@ export async function startMobile<Services extends ServiceRecord>(
                 await backend.stop();
             }
         },
-        mobile: createMobileFacet(config),
+        mobile: mobileFacet.open(config),
         udid: driven.udid,
     };
 }

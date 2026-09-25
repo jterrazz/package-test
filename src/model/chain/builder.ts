@@ -1,24 +1,18 @@
 import { readFileSync } from 'node:fs';
 
 import { declared as declaredContracts } from '../../capabilities/intercept/declared.js';
-import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
 import type { SeedSource } from '../../capabilities/seed/seed.capability.js';
 import type { ChainContext } from '../../capabilities/with/with.capability.js';
-import { ScreenResult } from '../../results/screen.result.js';
 // Type-only import — erased at runtime; the msw integration stays lazy (I1).
 import type { ContractRegistration } from '../../seams/msw/server.js';
-import { stubBackend } from '../../seams/stub-backend/stub-network.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
 import type { DatabasePort } from '../ports/database.port.js';
-import type { MobileScenario } from '../ports/device.port.js';
 import { validateDatabaseOption } from '../services/database-option.js';
-import { getCallerDir } from './caller.js';
 import type { SpecificationConfig } from './config.js';
 import { resolveSpecPath } from './resolve.js';
-import { isDiskDirectory, isDiskFile, requireDiskFile } from './spec-path.js';
-import type { DiskFile } from './spec-path.js';
+import { requireDiskFile } from './spec-path.js';
 
 // ── Types ──
 
@@ -31,43 +25,14 @@ type SeedEntry = {
     path: string;
 };
 
-// ── Facet views ──
-
 /**
-};
-
-/**
- * The `mobile` facet — screen chain entry handed out by
- * `specification.mobile()`. `.open()` is the single, terminal action: it
- * terminates and relaunches the app (deterministic fresh state), applies the
- * deep link, runs the scenario, and captures the final screen.
- */
-export type MobileSpecification = {
-    /**
-     * Declare the chain's backend contracts — served by the declared stub
-     * backend (requires the runner's `backend` option). Multiple calls append.
-     */
-    intercept: InterceptMethod<MobileSpecification>;
-
-    /**
-     * Relaunch the app and resolve with the captured screen. With a deep
-     * link, the app opens on it; with a scenario, the visitor interacts
-     * first (the When) and the capture reflects the FINAL screen state.
-     */
-    open: (deepLink?: string, scenario?: MobileScenario) => Promise<ScreenResult>;
-};
-
-/**
- * Fluent builder for declaring a single test specification.
+ * The setups a chain declared — clock, seed, intercept, with — and the
+ * pipeline that arms them around an action.
  *
- * Chain setup methods ({@link seed}, {@link headers}), then call an action
- * ({@link get}, {@link post}, {@link visit}) — actions are terminal: they
- * execute the specification and resolve to a typed result.
- *
- * Facets expose this class through the narrower {@link MobileSpecification}
- * view so it only surfaces the methods that make sense for it.
+ * No facet hands it out: every facet is a composition
+ * (`src/facets/<facet>/<facet>.facet.ts`) over the kernel's pipeline.
  */
-export class SpecificationBuilder implements MobileSpecification {
+export class SpecificationBuilder {
     private pinnedClock: null | string = null;
     private readonly config: SpecificationConfig;
     private readonly contracts: Contract[] = [];
@@ -131,8 +96,8 @@ export class SpecificationBuilder implements MobileSpecification {
      * append; composition and overriding live in `defineContracts()` /
      * `.with()`, not in call order.
      *
-     * An integration chain serves them through MSW; a mobile chain through
-     * the declared stub backend. Same queue, same semantics: first matching
+     * Served through MSW, or through the declared stub backend when the
+     * runner has one. Same queue, same semantics: first matching
      * non-exhausted contract wins, no `times` means unlimited.
      *
      * @example
@@ -157,39 +122,8 @@ export class SpecificationBuilder implements MobileSpecification {
         requestOrContracts: ContractInput | ContractRequest,
         maybeResponse?: ContractResponder | ContractResponse,
     ): this {
-        // A mobile chain has no in-process network to intercept — the app
-        // Runs on the simulator. Its contracts are served by the declared
-        // Stub backend instead.
-        if (this.config.device !== undefined) {
-            stubBackend(this.config.backend, 'mobile').accepts();
-        }
-
         this.contracts.push(...declaredContracts('.intercept', requestOrContracts, maybeResponse));
         return this;
-    }
-
-    // ── Mobile actions (terminal) ──
-
-    /**
-     * Terminate and relaunch the app on the simulator, apply the deep link,
-     * run the scenario, and resolve with the captured final screen — the
-     * projected accessibility tree and the visible texts. The driver session
-     * is the run's under a `mobile()` project whose Appium server outlives the
-     * file — a declared one, or the one its global setup spawned — and the
-     * runner's otherwise; every open starts from a deterministic fresh app
-     * state.
-     *
-     * @example
-     *   const result = await mobile.open('news://events');
-     *   expect(result.screen).toMatch(file('./expected/events.screen.json'));
-     *
-     *   const result = await mobile.open('news://events', async (visitor) => {
-     *       await visitor.tap(button('Enquête Fauci COVID-19'));
-     *       await visitor.see(content('rapports'));
-     *   });
-     */
-    async open(deepLink?: string, scenario?: MobileScenario): Promise<ScreenResult> {
-        return await this.executeSetup(async () => await this.runOpenAction(deepLink, scenario));
     }
 
     // ── Private execution pipeline ──
@@ -234,10 +168,10 @@ export class SpecificationBuilder implements MobileSpecification {
             );
         }
 
-        // Serve the chain's contracts. A mobile chain has a declared
-        // Stub backend — it resets between chains the way databases do: this
+        // Serve the chain's contracts. A declared
+        // Stub backend resets between chains the way databases do: this
         // Chain's contracts replace the previous chain's and the unmatched log
-        // Clears. Every other facet registers them with MSW.
+        // Clears. Without one they are registered with MSW.
         //
         // Strict either way (CONVENTIONS D7): once a chain declares at least
         // One contract, every outgoing request must match a non-exhausted one
@@ -273,58 +207,5 @@ export class SpecificationBuilder implements MobileSpecification {
         }
     }
 
-    // ── Private ──
-
-    private async runOpenAction(
-        deepLink?: string,
-        scenario?: MobileScenario,
-    ): Promise<ScreenResult> {
-        if (!this.config.device || this.config.bundleId === undefined) {
-            throw new Error('.open() requires a device adapter (use specification.mobile())');
-        }
-
-        const device = await this.config.device();
-        const screen = await device.open({
-            bundleId: this.config.bundleId,
-            deepLink,
-            scenario,
-        });
-
-        return new ScreenResult({
-            config: this.config,
-            screen,
-            testDir: this.testDir,
-        });
-    }
 }
 
-// ── Facet factories ──
-
-/**
- * The facet-level `.intercept()`: both overloads forwarded to a fresh chain.
- * The pair form is recognised by its second argument — a bare
- * {@link ContractRequest} never arrives alone.
- */
-function interceptOn(
-    start: () => SpecificationBuilder,
-): (
-    contractsOrRequest: ContractInput | ContractRequest,
-    response?: ContractResponder | ContractResponse,
-) => SpecificationBuilder {
-    return (contractsOrRequest, response) =>
-        response === undefined
-            ? start().intercept(contractsOrRequest as ContractInput)
-            : start().intercept(contractsOrRequest as ContractRequest, response);
-}
-
-/**
- * Create the `mobile` facet bound to the given adapter configuration.
- */
-export function createMobileFacet(config: SpecificationConfig): MobileSpecification {
-    const start = (): SpecificationBuilder => new SpecificationBuilder(config, getCallerDir());
-
-    return {
-        intercept: interceptOn(start),
-        open: async (deepLink, scenario) => await start().open(deepLink, scenario),
-    };
-}

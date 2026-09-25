@@ -65,27 +65,6 @@ describe('builder — the request a chain declares', () => {
     });
 });
 
-// ── Stub-backend facets ──
-
-describe('builder — contracts on the stub facets', () => {
-    test('a mobile chain without a backend option names its own constructor', () => {
-        // Given - a mobile-shaped config (a device accessor, no backend)
-        const builder = new SpecificationBuilder(
-            {
-                device: async () => {
-                    throw new Error('unused');
-                },
-            },
-            import.meta.dirname,
-        );
-
-        // Then - the fix names specification.mobile
-        expect(() =>
-            builder.intercept({ request: http.get('/events'), response: http.empty() }),
-        ).toThrow('specification.mobile({ …, backend');
-    });
-});
-
 describe('builder — what a file shares, with()', () => {
     test('a context states only what it names: no clock, nothing set', () => {
         // Given - a chain handed an empty context

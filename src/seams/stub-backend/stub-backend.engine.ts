@@ -3,11 +3,12 @@ import type { Contract } from '../../stubs/contract.js';
 import type { StubBackend } from './stub-backend.js';
 
 /**
- * The network of a site or an app running in its OWN process — served by the
- * stub backend its constructor started. Arming a chain replaces the previous
- * chain's contracts, the way databases reset; the strict failure is the
- * stub's. A runner that declared no backend refuses the setup when it is
- * stated, naming the constructor option that fixes it.
+ * The network of an app running in its OWN process (a server child, a
+ * simulator), served by the stub backend its runner declared: each chain's
+ * contracts replace the previous chain's, even when it declares none, and the
+ * strict violation is the backend's. A runner that declared no backend
+ * refuses `.intercept()` when it is stated, naming the option on its own
+ * constructor.
  */
 export function stubBackend(
     backend: StubBackend | undefined,
