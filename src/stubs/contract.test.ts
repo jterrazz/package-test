@@ -45,21 +45,6 @@ describe('contracts — defineContract', () => {
         const { content } = produced.body as { content: { text: string }[] };
         expect(content[0]?.text).toBe('echo:hi');
     });
-
-    test('builder .intercept() accepts a contract as a single argument', async () => {
-        // Given - a facet with no adapters and a declared contract
-        const { createApiFacet } = await import('../model/chain/builder.js');
-        const api = createApiFacet({});
-
-        const contract = defineContract({
-            request: anthropic.messages(),
-            response: anthropic.reply('hello'),
-        });
-
-        // Then - the single-argument contract overload chains without throwing; further chaining returns the same builder
-        const builder = api.intercept(contract);
-        expect(builder.intercept(contract)).toBe(builder);
-    });
 });
 
 describe('contracts — defineContracts composition', () => {

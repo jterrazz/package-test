@@ -5,14 +5,11 @@ import { runSpecDocument } from '../../actions/run/literate.js';
 import type { LiterateRunFlags } from '../../actions/run/literate.js';
 import { declared as declaredContracts } from '../../capabilities/intercept/declared.js';
 import type { InterceptMethod } from '../../capabilities/intercept/intercept.capability.js';
-import { routeRequest } from '../../capabilities/params/route.js';
-import type { RouteArguments, RouteOptionsAny } from '../../capabilities/params/route.js';
 import type { SeedSource } from '../../capabilities/seed/seed.capability.js';
 import type { ChainContext } from '../../capabilities/with/with.capability.js';
 import { CallResult } from '../../results/call.result.js';
 import { CliResult } from '../../results/cli.result.js';
 import { FetchResult } from '../../results/fetch.result.js';
-import { HttpResult } from '../../results/http.result.js';
 import { PageResult } from '../../results/page.result.js';
 import { ScreenResult } from '../../results/screen.result.js';
 import { copyPlan } from '../../seams/fs/fixtures.js';
@@ -21,8 +18,6 @@ import type { ContractRegistration } from '../../seams/msw/server.js';
 import type { Contract, ContractInput } from '../../stubs/contract.js';
 import type { ContractRequest, ContractResponder, ContractResponse } from '../../stubs/exchange.js';
 import { clock as timeClock } from '../clock/clock.js';
-import { parseRequestFile } from '../http-files/http-file.js';
-import { dedent } from '../matching/dedent.js';
 import type { VisitScenario } from '../ports/browser.port.js';
 import type { CliEnv, CliOutput, ExecOptions } from '../ports/cli.port.js';
 import type { DatabasePort } from '../ports/database.port.js';
@@ -34,7 +29,7 @@ import { getCallerDir } from './caller.js';
 import type { SpecificationConfig } from './config.js';
 import { expandWorkdir, resolveSpecPath } from './resolve.js';
 import { scratchDirectory } from './scratch.js';
-import { isDiskDirectory, isDiskFile, requireDiskFile, requireDiskTarget } from './spec-path.js';
+import { requireDiskFile, requireDiskTarget } from './spec-path.js';
 import type { DiskFile, DiskTarget } from './spec-path.js';
 
 // ── Types ──
@@ -48,71 +43,7 @@ type SeedEntry = {
     path: string;
 };
 
-/** An HTTP request to perform against the server adapter. */
-export type RequestEntry = {
-    /**
-     * The body: a value (objects JSON-serialized, strings sent raw), or a
-     * `file()` whose content is sent — parsed first when it is `.json`.
-     */
-    body?: unknown;
-    method: string;
-    path: string;
-    /** A complete request to send: a `.http` file, or its text written in the test. */
-    request?: DiskFile | string | undefined;
-    /** The route template the path was written as, when the test wrote one. */
-    template?: string | undefined;
-};
-
 // ── Facet views ──
-
-/**
- * The `api` facet — HTTP chain entry handed out by `specification.api()`.
- * Setup methods chain; action methods are terminal: they execute the spec
- * and resolve to the result.
- *
- * The `DatabaseKey` parameter is the typed vocabulary of `.seed()`: the keys
- * of the declared services record that are databases.
- */
-export type ApiSpecification<DatabaseKey extends string = string> = {
-    /** Pin the app's `Date` at `iso` for this chain — the calendar the app reads. */
-    clock: (iso: string) => ApiSpecification<DatabaseKey>;
-    /** Set HTTP headers for the request. Multiple calls merge. */
-    headers: (headers: Record<string, string>) => ApiSpecification<DatabaseKey>;
-    /** Declare outgoing calls — a contract, a list, a composite, or an inline request + response pair. */
-    intercept: InterceptMethod<ApiSpecification<DatabaseKey>>;
-    /** Queue a SQL seed — `file('./seeds/<name>.sql')` — to run before the action. */
-    seed: (
-        source: SeedSource,
-        options?: { database?: DatabaseKey },
-    ) => ApiSpecification<DatabaseKey>;
-
-    /** Send a DELETE request to a route — `(template, { params })` — and resolve with the result. */
-    delete: <Path extends string>(
-        path: Path,
-        ...options: RouteArguments<Path>
-    ) => Promise<HttpResult>;
-    /** Send a GET request to a route — `(template, { params })` — and resolve with the result. */
-    get: <Path extends string>(path: Path, ...options: RouteArguments<Path>) => Promise<HttpResult>;
-    /** Send a POST request — the body a value or a `file()` — and resolve with the result. */
-    post: <Path extends string>(
-        path: Path,
-        body?: unknown,
-        ...options: RouteArguments<Path>
-    ) => Promise<HttpResult>;
-    /** Send a PUT request — the body a value or a `file()` — and resolve with the result. */
-    put: <Path extends string>(
-        path: Path,
-        body?: unknown,
-        ...options: RouteArguments<Path>
-    ) => Promise<HttpResult>;
-    /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
-    request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
-    /**
-     * The facet with what a whole file shares — `const events = api.with({ clock, headers })` —
-     * every chain it starts beginning with those settings.
-     */
-    with: (context: Pick<ChainContext, 'clock' | 'headers'>) => ApiSpecification<DatabaseKey>;
-};
 
 /**
  * The `integration` facet — the in-process chain handed out by
@@ -249,8 +180,8 @@ export type MobileSpecification = {
  * actions are terminal: they execute the specification and resolve to a
  * typed result.
  *
- * Facets expose this class through the narrower {@link ApiSpecification} /
- * {@link CliSpecification} views so each facet
+ * Facets expose this class through the narrower {@link CliSpecification}
+ * view and its siblings so each facet
  * only surfaces the methods that make sense for it.
  */
 export class SpecificationBuilder
@@ -428,76 +359,6 @@ export class SpecificationBuilder
         return this;
     }
 
-    // ── HTTP actions (terminal) ──
-
-    /**
-     * Send a complete request — first line `METHOD /path`, then headers until a
-     * blank line, then the body — written in the test (dedented, as a value in
-     * place is), or in a `.http` file several tests share. Headers set via
-     * `.headers()` merge on top of the request's own.
-     *
-     * @example
-     *   const result = await api.request(`
-     *       POST /users
-     *       content-type: application/json
-     *
-     *       {"name": "Charlie"}
-     *   `);
-     *   const result = await api.request(file('../../requests/create-user.http'));
-     */
-    async request(source: DiskFile<'.http'> | string): Promise<HttpResult> {
-        const request =
-            typeof source === 'string' ? source : requireDiskFile('request', source, '.http');
-        return await this.executeHttp({ method: '', path: '', request });
-    }
-
-    /**
-     * Send a GET request to the server adapter and resolve with the result.
-     * A route with parameters is written as its template, the values beside it.
-     *
-     * @example
-     *   const result = await api.get("/api/items");
-     *   const result = await api.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } });
-     */
-    async get(path: string, options?: RouteOptionsAny): Promise<HttpResult> {
-        return await this.executeHttp({ method: 'GET', ...routeRequest('GET', path, options) });
-    }
-
-    /**
-     * Send a POST request to the server adapter and resolve with the result.
-     *
-     * @param body - Optional body: a value, or a `file()` whose content is
-     *   sent. Prefer `.request(file('./requests/name.http'))` for a complete
-     *   request.
-     * @example
-     *   const result = await api.post("/api/items", { name: "Widget" });
-     *   const result = await api.post("/api/items", file('./requests/widget.json'));
-     */
-    async post(path: string, body?: unknown, options?: RouteOptionsAny): Promise<HttpResult> {
-        return await this.executeHttp({
-            body,
-            method: 'POST',
-            ...routeRequest('POST', path, options),
-        });
-    }
-
-    /** Send a PUT request to the server adapter and resolve with the result. */
-    async put(path: string, body?: unknown, options?: RouteOptionsAny): Promise<HttpResult> {
-        return await this.executeHttp({
-            body,
-            method: 'PUT',
-            ...routeRequest('PUT', path, options),
-        });
-    }
-
-    /** Send a DELETE request to the server adapter and resolve with the result. */
-    async delete(path: string, options?: RouteOptionsAny): Promise<HttpResult> {
-        return await this.executeHttp({
-            method: 'DELETE',
-            ...routeRequest('DELETE', path, options),
-        });
-    }
-
     // ── Command actions (terminal) ──
 
     /**
@@ -648,10 +509,6 @@ export class SpecificationBuilder
 
     // ── Private execution pipeline ──
 
-    private async executeHttp(request: RequestEntry): Promise<HttpResult> {
-        return await this.executeSetup(null, async () => await this.runHttpAction(request));
-    }
-
     private async executeCommand(action: {
         args: string | string[];
         options?: ExecOptions | undefined;
@@ -784,54 +641,6 @@ export class SpecificationBuilder
             outcome = { error, threw: true, value: null };
         }
         return new CallResult({ config: this.config, outcome, testDir: this.testDir });
-    }
-
-    private async runHttpAction(request: RequestEntry): Promise<HttpResult> {
-        if (!this.config.server) {
-            throw new Error('HTTP actions require a server adapter (use specification.api())');
-        }
-
-        let { body, method, path } = request;
-        let fileHeaders: Record<string, string> | undefined;
-
-        if (isDiskDirectory(body)) {
-            throw new TypeError(
-                `.${method.toLowerCase()}(${JSON.stringify(path)}, directory(${JSON.stringify(body.path)})): a body is one file — name it with file().`,
-            );
-        }
-        if (isDiskFile(body)) {
-            const content = readFileSync(resolveSpecPath('body', body.path, this.testDir), 'utf8');
-            body = body.path.endsWith('.json') ? JSON.parse(content) : content;
-        }
-
-        if (request.request !== undefined) {
-            const parsed =
-                typeof request.request === 'string'
-                    ? parseRequestFile(dedent(request.request), 'the request in place')
-                    : parseRequestFile(
-                          readFileSync(
-                              resolveSpecPath('request', request.request.path, this.testDir),
-                              'utf8',
-                          ),
-                          request.request.path,
-                      );
-            body = parsed.body;
-            fileHeaders = parsed.headers;
-            method = parsed.method;
-            path = parsed.path;
-        }
-
-        const headers = { ...fileHeaders, ...this.requestHeaders };
-        const response = await this.config.server.request(method, path, body, {
-            headers: Object.keys(headers).length > 0 ? headers : undefined,
-            template: request.template,
-        });
-
-        return new HttpResult({
-            config: this.config,
-            response,
-            testDir: this.testDir,
-        });
     }
 
     private async runFetchAction(path: string): Promise<FetchResult> {
@@ -1058,18 +867,6 @@ function interceptOn(
             : start().intercept(contractsOrRequest as ContractRequest, response);
 }
 
-/** The facet-level `.intercept()`, handing back the facet's own view of the chain. */
-function interceptInto<View>(
-    start: () => SpecificationBuilder,
-    view: (builder: SpecificationBuilder) => View,
-): InterceptMethod<View> {
-    const intercept = interceptOn(start);
-    return (
-        contractsOrRequest: ContractInput | ContractRequest,
-        response?: ContractResponder | ContractResponse,
-    ) => view(intercept(contractsOrRequest, response));
-}
-
 function withDockerTestRunId(config: SpecificationConfig): SpecificationConfig {
     if (config.dockerConfig && !config.dockerTestRunId) {
         return {
@@ -1078,58 +875,6 @@ function withDockerTestRunId(config: SpecificationConfig): SpecificationConfig {
         };
     }
     return config;
-}
-
-/** One view per chain, so a setup hands back the handle it was called on. */
-const apiViews = new WeakMap<SpecificationBuilder, ApiSpecification>();
-
-/**
- * The api view of a chain already started: every setup hands back the same
- * view, so a document run after a setup is the api's `run`, never the cli's.
- */
-function apiView(builder: SpecificationBuilder): ApiSpecification {
-    const known = apiViews.get(builder);
-    if (known !== undefined) {
-        return known;
-    }
-    const view: ApiSpecification = {
-        clock: (iso) => apiView(builder.clock(iso)),
-        delete: async (path, ...options) => await builder.delete(path, ...options),
-        get: async (path, ...options) => await builder.get(path, ...options),
-        headers: (headers) => apiView(builder.headers(headers)),
-        intercept: interceptInto(() => builder, apiView),
-        post: async (path, body, ...options) => await builder.post(path, body, ...options),
-        put: async (path, body, ...options) => await builder.put(path, body, ...options),
-        request: async (source) => await builder.request(source),
-        seed: (source, options) => apiView(builder.seed(source, options)),
-        with: (context) => apiView(builder.with(context)),
-    };
-    apiViews.set(builder, view);
-    return view;
-}
-
-/**
- * Create the `api` facet bound to the given adapter configuration. The test
- * file directory is auto-detected from the call stack at each chain start.
- */
-export function createApiFacet(config: SpecificationConfig): ApiSpecification {
-    return apiFacet(() => new SpecificationBuilder(config, getCallerDir()));
-}
-
-/** The api facet over a chain start — `with()` hands back one over a start that states the context. */
-function apiFacet(start: () => SpecificationBuilder): ApiSpecification {
-    return {
-        clock: (iso) => apiView(start().clock(iso)),
-        delete: async (path, ...options) => await start().delete(path, ...options),
-        get: async (path, ...options) => await start().get(path, ...options),
-        headers: (headers) => apiView(start().headers(headers)),
-        intercept: interceptInto(start, apiView),
-        post: async (path, body, ...options) => await start().post(path, body, ...options),
-        put: async (path, body, ...options) => await start().put(path, body, ...options),
-        request: async (source) => await start().request(source),
-        seed: (source, options) => apiView(start().seed(source, options)),
-        with: (context) => apiFacet(() => start().with(context)),
-    };
 }
 
 /**

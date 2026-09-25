@@ -13,8 +13,8 @@ import { createDockerReader } from '../../results/container.js';
 import type { ContainerAccessor } from '../../results/container.js';
 import { routesLedger } from '../../runner/provided.js';
 import { HonoAdapter } from '../../seams/hono/hono.adapter.js';
-import { createApiFacet } from './api.chain.js';
 import type { ApiSpecification } from './api.chain.js';
+import { apiFacet } from './api.facet.js';
 
 // ── Types ──
 
@@ -92,7 +92,7 @@ export async function startApi<Services extends ServiceRecord>(
     };
 
     return {
-        api: createApiFacet(config),
+        api: apiFacet.open(config),
         cleanup: async () => {
             const ledgers = await routesLedger();
             if (ledgers !== undefined) {

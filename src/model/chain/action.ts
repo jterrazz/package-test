@@ -1,4 +1,4 @@
-import type { MatrixRow, Run } from './capability.js';
+import type { ActionOption, MatrixRow, Run } from './capability.js';
 
 /** Read a setup's slice by its definition — the one way an action sees what the chain was told. */
 export type SliceReader = <Slice>(capability: {
@@ -20,6 +20,8 @@ export type Action<
     readonly accessors: readonly MatrixRow[];
     readonly kind: 'action';
     readonly name: Name;
+    /** The arguments it takes beside its subject, each the matrix row it states. */
+    readonly options?: readonly ActionOption<string>[];
     readonly row: MatrixRow;
     /** The refusals owed before any setup is armed, and the directory the action runs in. */
     // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types

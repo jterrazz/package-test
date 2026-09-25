@@ -1,12 +1,7 @@
 /**
- * The api chain — the shared builder's, named here.
+ * The api chain — the composition's, named here.
  *
- * A re-export rather than an implementation: the setups and the terminal
- * actions of the node facets are ONE builder ({@link SpecificationBuilder}),
- * because a second copy of "declare a contract, seed a table, run the thing"
- * is how two facets drift.
- * The constructor beside it imports its chain from HERE, so the name a facet
- * answers to is stated in the facet's own folder.
+ * The constructor beside it opens the composition (`api.facet.ts`); this
+ * file states, in the facet's own folder, the name of the chain it hands out.
  */
-export { createApiFacet } from '../../model/chain/builder.js';
-export type { ApiSpecification } from '../../model/chain/builder.js';
+export type { ApiSpecification } from './api.facet.js';

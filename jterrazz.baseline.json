@@ -18,7 +18,7 @@
         "eslint/no-promise-executor-return": 5,
         "eslint/no-unused-vars": 4,
         "eslint/no-use-before-define": 1,
-        "eslint/prefer-destructuring": 6,
+        "eslint/prefer-destructuring": 3,
         "import/no-cycle": 2,
         "jsdoc/empty-tags": 25,
         "promise/avoid-new": 12,

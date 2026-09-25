@@ -48,7 +48,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/capabilities/env/env.capability.ts',
             'src/capabilities/fixture/fixture.capability.ts',
             'src/capabilities/fixture/fixture.port.ts',
-            'src/capabilities/headers/headers.capability.ts',
             'src/capabilities/intercept/intercept.port.ts',
             'src/capabilities/seed/seed.port.ts',
             'src/capabilities/signatures.ts',
@@ -74,6 +73,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'src/capabilities/params/params.capability.ts',
             'src/capabilities/with/with.capability.ts',
             'src/model/artifacts/artifacts.ts',
             'src/model/services/service-images.ts',
@@ -90,7 +90,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),
         name: 'the facet file set, as a re-export',
-        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
+        why: 'each names the chain its constructor hands out rather than implementing it — the builder the node facets not yet composed share, or a composition (`jobs`, `api`) — and `builder.test.ts`, the facet specs and `facet-matrix.test.ts` hold the thing they name',
     },
     {
         claims: (path) => /^src\/runner\/projects\/[a-z]+\.project\.ts$/u.test(path),
@@ -191,6 +191,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
+            'src/capabilities/headers/headers.capability.ts',
             'src/model/chain/action.ts',
             'src/model/chain/capability.ts',
             'src/model/chain/ground.ts',

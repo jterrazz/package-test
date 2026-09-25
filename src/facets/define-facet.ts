@@ -137,6 +137,21 @@ function chainOf(
 }
 
 /**
+ * The engine a constructor started, handed to a composition armed through it.
+ * Every constructor starts the engines its composition names, so an absent
+ * one is a facet wired wrong — refused when the facet is opened, never when a
+ * spec first reaches for it.
+ */
+export function required<Engine>(engine: Engine | undefined, port: string): Engine {
+    if (engine === undefined) {
+        throw new Error(
+            `defineFacet(): the constructor started no \`${port}\` engine, and the composition is armed through it`,
+        );
+    }
+    return engine;
+}
+
+/**
  * Define a facet by what it composes. `Self` is the chain type the facet
  * publishes, computed from the same composition; the compiler refuses a
  * composition that names other members than it.

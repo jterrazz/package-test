@@ -92,6 +92,13 @@ export type Capability<
 /** Any setup, whatever it holds — what a composition lists. */
 export type AnyCapability = Capability<string, unknown, readonly unknown[], object, ContextKey>;
 
+/** An argument an action takes beside its subject rather than a setup of the chain — `{ params }`. */
+export type ActionOption<Name extends string> = {
+    readonly kind: 'option';
+    readonly name: Name;
+    readonly row: MatrixRow;
+};
+
 /** `with()` — the one setup whose effect is the others': the contextual setups a file shares. */
 export type Sharing = { readonly kind: 'context'; readonly name: 'with'; readonly row: MatrixRow };
 
