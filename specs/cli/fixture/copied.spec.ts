@@ -3,12 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/*
- * This file is the framework's own matcher/accessor self-test: the toContain probes
- * demonstrate the .text/.raw/.file accessors and matcher behaviour themselves —
- * the fixture CLI's output is the vehicle, not the assertion target. Whole-output
- * correctness is exercised by the toMatch(file(…)) golden cases throughout.
- */
+/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('copied', () => {
     test('copies fixture file into working dir before exec', async () => {

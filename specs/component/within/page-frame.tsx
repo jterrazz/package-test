@@ -1,9 +1,4 @@
-/**
- * A page's frame — the landmarks a layout component carries: a header, a
- * sidebar, a named form, a search region and a footer. The header and the
- * footer state their roles: a component is mounted inside the test page's
- * `<main>`, where an implicit banner or contentinfo is no landmark at all.
- */
+/** The header and footer state their roles: mounted inside the test page's `<main>`, an implicit banner or contentinfo is no landmark. */
 export function PageFrame() {
     return (
         <>

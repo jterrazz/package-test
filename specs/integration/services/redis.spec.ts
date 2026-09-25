@@ -3,14 +3,7 @@ import { describe, expect, inject, test } from 'vitest';
 import { redis } from '../../../src/index.js';
 import { integration } from '../redis.specification.js';
 
-/*
- * The redis seam, met the way a consumer meets it: the facet starts the
- * container and the chain calls the handle with the live connection string.
- * A probe that flushes keys binds a FRESH handle to the same container — the
- * runner's own handle has taken a worker database index (rule G2), and a
- * client opened at the default index reaches the container's own index 0,
- * which no worker uses and no reset flushes.
- */
+/* A probe flushing keys binds a fresh handle: the runner's handle holds a worker index (G2), and index 0 is the container's own, which no reset flushes. */
 
 describe('redis', () => {
     test('builds a connection string on the redis scheme', async () => {
@@ -36,8 +29,7 @@ describe('redis', () => {
         expect(result.error.text).toBe('');
     });
 
-    // RUNTIME G2 — isolation is per (worker, service) pair: the runner's handle
-    // Holds this pair's database index, and the default index is the container's own.
+    // RUNTIME G2 — isolation is per (worker, service) pair: the runner's handle holds this pair's database index, and the default index is the container's own.
     test('flushes every key on reset', async () => {
         // Given - a key written to the container, then a reset
         const result = await integration.call(async ({ cache }) => {
@@ -229,8 +221,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — the project's container outlives a file, and a file that died
-    // Before its release left its keys at its index.
+    // RUNTIME G2 — the project's container outlives a file, and a file that died before its release left its keys at its index.
     test('a worker acquires its index empty, whatever a worker before it left there', async () => {
         // Given - one handle that writes at its index and never releases, then another acquired by the same worker
         const result = await integration.call(async ({ cache }) => {

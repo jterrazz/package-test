@@ -4,11 +4,7 @@ import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('kitchen-sink', () => {
-    // The D11 regression net: ONE fixture project that trips every checker pass
-    // At once — D4 unknown + malformed tokens, D4b http first line, D10 token
-    // Leak, C9 dead fixture, B5 await-using inference and A7 database — asserted
-    // As a single full-output golden. It churns as the diagnostic surface
-    // Evolves; that is its job (the checker output is OURS, so D11(d) is moot).
+    // The D11 regression net: one project tripping every checker pass, one full-output golden that churns with the diagnostic surface by design.
     test('surfaces every diagnostic in one run', async () => {
         // Given - a specs tree that violates all of the checker passes
         const result = await cli

@@ -26,8 +26,7 @@ describe('templates', () => {
         `);
     });
 
-    // RUNTIME B12 — a route template is handed exactly its parameters, and a
-    // Value no parameter takes is refused before a request is sent.
+    // RUNTIME B12 — a route template is handed exactly its parameters, and a value no parameter takes is refused before a request is sent.
     test('a template handed a parameter it does not name is refused', async () => {
         // Given - the item route, handed past the compiler a value under another name
         const sent = api.get('/users/:id', { params: { userId: 1 } } as never);

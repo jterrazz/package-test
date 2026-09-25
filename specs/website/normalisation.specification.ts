@@ -1,12 +1,7 @@
 import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
-/**
- * The runner for the normalised readings: the same fixture site, with the
- * `transform` a project states when its FRAMEWORK writes something into every
- * head that the specification never asked for — a view-transitions router's
- * two metas here, and the same shape for any noise a `{{token}}` cannot name.
- */
+/** The `transform` a project states when its framework writes into every head what the spec never asked for: a view-transitions router's two metas here. */
 export const { cleanup, website } = await specification.website({
     server: {
         command: 'node specs/shared/fixtures/specimen-website/server.mjs',

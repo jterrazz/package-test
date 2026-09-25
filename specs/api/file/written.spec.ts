@@ -4,7 +4,6 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-/** Where the export answered it wrote — the one field the spec reads off the body. */
 function exportedTo(body: unknown): string {
     if (typeof body === 'object' && body !== null && 'directory' in body) {
         return String(body.directory);

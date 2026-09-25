@@ -3,15 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli as dockerCli } from '../docker-cli.specification.js';
 
-/**
- * The daemon query this spec checks the runner's cleanup against.
- *
- * It is asked of `docker` directly, not of the framework: the container
- * lifecycle is what is under test here, so the oracle has to be a SECOND
- * opinion. Reading it through the same helper the dispose path uses would make
- * the assertion agree with the code by construction — and F7 has a spec reach
- * the framework through its public entry, which this is not part of.
- */
+/** Asked of `docker` directly, a second opinion: reading it through the dispose path's helper would agree with the code by construction. */
 function containersLabelled(key: string, value: string): string[] {
     try {
         return execSync(`docker ps -aq -f label=${key}=${value}`, {
@@ -40,11 +32,7 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
-/*
- * Container-log / in-container-exec probes (CONVENTIONS D11 scalpel): stdout here is
- * a live container's log stream or a shell command run inside it — third-party output
- * cut at an arbitrary instant, unstable to snapshot. Targeted toContain is the level.
- */
+/* A live container's log stream is cut at an arbitrary instant: targeted probes, D11 scalpel. */
 
 describe('labels', () => {
     test.skipIf(!HAS_DOCKER)(
@@ -76,7 +64,6 @@ describe('labels', () => {
                 expect(inside.exitCode).toBe(0);
                 expect(inside.stdout.text).toContain('out.txt');
 
-                // Absent container name → accessor with exists=false, no throw.
                 expect(result.container('nope').exists).toBeFalsy();
                 await expect(expect(result.container('nope')).toBeRunning()).rejects.toThrow(
                     /does not exist/u,
@@ -85,9 +72,7 @@ describe('labels', () => {
                 trackedId = result.containerIds[0];
                 expect(trackedId).toBeTruthy();
 
-                // While the scope is live, the tracked id really carries the run
-                // Label — a direct daemon query sees it (makes the after-dispose
-                // Assertion below falsifiable).
+                // While the scope is live the id really carries the run label, which makes the after-dispose assertion falsifiable.
                 expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);
             }
 
@@ -99,8 +84,7 @@ describe('labels', () => {
     );
 
     test.skipIf(!HAS_DOCKER)(
-        // RUNTIME G3 — the capture is docker-aware: every container a run
-        // Spawned carries its run label, and the scope's exit removes them.
+        // RUNTIME G3 — the capture is docker-aware: every container a run spawned carries its run label, and the scope's exit removes them.
         'dispose removes containers even when the run was never asserted on',
         async () => {
             // Given - the runner's test-run id, read from the injected child env

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-/** A panel that drops the body of a failed reply unread, and says the status it was served. */
 export function QuoteStatus() {
     const [status, setStatus] = useState<null | number>(null);
 

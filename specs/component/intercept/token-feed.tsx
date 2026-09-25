@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 
-/** A panel that renders a streamed reply piece by piece, as the pieces land. */
 export function TokenFeed() {
     const [text, setText] = useState('');
     const [done, setDone] = useState(false);

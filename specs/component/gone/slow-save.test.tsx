@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 
 import { SlowSave } from './slow-save.js';
 
-/** A write the server takes two seconds to acknowledge. */
 const slowWrite = defineStub({
     request: http.post('/api/save'),
     response: http.json({ ok: true }, { delay: 2000 }),

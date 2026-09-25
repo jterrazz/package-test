@@ -4,9 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('j4-spec-description-unique', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stderr is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects two documents of one directory sharing a description', async () => {
         // Given - two .spec.yaml files whose description: is the same sentence
         const result = await cli

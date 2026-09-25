@@ -1,11 +1,7 @@
 import { process as processService, specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
-/**
- * The website runner started BESIDE another process: an API the site reads at
- * render time. `server` is a function of the started services, which is how
- * the site learns the URL of something the OS chose the port for.
- */
+/** `server` is a function of the started services: how the site learns a URL whose port the OS chose. */
 export const { cleanup, website } = await specification.website({
     server: ({ api }) =>
         processService({

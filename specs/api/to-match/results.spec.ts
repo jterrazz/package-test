@@ -3,10 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { file, text } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
-/**
- * Run an assertion expected to fail and return the thrown message. Awaits so
- * it works for both sync matchers and the async (SQL-backed) table matchers.
- */
+/** Awaited, so it serves the sync matchers and the SQL-backed table ones alike. */
 async function catchMessage(assertion: () => unknown): Promise<string> {
     try {
         await assertion();
@@ -15,8 +12,6 @@ async function catchMessage(assertion: () => unknown): Promise<string> {
     }
     throw new Error('expected the assertion to throw, but it passed');
 }
-
-// ── Critical path — both node and compose ──
 
 describe('results', () => {
     test('response matches expected file', async () => {
@@ -30,14 +25,7 @@ describe('results', () => {
         expect(result.response).toMatch(file('./expected/all-users.http'));
     });
 
-    // ── Edge cases ──
-
-    /*
-     * These probe the framework's OWN mismatch-diff error messages — the diff
-     * formatting IS the product surface under test, so it is goldened in full
-     * (expected/*-error.txt) rather than reconstructed line-by-line via probes.
-     * The passing paths already assert whole-response correctness via .toMatch(file('./expected/<file>.http')).
-     */
+    /* The framework's own mismatch diff is the product under test, so it is goldened in full. */
 
     test('toMatch shows diff on body mismatch', async () => {
         // Given - response differs from expected file
@@ -102,8 +90,6 @@ describe('results', () => {
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
 
-    // ── Table assertions ──
-
     test('a table is compared whole to its rows written in place — every column, in its order', async () => {
         // Given - one user seeded
         const result = await api
@@ -115,8 +101,6 @@ describe('results', () => {
             [1, 'Alice', 'alice@test.com'],
         ]);
     });
-
-    // ── Detailed table assertions ──
 
     test('table details — shows diff on multi-column mismatch', async () => {
         // Given - two users in table, expecting wrong values

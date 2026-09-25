@@ -4,7 +4,6 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-/** Run a scenario expected to be refused and hand back the refusal text. */
 async function refusalOf(path: string, scenario: VisitScenario): Promise<string> {
     try {
         await website.visit(path, scenario);
@@ -14,8 +13,7 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
     throw new Error(`expected ${path} to be refused, but the visit succeeded`);
 }
 
-// RUNTIME W3 — a descriptor a verb ACTS on must designate exactly one
-// Element; the refusal enumerates the candidates and the rewrites.
+// RUNTIME W3 — a descriptor a verb ACTS on must designate exactly one element; the refusal enumerates the candidates and the rewrites.
 describe('ambiguity', () => {
     test('refuses an element that matches more than one node', async () => {
         // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles"), which the whole-name default does not reach

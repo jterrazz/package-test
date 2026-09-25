@@ -1,4 +1,3 @@
-/** A button whose handler throws — an exception nothing in the page catches. */
 export function BrokenButton() {
     return (
         <button

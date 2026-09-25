@@ -4,8 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('b5-await-using-inference', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (third-party linters) does not apply.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a docker runner result bound without await using', async () => {
         // Given - a docker-aware spec and a test binding its result with const
         const result = await cli

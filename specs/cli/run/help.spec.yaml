@@ -1,4 +1,3 @@
-# The plainest document: no ground to state, one run, one golden.
 description: prints the command list when asked for help
 runs:
     - command: help

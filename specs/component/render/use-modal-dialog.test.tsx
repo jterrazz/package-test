@@ -5,15 +5,7 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { useModalDialog } from './use-modal-dialog.js';
 
-/**
- * The Given of a hook spec is a HOST written here, in the test file: a hook has
- * no surface of its own, so the component carrying the states the test needs is
- * part of the test, not of the app.
- *
- * The dialog is its own component because the hook opens what it is GIVEN: the
- * effect runs when the thing holding the ref mounts, which is exactly how a
- * modal is written in an app.
- */
+/** A hook has no surface, so its Host is written in the test; the dialog is its own component because the hook's effect runs when the ref's holder mounts. */
 function Modal({
     fallback,
     onClose,

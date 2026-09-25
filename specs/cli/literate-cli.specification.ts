@@ -3,23 +3,14 @@ import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';
 
-/**
- * The runner the `<case>.spec.yaml` documents are bound to — the one the
- * `literate()` plugin names in `vitest.config.ts`, and the one
- * `specs/cli/run/` drives through the `cli.run()` bridge.
- *
- * It declares the two registries a document names by WORD: `env` (named
- * environment sets) and `serve` (named servers). A scenario states WHICH ground
- * it stands on; how that ground is built stays in code, once.
- */
+/** A document names its ground by word (`env`, `serve`); how that ground is built stays here, once. */
 const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
         frozen: { MY_VAR: 'from-the-frozen-set', TZ: 'UTC' },
     },
-    // A served command runs from the project root: stated here as the server's
-    // Own folder, so the command names the file where it lives.
+    // A served command runs from the project root, so the server's own folder is stated.
     root: '../shared/fixtures/specimen-cli-literate',
     serve: {
         echo: {

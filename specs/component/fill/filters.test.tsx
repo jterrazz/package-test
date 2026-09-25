@@ -3,7 +3,6 @@ import { describe, expect, test, vi } from 'vitest';
 
 import { Filters } from './filters.js';
 
-/** What the form reports when it is applied — the one callback these specs watch. */
 type Apply = (summary: string) => void;
 
 describe('Filters', () => {

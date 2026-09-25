@@ -4,9 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('d5-spec-volatile-literal', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stderr is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a loopback origin pinned in a stream', async () => {
         // Given - a golden carrying the port one run happened to get
         const result = await cli
@@ -22,9 +20,6 @@ describe('d5-spec-volatile-literal', () => {
         `);
     });
 
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stderr is asserted, tokens covering the run cwd.
     test('rejects the same literal under `expected/`, which is the other half of the reach', async () => {
         // Given - a golden file pinning a temp directory and a loopback port
         const result = await cli

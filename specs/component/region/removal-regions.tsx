@@ -1,7 +1,4 @@
-/**
- * Three "Remove" buttons, each in a `<section>`: one named by its label, one
- * by the heading it points at, one unnamed — which makes it no region at all.
- */
+/** One section named by its label, one by the heading it points at, one unnamed, which makes it no region at all. */
 export function RemovalRegions() {
     return (
         <main>

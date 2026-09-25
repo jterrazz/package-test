@@ -4,8 +4,7 @@ import { file } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 describe('reset', () => {
-    // RUNTIME B7 — a sequence is expressed by SEEDING the state the second run
-    // Would have found: every chain starts on databases the framework reset.
+    // RUNTIME B7 — a sequence is expressed by SEEDING the state the second run would have found: every chain starts on databases the framework reset.
     test('resets all databases before each spec', async () => {
         // Given - data in both databases from a previous spec
         await api

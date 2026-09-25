@@ -4,14 +4,9 @@ import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-/**
- * The channel the select is on, scoped to that field. Named rather than
- * written inline: three descriptors inside a verb is one call too deep for
- * `unicorn/max-nested-calls`.
- */
+/** Named: three descriptors inside a verb is one call too deep for `unicorn/max-nested-calls`. */
 const channelIs = (name: string): ElementRef => within(field('Channel'), selected(option(name)));
 
-/** The topic the wrapped select is on, scoped to that field, for the same reason. */
 const topicIs = (name: string): ElementRef => within(field('Topic'), selected(option(name)));
 
 describe('options', () => {

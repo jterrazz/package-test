@@ -1,9 +1,4 @@
-/**
- * Two links whose names OVERLAP — the shape CONVENTIONS W3 refuses to guess
- * between, and the shape the exact default answers on its own: a name
- * designates the accessible name WHOLE, so `link('Articles')` does not reach
- * "Articles archive". `{ exact: false }` asks for substring matching.
- */
+/** The names overlap: `link('Articles')` matches the whole name and does not reach "Articles archive". */
 export function AmbiguousLinks() {
     return (
         <div>

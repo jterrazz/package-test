@@ -8,7 +8,7 @@ import { integration } from '../pure.specification.js';
 
 const PRICING = 'https://pricing.spec.test';
 
-/** A local server that starts a 503 body and holds it open; its port, closed afterwards. */
+/** It starts a 503 body and holds it open. */
 async function heldReply(): Promise<number> {
     const upstream = createServer((_request, response) => {
         response.writeHead(503, { 'content-type': 'application/json' });

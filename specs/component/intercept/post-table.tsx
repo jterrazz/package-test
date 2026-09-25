@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 
 type Post = { id: number; title: string };
 
-/** A table that asks the network for its rows — the stub-shaped component. */
 export function PostTable() {
     const [posts, setPosts] = useState<null | Post[]>(null);
     const [total, setTotal] = useState(0);

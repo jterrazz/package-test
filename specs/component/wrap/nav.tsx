@@ -1,6 +1,5 @@
 import { Link, useParams } from 'react-router';
 
-/** A component that cannot render without a router — the chain's `.wrap()` subject. */
 export function Nav() {
     const { slug } = useParams();
     return (

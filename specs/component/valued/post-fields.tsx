@@ -1,9 +1,6 @@
 import { useState } from 'react';
 
-/**
- * Two text fields labelled the two ways a form writes it: one by a `for`
- * label, one by a label that WRAPS it — the subject of what a field holds.
- */
+/** One labelled by `for`, one by a wrapping label. */
 export function PostFields() {
     const [search, setSearch] = useState('');
     const [title, setTitle] = useState('');

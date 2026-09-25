@@ -1,9 +1,6 @@
 import { useState } from 'react';
 
-/**
- * A control that leaves the screen only once a slow answer comes back — the
- * subject of a wait longer than a poll's default second.
- */
+/** Leaves the screen only after a slow answer: a wait longer than a poll's default second. */
 export function SlowSave() {
     const [saved, setSaved] = useState(false);
 

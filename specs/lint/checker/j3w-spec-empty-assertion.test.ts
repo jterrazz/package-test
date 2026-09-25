@@ -4,9 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('j3w-spec-empty-assertion', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stderr is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('warns about a stream that is only {{any}}', async () => {
         // Given - a run that executes and proves nothing
         const result = await cli

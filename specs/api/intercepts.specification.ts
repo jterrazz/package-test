@@ -1,8 +1,4 @@
-/**
- * Runner for the strict-intercept specs (CONVENTIONS D7). Intercepts are
- * in-process (MSW), so the specimen under test runs in this process:
- * `specs/shared/fixtures/specimen-api-outbound/`, whose routes only call out.
- */
+/** Intercepts are in-process (MSW), so the specimen runs in this process: `specimen-api-outbound`, whose routes only call out. */
 import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';

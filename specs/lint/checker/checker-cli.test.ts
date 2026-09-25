@@ -4,9 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('checker-cli', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stream is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
         const result = await cli
@@ -38,8 +36,7 @@ describe('checker-cli', () => {
         `);
     });
 
-    // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
-    // Full-output golden would couple this to the diagnostic formatting.
+    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
         const result = await cli
@@ -51,8 +48,7 @@ describe('checker-cli', () => {
         expect(result.stderr.text).toContain('no `specs/` tree under');
     });
 
-    // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
-    // Full-output golden would couple this to the diagnostic formatting.
+    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a nonexistent root fails loudly instead of reporting a clean tree', async () => {
         // Given - a target directory that does not exist
         const result = await cli.exec('does-not-exist-xyz');
@@ -221,8 +217,7 @@ describe('checker-cli', () => {
         `);
     });
 
-    // Scalpel (D11): targeted exit-code + message probe on the CLI boundary — a
-    // Full-output golden would couple this to the diagnostic formatting.
+    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a report path that names no file fails loudly instead of counting nothing', async () => {
         // Given - a report that was never written
         const result = await cli

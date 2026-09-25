@@ -3,13 +3,7 @@ import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';
 
-/**
- * CLI runner with an ANSI-stripping `transform` — the D6 escape hatch under
- * test in specs/cli/assertions. ANSI is already stripped by default before
- * stream comparisons; this runner exists to observe the transform MECHANISM
- * itself (raw `.text` untouched, fixture side never transformed, update mode
- * writing the post-normalisation form).
- */
+/** ANSI is stripped by default: this runner observes the transform mechanism itself (`.raw` untouched, the golden never transformed). */
 const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');
 
 const stripAnsi = (text: string): string => text.replaceAll(/\u001B\[[0-9;]*m/gu, '');

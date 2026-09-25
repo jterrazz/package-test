@@ -7,7 +7,7 @@ import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 
-/** Remove a golden a test wrote, and `expected/` once it holds nothing — git keeps no empty folder. */
+/** Git keeps no empty folder, so `expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -64,7 +64,6 @@ describe('matching', () => {
             .exec('scaffold');
         await expect(result2.directory('out')).toMatch(directory(`./expected/${fixtureName}/`));
 
-        // Cleanup committed transient fixture
         removeGolden(resolve(EXPECTED_DIR, fixtureName));
     });
 

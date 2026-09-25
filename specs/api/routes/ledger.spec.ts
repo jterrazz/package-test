@@ -6,7 +6,6 @@ import { describe, expect, inject, test } from 'vitest';
 
 import { specification } from '../../../src/index.js';
 
-/** The ledger files the run's folder holds, by name. */
 function ledgersIn(directory: string): string[] {
     return existsSync(directory)
         ? readdirSync(directory).filter((name) => name.endsWith('.json'))

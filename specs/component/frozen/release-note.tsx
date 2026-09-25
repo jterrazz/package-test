@@ -1,4 +1,3 @@
-/** A note whose outline holds still — the subject a frozen golden is compared with. */
 export function ReleaseNote() {
     return (
         <section aria-label="Release">

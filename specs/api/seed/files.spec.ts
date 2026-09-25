@@ -75,8 +75,7 @@ describe('files', () => {
         ]);
     });
 
-    // RUNTIME A7 — with two databases `database:` is required on every seed,
-    // And with one it is refused: the record fixes the call.
+    // RUNTIME A7 — with two databases `database:` is required on every seed, and with one it is refused: the record fixes the call.
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seed() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
@@ -106,8 +105,6 @@ describe('files', () => {
         ).rejects.toThrow('seed() targets database "nonexistent-db" but it was not found');
     });
 
-    // Node-only: in compose mode the databases are auto-detected from the
-    // Compose file, so a "zero databases" runner cannot exist there.
     test.runIf(process.env.TEST_MODE !== 'compose')(
         'seed() without any declared SQL database fails with a clear error',
         async () => {

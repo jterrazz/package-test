@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { directory, text } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/** Run an assertion expected to fail and return its thrown message. */
 async function catchMessage(assertion: () => Promise<unknown>): Promise<string> {
     try {
         await assertion();

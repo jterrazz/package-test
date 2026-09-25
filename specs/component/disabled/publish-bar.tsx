@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-/** A control that refuses input until a condition is met — enablement, as a state. */
 export function PublishBar() {
     const [agreed, setAgreed] = useState(false);
     return (

@@ -5,14 +5,11 @@
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-// Import via the package entry point — it wires the integration registry the
-// Constructors consume, and it is the door a spec reaches the framework
-// Through (rule F7).
+// Through the package entry: it wires the integration registry the constructors consume (F7).
 import { postgres, redis, specification } from '../../../src/index.js';
 
 const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '');
 
-/** A Hono-compatible app the constructor never reaches: startup fails first. */
 const unreachedApp = { request: () => Response.json({}, { status: 200 }) };
 
 const BROKEN_POSTGRES_INIT = resolve(
@@ -25,15 +22,8 @@ const BROKEN_SECOND_POSTGRES = resolve(
     '../../shared/fixtures/broken-second-postgres',
 );
 
-/*
- * Scalpel by design: the captured console report interleaves the startup status
- * lines with live postgres container logs and absolute init-script paths — a full
- * snapshot is unstable by nature (third-party logs, timing, paths). Each test
- * probes the status markers / error text that prove the failure behaviour;
- * the message assertions probe the thrown Error, not a stream.
- */
+/* The startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (D11 scalpel). */
 
-/** Start a specification that must fail, capturing the report it printed. */
 async function startAndCapture(
     root: string,
     services: Record<string, unknown>,
@@ -55,13 +45,10 @@ async function startAndCapture(
     return { failure, output };
 }
 
-/** What one refused startup left behind: the error it threw, the report it printed. */
 type Capture = { failure: Error | undefined; output: string };
 
 describe('initiation-errors', () => {
-    // Three refusals, each costing a container start, captured once and read by
-    // Eight tests. The hook is the price of the containers, not of the Given:
-    // Every test below reads a value this file named, and names which one.
+    // Three refusals, each a container start, captured once and read by eight tests: the hook pays for the containers, not for a Given.
     let brokenInit: Capture;
     let multiService: Capture;
     let multiPostgres: Capture;
@@ -73,9 +60,7 @@ describe('initiation-errors', () => {
             cache: redis(),
             db: postgres(),
         });
-        // Insertion order matters: `db` must be wired (and succeed) before
-        // `brokenDb` fails, and the kebab-case of each key names the folder its
-        // Init sits in.
+        // `db` must be wired and succeed before `brokenDb` fails.
         multiPostgres = await startAndCapture(BROKEN_SECOND_POSTGRES, {
             db: postgres(),
             brokenDb: postgres(),

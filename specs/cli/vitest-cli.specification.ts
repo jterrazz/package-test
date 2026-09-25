@@ -1,8 +1,3 @@
-/**
- * This checkout's vitest as the binary under test — the runner update mode is
- * specified through: a scratch test laid in the working directory, run the
- * way a consumer runs its suite, rewritten in place.
- */
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
 

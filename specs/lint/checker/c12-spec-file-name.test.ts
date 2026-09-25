@@ -4,13 +4,10 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-/** The fixture workspace the member pass is exercised against. */
 const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
 
 describe('c12-spec-file-name', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stderr is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a case name that only repeats its directory', async () => {
         // Given - specs/rm/rm.spec.yaml
         const result = await cli
@@ -37,9 +34,6 @@ describe('c12-spec-file-name', () => {
         expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stream is asserted, tokens covering the run cwd.
     test('renames a `.test.ts` that sits under a facet folder', async () => {
         // Given - a tree holding `specs/api/users/creation.test.ts`
         const result = await cli
@@ -76,9 +70,6 @@ describe('c12-spec-file-name', () => {
         `);
     });
 
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stream is asserted, tokens covering the run cwd.
     test("renames under a tree that is one facet's whole, with no facet level", async () => {
         // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not facets
         const result = await cli

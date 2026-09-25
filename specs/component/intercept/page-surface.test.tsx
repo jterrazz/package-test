@@ -4,16 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { SurfacePanel } from './page-surface.js';
 import type { SurfacePort } from './page-surface.js';
 
-/**
- * The names 15.3 adds, exercised in a REAL browser rather than compared by
- * name against the node build. Each one runs on the page's own engine: the
- * service worker behind `intercept()`, and the two helpers that belong to no
- * runtime at all.
- *
- * `intercept()` is the double for a test with NO chain: a render declares its
- * network on the chain instead, because D7 is total on this facet and the
- * render's catch-all is what makes "this component has no network" a finding.
- */
+/** Run on the page's own engine rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain. */
 
 describe('SurfacePanel', () => {
     test('the module-scope double answers the page, from its own worker', async () => {

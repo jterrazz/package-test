@@ -1,8 +1,4 @@
-/**
- * A site search written with the HTML `<search>` element — the landmark
- * carried by the element itself, with no `role` attribute to spell it — and
- * a "Go" button inside it and outside it.
- */
+/** The `<search>` element carries the landmark with no `role` attribute; one "Go" button inside it, one outside. */
 export function SiteSearch() {
     return (
         <>

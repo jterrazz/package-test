@@ -3,9 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { http } from '../../../src/index.js';
 import { job } from '../job.specification.js';
 
-// Jobs run in-process by definition (CONVENTIONS A8) — specification.job()
-// Has no mode: the same runner works regardless of TEST_MODE.
-
 describe('strict', () => {
     test("the job's outgoing call is answered by the stub the chain declares", async () => {
         // Given - the one call the job makes out, answered in place

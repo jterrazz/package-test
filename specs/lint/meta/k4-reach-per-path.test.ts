@@ -3,22 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../lint.specification.js';
 
-/**
- * K4 — the REACH of a rule, proven on one project laid out with every path
- * role, from a SINGLE oxlint run.
- *
- * A reach the catalogue states and nothing checks is a sentence. The fixture
- * puts the same three violations (a sleep, an environment assignment, a DOM
- * global) in front of every role a file can have — a module test and a
- * component test beside their code, a facet spec under `specs/api/`, a
- * repository suite under `specs/build/`, the facet's specification, and the
- * config — and each assertion below reads what the run said about ONE path.
- *
- * One run, because that is what makes the assertions comparable: the same
- * plugin, the same options, the same tree. The project's own budget is the
- * unit project's, stated in chapter 03.
- */
-/** The one run every assertion below reads. */
+/** K4 — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable. */
 async function reachRun(): Promise<string> {
     const result = await cli
         .env({ LINT_CONFIG: 'oxlint.reach.json' })
@@ -27,11 +12,7 @@ async function reachRun(): Promise<string> {
     return result.stdout.text;
 }
 
-/**
- * What the run said about one path — read off the `unix` rendering the
- * wrapper pins (`<path>:<line>:<col>: <message> [<Severity>/<rule>]`), one
- * line per diagnostic.
- */
+/** `<path>:<line>:<col>: <message> [<Severity>/<rule>]`, the `unix` rendering the wrapper pins. */
 function about(output: string, path: string): string[] {
     return output
         .split('\n')

@@ -4,8 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('d4b-http-first-line', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (third-party linters) does not apply.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a requests/*.http without a request line', async () => {
         // Given - a request fixture whose first line is not "METHOD /path"
         const result = await cli

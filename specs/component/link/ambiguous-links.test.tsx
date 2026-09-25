@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 
 import { AmbiguousLinks } from './ambiguous-links.js';
 
-/** The message text a failed render hands back, or '' when it did not fail. */
 async function refusalOf(scenario: Parameters<typeof component.render>[1]): Promise<string> {
     return await component
         .render(<AmbiguousLinks />, scenario)

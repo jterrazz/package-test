@@ -17,11 +17,7 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
-/*
- * Container-log / in-container-exec probes (CONVENTIONS D11 scalpel): stdout here is
- * a live container's log stream or a shell command run inside it — third-party output
- * cut at an arbitrary instant, unstable to snapshot. Targeted toContain is the level.
- */
+/* A live container's log stream is cut at an arbitrary instant: targeted probes, D11 scalpel. */
 
 describe('unqueried', () => {
     test.skipIf(!HAS_DOCKER)(

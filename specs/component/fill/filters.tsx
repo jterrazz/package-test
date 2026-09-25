@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-/** Every input a visitor acts on, in one component — the verbs' subject. */
 export function Filters({ onApply }: { onApply: (summary: string) => void }) {
     const [query, setQuery] = useState('');
     const [drafts, setDrafts] = useState(false);

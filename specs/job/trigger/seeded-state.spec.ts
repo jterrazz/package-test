@@ -3,9 +3,6 @@ import { describe, expect, test } from 'vitest';
 import { file } from '../../../src/index.js';
 import { job } from '../job.specification.js';
 
-// Jobs run in-process by definition (CONVENTIONS A8) — specification.job()
-// Has no mode: the same runner works regardless of TEST_MODE.
-
 describe('seeded-state', () => {
     test('trigger resets databases at the start of each chain', async () => {
         // Given - a previous spec left synced events behind

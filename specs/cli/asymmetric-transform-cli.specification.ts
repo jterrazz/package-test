@@ -3,11 +3,7 @@ import { afterAll } from 'vitest';
 
 import { specification } from '../../src/index.js';
 
-/**
- * CLI runner whose `transform` strips the word " plain" from the output —
- * used by specs/cli/assertions to prove the transform is ASYMMETRIC: it runs
- * on the actual output only, never on the expected/ fixture.
- */
+/** The transform strips " plain" from the actual output only, never from the golden. */
 const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {

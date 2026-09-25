@@ -7,7 +7,7 @@ import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 
-/** Remove a golden a test wrote, and `expected/` once it holds nothing — git keeps no empty folder. */
+/** Git keeps no empty folder, so `expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -15,7 +15,6 @@ function removeGolden(path: string): void {
     }
 }
 
-/** Run a block with TEST_UPDATE=1 so toMatch writes the fixture. */
 function inUpdateMode(block: () => void): void {
     vi.stubEnv('TEST_UPDATE', '1');
     try {
@@ -25,12 +24,7 @@ function inUpdateMode(block: () => void): void {
     }
 }
 
-/*
- * This file is the framework's own matcher/accessor self-test: the toContain probes
- * demonstrate the .text/.raw/.file accessors and matcher behaviour themselves —
- * the fixture CLI's output is the vehicle, not the assertion target. Whole-output
- * correctness is exercised by the toMatch(file(…)) golden cases throughout.
- */
+/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('failure', () => {
     test('text exposes stderr content', async () => {

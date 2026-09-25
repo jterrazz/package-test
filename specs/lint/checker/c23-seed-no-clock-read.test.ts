@@ -4,9 +4,7 @@ import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('c23-seed-no-clock-read', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stream is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects every spelling of a clock read, and reads past a comment', async () => {
         // Given - a seed writing `datetime('now', …)`, `CURRENT_TIMESTAMP` and `NOW()`, under a comment that names one of them
         const result = await cli

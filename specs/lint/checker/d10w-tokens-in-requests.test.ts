@@ -4,8 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('d10w-tokens-in-requests', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (third-party linters) does not apply.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('warns when a token leaks into a requests/ file', async () => {
         // Given - a request body carrying a {{uuid}} token
         const result = await cli

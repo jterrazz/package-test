@@ -1,4 +1,3 @@
-/** A component reading the locale the PROJECT gives every page's browser context. */
 export function LocaleNote() {
     const { locale } = new Intl.DateTimeFormat().resolvedOptions();
     return (

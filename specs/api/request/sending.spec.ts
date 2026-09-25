@@ -88,8 +88,6 @@ describe('sending', () => {
         `);
     });
 
-    // ── Edge cases ──
-
     test('refuses a directory as a body, naming the one-file form', async () => {
         // Given - a body named by directory()
         // Then - the chain rejects before a request is sent: a body is one file

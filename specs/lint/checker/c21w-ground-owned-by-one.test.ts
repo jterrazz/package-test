@@ -4,9 +4,7 @@ import { directory } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('c21w-ground-owned-by-one', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (reserved for third-party linters) does not
-    // Apply — the whole stream is asserted, tokens covering the run cwd.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('warns on ground a single spec of the leaf reads', async () => {
         // Given - a tree violating C21
         const result = await cli

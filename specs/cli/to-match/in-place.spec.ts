@@ -3,12 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, text } from '../../../src/index.js';
 import { cli as vitestCli } from '../vitest-cli.specification.js';
 
-/*
- * This file is the framework's own matcher/accessor self-test: the toContain probes
- * demonstrate the .text/.raw/.file accessors and matcher behaviour themselves —
- * the fixture CLI's output is the vehicle, not the assertion target. Whole-output
- * correctness is exercised by the toMatch(file(…)) golden cases throughout.
- */
+/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('in-place', () => {
     test('a scratch test holding empty values is filled with what it compared, and the next run reads them back', async () => {

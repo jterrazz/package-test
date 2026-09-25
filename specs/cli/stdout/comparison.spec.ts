@@ -7,7 +7,7 @@ import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
 
-/** Remove a golden a test wrote, and `expected/` once it holds nothing — git keeps no empty folder. */
+/** Git keeps no empty folder, so `expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -15,7 +15,6 @@ function removeGolden(path: string): void {
     }
 }
 
-/** Run a block with TEST_UPDATE=1 so toMatch writes the fixture. */
 function inUpdateMode(block: () => void): void {
     vi.stubEnv('TEST_UPDATE', '1');
     try {
@@ -25,7 +24,6 @@ function inUpdateMode(block: () => void): void {
     }
 }
 
-/** Run an assertion expected to fail and return its thrown message. */
 function catchMessage(assertion: () => unknown): string {
     try {
         assertion();
@@ -35,12 +33,7 @@ function catchMessage(assertion: () => unknown): string {
     throw new Error('expected the assertion to throw, but it passed');
 }
 
-/*
- * This file is the framework's own matcher/accessor self-test: the toContain probes
- * demonstrate the .text/.raw/.file accessors and matcher behaviour themselves —
- * the fixture CLI's output is the vehicle, not the assertion target. Whole-output
- * correctness is exercised by the toMatch(file(…)) golden cases throughout.
- */
+/* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
 
 describe('comparison', () => {
     test('text exposes the comparable string', async () => {
@@ -88,9 +81,7 @@ describe('comparison', () => {
         );
     });
 
-    // RUNTIME D3 — every `toMatch` subject resolves against `expected/`; the
-    // Refusal names the path it looked at, and only `.request()` reads
-    // `requests/`.
+    // RUNTIME D3 — every `toMatch` subject resolves against `expected/`; the refusal names the path it looked at, and only `.request()` reads `requests/`.
     test('toMatch on a missing stream fixture names the path it resolved, and TEST_UPDATE', async () => {
         // Given - a fixture name that was never created
         const result = await cli
@@ -108,8 +99,7 @@ describe('comparison', () => {
         expect(message).toMatch(/TEST_UPDATE=1/u);
     });
 
-    // RUNTIME C5 — a slash in a fixture name is a SUBFOLDER of `expected/`,
-    // Not a separator the resolver flattens.
+    // RUNTIME C5 — a slash in a fixture name is a SUBFOLDER of `expected/`, not a separator the resolver flattens.
     test('a slash in the fixture name creates a subfolder under expected/', async () => {
         // Given - a fixture written via update mode with a slash in its name
         const fixtureName = `sub/help-${Date.now()}.txt`;
@@ -157,8 +147,7 @@ describe('comparison', () => {
         expect(() => result.json.value).toThrow(/stdout is not valid JSON/u);
     });
 
-    // RUNTIME B2 — a string is a value: a verb that reads the disk takes file()
-    // Or directory(), and a bare string is refused where it is written.
+    // RUNTIME B2 — a string is a value: a verb that reads the disk takes file() or directory(), and a bare string is refused where it is written.
     test('a fixture named by a bare string is refused where it is written', () => {
         // Given - the 16 spelling, a name resolved against a folder the line does not show
         // Then - refused at the call, naming the wrapper to write

@@ -1,13 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { RefObject } from 'react';
 
-/**
- * Open a `<dialog>` as a modal while it is mounted, report the platform's own
- * dismissal once, and give the keyboard back to whatever opened it.
- *
- * The hook is the subject; the component that hosts it is written in the test,
- * because a hook has no surface of its own to render.
- */
+/** Report the platform's own dismissal once, and give the keyboard back to whatever opened it. */
 export function useModalDialog(
     onClose: () => void,
     fallback?: RefObject<HTMLElement | null>,

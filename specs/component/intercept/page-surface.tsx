@@ -1,15 +1,9 @@
 import { useEffect, useState } from 'react';
 
-/** What a reader of the surface panel can be told. */
 export type SurfacePort = {
     announce: (what: string) => void;
 };
 
-/**
- * A unit that fetches and reports — the two things a page does that the 15.3
- * surface has to answer for INSIDE a browser: `intercept()` on the worker, and
- * a port double as a callback prop.
- */
 export function SurfacePanel({ port }: { port: SurfacePort }) {
     const [label, setLabel] = useState('');
 

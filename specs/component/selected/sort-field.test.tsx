@@ -4,11 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { SortField } from './sort-field.js';
 
-/**
- * The option the Sort field is on, scoped to that field. Named rather than
- * written inline: three descriptors inside a verb is one call too deep for
- * `unicorn/max-nested-calls`, and a named Given reads better anyway.
- */
+/** Named: three descriptors inside a verb is one call too deep for `unicorn/max-nested-calls`. */
 const sortedBy = (name: string): ElementRef => within(field('Sort'), selected(option(name)));
 
 describe('SortField', () => {

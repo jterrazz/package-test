@@ -4,10 +4,9 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
-/** The Appium double served once per run, which prints the sessions it saw when the run is over. */
+/** It prints the sessions it saw when the run is over. */
 const DOUBLE_SETUP = resolve(import.meta.dirname, '../../shared/fixtures/appium-double/per-run.ts');
 
-/** The scratch run's env: the double, whatever server the run spawning it drives. */
 const ON_THE_DOUBLE = { DOUBLE_SETUP, TEST_MOBILE_APPIUM_URL: null };
 
 describe('session', () => {

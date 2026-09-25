@@ -1,6 +1,5 @@
 import { useEffect } from 'react';
 
-/** A panel that talks to the console — the two streams' subject. */
 export function NoisyPanel() {
     useEffect(() => {
         // oxlint-disable-next-line no-console -- the console IS this fixture's subject: it exists so a spec can read `result.console` and `result.errors`

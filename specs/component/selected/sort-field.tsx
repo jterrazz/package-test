@@ -1,6 +1,5 @@
 import { useState } from 'react';
 
-/** A select offering two orders — the subject of which option a field is on. */
 export function SortField() {
     const [sort, setSort] = useState('newest');
 

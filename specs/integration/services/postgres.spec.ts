@@ -6,15 +6,9 @@ import { describe, expect, inject, test } from 'vitest';
 import { file, postgres } from '../../../src/index.js';
 import { integration } from '../integration.specification.js';
 
-/** The docker directory the specimen's services initialise from. */
 const SPECIMEN_DOCKER = resolve(import.meta.dirname, '../../shared/fixtures/specimen-api/docker');
 
-/*
- * The postgres seam, met the way a consumer meets it: the facet starts the
- * container, the chain hands the started handle to the call, and every chain
- * begins on a reset database. What needs no container — the refusals a handle
- * answers before it ever connects — is a module test beside `postgres.ts`.
- */
+/* Refusals needing no container are a module test beside `postgres.ts`. */
 
 describe('postgres', () => {
     test('builds a connection string carrying the credentials and the worker own database', async () => {
@@ -229,11 +223,7 @@ describe('postgres', () => {
         expect(result.value).toMatch([['ok']]);
     });
 
-    /*
-     * CONVENTIONS D11 scalpel (e): the reason inside each message is
-     * postgres's own wording, unstable across image versions — probe the
-     * framework's half of the sentence, never snapshot the driver's.
-     */
+    /* D11 scalpel: the reason is postgres's own wording, unstable across image versions; the framework's half is probed. */
 
     test('what the database refuses — a failing statement surfaces the database own complaint', async () => {
         // Given - a statement naming a table that does not exist

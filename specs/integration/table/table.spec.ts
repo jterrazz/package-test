@@ -4,12 +4,7 @@ import { file } from '../../../src/index.js';
 import { tally } from '../../shared/fixtures/orders/tally.js';
 import { integration } from '../pure.specification.js';
 
-/**
- * The table form chapter 06 prescribes for the golden half: one row per case,
- * the golden named by the row. The names are written as a template literal,
- * which is the shape a hand-paired fixture wall collapses into — and the shape
- * the checker's C9 pass has to read as a reference rather than as silence.
- */
+/** Golden names in a template literal: the shape C9 must read as a reference rather than silence. */
 const CASES = [
     { name: 'empty', of: [] as number[] },
     { name: 'one', of: [7] },

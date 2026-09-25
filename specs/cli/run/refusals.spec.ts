@@ -7,16 +7,7 @@ import { file, text } from '../../../src/index.js';
 import type { DiskFile, RelativePath } from '../../../src/index.js';
 import { cli } from '../literate-cli.specification.js';
 
-/**
- * The spec-document format run through the BRIDGE door (`cli.run`). The same
- * documents also run through the plugin door — `vitest.config.ts` collects
- * `specs/cli/run/*.spec.yaml` as test files — so every scenario here is
- * proven twice, once per entry point, against one engine.
- *
- * The `fixtures/` twins are the deliberately-wrong inputs: a document whose
- * golden or shape is wrong on purpose, kept out of the plugin's glob so the
- * runner never tries to pass them.
- */
+/** Every scenario runs through both doors, the plugin and `cli.run`; the `fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */
 
 function scratchFile(content: string): string {
     const dir = mkdtempSync(resolve(tmpdir(), 'spec-document-'));
@@ -28,7 +19,6 @@ function scratchFile(content: string): string {
     return path;
 }
 
-/** A scratch document, named the one way `cli.run()` accepts: `file()`, from this spec. */
 function documentAt(path: string): DiskFile<'.spec.yaml'> {
     return file(relative(import.meta.dirname, path) as RelativePath<'.spec.yaml'>);
 }
@@ -47,7 +37,6 @@ async function errorOf(run: Promise<unknown>): Promise<Error> {
     throw new Error('expected the spec document to fail, but it passed');
 }
 
-/** The `at …` frames of an error's stack, trimmed. */
 function frames(error: Error): string[] {
     return (error.stack ?? '')
         .split('\n')

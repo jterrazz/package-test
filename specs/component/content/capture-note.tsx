@@ -1,8 +1,4 @@
-/**
- * A note carrying, beside the line a reader sees, the two kinds of text a
- * rendered capture must not pick up: a stylesheet's source, and a node the
- * page does not display.
- */
+/** Beside the visible line, a stylesheet's source and an undisplayed node: text a rendered capture must not pick up. */
 export function CaptureNote() {
     return (
         <section aria-label="Note">

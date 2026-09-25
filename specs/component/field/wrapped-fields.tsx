@@ -1,9 +1,6 @@
 import { useState } from 'react';
 
-/**
- * Fields whose label WRAPS the control — the ordinary form markup, where the
- * label element's text is not the control's accessible name.
- */
+/** The label wraps the control, so its text is not the control's accessible name. */
 export function WrappedFields() {
     const [channel, setChannel] = useState('web');
     const [title, setTitle] = useState('');

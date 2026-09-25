@@ -1,7 +1,4 @@
-/**
- * A panel whose wrapper carries a test id and NO role: the one case `testId()`
- * exists for — a container with no landmark to scope on.
- */
+/** A container with no role and no landmark to scope on: the one case `testId()` exists for. */
 export function BarePanel() {
     return (
         <div data-testid="panel-body">

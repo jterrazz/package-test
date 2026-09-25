@@ -4,8 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
 describe('c9-dead-fixtures', () => {
-    // Full-output golden: the checker's diagnostics are OUR product, so the
-    // D11(d) id-only-grep carve-out (third-party linters) does not apply.
+    // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a fixture file no test literal references', async () => {
         // Given - a feature whose seeds/ holds a file no test string references
         const result = await cli

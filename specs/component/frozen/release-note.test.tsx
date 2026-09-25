@@ -3,7 +3,6 @@ import { describe, expect, test } from 'vitest';
 
 import { ReleaseNote } from './release-note.js';
 
-/** The failure a golden assertion threw, as text — the subject of the test below. */
 async function refusalOf(assertion: Promise<void>): Promise<string> {
     return await assertion.then(
         () => 'the frozen golden matched, which the wrong one must never do',
