@@ -15,12 +15,21 @@ import { onProjectDefaults } from './project-kit.js';
  * states only what is theirs.
  */
 
-// Every facet's helper is the FACET's, beside its constructor and its chain —
-// One folder per facet. This module
-// Is their index: the one import `@jterrazz/test/vitest` re-exports, plus the
-// One project that is not a facet's.
+/*
+ * Every facet's helper is the FACET's, beside its constructor and its chain —
+ * one folder per facet. This module is their index: the one import
+ * `@jterrazz/test/vitest` re-exports, plus the one project that is not a
+ * facet's.
+ */
 export { api, type ApiProjectOptions } from '../facets/api/api.project.js';
-export { cli, type CliProjectOptions } from '../facets/cli/cli.project.js';
+export {
+    cli,
+    type CliProjectOptions,
+    literate,
+    type LiterateDoor,
+    type LiterateOptions,
+    type LiteratePlugin,
+} from '../facets/cli/cli.project.js';
 export { component, type ComponentProjectOptions } from '../facets/component/component.project.js';
 export {
     integration,
@@ -30,7 +39,6 @@ export { job, type JobProjectOptions } from '../facets/job/job.project.js';
 export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
 export { type FacetProjectOptions } from './project-kit.js';
-export { type LiterateDoor } from '../facets/cli/cli.project.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
 export type UnitProjectOptions = {

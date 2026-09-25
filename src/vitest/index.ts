@@ -6,7 +6,6 @@
  * SPECS stays `@jterrazz/test` (CONVENTIONS F1).
  */
 
-export { literate, type LiterateOptions, type LiteratePlugin } from '../facets/cli/cli.project.js';
 export { defineSpecConfig, type SpecConfig } from './preset.js';
 export {
     api,
@@ -20,7 +19,10 @@ export {
     type IntegrationProjectOptions,
     job,
     type JobProjectOptions,
+    literate,
     type LiterateDoor,
+    type LiterateOptions,
+    type LiteratePlugin,
     mobile,
     type MobileProjectOptions,
     unit,
