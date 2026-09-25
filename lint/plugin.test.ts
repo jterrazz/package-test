@@ -7,7 +7,7 @@ import { describe, expect, test } from 'vitest';
 
 import { lessonParts } from '../src/model/lesson/lesson.js';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
-import { anchor, spliceCatalog } from './catalog.js';
+import { anchor, spliceCatalog, spliceSelfRules } from './catalog.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from './checker.js';
 import {
     catalog,
@@ -21,7 +21,7 @@ import {
     UPSTREAM_RULES,
 } from './manifest.js';
 import plugin, { recommendedRules, testing } from './plugin.js';
-import { CATALOGUE_CHAPTER } from './rule-code.js';
+import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
 
 /**
  * Catalogue meta-test — the docs-as-code contract.
@@ -207,6 +207,29 @@ describe('conventions catalogue — generation freshness (meta-test)', () => {
         expect(spliceCatalog(committed)).toBe(committed);
     });
 
+    test('the docs/03 table of the self rows is byte-identical to a fresh generation', () => {
+        // Given - the committed docs/03-testing.md
+        const committed = read(SELF_CHAPTER);
+
+        // Then - re-splicing the self rows changes nothing (run `npm run docs`)
+        expect(spliceSelfRules(committed)).toBe(committed);
+    });
+
+    test('a row is listed in the chapter of its audience, and only there', () => {
+        // Given - the public catalogue and the package's own table
+        const published = read(CATALOGUE_CHAPTER);
+        const own = read(SELF_CHAPTER);
+
+        // Then - a consumer row is anchored in docs/19 alone, a self row in docs/03 alone: a consumer never reads a rule that holds only this package
+        for (const entry of catalog) {
+            const [home, away] = entry.audience === 'self' ? [own, published] : [published, own];
+            expect(home, `${entry.name} is missing from its chapter`).toContain(anchor(entry.name));
+            expect(away, `${entry.name} is listed outside its chapter`).not.toContain(
+                anchor(entry.name),
+            );
+        }
+    });
+
     test('every anchor a rule message links to exists in the generated catalogue', () => {
         // Given - every `docs/19-linting.md#<id>` a shipped rule's message carries
         const generated = read('docs/19-linting.md');
@@ -314,16 +337,16 @@ describe('conventions catalogue — completeness (meta-test)', () => {
     });
 
     test('k3 — every diagnostic reads at its own row, on a heading that exists', () => {
-        // Given - the shipped plugin, whose messages carry a generated `read:` part
-        const chapter = read(CATALOGUE_CHAPTER);
+        // Given - the plugin's rules, whose messages carry a generated `read:` part, and the chapter each audience's rows live in
         for (const [name, rule] of Object.entries(plugin.rules)) {
+            const chapter = rule.meta.docs.audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
             for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
-                // Then - it routes to its own row's heading, which EXISTS in the chapter
+                // Then - it routes to its own row's heading, in its audience's chapter, and the heading EXISTS there
                 expect(lessonParts(message)?.read, `${name}.${key} reads elsewhere`).toBe(
-                    `${CATALOGUE_CHAPTER}#${name}`,
+                    `${chapter}#${name}`,
                 );
             }
-            expect(chapter).toContain(`<a id="${name}"></a>`);
+            expect(read(chapter)).toContain(`<a id="${name}"></a>`);
         }
     });
 

@@ -2,7 +2,7 @@ import { lessonLine } from '../src/model/lesson/lesson.js';
 import type { Lesson } from '../src/model/lesson/lesson.js';
 import { catalog } from './manifest.js';
 import type { CatalogEntry, RULE_DOCS } from './manifest.js';
-import { CATALOGUE_CHAPTER } from './rule-code.js';
+import { CATALOGUE_CHAPTER, SELF_CHAPTER } from './rule-code.js';
 
 /**
  * The two parts of a lesson a message writes for its case — what it found, and
@@ -43,11 +43,6 @@ export function whyOf(convention: string): string {
     return convention;
 }
 
-/** The heading a row is read at — `docs/19-linting.md#<row>`. */
-export function readOf(name: string): string {
-    return `${CATALOGUE_CHAPTER}#${name}`;
-}
-
 /** The catalogue row a name designates — a static rule, a checker pass, a meta row. */
 export function rowOf(name: string): CatalogEntry {
     const row = catalog.find((entry) => entry.name === name);
@@ -55,6 +50,15 @@ export function rowOf(name: string): CatalogEntry {
         throw new Error(`no catalogue row is named ${name}`);
     }
     return row;
+}
+
+/**
+ * The heading a row is read at: `docs/19-linting.md#<row>` for a `consumer`
+ * row, `docs/03-testing.md#<row>` for a `self` one.
+ */
+export function readOf(name: string): string {
+    const chapter = rowOf(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
+    return `${chapter}#${name}`;
 }
 
 /** One finding of a row as the line a reader acts on. */

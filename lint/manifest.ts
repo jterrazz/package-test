@@ -26,7 +26,8 @@ import type { RuleDoc } from './rule-shape.js';
  *   (`PROCESS_RULES`).
  *
  * The catalogue generator (`catalog.ts` / `dist/catalog.js`) reads this manifest
- * to (re)write the full seven-channel catalogue in `docs/19-linting.md`.
+ * to (re)write the `consumer` rows in `docs/19-linting.md` and the `self` rows
+ * in `docs/03-testing.md` — each row declares its audience.
  * `plugin.test.ts` guards freshness and completeness.
  *
  * This module is pure data — it imports a type and the sentences the runtime's

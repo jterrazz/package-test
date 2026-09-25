@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 import { renderSchema } from '../src/model/literate/spec-document.js';
-import { spliceCatalog } from './catalog.js';
+import { spliceCatalog, spliceSelfRules } from './catalog.js';
 import { spliceFork } from './fork.js';
 import { spliceLayers, spliceMatrix } from './matrix.js';
 import { spliceMetaTests } from './meta-tests.js';
@@ -18,7 +18,8 @@ import { spliceSiblings } from './siblings.js';
  * Regenerates the tables the manual carries between GENERATED markers, and the
  * published schema — each from the code that owns its facts:
  *
- * - the full seven-channel catalogue inside `docs/19-linting.md`, from
+ * - the catalogue of the `consumer` rules inside `docs/19-linting.md`, and
+ *   the table of the `self` rules inside `docs/03-testing.md`, from
  *   `lint/manifest.ts`;
  * - `schema/spec.schema.json`, the published JSON Schema of the `<case>.spec.yaml`
  *   document, from the grammar's own constants;
@@ -46,7 +47,7 @@ const testing = readFileSync(testingPath, 'utf8');
 const withMatrix = spliceMatrix(testing, root);
 const withLayers = spliceLayers(withMatrix, root);
 const withSiblings = spliceSiblings(withLayers, root);
-const nextTesting = spliceMetaTests(withSiblings, root);
+const nextTesting = spliceSelfRules(spliceMetaTests(withSiblings, root));
 if (nextTesting !== testing) {
     writeFileSync(testingPath, nextTesting);
 }

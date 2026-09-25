@@ -50,7 +50,7 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 Four things land in the SAME commit as the change that makes them true.
 
 - **The guard.** Every defect class discovered — in review, from a bug, during a migration — grows the thing that stops it recurring: a static rule, a meta-test, or a runtime refusal. That is rule K1, and it is what keeps the other channels growing instead of decaying. When no channel is possible, the change says so explicitly.
-- **The regenerated tables.** `npm run docs` rewrites them all at once — the rule catalogue spliced into [19 — Linting](19-linting.md), the capability matrix and the siblingless table in [03 — Testing](03-testing.md), the fork in [18 — Conventions](18-conventions.md), and `schema/spec.schema.json`. Never edit one by hand: the freshness meta-tests fail on a hand edit.
+- **The regenerated tables.** `npm run docs` rewrites them all at once — the rule catalogue spliced into [19 — Linting](19-linting.md), the capability matrix, the siblingless table and the package's own rules in [03 — Testing](03-testing.md), the fork in [18 — Conventions](18-conventions.md), and `schema/spec.schema.json`. Never edit one by hand: the freshness meta-tests fail on a hand edit.
 
 - **The chapter the behaviour falsified.** A page that still describes the old behaviour is a defect that ships. The corpus is mapped by [`docs/README.md`](README.md).
 - **The skill, when the public surface moved.** `skills/jterrazz-test/SKILL.md` is hand-written and short — which kind, the pitfalls, the chapter to read next — and a meta-test fails when it names a symbol the entries do not export or a chapter that is not on disk; `README.md` is the vitrine and moves with a public API change too.

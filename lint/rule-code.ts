@@ -14,3 +14,10 @@ export function codeOf(passId: string): string {
  * part routes to and the file `npm run docs` writes, one constant for both.
  */
 export { CATALOGUE_CHAPTER } from '../src/model/lesson/refusal.js';
+
+/**
+ * The chapter a `self` row is read at — where the package says how it tests
+ * itself. A rule only this package is held to has no row in the public
+ * catalogue, so its message routes here instead.
+ */
+export const SELF_CHAPTER = 'docs/03-testing.md';

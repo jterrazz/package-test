@@ -10,6 +10,10 @@ import type { CatalogEntry } from './manifest.js';
  * that FIXES it where the row states them (a ban with no destination is an
  * argument, not a rule).
  *
+ * The catalogue lists the `consumer` rows — what a project using the package
+ * meets. The `self` rows, this package's own suite discipline, are rendered
+ * into `docs/03-testing.md` instead ({@link spliceSelfRules}).
+ *
  * Output is deterministic (the manifest is pre-sorted), so `plugin.test.ts` can
  * assert freshness: running the generator must reproduce the committed chapter
  * byte-for-byte. `catalog-cli.ts` (bundled as `dist/catalog.js`) writes it.
@@ -19,6 +23,17 @@ import type { CatalogEntry } from './manifest.js';
 export const DOCS_START =
     '<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->';
 export const DOCS_END = '<!-- /GENERATED:catalog -->';
+
+/** Markers delimiting the `self` rows inside `docs/03-testing.md`. */
+export const SELF_START =
+    '<!-- GENERATED:self-rules — do not edit by hand; run `npm run docs`. Source: lint/manifest.ts -->';
+export const SELF_END = '<!-- /GENERATED:self-rules -->';
+
+/** The rows a project using the package meets — the public catalogue's. */
+const published = catalog.filter((entry) => entry.audience === 'consumer');
+
+/** The rows only this package is held to. */
+const own = catalog.filter((entry) => entry.audience === 'self');
 
 /** Escape a markdown table cell (pipes would split the row). */
 export function cell(text: string): string {
@@ -96,7 +111,7 @@ const FACET_ORDER = [
 
 /** The facet sections present in the catalogue, model first. */
 function facets(): string[] {
-    const present = new Set<string>(catalog.map((entry) => entry.facet));
+    const present = new Set<string>(published.map((entry) => entry.facet));
     return FACET_ORDER.filter((facet) => present.has(facet));
 }
 
@@ -123,10 +138,29 @@ function counts(): Record<CatalogEntry['channel'], number> {
         type: 0,
         upstream: 0,
     };
-    for (const entry of catalog) {
+    for (const entry of published) {
         tally[entry.channel] += 1;
     }
     return tally;
+}
+
+/** The columns every catalogue table has. */
+const COLUMNS = ['Code', 'Implementation', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
+
+/** Rows as a catalogue table, each anchored by its implementation name. */
+function rowTable(rows: CatalogEntry[]): string[] {
+    return table(
+        COLUMNS,
+        rows.map((entry) => [
+            entry.id,
+            `${anchor(entry.name)}\`${entry.name}\``,
+            entry.channel,
+            entry.reach,
+            cell(entry.convention),
+            cell(entry.fix),
+            cell(entry.rationale),
+        ]),
+    );
 }
 
 /**
@@ -136,36 +170,14 @@ function counts(): Record<CatalogEntry['channel'], number> {
  */
 function catalogueSections(): string[] {
     return facets().flatMap((facet) => {
-        const owned = catalog.filter((entry) => entry.facet === facet);
+        const owned = published.filter((entry) => entry.facet === facet);
         const tables = families(owned).map((family) => {
             const rows = owned
                 .filter((entry) => entry.family === family)
-                .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel])
-                .map((entry) => [
-                    entry.id,
-                    `${anchor(entry.name)}\`${entry.name}\``,
-                    entry.channel,
-                    entry.reach,
-                    cell(entry.convention),
-                    cell(entry.fix),
-                    cell(entry.rationale),
-                ]);
-            return [
-                `### ${family} — ${FAMILIES[family] ?? family}`,
-                '',
-                ...table(
-                    [
-                        'Code',
-                        'Implementation',
-                        'Channel',
-                        'Reach',
-                        'Convention',
-                        'Fix',
-                        'Rationale',
-                    ],
-                    rows,
-                ),
-            ].join('\n');
+                .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
+            return [`### ${family} — ${FAMILIES[family] ?? family}`, '', ...rowTable(rows)].join(
+                '\n',
+            );
         });
         tables.unshift(`## ${facet} — ${FACET_TITLES[facet] ?? facet}`);
         return tables;
@@ -173,7 +185,7 @@ function catalogueSections(): string[] {
 }
 
 /**
- * The full seven-channel catalogue spliced into `docs/19-linting.md` between the
+ * The consumer catalogue spliced into `docs/19-linting.md` between the
  * GENERATED markers — a counts line, then every family section. The surrounding
  * chapter prose is hand-maintained; only this region is generated.
  */
@@ -194,7 +206,7 @@ function renderDocsCatalog(): string {
         .filter(([count]) => count > 0)
         .map(([count, label]) => label.replace(' (', ` — ${String(count)} (`))
         .join(', ');
-    const intro = `Every rule the framework enforces, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
+    const intro = `Every rule a project using the framework meets, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
     const inner = [intro, ...catalogueSections()].join('\n\n');
     return `${DOCS_START}\n\n${inner}\n\n${DOCS_END}`;
 }
@@ -209,4 +221,17 @@ export function spliceCatalog(existing: string): string {
         );
     }
     return existing.slice(0, start) + renderDocsCatalog() + existing.slice(end + DOCS_END.length);
+}
+
+/** Replace the region between the GENERATED markers of `docs/03` with a fresh table of the `self` rows. */
+export function spliceSelfRules(existing: string): string {
+    const start = existing.indexOf(SELF_START);
+    const end = existing.indexOf(SELF_END);
+    if (start === -1 || end === -1) {
+        throw new Error(
+            `docs/03-testing.md is missing the GENERATED:self-rules markers (${SELF_START} … ${SELF_END})`,
+        );
+    }
+    const inner = rowTable(own).join('\n');
+    return `${existing.slice(0, start)}${SELF_START}\n\n${inner}\n\n${SELF_END}${existing.slice(end + SELF_END.length)}`;
 }
