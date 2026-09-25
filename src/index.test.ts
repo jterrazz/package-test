@@ -6,7 +6,12 @@ import { describe, expect, test } from 'vitest';
 /** The repository root, from this module's place inside `src/`. */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The node entry as a consumer installs it: `src/index.ts` built, where the manifest's `import` condition points. */
+/**
+ * The node entry as a consumer installs it: `src/index.ts` built, where the
+ * manifest's `import` condition points. It is the LAST build that is judged —
+ * `make check` builds before it tests; a bare test run after a `src/` edit
+ * reads the previous bundle, and a clone never built has none to read.
+ */
 function builtEntry(): string {
     // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: the one condition read here is the one the assertion below loads, and a wrong shape fails it
     const { exports } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
