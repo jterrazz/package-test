@@ -3463,3 +3463,5 @@ removed.
       exported functions nor enters Map/Set entries, and the bin test runs
       bins only over the SELF_CHECKER_PASSES fixtures. Defense in depth,
       not a leak; optionally run each bin over the F7 fixtures too.
+
+Audience batch, integrated (2026-09-25): intelligence
