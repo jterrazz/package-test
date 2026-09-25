@@ -4,16 +4,18 @@ import {
     BROWSER_VERBS,
     DRAWN_DESCRIPTORS,
     DRAWN_VERBS,
-    OWN_VERBS,
     WITHIN,
-} from '../../../elements/rows.js';
+} from '../../../elements/verbs.js';
 import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
+import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';
+
+/** The verb only a page's visitor hands out: a page has an address to go to. */
+const GOTO: MatrixRow = { group: 'Verb', name: 'goto', probe: '.goto(' };
 
 /** The worker's one browser, launched on the first visit that asks for it. */
 type Needs = { browser: () => Promise<BrowserPort> };
@@ -81,5 +83,5 @@ export const visit = defineAction<
         return new PageResult({ config, page, testDir });
     },
     row: { group: 'Terminal action', name: '.visit()', probe: ".visit('" },
-    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, OWN_VERBS.goto],
+    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, GOTO],
 });

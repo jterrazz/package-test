@@ -4,17 +4,22 @@ import {
     BROWSER_VERBS,
     DRAWN_DESCRIPTORS,
     DRAWN_VERBS,
-    OWN_VERBS,
     WITHIN,
-} from '../../../elements/rows.js';
+} from '../../../elements/verbs.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
+import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import { recordConsole } from './console-recorder.js';
 import type { PagePort } from './page.port.js';
 import { RenderResult } from './render.result.js';
 import type { ComponentScenario, RenderSubject } from './scenario.js';
 import { wrap } from './wrap.capability.js';
+
+/** The verbs only a component's visitor hands out: what a parent does to it. */
+const PARENT_VERBS: readonly MatrixRow[] = [
+    { group: 'Verb', name: 'rerender', probe: '.rerender(' },
+    { group: 'Verb', name: 'unmount', probe: '.unmount(' },
+];
 
 /** What a mounted subject offers the render, React or vanilla DOM alike. */
 type MountedSurface = Awaited<ReturnType<PagePort['mountDom']>>;
@@ -146,5 +151,5 @@ export const render = defineAction<
         return { workDir: null };
     },
     row: { group: 'Terminal action', name: '.render()', probe: '.render(' },
-    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, OWN_VERBS.rerender, OWN_VERBS.unmount],
+    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, ...PARENT_VERBS],
 });

@@ -3,7 +3,8 @@ import type { MatrixRow } from '../kernel/chain/capability.js';
 /*
  * The capability-matrix rows of the vocabulary a scenario is written in —
  * chapter 13's words. An action that hands a scenario a visitor states the
- * rows of its visitor's verbs and of the descriptors its surface resolves.
+ * rows of its visitor's verbs and of the descriptors its surface resolves;
+ * a verb one visitor alone hands out is stated by that visitor's action.
  */
 
 /** What every drawing surface's visitor hands out. */
@@ -21,14 +22,6 @@ export const BROWSER_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'check', probe: '.check(' },
     { group: 'Verb', name: 'select', probe: '.select(' },
 ];
-
-/** The verbs one visitor alone hands out. */
-export const OWN_VERBS = {
-    goto: { group: 'Verb', name: 'goto', probe: '.goto(' },
-    rerender: { group: 'Verb', name: 'rerender', probe: '.rerender(' },
-    tap: { group: 'Verb', name: 'tap', probe: '.tap(' },
-    unmount: { group: 'Verb', name: 'unmount', probe: '.unmount(' },
-} as const satisfies Record<string, MatrixRow>;
 
 /** What every drawing surface resolves: the four kinds a device has. */
 export const DRAWN_DESCRIPTORS: readonly MatrixRow[] = [

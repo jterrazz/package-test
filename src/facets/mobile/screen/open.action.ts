@@ -1,9 +1,12 @@
-import { DRAWN_DESCRIPTORS, DRAWN_VERBS, OWN_VERBS, WITHIN } from '../../../elements/rows.js';
+import { DRAWN_DESCRIPTORS, DRAWN_VERBS, WITHIN } from '../../../elements/verbs.js';
 import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
+import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import type { MobileScenario } from '../device/device.port.js';
 import type { AppPort } from './app.port.js';
 import { ScreenResult } from './screen.result.js';
+
+/** The verb only a device's visitor hands out. */
+const TAP: MatrixRow = { group: 'Verb', name: 'tap', probe: '.tap(' };
 
 /** What `.open()` puts on a chain. */
 export type OpenSignature = ChainSignature & {
@@ -38,5 +41,5 @@ export const open = defineAction<
     perform: async ([deepLink, scenario], _read, { app }, { config, testDir }) =>
         new ScreenResult({ config, screen: await app.open(deepLink, scenario), testDir }),
     row: { group: 'Terminal action', name: '.open()', probe: '.open(' },
-    verbs: [...DRAWN_VERBS, OWN_VERBS.tap],
+    verbs: [...DRAWN_VERBS, TAP],
 });

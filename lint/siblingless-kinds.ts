@@ -79,7 +79,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/kernel/context/with.capability.ts',
             'src/kernel/files/artifacts.ts',
-            'src/elements/rows.ts',
+            'src/elements/verbs.ts',
             'src/world/services/containers/service-images.ts',
             'lint/manifest.ts',
             'lint/rule-code.ts',
