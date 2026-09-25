@@ -4,9 +4,10 @@ import { join, resolve } from 'node:path';
 import { TOKEN_KINDS } from '../src/model/matching/match.js';
 import { cell, table } from './catalog.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
-import type { Capability, Column } from './facet-matrix.js';
+import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
 import type { AstNode } from './rule-shape.js';
+import { composedRows, COMPOSITIONS, isComposed } from './self/compositions.js';
 
 /**
  * The capability matrix — what the package proves about itself, per facet.
@@ -20,10 +21,12 @@ import type { AstNode } from './rule-shape.js';
  * visible: a facet can grow a method and never be specified on it, and no
  * amount of green tests says so.
  *
- * The rows come from three places and are authored in none: the facet
- * declaration (`facet-matrix.ts`), the `{{token}}` list the runner and the
- * checker already share, and — for the count — a static scan of the trees each
- * column owns. `npm run docs` writes the table into `docs/03-testing.md`
+ * The rows come from four places and are authored in none: the facet
+ * compositions (`self/compositions.ts`) — each facet's rows stated by the
+ * definitions it composes — the hand rows of `facet-matrix.ts` for a facet
+ * not yet composed and for what the engines own (goldens, doubles), the
+ * `{{token}}` list the runner and the checker already share, and — for the
+ * count — a static scan of the trees each column owns. `npm run docs` writes the table into `docs/03-testing.md`
  * between markers; `matrix.test.ts` refuses an empty declared cell.
  *
  * A cell counts FILES, not assertions: "three files exercise `.seed()` on api"
@@ -239,6 +242,51 @@ export type MatrixRow = {
 const TOKENS_ARE_THE_ENGINES =
     'the engine owns the family (proven in the module column); a facet uses the ones its goldens need';
 
+/** The groups a facet states about itself; the others are the engines'. */
+const FACET_GROUPS = new Set<CapabilityGroup>([
+    'Constructor option',
+    'Descriptor',
+    'Result accessor',
+    'Route option',
+    'Setup',
+    'Terminal action',
+    'Verb',
+]);
+
+/**
+ * The declared rows: a composed column's facet rows are its composition's,
+ * every other column's the hand rows'. A hand row keeps its place when a
+ * composition states it too, so the table reads in one order whichever side
+ * states a cell; a row a composition alone states closes its group.
+ */
+function declaredCapabilities(): Capability[] {
+    const rows: Capability[] = [];
+    for (const capability of CAPABILITIES) {
+        const columns = capability.columns.filter(
+            (column) => !FACET_GROUPS.has(capability.group) || !isComposed(column),
+        );
+        rows.push({ ...capability, columns });
+    }
+    for (const column of COLUMNS) {
+        const composition = column === 'module' ? undefined : COMPOSITIONS[column];
+        for (const row of composition === undefined ? [] : composedRows(composition)) {
+            const at = rows.find(
+                (capability) => capability.group === row.group && capability.name === row.name,
+            );
+            if (at === undefined) {
+                rows.push({ ...row, columns: [column] });
+            } else if (at.probe !== row.probe || at.member !== row.member) {
+                throw new Error(
+                    `${column} states the row ${row.group} · ${row.name} read as ${row.probe}, where another column reads it as ${at.probe}`,
+                );
+            } else {
+                at.columns = [...at.columns, column];
+            }
+        }
+    }
+    return rows.filter(({ columns }) => columns.length > 0);
+}
+
 /** Every capability the framework declares, plus one row per `{{token}}` family. */
 export function capabilities(): Capability[] {
     const tokens: Capability[] = TOKEN_KINDS.map((kind) => ({
@@ -259,7 +307,7 @@ export function capabilities(): Capability[] {
             website: TOKENS_ARE_THE_ENGINES,
         },
     }));
-    return [...CAPABILITIES, ...tokens];
+    return [...declaredCapabilities(), ...tokens];
 }
 
 /**

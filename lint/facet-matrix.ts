@@ -97,7 +97,7 @@ export type Capability = {
 };
 
 /** The interface key a row answers for — its `member`, or its name without punctuation. */
-export function memberOf(capability: Capability): string {
+export function memberOf(capability: Pick<Capability, 'member' | 'name'>): string {
     return capability.member ?? capability.name.replace(/^\./u, '').replace(/\(\)$/u, '');
 }
 

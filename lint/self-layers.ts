@@ -48,7 +48,8 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
  *   walk a rule must share with the runner, the spec-document parser, the
  *   indentation a value written in place shares with the test around it),
  *   and a dependency only through the seam that owns it (the yaml document,
- *   the git tree, the module parser).
+ *   the git tree, the module parser) — and the facets, from the one self
+ *   module the capability matrix reads their compositions through.
  *
  * `src/index.ts`, `src/surface.ts` and `src/browser/` are composition roots and
  * name no layer, so they are out of scope; module tests and `*.fixtures.ts`
@@ -181,10 +182,10 @@ export const FRAMEWORK_LAYERS = {
             // The run owns one key of the ratchet the checker writes: route coverage.
             'model/routes/routes',
         ],
-        // oxlint's plugin types: a type import, erased from the bundle. The
-        // Config names oxlint looks for are the toolchain's list, inlined
-        // Into the bundle, so the checker and `check` find the same config.
+        // oxlint's plugin types (erased) and the toolchain's config names
+        // (inlined), so the checker and `check` find the same config.
         packages: ['@oxlint/plugins', '@jterrazz/typescript/oxlint-config-names'],
+        seams: { 'lint/self/compositions.ts': ['facets/'] },
     },
     model: {
         imports: [

@@ -6,7 +6,6 @@ import type { ApiSpecificationOptions } from '../src/facets/api/api.handle.js';
 import type { CliSpecificationOptions } from '../src/facets/cli/cli.handle.js';
 import type { ComponentChain } from '../src/facets/component/component.shape.js';
 import type { IntegrationSpecificationOptions } from '../src/facets/integration/integration.handle.js';
-import type { JobsSpecificationOptions } from '../src/facets/jobs/jobs.handle.js';
 import type { MobileSpecificationOptions } from '../src/facets/mobile/mobile.handle.js';
 import type { WebsiteSpecificationOptions } from '../src/facets/website/website.handle.js';
 import type {
@@ -14,7 +13,6 @@ import type {
     CliSpecification,
     IntegrationSpecification,
     JobsResult,
-    JobsSpecification,
     MobileSpecification,
     WebsiteSpecification,
 } from '../src/index.js';
@@ -32,6 +30,7 @@ import type { ScreenResult } from '../src/results/screen.result.js';
 import type { ComponentProjectOptions } from '../src/runner/projects/component.project.js';
 import { CAPABILITIES, COLUMNS, memberOf, methodsByRole } from './facet-matrix.js';
 import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
+import { capabilities } from './matrix.js';
 
 /**
  * Meta-test (K1 guard) — the capability declaration IS the facet surfaces.
@@ -54,6 +53,12 @@ import type { CapabilityGroup, Column, FacetRole } from './facet-matrix.js';
  * not follow it.
  *
  * Types are erased at runtime, which is exactly why both halves are needed.
+ *
+ * A facet written as a composition carries both halves itself: `defineFacet`
+ * refuses a composition naming other members than its chain, its options are
+ * pinned to the constructor's `keyof` where they are composed, and every
+ * definition states the row of its own member (`self/compositions.test.ts`).
+ * Its chain and its options have no record here.
  */
 
 /** The seven columns that are a facet — every column but the module test. */
@@ -66,6 +71,18 @@ const FACET_COLUMNS = [
     'mobile',
     'website',
 ] as const satisfies readonly Exclude<Column, 'module'>[];
+
+/** The entries of a record kept per facet column, in column order. */
+function byColumn<Value>(
+    record: Partial<Record<(typeof FACET_COLUMNS)[number], Value>>,
+): [(typeof FACET_COLUMNS)[number], Value][] {
+    return FACET_COLUMNS.flatMap((column) => {
+        const value = record[column];
+        const entry: [(typeof FACET_COLUMNS)[number], Value][] =
+            value === undefined ? [] : [[column, value]];
+        return entry;
+    });
+}
 
 /** A member the matrix publishes, or the reason it does not. */
 type Published = string | true;
@@ -81,11 +98,10 @@ function published(record: Record<string, Published>): string[] {
         .toSorted();
 }
 
-/** What the declaration says a column publishes, for one group. */
+/** What the matrix says a column publishes, for one group. */
 function declared(column: Column, group: CapabilityGroup): string[] {
-    return CAPABILITIES.filter(
-        (capability) => capability.group === group && capability.columns.includes(column),
-    )
+    return capabilities()
+        .filter((capability) => capability.group === group && capability.columns.includes(column))
         .map((capability) => memberOf(capability))
         .toSorted();
 }
@@ -111,15 +127,6 @@ const apiChain = {
     request: 'action',
     with: 'setup',
 } satisfies Record<keyof ApiSpecification, FacetRole>;
-
-const jobsChain = {
-    clock: 'setup',
-    intercept: 'setup',
-    seed: 'setup',
-
-    trigger: 'action',
-    with: 'setup',
-} satisfies Record<keyof JobsSpecification, FacetRole>;
 
 const integrationChain = {
     clock: 'setup',
@@ -165,12 +172,12 @@ const componentChain = {
     render: 'action',
 } satisfies Record<keyof ComponentChain, FacetRole>;
 
-const CHAINS: Record<Exclude<Column, 'module'>, Record<string, FacetRole>> = {
+/** The chain of every facet not yet written as a composition. */
+const CHAINS: Partial<Record<Exclude<Column, 'module'>, Record<string, FacetRole>>> = {
     api: apiChain,
     cli: cliChain,
     component: componentChain,
     integration: integrationChain,
-    jobs: jobsChain,
     mobile: mobileChain,
     website: websiteChain,
 };
@@ -188,12 +195,6 @@ const apiOptions = {
     server: true,
     services: true,
 } satisfies Record<KeysOf<ApiSpecificationOptions>, Published>;
-
-const jobsOptions = {
-    jobs: true,
-    root: true,
-    services: true,
-} satisfies Record<KeysOf<JobsSpecificationOptions>, Published>;
 
 const cliOptions = {
     commands: true,
@@ -249,12 +250,12 @@ const componentOptions = {
     wrap: true,
 } satisfies Record<KeysOf<ComponentProjectOptions>, Published>;
 
-const OPTIONS: Record<Exclude<Column, 'module'>, Record<string, Published>> = {
+/** The options of every facet not yet written as a composition. */
+const OPTIONS: Partial<Record<Exclude<Column, 'module'>, Record<string, Published>>> = {
     api: apiOptions,
     cli: cliOptions,
     component: componentOptions,
     integration: integrationOptions,
-    jobs: jobsOptions,
     mobile: mobileOptions,
     website: websiteOptions,
 };
@@ -408,8 +409,7 @@ describe('facet capability declaration (K1 guard)', () => {
     test('each chain declares exactly the setups and terminal actions it has', () => {
         // Given - every chain, pinned to its own `keyof`
         // Then - the declaration names the same members, per column
-        for (const column of FACET_COLUMNS) {
-            const chain = CHAINS[column];
+        for (const [column, chain] of byColumn(CHAINS)) {
             expect(declared(column, 'Setup'), `${column} setups`).toStrictEqual(
                 methodsByRole(chain, 'setup'),
             );
@@ -422,9 +422,9 @@ describe('facet capability declaration (K1 guard)', () => {
     test('each kind declares exactly the options its constructor takes', () => {
         // Given - every options bag, pinned to its own `keyof`
         // Then - the declaration names the same options, per column
-        for (const column of FACET_COLUMNS) {
+        for (const [column, options] of byColumn(OPTIONS)) {
             expect(declared(column, 'Constructor option'), `${column} options`).toStrictEqual(
-                published(OPTIONS[column]),
+                published(options),
             );
         }
     });
