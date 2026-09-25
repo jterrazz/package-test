@@ -2,9 +2,10 @@ import plugin, { testing } from '@jterrazz/test/oxlint';
 import { spawnSync } from 'node:child_process';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import { describe, expect, test } from 'vitest';
 
-import { packedFiles, selfRuleNames, strandedBundles } from './audience.js';
+import { packedFiles, selfExposures, selfRuleNames, strandedBundles } from './audience.js';
 import { CHECKER_PASSES } from './manifest.js';
 import { codeOf } from './rule-code.js';
 
@@ -23,6 +24,42 @@ function checkerBin(): string {
         bin: Record<string, string>;
     };
     return bin['jterrazz-test-check'] ?? '';
+}
+
+/** One module the exports map publishes, and the condition that loads it. */
+type PublishedEntry = {
+    condition: string;
+    subpath: string;
+    target: string;
+};
+
+/**
+ * Every JavaScript module the exports map resolves to, one per subpath and
+ * condition — `types` is erased and a JSON schema carries no code.
+ */
+function publishedEntries(): PublishedEntry[] {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `exports` is the map this reads
+    const { exports } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
+        exports: Record<string, unknown>;
+    };
+    const entries: PublishedEntry[] = [];
+    const visit = (subpath: string, condition: string, node: unknown): void => {
+        if (typeof node === 'string') {
+            if (condition !== 'types' && /\.c?js$/u.test(node)) {
+                entries.push({ condition, subpath, target: node.replace(/^\.\//u, '') });
+            }
+            return;
+        }
+        if (typeof node === 'object' && node !== null) {
+            for (const [key, child] of Object.entries(node)) {
+                visit(subpath, key === 'default' ? condition : key, child);
+            }
+        }
+    };
+    for (const [subpath, node] of Object.entries(exports)) {
+        visit(subpath, 'default', node);
+    }
+    return entries;
 }
 
 describe('k12 — the tarball exposes no self rule (meta-test)', () => {
@@ -47,6 +84,55 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
         expect(packed.has('dist/oxlint.js')).toBe(true);
         expect(registered.filter((id) => self.has(id))).toStrictEqual([]);
         expect(enabled.filter((id) => self.has(id))).toStrictEqual([]);
+    });
+
+    test('the walk finds a self rule wherever an export nests it', () => {
+        // Given - a fragment that hides one of each kind at depth: a rule map in an override, a plugin name, a rule object
+        const fragment = {
+            testing: {
+                jsPlugins: ['jterrazz-self/plugin'],
+                overrides: [{ rules: { 'jterrazz/f3-specs-public-entry': 'off' } }],
+            },
+            nested: [{ meta: { docs: { audience: 'self' } } }],
+        };
+
+        // Then - each is answered at the path it was found
+        expect(selfExposures(fragment, self, 'x')).toStrictEqual([
+            'x.testing.jsPlugins.0 = jterrazz-self/plugin',
+            'x.testing.overrides.0.rules.jterrazz/f3-specs-public-entry',
+            'x.nested.0 (meta.docs.audience: self)',
+        ]);
+    });
+
+    test('no module the exports map publishes exposes a self rule, at any depth', async () => {
+        // Given - every published entry, loaded under the condition that resolves it — a `require` build through node's CommonJS loader, which `import()` hands its `module.exports`
+        const entries = publishedEntries();
+        expect(entries.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
+            expect.arrayContaining([
+                '.:import',
+                '.:browser',
+                './vitest:import',
+                './oxlint:import',
+                './oxlint:require',
+            ]),
+        );
+        const unpacked = entries.filter(({ target }) => !packed.has(target));
+        const exposures = await Promise.all(
+            entries.map(async ({ condition, subpath, target }) => {
+                const at = `${subpath} (${condition})`;
+                if (condition === 'browser') {
+                    // The browser build loads only inside Browser Mode: it is read as text
+                    const text = readFileSync(resolve(ROOT, target), 'utf8');
+                    return text.includes('jterrazz-self') ? [`${at} names jterrazz-self`] : [];
+                }
+                const loaded: unknown = await import(pathToFileURL(resolve(ROOT, target)).href);
+                return selfExposures(loaded, self, at);
+            }),
+        );
+
+        // Then - no rule object, plugin name nor rule map a consumer reaches is a self rule's
+        expect(unpacked).toStrictEqual([]);
+        expect(exposures.flat()).toStrictEqual([]);
     });
 
     test('the published checker runs no self pass, over the trees that trip each one', () => {

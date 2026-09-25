@@ -58,3 +58,80 @@ export function strandedBundles(root: string, packed: Set<string>): string[] {
         .map(([target]) => target)
         .toSorted();
 }
+
+/** A value a walk descends into: what can hold an export's nested values. */
+function isContainer(value: unknown): value is object {
+    return (typeof value === 'object' && value !== null) || typeof value === 'function';
+}
+
+/** The `audience` a rule object's `meta.docs` declares, if it is one. */
+function audienceOf(value: object): unknown {
+    const { meta } = value as { meta?: unknown };
+    if (!isContainer(meta)) {
+        return undefined;
+    }
+    const { docs } = meta as { docs?: unknown };
+    return isContainer(docs) ? (docs as { audience?: unknown }).audience : undefined;
+}
+
+/**
+ * An own property's value, through its getter if it has one — a module
+ * namespace a loader wraps answers its exports as accessors — and nothing
+ * when the getter refuses the receiver it is read on.
+ */
+function readOwn(node: object, key: string): unknown {
+    try {
+        return Reflect.get(node, key);
+    } catch {
+        return undefined;
+    }
+}
+
+/** What one own key exposes: a `jterrazz-self/` name, or a `rules` map naming a self row. */
+function keyExposures(key: string, child: unknown, at: string, self: Set<string>): string[] {
+    const found = key.startsWith('jterrazz-self/') ? [`${at}.${key}`] : [];
+    if (key === 'rules' && isContainer(child)) {
+        for (const id of Object.keys(child)) {
+            if (self.has(id.slice(id.indexOf('/') + 1))) {
+                found.push(`${at}.rules.${id}`);
+            }
+        }
+    }
+    return found;
+}
+
+/**
+ * Every place under `value` a consumer would meet a self rule: a rule object
+ * whose `meta.docs.audience` is `self`, a key or a string naming the
+ * `jterrazz-self/` plugin, and a `rules` map — at any depth, so the
+ * fragment's `overrides[].rules` too — that names a self row. Each is
+ * answered as the path it was found at.
+ */
+export function selfExposures(value: unknown, self: Set<string>, path = '<entry>'): string[] {
+    const found: string[] = [];
+    const seen = new WeakSet<object>();
+    const walk = (node: unknown, at: string): void => {
+        if (typeof node === 'string') {
+            if (node.startsWith('jterrazz-self/')) {
+                found.push(`${at} = ${node}`);
+            }
+            return;
+        }
+        if (!isContainer(node) || seen.has(node)) {
+            return;
+        }
+        seen.add(node);
+        if (audienceOf(node) === 'self') {
+            found.push(`${at} (meta.docs.audience: self)`);
+        }
+        for (const key of Reflect.ownKeys(node)) {
+            if (typeof key === 'string') {
+                const child = readOwn(node, key);
+                found.push(...keyExposures(key, child, at, self));
+                walk(child, `${at}.${key}`);
+            }
+        }
+    };
+    walk(value, path);
+    return found;
+}

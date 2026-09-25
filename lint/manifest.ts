@@ -1571,7 +1571,7 @@ export const META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and the tarball exposes no `self` rule: no packed file is a self bundle or a chunk only an unpacked bundle loads, the published plugin and its `testing` fragment name no self rule, and the published checker runs no self pass.',
+            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and the tarball exposes no `self` rule: no packed file is a self bundle or a chunk only an unpacked bundle loads; no module the `exports` map publishes, under each condition that loads it, carries at any depth a rule object whose `meta.docs` says `self`, a `jterrazz-self/` name, or a rule map — the `testing` fragment’s and its overrides’ included — naming a self row; and the published checker runs no self pass.',
         facet: 'model',
         family: 'K',
         fix: 'State the audience on the row, and wire a self rule in `lint/self-plugin.ts` or `lint/self-checker.ts` — never in `lint/plugin.ts` or `lint/checker.ts`.',
