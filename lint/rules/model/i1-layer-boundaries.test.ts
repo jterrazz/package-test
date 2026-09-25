@@ -3,6 +3,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../../rule-tester.fixtures.js';
+import { FRAMEWORK_LAYERS } from '../../self-layers.js';
 import { i1LayerBoundaries } from './i1-layer-boundaries.js';
 
 RuleTester.describe = describe;
@@ -14,8 +15,13 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-/** This package's own architecture — the map its `oxlint.config.ts` declares. */
-const FRAMEWORK_LAYERS = {
+/**
+ * A synthetic layer map that exercises each form of the option — prefix and
+ * exact-module edges, folder grants, per-module seams, a `lint/` beside a
+ * `src/`. It describes no real tree; the package's own map is exercised
+ * below, from `lint/self-layers.ts`.
+ */
+const SYNTHETIC_LAYERS = {
     facets: {
         imports: ['facets/', 'model/'],
         seams: { 'facets/api/api.handle.ts': ['seams/hono/'] },
@@ -37,7 +43,7 @@ const FRAMEWORK_LAYERS = {
     },
 };
 
-const framework = [{ layers: FRAMEWORK_LAYERS }];
+const framework = [{ layers: SYNTHETIC_LAYERS }];
 
 /** This repository's root: a `lint/` beside a `src/`, the spine the rule reads. */
 const SPINE = resolve(import.meta.dirname, '../../..');
@@ -263,6 +269,116 @@ ruleTester.run(
                         },
                     },
                 ],
+            },
+        ],
+    },
+);
+
+/** The package's own map, as `oxlint.config.ts` hands it to the rule. */
+const own = [{ layers: FRAMEWORK_LAYERS }];
+
+ruleTester.run(
+    "i1-layer-boundaries (the package's own map refuses a reverse edge)",
+    i1LayerBoundaries as unknown as OxlintRule,
+    {
+        invalid: [
+            // The kernel knows none of the layers built on it.
+            {
+                code: 'import { pinClock } from "../../world/clock/clock.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/kernel/chain/chain.ts',
+                options: own,
+            },
+            {
+                code: 'import { apiFacet } from "../../facets/api/index.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/kernel/chain/define-facet.ts',
+                options: own,
+            },
+            // Nor does it reach an engine a slice owns.
+            {
+                code: 'import { Client } from "pg";',
+                errors: [{ messageId: 'foreignDependency' }],
+                filename: '/repo/src/kernel/chain/perform.ts',
+                options: own,
+            },
+            // What surrounds the subject never reaches what is tested.
+            {
+                code: 'import { api } from "../../../facets/api/index.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/world/stubs/http/http.ts',
+                options: own,
+            },
+            // The three shared layers reach the kernel, not each other.
+            {
+                code: 'import { declaredDatabaseKeys } from "../world/services/services.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/expectations/result.ts',
+                options: own,
+            },
+            {
+                code: 'import { button } from "../../elements/elements.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/world/clock/clock.ts',
+                options: own,
+            },
+            {
+                code: 'import { websiteFacet } from "../facets/website/index.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/elements/elements.ts',
+                options: own,
+            },
+            // A facet reaches the preset only from its project, never from test code.
+            {
+                code: 'import { onProjectDefaults } from "../../../vitest/preset.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/facets/api/request/route.ts',
+                options: own,
+            },
+            // A facet folder owns its own engine, not a sibling's.
+            {
+                code: 'import { chromium } from "playwright";',
+                errors: [{ messageId: 'foreignDependency' }],
+                filename: '/repo/src/facets/api/server/hono.adapter.ts',
+                options: own,
+            },
+            // A stub reaches the token grammar only from the modules the seam names.
+            {
+                code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
+                errors: [{ messageId: 'crossLayer' }],
+                filename: '/repo/src/world/stubs/openai/openai.ts',
+                options: own,
+            },
+        ],
+        valid: [
+            // The runner config assembles each facet's project.
+            {
+                code: 'import { api } from "../facets/api/api.project.js";',
+                filename: '/repo/src/vitest/projects.ts',
+                options: own,
+            },
+            // A facet's project builds on the preset: the one declared seam.
+            {
+                code: 'import { onProjectDefaults } from "../../vitest/preset.js";',
+                filename: '/repo/src/facets/api/api.project.ts',
+                options: own,
+            },
+            // A facet reaches every shared layer below it.
+            {
+                code: 'import { BaseResult } from "../../expectations/result.js";',
+                filename: '/repo/src/facets/job/trigger.action.ts',
+                options: own,
+            },
+            {
+                code: 'import { chromium } from "playwright";',
+                filename: '/repo/src/facets/website/browser/playwright.adapter.ts',
+                options: own,
+            },
+            // A stub's request filter IS an expectation on the outgoing request.
+            {
+                code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
+                filename: '/repo/src/world/stubs/http/http.ts',
+                options: own,
             },
         ],
     },
