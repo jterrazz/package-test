@@ -196,7 +196,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/kernel/chain/state.ts',
             'src/kernel/database-option.ts',
             'src/world/services/startup/registry.ts',
-            'src/world/services/startup/start-services.ts',
             'src/kernel/pause.ts',
             'src/vitest/facet-project.ts',
             'src/world/stubs/exchange/stream.ts',
