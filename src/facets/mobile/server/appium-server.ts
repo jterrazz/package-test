@@ -11,7 +11,7 @@ const APPIUM_READY_TIMEOUT_MS = 60_000;
  * The guidance thrown when the optional peers are missing — the exact fix,
  * mirroring the playwright message on `.visit()`.
  */
-export const APPIUM_INSTALL_HINT =
+const APPIUM_INSTALL_HINT =
     'specification.mobile() requires appium and webdriverio (optional peer dependencies): npm install -D appium webdriverio && npx appium driver install xcuitest';
 
 /** The run's Appium server as a worker reads it: where it answers, the device the project declared, and the simulator booted for it. */

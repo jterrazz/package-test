@@ -98,11 +98,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: '`projects.test.ts` builds every one of them and asserts the project it produces',
     },
     {
-        claims: oneOf('src/facets/mobile/server/appium-server.ts'),
-        name: 'a mobile module that needs a device',
-        why: 'the server it starts is the real Appium, which no `make check` run starts — `specs/mobile/` connects to the Appium protocol double instead; what a device is NOT needed for — resolving the simulator, projecting the page source, wording the ambiguity — has its own sibling test, and the Appium server is the rest',
-    },
-    {
         claims: oneOf(
             'src/facets/component/render/console-recorder.ts',
             'src/facets/component/render/render.action.ts',
