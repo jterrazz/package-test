@@ -3707,3 +3707,52 @@ Open, **for the owner or maintainer**:
   to. That page is the maintainer's to create.
 
 The component-grouping worktree and branch are removed.
+
+## Refresh on 17, and the audience minors closed (2026-09-25): typescript
+
+package-typescript's `vision/17` now runs on this package's `vision/17`,
+at `17b489ee`. `npm ci` installed @jterrazz/test 17.0.0. The first
+`make fix` exited 0 and renamed nothing: the mover never descends into a
+ground folder, and the toolchain's one `contracts/` tree sits under
+`specs/cli/preset/fixtures/`. Five commits followed, `aeb6d83..a5b4018`.
+The last `make fix` exited 0, and `make check` exited 0 (161 files, 478
+tests).
+
+- **The tsconfig ground fixture** (`a59b409`) had its `contracts/` folder
+  moved to `stubs/` by hand. The spec now names the stub.
+- **REFUSALS** (`f824a4b`) now counts `throw X(` with or without `new`,
+  every `reject(`, and a script's `exit` handed a variable. A test pins
+  each spelling. It also pins what does not count: a rethrow of a caught
+  error, a clean exit, and `--linter-exit`. No shipped count changed.
+- **The shell-bin proof** (`2651085`) now judges behaviour, not names.
+  Every `selected` outside a comment is either the one definition or a
+  call naming a consumer pass. The environment variant sets every
+  variable of any case that the scripts read and never assign. The bin
+  also runs once per `case`-arm flag, followed by a pass. Each of the
+  three re-inlining spellings was tried by hand, and each went red.
+  docs/03 names what the proof still cannot reach: a flag tested
+  outside a `case` arm, and a choice read from a project file.
+- **Computed audience** (`edaa7b1`) is closed by a text proof,
+  `builder-calls.test.ts`, rather than by calling the builders or by
+  freezing `fragment()`. Every packed `fragment()` call must hand an
+  object literal, with no spread, whose `audience` is a string literal.
+  A namespace import, a re-export, or the builder handed on as a value
+  also fails. Three mutations of `layers.js` were tried, and each went
+  red. A fragment-shaped object built without the builder stays the
+  module walk's alone, and docs/03 says so.
+- **The docs/03 links** (`a5b4018`) are repointed to the repository URL,
+  as the owner chose. Beyond the six listed sites, the proof found
+  docs/01, 02 and 04, ADR-011, lint/README.md and README.md, whose
+  skill link was dead too. `shipped-links.test.ts` now fails any
+  relative link from a packed file to a page the checkout keeps and the
+  tarball omits. The map, docs/README.md, is exempt, because the Docs
+  (layout) pass requires its relative chapter row.
+
+Open, **for the owner or maintainer**:
+
+- The package-lock entry for `@jterrazz/test` still records `16.1.1`.
+  `npm ci` installed 17.0.0 from `file:../package-test`, and
+  `npm install --package-lock-only` rewrote nothing. It moves at release,
+  when the dependency stops being a `file:`.
+- ADR-011's body had a link repointed, and nothing else. Its status is
+  untouched.
