@@ -276,6 +276,20 @@ export function recordUnreached(root: string, count: number): void {
     writeFileSync(path, `${JSON.stringify({ ...file, test: sorted }, null, 4)}\n`);
 }
 
+/**
+ * Where the run collects route ledgers, read on the worker's side — what the
+ * api project's global setup provides; `undefined` for a run that measures no
+ * route coverage.
+ */
+export async function routesLedger(): Promise<string | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('routesLedger');
+    } catch {
+        return undefined;
+    }
+}
+
 /** Where the run collects the ledgers — the path the api project's global setup provides to its workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost

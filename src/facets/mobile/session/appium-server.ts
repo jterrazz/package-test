@@ -77,6 +77,20 @@ export async function serveAppium(
     return { server: await startAppiumServer(root), udid };
 }
 
+/**
+ * The run's Appium server, read on the worker's side — what a
+ * `mobile({ device })` project's global setup spawned and provides;
+ * `undefined` when each runner reaches its own.
+ */
+export async function mobileServer(): Promise<RunServer | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('mobileServer');
+    } catch {
+        return undefined;
+    }
+}
+
 /** What a `mobile()` project hands its global setup, and what that setup hands the workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost

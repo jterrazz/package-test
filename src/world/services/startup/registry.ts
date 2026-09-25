@@ -1,32 +1,28 @@
 import type { ContainerPort, ContainerRequest } from '../containers/container.port.js';
+import { ServiceContainer, serviceContainers } from '../containers/service-container.js';
 
 /**
- * Integration registry — the seam that keeps `specification/` free of external
- * dependencies (CONVENTIONS I1). Model code (the orchestrator) consumes the
- * container runtime through this registry; the concrete implementation lives
- * under `integrations/` and is wired in by the package entry point
- * (`src/index.ts`), which is the composition root every consumer goes through
- * (CONVENTIONS F1).
+ * The container runtime the orchestrator starts a service's container
+ * through. It is the project's served containers, or testcontainers of its
+ * own (`ServiceContainer`), unless a module test registers a double in its
+ * place.
  */
 
-/** The container-runtime factory the testcontainers integration provides. */
+/** The container-runtime factory the orchestrator asks. */
 export type ContainerIntegrations = {
     /** Start a single container programmatically (testcontainers). */
     createContainer: (options: ContainerRequest) => ContainerPort;
 };
 
-let containerIntegrations: ContainerIntegrations | null = null;
+let containerIntegrations: ContainerIntegrations = {
+    createContainer: (request) => new ServiceContainer(request, serviceContainers),
+};
 
-/** Wire the container runtime. Called by the package entry point. */
+/** Replace the container runtime — what a module test hands the orchestrator its double through. */
 export function registerContainerIntegrations(integrations: ContainerIntegrations): void {
     containerIntegrations = integrations;
 }
 
 export function getContainerIntegrations(): ContainerIntegrations {
-    if (!containerIntegrations) {
-        throw new Error(
-            "@jterrazz/test: container integrations are not registered — import from '@jterrazz/test' (the package entry point wires them).",
-        );
-    }
     return containerIntegrations;
 }

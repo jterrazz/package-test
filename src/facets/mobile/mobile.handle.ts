@@ -2,7 +2,6 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
-import { mobileServer, mobileSessions } from '../../vitest/provided.js';
 import { releaseIsolation, startServices } from '../../world/services/services.js';
 import type { ServiceRecord, StartedServices } from '../../world/services/services.js';
 import { StubBackend } from '../../world/stubs/backend/stub-backend.js';
@@ -10,9 +9,9 @@ import type { StubsConfig } from '../../world/stubs/backend/stub-backend.js';
 import type { DevicePort, DeviceTimeouts, SessionLedger } from './device/device.port.js';
 import type { MobileSpecification } from './mobile.facet.js';
 import { mobileFacet } from './mobile.facet.js';
-import { serveAppium } from './session/appium-server.js';
+import { mobileServer, serveAppium } from './session/appium-server.js';
 import type { AppiumServer, MobileDevice, RunServer } from './session/appium-server.js';
-import { sessionLedger } from './session/session-ledger.js';
+import { mobileSessions, sessionLedger } from './session/session-ledger.js';
 import { sameRuntime } from './session/simulator.js';
 
 // ── Types ──

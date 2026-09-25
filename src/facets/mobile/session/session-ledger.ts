@@ -98,6 +98,20 @@ export async function endSessions(directory: string): Promise<void> {
     rmSync(directory, { force: true, recursive: true });
 }
 
+/**
+ * Where the run records its driver sessions, read on the worker's side — what
+ * the mobile project's global setup provides; `undefined` for a run that
+ * shares no session, where each runner opens and ends its own.
+ */
+export async function mobileSessions(): Promise<string | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('mobileSessions');
+    } catch {
+        return undefined;
+    }
+}
+
 /** Where the run records its driver sessions — what the mobile project's global setup provides to its workers. */
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost

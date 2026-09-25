@@ -4,7 +4,6 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { resolveRoot } from '../../kernel/files/resolve.js';
-import { routesLedger } from '../../vitest/provided.js';
 import {
     declaredDatabaseKeys,
     releaseIsolation,
@@ -13,7 +12,7 @@ import {
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
-import { writeLedger } from './routes/routes.js';
+import { routesLedger, writeLedger } from './routes/routes.js';
 import { HonoAdapter } from './server/hono.adapter.js';
 import type { ServerPort } from './server/server.port.js';
 

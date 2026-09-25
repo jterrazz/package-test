@@ -10,6 +10,8 @@ import type { FacetProjectOptions } from '../../vitest/facet-project.js';
 import { onProjectDefaults } from '../../vitest/preset.js';
 import { COMPONENT_COMMANDS } from './page/commands.js';
 
+// The options every project shares, named here for the composition that states this project's own.
+export type { FacetProjectOptions } from '../../vitest/facet-project.js';
 /** `component()` — rendered units, beside the components they cover. */
 export type ComponentProjectOptions = {
     /** Freeze the page's `Date` for every render of the project. */

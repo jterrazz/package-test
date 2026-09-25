@@ -1,9 +1,21 @@
+import { existsSync } from 'node:fs';
+import { join } from 'node:path';
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject, mobileSessionSetup } from '../../vitest/facet-project.js';
+import { facetProject } from '../../vitest/facet-project.js';
 import type { FacetProjectOptions } from '../../vitest/facet-project.js';
 import type { MobileDevice } from './session/appium-server.js';
+
+/**
+ * The global setup that holds one driver session per run — this facet's
+ * `session/mobile-session.ts` in a source checkout, `mobile-session.js` in the
+ * built package.
+ */
+export function mobileSessionSetup(): string {
+    const source = join(import.meta.dirname, 'session/mobile-session.ts');
+    return existsSync(source) ? source : join(import.meta.dirname, 'mobile-session.js');
+}
 
 /**
  * What `mobile()` accepts: the common options, and — for a run whose specs

@@ -56,3 +56,27 @@ export class ServiceContainer implements ContainerPort {
         return this.delegate;
     }
 }
+
+/**
+ * Where the run serves its service containers, read on the worker's side —
+ * what the global setup of a project whose specs declare services provides;
+ * `undefined` for a run that serves none, where each specification starts its
+ * own.
+ */
+export async function serviceContainers(): Promise<string | undefined> {
+    try {
+        const { inject } = await import('vitest');
+        return inject('serviceContainers');
+    } catch {
+        return undefined;
+    }
+}
+
+/** Where the project's global setup serves its containers — provided to its workers. */
+declare module 'vitest' {
+    // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
+    interface ProvidedContext {
+        /** The loopback address the project's containers are asked for at. */
+        serviceContainers?: string;
+    }
+}

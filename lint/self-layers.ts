@@ -109,11 +109,6 @@ export const FRAMEWORK_LAYERS = {
             'facets/job/job.project.ts': ['vitest/facet-project', 'vitest/preset'],
             'facets/mobile/mobile.project.ts': ['vitest/facet-project', 'vitest/preset'],
             'facets/website/website.project.ts': ['vitest/facet-project', 'vitest/preset'],
-            // PENDING the restructure's follow-ups: the provided readers move
-            // Beside their providers, the component's options beside its project.
-            'facets/api/api.handle.ts': ['vitest/provided'],
-            'facets/mobile/mobile.handle.ts': ['vitest/provided'],
-            'facets/component/component.facet.ts': ['vitest/facet-project'],
         },
     },
     // @jterrazz/test/vitest — preset, projects, run lifecycle: assembles the facets' projects.
@@ -134,8 +129,6 @@ export const FRAMEWORK_LAYERS = {
             'facets/cli/documents/literate-plugin',
         ],
         packages: ['@vitest/browser-playwright', 'vite', 'vitest'],
-        // PENDING the restructure's follow-ups: the provided readers move beside their providers.
-        seams: { 'vitest/provided.ts': ['facets/mobile/session/appium-server'] },
     },
     lint: {
         imports: [

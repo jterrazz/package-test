@@ -26,7 +26,8 @@ export { integration } from '../facets/integration/integration.project.js';
 export { job, type JobProjectOptions } from '../facets/job/job.project.js';
 export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
-export { type FacetProjectOptions, type LiterateDoor } from './facet-project.js';
+export { type FacetProjectOptions } from './facet-project.js';
+export { type LiterateDoor } from '../facets/cli/cli.project.js';
 
 /** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
 export type UnitProjectOptions = {

@@ -1,6 +1,3 @@
-import { serviceContainers } from './vitest/provided.js';
-import { ServiceContainer } from './world/services/containers/service-container.js';
-import { registerContainerIntegrations } from './world/services/startup/registry.js';
 import { interceptThrough } from './world/stubs/intercept/intercept.scope.js';
 import type { Intercept } from './world/stubs/intercept/intercept.scope.js';
 
@@ -121,12 +118,3 @@ export type {
 export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
 export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';
-
-// ── Composition root (CONVENTIONS I1) ──
-// `specification/` never imports an external dependency: the orchestrator
-// Reaches the container runtime through the integration registry, wired here —
-// The single entry point every consumer imports (F1).
-
-registerContainerIntegrations({
-    createContainer: (request) => new ServiceContainer(request, serviceContainers),
-});

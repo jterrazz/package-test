@@ -10,6 +10,7 @@ import {
     reachesRoute,
     readLedgers,
     recordUnreached,
+    routesLedger,
     unreachedRoutes,
     writeLedger,
 } from './routes.js';
@@ -130,5 +131,15 @@ describe('route coverage — the ledgers and the ratchet', () => {
             test: { 'jterrazz/x': 2 },
             typescript: { a: 1 },
         });
+    });
+});
+
+describe('route coverage — where a worker writes its ledger', () => {
+    test('a run whose global setup provides no ledger measures no route coverage', async () => {
+        // Given - the unit project, which declares no route-coverage setup
+        const ledger = await routesLedger();
+
+        // Then - no folder to write a ledger into
+        expect(ledger).toBeUndefined();
     });
 });
