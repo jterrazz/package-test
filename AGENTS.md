@@ -5,7 +5,7 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 ## Mental model
 
 - **Six constructors, and only six.** `specification.api()`, `.job()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A seventh subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
-- **The root reads the sentence of a test.** Under `src/`: `index.ts` and `index.browser.ts` (the two runtimes of the one public entry) and `vitest/` (`@jterrazz/test/vitest`: preset, projects, run lifecycle); `facets/<facet>/` (WHAT is tested — the composition, the handle, the Vitest project and the facet's concept folders); `world/` (WHAT SURROUNDS the subject — `stubs/`, `services/`, `clock/`, `mocks/`); `elements/` (HOW a screen is designated and touched); `expectations/` (HOW a result is judged — `toMatch`, goldens, tokens, update mode); `kernel/` (the machinery that builds a facet and knows none). The edges point one way — `kernel ← world · elements · expectations ← facets ← vitest · the entries` — a facet never imports another, and each third-party engine belongs to one slice. At the root, `lint/` (the rules the package ships, no runtime imports). The map is stated as `FRAMEWORK_LAYERS` in `lint/self-layers.ts`, wired by `oxlint.config.ts`, and held beyond it by the self checker passes I9 to I12 (`lint/checker-source-tree.ts`, `lint/checker-source-imports.ts`, run by `make lint`): the source root, facet isolation, engine ownership, folder shape.
+- **The root reads the sentence of a test.** `src/` holds the two entries (`index.ts`, `index.browser.ts`), `vitest/`, and the trees `facets/`, `world/`, `elements/`, `expectations/`, `kernel/`; `lint/` sits at the repository root beside it. The edges point one way. The map, its edges and the passes that hold it: [01 § The source trees](docs/01-architecture.md#the-source-trees); the declaration: `lint/self-layers.ts`.
 - **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/manifest.ts` beside its implementation — in `lint/self-manifest.ts` for a rule only this package is held to, which no published entry imports — and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
 - **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `make build` comes first — always.
@@ -14,20 +14,15 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 
 The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md). Do not duplicate it — link to it.
 
-| Working on…                                       | Read                                          |
-| ------------------------------------------------- | --------------------------------------------- |
-| The layers, the runner model, the channels        | `docs/01-architecture.md`                     |
-| The loop, which file a change opens, what it owes | `docs/02-developing.md`                       |
-| The projects, the spec tree, the meta-tests       | `docs/03-testing.md`                          |
-| The npm release and what ships                    | `docs/04-operating.md`                        |
-| A facet: api · job · cli · integration            | `docs/10` · `11` · `12` · `06`                |
-| A facet: website · mobile · component             | `docs/08` · `09` · `07`                       |
-| A module test, and the doubles it may build       | `docs/05-module-tests.md`                     |
-| The element vocabulary every surface shares       | `docs/13-elements.md`                         |
-| Matchers, the `{{token}}` grammar                 | `docs/14-assertions.md` · `docs/15-tokens.md` |
-| Stubs and services                                | `docs/16-stubs.md` · `docs/17-services.md`    |
-| The principles, and what review must judge        | `docs/18-conventions.md`                      |
-| Rule ids, channels, the generated catalogue       | `docs/19-linting.md`                          |
+| Developing the package…                           | Read                                                           |
+| ------------------------------------------------- | -------------------------------------------------------------- |
+| The layers, the runner model, the channels        | [`docs/01-architecture.md`](docs/01-architecture.md)           |
+| The loop, which file a change opens, what it owes | [`docs/02-developing.md`](docs/02-developing.md)               |
+| The projects, the spec tree, the meta-tests       | [`docs/03-testing.md`](docs/03-testing.md)                     |
+| The npm release and what ships                    | [`docs/04-operating.md`](docs/04-operating.md)                 |
+| The principles, and what review must judge        | [`docs/18-conventions.md`](docs/18-conventions.md)             |
+| Rule ids, channels, the generated catalogue       | [`docs/19-linting.md`](docs/19-linting.md)                     |
+| Anything else: a facet, the vocabulary, stubs, …  | [`docs/README.md`](docs/README.md), which owns the chapter map |
 
 Decisions this package alone took are in `docs/decisions/`. The agent-facing skill is `skills/jterrazz-test/SKILL.md` — a short, hand-written routing page, not a second copy.
 
@@ -49,7 +44,7 @@ npm run docs                      # regenerate the generated tables and the sche
 
 ## Standing rules
 
-- **A discovery grows a guard, in the same change** (rule K1) — a static rule, a meta-test, or a runtime refusal, or an explicit note of why no channel can hold it.
-- **Never edit a generated table.** The catalogue between the `GENERATED:catalog` markers of `docs/19-linting.md`, the other `GENERATED` blocks of the chapters and `schema/spec.schema.json` all come from `npm run docs`. A hand edit fails the freshness meta-test.
-- **Four things land with the change that makes them true** — the guard, the regenerated tables, the chapter the behaviour falsified, and the skill when the public surface moved. Each is stated once, in `docs/02-developing.md` § What a change owes.
+- **A discovery grows a guard, in the same change** (rule K1) — see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
+- **Never edit a generated table** — `npm run docs` writes them; see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
+- **What lands with the change that makes it true** — the guard, the regenerated tables, the falsified chapter, the skill — is stated once, in [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **A rule belongs in the code, a principle in the constitution.** `lint/manifest.ts` (or `lint/self-manifest.ts`) for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.
