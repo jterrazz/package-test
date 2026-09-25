@@ -3270,3 +3270,69 @@ reinstalled from package-test `0ecd7a76` (`npm ci`). HEAD stays `cc9c3a4`.
       ADR-011" line under ADR-003's status.
     - The estate page for the family-wide audience decision is not written.
       It is maintainer work.
+
+## Audience batch of 2026-09-25: test
+
+No unit landed on package-test's `vision/17`: both reviews came back
+`fix-first` after one round, so neither branch was cherry-picked. Their
+worktrees and branches are kept. The toolchain was reinstalled from
+package-typescript `cc9c3a4` (`npm ci`). HEAD stays `187fb69d` before this
+entry. `make fix` exit 0, `make check` exit 0 (567 files, 2604 tests).
+
+- **Redis index per (worker, service) pair, and the owner sweep** (branch
+  `vision17-test-redis-index`, worktree `pt-redis-index`, HEAD
+  `86f3e9e5`). Skipped, `fix-first`. What stays open:
+    - docs/17-services.md:142 is false. Outside the project setup,
+      orchestrator.ts:97-103 starts one container per handle, so two
+      `redis()` under `cli()` or `website()` start two containers. Share
+      one container per canonical request (the `keyOf` of
+      run-containers.ts:27) with a module test, or scope :140 and rewrite
+      :142.
+    - docs/17-services.md:154 overstates the owner sweep: it runs only when
+      the next services setup starts (run-setup.ts:49). State the bound, or
+      also sweep in the setup's teardown (run-setup.ts:84-87).
+    - Three mutants of src/seams/redis/redis.ts survive: `letGo` not
+      freeing the slot, `acquire` not letting go first, and `release`
+      without try/finally. Add the two module tests the review names, each
+      red against its mutant.
+    - specs/integration/services/redis.spec.ts:39-40 and
+      docs/17-services.md:195 still say "per worker"; both should say
+      "per (worker, service) pair".
+    - The owner label keys on `os.hostname()`, which changes with the
+      network on macOS, so a sweep misses containers labelled under an
+      earlier name. State the limit in docs/17-services.md, or label with
+      a stable machine identity.
+    - `3523a998`'s body calls cross-project pool-id uniqueness "not
+      established"; vitest 5.0.1 draws every pool id from one Pool. Cite
+      that when the follow-up to share containers across projects opens.
+    - From the maker: the error strings still say "the run"
+      (run-container.ts:57); no spec proves the sweep against real Docker,
+      only the hand-run probe at docs/17-services.md:158; a reused owner
+      pid is not swept (a hypothesis, fails safe).
+- **Every rule declares its audience** (branch `vision17-test-audience`,
+  worktree `pt-audience`, HEAD `8310d955`). Skipped, `fix-first`. What
+  stays open:
+    - **Major.** K12 recognises a self bundle by its name (`dist/self-*`,
+      lint/audience.test.ts:69) and checks one bin
+      (`jterrazz-test-check`). Renamed bundles ship the F3 rule and C35
+      with K12 green. Assert instead that no packed bundle's `.map`
+      `sources` names a self module, and run the published-checker test
+      over every `bin` value; show both red under the rename.
+    - **Major.** K12 ignores the runtime and type channels. B12 flipped to
+      `self` still ships in dist/index.js with a dead `read:` anchor
+      (src/model/lesson/refusal.ts:40 hardcodes the chapter). Every
+      REFUSAL_WHY key must be a `consumer` row, no self type row may be
+      asserted against the published types, and each refusal's anchor must
+      exist in its audience's chapter. Update the K12 convention at
+      lint/manifest.ts:1574.
+    - docs/02-developing.md:340, in the consumer walkthrough, still cites
+      rule E1, which is self.
+    - docs/18-conventions.md:153 (§ K1) and :374 (K1–K5) present self rules
+      as consumer conventions, and docs/README.md:24 advertises them. Move
+      them to docs/03-testing.md.
+    - The published bundles still carry the self rows as data, through
+      lesson.ts importing `catalog`. **Owner call:** whether the manifest
+      is split at build time.
+    - docs/decisions/007:53 still reads "what rule F3 asks of every
+      consumer". Whether the historical ADR gets a superseding note is the
+      maintainer's call.
