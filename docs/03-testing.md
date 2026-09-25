@@ -75,7 +75,11 @@ The fixture apps the specs drive live in the pool, `specs/shared/fixtures/`, eac
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours. It is not under `fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: I2 requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and C1's row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
-The tree is filed by capability, the way a specimen's spec is ([§ A specimen's capability folder](#a-specimens-capability-folder)). Each unit and its test sit together in the folder of the capability that test chiefly asks about: a table with a stub in `intercept/`, the project's frame in `wrap/`, a modal hook with its Host in the test in `render/`, a form carrying every verb in `fill/`. A test that asks about two capabilities is filed by the one it chiefly asks about, and is split only when its claims can be carried by separate units, as post-table's were, since I2 leaves one unit per test.
+The tree is filed by capability, the way a specimen's spec is ([§ A specimen's capability folder](#a-specimens-capability-folder)). One test file asks about one capability, and sits with its unit in that capability's folder: a table with a stub in `intercept/`, the project's frame in `wrap/`, a modal hook with its Host in the test in `render/`, a form carrying every verb in `fill/`.
+
+A claim about a second capability goes to that capability's folder, beside a unit of its own. I2 pairs each test with one unit, so a component that could serve both becomes two small ones: `valued/` and `selected/` each hold a field of their own, rather than rendering `fill/`'s form from across the tree. What a test only passes through is not its capability: the `<StrictMode>` a hook spec renders its Host in is a Given of `render/`, and the descriptor that reaches an element is a means of every folder.
+
+One file still holds more than one: `intercept/page-surface.test.tsx` carries `mockOf` and `waitUntil` beside the module-scope `intercept()`. Neither has a row in the `component` column, so neither has a folder to be filed in.
 
 ## The layered reading
 
