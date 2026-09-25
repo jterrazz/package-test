@@ -1,78 +1,34 @@
-/**
- * The subject a spec reaches, read from its source — and the folder a subject
- * is filed under.
- *
- * A spec file is about ONE subject (C29), and its folder is that subject's
- * standard name (C30): the route an api chain sends, the job a job chain
- * triggers, the command a cli chain runs, the page a website chain visits, the
- * journey a mobile chain opens. Both rules read the subject here, statically:
- * the chains of a file are the calls hanging off a runner handle the file
- * imports from a `*.specification` module (`api`, `job`, `cli`, `website`,
- * `mobile`), or off a `const` bound to one's `.with(…)`.
- *
- * The standard name is DERIVED, never listed: `GET /events` is
- * `events/list/`, `GET /events/:id` `events/get/`, `POST /events`
- * `events/create/`, `PUT|PATCH /events/:id` `events/update/`, `DELETE
- * /events/:id` `events/delete/`, a route under an item
- * (`GET /events/:id/timeline`) its literal segments (`events/timeline/`), a
- * singleton (`GET /health`) `health/get/`, a method-less route (`ALL /mcp`)
- * its segments; a job is its name, a cli command its first word.
- *
- * Three readings a repository may correct, each where it is declared: the
- * plural test that tells a collection (`events`) from a singleton (`status`)
- * takes the irregular collections `jterrazz.config.ts` names
- * (`test: { collections: ['data', 'people'] }`); a route that takes any method
- * is named there too (`test: { methodless: ['/mcp'] }`), and a chain sending
- * it any verb reaches `ALL /mcp`; and a command's words stop at
- * the first word not in the list the chain's own runner declares
- * (`specification.cli(bin, { commands: ['db', 'migrate'] })`, the list written
- * there or bound to a `const` of the runner's file), or after the first word
- * when it declares none.
- */
+/** The standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `PUT|PATCH` update, `DELETE` delete; a route under an item takes its literal segments; a job is its name, a cli command its first word. `jterrazz.config.ts` corrects the irregular collections and the method-less routes, a cli runner its command words. */
 
-/** What a repository declared that the reading takes: its runner's commands, its irregular collections. */
 export type SubjectReading = {
-    /** The collections no plural test recognises, by their segment. */
     collections?: readonly string[] | undefined;
-    /** The words each cli runner declares its commands with, by the handle a spec holds it by. */
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
-    /** The routes that take any method, by their path. */
     methodless?: readonly string[] | undefined;
 };
 
-/** A method an api chain sends, or `ALL` for a route that takes any. */
 export type Method = 'ALL' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
 
-/** What a chain reaches — one per facet that has a subject. */
 export type Subject =
     | { command: string[]; facet: 'cli' }
     | {
           facet: 'api';
           method: Method;
           path: string;
-          /** Did the chain write the route's template — a `:name` segment, or `{ params }` beside the path? */
           template?: boolean;
       }
     | { facet: 'job'; job: string }
     | { facet: 'mobile'; journey: string }
     | { facet: 'website'; page: string };
 
-/** A subject where a file reaches it: the offset of the chain that does. */
 export type SubjectAt = { index: number; subject: Subject };
 
-/** The facets whose chains reach a subject. */
 export const SUBJECT_FACETS = ['api', 'cli', 'job', 'mobile', 'website'] as const;
 
-/** A path segment written as a hole: a template's `${…}`. */
 const HOLE = '\u0000';
 
-/** A segment that names a resource: lowercase words, never a value. */
 const LITERAL_SEGMENT = /^[a-z][a-z._-]*$/u;
 
-/**
- * A request path as its route template: the query dropped, every segment that
- * is a value — a hole, a number, an id, a symbol — written `:id`.
- */
+/** Every segment that is a value (a hole, a number, an id, a symbol) is written `:id`. */
 export function pathTemplate(path: string): string {
     const bare = path.split(/[?#]/u)[0] ?? '';
     const segments = bare
@@ -84,12 +40,11 @@ export function pathTemplate(path: string): string {
     return `/${segments.join('/')}`;
 }
 
-/** Is this word a collection's name — a plural noun (`events`, never `status`), or one the repository declares? */
+/** A plural noun (`events`, never `status`), or one the repository declares. */
 function isCollection(word: string, collections: readonly string[]): boolean {
     return collections.includes(word) || (word.endsWith('s') && !/(?:ss|us|is)$/u.test(word));
 }
 
-/** The action a route's single resource segment is filed under. */
 function actionOf(
     method: Method,
     resource: string,
@@ -108,14 +63,7 @@ function actionOf(
     return method.toLowerCase();
 }
 
-/**
- * The segment of a literal path that may be a value or the route's own —
- * `btc` in `/indicators/btc/chart`: a word right after a collection, with
- * more of the path after it. A template settles it, and so does a segment
- * that is plainly a value (a number, an id). The last segment is read as the
- * route's: after a collection it names a sub-route (`/map/pois/detail`) far
- * more often than an item.
- */
+/** `btc` in `/indicators/btc/chart`. The last segment is read as the route's: after a collection it names a sub-route far more often than an item. */
 export function ambiguousSegment(
     subject: Subject,
     reading: SubjectReading = {},
@@ -137,7 +85,6 @@ export function ambiguousSegment(
     );
 }
 
-/** The folder an api route is filed under — see {@link subjectFolder}. */
 function routeFolder(
     method: Method,
     path: string,
@@ -155,11 +102,7 @@ function routeFolder(
     return `${resource}/${actionOf(method, resource, segments.at(-1) === ':id', collections)}`;
 }
 
-/**
- * The folder a subject is filed under, relative to its facet folder — or
- * nothing, where the subject has no standard name: the root route, a cli run
- * with no command word, a page, a journey.
- */
+/** Nothing for a subject with no standard name: the root route, a cli run with no command word, a page, a journey. */
 export function subjectFolder(subject: Subject, reading: SubjectReading = {}): string | undefined {
     if (subject.facet === 'api') {
         return ambiguousSegment(subject, reading) === undefined
@@ -172,7 +115,7 @@ export function subjectFolder(subject: Subject, reading: SubjectReading = {}): s
     return subject.facet === 'job' ? subject.job : undefined;
 }
 
-/** How a subject reads in a message: `GET /events/:id`, `trigger digest`, … */
+/** `GET /events/:id`, `trigger digest`, … */
 export function subjectName(subject: Subject): string {
     if (subject.facet === 'api') {
         return `${subject.method} ${pathTemplate(subject.path)}`;
@@ -188,9 +131,6 @@ export function subjectName(subject: Subject): string {
     return subject.facet === 'mobile' ? `open ${subject.journey}` : `visit ${subject.page}`;
 }
 
-// ── Reading the source ──
-
-/** The offset past the string literal that opens at `start`, template holes included. */
 export function skipString(text: string, start: number): number {
     const quote = text[start];
     let index = start + 1;
@@ -212,10 +152,8 @@ export function skipString(text: string, start: number): number {
     return index;
 }
 
-/** The characters after which a `/` opens a regular expression rather than divides. */
 const BEFORE_REGEX = /(?:^|[(,=:[!&|?{};+\-*%<>~^]|\breturn|\btypeof|\bcase)\s*$/u;
 
-/** Does a `/` at `start` open a regular expression — no comment, and the code before it expects a value? */
 function opensRegex(text: string, start: number): boolean {
     return (
         text[start] === '/' &&
@@ -225,7 +163,6 @@ function opensRegex(text: string, start: number): boolean {
     );
 }
 
-/** The offset past a regular expression's closing `/` and its flags, from the one past its body. */
 function pastFlags(text: string, close: number): number {
     let end = close + 1;
     while (/[a-z]/u.test(text[end] ?? '')) {
@@ -234,7 +171,6 @@ function pastFlags(text: string, close: number): number {
     return end;
 }
 
-/** The offset past the regular expression that opens at `start`, or `start` when none does. */
 function regexEnd(text: string, start: number): number {
     if (!opensRegex(text, start)) {
         return start;
@@ -255,7 +191,6 @@ function regexEnd(text: string, start: number): number {
     return start;
 }
 
-/** The offset past the string, template or regular expression that opens at `start` — `start` when none does. */
 export function literalEnd(text: string, start: number): number {
     const character = text[start];
     if (character === "'" || character === '"' || character === '`') {
@@ -264,7 +199,6 @@ export function literalEnd(text: string, start: number): number {
     return regexEnd(text, start);
 }
 
-/** The offset of the bracket closing the one that opens at `open`. */
 export function closingOf(text: string, open: number): number {
     const pairs: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
     const stack: string[] = [];
@@ -289,7 +223,6 @@ export function closingOf(text: string, open: number): number {
     return text.length;
 }
 
-/** The arguments of a call, split at the commas of its own level. */
 export function argumentsOf(text: string): string[] {
     const parts: string[] = [];
     let start = 0;
@@ -315,7 +248,6 @@ export function argumentsOf(text: string): string[] {
     return last === '' ? parts : [...parts, last];
 }
 
-/** The value a literal states — a template's holes kept as {@link HOLE} — or nothing. */
 export function literalOf(argument: string | undefined): string | undefined {
     const text = argument?.trim() ?? '';
     const quote = text[0];
@@ -326,13 +258,10 @@ export function literalOf(argument: string | undefined): string | undefined {
     return quote === '`' ? body.replaceAll(/\$\{[^}]*\}/gu, HOLE) : body;
 }
 
-/** One call of a chain: its member name and its arguments' text. */
 export type ChainCall = { args: string; name: string };
 
-/** A chain off a handle: where it starts, and its calls in order. */
 export type Chain = { calls: ChainCall[]; end: number; handle: string; index: number };
 
-/** The member calls hanging off `handle` at `start`, `.a(…).b(…)`, as long as they go. */
 function chainAt(text: string, handle: string, start: number): Chain {
     const calls: ChainCall[] = [];
     let index = start + handle.length;
@@ -348,18 +277,15 @@ function chainAt(text: string, handle: string, start: number): Chain {
     }
 }
 
-/** A runner a spec imports from a specification module: `import { api } from '../api.specification.js'`. */
 const SPECIFICATION_IMPORT =
     /import\s*\{(?<names>[^}]*)\}\s*from\s*['"][^'"]*\.specification(?:\.[jt]s)?['"]/gu;
 
-/** The same import, its specifier kept. */
 const SPECIFICATION_DOOR =
     /import\s*\{(?<names>[^}]*)\}\s*from\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
 
-/** A view bound to a handle: `const events = api.with({ … })`. */
+/** `const events = api.with({ … })`. */
 const VIEW = /const\s+(?<view>[A-Za-z_$][\w$]*)\s*=\s*(?<from>[A-Za-z_$][\w$]*)\s*\.\s*with\s*\(/gu;
 
-/** The facet handles an import clause names, under their local names — of one facet, or of all. */
 function importedHandles(names: string, facet?: string): string[] {
     return names.split(',').flatMap((name) => {
         const [imported = '', local = imported] = name.trim().split(/\s+as\s+/u);
@@ -371,7 +297,6 @@ function importedHandles(names: string, facet?: string): string[] {
     });
 }
 
-/** The runner handles a spec imports from a specification module, and the views bound to them. */
 export function handlesOf(text: string): string[] {
     const handles = new Set<string>(
         [...text.matchAll(SPECIFICATION_IMPORT)].flatMap((found) =>
@@ -393,7 +318,6 @@ export function handlesOf(text: string): string[] {
     return [...handles];
 }
 
-/** Every chain the file hangs off one of `handles`. */
 export function chainsOf(text: string, handles: readonly string[]): Chain[] {
     if (handles.length === 0) {
         return [];
@@ -410,20 +334,13 @@ const HTTP_VERBS: Record<string, Method> = {
     put: 'PUT',
 };
 
-/** The request line of a `.http` a chain sends: `POST /events`. */
 const REQUEST_LINE = /^\s*(?<method>DELETE|GET|HEAD|OPTIONS|PATCH|POST|PUT)\s+(?<path>\S+)/u;
 
-/** A request named by `file()`, the one argument `request()` takes. */
 const REQUEST_FILE = /^file\(\s*(?<quote>['"])(?<path>[^'"]*)\k<quote>\s*\)$/u;
 
-/** A word that may name a command: lowercase, never a flag or a value. */
 const COMMAND_WORD = /^[a-z][a-z0-9-]*$/u;
 
-/**
- * The words of a command line that name the command: with the runner's
- * declared list, every leading word in it; without one, the first word alone —
- * a positional argument is never read as a subcommand.
- */
+/** Without the runner's declared list, the first word alone: a positional argument is never read as a subcommand. */
 export function commandWords(line: string, commands?: readonly string[]): string[] {
     const words = line.trim().split(/\s+/u);
     if (commands === undefined) {
@@ -440,10 +357,8 @@ export function commandWords(line: string, commands?: readonly string[]): string
     return named;
 }
 
-/** A runner's constructor call and the options it opens: `specification.cli(bin, {`. */
 const CLI_CONSTRUCTOR = /\bspecification\s*\.\s*cli\s*\(/u;
 
-/** The words of an array literal, from the text just past its `[`. */
 function wordsOf(text: string, open: number): string[] {
     return argumentsOf(text.slice(open + 1, closingOf(text, open))).flatMap((entry) => {
         const word = literalOf(entry);
@@ -451,7 +366,6 @@ function wordsOf(text: string, open: number): string[] {
     });
 }
 
-/** The array a `const` of the file binds to `name`, as its words. */
 function constantWords(text: string, name: string): string[] | undefined {
     const escaped = name.replaceAll('$', String.raw`\$`);
     const binding = new RegExp(String.raw`\bconst\s+${escaped}\s*(?::[^=]+)?=\s*\[`, 'u').exec(
@@ -460,12 +374,7 @@ function constantWords(text: string, name: string): string[] | undefined {
     return binding === null ? undefined : wordsOf(text, binding.index + binding[0].length - 1);
 }
 
-/**
- * The command list a specification module declares for its cli runner — the
- * `commands` of its `specification.cli(bin, { … })`, written there as an array
- * or bound to a `const` of the same file (`commands: COMMANDS`, or the
- * shorthand `{ commands }`) — or nothing when it declares none.
- */
+/** Written as an array or bound to a `const` of the same file (`commands: COMMANDS`, `{ commands }`). */
 export function declaredCommands(door: string): string[] | undefined {
     const text = withoutComments(door);
     const call = CLI_CONSTRUCTOR.exec(text);
@@ -484,11 +393,7 @@ export function declaredCommands(door: string): string[] | undefined {
     return named === undefined ? undefined : constantWords(text, named);
 }
 
-/**
- * The specification module each of a facet's handles comes from, by the
- * local name a spec holds it by — a view bound to one (`const db =
- * cli.with(…)`) included, under the module of the handle it was made from.
- */
+/** A view bound to a handle (`const db = cli.with(…)`) comes under the module of that handle. */
 export function doorsOf(
     text: string,
     facet: (typeof SUBJECT_FACETS)[number],
@@ -515,25 +420,21 @@ export function doorsOf(
     return Object.fromEntries(doors);
 }
 
-/** The route a `.http`'s request line sends. */
 function requestLineOf(text: string): Subject[] {
     const { method = '', path = '/' } = REQUEST_LINE.exec(text)?.groups ?? {};
     const verb = HTTP_VERBS[method.toLowerCase()];
-    // A request file's line is written as the route: there is no template to write beside it.
+    // A request file's line is the route: there is no template to write beside it.
     return verb === undefined ? [] : [{ facet: 'api', method: verb, path, template: true }];
 }
 
-/** Reads a `.http` a chain names by `file()`, from the spec's directory. */
 type RequestReader = (path: string) => string | undefined;
 
-/** What one terminal action reaches, from its first argument — and, for a cli one, its runner's command list. */
 type TerminalReader = (
     first: string | undefined,
     readRequest: RequestReader,
     commands: readonly string[] | undefined,
 ) => Subject[];
 
-/** A page a website chain visits or fetches. */
 const pageOf: TerminalReader = (first) => {
     const literal = literalOf(first);
     return literal?.startsWith('/') === true
@@ -541,7 +442,6 @@ const pageOf: TerminalReader = (first) => {
         : [];
 };
 
-/** The terminal actions that reach a subject, by name — the HTTP verbs apart. */
 const TERMINALS: Record<string, TerminalReader> = {
     exec: (first, _readRequest, commands) => {
         // A sequence is one session of the binary, opened by its first command.
@@ -564,11 +464,7 @@ const TERMINALS: Record<string, TerminalReader> = {
     visit: pageOf,
 };
 
-/**
- * The route an HTTP verb sends: its path, and whether the chain wrote it as
- * the route's template — a `:name` segment, or `{ params }` handed beside it
- * (second to `get`/`delete`, third to `post`/`put`, after the body).
- */
+/** `{ params }` comes second to `get`/`delete`, third to `post`/`put`, after the body. */
 function routeOf(method: Method, args: readonly string[]): Subject[] {
     const path = literalOf(args[0]);
     if (path?.startsWith('/') !== true) {
@@ -579,7 +475,6 @@ function routeOf(method: Method, args: readonly string[]): Subject[] {
     return [{ facet: 'api', method, path, template }];
 }
 
-/** The route a chain sends, as the app declares it: `ALL` where the repository names its path method-less. */
 function declaredMethod(subject: Subject, methodless: readonly string[]): Subject {
     if (subject.facet !== 'api' || methodless.length === 0) {
         return subject;
@@ -590,10 +485,6 @@ function declaredMethod(subject: Subject, methodless: readonly string[]): Subjec
         : subject;
 }
 
-/**
- * The subject a chain's terminal action reaches — a cli sequence is one
- * session, opened by its first command.
- */
 export function subjectsOfChain(
     chain: Chain,
     readRequest: RequestReader = () => '',
@@ -614,7 +505,6 @@ export function subjectsOfChain(
     return reached.map((subject) => declaredMethod(subject, reading.methodless ?? []));
 }
 
-/** Where the comment that opens at `index` ends, or `index` when none opens there. */
 function commentEnd(text: string, index: number): number {
     if (text[index] !== '/') {
         return index;
@@ -630,10 +520,7 @@ function commentEnd(text: string, index: number): number {
     return index;
 }
 
-/**
- * The source with its comments blanked, unit for unit so every offset holds:
- * a chain written in a comment is prose.
- */
+/** Blanked unit for unit so every offset holds: a chain written in a comment is prose. */
 export function withoutComments(text: string): string {
     let out = '';
     let index = 0;
@@ -652,7 +539,6 @@ export function withoutComments(text: string): string {
     return out;
 }
 
-/** Every subject a spec's source reaches, where it reaches it. */
 export function subjectsOf(
     source: string,
     readRequest?: RequestReader,

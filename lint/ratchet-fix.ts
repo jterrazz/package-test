@@ -1,11 +1,6 @@
 import { ROUTES_KEY } from '../src/facets/api/routes/baseline.js';
 
-/**
- * The section a fix records: every entry lowered to the count that fell below
- * it, an entry at zero dropped — never an entry raised, never a key added,
- * which would record debt that grew. `undefined` when nothing fell. The run's
- * own key is the run's, and stays as it is held.
- */
+/** Never an entry raised nor a key added, which would record debt that grew; the run's own key stays as held. */
 export function tightened(
     counts: Readonly<Record<string, number>>,
     baseline: Readonly<Record<string, number>>,

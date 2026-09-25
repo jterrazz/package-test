@@ -5,56 +5,27 @@ import { treeKind } from '../src/kernel/files/git-tree.js';
 import { GROUND_FIXTURES, SHARED_GROUND } from '../src/kernel/files/ground.js';
 import { closingOf, literalEnd, withoutComments } from './subject.js';
 
-/**
- * A SPECIMEN: an app under `specs/shared/fixtures/` a chain reaches, rather
- * than the project's own. A spec of the project's app is filed by the route,
- * the job or the command it reaches (C29, C30); a spec of a specimen specifies
- * the FRAMEWORK, and is filed by the capability it specifies.
- *
- * Read without a hidden convention, from the modules that build the spec's
- * runners — each specification module it imports a runner from, one those
- * import a runner from in turn, and the spec itself when it builds one inline:
- * the runner reaches a specimen when one of them names the shared fixtures in
- * a literal. A literal naming a file inside a specimen's folder names the app
- * — the module it imports, the binary or the script its command runs. A
- * literal naming the folder itself is a ROOT, and names the app only when a
- * `specification.*(…)` call it feeds — inline, or through the `const` it
- * initialises — runs a server command from it (`server: { command }`): a root
- * alone is where the runner's services read their ground (a database's init
- * scripts), and no app.
- *
- * An integration chain calls a module rather than a runner's app: an
- * integration spec also reaches the module of the shared fixtures it imports.
- */
+/** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
 
-/** A path into the shared fixtures, as a literal names it — the specimen's folder captured, then whether it goes inside. */
 const INTO_SHARED_FIXTURES = new RegExp(
     String.raw`(?:^|[/'"\x60\s])${SHARED_GROUND}/${GROUND_FIXTURES}/(?<name>[\w.-]+)(?<inside>/[\w.-])?`,
     'u',
 );
 
-/** A module a file imports from a specification module: `from '../api.specification.js'`. */
 const SPECIFICATION_FROM = /\bfrom\s*['"](?<from>[^'"]*\.specification(?:\.[jt]s)?)['"]/gu;
 
-/** Any module a file imports: `from '../../shared/fixtures/orders/orders.js'`. */
 const IMPORT_FROM = /\bfrom\s*['"](?<from>[^'"]+)['"]/gu;
 
-/** A runner built in the file itself: `specification.api(`. */
 const BUILDS_A_RUNNER = /\bspecification\.\w+\s*\(/gu;
 
-/** A `const` a literal may initialise: `const BROKEN = resolve(`. */
 const CONST_NAME = /\bconst\s+(?<name>[A-Za-z_$][\w$]*)\s*=/gu;
 
-/** The server a runner starts, as an object: `server: {`. */
 const SERVER_OBJECT = /\bserver\s*:\s*\{/gu;
 
-/** A command a server runs: `command: 'node server.mjs'`. */
 const RUNS_A_COMMAND = /\bcommand\s*:/u;
 
-/** The facet whose chains call a module, never a runner's app. */
 const CALLS_A_MODULE = 'integration';
 
-/** The string literals of a source whose comments are blanked, each where it starts. */
 function literalsOf(blank: string): { at: number; literal: string }[] {
     const literals: { at: number; literal: string }[] = [];
     for (let index = 0; index < blank.length;) {
@@ -69,7 +40,6 @@ function literalsOf(blank: string): { at: number; literal: string }[] {
     return literals;
 }
 
-/** Each `specification.*(…)` call of a source whose comments are blanked: its parentheses' offsets. */
 function runnerCalls(blank: string): { end: number; start: number }[] {
     return [...blank.matchAll(BUILDS_A_RUNNER)].map((match) => {
         const open = match.index + match[0].length - 1;
@@ -77,7 +47,6 @@ function runnerCalls(blank: string): { end: number; start: number }[] {
     });
 }
 
-/** Whether a runner's arguments start a server that runs a command: `server: { command }`. */
 function runsAServerCommand(call: string): boolean {
     return [...call.matchAll(SERVER_OBJECT)].some((match) => {
         const open = match.index + match[0].length - 1;
@@ -85,7 +54,6 @@ function runsAServerCommand(call: string): boolean {
     });
 }
 
-/** The `const` whose initialiser holds the offset `at`, when one does. */
 function constHolding(blank: string, at: number): string | undefined {
     const last = [...blank.slice(0, at).matchAll(CONST_NAME)].at(-1);
     if (last === undefined || blank.slice(last.index, at).includes(';')) {
@@ -94,7 +62,6 @@ function constHolding(blank: string, at: number): string | undefined {
     return last.groups?.name;
 }
 
-/** Whether the root a literal at `at` names feeds a runner that runs a server command from it. */
 function rootOfAServer(blank: string, at: number): boolean {
     const calls = runnerCalls(blank);
     const around = calls.filter(({ end, start }) => start < at && at < end);
@@ -113,7 +80,6 @@ function rootOfAServer(blank: string, at: number): boolean {
     return fed.some(({ end, start }) => runsAServerCommand(blank.slice(start, end + 1)));
 }
 
-/** The specimen a module building a runner names — its folder alone only as a server command's root. */
 function specimenNamedIn(text: string): string | undefined {
     const blank = withoutComments(text);
     for (const { at, literal } of literalsOf(blank)) {
@@ -128,14 +94,12 @@ function specimenNamedIn(text: string): string | undefined {
     return undefined;
 }
 
-/** The specification modules a source imports from, resolved from its folder. */
 function doorsOf(file: string, text: string): string[] {
     return [...withoutComments(text).matchAll(SPECIFICATION_FROM)].map(({ groups }) =>
         resolve(dirname(file), (groups?.from ?? '').replace(/\.js$/u, '.ts')),
     );
 }
 
-/** The specimen a specification module names, or one it imports a runner from names. */
 function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
     if (seen.has(door) || treeKind(door) !== 'file') {
         return undefined;
@@ -155,7 +119,6 @@ function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
     return undefined;
 }
 
-/** The module of the shared fixtures a spec imports, by its folder. */
 function importedSpecimen(text: string): string | undefined {
     for (const { groups } of withoutComments(text).matchAll(IMPORT_FROM)) {
         const name = INTO_SHARED_FIXTURES.exec(groups?.from ?? '')?.groups?.name;
@@ -166,11 +129,7 @@ function importedSpecimen(text: string): string | undefined {
     return undefined;
 }
 
-/**
- * The specimen a spec of `facet` reaches, by its folder's name under
- * `specs/shared/fixtures/` — or nothing, when every runner it uses drives the
- * project's own app.
- */
+/** Nothing when every runner drives the project's own app. */
 export function specimenOf(file: string, text: string, facet: string): string | undefined {
     if (facet === CALLS_A_MODULE) {
         const called = importedSpecimen(text);

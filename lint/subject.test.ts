@@ -12,7 +12,6 @@ import {
 } from './subject.js';
 import type { Subject } from './subject.js';
 
-/** A template's hole, as the reader keeps it in a literal. */
 const HOLE = '\u0000';
 describe('subject', () => {
     test.each<[string, Subject, string | undefined]>([

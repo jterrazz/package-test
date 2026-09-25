@@ -43,80 +43,35 @@ import type { Teaching } from './lesson.js';
 import { codeOf } from './rule-code.js';
 import type { SelfPassId } from './self-checker.js';
 
-/**
- * The conventions checker — the non-oxlint static channel.
- *
- * Oxlint only visits JS/TS sources; the D4 token grammar also constrains the
- * DATA fixtures under `expected/**` and `requests/**`. This module walks a specs
- * tree and reports:
- *
- * - **unknown / malformed tokens** in `expected/` fixtures — any text file, not
- *   just `.http`/`.json`/`.txt` (D4);
- * - the **HTTP first-line grammar** of depth-1 `requests/*.http` (a request line)
- *   and `expected/*.http` (a status line) (D4b);
- * - **tokens leaking into `requests/`** — requests are inputs, never matched, so
- *   a `{{token}}` there is almost always a mistake (D10, warning);
- * - the **`<case>.spec.yaml` grammar** wherever a scenario document sits: its
- *   shape (D4b), read through the runner's own parser, plus the token
- *   vocabulary of its streams (D4);
- * - the **document conventions** — key order, naming, description, block
- *   scalars, pinned values, registered names — bundled in `checker-spec.ts`.
- *
- * It shares TOKEN_KINDS with the runtime matcher so the channels cannot drift.
- */
+/** Oxlint visits only JS/TS sources, and the D4 grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
 
-/** A well-formed token: `{{word}}` / `{{word#ref}}`. */
 const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
-/** Any `{{ … }}` block (no nested braces) — classified by the scanner below. */
 const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
-/** The leading identifier of a brace block, for malformed-ref classification. */
 const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
 
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
-/** Directories whose files the walk judges, each by its own law. */
 const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
 
-/**
- * The ways a seed asks the machine what time it is.
- *
- * Three spellings and nothing else, because each is decidable on sight: the
- * quoted `'now'` argument SQLite's date functions take (`datetime('now')`,
- * `strftime('%s', 'now')`, `julianday('now')`, `date('now', '-1 day')`), the
- * SQL keyword every engine spells the same, and Postgres/MySQL's `NOW()`.
- * The bare word `now` is not one of them — it is a column name as often as a
- * clock read, and a rule that guessed would be refused rather than obeyed.
- */
+/** Only spellings decidable on sight: the bare word `now` is a column name as often as a clock read. */
 const CLOCK_READ = /'now'|\bCURRENT_(?:TIMESTAMP|DATE|TIME)\b|\bNOW\s*\(\s*\)/iu;
 
-/** A line comment, and a block comment — a `-- datetime('now')` is prose, not state. */
 const SQL_LINE_COMMENT = /--[^\n]*/gu;
 const SQL_BLOCK_COMMENT = /\/\*[\s\S]*?\*\//gu;
 
-/** The file with its comments blanked out, line for line so a finding still points. */
+/** Line for line, so a finding still points. */
 function withoutComments(text: string): string {
     return text
         .replaceAll(SQL_BLOCK_COMMENT, (block) => block.replaceAll(/[^\n]/gu, ' '))
         .replaceAll(SQL_LINE_COMMENT, '');
 }
 
-/**
- * Directories the walk never enters. `fixtures/` trees (the shared pool and
- * the leaf-local ones) are verbatim fixture cwd material — file STATE, not
- * assertion fixtures — so the token grammar has no meaning inside them.
- */
+/** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-/** The four ground names — what a document may never sit under (C16). */
 const GROUND_NAMES = new Set<string>(GROUND_DIRS);
 
-/**
- * The passes a run over a `specs/` TREE puts on it.
- *
- * The three `d4*`/`d10w` ids are sub-scans of {@link checkConventionFiles}; the
- * rest are the cross-file and facet passes. The CLI prints this list when a run
- * is clean, so what the reader is told ran is the registry itself.
- */
+/** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
     'a7-database-property',
     'b5-await-using-inference',
@@ -150,12 +105,6 @@ export const TREE_PASS_IDS = [
     'j5-spec-description',
 ] as const;
 
-/**
- * The passes a run over one workspace MEMBER puts on it — what no file under
- * `specs/` can answer: whether the member states how its tests run, whether its
- * config draws a browser, what it declares, and whether a `.spec.ts` of its own
- * ever reached a specs tree.
- */
 export const MEMBER_PASS_IDS = [
     'c12-spec-file-name',
     'c8-disk-target-exists',
@@ -165,21 +114,11 @@ export const MEMBER_PASS_IDS = [
     'f8-no-seam-dependency',
 ] as const;
 
-/**
- * Every logical pass bundled into `dist/checker.js` — the `consumer` passes
- * alone, a `self` pass being `self-checker.ts`'s — the authoritative registry
- * both the manifest catalogue (docs) and the E2E inventory meta-test derive
- * from, so neither can name a pass the CLI does not actually run.
- */
+/** The registry the catalogue and the E2E inventory derive from, so neither names a pass the CLI does not run. */
 export const CHECKER_PASS_IDS: string[] = [
     ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
 ];
 
-/**
- * The name of a pass a checker runs — its catalogue row's: the published
- * checker's, or the self checker's (`self-checker.ts`), whose findings share
- * this shape and this report line.
- */
 export type CheckerPassId =
     | (typeof MEMBER_PASS_IDS)[number]
     | (typeof TREE_PASS_IDS)[number]
@@ -188,32 +127,21 @@ export type CheckerPassId =
 export type Severity = 'error' | 'warn';
 
 export type TokenViolation = Teaching & {
-    /** 1-based; a finding about a whole file or folder points at its first column. */
+    /** A finding about a whole file or folder points at its first column. */
     column?: number;
     file: string;
     line: number;
-    /**
-     * The pass this finding belongs to. Its row gives the lesson its `why` and
-     * its `read`, and its code (`d4`, `c9`, `e3`) is what the JSON contract
-     * publishes as `jterrazz-check(<code>)` and the toolchain's ratchet counts
-     * under `jterrazz-check/<code>`.
-     */
+    /** Published as `jterrazz-check(<code>)`, counted by the ratchet under `jterrazz-check/<code>`. */
     rule: CheckerPassId;
     severity: Severity;
     token?: string;
 };
 
-/** A finding as the lesson a reader acts on: found, why, fix, read. */
 export function messageOf(violation: TokenViolation): string {
     return lessonOf(violation.rule, violation);
 }
 
-/**
- * Scan one fixture text for tokens outside the grammar: unknown kinds
- * (`{{userid}}`) and malformed captures of a known kind (`{{iso8601#}}`,
- * `{{uuid #id}}`). Well-formed template noise (`{{.Server.Version}}`,
- * `{{ spaced }}`, `{{123}}`) is structurally out of the grammar and ignored.
- */
+/** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored. */
 export function findUnknownTokens(text: string): { line: number; token: string }[] {
     const violations: { line: number; token: string }[] = [];
     const lines = text.split('\n');
@@ -226,8 +154,7 @@ export function findUnknownTokens(text: string): { line: number; token: string }
                 }
                 continue;
             }
-            // Not a well-formed token: flag only when it starts with a KNOWN
-            // kind followed by junk (a malformed ref), never arbitrary noise.
+            // Flagged only when a known kind is followed by junk, never arbitrary noise.
             const kind = LEADING_WORD.exec(inner)?.groups?.kind;
             if (kind !== undefined && KNOWN.has(kind) && inner !== kind) {
                 violations.push({ line: index + 1, token: match[0] });
@@ -237,7 +164,6 @@ export function findUnknownTokens(text: string): { line: number; token: string }
     return violations;
 }
 
-/** An unknown or malformed token, as the lesson the D4 pass prints. */
 function tokenLesson(token: string): Pick<TokenViolation, 'fix' | 'found' | 'rule'> {
     const inner = token.slice(2, -2);
     if (VALID_TOKEN.test(inner)) {
@@ -255,7 +181,6 @@ function tokenLesson(token: string): Pick<TokenViolation, 'fix' | 'found' | 'rul
     };
 }
 
-/** Known tokens present in a text — for the `requests/` leak warning (D10). */
 export function findKnownTokens(text: string): { line: number; token: string }[] {
     const found: { line: number; token: string }[] = [];
     const lines = text.split('\n');
@@ -270,7 +195,6 @@ export function findKnownTokens(text: string): { line: number; token: string }[]
     return found;
 }
 
-/** A binary file is anything that fails to decode cleanly as UTF-8. */
 function decodeText(path: string): null | string {
     let text;
     try {
@@ -278,12 +202,10 @@ function decodeText(path: string): null | string {
     } catch {
         return null;
     }
-    // Reject bytes that are not valid UTF-8 text (NUL or U+FFFD replacement
-    // char) — a binary snapshot carries no token grammar.
+    // A NUL or a U+FFFD replacement char: a binary snapshot carries no token grammar.
     return text.includes('\u0000') || text.includes('\uFFFD') ? null : text;
 }
 
-/** First non-empty line of a text (the HTTP first-line grammar target). */
 function firstLine(text: string): string {
     for (const line of text.split('\n')) {
         if (line.trim().length > 0) {
@@ -296,15 +218,7 @@ function firstLine(text: string): string {
 const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/u;
 const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/u;
 
-/**
- * Check one `<case>.spec.yaml` — D4b's shape through the SAME parser the runner
- * uses (one grammar, no drift), then D4's token vocabulary over the STREAMS
- * only: a `{{token}}` in a description or a command is text, never a
- * placeholder, and `stdin:` is an input the comparison never reads.
- *
- * Precision over recall, as everywhere in this channel: the parser refuses at
- * the first defect, so one document reports one grammar violation per run.
- */
+/** D4b through the runner's own parser, then D4 over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
 export function checkSpecFile(text: string, rel: string): TokenViolation[] {
     let document;
     try {
@@ -341,19 +255,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
     return violations;
 }
 
-/**
- * C23 — a seed states absolute timestamps; it never reads the clock.
- *
- * A `seeds/*.sql` that writes `datetime('now')` makes the row's date the date
- * the suite happened to run, so a case about "published yesterday" proves
- * something different every day and nothing at all across midnight. Worse under
- * SQLite, where `datetime('now')` writes a space-separated text while an ORM
- * writes ISO `T`: the two sort against each other, and the ordering breaks on
- * the days the values straddle a calendar boundary.
- *
- * The chain already owns the answer — `.clock()` pins what the code under test
- * reads — so the seed has nothing to ask the machine for.
- */
+/** The chain's `.clock()` pins what the code reads, so a seed never asks the machine; under SQLite `datetime('now')` also writes a space where an ORM writes `T`, and the two mis-sort. */
 function checkSeedClockReads(path: string, rel: string, name: string): TokenViolation[] {
     // C7 (oxlint) owns the extension rule; this pass reads the SQL alone.
     if (!name.endsWith('.sql')) {
@@ -381,10 +283,6 @@ function checkSeedClockReads(path: string, rel: string, name: string): TokenViol
     return violations;
 }
 
-/**
- * Walk `rootDir` and check every fixture file. Paths in the result are relative
- * to `rootDir`. Errors fail the checker; warnings are advisory.
- */
 export function checkConventionFiles(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const visit = (
@@ -413,9 +311,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 visit(path, next);
                 continue;
             }
-            // A spec document lives BESIDE its test, not under ground — it IS
-            // the scenario, not material a scenario stands on — so it is
-            // checked wherever the walk finds it, and C16 says where that is.
+            // A spec document is the scenario, not ground, so it is checked wherever the walk finds it; C16 says where that is.
             if (entry.name.endsWith(SPEC_EXTENSION)) {
                 if (rel.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))) {
                     violations.push({
@@ -439,7 +335,6 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
             if (inside === null) {
                 continue;
             }
-            // Depth-1 = directly under the requests/ or expected/ root.
             const depth1 = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
 
             if (inside === GROUND_SEEDS) {
@@ -479,10 +374,9 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 continue;
             }
 
-            // expected/ — every text file carries the token grammar (D4).
             const text = decodeText(path);
             if (text === null) {
-                continue; // Binary snapshot — skip.
+                continue;
             }
             if (depth1 && entry.name.endsWith('.http') && !STATUS_LINE.test(firstLine(text))) {
                 violations.push({
@@ -503,10 +397,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     token,
                 });
             }
-            // d5 reaches GROUND, not documents alone: a golden that pins a
-            // loopback port, a temp directory or somebody's home passed once,
-            // on one machine — the same literal, in the other half of the
-            // same tree.
+            // d5 reaches ground as well as documents: the same volatile literal in the other half of the tree.
             for (const [index, line] of text.split('\n').entries()) {
                 const volatileLiteral = volatileLiteralIn(line);
                 if (volatileLiteral === undefined) {
@@ -527,12 +418,6 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/**
- * Run every checker pass over `rootDir`: the token/HTTP grammar passes (D4 /
- * D4b / D10) plus the cross-file passes (C9 dead fixtures, C14/C15 fixture
- * placement, B5 await-using inference, A7 database property). This is the entry
- * the bundled bin drives.
- */
 export function runAllChecks(rootDir: string): TokenViolation[] {
     return [
         ...checkTestUnderFacet(rootDir),
@@ -554,23 +439,17 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
     ];
 }
 
-/**
- * One finding as the report line every editor's problem matcher parses, the
- * compiler convention oxlint's own findings normalise to:
- * `<file>:<line>:<column>: <severity> jterrazz-check(<code>): <message>`.
- */
+/** The compiler convention every editor's problem matcher parses, and oxlint's findings normalise to. */
 export function reportLine(violation: TokenViolation, message: string): string {
     const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
     return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${message}`;
 }
 
-/** A consumer pass's finding as its report line, its lesson read off its row. */
 export function formatViolation(violation: TokenViolation): string {
     return reportLine(violation, messageOf(violation));
 }
 
-/** Render violations the way the lint chain prints them. One line per finding. */
 export function formatViolations(violations: TokenViolation[]): string {
     return violations.map(formatViolation).join('\n');
 }

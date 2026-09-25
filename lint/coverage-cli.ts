@@ -13,20 +13,7 @@ import {
     writeBaseline,
 } from './coverage.js';
 
-/**
- * CLI for the coverage ratchet (bundled as `dist/coverage.js`).
- *
- *     node dist/coverage.js            # the gate: refuse a drop
- *     node dist/coverage.js --write    # record where the suite stands
- *
- * `--scope <name>` records under a name other than `all` — what a run of one
- * project writes, so `npm run coverage -- --project unit --scope unit` keeps
- * its own floor without touching the whole suite's.
- *
- * Both modes read the report of the LAST `--coverage` run; neither runs the
- * suite, because a gate that re-runs the tests is a second suite whose result
- * can disagree with the first.
- */
+/** `node dist/coverage.js` refuses a drop, `--write` records; `--scope <name>` keeps one project's floor apart. Neither runs the suite: they read the last `--coverage` report, or a second run could disagree with the first. */
 const argv = process.argv.slice(2);
 const write = argv.includes('--write');
 const scopeFlag = argv.indexOf('--scope');

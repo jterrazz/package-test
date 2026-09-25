@@ -19,85 +19,37 @@ import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 import { literalSpans } from './spec-values.js';
 
-/**
- * The cross-file checker passes — the analyses oxlint cannot express because
- * they need to read TWO files at once (a `*.specification.ts` record and the
- * `specs/` test files importing it) or a whole feature tree at once.
- *
- * They live in the checker channel (bundled as `dist/checker.js`) rather than
- * the oxlint plugin, which only ever sees one source file. Each pass follows
- * the checker doctrine: **precision over recall** — a heuristic that cannot
- * decide stays silent (under-reports) so the pass never blocks a legitimate
- * shape. All three are string/scan based (no TS parser in the light lint
- * bundle), matching the token checker's aesthetic.
- *
- * - **C9 dead fixtures** — per feature dir, a fixture file no reference
- *   RESOLVES to is dead weight; a feature dir with ground subdirs but no
- *   `<feature>.test.ts` is an orphan. A `<case>.spec.yaml` counts as a test
- *   AND as a referrer: the paths of its `fixture:` entries keep those trees
- *   alive exactly as a `.fixture(directory('…'))` literal does.
- * - **B5 await-using (inference)** — the docker-aware runners of a spec file
- *   are derived from its `docker:` option, then every `<runner>….exec()` bound
- *   without `await using` in an importing test is flagged. The primary B5
- *   channel now (the oxlint rule needs the runner names spelled out by hand).
- * - **A7 database property** — a spec's `services:` record fixes how many SQL
- *   databases exist; importing tests must (≥2) or must not (==1) pass
- *   `{ database }` to every `.seed()` / `.table()`.
- * - **C28 / C15 where ground lives** — an entry of the specs root's shared
- *   ground (`<specs>/shared/<role>/`) only ONE spec directory reaches for
- *   belongs beside that leaf (autofixed), and a path leaves its leaf only
- *   into that ground.
- */
+/** Passes that read two files or a whole tree at once, which oxlint cannot; precision over recall: a heuristic that cannot decide stays silent. */
 
-/** Directories the cross-file walks never descend into. */
 const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
-/** The ground directories of a leaf — the files a spec stands on. */
 const GROUND_SUBDIRS = new Set<string>(GROUND_DIRS);
 
-/** Destructured names that are never a runner (so never the A7/B5 subject). */
 const NON_RUNNER_BINDINGS = new Set(['cleanup', 'docker', 'orchestrator']);
 
-/** The specification constructors whose records/options the passes read. */
 const CONSTRUCTORS = 'api|cli|job';
 
-/** Is this the shared folder of a specs root — `<specs>/shared/`? */
 function isSharedFolder(dir: string): boolean {
     return basename(dir) === SHARED_GROUND && basename(dirname(dir)) === 'specs';
 }
 
-/**
- * A pool is a role folder of the specs root's shared ground —
- * `specs/shared/fixtures/`, `specs/shared/seeds/`, `specs/shared/requests/`,
- * `specs/shared/expected/`, holding what several leaves share. The cross-file
- * walks prune it with the shared folder; {@link checkPoolFixtures} inspects
- * its top level separately.
- */
 function isPool(dir: string): boolean {
     return isGroundName(basename(dir)) && isSharedFolder(dirname(dir));
 }
 
-/** The four pools a specs root may hold, whether or not they exist. */
 export function poolsOf(specsRoot: string): string[] {
     return GROUND_DIRS.map((ground) => join(specsRoot, SHARED_GROUND, ground));
 }
 
-/** The specs root a pool belongs to. */
 function specsRootOfPool(pool: string): string {
     return dirname(dirname(pool));
 }
 
-/**
- * Is this a directory the walks do not enter? Ground — the shared folder and
- * every leaf's own — holds material a spec stands on, never a live spec: a
- * fixture project with a `specs/` tree of its own is an input, judged where a
- * spec runs the checker over it.
- */
+/** A fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it. */
 function isPruned(dir: string): boolean {
     return PRUNED.has(basename(dir)) || isGroundName(basename(dir)) || isSharedFolder(dir);
 }
 
-/** Recursively list every file under `dir`, skipping pruned dirs and the pool. */
 export function listFiles(dir: string, predicate: (path: string) => boolean): string[] {
     const out: string[] = [];
     const visit = (current: string): void => {
@@ -122,7 +74,6 @@ export function listFiles(dir: string, predicate: (path: string) => boolean): st
     return out;
 }
 
-/** Recursively list every directory under `dir` (inclusive), pool pruned. */
 function listDirs(dir: string): string[] {
     const out: string[] = [];
     const visit = (current: string): void => {
@@ -144,11 +95,6 @@ function listDirs(dir: string): string[] {
     return out;
 }
 
-/**
- * Locate every `specs/` root under `dir` — the anchor a fixture path is
- * measured from. A nested one (a fixture project's own tree) sits inside a pool,
- * which the walk does not enter; the pool's contents are inputs, not live specs.
- */
 export function findSpecsRoots(dir: string): string[] {
     const roots: string[] = [];
     const visit = (current: string): void => {
@@ -172,7 +118,6 @@ export function findSpecsRoots(dir: string): string[] {
     return roots;
 }
 
-/** Locate the pools (unlike {@link listDirs}, does not prune them). */
 function findPools(dir: string): string[] {
     const pools: string[] = [];
     const visit = (current: string): void => {
@@ -206,12 +151,7 @@ function readText(path: string): string {
     }
 }
 
-/**
- * Blank out `//` and block comments (replacing them with spaces, newlines
- * preserved so offsets and line numbers stay intact) while leaving string
- * literals untouched. The regex/scan passes read this so a commented-out
- * `.exec()` or a comma inside a `services:` comment never confuses them.
- */
+/** Newlines survive and strings stay untouched, so offsets and line numbers still hold. */
 export function blankComments(text: string): string {
     const out = [...text];
     let state: "'" | '"' | '' | '`' | 'block' | 'line' = '';
@@ -252,18 +192,11 @@ export function blankComments(text: string): string {
     return out.join('');
 }
 
-/** File contents with comments blanked — the parse view for the scan passes. */
 function readSource(path: string): string {
     return blankComments(readText(path));
 }
 
-/**
- * The paths a `<case>.spec.yaml` names — its referrer literals, every key's: a
- * `fixture:`, a `seed:`, a `request:`, a `body:`, a `response:`, an
- * `intercept:`. The runner's own parser reads them, so the two channels cannot
- * disagree about what the document says; an unparseable file vouches for
- * nothing (the `d4b-spec-shape` pass is what reports it).
- */
+/** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`d4b-spec-shape` reports it). */
 function collectSpecLiterals(path: string): Set<string> {
     try {
         const document = parseSpecDocument(readText(path), path);
@@ -273,13 +206,7 @@ function collectSpecLiterals(path: string): Set<string> {
     }
 }
 
-/**
- * Is this a file a leaf's ground may be referenced from?
- *
- * Every test suffix counts, and so does a document: a rendered unit's golden —
- * its ARIA tree — sits in the same `expected/` as a spec's, read by a file the
- * suffix alone tells apart.
- */
+/** A document counts: a rendered unit's ARIA golden sits in the same `expected/` as a spec's. */
 function isReferrer(name: string): boolean {
     return isTestFileName(name) || name.endsWith(SPEC_EXTENSION);
 }
@@ -288,8 +215,6 @@ function isDir(path: string): boolean {
     return treeKind(path) === 'directory';
 }
 
-/** The 1-based line number of a source offset. */
-/** The 1-based column of `index` on its line. */
 function columnAt(text: string, index: number): number {
     return index - text.lastIndexOf('\n', index - 1);
 }
@@ -304,10 +229,7 @@ function lineAt(text: string, index: number): number {
     return line;
 }
 
-/**
- * Every quoted string and simple template literal in a source. Over-collection
- * only ever *hides* a dead-fixture finding, so a greedy regex is safe here.
- */
+/** Over-collection only ever hides a dead-fixture finding, so a greedy regex is safe. */
 const STRING_LITERAL =
     /'(?<single>(?:[^'\\\n]|\\.)*)'|"(?<double>(?:[^"\\\n]|\\.)*)"|`(?<template>(?:[^`$\\]|\\.)*)`/gu;
 function collectLiterals(text: string): Set<string> {
@@ -321,14 +243,7 @@ function collectLiterals(text: string): Set<string> {
     return found;
 }
 
-/**
- * A golden NAMED by a template literal with a hole — the table form chapter 17
- * prescribes for the golden half (`toMatch(file(`./expected/${name}.json`))` under a
- * `test.each`). The hole's value is not readable here, but its static ends are:
- * an entry of `directory` — the folders written before the hole, resolved from
- * the file — whose name starts with `prefix` and ends with `suffix` is one the
- * table could have asked for, which is all C9 needs to stop calling it dead.
- */
+/** The hole is unreadable but its static ends are not: an entry matching the prefix and suffix could be asked for by the table, which is all C9 needs. */
 export type LiteralPattern = { directory: string; prefix: string; suffix: string };
 
 const TEMPLATE_WITH_HOLE = /`(?<body>(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*)`/gu;
@@ -341,16 +256,11 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
         if (opens === -1 || closes === -1 || closes < opens) {
             continue;
         }
-        // The path's folders are the ground this entry sits in; the entry is
-        // matched on what the template states after the last of them, up to
-        // the folder the hole may name.
         const before = body.slice(0, opens);
         const cut = before.lastIndexOf('/');
         const prefix = before.slice(cut + 1);
         const suffix = body.slice(closes + 1);
-        // A template that is ALL hole names everything; it vouches for
-        // nothing in particular, and C9 already downgrades that file's
-        // findings to warn through `hasNonLiteralFixtureArg`.
+        // An all-hole template vouches for nothing; C9 already downgrades that file to warn through `hasNonLiteralFixtureArg`.
         if (prefix.length > 0 || suffix.length > 0) {
             const folders = before.slice(0, Math.max(cut, 0));
             found.push({
@@ -363,20 +273,12 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
     return found;
 }
 
-/**
- * Does the text name the disk with a NON-literal — a `file(…)`/`directory(…)`
- * whose path is computed, or a verb that reads the disk (`.seed`, `.request`,
- * `.fixture`, `.run`) handed a variable rather than the wrapper? Either makes
- * the reference set incomplete, so the feature is reported at warn level
- * instead of error (a false positive would be worse than a miss).
- */
+/** A non-literal path makes the reference set incomplete, so the feature is reported at warn: a false positive would be worse than a miss. */
 const DISK_ARG = /(?<![.\w])(?:file|directory)\s*\(\s*(?<arg>[^,)]*)/gu;
 const DISK_VERB_ARG = /\.(?:seed|request|fixture|run)\s*\(\s*(?<arg>[^,)]*)/gu;
 
-/** A plain string literal: quoted, or a template with no hole. */
 const PLAIN_STRING = /^(?:'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`$\\]|\\.)*`)$/u;
 
-/** The trimmed first arguments `pattern` captures in `text`, the empty ones dropped. */
 function argumentsOf(text: string, pattern: RegExp): string[] {
     return [...text.matchAll(pattern)]
         .map((match) => (match.groups?.arg ?? '').trim())
@@ -390,15 +292,7 @@ function hasNonLiteralFixtureArg(text: string): boolean {
     return verbTakesABinding || argumentsOf(text, DISK_ARG).some((arg) => !PLAIN_STRING.test(arg));
 }
 
-// ── Suppression (checker channel) ────────────────────────────────────────────
-
-/**
- * `// checker-disable-next-line <id>[,<id>] -- reason` suppresses the passes
- * named by id (`a7`, `b5`, `c9`, or `*`) on the next line of code — blank
- * lines and other comments (another tool's directive) are stepped over;
- * `checker-disable-line` suppresses its own line. Mirrors the oxlint-disable
- * idiom the repo already uses for negative specs.
- */
+/** `// checker-disable-next-line <id>[,<id>] -- reason`, stepping over blank lines and other tools' directives; `checker-disable-line` for its own line. */
 export function suppressedLines(text: string, id: string): Set<number> {
     const suppressed = new Set<number>();
     const lines = text.split('\n');
@@ -410,12 +304,10 @@ export function suppressedLines(text: string, id: string): Set<number> {
         return ids.includes(id) || ids.includes('*');
     };
     for (const [index, line] of lines.entries()) {
-        // Case-insensitive: the repo's formatter capitalizes comment leads
-        // (`checker-…` → `Checker-…`).
+        // Case-insensitive: the formatter capitalizes comment leads (`checker-…` → `Checker-…`).
         let match = /checker-disable-next-line\s+(?<ids>.*)$/iu.exec(line);
         if (match !== null && applies(match.groups?.ids ?? '')) {
-            // The next line of CODE: a directive of another tool may stand
-            // between, since each of them also claims the next line.
+            // A directive of another tool may stand between, since each also claims the next line.
             for (let next = index + 1; next < lines.length; next += 1) {
                 const following = (lines[next] ?? '').trim();
                 if (following.length > 0 && !following.startsWith('//')) {
@@ -432,9 +324,6 @@ export function suppressedLines(text: string, id: string): Set<number> {
     return suppressed;
 }
 
-// ── Balanced scanning helpers ────────────────────────────────────────────────
-
-/** From the `(` at `openIndex`, the substring inside the matching `)`. */
 function balancedParens(text: string, openIndex: number): string {
     let depth = 0;
     for (let i = openIndex; i < text.length; i += 1) {
@@ -451,7 +340,6 @@ function balancedParens(text: string, openIndex: number): string {
     return text.slice(openIndex + 1);
 }
 
-/** From the `{` at `openIndex`, the substring inside the matching `}`. */
 function balancedBraces(text: string, openIndex: number): null | string {
     let depth = 0;
     for (let i = openIndex; i < text.length; i += 1) {
@@ -468,7 +356,6 @@ function balancedBraces(text: string, openIndex: number): null | string {
     return null;
 }
 
-/** Split an object/argument body on its depth-0 commas. */
 function splitTopLevel(body: string): string[] {
     const parts: string[] = [];
     let depth = 0;
@@ -488,22 +375,14 @@ function splitTopLevel(body: string): string[] {
     return parts;
 }
 
-// ── Specification-file model ─────────────────────────────────────────────────
-
 type SpecModel = {
-    /** True when a `specification.cli(…)` call carries a `docker:` option. */
     dockerAware: boolean;
     file: string;
-    /** Named exports bound to a runner (destructured, minus cleanup/docker/…). */
     runnerExports: Set<string>;
-    /**
-     * Count of SQL database factories in the `services` record, or `null` when
-     * the record is absent or not a plain literal (then A7 cannot be decided).
-     */
+    /** `null` when the record is absent or not a plain literal: A7 cannot be decided then. */
     sqlDatabaseCount: null | number;
 };
 
-/** The destructured export names of a `= await specification.<ctor>(` binding. */
 function runnerExportsOf(text: string): Set<string> {
     const names = new Set<string>();
     const decl = new RegExp(
@@ -512,7 +391,6 @@ function runnerExportsOf(text: string): Set<string> {
     );
     for (const match of text.matchAll(decl)) {
         for (const raw of (match.groups?.names ?? '').split(',')) {
-            // `export const { cleanup, cli }` / `{ api: bareApi }` → key side.
             const key = (raw.split(':')[0] ?? '').trim();
             if (key.length > 0 && !NON_RUNNER_BINDINGS.has(key)) {
                 names.add(key);
@@ -522,20 +400,17 @@ function runnerExportsOf(text: string): Set<string> {
     return names;
 }
 
-/** The leading callee identifier of an expression (`postgres()` → `postgres`). */
 function leadingCallee(value: string): null | string {
     const match = /^(?<callee>[A-Za-z_$][\w$]*)\s*\(/u.exec(value.trim());
     return match === null ? match : (match.groups?.callee ?? null);
 }
 
-/** SQL factory count of a `services:` record, or null if non-literal/absent. */
 function sqlDatabaseCount(text: string): null | number {
     const keyword = /\bservices\s*:/u.exec(text);
     if (keyword === null) {
         return null;
     }
     const braceIndex = text.indexOf('{', keyword.index + keyword[0].length);
-    // A non-`{` value (a variable) is out of static reach.
     if (
         braceIndex === -1 ||
         text.slice(keyword.index + keyword[0].length, braceIndex).trim() !== ''
@@ -553,12 +428,12 @@ function sqlDatabaseCount(text: string): null | number {
         }
         const colon = pair.indexOf(':');
         if (colon === -1) {
-            return null; // Shorthand / spread — non-literal record.
+            return null;
         }
         const value = pair.slice(colon + 1).trim();
         const callee = leadingCallee(value);
         if (callee === null) {
-            return null; // A handle variable — the count is not literal.
+            return null;
         }
         if (callee === 'postgres' || callee === 'sqlite' || callee === 'mysql') {
             count += 1;
@@ -585,7 +460,6 @@ function modelSpecFile(file: string): SpecModel {
     };
 }
 
-/** Resolve a relative import specifier to a `.ts` path (else undefined). */
 function resolveRelativeImport(fromFile: string, specifier: string): string | undefined {
     if (!specifier.startsWith('.')) {
         return undefined;
@@ -595,7 +469,6 @@ function resolveRelativeImport(fromFile: string, specifier: string): string | un
 
 type ImportedBinding = { local: string; name: string; source: string };
 
-/** Every `import { a, b as c } from '…'` binding in a file. */
 function namedImports(text: string): ImportedBinding[] {
     const bindings: ImportedBinding[] = [];
     const decl = /import\s+(?:type\s+)?\{(?<names>[^}]*)\}\s+from\s+['"](?<source>[^'"]+)['"]/gu;
@@ -616,13 +489,7 @@ function namedImports(text: string): ImportedBinding[] {
     return bindings;
 }
 
-// ── B5 (inference) ───────────────────────────────────────────────────────────
-
-/**
- * Docker-aware runner results must be bound with `await using`. The runner
- * identifiers are inferred from the `docker:` option of imported spec files —
- * no hand-maintained runner list, unlike the oxlint rule.
- */
+/** The runners are inferred from the `docker:` option of the imported spec files, where the oxlint rule needs them spelled by hand. */
 export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const specFiles = listFiles(rootDir, (path) => path.endsWith('.specification.ts'));
@@ -651,8 +518,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
             continue;
         }
         const suppressed = suppressedLines(readText(testFile), 'b5');
-        // A declaration whose initializer is `await <runner>…​.exec(` — the
-        // `await using` form matches group 1 and is exempt.
+        // The `await using` form matches group 1 and is exempt.
         const binding =
             /\b(?<kind>await\s+using|const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*await\s+(?<runner>[A-Za-z_$][\w$]*)\b[^;]*?\.exec\s*\(/gu;
         for (const match of text.matchAll(binding)) {
@@ -679,9 +545,6 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-// ── A7 (database property) ───────────────────────────────────────────────────
-
-/** Local inline runners a test declares itself (`specification.api(…)`). */
 function localRunnerBindings(text: string): Set<string> {
     const locals = new Set<string>();
     const decl = new RegExp(
@@ -700,7 +563,6 @@ function localRunnerBindings(text: string): Set<string> {
     return locals;
 }
 
-/** The identifier immediately before a `.seed(`/`.table(` member, if any. */
 function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     const before = text.slice(0, dotIndex);
     const match = /(?<name>[A-Za-z_$][\w$]*)\s*$/u.exec(before);
@@ -726,8 +588,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
 
     for (const testFile of listFiles(rootDir, isNodeTestFileName)) {
         const text = readSource(testFile);
-        // Which enforced specs does this test import? Enforce only when exactly
-        // one applies (mixed DB configurations are ambiguous → skip).
+        // Enforced only when exactly one imported spec applies: mixed database configurations are ambiguous.
         const applicable = new Set<SpecModel>();
         for (const binding of namedImports(text)) {
             const target = resolveRelativeImport(testFile, binding.source);
@@ -748,7 +609,6 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
         for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
             const verb = match.groups?.verb ?? '';
             const object = memberObjectIdentifier(text, match.index);
-            // Skip calls dispatched on a runner the test declared itself.
             if (object !== null && locals.has(object)) {
                 continue;
             }
@@ -782,27 +642,13 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-// ── C9 (dead fixtures + orphan dirs) ─────────────────────────────────────────
-
-/** The disk, named anywhere: a `file(…)` or `directory(…)` call with a plain string argument. */
 const DISK_CALL =
     /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
-/**
- * What the referrers of one scan name, RESOLVED: the paths their literals
- * point at from the file that writes them, and the template-literal tables
- * they could ask for. An entry is referenced by the path that reaches it,
- * never by a literal that merely spells its name.
- */
+/** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 
-/**
- * Every path `file` names, resolved. A document's keys are read from the
- * document. A source's `file()`/`directory()` arguments are read from the
- * file; so is each word of its other literals, and from the project root as
- * well — a path bound first to a name, or written into a command a process
- * service runs from the root (`node specs/shared/fixtures/app/server.mjs`).
- */
+/** A source's other literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/shared/fixtures/app/server.mjs`). */
 function referencesOf(file: string, into: References): void {
     const from = dirname(file);
     if (file.endsWith(SPEC_EXTENSION)) {
@@ -827,7 +673,6 @@ function referencesOf(file: string, into: References): void {
     into.patterns.push(...collectLiteralPatterns(text, from));
 }
 
-/** Is the entry at `path` — a ground file, or a tree — reached by a reference? */
 function entryReferenced(path: string, references: References): boolean {
     const name = basename(path);
     for (const pattern of references.patterns) {
@@ -847,13 +692,11 @@ function entryReferenced(path: string, references: References): boolean {
     return false;
 }
 
-/** A child named like a ground subdir but actually a fixture container. */
 function isConventionalSubdir(path: string): boolean {
     if (!isDir(path)) {
         return false;
     }
-    // A real seeds/expected/… holds leaf fixtures: never a test, never a
-    // nested ground subdir (those signal a feature dir named like one).
+    // A real ground folder holds leaf fixtures, never a test nor a nested ground folder.
     const files = listFiles(path, isTestFileName);
     if (files.length > 0) {
         return false;
@@ -870,7 +713,6 @@ function isConventionalSubdir(path: string): boolean {
 export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const dir of listDirs(rootDir)) {
-        // The specs root is no feature: its shared ground is scanned separately.
         if (basename(dir) === 'specs') {
             continue;
         }
@@ -897,8 +739,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             .map((entry) => join(dir, entry.name));
         const rel = relative(rootDir, dir);
 
-        // A domain owns 1..n `<aspect>.test.ts` (C1') — the ground is dead
-        // weight only when the domain carries no test at all.
+        // A domain owns 1..n `<aspect>.test.ts` (C1'): its ground is dead only when it carries no test at all.
         if (testFiles.length === 0) {
             violations.push({
                 file: rel,
@@ -943,13 +784,11 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/** Unreferenced top-level entries of the pools (`specs/shared/fixtures/`, `specs/shared/seeds/`, …). */
 function checkPoolFixtures(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
-        // Every reference in the specs tree, excluding those made from
-        // inside the pool itself (a dead entry cannot vouch for another).
+        // A reference made from inside the pool is left out: a dead entry cannot vouch for another.
         const references: References = { paths: new Set(), patterns: [] };
         for (const file of listReferrers(specsRoot, pool)) {
             referencesOf(file, references);
@@ -971,32 +810,18 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-// ── C28's level half / C15 (where ground lives) ────────────────────────────────────────────
-
-/** One fixture reference: the path a spec named, and where it named it. */
 type FixtureReference = {
-    /** Where the path's literal starts; a document entry points at its line. */
     column: number;
     file: string;
-    /** The document key that names the path — absent for a `file()`/`directory()` call. */
     key?: string;
-    /** What the path names: its wrapper, or what a document key reads. */
     kind: 'directory' | 'file';
     line: number;
     path: string;
 };
 
-/** A fixture, named by a wrapper with a plain string argument. */
 const FIXTURE_CALL =
     /\.fixture\(\s*(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>/gu;
 
-/**
- * Every fixture path a spec file names, with the line it names it on. A
- * `<case>.spec.yaml` is read through the runner's own parser; a `.ts` file
- * through the literal arguments `pattern` matches — a non-literal argument is
- * out of static reach and stays silent (the checker doctrine: precision over
- * recall).
- */
 function collectFixtureReferences(
     file: string,
     pattern = FIXTURE_CALL,
@@ -1019,7 +844,6 @@ function collectFixtureReferences(
             continue;
         }
         const path = match.groups?.path;
-        // A template with a hole names whatever it is handed: out of static reach.
         if (path !== undefined && path.length > 0 && isRelativePath(path) && !path.includes('${')) {
             const at = match.index + match[0].lastIndexOf(`${match.groups?.quote ?? ''}${path}`);
             references.push({
@@ -1034,11 +858,7 @@ function collectFixtureReferences(
     return references;
 }
 
-/**
- * Which indexes of `text` (comments already blanked) sit inside a string
- * literal. A template is read whole as a string: a call inside `${…}` is out
- * of reach, which a precision-over-recall pass accepts.
- */
+/** A template is read whole as a string: a call inside `${…}` is out of reach. */
 function stringMask(text: string): boolean[] {
     const mask: boolean[] = [];
     let quote = '';
@@ -1060,7 +880,6 @@ function stringMask(text: string): boolean[] {
     return mask;
 }
 
-/** Every spec file of a tree that may name a fixture, the pool excluded. */
 function listReferrers(specsRoot: string, pool: string): string[] {
     return listFiles(
         specsRoot,
@@ -1068,7 +887,6 @@ function listReferrers(specsRoot: string, pool: string): string[] {
     ).filter((file) => !file.startsWith(`${pool}/`) && !file.startsWith(`${pool}\\`));
 }
 
-/** The pool entry a path names from `file` — the FIRST segment below the pool. */
 function poolEntryOf(file: string, path: string, pool: string): string | undefined {
     const inPool = relative(pool, resolve(dirname(file), path));
     if (inPool === '' || inPool.startsWith('..') || isAbsolute(inPool)) {
@@ -1078,7 +896,6 @@ function poolEntryOf(file: string, path: string, pool: string): string | undefin
     return entry.length > 0 ? entry : undefined;
 }
 
-/** Pool entry → the spec directories that reference it, each with its referrers. */
 function poolUsage(specsRoot: string, pool: string): Map<string, Map<string, string[]>> {
     const usage = new Map<string, Map<string, string[]>>();
     for (const file of listReferrers(specsRoot, pool)) {
@@ -1099,11 +916,7 @@ function poolUsage(specsRoot: string, pool: string): Map<string, Map<string, str
     return usage;
 }
 
-/**
- * The leaf every one of `leaves` is, or sits under: the one leaf, or the
- * route's that encloses the others — `undefined` when they only meet above
- * any leaf, where the pool is their common level.
- */
+/** `undefined` when the leaves only meet above any leaf, where the pool is their common level. */
 function commonLeaf(leaves: readonly string[]): string | undefined {
     const [first, ...others] = leaves;
     if (first === undefined) {
@@ -1120,7 +933,6 @@ function commonLeaf(leaves: readonly string[]): string | undefined {
     return leaves.includes(common) || (others.length > 0 && isLeaf(common)) ? common : undefined;
 }
 
-/** A pool entry only one leaf reaches for, and the leaf it belongs to. */
 type MisplacedPoolFixture = {
     entry: string;
     leaf: string;
@@ -1128,12 +940,7 @@ type MisplacedPoolFixture = {
     referrers: string[];
 };
 
-/**
- * Every path the member's module tests name: each relative literal one
- * writes, resolved from its directory, and each path one builds from literal
- * pieces — the paths C8 reads. A module test reads its ground from outside
- * every leaf, so what it names is shared, whatever the specs say.
- */
+/** A module test reads its ground from outside every leaf, so what it names is shared, whatever the specs say. */
 export function pathsModuleTestsName(member: string): string[] {
     const named: string[] = [];
     for (const file of moduleTestsOf(member)) {
@@ -1147,13 +954,7 @@ export function pathsModuleTestsName(member: string): string[] {
     return named;
 }
 
-/**
- * Pool entries — a file or a directory, in any of the four pools — reached
- * from exactly ONE spec directory, and named by no module test of the member.
- * Two documents of the same leaf count as one — the unit is the folder, not
- * the file. An entry no reference names at all is C9's dead-fixture case, not
- * this one.
- */
+/** Two documents of one leaf count once: the unit is the folder. An entry nothing names is C9's case, not this one. */
 function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     const misplaced: MisplacedPoolFixture[] = [];
     const named = new Map<string, string[]>();
@@ -1180,20 +981,6 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     return misplaced;
 }
 
-/**
- * CONVENTIONS C28, its level half — a pool entry is SHARED, or it is local. An entry of one of
- * the specs root's shared folders — `shared/fixtures/`, `shared/seeds/`,
- * `shared/requests/`, `shared/expected/` — that exactly one spec directory
- * reaches for, and no module test of the member names, is misplaced: it
- * belongs beside that leaf, in the leaf's folder of the same role
- * (`<leaf>/seeds/<name>`), named by the path from the leaf (`./seeds/<name>`).
- *
- * The catch: a fixture built for one scenario and parked in the pool reads as
- * shared ground. Every later author assumes some other spec depends on it, so
- * nobody dares change it — and the one spec that actually owns it is a directory
- * away, invisible. Fixed by `--fix`, which moves the tree and rewrites the
- * referrers.
- */
 export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
     return misplacedPoolFixtures(rootDir).map(({ entry, leaf, pool, referrers }) => {
         const relEntry = relative(rootDir, join(pool, entry));
@@ -1218,22 +1005,14 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
     });
 }
 
-/**
- * Apply C28's level half: move each single-reader pool entry beside its leaf and rewrite the
- * paths that climbed to it into the path from the leaf — no module test names
- * it, or it would be shared. The move is a `git mv`
- * in a work tree, so the moved fixture keeps its history; a plain rename elsewhere.
- * A pool the move empties goes with it, and the shared folder when it was the
- * last, as C27's leaf folder does. Returns what
- * moved, relative to `rootDir`.
- */
+/** A pool the move empties goes with it, and the shared folder when it was the last. */
 export function fixPoolFixtures(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { entry, leaf, pool, referrers } of misplacedPoolFixtures(rootDir)) {
         const role = basename(pool);
         const destination = join(leaf, role, entry);
         if (existsSync(destination)) {
-            continue; // Something already sits there — the author decides.
+            continue;
         }
         mkdirSync(dirname(destination), { recursive: true });
         moveKeepingHistory(join(pool, entry), destination);
@@ -1256,13 +1035,7 @@ export function fixPoolFixtures(rootDir: string): string[] {
     return moved;
 }
 
-// ── C27 (ground copied across leaves) ────────────────────────────────────────
-
-/**
- * What an entry of ground holds, as one string two copies share: a file's
- * bytes, a tree's every file by its path below the entry — the listing git
- * keeps, so an ignored file is no difference.
- */
+/** A tree compares by the listing git keeps, so an ignored file is no difference. */
 function fingerprintOf(path: string): string {
     const hash = createHash('sha256');
     const visit = (current: string, below: string): void => {
@@ -1283,28 +1056,20 @@ function fingerprintOf(path: string): string {
     return `${isDir(path) ? 'tree' : 'file'}:${hash.digest('hex')}`;
 }
 
-/** Remove a folder that holds nothing. */
 function removeIfEmpty(folder: string): void {
     if (existsSync(folder) && readdirSync(folder).length === 0) {
         rmSync(folder, { recursive: true });
     }
 }
 
-/** One entry of ground copied into several leaves, and where the copies belong. */
 type CopiedGround = {
-    /** The copies, sorted — the first is the one a fix moves. */
+    /** Sorted: the first is the one a fix moves. */
     copies: string[];
-    /** What every copy holds. */
     fingerprint: string;
-    /**
-     * The specs root's shared folder of the copies' role, holding the entry by its
-     * name — or `null` when the copies go by several names, and none of them
-     * is the one to keep.
-     */
+    /** `null` when the copies go by several names: none of them is the one to keep. */
     target: null | string;
 };
 
-/** The leaf ground entries of `specsRoot`, grouped by their role and what they hold — whatever their names. */
 function leafGroundOf(
     specsRoot: string,
 ): Map<string, { copies: string[]; fingerprint: string; role: string }> {
@@ -1331,10 +1096,6 @@ function leafGroundOf(
     return groups;
 }
 
-/**
- * Ground entries — a file or a tree — that two leaves or more hold byte for
- * byte under the same role, by one name or by several.
- */
 function copiedGround(rootDir: string): CopiedGround[] {
     const copied: CopiedGround[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
@@ -1358,7 +1119,6 @@ function copiedGround(rootDir: string): CopiedGround[] {
     return copied;
 }
 
-/** What a copy's warning ends on: where the entry goes, or why `--fix` leaves it. */
 function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): string {
     if (target === null) {
         return 'give the copies the one name the entry should keep — they go by several, so `make fix` moves none';
@@ -1370,19 +1130,7 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
     return `keep one copy in ${where} — \`make fix\` moves it there and rewrites every path that named a copy`;
 }
 
-/**
- * CONVENTIONS C27 — ground several leaves share lives once. An entry of a
- * leaf's ground that another leaf holds byte for byte, under the same role,
- * is a copy, whatever it is called: it belongs in the specs root's shared
- * folder of its role, named by the path that climbs to it.
- *
- * The catch: a seed copied into every leaf that needs it. The copies drift —
- * one leaf's gains a column, the next does not — and the reader of either
- * cannot tell a deliberate difference from a forgotten one. A warning, since
- * two leaves may mean to diverge tomorrow; `--fix` moves one copy and rewrites
- * every whole relative literal that named any of them — only when the copies share one name,
- * since that name is the only one a fix could keep.
- */
+/** A warning, since two leaves may mean to diverge; `--fix` acts only when the copies share one name, the only name a fix could keep. */
 export function checkCopiedGround(rootDir: string): TokenViolation[] {
     return copiedGround(rootDir).flatMap((group) => {
         const advice = copyAdvice(rootDir, group);
@@ -1400,16 +1148,13 @@ export function checkCopiedGround(rootDir: string): TokenViolation[] {
     });
 }
 
-/** `to`, as the relative path a file in `from` names it by. */
 function pathFrom(from: string, to: string): string {
     const rest = relative(from, to).split(sep).join('/');
     return rest.startsWith('.') ? rest : `./${rest}`;
 }
 
-/** An entry a fixer moves: where it was, and where it goes. */
 type Move = { copy: string; target: string };
 
-/** `path`, written from `from`, moved from the entry `copy` to the entry `target` — or `undefined` when it names no part of the copy. */
 function repointed(from: string, path: string, { copy, target }: Move): string | undefined {
     const reached = resolve(from, path);
     if (reached !== copy && !isWithin(copy, reached)) {
@@ -1419,7 +1164,6 @@ function repointed(from: string, path: string, { copy, target }: Move): string |
     return path.endsWith('/') && !moved.endsWith('/') ? `${moved}/` : moved;
 }
 
-/** Every relative path a source writes as a whole string literal, a template with a hole left out, with its span. */
 function relativeLiterals(text: string): { end: number; start: number; value: string }[] {
     const scanned = blankComments(text);
     return literalSpans(scanned).flatMap(({ end, start }) => {
@@ -1429,7 +1173,6 @@ function relativeLiterals(text: string): { end: number; start: number; value: st
     });
 }
 
-/** The literal paths a source writes, rewritten where one names a copy. */
 export function repointSource(file: string, move: (path: string) => string | undefined): string {
     const text = readText(file);
     let next = '';
@@ -1444,7 +1187,6 @@ export function repointSource(file: string, move: (path: string) => string | und
     return `${next}${text.slice(last)}`;
 }
 
-/** The paths a document's keys name, rewritten on their lines where one names a copy. */
 function repointDocument(file: string, move: (path: string) => string | undefined): string {
     const text = readText(file);
     let named;
@@ -1469,12 +1211,6 @@ function repointDocument(file: string, move: (path: string) => string | undefine
     return lines.join('\n');
 }
 
-/**
- * Rewrite, in every module test of the member holding `specsRoot`, the
- * relative literals that name a moved entry: a module test stands on the
- * ground it names as a spec does, so the path follows the move. Returns the
- * files rewritten.
- */
 export function repointModuleTests(specsRoot: string, moves: readonly Move[]): string[] {
     const rewritten: string[] = [];
     for (const file of moduleTestsOf(dirname(specsRoot))) {
@@ -1491,16 +1227,7 @@ export function repointModuleTests(specsRoot: string, moves: readonly Move[]): s
     return rewritten;
 }
 
-/**
- * Apply C27: one copy of each copied entry moves to the specs root's shared
- * folder of its role — a `git mv` in a work tree — the others are deleted, and every
- * whole relative literal of the specs tree and of the member's module tests
- * that named a copy names the moved entry. An entry the
- * target already holds byte for byte keeps it and deletes every copy; one
- * holding something else is the author's call, and nothing moves; so are
- * copies of several names. A leaf's ground folder the move empties goes with it. Returns
- * what moved, relative to `rootDir`.
- */
+/** An entry the target already holds byte for byte deletes every copy; one holding something else, or copies of several names, are the author's call and nothing moves. */
 export function fixCopiedGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { copies, fingerprint, target } of copiedGround(rootDir)) {
@@ -1550,7 +1277,6 @@ export function fixCopiedGround(rootDir: string): string[] {
     return moved;
 }
 
-/** Does this folder hold a test of its own — is it a leaf? */
 function isLeaf(directory: string): boolean {
     return treeEntries(directory).some(
         (entry) =>
@@ -1558,11 +1284,7 @@ function isLeaf(directory: string): boolean {
     );
 }
 
-/**
- * The ground folders of the leaves that enclose `leaf` below the specs root —
- * a route's, reached from the leaf of a route under it (`map/pois/` holds the
- * ground `map/pois/detail/` shares with it).
- */
+/** `map/pois/` holds the ground `map/pois/detail/` shares with it. */
 function enclosingGround(specsRoot: string, leaf: string): string[] {
     const ground: string[] = [];
     for (let folder = dirname(leaf); isWithin(specsRoot, folder) && folder !== specsRoot;) {
@@ -1578,27 +1300,10 @@ function enclosingGround(specsRoot: string, leaf: string): string[] {
     return ground;
 }
 
-/** The ground folders at the specs root itself — the shared ground outside `shared/`. */
 function rootGroundOf(specsRoot: string): string[] {
     return GROUND_DIRS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
 }
 
-/**
- * CONVENTIONS C15 — a path leaves its leaf only into the specs root's shared
- * ground, or into the ground of a leaf that encloses it. Every `file()` and
- * `directory()` names its entry from the spec file; a path whose target stays
- * under the spec's own directory is the leaf's ground, one under
- * `<specs>/shared/fixtures/`, `seeds/`, `requests/` or `expected/` is a pool,
- * and anything else reaches into a sibling's ground — a pool by another door,
- * with none of its visibility. A role folder at the specs root itself
- * (`<specs>/seeds/`) is shared ground outside `shared/`: reported as a folder,
- * and every path into it as a path.
- *
- * The catch: a leaf quietly depending on a neighbour's ground. The neighbour's
- * author has no way to know, edits their own files, and breaks a spec two
- * folders away. Ground several leaves share belongs in the pool, where its
- * sharing is declared.
- */
 export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
@@ -1641,14 +1346,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-/**
- * Apply C15 to the shared ground outside `shared/`: every entry of a role
- * folder at the specs root moves to the shared folder of its role — a `git mv`
- * in a work tree — and every whole relative literal that named it, a source's
- * or a document's key of the specs tree, a module test's, names it there. An entry the shared folder
- * already holds by that name stays, for the author. A root folder the move
- * empties goes with it. Returns what moved, relative to `rootDir`.
- */
+/** An entry the shared folder already holds by that name stays, for the author. */
 export function fixRootGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
@@ -1689,20 +1387,7 @@ export function fixRootGround(rootDir: string): string[] {
     return moved;
 }
 
-/**
- * CONVENTIONS C8 — every path a test names exists, as what it says it is.
- *
- * A `file()` or `directory()` with a literal path, a document's `fixture:`,
- * and a path the test resolves from its own directory, each resolved from the
- * test's own directory: a path that names nothing, a `file()` naming a
- * directory, or a `directory()` naming a file is reported at
- * the path. Inside a git work tree a path names only what git does not
- * ignore: an ignored target is on this workstation and on no checkout. The
- * catch is the typo that would only fail a run — a test later,
- * far from the line that made it. A call written inside a string (a rule's
- * test case, a sample) is text, not a call, and is not read.
- */
-/** A path naming nothing git keeps: what it names, and the gesture. */
+/** Inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout. */
 function missingTarget(named: string, target: string, onDisk: boolean): Teaching {
     return onDisk
         ? {
@@ -1715,7 +1400,6 @@ function missingTarget(named: string, target: string, onDisk: boolean): Teaching
           };
 }
 
-/** A path naming the other kind of entry than its wrapper says. */
 function crossedTarget(
     named: string,
     { found, key, path }: { found: 'directory' | 'file'; key: string | undefined; path: string },
@@ -1731,15 +1415,7 @@ function crossedTarget(
     };
 }
 
-/**
- * The paths a test resolves from its own directory, each where its first
- * literal starts: every piece a literal (path-references' reader), and one
- * piece alone only when it is spelled `./` or `../`, as a `file()` is — a lone
- * bare piece (`resolve(import.meta.dirname, 'expected')`) is an output folder
- * the test makes as often as a path it reads. A piece opening on `/` restarts
- * the path, and leaves the call out. A path spelled into a command a process
- * runs is the author's: no call names it.
- */
+/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, 'expected')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
 function anchoredPaths(
     file: string,
 ): { column: number; line: number; named: string; target: string }[] {
@@ -1814,7 +1490,6 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
     return violations;
 }
 
-/** C8 over every `specs/` tree below `rootDir` — its specs and its documents. */
 export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         listReferrers(specsRoot, join(specsRoot, SHARED_GROUND)).flatMap((file) =>
@@ -1823,50 +1498,30 @@ export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
     );
 }
 
-/** Is `path` inside `directory` (strictly — a directory is not inside itself)? */
 function isWithin(directory: string, path: string): boolean {
     const rest = relative(directory, path);
     return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
 }
 
-// ── J9 — a suppression states why (checker channel) ──────────────────────────
-
-/** The directive, whatever precedes it on the line, and what follows the ids. */
 const DIRECTIVE = /(?<lead>.*?)checker-disable(?:-next-line|-line)\s+(?<rest>.*)$/iu;
 
-/**
- * A directive is written in a COMMENT — the word inside a string is a test
- * TALKING about suppressions, which is what this package's own suite does.
- */
+/** Only in a comment: the word inside a string is a test talking about suppressions. */
 const COMMENT_LEAD = /(?:^|\s)(?:\/\/|\/\*|\*|#)\s*$/u;
 
-/** The files a directive can be written in — source, documents, goldens. */
 const READABLE = /\.(?:[cm]?[jt]sx?|ya?ml|json|md|sql|http|txt)$/u;
 
-/** Is this a file a human writes a directive in? */
 function isReadableText(path: string): boolean {
     return READABLE.test(path);
 }
 
-/** The ids a directive names, or the placeholder a reader fills. */
 function idOf(rest: string | undefined): string {
     const ids = rest?.trim() ?? '';
     return ids === '' ? '<id>' : ids;
 }
 
-/** A reason: the `--` separator with something after it. */
 const REASON = /--\s*\S/u;
 
-/**
- * J9 — every checker suppression says WHY.
- *
- * A suppression with no reason is a rule turned off by someone who is no longer
- * here: the next reader cannot tell whether the pass was wrong, the shape was
- * exceptional, or it was simply in the way — so the line survives every review
- * and the convention quietly stops holding. The toolchain's own
- * `suppressions-reason` gate reads `oxlint-disable*` and nothing else, which is
- * why this channel carries its own.
- */
+/** The toolchain's `suppressions-reason` gate reads `oxlint-disable*` only, so this channel carries its own. */
 export function checkSuppressionReason(rootDir: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const file of listFiles(rootDir, isReadableText)) {

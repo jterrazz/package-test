@@ -27,60 +27,34 @@ import {
 import type { Subject, SubjectReading } from './subject.js';
 import { testSettingsAt } from './test-settings.js';
 
-/**
- * C29 and C30 — a spec file is about ONE subject, filed under that subject's
- * standard name. A spec of a specimen (`lint/specimen.ts`) is out of their
- * reach: it is filed by the capability it specifies.
- *
- * The subject is what the file's chains reach (`lint/subject.ts`): a route, a
- * job, a command, a page, a journey. A file that reaches several is several
- * files, and `--fix` splits it — each test to the file of the subject it
- * reaches, keeping the imports and the file-level constants it uses, what
- * two of the new files read moved once into their folder's fixtures module. A file
- * about one subject whose name the tree derives (api, job, cli) lives in that
- * folder, and `--fix` moves it there. Either move keeps every path the code
- * names pointing where it pointed, and sends the ground the old leaf holds for
- * another leaf up to the specs root's shared ground, where C28's own fix moves
- * each entry down to the one leaf that reads it.
- */
+/** A spec of a specimen (`lint/specimen.ts`) is out of reach: it is filed by the capability it specifies. Every move keeps each path the code names pointing where it pointed. */
 
-/** A source span, by offsets. */
 type Span = { end: number; start: number };
 
-/** One test of a spec file: where it stands, its title, and what it reaches. */
 type TestOf = Span & { subjects: string[]; title: string };
 
-/** A spec file read for its subjects. */
 type SpecRead = {
-    /** The facet folder the file sits in. */
     facet: string;
     file: string;
-    /** What the repository declared that its subjects are read with. */
     reading: SubjectReading;
-    /** Every subject the file's chains reach, in order of first appearance, by name. */
     subjects: Map<string, { index: number; subject: Subject }>;
     tests: TestOf[];
     text: string;
 };
 
-/** The start of a test's call: `test(`, `it(`, and their modifiers (`test.each(…)(`). */
 const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
 
-/** The literal title a test call opens on. */
 const TITLE = /^\s*(?<quote>['"`])(?<title>(?:[^\\]|\\.)*?)\k<quote>/u;
 
-/** The offset where the line holding `index` starts. */
 function lineStart(text: string, index: number): number {
     return text.lastIndexOf('\n', index - 1) + 1;
 }
 
-/** The offset past the line holding `index`, its newline included. */
 function lineEnd(text: string, index: number): number {
     const end = text.indexOf('\n', index);
     return end === -1 ? text.length : end + 1;
 }
 
-/** Where a test's lines begin: its own line, and the comment lines right above it. */
 function withLeadingComments(text: string, start: number): number {
     let begin = lineStart(text, start);
     while (begin > 0) {
@@ -102,7 +76,6 @@ function withLeadingComments(text: string, start: number): number {
     return begin;
 }
 
-/** The tests of a file, each by the whole lines it takes, in order. */
 function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
     const text = withoutComments(source);
     const tests: Omit<TestOf, 'subjects'>[] = [];
@@ -121,22 +94,15 @@ function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
     return tests;
 }
 
-/** The facet folder a spec sits in, below the specs root. */
 function facetOf(specsRoot: string, file: string): string {
     return relative(specsRoot, file).split(/[/\\]/u)[0] ?? '';
 }
 
-/** A file the spec names by a relative path, read — `undefined` when the tree holds none there. */
 function readBeside(file: string, path: string): string | undefined {
     const target = resolve(dirname(file), path);
     return treeKind(target) === 'file' ? readFileSync(target, 'utf8') : undefined;
 }
 
-/**
- * What the spec's subjects are read with: the irregular collections and the
- * method-less routes of the unit's `jterrazz.config.ts`, and the command list of each runner the spec
- * imports a `cli` from, by the handle it holds that runner by.
- */
 function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
     const { collections, methodless } = testSettingsAt(
         projectRootOf(specsRoot) ?? dirname(specsRoot),
@@ -152,7 +118,6 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
     return { collections, commands, methodless };
 }
 
-/** Read one spec for its subjects and its tests. */
 function readSpec(specsRoot: string, file: string): SpecRead {
     const text = readFileSync(file, 'utf8');
     const facet = facetOf(specsRoot, file);
@@ -182,11 +147,6 @@ function readSpec(specsRoot: string, file: string): SpecRead {
     return { facet, file, reading, subjects, tests, text };
 }
 
-/**
- * Every `.spec.ts` of a facet whose chains reach a subject of the project's
- * own app — a spec of a specimen is filed by its capability, never by
- * the route, the job or the command it reaches.
- */
 function subjectSpecs(specsRoot: string): SpecRead[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts'))
         .filter((file) => (SUBJECT_FACETS as readonly string[]).includes(facetOf(specsRoot, file)))
@@ -194,18 +154,16 @@ function subjectSpecs(specsRoot: string): SpecRead[] {
         .filter((spec) => specimenOf(spec.file, spec.text, spec.facet) === undefined);
 }
 
-/** The 1-based line and column of an offset. */
 function positionOf(text: string, index: number): { column: number; line: number } {
     const before = text.slice(0, index);
     return { column: index - lineStart(text, index) + 1, line: before.split('\n').length };
 }
 
-/** The aspect a spec file names: `pagination.spec.ts` → `pagination`. */
 function aspectOf(file: string): string {
     return basename(file).replace(/\.spec\.ts$/u, '');
 }
 
-/** A subject as the words of a file name: `/articles/:id` → `articles-id`. */
+/** `/articles/:id` → `articles-id`. */
 function slugOf(name: string): string {
     return (
         name
@@ -215,10 +173,6 @@ function slugOf(name: string): string {
     );
 }
 
-/**
- * Where the file of one subject goes: its standard name's folder under the
- * facet, or — for a subject with none — beside the file, named for it.
- */
 function targetOf(specsRoot: string, spec: SpecRead, name: string, keepsName: boolean): string {
     const subject = spec.subjects.get(name)?.subject;
     const folder = subject === undefined ? undefined : subjectFolder(subject, spec.reading);
@@ -234,12 +188,10 @@ function targetOf(specsRoot: string, spec: SpecRead, name: string, keepsName: bo
     return join(specsRoot, spec.facet, folder, `${aspect}.spec.ts`);
 }
 
-/** A test whose own chains reach several subjects — a journey no cut can separate. */
 function journeyOf(spec: SpecRead): TestOf | undefined {
     return spec.tests.find((test) => test.subjects.length > 1);
 }
 
-/** The subjects the file's tests open on, in order: each is one file of a split. */
 function openedSubjects(spec: SpecRead): string[] {
     return [
         ...new Set(
@@ -250,11 +202,7 @@ function openedSubjects(spec: SpecRead): string[] {
     ];
 }
 
-/**
- * The files a split writes, one per subject a test opens on — a journey goes
- * with the subject its chain starts on; the first keeps the file's name where
- * the subject has no folder.
- */
+/** A journey goes with the subject its chain starts on. */
 function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string> {
     const plan = new Map<string, string>();
     for (const [position, name] of openedSubjects(spec).entries()) {
@@ -263,7 +211,6 @@ function splitPlan(specsRoot: string, spec: SpecRead): Map<string, string> {
     return plan;
 }
 
-/** What C29 tells the author of a file reaching several subjects to do. */
 function splitAdvice(specsRoot: string, spec: SpecRead): string {
     const journey = journeyOf(spec);
     const targets = [...splitPlan(specsRoot, spec).values()].map((path) => shown(specsRoot, path));
@@ -278,28 +225,21 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
     return journey === undefined ? split : `${split}; ${seed}`;
 }
 
-/** Where C29 reports a file: the first chain that reaches a second subject. */
 function secondSubjectAt(spec: SpecRead): { column: number; line: number } {
     const [, second] = [...spec.subjects.values()];
     return positionOf(spec.text, second?.index ?? 0);
 }
 
-/** Has the file's author silenced this finding — `checker-disable-line c29|c30 -- <reason>`? */
 function silenced(spec: SpecRead): boolean {
     return spec.subjects.size > 1
         ? suppressedLines(spec.text, 'c29').has(secondSubjectAt(spec).line)
         : suppressedLines(spec.text, 'c30').has(1);
 }
 
-/** A path as the report prints it, below the specs root. */
 function shown(specsRoot: string, path: string): string {
     return relative(specsRoot, path).split(sep).join('/');
 }
 
-/**
- * CONVENTIONS C29 — every chain of a spec file reaches one subject. Reported
- * at the first chain that reaches a second one.
- */
 export function checkOneSubject(specsRoot: string): TokenViolation[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         if (spec.subjects.size < 2 || silenced(spec)) {
@@ -319,11 +259,7 @@ export function checkOneSubject(specsRoot: string): TokenViolation[] {
     });
 }
 
-/**
- * The C30 finding of a subject whose path holds a word that may be a value:
- * no folder is derived from it, and the author writes the template that says
- * which it is. Reported at the chain that sends it.
- */
+/** No folder is derived from a word that may be a value: the author writes the template that says which it is. */
 function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViolation | undefined {
     const at = spec.subjects.get(name);
     const segment = at === undefined ? undefined : ambiguousSegment(at.subject, spec.reading);
@@ -345,11 +281,6 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViol
     };
 }
 
-/**
- * CONVENTIONS C30 — a spec file about one subject sits in its subject's
- * standard folder. Reported at the file's first line; a subject whose path
- * reads two ways is reported at its chain, and never moved.
- */
 export function checkSubjectFolder(specsRoot: string): TokenViolation[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         const [only] = [...spec.subjects.keys()];
@@ -377,9 +308,6 @@ export function checkSubjectFolder(specsRoot: string): TokenViolation[] {
     });
 }
 
-// ── Fix ──
-
-/** An import clause: its default name, its named specifiers, and where it stands. */
 type ImportClause = Span & {
     defaultName: string | undefined;
     named: { local: string; text: string }[];
@@ -387,11 +315,9 @@ type ImportClause = Span & {
     typeOnly: boolean;
 };
 
-/** `import x, { a, b as c } from '…';` — a named or default import, across lines. */
 const IMPORT =
     /^import\s+(?<type>type\s+)?(?:(?<plain>[\w$]+)\s*,?\s*)?(?:\{(?<named>[^}]*)\})?\s*from\s+(?<quote>['"])(?<source>[^'"]+)\k<quote>;?[ \t]*\n?/gmu;
 
-/** The import clauses of a file. */
 function importsOf(text: string): ImportClause[] {
     return [...text.matchAll(IMPORT)].map((found) => ({
         defaultName: found.groups?.plain,
@@ -410,7 +336,6 @@ function importsOf(text: string): ImportClause[] {
     }));
 }
 
-/** An import clause written back with only the names it keeps — nothing when it keeps none. */
 function importText(clause: ImportClause, keeps: (local: string) => boolean): string {
     const plain =
         clause.defaultName !== undefined && keeps(clause.defaultName)
@@ -425,11 +350,7 @@ function importText(clause: ImportClause, keeps: (local: string) => boolean): st
         : `import ${clause.typeOnly ? 'type ' : ''}${parts.join(', ')} from '${clause.source}';\n`;
 }
 
-/**
- * The code alone: comments, strings and regular expressions blanked — a name
- * written in a message (`'cli-app'`, `'the text'`) is no read of it. A
- * template stays whole, since what its holes hold is code.
- */
+/** A name written in a message is no read of it; a template stays whole, since its holes hold code. */
 function codeOnly(text: string): string {
     const blank = withoutComments(text);
     let out = '';
@@ -447,7 +368,6 @@ function codeOnly(text: string): string {
     return out;
 }
 
-/** Is `name` read anywhere in `text` outside the span it is declared in? */
 function isRead(text: string, name: string, declared: Span): boolean {
     const body = codeOnly(`${text.slice(0, declared.start)}\n${text.slice(declared.end)}`);
     return new RegExp(
@@ -456,14 +376,11 @@ function isRead(text: string, name: string, declared: Span): boolean {
     ).test(body);
 }
 
-/** A file-level declaration, the comment lines above it included — a type's or a value's. */
 type Declaration = Span & { name: string; type: boolean };
 
-/** A top-level declaration's head: `const X`, `let X`, `function x`, `async function x`, `type X`, `interface X`. */
 const DECLARATION =
     /^(?:(?:const|let)\s+(?<variable>[\w$]+)|(?:async\s+)?function\s*\*?\s*(?<fn>[\w$]+)|type\s+(?<alias>[\w$]+)|interface\s+(?<shape>[\w$]+))/gmu;
 
-/** Where a top-level statement that opens at `start` ends: its `;`, or the brace closing a function's or an interface's body. */
 function statementEnd(blank: string, start: number, isFunction: boolean): number {
     let index = start;
     while (index < blank.length) {
@@ -475,8 +392,7 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
         }
         if (character === '(' || character === '[' || character === '{') {
             const close = closingOf(blank, index);
-            // A function's body is the brace that closes its line: an object
-            // type in its return annotation is followed by more of the head.
+            // An object type in a return annotation is followed by more of the head.
             if (
                 isFunction &&
                 character === '{' &&
@@ -495,7 +411,7 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
     return blank.length;
 }
 
-/** The top-level `const`/`let`/`function`/`type`/`interface` declarations of a file — an export is read elsewhere, and kept. */
+/** An export is read elsewhere, and kept. */
 function declarationsOf(text: string): Declaration[] {
     const blank = withoutComments(text);
     return [...blank.matchAll(DECLARATION)].flatMap((match) => {
@@ -520,7 +436,6 @@ function declarationsOf(text: string): Declaration[] {
     });
 }
 
-/** The code with one file-level declaration nothing reads taken out — or as it was. */
 function withoutAnUnreadDeclaration(text: string): string {
     const unread = declarationsOf(text).find(
         (declaration) => !isRead(text, declaration.name, declaration),
@@ -528,7 +443,6 @@ function withoutAnUnreadDeclaration(text: string): string {
     return unread === undefined ? text : text.slice(0, unread.start) + text.slice(unread.end);
 }
 
-/** The code with each import clause keeping only the names the rest of it reads. */
 function withImportsPruned(text: string): string {
     const clauses = importsOf(text);
     // A name another import clause spells (`{ cli as vitestCli }`) is no read of it.
@@ -543,7 +457,6 @@ function withImportsPruned(text: string): string {
     return current;
 }
 
-/** Drop the file-level declarations and the imports nothing left in the file reads. */
 function pruned(text: string): string {
     let current = text;
     for (let previous = ''; previous !== current;) {
@@ -555,17 +468,14 @@ function pruned(text: string): string {
         .replace(/(?:\n[ \t]*\/\/[^\n]*|\n[ \t]*)+$/u, '\n');
 }
 
-/** A relative path from `from` to `to`, as the code spells one: `./x`, `../y`. */
 function relativePath(from: string, to: string): string {
     const path = relative(from, to).split(sep).join('/');
     return path.startsWith('.') ? path : `./${path}`;
 }
 
-/** A literal path the code names, and the call or clause that names it. */
 const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
-/** The spans of the file's string literals, templates and regular expressions — text, never a call. */
 function literalSpans(text: string): Span[] {
     const blank = withoutComments(text);
     const spans: Span[] = [];
@@ -581,11 +491,7 @@ function literalSpans(text: string): Span[] {
     return spans;
 }
 
-/**
- * The code, every relative path it names rebased from `from` to `to`, pointing
- * where it pointed. A call spelled inside a string is text, and a path naming
- * nothing — a negative spec's missing file — says the same from anywhere.
- */
+/** A path naming nothing, a negative spec's missing file, says the same from anywhere. */
 function rebased(text: string, from: string, to: string): string {
     const strings = literalSpans(text);
     let out = '';
@@ -606,10 +512,8 @@ function rebased(text: string, from: string, to: string): string {
     return out + text.slice(last);
 }
 
-/** A top-level `describe(` call, opening at the start of its line. */
 const DESCRIBE_CALL = /^describe(?:\.\w+(?:\([^()]*\))?)*\s*\(/gmu;
 
-/** The top-level describes of a file, by the whole lines they take, and whether they hold a test. */
 function describesOf(text: string): (Span & { holdsTests: boolean; open: number })[] {
     const blank = withoutComments(text);
     return [...blank.matchAll(DESCRIBE_CALL)].map((found) => {
@@ -626,11 +530,7 @@ function describesOf(text: string): (Span & { holdsTests: boolean; open: number 
     });
 }
 
-/**
- * The code with ONE top-level describe, titled with the aspect: a describe
- * the cut left with no test goes, and the bodies of the others join the first
- * — C31's law, which a split would otherwise break on every file it writes.
- */
+/** C31: a split would otherwise break the one-describe law on every file it writes. */
 function oneDescribe(text: string, aspect: string): string {
     let current = text;
     for (const empty of describesOf(current)
@@ -661,7 +561,6 @@ function oneDescribe(text: string, aspect: string): string {
     );
 }
 
-/** The code with one test's lines taken out. */
 function without(text: string, spans: Span[]): string {
     let current = text;
     for (const span of spans.toSorted((a, b) => b.start - a.start)) {
@@ -670,10 +569,6 @@ function without(text: string, spans: Span[]): string {
     return current;
 }
 
-/**
- * Every literal path of the specs tree, resolved: which file names which
- * target, so a moved entry's readers can be found and rewritten.
- */
 function diskReferences(specsRoot: string): { file: string; target: string }[] {
     return listFiles(specsRoot, (path) => /\.(?:spec|test)\.tsx?$/u.test(path)).flatMap((file) =>
         [...readFileSync(file, 'utf8').matchAll(RELATIVE_LITERAL)]
@@ -686,16 +581,10 @@ function diskReferences(specsRoot: string): { file: string; target: string }[] {
     );
 }
 
-/** Is `path` the entry, or below it? */
 function isAtOrBelow(entry: string, path: string): boolean {
     return path === entry || path.startsWith(`${entry}${sep}`);
 }
 
-/**
- * The ground a moved or split spec leaves behind: every entry of the old
- * leaf's four folders a file of another leaf reads goes up to the specs
- * root's shared folder of its role, and every path that named it follows.
- */
 function liftGround(specsRoot: string, leaf: string): string[] {
     const lifted: string[] = [];
     const references = diskReferences(specsRoot);
@@ -738,15 +627,10 @@ function liftGround(specsRoot: string, leaf: string): string[] {
     return lifted;
 }
 
-// ── The helpers a split shares ──
-
-/** One file a split writes: where, and its code, paths already rebased and pruned. */
 type Draft = { target: string; text: string };
 
-/** A call that builds a path — what a module no test is may never hold (C26). */
 const BUILDS_DISK = /(?<![\w$.])(?:file|directory)\s*\(/u;
 
-/** Does `code` read `name` — a whole identifier, never a member or a longer name? */
 function reads(code: string, name: string): boolean {
     return new RegExp(
         String.raw`(?<![\w$.])${name.replaceAll('$', String.raw`\$`)}(?![\w$])`,
@@ -754,14 +638,7 @@ function reads(code: string, name: string): boolean {
     ).test(codeOnly(code));
 }
 
-/**
- * The file-level declarations a split moves into the leaf's fixtures module:
- * the values two files or more still read, with every declaration they read
- * in turn — a type alias or an interface among them — never one that builds a
- * `file()` or a `directory()` (C26), nor one that reads such a declaration,
- * which stay copied where they are read. A type only tests read is no helper:
- * it stays in each file that reads it.
- */
+/** A declaration building a `file()` or `directory()` (C26), or reading one, stays copied where it is read; a type only tests read stays in each file. */
 function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
     const declarations = declarationsOf(spec.text);
     const code = new Map(declarations.map((d) => [d.name, spec.text.slice(d.start, d.end)]));
@@ -804,7 +681,6 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
     return declarations.filter((d) => moved.has(d.name));
 }
 
-/** The folder every path of the list sits in or below — the nearest they share. */
 function commonFolder(paths: readonly string[]): string {
     const [first = [], ...rest] = paths.map((path) => path.split(sep));
     let depth = first.length;
@@ -817,13 +693,11 @@ function commonFolder(paths: readonly string[]): string {
     return first.slice(0, depth).join(sep);
 }
 
-/** A declaration's code, exported: `export` written before its head, its doc comment kept above. */
 function exported(code: string): string {
     const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(withoutComments(code));
     return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
 }
 
-/** The code with an import line added after its last import. */
 function withImportLine(text: string, line: string): string {
     const last = importsOf(text).at(-1);
     return last === undefined
@@ -831,11 +705,7 @@ function withImportLine(text: string, line: string): string {
         : `${text.slice(0, last.end)}${line}\n${text.slice(last.end)}`;
 }
 
-/**
- * The clause importing what a file reads from the fixtures module: `import
- * type` when it reads only types, a `type` before each type among values
- * otherwise, so no type becomes a runtime import.
- */
+/** A `type` marks each type among values, so no type becomes a runtime import. */
 function importLine(read: readonly string[], types: ReadonlySet<string>, from: string): string {
     if (read.every((name) => types.has(name))) {
         return `import type { ${read.join(', ')} } from '${from}';`;
@@ -844,13 +714,7 @@ function importLine(read: readonly string[], types: ReadonlySet<string>, from: s
     return `import { ${names.join(', ')} } from '${from}';`;
 }
 
-/**
- * The drafts of a split once the helpers two of them read live once: moved
- * into the fixtures module of the folder their readers share,
- * `<folder>/<folder>.fixtures.ts`, exported, and imported by each reader —
- * the typed-fixture module the naming recap names, beside the tests it serves.
- * A module already at that path is the author's: the copies stay.
- */
+/** A module already at `<folder>/<folder>.fixtures.ts` is the author's: the copies stay. */
 function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; fixtures?: Draft } {
     const moved = movedDeclarations(spec, drafts);
     if (moved.length === 0) {
@@ -896,10 +760,8 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
     };
 }
 
-/** A hook call, opening its line — at the top level or in a describe's body. */
 const HOOK_CALL = /^[ \t]*(?:afterAll|afterEach|beforeAll|beforeEach)\s*\(/gmu;
 
-/** The names a hook's body may read that no test sets: the runner's own, and the language's. */
 const AMBIENT = new Set([
     'afterAll',
     'afterEach',
@@ -923,7 +785,6 @@ const AMBIENT = new Set([
     'vi',
 ]);
 
-/** The names a piece of code reads — never a property after a dot, never a word inside a string. */
 function namesRead(code: string): Set<string> {
     const bare = codeOnly(code);
     return new Set(
@@ -933,13 +794,7 @@ function namesRead(code: string): Set<string> {
     );
 }
 
-/**
- * The code without the hooks nothing else in it reads the state of: a hook
- * whose names — the source it clears, the double it resets — the rest of the
- * file (its imports and the name's own declaration aside) never reads, went
- * with the tests that did. A hook reading nothing but the runner's names is
- * every test's, and stays.
- */
+/** A hook reading nothing but the runner's names is every test's, and stays. */
 function withoutIdleHooks(text: string): string {
     const blank = withoutComments(text);
     const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {
@@ -964,7 +819,6 @@ function withoutIdleHooks(text: string): string {
     return without(text, idle);
 }
 
-/** The files a split writes, one per subject: each with its tests, paths rebased, unread code pruned. */
 function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
     const [first = ''] = openedSubjects(spec);
     const neutral = new Set(spec.tests.filter((test) => test.subjects.length === 0));
@@ -983,7 +837,6 @@ function splitDrafts(spec: SpecRead, plan: Map<string, string>): Draft[] {
     });
 }
 
-/** Write a split's files, the helpers they share once, and the file's history with its first subject. */
 function writeSplit(
     specsRoot: string,
     spec: SpecRead,
@@ -993,7 +846,6 @@ function writeSplit(
     const shared = withSharedHelpers(spec, drafts);
     const [opening] = shared.drafts;
     if (opening !== undefined && !keepsFile && opening.target !== spec.file) {
-        // The file's history follows its first subject.
         mkdirSync(dirname(opening.target), { recursive: true });
         moveKeepingHistory(spec.file, opening.target);
     }
@@ -1007,13 +859,7 @@ function writeSplit(
         .map(({ target }) => `${shown(specsRoot, spec.file)} → ${shown(specsRoot, target)}`);
 }
 
-/**
- * Apply C29 and C30: split each spec reaching several subjects into one file
- * per subject, and move each spec about one subject to its standard folder.
- * A test reaching two subjects goes with the one its chain opens on, and C29
- * keeps naming it; a file whose target is taken is left for its author.
- * Returns what it did, below the specs root.
- */
+/** A test reaching two subjects goes with the one its chain opens on; a file whose target is taken is left for its author. */
 export function fixSubjects(specsRoot: string): string[] {
     const done: string[] = [];
     for (const spec of subjectSpecs(specsRoot)) {
@@ -1038,10 +884,6 @@ export function fixSubjects(specsRoot: string): string[] {
     return done;
 }
 
-/**
- * Remove the folder a move left empty, and each parent it empties in turn, up
- * to the specs root — as C14 and C27 remove the folders theirs empty.
- */
 function removeEmptied(specsRoot: string, folder: string): void {
     let current = folder;
     while (current !== specsRoot && current.startsWith(specsRoot) && existsSync(current)) {

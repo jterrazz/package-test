@@ -7,40 +7,14 @@ import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../src/kernel/files/
 import type { TokenViolation } from './checker.js';
 import { isNodeTestFileName, isTestFileName } from './role.js';
 
-/**
- * The FACET passes — what a tree says about itself, read from the tree.
- *
- * A statique rule sees one file; these three need the shape around it: which
- * folder a file sits under, what the specification at that folder's root
- * constructs, which ground lives below it, and who reads that ground. The four
- * hold the one law the fork rests on — **folder = constructor** — from both
- * sides: a facet folder has the runner its name promises (C20), a spec under it
- * reaches that runner (C18), and ground one spec alone reads belongs to that
- * spec (C21w).
- *
- * A first-level folder that is NOT a facet is a repository suite — it covers a
- * tree rather than a product, C1's declared depth judges its shape, and none of
- * these passes reaches it.
- */
-
-/** The six facet folders — a first-level name under `specs/` that IS a constructor. */
 export const FACETS: string[] = ['api', 'cli', 'integration', 'job', 'mobile', 'website'];
 
-/**
- * Directories no facet walk enters.
- *
- * A `fixtures/` folder — a leaf's, or the pool's (`specs/shared/fixtures/`) —
- * is verbatim material, the reusable apps AND the trees that fail on purpose,
- * never live specs, so every pass prunes it exactly as the token checker does.
- */
 const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-/** Does this facet-relative path cross ground — a folder with one of the four reserved names? */
 function isUnderGround(relativePath: string): boolean {
     return relativePath.split(/[/\\]/u).some((segment) => isGroundName(segment));
 }
 
-/** The tree listing, answering `[]` for anything it cannot read. */
 function entriesOf(dir: string): TreeEntry[] {
     try {
         return treeEntries(dir);
@@ -49,34 +23,18 @@ function entriesOf(dir: string): TreeEntry[] {
     }
 }
 
-/** The specification files at a directory's own level. */
 function specificationsIn(dir: string): string[] {
     return entriesOf(dir)
         .filter((entry) => entry.isFile() && entry.name.includes('.specification.'))
         .map((entry) => join(dir, entry.name));
 }
 
-/**
- * Every import SOURCE a file names — static, dynamic, and re-export.
- *
- * The source, not a substring of the file: `../website.specification` carries
- * no extension, so a scan for `.specification.js` read a spec that reaches its
- * runner as a module test parked in a facet tree, and told the author to move
- * the file that specifies the product.
- */
+/** The source, not a substring: `../website.specification` carries no extension. */
 const IMPORT_SOURCE = /(?:\bfrom|\bimport|\brequire)\s*\(?\s*['"](?<source>[^'"]+)['"]/gu;
 
-/** The framework's own entry — a spec may construct the runner itself. */
 const CONSTRUCTS = /\bspecification\.[a-z]+\s*\(/u;
 
-/**
- * Does this file reach the runner of the facet it sits under?
- *
- * Two shapes answer yes: importing the facet's `*.specification` module
- * (however the import spells the extension), and constructing the runner in
- * the file itself — a refusal spec proves the constructor that must FAIL to
- * start, and has no specification module to import.
- */
+/** Constructing the runner in the file counts: a refusal spec proves the constructor that must fail to start, and has no specification module to import. */
 export function reachesRunner(text: string): boolean {
     for (const match of text.matchAll(IMPORT_SOURCE)) {
         const source = match.groups?.source ?? '';
@@ -90,7 +48,6 @@ export function reachesRunner(text: string): boolean {
     return CONSTRUCTS.test(text);
 }
 
-/** Read a file as text, or `null`. */
 function textOf(path: string): null | string {
     try {
         return readFileSync(path, 'utf8');
@@ -99,11 +56,6 @@ function textOf(path: string): null | string {
     }
 }
 
-/**
- * Every file under `dir`, depth-first.
- *
- * @yields each file path.
- */
 function* walkFiles(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
         const path = join(dir, entry.name);
@@ -117,21 +69,12 @@ function* walkFiles(dir: string): Generator<string> {
     }
 }
 
-/** The facet folders a specs root actually holds. */
 function facetFoldersOf(specsRoot: string): { facet: string; path: string }[] {
     return entriesOf(specsRoot)
         .filter((entry) => entry.isDirectory() && FACETS.includes(entry.name))
         .map((entry) => ({ facet: entry.name, path: join(specsRoot, entry.name) }));
 }
 
-/**
- * C20 — a folder named for a facet holds the specification that constructs it.
- *
- * Positive-only: `specs/api/` promises `specification.api()`, and a reader who
- * opens it expecting a runner and finding none has been told something false by
- * the tree itself. Any OTHER first-level name is a repository suite and is
- * judged by C1's declared depth alone — the folder never has to be a facet.
- */
 export function checkFacetFolder(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const { facet, path } of facetFoldersOf(specsRoot)) {
@@ -154,14 +97,6 @@ export function checkFacetFolder(specsRoot: string): TokenViolation[] {
     return violations;
 }
 
-/**
- * C18 — a spec under a facet folder reaches the runner that folder promises.
- *
- * A test file that imports neither the facet's specification module nor the
- * framework is a MODULE test parked in a facet tree: it runs under the facet's
- * project, pays its budget and its services, and proves something that belongs
- * beside the module it covers.
- */
 export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const { facet, path } of facetFoldersOf(specsRoot)) {
@@ -174,11 +109,7 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
             if (!isTestFileName(name)) {
                 continue;
             }
-            // Ground is ground, whichever of the four names it carries: a
-            // `.test.ts` under `expected/` is a GOLDEN — the file a fixer is
-            // expected to produce — and one under `fixtures/` is the input of
-            // that same golden. Neither is a spec, and neither reaches a runner
-            // by construction.
+            // A test file under ground is a golden or its input, never a spec.
             if (isUnderGround(relative(path, file))) {
                 continue;
             }
@@ -199,11 +130,6 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
     return violations;
 }
 
-/**
- * Every directory under `dir`, depth-first.
- *
- * @yields each directory path.
- */
 function* walkDirectories(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
         if (!entry.isDirectory() || SKIPPED.has(entry.name)) {
@@ -215,33 +141,14 @@ function* walkDirectories(dir: string): Generator<string> {
     }
 }
 
-/** The facets whose folders are their subjects' standard names (C30). */
 const SUBJECT_FOLDER_FACETS = new Set(['api', 'cli', 'job']);
 
-/** The ground names a leaf can hold. */
 const GROUND = new Set<string>(GROUND_DIRS);
 
-/**
- * A golden named by a TEMPLATE rather than by a literal — `toMatch(file(`./expected/${x}.json`))`.
- *
- * Such a test reads whatever the table hands it, so the names under the ground
- * appear nowhere in its source. It is a reader of every golden in its leaf,
- * and counting it as none made a shared `expected/` read as one spec's own.
- */
+/** Such a test reads every golden of its leaf though its source names none. */
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
-/**
- * C21w (warning) — ground a single spec reads belongs to that spec.
- *
- * A leaf holding several specs and one `expected/` that only one of them
- * names reads as shared material: the next author assumes someone else depends
- * on it and nobody dares touch it. The fix is C1's — the spec that stands on
- * its own ground earns its own domain folder.
- *
- * Not where the folder is the subject's standard name (api, cli, job — C30):
- * there the leaf IS the subject, its aspect files share it by design, and a
- * folder of its own is one C30 would move the spec back out of.
- */
+/** Not where the folder is the subject's standard name (C30): there the leaf is the subject, and its aspect files share it by design. */
 export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const derived = (directory: string): boolean =>
@@ -250,9 +157,7 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
         (candidate) => !derived(candidate),
     )) {
         const entries = entriesOf(directory);
-        // A `.test.tsx` is out of reach, as it is for C1: a rendered unit sits
-        // beside its component, and a tree of them has no domain folders for
-        // the ground to move into.
+        // A `.test.tsx` is out of reach, as for C1: a tree of rendered units has no domain folders for the ground to move into.
         const tests = entries
             .filter((entry) => entry.isFile() && isNodeTestFileName(entry.name))
             .map((entry) => join(directory, entry.name));

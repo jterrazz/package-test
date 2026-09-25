@@ -9,17 +9,7 @@ import { runSelfChecks, runSelfSourceChecks, SELF_PASS_IDS } from './self-checke
 import { SELF_CHAPTER, selfRowOf } from './self-manifest.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
-/**
- * CLI entry for the self checker (bundled as `dist/self-checker.js`, left
- * out of the tarball by `files`).
- *
- *     node dist/self-checker.js [dir]     # a project root, or a specs tree — default: cwd
- *
- * It runs the passes of {@link SELF_PASS_IDS} over every specs tree under
- * `dir` and over the source tree of `dir` itself, prints each finding on the published checker's report line, and
- * exits 1 on an error. No fixer, no ratchet, no JSON: a self pass judges
- * this repository alone, which is held at zero.
- */
+/** `node dist/self-checker.js [dir]`, never in the tarball: no fixer, no ratchet, no JSON, since this repository is held at zero. */
 const root = resolve(process.argv[2] ?? '.');
 
 const findings: TokenViolation[] = [...runSelfSourceChecks(root)];

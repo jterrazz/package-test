@@ -22,83 +22,33 @@ import { isInside, literalSpans, nameAround } from './spec-values.js';
 import type { Span } from './spec-values.js';
 import { closingOf, literalEnd, withoutComments } from './subject.js';
 
-/**
- * C28 — a ground file exists only if it is shared, and a value only as long
- * as a test can hold it.
- *
- * A file a spec stands on is read at a distance: the reader of the test sees
- * `file('./expected/created.http')` and has to open another file to know what
- * the test expects. That is the price of sharing, and a file is worth it only
- * when several tests pay it together. So the checker counts the TESTS each
- * ground file is read by — a `test()`/`it()` whose body names it, a document —
- * and judges its level:
- *
- * A module test reads from outside every leaf, so a file one names — or a
- * folder holding it — is shared whatever the specs say: never written in
- * place, never moved down.
- *
- * - read by ONE test → it belongs in that test, written in place: a golden as
- *   the value `toMatch` compares, a request as its text or its body value. A
- *   directory tree, a binary file and a file longer than its role's cap
- *   ({@link INLINE_CAPS}) stay files; so does `fixtures/`, which is file state
- *   a program reads, and `seeds/`: SQL is never written in a test, so a seed
- *   one test reads lives beside it, in `./seeds/`;
- * - read by several tests of ONE leaf → beside them, in the leaf's own ground;
- *   a shared entry one leaf alone reaches, and no module test names, is moved
- *   down (what C14 was);
- * - read from several leaves → the specs root's shared ground, where C15 already
- *   holds a path that leaves its leaf, and C27 finds copies.
- *
- * The caps hold the other way too: a request written in the test longer than
- * the requests cap, or an expectation longer than the expected cap, is a file
- * even when one test reads it.
- *
- * A reference written outside every test — a `const` at the top of a file, a
- * helper — is read by as many tests as call it, which no scan can count: it
- * counts as shared, and the pass stays silent (precision over recall). Zero
- * references is C9's dead fixture.
- *
- * `--fix` inlines a single-use file where its one reference is a literal
- * `file()` handed straight to the verb that reads it, then deletes the file:
- * `toMatch(file(…))` → the text (or, for a json subject, the value) in place,
- * `.post(path, file(…))` → the body value, `.request(file(…))` → the
- * request's text. It writes a value past its cap to a file beside the test,
- * named from the test's title, and names it with `file()`. Any other shape is
- * reported and left to the author.
- */
+/** A reference outside every test (a top-level `const`, a helper) counts as shared: no scan can count its readers. */
 
-/** The most lines a value of each role holds in place — the owner's caps; a role absent here is never written in place. */
+/** A role absent here is never written in place. */
 export const INLINE_CAPS: Readonly<Record<string, number>> = {
     [GROUND_EXPECTED]: 150,
     [GROUND_REQUESTS]: 30,
 };
 
-/** A `file()`/`directory()` literal, and the verb or matcher it is handed to. */
 const DISK_LITERAL =
     /(?<![.\w])(?<kind>file|directory)\(\s*(?<quote>['"`])(?<path>(?:[^'"`\\]|\\.)*)\k<quote>\s*\)/gu;
 
-/** A file whose calls are tests. */
 const TEST_FILE = /\.(?:spec|test)\.[cm]?[jt]sx?$/u;
 
-/** The start of a test's call: `test(`, `it(`, and their modifiers (`test.each(…)(`). */
 const TEST_CALL = /(?<![.\w$])(?:test|it)(?:\.\w+(?:\([^()]*\))?)*\s*\(/gu;
 
-/** One reference to a ground file: where it is written, and the test it is written in. */
 type Reference = {
     column: number;
-    /** The source offset of the `file(`/`directory(` call, and past its closing paren. */
     end: number;
     file: string;
     kind: 'directory' | 'file';
     line: number;
     start: number;
-    /** The ground file it resolves to. */
     target: string;
-    /** The test it counts for — `undefined` for a reference outside every test. */
+    /** `undefined` for a reference outside every test. */
     test: string | undefined;
 };
 
-/** Past the string literal opening at `start`, a template's holes skipped by depth. */
 function stringEnd(text: string, start: number): number {
     const quote = text[start];
     let index = start + 1;
@@ -108,7 +58,6 @@ function stringEnd(text: string, start: number): number {
     return index + 1;
 }
 
-/** Past the parenthesis closing the one opening at `open`, strings skipped. */
 function closingParen(text: string, open: number): number {
     let depth = 0;
     let index = open;
@@ -127,7 +76,6 @@ function closingParen(text: string, open: number): number {
     return text.length;
 }
 
-/** Each test of a source, as the span of its call. */
 function testSpans(text: string): { end: number; start: number }[] {
     return [...text.matchAll(TEST_CALL)].map((match) => ({
         end: closingParen(text, match.index + match[0].length - 1),
@@ -135,22 +83,19 @@ function testSpans(text: string): { end: number; start: number }[] {
     }));
 }
 
-/** The 1-based line and column of an offset. */
 function positionOf(text: string, index: number): { column: number; line: number } {
     const before = text.slice(0, index);
     return { column: index - before.lastIndexOf('\n'), line: before.split('\n').length };
 }
 
-/** The first ground folder a path passes through, if any — C24's reading. */
+/** C24's reading. */
 function roleOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundName(segment));
 }
 
-/** Every literal reference a test file writes to a ground file, each with the test it sits in. */
 function referencesIn(file: string): Reference[] {
     const text = blankComments(readFileSync(file, 'utf8'));
-    // A module that is no test — a specification, a helper — is read by every
-    // test that imports it: what it names counts as shared.
+    // A module that is no test is read by every test importing it: what it names is shared.
     const spans = TEST_FILE.test(file) ? testSpans(text) : [];
     const references: Reference[] = [];
     for (const match of text.matchAll(DISK_LITERAL)) {
@@ -172,23 +117,21 @@ function referencesIn(file: string): Reference[] {
     return references;
 }
 
-/** The path from a test to its target, as the test spells it. */
 function written(file: string, target: string): string {
     return relative(dirname(file), target).split('\\').join('/');
 }
 
-/** The lines a value takes, its closing newline no line of its own. */
+/** Its closing newline is no line of its own. */
 export function valueLines(text: string): number {
     return text.replace(/\n$/u, '').split('\n').length;
 }
 
-/** The lines a file's content takes in place: a JSON file as the fixer writes its value, anything else as it stands. */
+/** A JSON file counts as the fixer writes its value. */
 function inPlaceLines(path: string, content: string): number {
     const parsed = path.endsWith('.json') ? jsonOf(content) : undefined;
     return valueLines(parsed === undefined ? content : JSON.stringify(parsed, null, 4));
 }
 
-/** Is this file one no test can hold in place — a binary, or longer than its role's cap? */
 function staysAFile(path: string, cap: number): boolean {
     const bytes = readFileSync(path);
     if (bytes.subarray(0, 8000).includes(0)) {
@@ -197,17 +140,14 @@ function staysAFile(path: string, cap: number): boolean {
     return inPlaceLines(path, bytes.toString('utf8')) > cap;
 }
 
-/** A single-use ground file, its first reference, and how many times its one test names it. */
 type SingleUse = { reference: Reference; references: number; target: string };
 
-/** The one reference of a file one test alone reads — `undefined` when several tests, or none, read it. */
 function oneTestReads(named: readonly Reference[]): Reference | undefined {
     const [only] = named;
     const tests = new Set(named.map((reference) => reference.test));
     return only?.test !== undefined && tests.size === 1 ? only : undefined;
 }
 
-/** Can the file this reference names be written in place — a file, of an inline role, text within its cap? */
 function inlinable(reference: Reference, target: string): boolean {
     const cap = INLINE_CAPS[roleOf(written(reference.file, target)) ?? ''];
     return (
@@ -218,13 +158,11 @@ function inlinable(reference: Reference, target: string): boolean {
     );
 }
 
-/** Is `path` strictly inside `directory`? */
 function within(directory: string, path: string): boolean {
     const rest = relative(directory, path);
     return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
 }
 
-/** Every ground file of the inline roles one test alone reads, and no module test names, under `rootDir`. */
 function singleUseFiles(rootDir: string): SingleUse[] {
     const roots = findSpecsRoots(rootDir);
     const references = roots.flatMap((root) =>
@@ -253,21 +191,16 @@ function singleUseFiles(rootDir: string): SingleUse[] {
     );
 }
 
-/** The form a single-use file takes in place, by the role its reference reads. */
 function inPlaceForm(reference: Reference): string {
     return roleOf(written(reference.file, reference.target)) === GROUND_EXPECTED
         ? 'the value `toMatch` compares'
         : 'the request or its body';
 }
 
-// ── A value past its cap ──
-
-/** A value written in a test, past the cap of the role its file would take. */
 type Oversized = {
     column: number;
-    /** The argument's span in the source. */
     end: number;
-    /** The file it goes to, beside the test — `undefined` when no file form holds it. */
+    /** `undefined` when no file form holds it. */
     extension: string | undefined;
     file: string;
     line: number;
@@ -275,33 +208,23 @@ type Oversized = {
     name: string;
     role: string;
     start: number;
-    /** The subject, when it is a plain value — a string has no golden, so the value stays in place. */
+    /** A string has no golden, so the value stays in place. */
     subject: string | undefined;
-    /** What the file holds — `undefined` when the value is no literal the fixer can read. */
     text: string | undefined;
 };
 
-/** A call whose argument is a value of a ground role: a body, a request, an expectation. */
 const VALUE_CALL = /\.(?<verb>post|put|request|toMatch)\s*\(/gu;
 
-/** The first characters of a value written in place: a string, a template, an object, a list. */
 const VALUE_START = /^[`'"{[]/u;
 
-/** The accessors whose subject is a json — its golden is a value in place. */
 const JSON_SUBJECT = /\.(?:head|json|jsonLd|screen|value)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
-/** A string subject — vitest's own `toMatch`, no whole result. */
 const STRING_SUBJECT = /\.(?:text|raw)\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
-/**
- * A subject that is a plain value — a name or a string literal handed to
- * `expect()`, no result's accessor: vitest's own `toMatch`, whose argument is
- * no file. Its long value is reported, never written to one.
- */
+/** vitest's own `toMatch` takes no file: its long value is reported, never written to one. */
 const PLAIN_SUBJECT =
     /expect\s*\(\s*(?<subject>[A-Za-z_$][\w$]*|'[^'\n]*'|"[^"\n]*")\s*\)\s*\.(?:not\s*\.\s*)?toMatch\s*\($/u;
 
-/** The arguments of the call opening at `open`, each by its trimmed span. */
 function argumentSpans(text: string, open: number): Span[] {
     const close = closingOf(text, open);
     const spans: Span[] = [];
@@ -330,7 +253,6 @@ function argumentSpans(text: string, open: number): Span[] {
     return spans;
 }
 
-/** The value a literal states, read as the runtime reads it — `undefined` when it is no literal. */
 function literalValue(source: string): unknown {
     if (/\$\{/u.test(source)) {
         return undefined;
@@ -342,7 +264,6 @@ function literalValue(source: string): unknown {
     }
 }
 
-/** The text a value's file holds, and the extension it takes, by the verb that reads it. */
 function fileForm(
     verb: string,
     before: string,
@@ -365,10 +286,8 @@ function fileForm(
         : { extension: '.json', text: json };
 }
 
-/** A call's value argument, when it is written in place: its span, its role, and the verb before it. */
 type Candidate = Span & { before: string; role: string; source: string; verb: string };
 
-/** The value a `VALUE_CALL` match hands its verb, if it is one written in place. */
 function candidateAt(
     text: string,
     call: RegExpExecArray,
@@ -389,7 +308,6 @@ function candidateAt(
     return { ...argument, before, role, source, verb };
 }
 
-/** Every value a test file writes in place past its role's cap. */
 function oversizedIn(file: string): Oversized[] {
     const source = readFileSync(file, 'utf8');
     const text = withoutComments(source);
@@ -432,14 +350,13 @@ function oversizedIn(file: string): Oversized[] {
     });
 }
 
-/** Every value the specs trees under `rootDir` write in place past its role's cap. */
 function oversizedValues(rootDir: string): Oversized[] {
     return findSpecsRoots(rootDir).flatMap((root) =>
         listFiles(root, (path) => TEST_FILE.test(path)).flatMap((file) => oversizedIn(file)),
     );
 }
 
-/** The path a value's file takes beside `file`: its own bytes reused, another's skipped past with a suffix. */
+/** Its own bytes are reused; another's are skipped past with a suffix. */
 function freePath(file: string, oversized: Oversized): string {
     const folder = join(dirname(file), oversized.role);
     for (let suffix = 1; ; suffix += 1) {
@@ -453,7 +370,6 @@ function freePath(file: string, oversized: Oversized): string {
     }
 }
 
-/** How C28 tells the author to take a value past its cap out of the test. */
 function capFix(oversized: Oversized, target: string): string {
     if (oversized.subject !== undefined) {
         return `a string has no golden: wrap it — \`expect(text(${oversized.subject})).toMatch(file('./${oversized.role}/${oversized.name}.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file`;
@@ -463,7 +379,6 @@ function capFix(oversized: Oversized, target: string): string {
         : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`;
 }
 
-/** What C28 tells the author of a value past its cap. */
 function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
     const kind = oversized.role === GROUND_EXPECTED ? 'an expectation' : 'a request';
     const target = `./${oversized.role}/${oversized.name}${oversized.extension ?? ''}`;
@@ -478,12 +393,6 @@ function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
     };
 }
 
-/**
- * C28 — every ground file of the inline roles one test alone reads, reported
- * where the test names it; every value past its role's cap and every SQL
- * written in a test, reported where it is written; and every entry of the
- * shared ground one leaf alone reaches, reported where it sits.
- */
 export function checkGroundSharing(rootDir: string): TokenViolation[] {
     const single = singleUseFiles(rootDir).map(({ reference, target }) => ({
         column: reference.column,
@@ -503,7 +412,6 @@ export function checkGroundSharing(rootDir: string): TokenViolation[] {
     ];
 }
 
-/** Write every value past its cap to its file beside the test, named with `file()` where it stood. */
 function fixOversizedValues(rootDir: string): string[] {
     const done: string[] = [];
     const byFile = Map.groupBy(
@@ -526,9 +434,6 @@ function fixOversizedValues(rootDir: string): string[] {
     return done;
 }
 
-// ── --fix ──
-
-/** A template literal's body: every character it would read as syntax, escaped. */
 function escapeTemplate(text: string): string {
     return text
         .replaceAll('\\', String.raw`\\`)
@@ -536,7 +441,6 @@ function escapeTemplate(text: string): string {
         .replaceAll('${', '\\${');
 }
 
-/** A text as a template literal: one line alone, or a block indented one level deeper than `indent`. */
 function block(text: string, indent: string): string {
     const lines = text.split('\n');
     if (lines.length === 1) {
@@ -546,21 +450,16 @@ function block(text: string, indent: string): string {
     const last = lines.pop() ?? '';
     const body = lines.map((line) => (line === '' ? '' : `${inner}${line}`)).join('\n');
     const closing = last === '' ? indent : `${inner}${last}`;
-    // The literal is read back by the runtime's own dedent, so the fixer
-    // proves the round trip instead of guessing at the shapes that lose it
-    // (text already indented, a last line of spaces alone): a candidate that
-    // does not come back unchanged is written as one quoted line instead.
+    // The literal is read back through the runtime's own dedent: a candidate that does not come back unchanged is written as one quoted line.
     return dedent(`\n${body}\n${closing}`) === text
         ? `\`\n${escapeTemplate(body)}\n${escapeTemplate(closing)}\``
         : JSON.stringify(text);
 }
 
-/** A JSON value as code, each line after the first indented with the call. */
 function value(parsed: unknown, indent: string): string {
     return (JSON.stringify(parsed, null, 4) ?? 'null').split('\n').join(`\n${indent}`);
 }
 
-/** The JSON a text holds, or `undefined` when it holds none. */
 function jsonOf(text: string): unknown {
     try {
         return JSON.parse(text) as unknown;
@@ -569,10 +468,7 @@ function jsonOf(text: string): unknown {
     }
 }
 
-/**
- * What replaces the `file(…)` call in place, read from what it is handed to —
- * or `undefined` when the shape is one the fixer does not rewrite.
- */
+/** `undefined` for a shape the fixer does not rewrite. */
 function replacementOf(
     before: string,
     content: string,
@@ -599,16 +495,13 @@ function replacementOf(
         : block(content, indent);
 }
 
-/** A string literal, its content dropped — what a scan for a call must not read. */
 const QUOTED = /'(?:[^'\\\n]|\\.)*'|"(?:[^"\\\n]|\\.)*"|`(?:[^`\\]|\\.)*`/gu;
 
-/** The file's imports once it was inlined into: no `file` when it reads no file. */
 function importsOf(text: string): string {
     const code = blankComments(text).replaceAll(QUOTED, "''");
     return /(?<![.\w])file\(/u.test(code) ? text : withoutEntryImport(text, 'file');
 }
 
-/** Remove the leaf ground folders a fix emptied, deepest first. */
 function removeEmptied(folders: Set<string>): void {
     for (const folder of [...folders].toSorted((a, b) => b.length - a.length)) {
         try {
@@ -621,20 +514,13 @@ function removeEmptied(folders: Set<string>): void {
     }
 }
 
-/**
- * Apply C28: write every SQL a test holds to a seed file beside it, and every
- * value past its cap to a file beside it; inline each single-use file into its
- * one test and delete it; then move every entry of the shared ground one leaf
- * alone reaches beside that leaf. Returns what changed, relative to `rootDir`, each
- * line opening on its verb — `wrote`, `inlined`, `moved`.
- */
 export function fixGroundSharing(rootDir: string): string[] {
     const done = [...fixInlineSeeds(rootDir), ...fixOversizedValues(rootDir)].map(
         (change) => `wrote ${change}`,
     );
     const emptied = new Set<string>();
     const byFile = new Map<string, SingleUse[]>();
-    // A file its one test names twice is written in place by the author, once, as a value both read.
+    // A file its one test names twice is the author's to write in place, once.
     for (const use of singleUseFiles(rootDir).filter(({ references }) => references === 1)) {
         byFile.set(use.reference.file, [...(byFile.get(use.reference.file) ?? []), use]);
     }

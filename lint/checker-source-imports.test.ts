@@ -3,11 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { checkEngineOwner, checkFacetIsolation } from './checker-source-imports.js';
 import { located, ROOT, treeOf } from './checker-source.fixtures.js';
 
-/**
- * The self checker passes I10 (`i10-facet-isolation`) and I11
- * (`i11-engine-owner`) — what the modules of the source tree may import,
- * beyond the direction I1 holds between its layers.
- */
+/** The self checker passes I10 (`i10-facet-isolation`) and I11 (`i11-engine-owner`). */
 describe('checker-source-imports', () => {
     test('the imports of the source tree (self checker passes I10, I11) — i10 — a facet never imports another, and is entered from outside by its face', () => {
         // Given - the package's own tree, and one where a facet reaches another, and an entry skips the face for a root file and for a concept folder

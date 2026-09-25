@@ -2,12 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { suppressedLines } from './checker-crossfile.js';
 
-// The cross-file passes (checkDeadFixtures / checkDatabaseProperty /
-// CheckDockerRunnerAwaitUsing) read whole feature TREES off disk, so a module
-// test exercising them would need real files — a specification, not a unit
-// (CONVENTIONS §I). Those live in specs/lint/checker/ as E2E goldens. What
-// stays here is the pure, code-input logic: the checker-channel suppression
-// mechanism, tested exhaustively on source strings.
+// The cross-file passes read whole trees off disk, so they are specified in `specs/lint/checker/`; this file holds the suppression mechanism, on source strings.
 
 describe('checker-crossfile', () => {
     test('checker suppression — suppressedLines (checker-disable comments) — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
@@ -47,7 +42,6 @@ describe('checker-crossfile', () => {
         // Then - both a7 and b5 are suppressed on line 2
         expect(suppressedLines(text, 'a7')).toStrictEqual(new Set([2]));
         expect(suppressedLines(text, 'b5')).toStrictEqual(new Set([2]));
-        // But an unlisted pass is not
         expect(suppressedLines(text, 'c9')).toStrictEqual(new Set());
     });
 

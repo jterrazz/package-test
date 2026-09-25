@@ -12,7 +12,6 @@ import { describe, expect, test } from 'vitest';
 
 import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './checker-migration.js';
 
-/** A tree written for 16.x, on disk: a specs tree, or (`at: ''`) a member. */
 function tree16(files: Record<string, string>, at = 'specs'): string {
     const scratch = mkdtempSync(join(tmpdir(), 'migrate-'));
     const root = join(scratch, at);

@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { BASELINE_FILE, drops, raised, readBaseline, report } from './coverage.js';
 
-/** A throwaway root carrying one written `coverage.baseline.json`. */
 function rootWith(contents: string): string {
     const root = mkdtempSync(join(tmpdir(), 'coverage-baseline-'));
     writeFileSync(join(root, BASELINE_FILE), contents);

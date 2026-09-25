@@ -9,21 +9,11 @@ import {
 } from './ast.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * A CARRIED read: a value a test takes from one result only to send it in a
- * later request of the same test — the cursor a page hands back, sent to fetch
- * the next. D20 exempts it from the whole comparison a read of a result owes.
- */
+/** D20 exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison. */
 
-/** How many names a carried value may pass through before the rule stops following it. */
 const CARRY_DEPTH = 4;
 
-/**
- * Is this call a link of a REQUEST — a chain off a handle, awaited whole
- * (`await api.params({ cursor }).get('/facts')`), or held whole in a name the
- * test awaits (`const next = api.get('/facts'); await next`)? A result's own
- * members and `expect(…)` are never one.
- */
+/** `await api.params({ cursor }).get('/facts')`, or held whole in a name the test awaits; a result's own members and `expect(…)` are never one. */
 function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string>): boolean {
     const root = chainRootName(call);
     if (child(call, 'callee')?.type !== 'MemberExpression' || root === undefined) {
@@ -36,7 +26,6 @@ function isRequestLink(call: AstNode, test: AstNode, results: ReadonlySet<string
     return holder?.type === 'AwaitExpression' || isAwaitedLater(holder, test);
 }
 
-/** Does this declarator bind a name the test awaits after it (`const next = …; await next`)? */
 function isAwaitedLater(declarator: AstNode | undefined, test: AstNode): boolean {
     const name =
         declarator?.type === 'VariableDeclarator'
@@ -55,7 +44,6 @@ function isAwaitedLater(declarator: AstNode | undefined, test: AstNode): boolean
     return awaited;
 }
 
-/** What holds the whole chain a link belongs to — the node above its last link. */
 function holderOfChain(link: AstNode): AstNode | undefined {
     let top = link;
     let parent = child(top, 'parent');
@@ -69,7 +57,6 @@ function holderOfChain(link: AstNode): AstNode | undefined {
     return parent;
 }
 
-/** Is this identifier a READ of its name — not a member's property nor a written key? */
 function isReference(node: AstNode): boolean {
     const parent = child(node, 'parent');
     if (parent?.type === 'MemberExpression') {
@@ -81,10 +68,6 @@ function isReference(node: AstNode): boolean {
     return parent?.type !== 'VariableDeclarator' || child(parent, 'id') !== node;
 }
 
-/**
- * Does the name this declarator binds flow ONLY into later requests — read at
- * least once, and every read after it carried in turn?
- */
 function bindingCarried(
     declarator: AstNode,
     callback: AstNode,
@@ -111,12 +94,7 @@ function bindingCarried(
     );
 }
 
-/**
- * Is this read's value CARRIED — sent in a later request of the same test
- * (a path, `params`, a body, a header), directly or through the names and
- * helpers it passes on the way? An `expect(…)` or a statement of its own on
- * the way makes it a read.
- */
+/** An `expect(…)` or a statement of its own on the way makes it a read. */
 export function isCarried(
     node: AstNode,
     callback: AstNode,

@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { testSettingsAt } from './test-settings.js';
 
-/** A unit holding a `jterrazz.config.ts` of this text, or none. */
 function unit(config?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-settings-'));
     if (config !== undefined) {

@@ -11,14 +11,6 @@ import {
 } from './ast.js';
 import type { AstNode } from './rule-shape.js';
 
-/**
- * The text C31's fix writes: a file's top-level groups and tests read as
- * statements, and merged into the one `describe` the rule asks for — each
- * group's tests titled `<group> — <test>`, the statements between them kept
- * at module scope.
- */
-
-/** Is this callee `describe`, or one of its modifiers (`describe.skip`, `describe.each(…)`)? */
 function isDescribeCallee(callee: AstNode | undefined): boolean {
     if (callee?.type === 'Identifier') {
         return identifierName(callee) === 'describe';
@@ -29,18 +21,15 @@ function isDescribeCallee(callee: AstNode | undefined): boolean {
     return callee?.type === 'CallExpression' && isDescribeCallee(child(callee, 'callee'));
 }
 
-/** The callee of the call a top-level statement makes, when it is one. */
 export function calleeOf(statement: AstNode): AstNode | undefined {
     const expression = child(statement, 'expression');
     return expression?.type === 'CallExpression' ? child(expression, 'callee') : undefined;
 }
 
-/** The first argument of the call a top-level statement makes. */
 export function firstArgumentOf(statement: AstNode): AstNode | undefined {
     return childList(child(statement, 'expression'), 'arguments')[0];
 }
 
-/** The statements of the block a group's function runs, when it is a plain `describe` with one. */
 export function groupBodyOf(group: AstNode): AstNode | undefined {
     if (identifierName(calleeOf(group)) !== 'describe') {
         return undefined;
@@ -50,7 +39,6 @@ export function groupBodyOf(group: AstNode): AstNode | undefined {
     return body?.type === 'BlockStatement' ? body : undefined;
 }
 
-/** A title written in quotes or backticks, escaped for its own delimiter. */
 export function escapedFor(title: AstNode, text: string): string {
     const raw = typeof title.raw === 'string' ? title.raw : "'";
     const delimiter = title.type === 'TemplateLiteral' ? '`' : raw.charAt(0);
@@ -58,7 +46,7 @@ export function escapedFor(title: AstNode, text: string): string {
     return delimiter === '`' ? escaped.replaceAll('${', '\\${') : escaped;
 }
 
-/** A group's tests, each title prefixed with the group's (C33's grouping), or `undefined` when it holds anything else. */
+/** `undefined` when the group holds anything but tests. */
 export function flattenedGroup(source: string, group: AstNode, named: string): string | undefined {
     const body = groupBodyOf(group);
     const title = stringValue(firstArgumentOf(group));
@@ -83,11 +71,7 @@ export function flattenedGroup(source: string, group: AstNode, named: string): s
     return text + source.slice(from, nodeEnd(body) - 1);
 }
 
-/**
- * The text replacing the run from the first member (a group or a test) to the
- * last: the statements between them kept at module scope above, then one
- * `describe` titled `named` holding every test. `undefined` when a group cannot flatten.
- */
+/** The statements between the members stay at module scope above the one describe; `undefined` when a group cannot flatten. */
 function mergedText(
     source: string,
     statements: AstNode[],
@@ -121,7 +105,6 @@ function mergedText(
     return `${hoisted}describe('${named}', () => {\n${grouped.trim()}\n});`;
 }
 
-/** The edit that brings `describe` into its `vitest` import, else a line of its own on top. */
 function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
     const vitest = statements.find(
         (statement) =>
@@ -147,17 +130,14 @@ function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {
           );
 }
 
-/** Is this top-level statement a group — `describe(…)` or one of its forms? */
 export function isGroup(statement: AstNode): boolean {
     return isDescribeCallee(calleeOf(statement));
 }
 
-/** Is this top-level statement a test? */
 export function isTest(statement: AstNode): boolean {
     return isTestCallee(calleeOf(statement));
 }
 
-/** The fix that merges `members` into one describe, when the merge is mechanical. */
 export function mergeFix(
     source: string,
     statements: AstNode[],

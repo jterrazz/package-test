@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { checkOneSubject, checkSubjectFolder, fixSubjects } from './checker-subject.js';
 
-/** A specs tree on disk, outside every work tree: the walk reads the disk. */
+/** Outside every work tree: the walk reads the disk. */
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'checker-subject-'));
     const root = join(scratch, 'specs');
@@ -20,7 +20,6 @@ function specsTree(files: Record<string, string>): string {
 
 const RUNNER = 'export const { api, cleanup } = await specification.api({});\n';
 
-/** A spec of two routes, each test on one, a helper and a constant only one of them reads. */
 const TWO_ROUTES = [
     "import { file } from '@jterrazz/test';",
     "import { describe, expect, test } from 'vitest';",
@@ -55,7 +54,6 @@ const TWO_ROUTES = [
     '',
 ].join('\n');
 
-/** A spec whose one test ends its chain on `terminal`. */
 function chartSpec(terminal: string): string {
     return [
         "import { api } from '../api.specification.js';",
@@ -64,7 +62,6 @@ function chartSpec(terminal: string): string {
     ].join('\n');
 }
 
-/** The chart route, once written as its template and once as the path it fills. */
 const CHARTS = {
     'api/api.specification.ts': RUNNER,
     'api/charts/filled.spec.ts': chartSpec("get('/indicators/btc/chart?range=1D')"),
@@ -73,7 +70,6 @@ const CHARTS = {
     ),
 };
 
-/** A spec running `db migrate`, its `cli` imported from the named specification module. */
 function migrating(door: string): string {
     return [
         `import { cli } from '../${door}.specification.js';`,

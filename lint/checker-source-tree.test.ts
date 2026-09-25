@@ -3,10 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { checkFolderShape, checkSourceRoot } from './checker-source-tree.js';
 import { located, ROOT, treeOf } from './checker-source.fixtures.js';
 
-/**
- * The self checker passes I9 (`i9-source-root`) and I12 (`i12-folder-shape`)
- * — what the source root holds, and what a folder of it may be named and hold.
- */
+/** The self checker passes I9 (`i9-source-root`) and I12 (`i12-folder-shape`). */
 describe('checker-source-tree', () => {
     test('the shape of the source tree (self checker passes I9, I12) — i9 — the source root holds the two entries and the six trees, and nothing else', () => {
         // Given - the package's own tree, and one with a module and a folder left at its root

@@ -12,7 +12,6 @@ import { describe, expect, test } from 'vitest';
 
 import { migrateStubs } from './checker-migration-stubs.js';
 
-/** A tree on disk: a specs tree, or (`at: ''`) a member. */
 function tree(files: Record<string, string>, at = 'specs'): string {
     const scratch = mkdtempSync(join(tmpdir(), 'migrate-stubs-'));
     const root = join(scratch, at);
@@ -23,7 +22,6 @@ function tree(files: Record<string, string>, at = 'specs'): string {
     return root;
 }
 
-/** A file of the tree, read back. */
 function read(root: string, path: string): string {
     return readFileSync(join(root, path), 'utf8');
 }

@@ -2,12 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { fixSpecDocument } from './checker-spec.js';
 
-/**
- * The two REWRITABLE document passes, read from the fixer's side: what
- * `node dist/checker.js <root> --fix` does to a file, and what it refuses to
- * touch. The passes themselves are proven end to end in `specs/lint/checker/`,
- * against the real binary.
- */
+/** The passes themselves are proven end to end in `specs/lint/checker/`, against the real binary. */
 
 describe('checker-spec', () => {
     test('fixSpecDocument — key order and block scalars — moves the keys back into the canonical order, each with its comment', () => {

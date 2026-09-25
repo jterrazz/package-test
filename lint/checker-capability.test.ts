@@ -6,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { checkCapabilityFolder } from './checker-capability.js';
 
-/** A specs tree on disk, from its files. Returns the specs root. */
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'checker-capability-'));
     const root = join(scratch, 'specs');
@@ -20,7 +19,6 @@ function specsTree(files: Record<string, string>): string {
 
 const SPECIMEN = "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n";
 
-/** A spec at `depth` folders below the facet, importing the facet's runner. */
 function spec(depth: number): string {
     return `import { api } from '${'../'.repeat(depth)}api.specification.js';\n`;
 }

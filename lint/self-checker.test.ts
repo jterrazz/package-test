@@ -7,7 +7,6 @@ import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { runAllChecks } from './checker.js';
 import { runSelfChecks, SELF_PASS_IDS } from './self-checker.js';
 
-/** A specs tree on disk, from its files. Returns the specs root. */
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'self-checker-'));
     const root = join(scratch, 'specs');
@@ -19,7 +18,7 @@ function specsTree(files: Record<string, string>): string {
     return root;
 }
 
-/** A spec of a specimen filed by the route it reaches — what C35 refuses. */
+/** What C35 refuses. */
 const MISFILED = {
     'api/api.specification.ts':
         "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",

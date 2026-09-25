@@ -20,7 +20,6 @@ import {
     ownFixesConfig,
 } from './ratchet-own-fixes.js';
 
-/** Every category, as the wrapper turns it off. */
 const off = {
     correctness: 'off',
     nursery: 'off',
@@ -31,10 +30,8 @@ const off = {
     suspicious: 'off',
 };
 
-/** The options the wrapper sets, whatever the config's. */
 const disarmed = { reportUnusedDisableDirectives: 'off', typeAware: false };
 
-/** A project root holding `files`, each written as given. */
 function projectWith(files: Record<string, string>): string {
     const root = mkdtempSync(join(tmpdir(), 'own-fixes-'));
     for (const [path, content] of Object.entries(files)) {
@@ -44,7 +41,6 @@ function projectWith(files: Record<string, string>): string {
     return root;
 }
 
-/** A stub oxlint that appends its arguments and the folder it ran in, copies the wrapper it was handed, runs `script`, then exits `status`. */
 function stubOxlint(root: string, status: number, script = ''): void {
     mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });
     const bin = join(root, 'node_modules', '.bin', 'oxlint');

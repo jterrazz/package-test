@@ -17,28 +17,10 @@ import type { Node, Pair, YAMLMap } from '../src/kernel/yaml/document.js';
 import type { CheckerPassId, Severity, TokenViolation } from './checker.js';
 import type { Teaching } from './lesson.js';
 
-/**
- * The `<case>.spec.yaml` conventions — the checker passes that judge a document
- * beyond its grammar.
- *
- * The grammar pass (`d4b-spec-shape`, in `checker.ts`) answers "can the runner
- * execute this?". These answer the questions a reader asks afterwards: is it
- * where it says it is, does it read in one order, does it assert something, and
- * is what it asserts still true tomorrow. Each pass exists because a defect
- * class was found by hand first; the header of each names it.
- *
- * Two of them are FIXABLE — key order and block scalars — because the writer
- * can rewrite them without judgment: the same `yaml` document round trip update
- * mode already relies on puts the keys back in order and re-styles a stream,
- * comments and everything else intact.
- */
+/** Key order and block scalars are fixable without judgment: the same `yaml` round trip update mode relies on keeps comments and everything else intact. */
 
-// ── Shared ──
-
-/** A violation before it knows its file — the passes below return these. */
 type Finding = Teaching & {
     line: number;
-    /** The catalogue pass this finding belongs to. */
     rule: CheckerPassId;
     severity: Severity;
 };
@@ -52,7 +34,7 @@ function finding(
     return { fix, found, line, rule, severity };
 }
 
-/** Directories the walks never enter — `fixtures/` holds INPUTS, never scenarios. */
+/** `fixtures/` holds inputs, never scenarios. */
 const PRUNED = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
 function listSpecFiles(dir: string): string[] {
@@ -87,7 +69,7 @@ function readText(path: string): string {
     }
 }
 
-// ── The YAML view (styles and key order live only in the AST) ──
+// Styles and key order live only in the AST.
 
 function documentMap(file: SpecFile): null | YAMLMap {
     const root = file.source.document.contents;
@@ -102,14 +84,12 @@ function keyName(pair: Pair<Node, Node>): null | string {
     return isScalar(pair.key) && typeof pair.key.value === 'string' ? pair.key.value : null;
 }
 
-/** The mappings of `runs:`. */
 function runMaps(file: SpecFile): YAMLMap[] {
     const map = documentMap(file);
     const items = map?.get('runs', true);
     return isSeq(items) ? (items.items as Node[]).filter((item) => isMap(item)) : [];
 }
 
-/** The stream scalars of one run — the values the block-scalar rule judges. */
 function streamScalars(run: YAMLMap): { key: string; scalar: Scalar }[] {
     const found: { key: string; scalar: Scalar }[] = [];
     for (const pair of pairsOf(run)) {
@@ -145,15 +125,6 @@ function isBlock(scalar: Scalar): boolean {
     return String(scalar.type ?? '').startsWith('BLOCK');
 }
 
-// ── d4b-spec-key-order ──
-
-/**
- * The canonical order, top level and inside a run: the ground a session stands
- * on before the session, what was given to a command before what came back.
- * Two authors ordering differently make an unreadable diff out of an unchanged
- * document; a `runs:` above `env:` makes a reader meet the session before its
- * setup.
- */
 function checkKeyOrder(file: SpecFile, lineAt: (node: Pair<Node, Node>) => number): Finding[] {
     const findings: Finding[] = [];
     const inspect = (map: YAMLMap, order: readonly string[], where: string): void => {
@@ -188,13 +159,6 @@ function checkKeyOrder(file: SpecFile, lineAt: (node: Pair<Node, Node>) => numbe
     return findings;
 }
 
-// ── d4b-spec-block-scalar ──
-
-/**
- * A stream is written as a block scalar (`|` or `|-`), never as a quoted string
- * with `\n` escapes. A one-line golden is unreadable, and no diff can show it:
- * the whole point of the format is that the expected output looks like output.
- */
 function checkBlockScalars(file: SpecFile, lineOf: (scalar: Scalar) => number): Finding[] {
     const findings: Finding[] = [];
     for (const run of runMaps(file)) {
@@ -213,18 +177,9 @@ function checkBlockScalars(file: SpecFile, lineOf: (scalar: Scalar) => number): 
     return findings;
 }
 
-// ── c12-spec-file-name ──
-
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
-/** Words the `.spec.yaml` suffix already says — a case name repeating one says nothing. */
 const REDUNDANT_WORDS = new Set(['cli', 'spec', 'test']);
 
-/**
- * The file is `<case>.spec.yaml`, and `<case>` NAMES the case: kebab-case, no
- * word the suffix already carries, and never the bare name of its directory —
- * a `rm/` folder holding `rm.spec.yaml` says nothing twice, where `removed`,
- * `unattended` and `missing` each say one thing.
- */
 function checkFileName(rel: string): Finding[] {
     const name = basename(rel);
     const caseName = name.slice(0, -SPEC_EXTENSION.length);
@@ -259,17 +214,9 @@ function checkFileName(rel: string): Finding[] {
     return findings;
 }
 
-// ── j5-spec-description ──
-
 const MAX_DESCRIPTION = 100;
-/** A first word that is an identifier, not prose — exempt from the lowercase rule. */
 const SYMBOL_WORD = /^[A-Z0-9_]+$/u;
 
-/**
- * The description IS the vitest test title, and it is held to the title rules:
- * one lowercase line of prose, no trailing period, short enough to read in a
- * runner's output. A title that is a paragraph is a comment in the wrong place.
- */
 function checkDescription(document: SpecDocument): Finding[] {
     const findings: Finding[] = [];
     const text = document.description;
@@ -310,9 +257,6 @@ function checkDescription(document: SpecDocument): Finding[] {
     return findings;
 }
 
-// ── d5-spec-volatile-literal ──
-
-/** The literals the update writer must have failed to tokenise, and their token. */
 const VOLATILE = [
     {
         pattern: /\b(?:127\.0\.0\.1|localhost|0\.0\.0\.0):\d{2,5}\b/u,
@@ -323,23 +267,8 @@ const VOLATILE = [
     { pattern: /(?:^|[\s"'(=])\/(?:Users|home)\/[^\s"'/]+\//u, token: '{{workdir}} or {{path}}' },
 ] as const;
 
-/**
- * The volatile literal on this line, if it carries one — the reader BOTH halves
- * of d5's reach use, so a document's expected stream and a file under
- * `expected/` are judged by one list.
- *
- * A `{{token}}` is removed before the test: the token IS the answer the rule
- * asks for, and a path written after one is the token's tail, not a literal.
- */
-/**
- * The whole word the match sits inside — the string the pinned-value carve-out
- * looks up.
- *
- * A pattern matches the SHAPE that makes a value volatile (`/tmp/`, a loopback
- * origin) and not the value itself, so asking whether the document pinned
- * `/tmp/` would exempt every temp path once any of them was named. The word the
- * match belongs to is what the document either states or does not.
- */
+/** A `{{token}}` is removed first: a path written after one is the token's tail, not a literal. */
+/** A pattern matches the shape that makes a value volatile, so the carve-out looks up the whole word, or one pinned `/tmp/` would exempt every temp path. */
 function wordAround(text: string, index: number): string {
     let start = index;
     let end = index;
@@ -366,17 +295,7 @@ export function volatileLiteralIn(
     return undefined;
 }
 
-/**
- * A stream that pins a loopback port, a temp directory or somebody's home is a
- * golden that passed once, on one machine: the port was free that second, the
- * temp path belonged to that run. It is the exact shape of a value the update
- * writer would have tokenised, which is why finding one means a token was
- * overwritten by hand.
- *
- * Unless the document FIXED it — the same carve-out d5w rests on, for the same
- * reason: a path the command was handed, or one a `fixture:` ships, is a value
- * the document states rather than one the run minted.
- */
+/** Unless the document fixed it, the carve-out d5w rests on: a value the document states rather than one the run minted. */
 function checkVolatileLiterals(document: SpecDocument, dir: string): Finding[] {
     const findings: Finding[] = [];
     let fixed: null | string = null;
@@ -401,25 +320,10 @@ function checkVolatileLiterals(document: SpecDocument, dir: string): Finding[] {
     return findings;
 }
 
-// ── d5w-spec-pinned-value ──
-
 const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/u;
 const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/u;
 
-/**
- * Everything the document itself FIXED — what it feeds in, what it names, and
- * what its fixtures hold.
- *
- * The first three sources are the document's own words: a literal that appears
- * in a command's arguments or in an `env:`/`serve:` value is one the DOCUMENT
- * put there, not one a run minted — a reader sees it being pinned two lines
- * above the stream that asserts it.
- *
- * The last is the ground beside it. A document's sibling `fixtures/` is its
- * material whether or not a `fixture:` line names the exact file: the tree is
- * there to be read by the run, and a value it holds is one the repository
- * committed.
- */
+/** A sibling `fixtures/` is the document's material whether or not a `fixture:` line names the exact file. */
 function fixedData(document: SpecDocument, dir: string): string {
     const parts = document.runs.flatMap((run) => [run.stdin ?? '', run.command]);
     for (const token of document.env) {
@@ -454,12 +358,6 @@ function fixedData(document: SpecDocument, dir: string): string {
     return parts.join('\n');
 }
 
-/**
- * A timestamp or a uuid spelled out in a golden is a value nothing fixed —
- * unless the document DID fix it, by feeding it in through `stdin:` or shipping
- * it in a `fixture:`. That carve-out is the whole rule: the defect is not the
- * literal, it is the literal nobody pinned.
- */
 function checkPinnedValues(document: SpecDocument, dir: string): Finding[] {
     const findings: Finding[] = [];
     const streams = assertedStreams(document);
@@ -498,13 +396,6 @@ function checkPinnedValues(document: SpecDocument, dir: string): Finding[] {
     return findings;
 }
 
-// ── j3w-spec-empty-assertion ──
-
-/**
- * A stream whose entire content is `{{any}}` states that the command printed
- * something, or nothing, of any shape — which is what a stream does anyway. The
- * run happens and proves nothing.
- */
 function checkEmptyAssertions(document: SpecDocument): Finding[] {
     const findings: Finding[] = [];
     for (const stream of assertedStreams(document)) {
@@ -528,13 +419,6 @@ function checkEmptyAssertions(document: SpecDocument): Finding[] {
     return findings;
 }
 
-// ── d11w-spec-silent-refusal ──
-
-/**
- * A non-zero exit with neither stream is a CLI that failed without a word — or,
- * far more often, a golden whose author forgot that the words went to stderr.
- * Either way the document does not say WHY the command refused.
- */
 function checkSilentRefusals(document: SpecDocument): Finding[] {
     return document.runs
         .filter((run) => run.exitCode !== 0 && run.stdout === null && run.stderr === null)
@@ -551,9 +435,7 @@ function checkSilentRefusals(document: SpecDocument): Finding[] {
         );
 }
 
-// ── c8-spec-registered-name ──
-
-/** The top-level keys of an object literal, read by depth, not by parsing. */
+/** Read by depth, not by parsing. */
 function objectKeys(source: string, from: number): { end: number; keys: string[] } {
     const keys: string[] = [];
     let depth = 0;
@@ -595,13 +477,7 @@ function objectKeys(source: string, from: number): { end: number; keys: string[]
     return { end: source.length, keys };
 }
 
-/**
- * The `env` and `serve` names registered by the `specification.cli(…)` calls of
- * the nearest directory holding a `*.specification.ts`, read as literals. A
- * directory may declare several runners, and nothing in a document says which
- * one runs it, so their registries are read as a UNION: a name known to any
- * neighbouring runner passes, and only a name known to none is a typo.
- */
+/** Nothing in a document says which neighbouring runner runs it, so their registries are read as a union. */
 function registeredNames(dir: string): null | { env: Set<string>; serve: Set<string> } {
     let current = dir;
     for (;;) {
@@ -649,11 +525,6 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
     }
 }
 
-/**
- * Every bare word of `env:` and every `serve:` name must be a key of a runner
- * registered above the document. A typo (`serve: dashbord`) is a refusal at
- * run time today, one test file into a suite; here it is a line in a lint run.
- */
 function checkRegisteredNames(document: SpecDocument, dir: string): Finding[] {
     if (document.env.length === 0 && document.serve.length === 0) {
         return [];
@@ -692,14 +563,7 @@ function checkRegisteredNames(document: SpecDocument, dir: string): Finding[] {
     return findings;
 }
 
-// ── Entry ──
-
-/**
- * Run every document-conventions pass over one `<case>.spec.yaml`. A document
- * the grammar refuses yields NOTHING here: `d4b-spec-shape` already reported
- * it, and a second cascade of findings about a file nobody can parse only
- * buries the one line that matters.
- */
+/** A document the grammar refuses yields nothing here: `d4b-spec-shape` already reported it. */
 export function checkSpecConventions(text: string, rel: string, path: string): TokenViolation[] {
     let file: SpecFile;
     try {
@@ -735,11 +599,6 @@ export function checkSpecConventions(text: string, rel: string, path: string): T
     }));
 }
 
-/**
- * J4-spec-description-unique — the description is the test title, and two
- * documents in one directory sharing it make a failing run ambiguous: the
- * reporter names the title, and the reader has two files to open.
- */
 export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
     const byDirectory = new Map<string, Map<string, string>>();
     const violations: TokenViolation[] = [];
@@ -771,9 +630,6 @@ export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-// ── Fix ──
-
-/** Put the keys `order` names in its order, in the slots they already hold. */
 function reorder(map: YAMLMap, order: readonly string[]): void {
     const known = pairsOf(map).filter((pair) => order.includes(keyName(pair) ?? ''));
     const sorted = [...known].sort(
@@ -785,11 +641,7 @@ function reorder(map: YAMLMap, order: readonly string[]): void {
     );
 }
 
-/**
- * Apply the two fixable passes to one document: reorder its keys, and re-style
- * every stream as a block scalar. Returns `null` when nothing moved — the
- * caller writes only what changed, so a clean tree keeps its mtimes.
- */
+/** `null` when nothing moved: the caller writes only what changed, so a clean tree keeps its mtimes. */
 export function fixSpecDocument(text: string, rel: string): null | string {
     let file: SpecFile;
     try {
@@ -814,7 +666,6 @@ export function fixSpecDocument(text: string, rel: string): null | string {
     return next === text ? null : next;
 }
 
-/** Fix every `<case>.spec.yaml` under `rootDir`; returns the paths rewritten. */
 export function fixSpecFiles(rootDir: string): string[] {
     const written: string[] = [];
     for (const path of listSpecFiles(rootDir)) {

@@ -10,25 +10,15 @@ import type { LayerOptions } from './rules/model/i1-layer-boundaries.js';
 import { ENGINE_OWNERS } from './self-engines.js';
 import { FRAMEWORK_LAYERS } from './self-layers.js';
 
-/**
- * What the modules of this package's `src/` and `lint/` import — the self
- * checker passes I10 and I11: a facet reached from outside it, and an engine
- * imported outside the one slice that owns it. Each finding sits at the
- * import that names it.
- */
-
-/** Where a layer of the map sits in the repository: `lint/` at its root, every other under `src/`. */
 function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;
 }
 
-/** A path of the layer map (`facets/api/api.project`, `lint/self/compositions.ts`) as the repository file it names. */
 function fileOf(path: string): string {
     const file = path.endsWith('.ts') ? path : `${path}.ts`;
     return file.startsWith('lint/') ? file : `src/${file}`;
 }
 
-/** Every edge the layer map grants into `facets/`: the module or tree reaching, and the path it may reach. */
 function facetEdges(): { path: string; reader: string }[] {
     const edges: { path: string; reader: string }[] = [];
     for (const [layer, options] of Object.entries<LayerOptions>(FRAMEWORK_LAYERS)) {
@@ -42,14 +32,7 @@ function facetEdges(): { path: string; reader: string }[] {
     return edges.filter(({ path }) => path.startsWith('facets/'));
 }
 
-/**
- * May `from`, outside the facet `facet`, import the facet's root file `name`?
- * The face (`index.ts`, `index.browser.ts`) serves anyone; each other root
- * file has the one reader the layer map grants it: the project the runner's
- * config assembles, the handle the constructors record gathers, the
- * composition the self checker proves, which reads every `.facet.ts` through
- * its seam onto `facets/`.
- */
+/** The face (`index.ts`, `index.browser.ts`) serves anyone; each other root file has the one reader the layer map grants it. */
 function entersByTheFace(from: string, facet: string, name: string): boolean {
     if (name === 'index.ts' || name === 'index.browser.ts') {
         return true;
@@ -62,35 +45,25 @@ function entersByTheFace(from: string, facet: string, name: string): boolean {
     );
 }
 
-/**
- * May `from` reach `target`, a module inside a facet's concept folder? Only
- * where the layer map names that one module for the tree `from` sits in: the
- * two modules the checker reads with the runner (the route ratchet's key, the
- * `.spec.yaml` grammar).
- */
 function reachedInside(from: string, target: string): boolean {
     return facetEdges().some(
         ({ path, reader }) => fileOf(path) === target && from.startsWith(reader),
     );
 }
 
-/** Is the path a module the code runs — no test, no type test, no fixture module, no ground? */
 function isProduction(path: string): boolean {
     return (
         /\.tsx?$/u.test(path) && !/\.(?:test|test-d|fixtures)\.tsx?$/u.test(path) && !inGround(path)
     );
 }
 
-/** A module a production module names, and where it names it. */
 type Reference = { column: number; line: number; specifier: string };
 
-/** The 1-based line and column of an offset. */
 function positionOf(text: string, index: number): { column: number; line: number } {
     const before = text.slice(0, Math.max(index, 0));
     return { column: index - before.lastIndexOf('\n'), line: before.split('\n').length };
 }
 
-/** Every specifier a module names: its imports and re-exports (types included) and each `import('…')`, each at its statement. */
 function referencesOf(path: string): Reference[] {
     const text = readFileSync(path, 'utf8');
     const program = parseProgram(path, text);
@@ -114,12 +87,11 @@ function referencesOf(path: string): Reference[] {
     return found;
 }
 
-/** The repository path a relative specifier of `from` names, its `.js` read as the `.ts` it is built from. */
+/** Its `.js` read as the `.ts` it is built from. */
 function targetOf(from: string, specifier: string): string {
     return posix.normalize(posix.join(posix.dirname(from), specifier)).replace(/\.js$/u, '.ts');
 }
 
-/** The production modules of the two trees that hold code, `src/` and `lint/`, each with what it names. */
 function productionReferences(root: string): { from: string; reference: Reference }[] {
     return [...listed(resolve(root, 'src'), 'src'), ...listed(resolve(root, 'lint'), 'lint')]
         .filter(({ directory, path }) => !directory && isProduction(path))
@@ -128,12 +100,6 @@ function productionReferences(root: string): { from: string; reference: Referenc
         );
 }
 
-/**
- * I10 — every import of a production module that crosses into a facet it is
- * not in, at the import: a facet importing another, or anything outside a
- * facet entering it other than by its face — a root file its one reader
- * aside, a concept folder the one tree that reaches it for its reason aside.
- */
 export function checkFacetIsolation(root: string): TokenViolation[] {
     return productionReferences(root)
         .filter(({ reference }) => reference.specifier.startsWith('.'))
@@ -186,7 +152,6 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
         .toSorted(byPosition);
 }
 
-/** I11 — every engine a production module imports from outside the one slice that owns it, at the import. */
 export function checkEngineOwner(root: string): TokenViolation[] {
     return productionReferences(root)
         .flatMap(({ from, reference }) => {

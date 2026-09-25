@@ -14,7 +14,6 @@ import {
     writeBaseline,
 } from './ratchet.js';
 
-/** A project whose `node_modules/.bin/oxlint` prints `output` — the binary the ratchet runs. */
 function projectWithOxlint(output: string): string {
     const root = mkdtempSync(join(tmpdir(), 'ratchet-oxlint-'));
     mkdirSync(join(root, 'node_modules', '.bin'), { recursive: true });

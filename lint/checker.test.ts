@@ -18,10 +18,8 @@ import {
 } from './checker.js';
 import { codeOf } from './rule-code.js';
 
-// The fs-anchored cases run against the shared E2E fixture trees.
 const FIXTURES = resolve(import.meta.dirname, '../specs/lint/checker/fixtures/lint-violations');
 
-/** A document whose name only repeats its directory — a C12 finding wherever it is read. */
 const REPEATED_NAME = [
     'description: names its directory again instead of naming the case',
     'runs:',
@@ -31,7 +29,6 @@ const REPEATED_NAME = [
     '          Removed.',
     '',
 ].join('\n');
-/** A repository holding `files`, of which it adds `add` and ignores what `ignore` names. */
 function repository(files: string[], add: string[], ignore = ''): string {
     const root = mkdtempSync(join(tmpdir(), 'checker-tree-'));
     for (const path of files) {
@@ -45,14 +42,12 @@ function repository(files: string[], add: string[], ignore = ''): string {
     }
     return root;
 }
-/** The findings of `rule` a run over `<root>/specs` reports, as `file:line: found`. */
 function findings(root: string, rule: string): string[] {
     return runAllChecks(join(root, 'specs'))
         .filter((violation) => violation.rule === rule || codeOf(violation.rule) === rule)
         .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
-/** A tree whose pool holds `app/`, reached from the one leaf `specs/api/`. */
 function singleReaderPool(git: boolean): string {
     const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
     mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });

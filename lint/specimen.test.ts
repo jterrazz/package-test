@@ -6,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 import { forgetTree } from '../src/kernel/files/git-tree.js';
 import { specimenOf } from './specimen.js';
 
-/** A specs tree on disk, from its files. Returns the specs root. */
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'specimen-'));
     const root = join(scratch, 'specs');

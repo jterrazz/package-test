@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { isStrayFolder } from './first-level.js';
 
-/** A specs tree on disk, from its files' paths. Returns the specs root. */
 function specsTree(paths: readonly string[]): string {
     const scratch = mkdtempSync(join(tmpdir(), 'first-level-'));
     const root = join(scratch, 'specs');

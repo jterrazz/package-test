@@ -4,19 +4,9 @@ import { treeEntries, treeKind } from '../src/kernel/files/git-tree.js';
 import { isGroundName } from '../src/kernel/files/ground.js';
 import { isTestFileName } from './role.js';
 
-/** Directories a member walk never enters. */
 const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
-/**
- * Every MODULE test of a member: each test file outside its `specs/` tree —
- * `src/`, `lint/`, wherever a module keeps its test beside it. The walk never
- * enters ground (a fixture project's tests are an input) nor a nested package
- * (its own member), and leaves `specs/` to the tree passes.
- *
- * A module test stands on files as a spec does, so the passes that read or
- * rewrite the paths a test names read these too: C8 and the fixers that move
- * ground.
- */
+/** Never ground (a fixture project's tests are an input) nor a nested package; `specs/` is the tree passes'. */
 export function moduleTestsOf(member: string): string[] {
     const found: string[] = [];
     const walk = (dir: string): void => {

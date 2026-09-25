@@ -5,7 +5,6 @@ import { describe, expect, test } from 'vitest';
 
 import { moduleTestsOf } from './module-tests.js';
 
-/** A member on disk, each file empty. */
 function member(paths: string[]): string {
     const root = mkdtempSync(join(tmpdir(), 'module-tests-'));
     for (const path of paths) {

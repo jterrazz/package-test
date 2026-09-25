@@ -10,73 +10,30 @@ import type { TokenViolation } from './checker.js';
 import { moduleTestsOf } from './module-tests.js';
 import { isTestFileName } from './role.js';
 
-/**
- * The MEMBER pass — what a workspace member owes, read from the member itself
- * rather than from a spec tree.
- *
- * The three findings here answer questions no file under `specs/` can: does
- * this member have a vitest config at all, does its config give every test it
- * collects a drawing of a browser, and does it declare a dependency the
- * framework already carries. A member with no `specs/` root is still judged —
- * that is the whole point, since the first of the three is about a member that
- * has tests and no configuration for them.
- *
- * The pass is the toolchain's door: `jterrazz-test-check --member <dir>` runs
- * it for one member, and a path-less `--format json` run at the project root
- * runs it for every member the root manifest declares.
- */
+/** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
 
-/** How deep a member may sit below the root — the toolchain's bound, to the segment. */
+/** The toolchain's bound, to the segment. */
 const MEMBER_DEPTH = 6;
 
-/** Directories the member walk never enters. */
 const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
-/** The two simulated DOMs — the same pair the statique E5b refuses. */
+/** The same pair the statique E5b refuses. */
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
 
-/**
- * Dependencies `@jterrazz/test` carries. A member declaring one of these
- * duplicates a transitive it already resolves. Optional peers are not here:
- * `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared
- * BY the consumer on purpose.
- */
+/** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */
 const CARRIED = new Set(['msw', 'vitest-mock-extended']);
 
-/**
- * Carried, but only where it can only be the test seam's. `yaml` is a product
- * library as much as a fixture reader: a member that parses YAML at RUNTIME
- * declares it rightly, and a rule that read `dependencies` here would be
- * telling a product to drop a library the framework never ships to it. So the
- * finding is limited to the one declaration that can only mean the seam.
- */
+/** Only as a dev dependency: a member parsing YAML at runtime declares `yaml` rightly, and the framework never ships it to a product. */
 const CARRIED_IN_DEV = new Set(['yaml']);
 
-/**
- * The framework itself. It DECLARES what every other member inherits, so the
- * one manifest F8 must never read is its own — a rule that fired on the
- * package carrying the dependency would be asking it to remove the thing it
- * exists to provide.
- */
+/** F8 never reads the manifest of the package that carries the dependencies. */
 const FRAMEWORK = '@jterrazz/test';
 const RETIRED = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 const RETIRED_SCOPES = ['@testing-library/'];
 
-/**
- * The one retired seam a member may still declare, and what makes it allowed.
- *
- * React Native renders under jest until the react-native-web answer lands, and
- * where jest is the sanctioned runner `@testing-library/react-native` is the
- * only vocabulary there is: the rule would be asking for a facet that does not
- * reach that runtime yet. The allowance lapses the day jest stops running the
- * member's tests, and it has TWO sources, because jest is not always the
- * member's own: in a workspace where one app owns the only working RN
- * toolchain, the library declares the vocabulary and the app runs the tests
- * that use it.
- */
+/** React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests. */
 const JEST_ONLY_SEAM = '@testing-library/react-native';
 
-/** Does the member's OWN manifest say jest runs here? */
 function declaresJest(manifest: Manifest): boolean {
     const declares = (name: string): boolean =>
         name in (manifest.dependencies ?? {}) || name in (manifest.devDependencies ?? {});
@@ -88,20 +45,15 @@ function declaresJest(manifest: Manifest): boolean {
     );
 }
 
-/** The config names jest answers to, whatever a project writes it in. */
 const JEST_CONFIG = /^jest\.config\.[cm]?[jt]s$/u;
 
-/** The keys of a jest config that name WHERE its tests are. */
 const JEST_REACH =
     /\b(?:roots|testMatch|testPathDirs|testPathIgnorePatterns)\s*:\s*\[(?<paths>[^\]]*)\]/gu;
 
-/** One quoted entry of such a list. */
 const JEST_PATH = /['"`](?<path>[^'"`\n]*)['"`]/gu;
 
-/** The file a pnpm workspace is declared in, whichever spelling the repository uses. */
 const PNPM_WORKSPACE = ['pnpm-workspace.yaml', 'pnpm-workspace.yml'];
 
-/** Does this directory DECLARE a workspace — npm/bun `workspaces`, or pnpm's own file? */
 function declaresWorkspace(dir: string): boolean {
     if (PNPM_WORKSPACE.some((name) => treeKind(join(dir, name)) === 'file')) {
         return true;
@@ -110,23 +62,7 @@ function declaresWorkspace(dir: string): boolean {
     return manifest !== null && workspacePatterns(manifest).length > 0;
 }
 
-/**
- * The workspace a member belongs to, found by walking UP from the member.
- *
- * The jest config that collects a member's tests is not always below it: in the
- * layout the allowance was written for, the app owning the only working React
- * Native toolchain roots into the library BESIDE it. Read from the member's own
- * anchor, the walk below it found nothing, so `cd packages/native &&
- * jterrazz-test-check` — which is what that member's own gate runs — reported
- * F8 while the root-anchored run cleared it. Two directions, two verdicts, on
- * one member: the chapter's contract is that a path-less run reports what the
- * per-root and per-member runs report.
- *
- * The walk stops at the first directory that declares a workspace, and never
- * leaves the checkout: a `.git` is where this repository ends and somebody
- * else's tree begins — a directory in a clone, a FILE in a worktree, so its
- * kind is never asked.
- */
+/** Walked up from the member, so a run started inside it reads the jest the root run reads; it stops at the first workspace declaration and never leaves the checkout (a `.git` directory or worktree file). */
 function workspaceRootOf(memberDir: string): string {
     let current = memberDir;
     for (;;) {
@@ -141,10 +77,8 @@ function workspaceRootOf(memberDir: string): string {
     }
 }
 
-/** Every `jest.config.*` under `rootDir`, by absolute path — read once per root. */
 const jestConfigs = new Map<string, string[]>();
 
-/** Find them, bounded by the same skips and depth the member walk uses. */
 function findJestConfigs(rootDir: string): string[] {
     const cached = jestConfigs.get(rootDir);
     if (cached !== undefined) {
@@ -177,20 +111,7 @@ function findJestConfigs(rootDir: string): string[] {
     return found;
 }
 
-/**
- * Does a jest config ELSEWHERE in the workspace collect this member's tests?
- *
- * jterrazz-design is the shape: the render tests are co-located in
- * `packages/native/src`, and `apps/playground` — which owns the only working
- * React Native toolchain — is what runs them, rooting into the library from its
- * own config. The library's manifest says `vitest --run`, so reading the
- * allowance from the member alone answered "no jest here" and F8 errored on
- * exactly the layout the exemption was written for.
- *
- * `<rootDir>` is jest's own token for the directory its config sits in, so a
- * path is resolved against that, and the member is reached when the result
- * lands inside it.
- */
+/** `<rootDir>` is jest's token for its config's directory: a path resolves against it, and the member is reached when the result lands inside it. */
 function jestReachesMember(memberDir: string, rootDir: string): boolean {
     return findJestConfigs(rootDir).some((config) => {
         const from = dirname(config);
@@ -210,7 +131,6 @@ function jestReachesMember(memberDir: string, rootDir: string): boolean {
     });
 }
 
-/** Where a member states what it collects, whatever extension it writes it in. */
 const CONFIG_NAMES = [
     'vitest.config.ts',
     'vitest.config.mts',
@@ -229,7 +149,6 @@ type Manifest = {
     workspaces?: string[] | { packages?: string[] };
 };
 
-/** A member's manifest, or null when it has none (it is then not a member). */
 export function readManifest(dir: string): Manifest | null {
     const path = join(dir, 'package.json');
     if (treeKind(path) !== 'file') {
@@ -243,7 +162,6 @@ export function readManifest(dir: string): Manifest | null {
     }
 }
 
-/** The member's vitest config, by path, or null. */
 function configOf(dir: string): null | string {
     for (const name of CONFIG_NAMES) {
         const path = join(dir, name);
@@ -254,14 +172,7 @@ function configOf(dir: string): null | string {
     return null;
 }
 
-/**
- * Does this member hold a test file it OWNS?
- *
- * A directory carrying its own `package.json` is another package's tree — a
- * workspace member, a vendored clone — and its tests are its own to configure.
- * A root that only delegates would otherwise be told to write a config for
- * files it never collects, which is the finding read backwards.
- */
+/** A directory carrying its own `package.json` is another package's tree, and its tests are its own to configure. */
 function holdsTests(dir: string): boolean {
     const stack = [dir];
     let first = true;
@@ -295,18 +206,12 @@ function holdsTests(dir: string): boolean {
     return false;
 }
 
-/**
- * A `test` script that only hands the work to the members below it. It is not
- * evidence that THIS package runs vitest — `npm run test --workspaces`,
- * `pnpm -r test` and `turbo run test` all read as "ask the members".
- */
+/** `npm run test --workspaces`, `pnpm -r test` and `turbo run test` hand the work to the members: no evidence this package runs vitest. */
 const DELEGATING_TEST =
     /--workspaces|(?:^|\s)-r(?:\s|$)|--recursive|turbo\s+run|nx\s+run-many|lerna\s+run/u;
 
-/** What a declaration is: a transitive the framework resolves, or a seam it replaced. */
 type Seam = { kind: 'carried' | 'retired'; name: string };
 
-/** Every seam name this member declares that it should not, and why it should not. */
 function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
     if (manifest.name === FRAMEWORK) {
         return [];
@@ -331,7 +236,7 @@ function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
     }));
 }
 
-/** The line a manifest key is written on — a finding points at the declaration, not at `{`. */
+/** A finding points at the declaration, not at `{`. */
 function lineOfKey(dir: string, key: string): number {
     try {
         const lines = readFileSync(join(dir, 'package.json'), 'utf8').split('\n');
@@ -342,20 +247,13 @@ function lineOfKey(dir: string, key: string): number {
     }
 }
 
-/**
- * Run E3, E5b and F8 over ONE member. `memberDir` is absolute; `rootDir`
- * anchors the paths the findings report, so a member's finding reads the same
- * whether the pass ran over it alone or over the whole workspace.
- */
-/** E3 — a member with tests of its own states how they run. */
 function configPresent(
     manifest: Manifest,
     memberDir: string,
     label: string,
     subject: string,
 ): TokenViolation[] {
-    // A delegating `test` script is the MEMBERS' tests, not this package's,
-    // and the walk stops at the next `package.json` for the same reason.
+    // A delegating `test` script runs the members' tests, not this package's.
     const testScript = manifest.scripts?.test;
     const ownsTests =
         (typeof testScript === 'string' && !DELEGATING_TEST.test(testScript)) ||
@@ -375,7 +273,6 @@ function configPresent(
     ];
 }
 
-/** E5b — a config that gives every file it collects a drawing of a browser. */
 function simulatedDom(config: string, rootDir: string): TokenViolation[] {
     const text = readFileSync(config, 'utf8');
     const found = SIMULATED_DOM.exec(text);
@@ -395,12 +292,6 @@ function simulatedDom(config: string, rootDir: string): TokenViolation[] {
     ];
 }
 
-/**
- * F8 — a dependency the framework already carries, or a seam it replaced.
- *
- * The two are not the same sentence: removing a transitive changes nothing a
- * test can see, while dropping a retired seam means writing its facet.
- */
 function seamDependencies(member: {
     label: string;
     manifest: Manifest;
@@ -408,9 +299,6 @@ function seamDependencies(member: {
     subject: string;
 }): TokenViolation[] {
     const { label, manifest, memberDir, subject } = member;
-    // The workspace is walked UP to rather than taken from the anchor: the run
-    // started inside the member has to read the same jest as the run started at
-    // the root, or one gate contradicts the other.
     const jestRuns =
         declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));
     return declaredSeams(manifest, jestRuns).map((seam) => ({
@@ -429,10 +317,6 @@ function seamDependencies(member: {
     }));
 }
 
-/**
- * Re-anchor a member-relative finding on the root the run reports against, so
- * one member's path reads the same alone as inside a whole-workspace run.
- */
 function anchoredToRoot(violations: TokenViolation[], label: string): TokenViolation[] {
     if (label === '.') {
         return violations;
@@ -444,26 +328,12 @@ function anchoredToRoot(violations: TokenViolation[], label: string): TokenViola
     return anchored;
 }
 
-/**
- * Run E3, E5b and F8 over ONE member. `memberDir` is absolute; `rootDir`
- * anchors the paths the findings report, so a member's finding reads the same
- * whether the pass ran over it alone or over the whole workspace.
- */
-/**
- * The words a repository invents for what `expected/` already means — the
- * snapshot folders of other runners and the plural a reader reaches for.
- */
+/** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
 const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);
 
-/** A module of code: what makes a folder a place code lives, never ground. */
 const CODE_MODULE = /\.[cm]?[jt]sx?$/u;
 
-/**
- * Is this synonym-named folder one a test would stand on? Under a `specs/`
- * tree of the member (never a folder above it), always; elsewhere, when it holds no module of code — a `goldens/`
- * folder of matcher source is named for what its code does, and a folder of
- * `.snap` or `.json` files is ground by another word.
- */
+/** Under the member's `specs/` tree always; elsewhere only when it holds no code: a `goldens/` folder of matcher source is named for what its code does. */
 function holdsGround(path: string, memberDir: string): boolean {
     if (relative(memberDir, path).split(sep).includes('specs')) {
         return true;
@@ -475,13 +345,7 @@ function holdsGround(path: string, memberDir: string): boolean {
     }
 }
 
-/**
- * C25 — one word per meaning: a folder a test stands on named `snapshots/`,
- * `__snapshots__/`, `golden/` or `goldens/` is refused, anywhere in the
- * member. What it would hold is what a test asserts, and that is `expected/`.
- * The walk stops at a nested package (its own member) and never enters ground:
- * a fixture project may carry the word on purpose.
- */
+/** The walk stops at a nested package and never enters ground: a fixture project may carry the word on purpose. */
 function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
     const found: TokenViolation[] = [];
     const walk = (dir: string): void => {
@@ -520,8 +384,7 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         return [];
     }
     const label = relative(rootDir, memberDir) || '.';
-    // What a HUMAN calls this member. `--member .` is the ordinary run, and
-    // `.: no vitest.config.ts` names nothing a reader can act on.
+    // `--member .` is the ordinary run, and `.: no vitest.config.ts` names nothing a reader can act on.
     const subject = label === '.' ? (manifest.name ?? basename(memberDir)) : label;
     const config = configOf(memberDir);
 
@@ -529,16 +392,14 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         ...(config === null ? configPresent(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : simulatedDom(config, rootDir)),
         ...seamDependencies({ label, manifest, memberDir, subject }),
-        // C12's first clause: only a walk of the MEMBER sees a `.spec.ts`
-        // that never reached a `specs/` tree.
+        // Only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.
         ...anchoredToRoot(checkSpecOutsideSpecs(memberDir), label),
         ...groundSynonyms(memberDir, label),
-        // C8 over the module tests: the tree pass reads the tests under `specs/`.
+        // The tree pass reads the tests under `specs/`.
         ...moduleTestsOf(memberDir).flatMap((test) => diskTargetFindings(test, rootDir)),
     ];
 }
 
-/** The glob-ish workspace patterns a root manifest declares. */
 function workspacePatterns(manifest: Manifest): string[] {
     const { workspaces } = manifest;
     if (Array.isArray(workspaces)) {
@@ -547,13 +408,7 @@ function workspacePatterns(manifest: Manifest): string[] {
     return workspaces?.packages ?? [];
 }
 
-/**
- * A glob over path SEGMENTS — `*` stops at a separator, `**` does not. The
- * same translation `@jterrazz/typescript`'s `lib/workspace-members.js` makes,
- * because the two lists have to be the same list: a member the toolchain runs
- * `--member` over and the path-less run never discovers is a finding the
- * ratchet can neither record nor clear.
- */
+/** The translation `@jterrazz/typescript`'s `lib/workspace-members.js` makes: the two member lists must be one list, or the ratchet can neither record nor clear a finding. */
 function toPattern(glob: string): RegExp {
     const escaped = glob
         .replaceAll(/[.+^${}()|[\]\\]/gu, String.raw`\$&`)
@@ -563,10 +418,7 @@ function toPattern(glob: string): RegExp {
     return new RegExp(`^${escaped}$`, 'u');
 }
 
-/**
- * Every workspace member declared by the root manifest, plus the root itself —
- * a single-package repository IS its own member, and the pass has to reach it.
- */
+/** The root itself included: a single-package repository is its own member. */
 export function discoverMembers(rootDir: string): string[] {
     const manifest = readManifest(rootDir);
     if (manifest === null) {
@@ -596,8 +448,7 @@ export function discoverMembers(rootDir: string): string[] {
             }
             const child = join(dir, entry.name);
             const path = relative(rootDir, child).split(sep).join('/');
-            // A directory a pattern claims IS a member, and a member is never
-            // walked into: what it contains is its own workspace, not this one's.
+            // A member is never walked into: what it contains is its own workspace.
             if (patterns.some((pattern) => pattern.test(path)) && readManifest(child) !== null) {
                 members.add(child);
                 continue;
@@ -609,7 +460,7 @@ export function discoverMembers(rootDir: string): string[] {
     return [...members];
 }
 
-/** Paths git is told to ignore — the toolchain skips them, so the two lists agree. */
+/** The toolchain skips them too, so the two lists agree. */
 function ignoredPaths(rootDir: string, candidates: string[]): Set<string> {
     if (candidates.length === 0) {
         return new Set();
@@ -625,35 +476,19 @@ function ignoredPaths(rootDir: string, candidates: string[]): Set<string> {
         }
         return new Set(answer.stdout.split('\n').filter(Boolean));
     } catch {
-        // No git, or no repository — an unignorable tree is judged whole.
         return new Set();
     }
 }
 
-/** How deep below a member a nested `specs/` may sit before the walk gives up. */
 const SPECS_DEPTH = 6;
 
-/**
- * Every `specs/` root the tree passes have to walk: the project's own, and
- * each member's — including a member that NESTS its facet tree (`web/specs`).
- * Stated here rather than guessed by the walk, so a path-less run reports
- * exactly what a per-root run would.
- *
- * A `specs/` tree is never descended into (the fixtures under it are not spec
- * roots), and neither is another package's tree: a directory carrying its own
- * `package.json` belongs to whichever member declares it. A member DIRECTORY
- * named `specs` is a root of its own — the tree can be the member.
- */
+/** Stated rather than guessed, so a path-less run reports exactly what a per-root run would; a member directory named `specs` is a root of its own. */
 export function discoverSpecRoots(rootDir: string): string[] {
     const roots = new Set<string>();
-    // A directory with no manifest is no member, and the walk still owes an
-    // answer about it: a tree named by hand is judged on what it HOLDS.
+    // A tree named by hand is judged on what it holds.
     const members = discoverMembers(rootDir);
     for (const member of members.length === 0 ? [rootDir] : members) {
-        // A member whose own root IS the tree — a workspace declaring
-        // `packages: ['specs']`. Without this, the run the toolchain merges
-        // into the ratchet walked no tree at all and the member's facet
-        // findings were reachable only by naming the path by hand.
+        // A workspace declaring `packages: ['specs']`: without this the ratchet run walked no tree for that member.
         if (basename(member) === 'specs') {
             roots.add(member);
         }
@@ -692,7 +527,6 @@ export function discoverSpecRoots(rootDir: string): string[] {
     return found.filter((path) => !ignored.has(relative(rootDir, path)));
 }
 
-/** Run the member pass over every member the root declares. */
 export function checkMembers(rootDir: string): TokenViolation[] {
     return discoverMembers(rootDir).flatMap((member) => checkMember(member, rootDir));
 }
