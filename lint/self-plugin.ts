@@ -1,5 +1,6 @@
 import type { LintPlugin } from './rule-shape.js';
 import { f7NoFrameworkInternals } from './rules/model/f7-no-framework-internals.js';
+import { i6FacetIsComposition } from './rules/model/i6-facet-is-composition.js';
 
 /**
  * The self plugin — the static rules whose audience is `self`: this
@@ -16,6 +17,7 @@ const selfPlugin: LintPlugin = {
     meta: { name: 'jterrazz-self' },
     rules: {
         'f7-no-framework-internals': f7NoFrameworkInternals,
+        'i6-facet-is-composition': i6FacetIsComposition,
     },
 };
 

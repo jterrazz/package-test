@@ -81,10 +81,11 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/rule-code.ts',
             'lint/self-layers.ts',
             'lint/self-manifest.ts',
+            'lint/self/architecture-rows.ts',
             'lint/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the two manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `make lint` for the layer map, which judges every module by it, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.chain\.ts$/u.test(path),

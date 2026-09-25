@@ -1,0 +1,9 @@
+description: a facet file holding logic, and a constructor running a step, are refused
+fixture: ./fixtures/logic/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/facets/jobs/jobs.facet.ts:17:1  jterrazz-self(i6-facet-is-composition)
+          src/facets/jobs/jobs.handle.ts:7:11  jterrazz-self(i6-facet-is-composition)
+          src/facets/jobs/jobs.handle.ts:8:20  jterrazz-self(i6-facet-is-composition)

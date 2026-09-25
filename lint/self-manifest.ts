@@ -1,6 +1,7 @@
 import { consumerCatalog, ordered, statiqueRows } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
 import type { RuleDoc } from './rule-shape.js';
+import { ARCHITECTURE_META_ROWS, ARCHITECTURE_RULE_DOCS } from './self/architecture-rows.js';
 
 /**
  * The `self` rows — the rules only this package is held to: its own suite,
@@ -37,6 +38,7 @@ export const SELF_RULE_DOCS = {
             'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; those folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
         reach: 'specs',
     },
+    ...ARCHITECTURE_RULE_DOCS,
 } satisfies Record<string, RuleDoc>;
 
 /** The **checker** `self` rows — each a pass `dist/self-checker.js` runs (`self-checker.ts`). */
@@ -237,6 +239,7 @@ export const META_ROWS: CatalogEntry[] = [
             'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 refused a consumer’s own `src/model/` until its self half left it as F7.',
         reach: 'all',
     },
+    ...ARCHITECTURE_META_ROWS,
     {
         audience: 'self',
         channel: 'meta',

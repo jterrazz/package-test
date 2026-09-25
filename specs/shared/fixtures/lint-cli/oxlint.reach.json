@@ -95,6 +95,7 @@
         "jterrazz/w1-scenario-pure": "error",
         "jterrazz/w2-testid-states-what-is-missing": "error",
         "jterrazz/w5w-scenario-settles": "warn",
-        "jterrazz-self/f7-no-framework-internals": "error"
+        "jterrazz-self/f7-no-framework-internals": "error",
+        "jterrazz-self/i6-facet-is-composition": "error"
     }
 }
