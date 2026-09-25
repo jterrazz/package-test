@@ -1,0 +1,7 @@
+description: a colocated test titled with its module's role suffix is refused
+fixture: ./fixtures/role-suffix/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/request.action.test.ts:5:10  jterrazz(c31-describe-names-file)

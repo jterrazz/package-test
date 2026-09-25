@@ -92,7 +92,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 119   |
 | Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 64    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 163   |
-| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 173   |
+| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 174   |
 | Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 58    |
 
 <!-- /GENERATED:layers -->
@@ -180,7 +180,7 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/siblings.ts -->
 
-Today **111 modules** have no sibling test, and every one of them is claimed:
+Today **112 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                  | Proven instead by                                                                                                                                                                                                                                                                                       |
 | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -497,7 +497,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/specimen.test.ts`                     | specimenOf             | 7     |
 | `lint/subject.test.ts`                      | subject                | 14    |
 | `lint/test-settings.test.ts`                | testSettingsAt         | 5     |
-| `lint/test-title.test.ts`                   | testTitle              | 5     |
+| `lint/test-title.test.ts`                   | testTitle              | 6     |
 | `lint/type-aware.test.ts`                   | typeAwareFindings      | 2     |
 | `lint/type-channel.test.ts`                 | type-channel           | 3     |
 | `lint/self/compositions.test.ts`            | compositions           | 4     |

@@ -18,7 +18,9 @@ import type { AstNode } from './rule-shape.js';
  * 1. the name the sibling's default export declares;
  * 2. its one value export, when it has exactly one;
  * 3. the value export spelling the base name in camelCase or PascalCase
- *    (`route-judge` → `routeJudge`, `RouteJudge`);
+ *    (`route-judge` → `routeJudge`, `RouteJudge`) — or, the base carrying a
+ *    role suffix, the base less it (`request.action` → `request`): a role
+ *    names what the file is, the subject what the test is about;
  * 4. the base name itself, when no sibling answers.
  *
  * A value export is what a module hands at run time: a type, an interface, or
@@ -42,6 +44,9 @@ function siblingsOf(filename: string): string[] {
         ? [`${stem}.tsx`, `${stem}.ts`]
         : [`${stem}.ts`, `${stem}.tsx`];
 }
+
+/** The role suffixes a module's base may end on, after its concept. */
+const ROLE_SUFFIX = /\.(?:action|adapter|capability|engine|facet|handle|port|project|result)$/u;
 
 /** `route-judge` → `routeJudge`. */
 function camelOf(base: string): string {
@@ -100,9 +105,11 @@ export function subjectOfSource(base: string, source: string, filename: string):
     if (values.length === 1) {
         return values[0] ?? base;
     }
-    const camel = camelOf(base);
-    const pascal = camel.charAt(0).toUpperCase() + camel.slice(1);
-    return values.find((name) => name === camel || name === pascal) ?? base;
+    const spellings = [base, base.replace(ROLE_SUFFIX, '')].flatMap((stem) => {
+        const camel = camelOf(stem);
+        return [camel, camel.charAt(0).toUpperCase() + camel.slice(1)];
+    });
+    return spellings.find((spelling) => values.includes(spelling)) ?? base;
 }
 
 /** The subject of a colocated test: read from the module beside it, else its base name. */

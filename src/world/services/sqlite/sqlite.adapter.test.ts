@@ -27,7 +27,7 @@ const guardDir = mkdtempSync(resolve(tmpdir(), 'sqlite-template-guard-'));
 
 const lockDir = mkdtempSync(resolve(tmpdir(), 'sqlite-lock-'));
 
-describe('sqlite.adapter', () => {
+describe('sqlite', () => {
     afterAll(() => {
         rmSync(workdir, { force: true, recursive: true });
         rmSync(guardDir, { force: true, recursive: true });

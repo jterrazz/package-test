@@ -30,6 +30,16 @@ describe('testTitle', () => {
         expect(subjectOfSource('locale-note', source, 'locale-note.tsx')).toBe('LocaleNote');
     });
 
+    test('names the export spelling the base less its role suffix, the whole base first', () => {
+        // Given - an action module exporting its verb and a helper, and a service exporting its class
+        const action = 'export function request() {}\nexport const METHODS = [];\n';
+        const service = 'export class UserService {}\nexport const user = 1;\n';
+
+        // Then - the subject is the concept, not the file's role; a whole-base spelling still wins
+        expect(subjectOfSource('request.action', action, 'request.action.ts')).toBe('request');
+        expect(subjectOfSource('user.service', service, 'user.service.ts')).toBe('UserService');
+    });
+
     test('falls back to the base name when no export answers', () => {
         // Given - two value exports, neither spelling the base name
         const source = 'export const a = 1;\nexport const b = 2;\n';

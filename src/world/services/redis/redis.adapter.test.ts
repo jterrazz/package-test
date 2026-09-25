@@ -33,8 +33,8 @@ async function acquired(
  * exist for. What needs a live redis is a spec — `specs/integration/redis/`.
  */
 
-describe('redis.adapter', () => {
-    test('redis handle — builds a redis connection string from a host and a port', () => {
+describe('redis', () => {
+    test('redis.adapter — redis handle — builds a redis connection string from a host and a port', () => {
         // Given - a handle and a mapped port
         const connectionString = redis().buildConnectionString('127.0.0.1', 6380);
 
@@ -42,26 +42,26 @@ describe('redis.adapter', () => {
         expect(connectionString).toBe('redis://127.0.0.1:6380');
     });
 
-    test('redis handle — carries no name of its own until the stack assigns the record key', () => {
+    test('redis.adapter — redis handle — carries no name of its own until the stack assigns the record key', () => {
         // Given - a freshly created handle, before any stack starts it
         // Then - the record key is the only name in play, and it is not known yet
         expect(redis().serviceName).toBeNull();
     });
 
-    test('redis handle — defaults to the slim redis:7 image pinned by digest, and takes an override', () => {
+    test('redis.adapter — redis handle — defaults to the slim redis:7 image pinned by digest, and takes an override', () => {
         // Given - one handle with no image option and one with an explicit image
         // Then - the default is the pinned slim image, and the override wins
         expect(redis().defaultImage).toMatch(/^redis:7-alpine@sha256:[0-9a-f]{64}$/u);
         expect(redis({ image: 'redis:7' }).defaultImage).toBe('redis:7');
     });
 
-    test('redis handle — is not a database', () => {
+    test('redis.adapter — redis handle — is not a database', () => {
         // Given - a cache handle, not a SQL store
         // Then - it exposes no database adapter
         expect(redis().createDatabaseAdapter()).toBeNull();
     });
 
-    test('redis handle — refuses a healthcheck with no connection string, naming what is missing', async () => {
+    test('redis.adapter — redis handle — refuses a healthcheck with no connection string, naming what is missing', async () => {
         // Given - a fresh handle nothing ever wired
         // Then - the refusal says which half is absent
         await expect(redis().healthcheck()).rejects.toThrow(
@@ -69,7 +69,7 @@ describe('redis.adapter', () => {
         );
     });
 
-    test('redis handle — carries the driver reason when a healthcheck cannot connect', async () => {
+    test('redis.adapter — redis handle — carries the driver reason when a healthcheck cannot connect', async () => {
         // Given - a handle pointed at a port nothing listens on
         const unreachable = redis();
         unreachable.connectionString = 'redis://localhost:1';
@@ -84,7 +84,7 @@ describe('redis.adapter', () => {
         expect(failure?.cause).toBeDefined();
     });
 
-    test('redis handle — cannot flush a container it cannot reach', async () => {
+    test('redis.adapter — redis handle — cannot flush a container it cannot reach', async () => {
         // Given - a handle pointed at a port nothing listens on
         const unreachable = redis();
         unreachable.connectionString = 'redis://localhost:1';
@@ -93,7 +93,7 @@ describe('redis.adapter', () => {
         await expect(unreachable.reset()).rejects.toThrow();
     });
 
-    test('redis handle — asks its container for an index for every worker a run can hold', () => {
+    test('redis.adapter — redis handle — asks its container for an index for every worker a run can hold', () => {
         // Given - the command a redis container is started with
         // Then - it serves 256 indexes, 0 its own and one per worker
         expect(redis().containerOptions).toStrictEqual({
@@ -101,7 +101,7 @@ describe('redis.adapter', () => {
         });
     });
 
-    test('redis handle — asks for one container whatever service the stack names it', () => {
+    test('redis.adapter — redis handle — asks for one container whatever service the stack names it', () => {
         // Given - a handle the stack named "queue"
         const queue = redis();
         queue.serviceName = 'queue';
@@ -112,7 +112,7 @@ describe('redis.adapter', () => {
         });
     });
 
-    test('redis handle — refuses a worker past its container indexes, naming the way out', async () => {
+    test('redis.adapter — redis handle — refuses a worker past its container indexes, naming the way out', async () => {
         // Given - a handle acquired by pool id 64, the first with no index left
         const crowded = redis();
         crowded.connectionString = 'redis://localhost:1';
@@ -123,7 +123,7 @@ describe('redis.adapter', () => {
         );
     });
 
-    test('redis handle — refuses a fifth redis service in one worker, naming the way out', async () => {
+    test('redis.adapter — redis handle — refuses a fifth redis service in one worker, naming the way out', async () => {
         // Given - four services of worker 60 holding their indexes, and a fifth asking
         const held = ['a', 'b', 'c', 'd'].map((name) => {
             const handle = redis();
@@ -146,7 +146,7 @@ describe('redis.adapter', () => {
         );
     });
 
-    test('redis handle — serves pool id 63 its four services, the last index of the container, and worker 0 the band of pool id 1', async () => {
+    test('redis.adapter — redis handle — serves pool id 63 its four services, the last index of the container, and worker 0 the band of pool id 1', async () => {
         // Given - four services of pool id 63, and one of worker 0 and of pool id 1
         const last = await Promise.all(
             ['a', 'b', 'c', 'd'].map(
@@ -173,7 +173,7 @@ describe('redis.adapter', () => {
         });
     });
 
-    test('redis handle — keeps a slot while any handle holds it, so another service never lands on a live index', async () => {
+    test('redis.adapter — redis handle — keeps a slot while any handle holds it, so another service never lands on a live index', async () => {
         // Given - two handles of worker 50's "cache" and one of its "queue"; the first cache and the queue released
         const [firstCache, queue, secondCache] = [
             unreachableService('cache'),
@@ -201,7 +201,7 @@ describe('redis.adapter', () => {
         });
     });
 
-    test('redis handle — gives its pair back on release even when the flush fails', async () => {
+    test('redis.adapter — redis handle — gives its pair back on release even when the flush fails', async () => {
         // Given - worker 40's cache acquired and released against a container nothing answers on, so both flushes fail
         const cache = unreachableService('cache');
         const held = await acquired(cache, '40');
@@ -223,7 +223,7 @@ describe('redis.adapter', () => {
         });
     });
 
-    test('redis handle — gives its pair back before it acquires again', async () => {
+    test('redis.adapter — redis handle — gives its pair back before it acquires again', async () => {
         // Given - worker 30's cache acquired twice with no release between, then released once
         const cache = unreachableService('cache');
         const first = await acquired(cache, '30');
