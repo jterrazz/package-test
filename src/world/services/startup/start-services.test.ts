@@ -12,7 +12,7 @@ describe('startProcessServices', () => {
         // Given - a record whose second process fails its build step
         const first = processService({ command: SERVER, ready: READY });
         const broken = processService({
-            before: `node -e "process.exit(1)"`,
+            before: `node -e "console.error('the build failed'); process.exit(1)"`,
             command: SERVER,
             ready: READY,
         });
@@ -22,9 +22,9 @@ describe('startProcessServices', () => {
         const starting = startProcessServices(services, process.cwd(), 'run-1');
 
         // Then - the start is refused, and the first server, which did come up, no longer answers
-        await expect(starting).rejects.toThrow();
+        await expect(starting).rejects.toThrow('the build failed');
         expect(first.connectionString).toMatch(/^http:/u);
         expect(first.started).toBe(false);
-        await expect(fetch(first.connectionString)).rejects.toThrow();
+        await expect(fetch(first.connectionString)).rejects.toThrow('fetch failed');
     });
 });

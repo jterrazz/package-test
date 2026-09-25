@@ -10,6 +10,6 @@ describe('declaredDatabaseKeys', () => {
         const services = { analyticsDb: postgres(), cache: redis(), db: postgres() };
 
         // Then - the cache is left out, and the first database stays first (A7's default)
-        expect(declaredDatabaseKeys(services)).toEqual(['analyticsDb', 'db']);
+        expect(declaredDatabaseKeys(services)).toStrictEqual(['analyticsDb', 'db']);
     });
 });
