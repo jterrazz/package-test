@@ -1,4 +1,4 @@
-import type { Armed } from '../../../kernel/chain/capability.js';
+import type { ClockPort } from '../../../world/clock/clock.port.js';
 import { afterThisTest, pinClock, providedClock, releaseClock } from './page-runtime.js';
 
 /**
@@ -8,7 +8,7 @@ import { afterThisTest, pinClock, providedClock, releaseClock } from './page-run
  * after its render resolves, and the page gets its real clock back when the
  * test ends. An instant that is not one is refused when the chain is armed.
  */
-export const pageClock: { readonly pin: (iso: null | string) => Armed } = {
+export const pageClock: ClockPort = {
     pin: (iso) => {
         const instant = iso ?? providedClock();
         if (instant !== undefined) {

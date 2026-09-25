@@ -1,4 +1,4 @@
-import type { Armed } from '../../../kernel/chain/capability.js';
+import type { ClockPort } from '../../../world/clock/clock.port.js';
 
 /**
  * The calendar of the PAGE a website chain visits. The site runs in its own
@@ -6,6 +6,6 @@ import type { Armed } from '../../../kernel/chain/capability.js';
  * with the visit (`BrowserOpenOptions.clock`): arming the chain pins nothing
  * in this process.
  */
-export const pageClock: { readonly pin: (iso: string) => Armed } = {
+export const pageClock: ClockPort = {
     pin: () => ({}),
 };
