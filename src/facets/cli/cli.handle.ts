@@ -17,9 +17,9 @@ import type {
 } from '../../model/services/services.js';
 import { createDockerReader } from '../../results/container.js';
 import type { ContainerAccessor } from '../../results/container.js';
+import { ExecAdapter } from '../../seams/process/exec.adapter.js';
 import { createCliFacet } from './cli.chain.js';
 import type { CliSpecification } from './cli.chain.js';
-import { ExecAdapter } from './exec.adapter.js';
 
 // ── Types ──
 
