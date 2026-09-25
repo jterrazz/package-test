@@ -1,9 +1,11 @@
 /**
  * Vitest custom matchers for `@jterrazz/test` accessors.
  *
- * Auto-registered (idempotently) on the first `specification.api()` /
- * `specification.job()` / `specification.cli()` call via a dynamic
- * `import('vitest')` — the library never hard-imports vitest at module load.
+ * Auto-registered (idempotently) on the first call of any `specification.*`
+ * constructor — each handle awaits `registerMatchers`, which reaches vitest by
+ * a dynamic `import('vitest')`, so the library never hard-imports vitest at
+ * module load. The page build registers its own through
+ * `registerBrowserMatchers`.
  *
  * All assertions go through `expect()` (CONVENTIONS D1). Only matchers that
  * do IO are async (D2): `table` (SQL query), `filesystem`/`directory`

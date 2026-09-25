@@ -81,12 +81,6 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
      */
     root?: string;
     /**
-     * How long this runner's session waits, in milliseconds — every field
-     * optional, each falling back to the framework's default. A project
-     * driving a DEV build states the wait its bundler's cold boot needs
-     * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
-     */
-    /**
      * Named services started with the runner and stopped with it — a
      * `process()` for the bundler the app loads from, a database a dev build
      * reads. Metro stops being a `beforeAll` the repository maintains: it is
@@ -94,6 +88,12 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
      * like every other external process the framework owns.
      */
     services?: Services;
+    /**
+     * How long this runner's session waits, in milliseconds — every field
+     * optional, each falling back to the framework's default. A project
+     * driving a DEV build states the wait its bundler's cold boot needs
+     * (`{ action: 45_000 }`) instead of sleeping inside its scenarios.
+     */
     timeouts?: DeviceTimeouts;
 };
 

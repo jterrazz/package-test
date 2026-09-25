@@ -6,6 +6,11 @@ import type { TestProject } from 'vitest/node';
 import { serveAppium } from '../server/appium-server.js';
 import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
 
+/** What the setup reads of the project: its root, what it declared, and the channel to its workers. */
+type SessionProject = Pick<TestProject, 'provide'> & {
+    config: { provide?: Partial<ProvidedContext>; root: string };
+};
+
 /**
  * The mobile project's global setup: one driver session per run.
  *
@@ -19,11 +24,6 @@ import { endSessions, MOBILE_SESSIONS_DIR } from './session-ledger.js';
  * Appium server once for the run and provides both to the workers, and it
  * stops the server after the sessions are ended.
  */
-/** What the setup reads of the project: its root, what it declared, and the channel to its workers. */
-type SessionProject = Pick<TestProject, 'provide'> & {
-    config: { provide?: Partial<ProvidedContext>; root: string };
-};
-
 export default async function setup(project: SessionProject): Promise<() => Promise<void>> {
     const directory = join(project.config.root, MOBILE_SESSIONS_DIR, randomUUID());
     project.provide('mobileSessions', directory);
