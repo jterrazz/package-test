@@ -1,29 +1,42 @@
-import plugin, { testing } from '@jterrazz/test/oxlint';
 import { spawnSync } from 'node:child_process';
-import { readdirSync, readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
-import { pathToFileURL } from 'node:url';
+import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { tmpdir } from 'node:os';
+import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packedFiles, selfExposures, selfRuleNames, strandedBundles } from './audience.js';
-import { codeOf } from './rule-code.js';
-import { SELF_CHECKER_PASSES } from './self-manifest.js';
+import { REFUSAL_WHY } from '../src/model/lesson/refusal.js';
+import {
+    extractTarball,
+    filesUnder,
+    selfExposures,
+    selfMentions,
+    selfRows,
+    selfRuleNames,
+    strandedBundles,
+} from './audience.js';
+import { RUNTIME_RULES } from './manifest.js';
+import { CATALOGUE_CHAPTER, codeOf } from './rule-code.js';
+import { catalog, SELF_CHECKER_PASSES } from './self-manifest.js';
 
 /**
  * K12 (meta-test) — a rule only this package is held to never reaches a
- * consumer. What the tarball carries is read the way npm reads it, and the
- * entries a consumer runs are loaded as they would load them (`npm run
- * build` first).
+ * consumer. The tarball is packed and extracted as an install holds it (`npm
+ * run build` first); its text is read whole, and every entry a consumer runs
+ * is loaded, or run, from there.
  */
 const ROOT = resolve(import.meta.dirname, '..');
 
-/** The bin the manifest publishes for the checker. */
-function checkerBin(): string {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `bin` is the record this reads
-    const { bin } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
-        bin: Record<string, string>;
-    };
-    return bin['jterrazz-test-check'] ?? '';
+/** The fields of a manifest this reads: what a consumer's install loads and runs. */
+type Manifest = {
+    bin?: Record<string, string>;
+    exports: Record<string, unknown>;
+};
+
+/** A package's manifest, as its install reads it. */
+function manifestOf(dir: string): Manifest {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `bin` and `exports` are the fields this reads
+    return JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8')) as Manifest;
 }
 
 /** One module the exports map publishes, and the condition that loads it. */
@@ -37,11 +50,7 @@ type PublishedEntry = {
  * Every JavaScript module the exports map resolves to, one per subpath and
  * condition — `types` is erased and a JSON schema carries no code.
  */
-function publishedEntries(): PublishedEntry[] {
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`: `exports` is the map this reads
-    const { exports } = JSON.parse(readFileSync(resolve(ROOT, 'package.json'), 'utf8')) as {
-        exports: Record<string, unknown>;
-    };
+function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
     const entries: PublishedEntry[] = [];
     const visit = (subpath: string, condition: string, node: unknown): void => {
         if (typeof node === 'string') {
@@ -62,38 +71,59 @@ function publishedEntries(): PublishedEntry[] {
     return entries;
 }
 
+/** The channels whose every row is something the published surface does to a consumer. */
+const PUBLISHED_CHANNELS = new Set(['runtime', 'type', 'upstream']);
+
 describe('k12 — the tarball exposes no self rule (meta-test)', () => {
-    const packed = new Set(packedFiles(ROOT));
+    // Under the run's temp root, which the run removes whole
+    const scratch = mkdtempSync(join(tmpdir(), 'k12-tarball-'));
+    const installed = extractTarball(ROOT, scratch);
+    const packed = new Set(filesUnder(installed));
+    const rows = selfRows();
     const self = selfRuleNames();
 
-    test('no packed file is a self bundle, nor a chunk only an unpacked bundle loads', () => {
-        // Given - every path npm would publish
-        const selfBundles = [...packed].filter((path) => path.startsWith('dist/self-'));
+    test('no byte the tarball carries names a self rule', () => {
+        // Given - every file of the extracted tarball, read as text: bundles, chunks, types, pages, manifest
+        const mentions = [...packed].flatMap((path) =>
+            selfMentions(readFileSync(join(installed, path), 'utf8'), rows).map(
+                (token) => `${path}: ${token}`,
+            ),
+        );
 
-        // Then - the self bundles stay home, and so does what the bundler split out of them and of the other unshipped entries
-        expect(selfBundles).toStrictEqual([]);
+        // Then - no self rule's name, code, nor the plugin that registers one, is in any of it
+        expect(packed.has('package.json')).toBe(true);
+        expect(mentions).toStrictEqual([]);
+    });
+
+    test('a text is found naming a self rule by its name, its code, or its plugin', () => {
+        // Given - one text per way of naming a row, and one that only looks like a code
+        const [row] = rows;
+        const named = row === undefined ? [] : [`${row.name} runs`, `rule ${row.id}.`];
+
+        // Then - each is found, and a longer code sharing a prefix is not the row's
+        expect(named.map((text) => selfMentions(text, rows).length > 0)).toStrictEqual([
+            true,
+            true,
+        ]);
+        expect(selfMentions('"jterrazz-self/x": "error"', rows)).toContain('jterrazz-self');
+        expect(selfMentions('K12 holds', [{ id: 'K1', name: 'k1-x' }])).toStrictEqual([]);
+    });
+
+    test('no packed chunk is one only an unpacked bundle loads', () => {
+        // Given - the bundles the build writes, and the paths the tarball holds
+        // Then - what the bundler split out of the unshipped entries stays home with them
         expect(strandedBundles(ROOT, packed)).toStrictEqual([]);
     });
 
-    test('the published plugin registers no self rule, and its fragment enables none', () => {
-        // Given - the plugin entry, loaded through the exports map a consumer's oxlint resolves
-        const registered = Object.keys(plugin.rules);
-        const enabled = Object.keys(testing.rules ?? {}).map((id) => id.slice(id.indexOf('/') + 1));
-
-        // Then - the entry is packed, and neither its rule map nor the fragment names a self rule
-        expect(packed.has('dist/oxlint.js')).toBe(true);
-        expect(registered.filter((id) => self.has(id))).toStrictEqual([]);
-        expect(enabled.filter((id) => self.has(id))).toStrictEqual([]);
-    });
-
     test('the walk finds a self rule wherever an export nests it', () => {
-        // Given - a fragment that hides one of each kind at depth: a rule map in an override, a plugin name, a rule object
+        // Given - a fragment that hides one of each kind at depth: a rule map in an override, a plugin name, a rule object, a rule keyed by its bare name
         const fragment = {
             testing: {
                 jsPlugins: ['jterrazz-self/plugin'],
                 overrides: [{ rules: { 'jterrazz/f7-no-framework-internals': 'off' } }],
             },
             nested: [{ meta: { docs: { audience: 'self' } } }],
+            plugin: { rules: { 'c35-capability-folder': {} } },
         };
 
         // Then - each is answered at the path it was found
@@ -101,12 +131,13 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
             'x.testing.jsPlugins.0 = jterrazz-self/plugin',
             'x.testing.overrides.0.rules.jterrazz/f7-no-framework-internals',
             'x.nested.0 (meta.docs.audience: self)',
+            'x.plugin.rules.c35-capability-folder',
         ]);
     });
 
-    test('no module the exports map publishes exposes a self rule, at any depth', async () => {
-        // Given - every published entry, loaded under the condition that resolves it — a `require` build through node's CommonJS loader, which `import()` hands its `module.exports`
-        const entries = publishedEntries();
+    test('no module the exports map publishes exposes a self rule, at any depth', () => {
+        // Given - every published entry of the extracted package, loaded by node itself as an install loads it — `require` takes a CommonJS build and an ES module alike
+        const entries = publishedEntries(manifestOf(installed).exports);
         expect(entries.map(({ condition, subpath }) => `${subpath}:${condition}`)).toStrictEqual(
             expect.arrayContaining([
                 '.:import',
@@ -116,43 +147,71 @@ describe('k12 — the tarball exposes no self rule (meta-test)', () => {
                 './oxlint:require',
             ]),
         );
-        const unpacked = entries.filter(({ target }) => !packed.has(target));
-        const exposures = await Promise.all(
-            entries.map(async ({ condition, subpath, target }) => {
-                const at = `${subpath} (${condition})`;
-                if (condition === 'browser') {
-                    // The browser build loads only inside Browser Mode: it is read as text
-                    const text = readFileSync(resolve(ROOT, target), 'utf8');
-                    return text.includes('jterrazz-self') ? [`${at} names jterrazz-self`] : [];
-                }
-                const loaded: unknown = await import(pathToFileURL(resolve(ROOT, target)).href);
-                return selfExposures(loaded, self, at);
-            }),
-        );
+        const load = createRequire(join(installed, 'package.json'));
+        const exposures = entries
+            .filter(({ condition }) => condition !== 'browser')
+            .map(({ condition, subpath, target }) => {
+                const loaded: unknown = load(join(installed, target));
+                return selfExposures(loaded, self, `${subpath} (${condition})`);
+            });
 
-        // Then - no rule object, plugin name nor rule map a consumer reaches is a self rule's
-        expect(unpacked).toStrictEqual([]);
+        // Then - every entry is in the tarball, and no rule object, name nor rule map a consumer reaches is a self rule's — the browser build, which loads only inside Browser Mode, is held by the text above
+        expect(entries.filter(({ target }) => !packed.has(target))).toStrictEqual([]);
         expect(exposures.flat()).toStrictEqual([]);
     });
 
-    test('the published checker runs no self pass, over the trees that trip each one', () => {
-        // Given - the bin the tarball publishes, run over every fixture a self pass's documents stand on
-        const bin = checkerBin();
-        const passes = SELF_CHECKER_PASSES;
-        expect(packed.has(bin.replace(/^\.\//u, ''))).toBe(true);
-        expect(passes.length).toBeGreaterThan(0);
-        for (const { name } of passes) {
+    test('no bin the tarball publishes runs a self pass, over the trees that trip each one', () => {
+        // Given - every bin of the extracted package, run over every fixture a self pass's documents stand on
+        const bins = Object.entries(manifestOf(installed).bin ?? {});
+        const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${codeOf(name)})`);
+        const trees = SELF_CHECKER_PASSES.flatMap(({ name }) => {
             const fixtures = resolve(ROOT, 'specs/lint', name, 'fixtures');
-            for (const tree of readdirSync(fixtures)) {
-                const run = spawnSync('node', [resolve(ROOT, bin), resolve(fixtures, tree)], {
+            return readdirSync(fixtures).map((tree) => resolve(fixtures, tree));
+        });
+        const printed = bins.flatMap(([bin, target]) =>
+            trees.flatMap((tree) => {
+                const run = spawnSync('node', [join(installed, target), tree], {
                     encoding: 'utf8',
                 });
+                const output = `${run.stdout}${run.stderr}`;
+                return [
+                    ...codes.filter((code) => output.includes(code)),
+                    ...selfMentions(output, rows),
+                ].map((token) => `${bin} on ${tree}: ${token}`);
+            }),
+        );
 
-                // Then - it prints no finding of that pass
-                expect(`${run.stdout}${run.stderr}`, `${name} on ${tree}`).not.toContain(
-                    `jterrazz-check(${codeOf(name)})`,
-                );
-            }
-        }
+        // Then - every bin is in the tarball, and none prints a self pass's finding or names a self rule
+        expect(bins.length).toBeGreaterThan(0);
+        expect(trees.length).toBeGreaterThan(0);
+        expect(
+            bins.filter(([, target]) => !packed.has(target.replace(/^\.\//u, ''))),
+        ).toStrictEqual([]);
+        expect(printed).toStrictEqual([]);
+    });
+
+    test('a runtime, type or upstream row is a consumer row: the published surface holds it', () => {
+        // Given - the channels a consumer meets through what the package publishes: its runtime's refusals, its types, its fragment's options
+        const selfOnPublished = catalog
+            .filter((row) => PUBLISHED_CHANNELS.has(row.channel) && row.audience === 'self')
+            .map((row) => row.name);
+
+        // Then - none is self: a self row there would be one the tarball carries to every consumer
+        expect(selfOnPublished).toStrictEqual([]);
+    });
+
+    test('the runtime refuses only for a consumer row, read at a heading the catalogue carries', () => {
+        // Given - every row the published runtime refuses for, and the catalogue chapter its refusals read at
+        const consumerRuntime = new Set(
+            RUNTIME_RULES.filter((row) => row.audience === 'consumer').map((row) => row.name),
+        );
+        const chapter = readFileSync(resolve(ROOT, CATALOGUE_CHAPTER), 'utf8');
+        const refused = Object.keys(REFUSAL_WHY);
+
+        // Then - each is a consumer runtime row, and its anchor exists where the refusal sends the reader
+        expect(refused.filter((name) => !consumerRuntime.has(name))).toStrictEqual([]);
+        expect(refused.filter((name) => !chapter.includes(`<a id="${name}"></a>`))).toStrictEqual(
+            [],
+        );
     });
 });

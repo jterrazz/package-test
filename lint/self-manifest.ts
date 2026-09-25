@@ -220,14 +220,14 @@ export const META_ROWS: CatalogEntry[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and the tarball exposes no `self` rule: no packed file is a self bundle or a chunk only an unpacked bundle loads; no module the `exports` map publishes, under each condition that loads it, carries at any depth a rule object whose `meta.docs` says `self`, a `jterrazz-self/` name, or a rule map — the `testing` fragment’s and its overrides’ included — naming a self row; and the published checker runs no self pass.',
+            'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and lives in the manifest of its audience, and the tarball exposes no `self` rule, read as `npm pack` writes it and extracted: no byte of it — bundle, chunk, type, page, manifest — names a self row by its name or its code, nor the `jterrazz-self` plugin; no module the `exports` map publishes, loaded under each condition node loads, carries at any depth a rule object whose `meta.docs` says `self` or a key or string naming a self row; no bin it publishes prints a self pass’s finding over that pass’s fixtures; no packed chunk is one only an unpacked bundle loads; and no row of the runtime, type or upstream channel is `self`, every refusal the runtime raises being a consumer row read at a heading of the catalogue.',
         facet: 'model',
         family: 'K',
         fix: 'State the audience on the row, and wire a self rule in `lint/self-plugin.ts` or `lint/self-checker.ts` — never in `lint/plugin.ts` or `lint/checker.ts`.',
         id: 'K12',
         name: 'k12-rule-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 (whose self half is F7) refused a consumer’s own `src/model/`.',
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: C35 filed their specs by a capability matrix they do not have, and F3 refused a consumer’s own `src/model/` until its self half left it as F7.',
         reach: 'all',
     },
     {
