@@ -4,7 +4,7 @@ import { CallResult } from './call.result.js';
 import type { CallOutcome } from './call.result.js';
 
 /** The services a module is constructed against — the record the constructor started. */
-export type ServicesPort = Readonly<Record<string, unknown>>;
+type Needs = { services: Readonly<Record<string, unknown>> };
 
 /** The module under test, handed the started services. */
 type Subject = (services: never) => unknown;
@@ -31,13 +31,7 @@ export interface CallSignature extends ChainSignature {
  * refusal is a reading, never a rejection: `result.error` carries it, so a
  * spec of a module that says no needs no `try`/`catch`.
  */
-export const call = defineAction<
-    'call',
-    [subject: Subject],
-    CallResult,
-    CallSignature,
-    { services: ServicesPort }
->({
+export const call = defineAction<'call', [subject: Subject], CallResult, CallSignature, Needs>({
     accessors: [
         { group: 'Result accessor', name: '.value', probe: 'result.value' },
         { group: 'Result accessor', name: '.error', probe: 'result.error' },
