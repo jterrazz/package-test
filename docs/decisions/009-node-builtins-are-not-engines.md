@@ -12,8 +12,7 @@ source trees](../01-architecture.md#the-source-trees)). I11 (`lint/checker-sourc
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
 `facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun
-simctl`), `expectations/command/` (`docker inspect` for a result's
-containers), `kernel/files/git-tree.ts` (what git does not ignore) and, until
+simctl`), `expectations/command/` (`docker` for a result's containers), `kernel/files/git-tree.ts` (what git does not ignore) and, until
 this record, `world/services/sqlite/` (`prisma db push`).
 
 These are not one engine used six times. Each spawns a different program for a
@@ -29,9 +28,19 @@ forbids.
   third-party packages, and the one-slice-per-engine rule is read that way.
 - A slice spawns only the program its own concept owns, from within that one
   concept folder: the cli facet its subject, the mobile server the simulator
-  tools, `expectations/command/` `docker` (its lookup and its container
-  reads), the git tree `git`.
-- Within `world/`, every process goes through `world/services/process/`:
+  tools, `expectations/command/docker-cli.ts` `docker` (its lookup and its
+  container reads, one module with one timeout), the git tree `git`.
+- `docker` stays in `expectations/`, not in `world/services/` beside
+  `testcontainers`, although the plan's engine list pairs them. The two read
+  different containers: `world/services/containers/` starts the ones the
+  TEST declares, through `testcontainers`; the `docker` CLI reads the ones the
+  SUBJECT started, labelled by the run, to judge a result
+  (`CliResult.container()`, `ContainerAccessor`). Both readers are results,
+  and `expectations/` may import only the kernel, so the move would need an
+  `expectations → world` edge the layer map forbids, or a port threaded
+  through every `CliResult` a facet builds for one program with one
+  lifecycle — `execSync('docker …')` renamed.
+- Within `world/`, every process goes through `world/services/process/serve.ts`:
   sqlite's schema push now calls its `runToCompletion`, so `world/` has one
   spawning site.
 - The rule therefore reads: each third-party engine is imported by exactly ONE
