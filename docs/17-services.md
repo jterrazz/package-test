@@ -81,6 +81,8 @@ export const { cleanup, website } = await specification.website({
 });
 ```
 
+**The framework ends what it started.** A process is spawned detached — its own process group on POSIX — and on teardown the whole group is sent `SIGTERM`, escalating to `SIGKILL` after a 2 s grace, so what the command forked (a watcher, a background server) dies with it instead of outliving the run. A website's server and a mobile run's Appium server are ended the same way, by the same code.
+
 `website()` and `mobile()` take a `services` record for exactly this: a site started beside the API it calls, a simulator started beside its Metro bundler (`process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/ })`). What used to be a bundler bootstrap the repository maintained is a declaration.
 
 **The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per RUN, where a run is one evaluation of the specification module, so two test files importing the same specification get a child each with an id of its own. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule D16 refuses under an oracle and which makes two runs of the same suite disagree.

@@ -45,7 +45,7 @@ export const { cleanup, website } = await specification.website({
 
 `server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
-The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is terminated by process group (SIGTERM, escalating to SIGKILL after a 2 s grace) — the same escalation as the [cli](12-cli.md) exec adapter, so a framework's own child processes don't outlive the run.
+The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)), its own children with it.
 
 The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
 
@@ -53,26 +53,7 @@ The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`
 
 A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([17 — Services](17-services.md)) — started before the site, in declaration order, and stopped with the specification.
 
-That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time.
-
-```typescript
-import { postgres, process, specification } from '@jterrazz/test';
-import { afterAll } from 'vitest';
-
-export const { cleanup, website } = await specification.website({
-    server: (services) =>
-        process({
-            command: 'next dev',
-            env: { NEXT_PUBLIC_API_URL: services.api.connectionString },
-        }),
-    services: {
-        api: process({ command: 'bin/server web --port $PORT', ready: '/health' }),
-        db: postgres(),
-    },
-});
-
-afterAll(cleanup);
-```
+That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example — a `next dev` beside the API it calls and that API's database — is [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)'s.
 
 A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
@@ -268,7 +249,7 @@ export const { cleanup, website } = await specification.website({
 });
 ```
 
-It applies to every COMPARED reading of a result — the head projection, the json-ld, the content, the console — so it answers for whatever it is handed; what the page said is still read whole through `meta()`, `canonical()` and the rest. Prefer a `{{token}}` wherever the noise has a shape the grammar already names.
+It applies to every COMPARED reading of a result — the head projection, the json-ld, the content, the console — so it answers for whatever it is handed; what the page said is still read whole through `meta()`, `canonical`, `alternates` and the rest. Prefer a `{{token}}` wherever the noise has a shape the grammar already names.
 
 Structured data gets the same treatment — every `ld+json` block on the page, in one golden:
 
@@ -392,10 +373,9 @@ No `seeds/` or `requests/` — a website chain has no `.seed()` setup and no req
 
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
 - **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
-- **Reaching for `testId()` as the default locator.** It exists as an escape hatch (rule W2 warns) — prefer `button`/`link`/`field`/`heading`/`content`, the same vocabulary a user's accessibility tree exposes.
-- **Reaching for `testId()` to escape an ambiguity.** It silences the refusal without answering it: the test stops asserting the role and the accessible name, which is most of what a user-facing element was buying. Scope it with `within()` instead — that is the fix rule W3 is pointing at.
+- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and W2 refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, W3's fix — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
-- **Snapshotting the tree to prove focus.** The accessibility tree carries none — `see(focused(x))` is the assertion that does. Enablement and selection it DOES carry (`[disabled]`, `[selected]`), so those a golden may pin; `see(disabled(x))` is for the one control a test is about.
+- **Snapshotting the tree to prove focus.** The tree carries none — [13 § Modifiers](13-elements.md#modifiers) says what does, and what a golden may pin instead.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.

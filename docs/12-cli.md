@@ -75,7 +75,7 @@ test('dev server boots', async () => {
 
 - `waitFor` — a pattern; the promise resolves (exit code 0) as soon as it appears in **stdout or stderr** (both streams are watched). If the process exits before matching, the result carries a non-zero exit code (a clean exit-0 without the pattern is reported as `1`).
 - `timeout` — milliseconds; the process is killed when it elapses without a match, with exit code `124`. **Default: 10 000 ms** when `waitFor` is set without a `timeout`.
-- On resolution (match, exit, or timeout) the child is terminated with `SIGTERM`, escalating to `SIGKILL` after a 2 s grace period if it ignores the first signal.
+- On resolution (match, exit, or timeout) the child is ended with the escalation every `process()` takes ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)).
 - Termination targets the **whole process group**, not just the direct shell child: the process is spawned detached (its own group on POSIX) and signalled via the negative pid, so descendants — a `tsdown --watch` grandchild under a `dev` command, a background server the script forked — die with it instead of leaking past the spec. On platforms without group support (Windows), or when the group is already gone, it degrades to the direct child kill.
 - Passing either option marks the run as long-running; combining them with the array (sequence) form is an error.
 
@@ -186,7 +186,7 @@ When the runner has `services`, the framework injects into the child env, automa
 | `DATABASE_URL` | Standard alias, only when the record has **exactly one** SQL database                                                                                  |
 | `REDIS_URL`    | Standard alias, only when the record has **exactly one** redis                                                                                         |
 
-`.env()` overrides any injected value; `null` removes it. Re-declaring what injection already provides (`.env({ DATABASE_URL: db.connectionString })`) is redundant — future lint warning.
+`.env()` overrides any injected value; `null` removes it. Re-declaring what injection already provides (`.env({ DATABASE_URL: db.connectionString })`) is redundant — rule [B6w](19-linting.md#b6w-redundant-env-url) warns.
 
 ```typescript
 // One SQL database → DATABASE_URL and DB_URL both injected, no database: option (rule A7)
@@ -451,7 +451,7 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method (rule B2).
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule D6).
 - **Assigning a Docker-aware result without `await using`.** Error (rule B5) — that is the leak-cleanup mechanism.
-- **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection — override only to _change_ it, `null` to remove it.
+- **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule B6's auto-injection, and [B6w](19-linting.md#b6w-redundant-env-url) warns — override only to _change_ it, `null` to remove it.
 - **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `fixtures/` and the shared `specs/shared/fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule C7).
