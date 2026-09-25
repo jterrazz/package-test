@@ -18,16 +18,21 @@ The vocabulary is user-facing by construction (rule W2): there is no CSS surface
 
 ## Descriptors
 
-The six every surface has:
+The four every surface has:
 
 | Descriptor      | Locates by                                                                            |
 | --------------- | ------------------------------------------------------------------------------------- |
 | `button(name)`  | accessible name, button role                                                          |
-| `link(name)`    | accessible name, link role                                                            |
 | `field(label)`  | accessible name, input roles — or the label that names it                             |
-| `heading(name)` | accessible name, heading role                                                         |
-| `content(text)` | any element containing the text                                                       |
+| `content(text)` | any element whose text IS the text, whole (`{ exact: false }` to contain)             |
 | `testId(id)`    | `data-testid` on the web, the accessibility identifier on a device — the escape hatch |
+
+The two a browser adds, on the website and the component:
+
+| Descriptor      | Locates by                    |
+| --------------- | ----------------------------- |
+| `link(name)`    | accessible name, link role    |
+| `heading(name)` | accessible name, heading role |
 
 Five more roles a visitor reads and acts on, each optionally named because a surface carries several of them and one of them usually carries no name at all:
 
@@ -47,17 +52,17 @@ And one role that is read where it SITS rather than where it shows:
 
 `see(option('LinkedIn'))` asks whether the option is OFFERED, not whether it is on the screen: the options of a collapsed `<select>` are in the document and in the accessibility tree, and not one of them has a box until a visitor opens it. Which one the field is on is the `selected` modifier.
 
-The **landmarks** are the ARIA landmark set and nothing more — a closed vocabulary keeps `within()` from becoming a second selector language. Each takes an optional accessible name, for surfaces carrying several of the same region:
+The **landmarks** are the ARIA landmark set and nothing more — a closed vocabulary keeps `within()` from becoming a second selector language. Each takes an optional accessible name, for surfaces carrying several of the same region — and `region` and `form` want one in practice, since an unnamed `<section>` or `<form>` is no landmark at all:
 
 | Landmark               | Matches                                  |
 | ---------------------- | ---------------------------------------- |
-| `banner()`             | the page header                          |
+| `banner(name?)`        | the page header                          |
 | `navigation(name?)`    | a `<nav>` — name it when several         |
-| `main()`               | the primary content                      |
+| `main(name?)`          | the primary content                      |
 | `complementary(name?)` | an `<aside>`, a sidebar                  |
-| `contentinfo()`        | the page footer                          |
-| `region(name)`         | a `<section>` with an accessible name    |
-| `form(name)`           | a named form landmark                    |
+| `contentinfo(name?)`   | the page footer                          |
+| `region(name?)`        | a `<section>` with an accessible name    |
+| `form(name?)`          | a named form landmark                    |
 | `search(name?)`        | a `<search>` element, or `role="search"` |
 
 ## Modifiers
@@ -93,39 +98,26 @@ await visitor.see(channel);
 
 A scenario is the When: pure interaction, no `expect()` inside it (rule W1). Every verb auto-waits; there are no sleeps anywhere in the framework.
 
-| Verb                      | Does                                                                | Where          |
-| ------------------------- | ------------------------------------------------------------------- | -------------- |
-| `click(element)`          | Click the element                                                   | web, component |
-| `tap(element)`            | Tap the element — the device's word for the same act                | mobile         |
-| `fill(element, value)`    | Fill a form field                                                   | everywhere     |
-| `press(key)`              | Press a key (e.g. `'Enter'`)                                        | web, component |
-| `select(element, option)` | Select an option in a select field                                  | web, component |
-| `check(element)`          | Check a checkbox or radio                                           | web, component |
-| `hover(element)`          | Hover the element                                                   | web, component |
-| `goto(path)`              | Navigate to another path of the site under test                     | web            |
-| `rerender(ui)`            | What a PARENT does: new props, same mount                           | component      |
-| `unmount()`               | What a parent does when it takes the thing off the screen           | component      |
-| `see(element)`            | **The synchronization primitive** — retries until visible           | everywhere     |
-| `gone(element)`           | The absence primitive — retries until hidden or out of the document | web, component |
+| Verb                      | Does                                                                |
+| ------------------------- | ------------------------------------------------------------------- |
+| `click(element)`          | Click the element                                                   |
+| `tap(element)`            | Tap the element — the device's word for the same act                |
+| `fill(element, value)`    | Fill a form field                                                   |
+| `press(key)`              | Press a key (e.g. `'Enter'`)                                        |
+| `select(element, option)` | Select an option in a select field                                  |
+| `check(element)`          | Check a checkbox or radio                                           |
+| `hover(element)`          | Hover the element                                                   |
+| `goto(path)`              | Navigate to another path of the site under test                     |
+| `rerender(ui)`            | What a PARENT does: new props, same mount                           |
+| `unmount()`               | What a parent does when it takes the thing off the screen           |
+| `see(element)`            | **The synchronization primitive** — retries until visible           |
+| `gone(element)`           | The absence primitive — retries until hidden or out of the document |
 
-`goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` waits for the mobile facet's adapter to answer for absence, which an XCUITest tree does not do honestly yet.
+`goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` is absent on mobile until the adapter can answer for absence honestly, which an XCUITest tree does not do yet.
 
 ## The per-facet matrix
 
-What each surface can name. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
-
-| Word                                               | website | component | mobile |
-| -------------------------------------------------- | ------- | --------- | ------ |
-| `button` `field` `content` `testId`                | yes     | yes       | yes    |
-| `link` `heading`                                   | yes     | yes       | —      |
-| `dialog` `status` `table` `row` `listitem`         | yes     | yes       | —      |
-| `option`                                           | yes     | yes       | —      |
-| landmarks (`main` `navigation` `region` …)         | yes     | yes       | —      |
-| `within(scope, target)`                            | yes     | yes       | yes    |
-| `{ exact: false }`                                 | yes     | yes       | yes    |
-| `focused` `disabled` `enabled` `selected` `valued` | yes     | yes       | —      |
-| `see`                                              | yes     | yes       | yes    |
-| `gone`                                             | yes     | yes       | —      |
+Which surface declares which verb, descriptor and modifier is generated from the code — [03 — Testing § The capability matrix](03-testing.md#the-capability-matrix), its **Verb** and **Descriptor** sections, a `—` for a word the facet does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
 
 The ARIA landmarks are web-only: passing one to a mobile verb refuses at runtime with a message naming the boundary — an iOS screen has no ARIA regions, and inventing an equivalent would be a second vocabulary wearing the first one's words.
 
@@ -207,7 +199,7 @@ A name only part of an accessible name designates nothing, on every surface and 
 
 ## `testId()` — the one escape hatch
 
-`testId(id)` reads `data-testid` on the web and the accessibility identifier on a device. It is the ONLY descriptor that names something a user cannot perceive, and rule W2 is an error on it: a `testId()` carries a same-line comment naming what the element lacks.
+`testId(id)` reads `data-testid` on the web and the accessibility identifier on a device. It is the ONLY descriptor that names something a user cannot perceive, and rule W2 is an error on it: a `testId()` carries a `// testId: <what is missing>` comment on its own line or the one directly above.
 
 ```typescript
 // testId: the row has no accessible name — the cells carry the data
@@ -218,7 +210,7 @@ The comment is an INVARIANT, not a rationale: it states the property of the mark
 
 ## Pitfalls
 
-- **Asserting focus with a golden.** The accessibility tree carries no focus state. `see(focused(x))` / `gone(focused(x))` are the verbs that do.
+- **Asserting focus with a golden.** The tree carries no focus — [§ Modifiers](#modifiers).
 - **Expecting a name to match a prefix.** It does not: write the name whole, read off the ARIA tree, or scope it with `within(…)`.
 - **Answering an ambiguity with `{ exact: false }`.** The option widens the match; ambiguity wants narrowing. Scope it.
 - **Reaching for `testId()` first.** It is the last rung, and W2 asks for the line saying why. A heading, a button or a field usually names the thing already.
