@@ -3714,7 +3714,7 @@ package-typescript's `vision/17` now runs on this package's `vision/17`,
 at `17b489ee`. `npm ci` installed @jterrazz/test 17.0.0. The first
 `make fix` exited 0 and renamed nothing: the mover never descends into a
 ground folder, and the toolchain's one `contracts/` tree sits under
-`specs/cli/preset/fixtures/`. Five commits followed, `aeb6d83..a5b4018`.
+`package-typescript/specs/cli/preset/fixtures/`. Five commits followed, `aeb6d83..a5b4018`.
 The last `make fix` exited 0, and `make check` exited 0 (161 files, 478
 tests).
 
