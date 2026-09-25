@@ -1,19 +1,10 @@
 import type { Context } from '@oxlint/plugins';
 
-import {
-    chainRootName,
-    child,
-    childList,
-    identifierName,
-    memberPath,
-    memberPropertyName,
-    propertyKeyName,
-    segments,
-    stringValue,
-} from '../../ast.js';
-import { facetFileFindings, layerOf } from '../../facet-file.js';
+import { segments } from '../../ast.js';
+import { facetFileFindings } from '../../facet-file.js';
+import { handleFileFindings } from '../../facet-handle.js';
 import { lessonsAt } from '../../lesson.js';
-import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
+import type { LintRule, Visitor } from '../../rule-shape.js';
 import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../self-manifest.js';
 
 /** What a facet's folder file is: its composition, its constructor, or neither. */
@@ -31,52 +22,6 @@ function facetFileOf(filename: string): FacetFile {
     return file === `${facet}.handle.ts` ? 'constructor' : undefined;
 }
 
-/** A definition's own steps — what the chain runs, never its constructor. */
-const STEPS = new Set(['arm', 'perform', 'reduce']);
-
-/** The layer each name a constructor imports lives in, when it is one I6 judges. */
-type Imported = ReadonlyMap<string, 'definition' | 'facet' | 'result'>;
-
-/** A step of a definition, and what it is read off. */
-type Step = { owner: string; step: string };
-
-/** What a value is read off, when that is a definition or a facet the file imports. */
-function composedOwner(node: AstNode | undefined, imported: Imported): string | undefined {
-    const root = chainRootName(node);
-    const layer = root === undefined ? undefined : imported.get(root);
-    return layer === 'definition' || layer === 'facet' ? (memberPath(node) ?? root) : undefined;
-}
-
-/** The step a call runs, when it is one of a definition the file imports, or a step destructured from one. */
-function stepRun(
-    callee: AstNode | undefined,
-    imported: Imported,
-    bound: ReadonlyMap<string, Step>,
-): Step | undefined {
-    if (callee?.type === 'Identifier') {
-        return bound.get(identifierName(callee) ?? '');
-    }
-    const step = callee === undefined ? undefined : memberPropertyName(callee);
-    const owner = composedOwner(child(callee, 'object'), imported);
-    return step !== undefined && STEPS.has(step) && owner !== undefined
-        ? { owner, step }
-        : undefined;
-}
-
-/** The steps a declarator destructures from a definition or a facet: `const { reduce } = seed`. */
-function destructuredSteps(declarator: AstNode, imported: Imported): [string, Step][] {
-    const owner = composedOwner(child(declarator, 'init'), imported);
-    const pattern = child(declarator, 'id');
-    if (owner === undefined || pattern?.type !== 'ObjectPattern') {
-        return [];
-    }
-    return childList(pattern, 'properties').flatMap((property): [string, Step][] => {
-        const step = propertyKeyName(property) ?? '';
-        const local = identifierName(child(property, 'value'));
-        return STEPS.has(step) && local !== undefined ? [[local, { owner, step }]] : [];
-    });
-}
-
 /**
  * CONVENTIONS I6 — a facet file is a composition, and its constructor opens it.
  *
@@ -88,53 +33,16 @@ function destructuredSteps(declarator: AstNode, imported: Imported): [string, St
 export const i6FacetIsComposition: LintRule = {
     createOnce(context: Context): Visitor {
         let file: FacetFile;
-        const imported = new Map<string, 'definition' | 'facet' | 'result'>();
-        const bound = new Map<string, Step>();
         return {
             before: () => {
                 file = facetFileOf(context.filename);
-                imported.clear();
-                bound.clear();
                 return file !== undefined;
             },
-            CallExpression: (node) => {
-                const run =
-                    file === 'constructor'
-                        ? stepRun(child(node, 'callee'), imported, bound)
-                        : undefined;
-                if (run !== undefined) {
-                    context.report({ data: run, messageId: 'runsStep', node });
-                }
-            },
-            ImportDeclaration: (node) => {
-                const layer = layerOf(stringValue(child(node, 'source')) ?? '');
-                for (const specifier of childList(node, 'specifiers')) {
-                    const local = identifierName(child(specifier, 'local'));
-                    if (layer !== undefined && local !== undefined) {
-                        imported.set(local, layer);
-                    }
-                }
-            },
-            NewExpression: (node) => {
-                const built = identifierName(child(node, 'callee'));
-                if (
-                    file === 'constructor' &&
-                    built !== undefined &&
-                    imported.get(built) === 'result'
-                ) {
-                    context.report({ data: { built }, messageId: 'buildsResult', node });
-                }
-            },
             Program: (node) => {
-                if (file === 'composition') {
-                    for (const finding of facetFileFindings(node)) {
-                        context.report(finding);
-                    }
-                }
-            },
-            VariableDeclarator: (node) => {
-                for (const [local, step] of destructuredSteps(node, imported)) {
-                    bound.set(local, step);
+                const findings =
+                    file === 'composition' ? facetFileFindings(node) : handleFileFindings(node);
+                for (const finding of findings) {
+                    context.report(finding);
                 }
             },
         };

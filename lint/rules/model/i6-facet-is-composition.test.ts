@@ -157,6 +157,28 @@ ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), 
             ],
             filename: '/repo/src/facets/jobs/jobs.handle.ts',
         },
+        // A step reached through an alias of the step or of its definition, a destructured default, and a binding written after the call.
+        {
+            code: `${OPENS}\nexport function early(state, context) {\n    return late([], state, context);\n}\nconst { reduce: late } = seed;\nexport function aliased(state, context) {\n    const run = seed.reduce;\n    const definition = seed;\n    const { reduce = undefined } = seed;\n    run([], state, context);\n    definition.reduce([], state, context);\n    return reduce([], state, context);\n}\n`,
+            errors: [
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+            ],
+            filename: '/repo/src/facets/jobs/jobs.handle.ts',
+        },
+        // A step called through `call`, read by a string key or off a cast, and a result built through a namespace import.
+        {
+            code: `${OPENS}\nimport * as results from '../../results/result.js';\nexport function reached(state, context) {\n    seed.reduce.call(undefined, [], state, context);\n    seed['reduce']([], state, context);\n    (seed as any).reduce([], state, context);\n    return new results.BaseResult({ config: {}, testDir: '' });\n}\n`,
+            errors: [
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+                { messageId: 'runsStep' },
+                { messageId: 'buildsResult' },
+            ],
+            filename: '/repo/src/facets/jobs/jobs.handle.ts',
+        },
     ],
     valid: [
         { code: COMPOSED, filename: '/repo/src/facets/jobs/jobs.facet.ts' },
