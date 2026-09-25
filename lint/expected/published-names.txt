@@ -237,6 +237,7 @@ dist/vitest.d.ts:
     CliProjectOptions
     ComponentProjectOptions
     FacetProjectOptions
+    IntegrationProjectOptions
     JobProjectOptions
     LiterateDoor
     LiterateOptions
