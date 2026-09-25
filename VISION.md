@@ -3336,3 +3336,39 @@ entry. `make fix` exit 0, `make check` exit 0 (567 files, 2604 tests).
     - docs/decisions/007:53 still reads "what rule F3 asks of every
       consumer". Whether the historical ADR gets a superseding note is the
       maintainer's call.
+
+## Audience batch of 2026-09-25: intelligence
+
+No unit landed on package-intelligence's `vision/17`, cut from
+`origin/main`. HEAD stays `ba9d695`. The package has no `make fix` or
+`make check`; its equivalents all exit 0: `make build`, `npm run lint:fix`,
+`make lint`, and `make test` (18 files, 210 tests).
+
+- **Every rule declares its audience** (branch
+  `vision17-intelligence-audience`, worktree `pi-audience`, HEAD
+  `3144c38`). Skipped: its review came back `fix-first` after one round.
+  The worktree and the branch are kept. What stays open:
+    - **Major.** `1f25059` dropped the packed file-list check. A home-only
+      tsdown entry ships in the tarball and the spec stays green. Pin the
+      exact packed file set in oxlint-entry.spec.ts. Show it red under a
+      temporary `home-lint` entry. Then state in docs/02-developing.md that
+      a self rule's plugin module is never a tsdown entry.
+    - **Major.** Every rule module imports RULE_DOCS, so a `self` row's
+      text is inlined into dist/oxlint.{js,cjs} and their maps. The
+      meta-tests stay green. Move self rows into a module the plugin never
+      reaches, with its own SelfRuleId. Judge the union in plugin.test.ts.
+      Add a tarball row saying no shipped file carries a self id or its
+      convention text. **Owner call:** if the split is rejected, reword
+      docs/02:84-86 and manifest.ts:25-28 to say the text is bundled.
+      @jterrazz/test has the same leak.
+    - The audience walk skips functions (spec:49), and only `./oxlint`'s
+      export set is pinned. Pin the sorted export names of every subpath,
+      in ESM and in CJS.
+    - docs/02-developing.md:84-86 claims a home wiring for self rules. No
+      such wiring exists. Say so, or drop the claim.
+    - `exportMap()` (spec:77) reads the root package.json, not the
+      extracted one. Pass it `installed`.
+    - The meta rows and runtime refusals declare their audience only in
+      `f25c84f`'s commit body. Accept that as recorded. docs/03-testing.md
+      should state that the meta rows are `self` and that the refusals are
+      the API's contract, with no catalogue row.
