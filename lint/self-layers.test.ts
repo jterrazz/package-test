@@ -15,8 +15,11 @@ const own = [{ layers: FRAMEWORK_LAYERS }];
 
 describe('the layer map — lock 2, the direction the source trees import in', () => {
     test('names every tree of the source root, and lint beside it', () => {
+        // Given - the map this package hands its own lint
+        const trees = Object.keys(FRAMEWORK_LAYERS).toSorted();
+
         // Then - no tree is left out of the direction the rule enforces
-        expect(Object.keys(FRAMEWORK_LAYERS).toSorted()).toStrictEqual([
+        expect(trees).toStrictEqual([
             'elements',
             'expectations',
             'facets',
