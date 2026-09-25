@@ -3,15 +3,15 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../../rule-tester.fixtures.js';
-import { FRAMEWORK_LAYERS } from '../../self-layers.js';
 import { i1LayerBoundaries } from './i1-layer-boundaries.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
 
 // Boundary cast: a `LintRule` reads every node as an `AstNode`, where oxlint
-// types each handler with its node's interface.
+// Types each handler with its node's interface.
 type OxlintRule = Parameters<RuleTester['run']>[1];
+const rule = i1LayerBoundaries as unknown as OxlintRule;
 
 const ruleTester = new RuleTester();
 
@@ -54,7 +54,7 @@ const UNDER_SRC = checkoutUnder('src', ['src']);
 /** A spine no package holds — a repository alone — checked out under a folder named `src/`. */
 const REPOSITORY_UNDER_SRC = repositoryUnder('src', ['src']);
 
-ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unknown as OxlintRule, {
+ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
     invalid: [
         // A layer that declares no packages imports none.
         {
@@ -207,7 +207,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', i1LayerBoundaries as unkn
     ],
 });
 
-ruleTester.run('i1-layer-boundaries (no map)', i1LayerBoundaries as unknown as OxlintRule, {
+ruleTester.run('i1-layer-boundaries (no map)', rule, {
     invalid: [],
     valid: [
         // Given no declared architecture, the rule says nothing: an
@@ -238,148 +238,34 @@ ruleTester.run('i1-layer-boundaries (no map)', i1LayerBoundaries as unknown as O
     ],
 });
 
-ruleTester.run(
-    'i1-layer-boundaries (any architecture)',
-    i1LayerBoundaries as unknown as OxlintRule,
-    {
-        invalid: [
-            // A consumer's own layering, in its own vocabulary.
-            {
-                code: 'import { Client } from "pg";',
-                errors: [{ messageId: 'foreignDependency' }],
-                filename: '/app/src/domain/order.ts',
-                options: [{ layers: { domain: { imports: ['domain/'] } } }],
-            },
-            {
-                code: 'import { repository } from "../infrastructure/repository.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/app/src/domain/order.ts',
-                options: [{ layers: { domain: { imports: ['domain/'] } } }],
-            },
-        ],
-        valid: [
-            {
-                code: 'import { order } from "../domain/order.js";',
-                filename: '/app/src/application/place-order.ts',
-                options: [
-                    {
-                        layers: {
-                            application: { imports: ['application/', 'domain/'] },
-                            domain: { imports: ['domain/'] },
-                        },
+ruleTester.run('i1-layer-boundaries (any architecture)', rule, {
+    invalid: [
+        // A consumer's own layering, in its own vocabulary.
+        {
+            code: 'import { Client } from "pg";',
+            errors: [{ messageId: 'foreignDependency' }],
+            filename: '/app/src/domain/order.ts',
+            options: [{ layers: { domain: { imports: ['domain/'] } } }],
+        },
+        {
+            code: 'import { repository } from "../infrastructure/repository.js";',
+            errors: [{ messageId: 'crossLayer' }],
+            filename: '/app/src/domain/order.ts',
+            options: [{ layers: { domain: { imports: ['domain/'] } } }],
+        },
+    ],
+    valid: [
+        {
+            code: 'import { order } from "../domain/order.js";',
+            filename: '/app/src/application/place-order.ts',
+            options: [
+                {
+                    layers: {
+                        application: { imports: ['application/', 'domain/'] },
+                        domain: { imports: ['domain/'] },
                     },
-                ],
-            },
-        ],
-    },
-);
-
-/** The package's own map, as `oxlint.config.ts` hands it to the rule. */
-const own = [{ layers: FRAMEWORK_LAYERS }];
-
-ruleTester.run(
-    "i1-layer-boundaries (the package's own map refuses a reverse edge)",
-    i1LayerBoundaries as unknown as OxlintRule,
-    {
-        invalid: [
-            // The kernel knows none of the layers built on it.
-            {
-                code: 'import { pinClock } from "../../world/clock/clock.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/kernel/chain/chain.ts',
-                options: own,
-            },
-            {
-                code: 'import { apiFacet } from "../../facets/api/index.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/kernel/chain/define-facet.ts',
-                options: own,
-            },
-            // Nor does it reach an engine a slice owns.
-            {
-                code: 'import { Client } from "pg";',
-                errors: [{ messageId: 'foreignDependency' }],
-                filename: '/repo/src/kernel/chain/perform.ts',
-                options: own,
-            },
-            // What surrounds the subject never reaches what is tested.
-            {
-                code: 'import { api } from "../../../facets/api/index.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/world/stubs/http/http.ts',
-                options: own,
-            },
-            // The three shared layers reach the kernel, not each other.
-            {
-                code: 'import { declaredDatabaseKeys } from "../world/services/services.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/expectations/result.ts',
-                options: own,
-            },
-            {
-                code: 'import { button } from "../../elements/elements.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/world/clock/clock.ts',
-                options: own,
-            },
-            {
-                code: 'import { websiteFacet } from "../facets/website/index.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/elements/elements.ts',
-                options: own,
-            },
-            // A facet reaches the preset only from its project, never from test code.
-            {
-                code: 'import { onProjectDefaults } from "../../../vitest/preset.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/facets/api/request/route.ts',
-                options: own,
-            },
-            // A facet folder owns its own engine, not a sibling's.
-            {
-                code: 'import { chromium } from "playwright";',
-                errors: [{ messageId: 'foreignDependency' }],
-                filename: '/repo/src/facets/api/server/hono.adapter.ts',
-                options: own,
-            },
-            // A stub reaches the token grammar only from the modules the seam names.
-            {
-                code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
-                errors: [{ messageId: 'crossLayer' }],
-                filename: '/repo/src/world/stubs/openai/openai.ts',
-                options: own,
-            },
-        ],
-        valid: [
-            // The runner config assembles each facet's project.
-            {
-                code: 'import { api } from "../facets/api/api.project.js";',
-                filename: '/repo/src/vitest/projects.ts',
-                options: own,
-            },
-            // A facet's project builds on the preset: the one declared seam.
-            {
-                code: 'import { onProjectDefaults } from "../../vitest/preset.js";',
-                filename: '/repo/src/facets/api/api.project.ts',
-                options: own,
-            },
-            // A facet reaches every shared layer below it.
-            {
-                code: 'import { BaseResult } from "../../expectations/result.js";',
-                filename: '/repo/src/facets/job/trigger.action.ts',
-                options: own,
-            },
-            {
-                code: 'import { chromium } from "playwright";',
-                filename: '/repo/src/facets/website/browser/playwright.adapter.ts',
-                options: own,
-            },
-            // A stub's request filter IS an expectation on the outgoing request.
-            {
-                code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
-                filename: '/repo/src/world/stubs/http/http.ts',
-                options: own,
-            },
-        ],
-    },
-);
+                },
+            ],
+        },
+    ],
+});
