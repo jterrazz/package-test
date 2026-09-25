@@ -32,7 +32,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/index.browser.ts',
-            'src/vitest/index.ts',
             'src/facets/api/index.ts',
             'src/facets/cli/index.ts',
             'src/facets/component/index.ts',
