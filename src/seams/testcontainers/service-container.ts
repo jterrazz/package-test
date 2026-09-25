@@ -3,7 +3,7 @@ import { RunContainer } from './run-container.js';
 import { TestcontainersAdapter } from './testcontainers.js';
 
 /**
- * The container a declared service gets: the run's, when the project's global
+ * The container a declared service gets: the project's, when its global
  * setup serves one — asked where it is at start, since only then does the
  * worker know — and one of its own otherwise, started and stopped with it.
  */
@@ -13,7 +13,7 @@ export class ServiceContainer implements ContainerPort {
     private readonly locate: () => Promise<string | undefined>;
 
     /**
-     * @param locate - where the run serves its containers, `undefined` when it serves none
+     * @param locate - where the project serves its containers, `undefined` when it serves none
      */
     constructor(request: ContainerRequest, locate: () => Promise<string | undefined>) {
         this.request = request;

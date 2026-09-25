@@ -276,11 +276,11 @@ describe('the node facet helpers — one canonical project per kind', () => {
         expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
     });
 
-    test('the facets that declare services carry the setup that starts them once per run', () => {
+    test('the facets that declare services carry the setup that starts them once per project', () => {
         // Given - the global setups of the three facets whose specs declare containers
         const setups = [api(), jobs(), integration()].map((project) => testOf(project).globalSetup);
 
-        // Then - each serves the run's containers, which a file without it starts per specification
+        // Then - each serves the project's containers, which a file without it starts per specification
         for (const carried of setups) {
             expect(carried).toContain(servicesSetup());
         }

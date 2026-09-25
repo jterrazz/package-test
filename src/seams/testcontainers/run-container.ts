@@ -2,7 +2,7 @@ import type { ContainerPort, ContainerRequest } from '../../model/ports/containe
 import { field } from './run-containers.js';
 import type { RunAddress } from './run-containers.js';
 
-/** The run's answer to a request: where the container is, or why there is none. */
+/** The project's answer to a request: where the container is, or why there is none. */
 function answered(value: unknown): RunAddress | { error: string } {
     const error = field(value, 'error');
     if (typeof error === 'string') {
@@ -18,8 +18,8 @@ function answered(value: unknown): RunAddress | { error: string } {
 }
 
 /**
- * A container of the run, as a worker holds it: started by asking the run,
- * never stopped by the worker, its logs read from the run.
+ * A container of the project, as a worker holds it: started by asking the
+ * project's setup, never stopped by the worker, its logs read from the setup.
  */
 export class RunContainer implements ContainerPort {
     private address: null | RunAddress = null;
@@ -44,7 +44,7 @@ export class RunContainer implements ContainerPort {
         this.address = answer;
     }
 
-    /** Let go of the container — the run started it, and the run's teardown stops it. */
+    /** Let go of the container — the project's setup started it, and its teardown stops it. */
     async stop(): Promise<void> {
         this.address = null;
         await Promise.resolve();

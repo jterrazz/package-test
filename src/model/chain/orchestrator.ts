@@ -142,7 +142,7 @@ export class Orchestrator {
             } catch (error: any) {
                 let logs = '';
                 try {
-                    // A container of the run logs every file's work: the report reads from this start's.
+                    // A container of the project logs every file's work: the report reads from this start's.
                     logs = await container.getLogs(new Date(startedAt - LOG_CLOCK_MARGIN_MS));
                 } catch {
                     /* Ignore log fetch errors */

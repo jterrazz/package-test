@@ -9,7 +9,7 @@ export type ApiProjectOptions = FacetProjectOptions;
 
 /**
  * An api project collects the facet's `.spec.ts` files —
- * `specs/api/**\/*.spec.ts` — serves the run's service containers, and measures
+ * `specs/api/**\/*.spec.ts` — serves the project's service containers, and measures
  * its route coverage: a global setup names, after the run, every route the
  * apps declare that no test reached.
  */

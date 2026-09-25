@@ -76,7 +76,7 @@ export class RunContainers {
         return await container.getLogs(since);
     }
 
-    /** Stop every container the run started, whatever the others did. */
+    /** Stop every container the project started, whatever the others did. */
     async stop(): Promise<void> {
         const pending = [...this.started.values()];
         this.started.clear();
@@ -95,14 +95,14 @@ export class RunContainers {
             await container.start();
             return container;
         } catch (error) {
-            // A start that failed is not the run's container: the next request tries again.
+            // A start that failed is not the project's container: the next request tries again.
             this.started.delete(key);
             throw error;
         }
     }
 }
 
-/** The run's containers, served on a loopback port. */
+/** The project's containers, served on a loopback port. */
 export type ServedContainers = { close: () => Promise<void>; url: string };
 
 /** An object's own field, when it has one. */

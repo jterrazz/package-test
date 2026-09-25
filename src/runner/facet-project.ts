@@ -116,7 +116,7 @@ export function mobileSessionSetup(): string {
 }
 
 /**
- * The global setup that serves the run's service containers — the testcontainers
+ * The global setup that serves the project's service containers — the testcontainers
  * seam's `run-setup.ts` in a source checkout, `services-setup.js` in the built
  * package, where the bundle and its entries share one folder.
  */

@@ -61,7 +61,7 @@ describe('the run containers', () => {
     });
 
     test('stop every container the run started', async () => {
-        // Given - two containers of the run
+        // Given - two containers of the project
         const runtime = fakeRuntime();
         const run = new RunContainers(runtime.create);
         await run.acquire(POSTGRES);

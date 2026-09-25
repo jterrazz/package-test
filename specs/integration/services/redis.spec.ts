@@ -127,9 +127,9 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — the run starts ONE redis container: two services are two indexes, not two containers.
-    test('two redis services are served by the one container the run started', async () => {
-        // Given - each service's address, and the run's answer to a redis request
+    // RUNTIME G2 — the project starts ONE redis container: two services are two indexes, not two containers.
+    test('two redis services are served by the one container the project started', async () => {
+        // Given - each service's address, and the project's answer to a redis request
         const result = await integration.call(async ({ cache, queue }) => {
             const run = inject('serviceContainers');
             const asked = await fetch(`${run}/containers`, {
@@ -229,7 +229,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — the run's container outlives a file, and a file that died
+    // RUNTIME G2 — the project's container outlives a file, and a file that died
     // Before its release left its keys at its index.
     test('a worker acquires its index empty, whatever a worker before it left there', async () => {
         // Given - one handle that writes at its index and never releases, then another acquired by the same worker
