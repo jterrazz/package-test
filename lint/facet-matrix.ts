@@ -1,6 +1,9 @@
 /**
- * The facet capability declaration — the one statement of WHICH capability
- * each kind of test has, and the literal a test exercising it carries.
+ * The hand rows of the capability matrix — WHICH capability each kind of
+ * test has, and the literal a test exercising it carries — for what the
+ * engines own (goldens, doubles) and for every facet not yet written as a
+ * composition; a composed facet states its own rows (`self/compositions.ts`),
+ * held equal to the ones here while both exist.
  *
  * It is not a third copy of the surface: every row of the five groups a facet
  * interface can answer for (constructor options, setups, terminal actions,
