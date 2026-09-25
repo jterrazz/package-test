@@ -2,7 +2,7 @@
 
 ## Overnight, 2026-09-24 — read this first
 
-**Where things stand.** Three local `vision/17` branches, every gate green: package-test (17.0.0, 2362 tests), package-typescript (11.0.0, 400 tests), signews-api on both (429 tests, `make check` 32 s). Nothing pushed or released.
+**Where things stand.** Three local `vision/17` branches, every gate green: package-test (17.0.0, 2742 tests), package-typescript (11.0.0, 400 tests), signews-api on both (429 tests, `make check` 32 s). Nothing pushed or released.
 
 **What landed overnight** (iterations 20–28, details below in their sections):
 
@@ -3756,3 +3756,74 @@ Open, **for the owner or maintainer**:
   when the dependency stops being a `file:`.
 - ADR-011's body had a link repointed, and nothing else. Its status is
   untouched.
+
+## Architecture wave closed (2026-09-25)
+
+Three close units were integrated onto package-test's `vision/17` by
+cherry-pick, with no merge commits, in this order:
+
+- **close-i8** (branch HEAD `3d132578`, 8 commits). I8 now honours the
+  kinds that have no sibling, `render` is declared page-only, and a test
+  proves that loading the node entry reaches no msw, playwright or
+  webdriverio. docs/01 gives the three results edges that plan §4.4
+  dropped, each with its reason.
+- **close-stubs** (branch HEAD `3a35e7d2`, 4 commits). The clock
+  capability refuses a stated non-instant for every engine, which closes
+  U-post-4. C4 kind-checks a stub reached through a namespace import.
+  `openai.stream` and `anthropic.stream` serve a provider's streamed
+  reply. C13 names a leftover `contracts/` folder beside a test, and
+  names the mover that moves it.
+- **close-component** (branch HEAD `7fc4d1a2`, 7 commits). Component
+  test files are split so that each asks about one capability. docs/03
+  names `page-surface` as the one exception.
+
+The docs/03 generated counts conflicted twice while close-stubs was
+being picked. Both times vision/17's figures were kept, and
+`npm run docs` then restated them in a separate chore commit. The Markdown
+(prose) gate was red because this page cited a package-typescript
+fixtures path as if it were local. The path is now qualified with its
+repository. With I8 closed, `make fix` exits 0 and **`make check` exits
+0**: 623 test files and 2742 tests pass. The coverage floor was checked
+and holds, with statements at 94.88%, branches at 85.75%, functions at
+96.34% and lines at 94.83%.
+
+Open, **for the orchestrator**:
+
+- Plan §4.4 should record the three results edges as a correction:
+  model→results, facets→results through the handles' `createDockerReader`,
+  and seams→results/text through `vitest-browser/golden.ts`.
+- Iteration 38 said SSE and streams are `http`. docs/16 now refines that
+  with the provider streams. The owner should confirm the refinement.
+
+Open, **for the owner or maintainer**:
+
+- The `.json body` module count reads 12 when the true figure is 11. The
+  probe matches the `'package.json'` literal in `src/index.test.ts`,
+  because `matcherOf` anchors a probe that starts with a dot only on that
+  dot.
+- `oxlint.config.ts` still exempts `src/seams/vitest/**` from F2, but
+  `clock.engine.ts` imports only `model/`. If that exemption is dead,
+  drop it, and docs/01's "the two vitest seams" becomes "the page seam".
+- C13's rule that any `contracts/` under `specs/` counts is not pinned.
+  Its only invalid in-specs case also has a facade. It needs a case with
+  kind folders only. C13 also looks only at the folder beside a test,
+  while the mover renames every `contracts/`. Either accept that limit
+  and record it, or also probe the ancestors.
+- C4's `composes()` still matches only a bare `defineStubs`, so
+  `export default t.defineStubs(…)` is refused. Either extend it or
+  record the limit in the C4 convention.
+- The cast in `integration.handle.ts` stays, because the Services
+  parameter blocks removing it. The hand-written component node stub
+  stays too: it is already exhaustive with no cast, and
+  architecture-plan.md:718's helper would need one. Both need a decision.
+- `mockOf` and `waitUntil` have no component row, so their tests stay in
+  `intercept/page-surface.test.tsx`. Once rows exist, splitting them into
+  `mock-of/` and `wait-until/` is mechanical. The two page-matcher
+  `toContain` tests would move to that row's folder.
+- docs/03:80 should say that the verbs a form is driven by belong to
+  `fill/`. Without that, fill/'s `press`, `gone` and `check` claims read
+  as a second capability.
+- The component `.wrap()` cell rests on one file, nav. use-modal-dialog
+  no longer goes through `.wrap()`.
+
+The three worktrees and branches are removed.
