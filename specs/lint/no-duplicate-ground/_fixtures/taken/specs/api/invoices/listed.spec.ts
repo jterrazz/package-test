@@ -7,7 +7,7 @@ describe('listed', () => {
 test('the invoices are listed over the shared users', async () => {
     // Given - the seeds it stands on
     const result = await api
-        .seed(file('../../_shared/_seeds/two-users.sql'))
+        .seed(file('../_seeds/two-users.sql'))
         .get('/invoices');
 
     // Then - the app answered

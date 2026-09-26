@@ -4,6 +4,6 @@ runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/_shared/_seeds/two-users.sql: exists
+          specs/api/_seeds/two-users.sql: exists
           specs/api/orders/orders.spec.ts:
-              contains: file('../../_shared/_seeds/two-users.sql')
+              contains: file('../_seeds/two-users.sql')

@@ -119,20 +119,22 @@ The file layout follows the same split: a **public facade** per feature, **inter
 ```
 specs/<facet>/<feature>/
 ├── <feature>.test.ts
-└── stubs/
-    ├── newsroom.stubs.ts              PUBLIC — named exports = the world
-    │                                      and its scenarios
-    ├── http/
-    │   ├── events.ts                      a unit stub
-    │   ├── events.response.json           the payload it serves
-    │   ├── events.fr.response.json        a qualified payload — same owner
-    │   └── article-gone.ts                a factory: (id) => Stub
-    ├── openai/
-    │   ├── classify-article.ts
-    │   └── classify-article.request.ts    the exact prompt it matches
-    └── anthropic/
-        └── draft-reply.ts
+└── _setup/
+    └── stubs/
+        ├── newsroom.stubs.ts          PUBLIC — the world and its scenarios, by name
+        ├── http/
+        │   ├── events.ts                  a unit stub
+        │   ├── events.response.json       the payload it serves
+        │   ├── events.fr.response.json    a qualified payload — same owner
+        │   └── article-gone.ts            a factory: (id) => Stub
+        ├── openai/
+        │   ├── classify-article.ts
+        │   └── classify-article.request.ts    the exact prompt it matches
+        └── anthropic/
+            └── draft-reply.ts
 ```
+
+Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([18 — Conventions § The naming recap](18-conventions.md#the-naming-recap)).
 
 The rules, enforced by [`stubs-root-holds-facades-and-kinds`](19-linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](19-linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](19-linting.md#stub-data-has-a-builder):
 
@@ -141,7 +143,7 @@ The rules, enforced by [`stubs-root-holds-facades-and-kinds`](19-linting.md#stub
 - A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
 - **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
-- Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `_shared/` folder.
+- Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 
@@ -184,7 +186,7 @@ import { http } from '@jterrazz/test';
 import { expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
-import { newsroom } from './stubs/newsroom.stubs.js';
+import { newsroom } from './_setup/stubs/newsroom.stubs.js';
 
 test('serves the declared world', async () => {
     // Given - a one-off inline pair alongside the feature's world
@@ -381,7 +383,7 @@ A provider's streamed reply is its provider's stub, not an `http` one: `openai.s
 Both take `delay`, the milliseconds between two events. Any other server-sent stream is an `http.sse()` stub.
 
 ```typescript
-// specs/api/assistant/stubs/openai/greeting.ts
+// specs/api/assistant/_setup/stubs/openai/greeting.ts
 import { defineStub, openai } from '@jterrazz/test';
 
 export default defineStub({
@@ -432,7 +434,7 @@ Two scoping notes:
 
 ## Pitfalls
 
-- **Reaching into a kind folder from a test.** `import events from './stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
+- **Reaching into a kind folder from a test.** `import events from './_setup/stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
 - **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the stub pins the _interaction_, not the wording.
 - **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
 - **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.

@@ -14,10 +14,10 @@ import { suppressedLines } from '../../engine/project/suppression.js';
 import { blankComments, findSpecsRoots, listFiles } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
 import {
-    checkPoolGroundSharedOrInline,
-    fixPoolGround,
+    checkGroundPlacement,
+    fixGroundPlacement,
     pathsModuleTestsName,
-} from './ground-shared-or-inline.pool.js';
+} from './ground-shared-or-inline.placement.js';
 import { checkInlineSeeds, fixInlineSeeds } from './ground-shared-or-inline.seeds.js';
 
 /** A role absent here is never written in place. */
@@ -407,7 +407,7 @@ export function checkGroundSharedOrInline(rootDir: string): Finding[] {
         ...single,
         ...oversizedValues(rootDir).map((oversized) => capFinding(rootDir, oversized)),
         ...checkInlineSeeds(rootDir),
-        ...checkPoolGroundSharedOrInline(rootDir).filter((finding) => !inlined.has(finding.file)),
+        ...checkGroundPlacement(rootDir).filter((finding) => !inlined.has(finding.file)),
     ];
 }
 
@@ -554,6 +554,6 @@ export function fixGroundSharedOrInline(rootDir: string): string[] {
     }
     removeEmptied(emptied);
     forgetTree();
-    done.push(...fixPoolGround(rootDir).map((move) => `moved ${move}`));
+    done.push(...fixGroundPlacement(rootDir).map((move) => `moved ${move}`));
     return done;
 }

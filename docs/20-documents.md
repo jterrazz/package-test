@@ -20,7 +20,7 @@ A document is ONE test: its `description:` is the vitest title, and nothing in i
 `fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
 
 - **Role** — a path whose first ground folder is not `_fixtures/` is refused by the grammar, on its line, so the checker (`document-follows-its-grammar`) and the runner refuse the same document (`verb-reads-its-ground-folder`'s law, for data).
-- **Locality** — a path leaves its leaf only into the specs root's shared `<specs>/_shared/_fixtures/`, or the ground of a leaf that encloses it (`no-reach-into-sibling-ground`).
+- **Locality** — a path leaves its leaf only by climbing: into the ground of a folder that encloses it, or the specs root's shared `<specs>/_shared/_fixtures/` (`no-reach-into-sibling-ground`).
 - **Existence** — every path names an entry git does not ignore, of the kind it names — a directory with its trailing `/`, a file without (`named-path-exists`); at run time a missing one is refused with what it resolved to.
 - **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (`no-unused-ground`, `ground-shared-or-inline`).
 

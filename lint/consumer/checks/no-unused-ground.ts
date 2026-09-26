@@ -17,6 +17,7 @@ import {
     isReferrer,
     isWithin,
     listDirs,
+    listFiles,
     listReferrers,
     readSource,
     readText,
@@ -171,9 +172,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
             continue;
         }
         const feature = basename(dir);
-        const testFiles = entries
-            .filter((entry) => entry.isFile() && isReferrer(entry.name))
-            .map((entry) => join(dir, entry.name));
+        const testFiles = listFiles(dir, (path) => isReferrer(basename(path)));
         const rel = relative(rootDir, dir);
 
         // A domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.

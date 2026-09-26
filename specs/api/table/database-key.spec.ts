@@ -7,7 +7,7 @@ describe('database-key', () => {
     test('table details — queries a specific database by key', async () => {
         // Given - seed analytics directly
         const result = await api
-            .seed(file('../../_shared/_seeds/two-events.sql'), { database: 'analyticsDb' })
+            .seed(file('../_seeds/two-events.sql'), { database: 'analyticsDb' })
             .get('/events');
 
         // Then - multi-column check on analytics-db

@@ -1,0 +1,12 @@
+description: a _ name off the closed list, a _shared/ below the root and a bare reserved name are refused
+fixture: ./_fixtures/unlisted/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/_shared/notes.md:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/cli/doubles/:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/cli/orders/_helpers/:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/cli/orders/_shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/cli/orders/seeds/:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)

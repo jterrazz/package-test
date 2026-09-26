@@ -8,7 +8,7 @@ describe('reset', () => {
     test('resets all databases before each spec', async () => {
         // Given - data in both databases from a previous spec
         await api
-            .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
             .seed(file('./_seeds/one-event.sql'), { database: 'analyticsDb' })
             .get('/users');
 

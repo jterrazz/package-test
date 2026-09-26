@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { cli as dockerCli } from '../setup/docker.specification.js';
+import { cli as dockerCli } from './docker.specification.js';
 
 describe('widget', () => {
     test('binds a docker runner result with await using', async () => {

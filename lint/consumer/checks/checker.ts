@@ -7,6 +7,7 @@ import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import type { Scalar } from '../../engine/project/yaml-document.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows } from '../catalogue/manifest.js';
+import { checkAdapterNamedForItsPort } from './adapter-named-for-its-port.js';
 import { checkCheckerSuppressionStatesAReason } from './checker-suppression-states-a-reason.js';
 import { checkDatabaseNamedOnlyWhenSeveral } from './database-named-only-when-several.js';
 import { checkDockerExecBoundWithAwaitUsing } from './docker-exec-bound-with-await-using.js';
@@ -47,12 +48,21 @@ import { checkNoUnusedGround } from './no-unused-ground.js';
 import { checkNoVolatileLiteral, noVolatileLiteralsInGround } from './no-volatile-literal.js';
 import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
 import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
+import { checkReservedFolderInClosedList } from './reserved-folder-in-closed-list.js';
 import { checkSeedsStateAbsoluteTime } from './seeds-state-absolute-time.js';
+import { checkSetupModuleAtLowestCommonFolder } from './setup-module-at-lowest-common-folder.js';
+import { checkSpecCodeInSetupFolder } from './spec-code-in-setup-folder.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
+import { checkSpecsRootHoldsFacetsAndShared } from './specs-root-holds-facets-and-shared.js';
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
+    'specs-root-holds-facets-and-shared',
+    'reserved-folder-in-closed-list',
+    'spec-code-in-setup-folder',
+    'setup-module-at-lowest-common-folder',
+    'adapter-named-for-its-port',
     'database-named-only-when-several',
     'docker-exec-bound-with-await-using',
     'file-suffix-matches-place',
@@ -188,6 +198,11 @@ export const CHECKER: CheckerRegistry = {
     memberPassIds: MEMBER_PASS_IDS,
     rows: consumerRows,
     tree: [
+        checkSpecsRootHoldsFacetsAndShared,
+        checkReservedFolderInClosedList,
+        checkSpecCodeInSetupFolder,
+        checkSetupModuleAtLowestCommonFolder,
+        checkAdapterNamedForItsPort,
         checkFileSuffixMatchesPlace,
         checkFacetFolderHasSpecification,
         checkFacetTestUsesItsRunner,

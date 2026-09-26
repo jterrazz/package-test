@@ -1,5 +1,0 @@
-description: a seed the specs root shares, reached from two leaves under its delta, passes
-fixture: ./_fixtures/specs-root-ground/
-runs:
-    - command: checker .
-      exit: 0

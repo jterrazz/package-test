@@ -1,0 +1,5 @@
+description: a seed the api folder keeps, reached from two leaves below it, passes
+fixture: ./_fixtures/enclosing-ground/
+runs:
+    - command: checker .
+      exit: 0

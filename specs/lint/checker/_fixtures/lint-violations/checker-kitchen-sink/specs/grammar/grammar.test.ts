@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { file } from '@jterrazz/test';
 
-import { api } from '../setup/multi.specification.js';
+import { api } from '../db/multi.specification.js';
 
 describe('grammar', () => {
     test('exercises the fixture-grammar passes', async () => {

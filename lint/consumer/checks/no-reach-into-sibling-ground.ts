@@ -15,7 +15,6 @@ import {
     DISK_CALL,
     findSpecsRoots,
     isDir,
-    isLeaf,
     isWithin,
     listReferrers,
     readText,
@@ -31,9 +30,7 @@ export function poolsOf(specsRoot: string): string[] {
 function enclosingGround(specsRoot: string, leaf: string): string[] {
     const ground: string[] = [];
     for (let folder = dirname(leaf); isWithin(specsRoot, folder) && folder !== specsRoot;) {
-        if (isLeaf(folder)) {
-            ground.push(...GROUND_DIRS.map((role) => join(folder, role)));
-        }
+        ground.push(...GROUND_DIRS.map((role) => join(folder, role)));
         const parent = dirname(folder);
         if (parent === folder) {
             break;
@@ -78,7 +75,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                     column,
                     file: rel,
                     line,
-                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the specs root's shared folder of its role: ${pools.map((pool) => `${relative(rootDir, pool)}/`).join(', ')}`,
+                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${relative(rootDir, join(specsRoot, SHARED_GROUND))}/<role>/ when they span facets`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
                     rule: 'no-reach-into-sibling-ground',
                     severity: 'error',

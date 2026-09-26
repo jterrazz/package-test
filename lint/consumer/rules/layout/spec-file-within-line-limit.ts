@@ -5,10 +5,9 @@ import { child, isTestCallee, testName, walk } from '../../../engine/project/ast
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { MAX_SPEC_LINES } from '../../../engine/project/specs-modules.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
-
-export const MAX_SPEC_LINES = 400;
 
 const GROUPS_SHOWN = 5;
 

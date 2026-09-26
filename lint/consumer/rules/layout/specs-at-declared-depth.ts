@@ -3,12 +3,13 @@ import type { Context } from '@oxlint/plugins';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isFile } from '../../../engine/project/fs-cache.js';
-import { isGroundName, SHARED_GROUND } from '../../../engine/project/ground.js';
+import { isGroundName, SETUP_FOLDER, SHARED_GROUND } from '../../../engine/project/ground.js';
 import { specsAnchorOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { declaresTests } from '../../../engine/project/specs-modules.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
-import { declaresTests, isStrayFolder } from './specs-at-declared-depth.first-level.js';
+import { isStrayFolder } from './specs-at-declared-depth.first-level.js';
 
 const NODE_TEST_SUFFIXES = ['.spec.ts', '.test.ts'];
 const TEST_SUFFIX = '.test.ts';
@@ -67,7 +68,7 @@ export const specsAtDeclaredDepth: LintRule = {
                 if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
                     const ground = anchor.relative
                         .slice(0, -1)
-                        .find((segment) => isGroundName(segment));
+                        .find((segment) => isGroundName(segment) || segment === SETUP_FOLDER);
                     if (ground !== undefined) {
                         if (!testsItsNeighbour(context.filename)) {
                             context.report({ data: { ground }, messageId: 'specInGround', node });
@@ -81,6 +82,12 @@ export const specsAtDeclaredDepth: LintRule = {
                     context.report({ messageId: 'specInShared', node });
                     return;
                 }
+                if (base.endsWith(SPECIFICATION_SUFFIX)) {
+                    if (nesting !== 1) {
+                        context.report({ messageId: 'specNotAtFacetRoot', node });
+                    }
+                    return;
+                }
                 if (depth === 'off') {
                     return;
                 }
@@ -92,10 +99,6 @@ export const specsAtDeclaredDepth: LintRule = {
                         } else if (nesting > 2 && !sitsInASubjectPath(anchor.relative, base)) {
                             context.report({ messageId: 'testTooDeepForFacet', node });
                         }
-                        return;
-                    }
-                    if (base.endsWith(SPECIFICATION_SUFFIX) && nesting !== 1) {
-                        context.report({ messageId: 'specNotAtFacetRoot', node });
                     }
                     return;
                 }
@@ -125,12 +128,6 @@ export const specsAtDeclaredDepth: LintRule = {
                     } else if (nesting > 2 && !sitsInASubjectPath(anchor.relative, base)) {
                         context.report({ messageId: 'testTooDeep', node });
                     }
-                    return;
-                }
-                if (base.endsWith(SPECIFICATION_SUFFIX)) {
-                    if (nesting !== 1) {
-                        context.report({ messageId: 'specNotAtFacetRoot', node });
-                    }
                 }
             },
         };
@@ -142,12 +139,12 @@ export const specsAtDeclaredDepth: LintRule = {
             rowNamed(consumerRows, 'specs-at-declared-depth'),
             {
                 specInGround: {
-                    found: 'a spec under `{{ground}}/`, a reserved ground name',
-                    fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+                    found: 'a spec under `{{ground}}/`, a reserved folder that is no subject',
+                    fix: 'move the spec out of `{{ground}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
                 },
                 specInShared: {
                     found: 'a spec under `specs/_shared/`, the ground several leaves share',
-                    fix: 'move it into its facet: `specs/_shared/` holds only `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
+                    fix: 'move it into its facet: `specs/_shared/` holds only `_setup/`, `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
                 },
                 specNotAtFacetRoot: {
                     found: 'a `*.specification.ts` below its facet root',
@@ -155,7 +152,7 @@ export const specsAtDeclaredDepth: LintRule = {
                 },
                 strayFolder: {
                     found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `_shared/`, and holds no test of its own',
-                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/_shared/_fixtures/`; then remove `specs/{{folder}}/`',
+                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture under `specs/_shared/_fixtures/`; then remove `specs/{{folder}}/`',
                 },
                 testAtFacetRoot: {
                     found: 'a spec directly at its facet root',

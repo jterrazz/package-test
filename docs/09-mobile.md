@@ -215,7 +215,7 @@ The tree describes the **whole mounted hierarchy**, including rows below the fol
 
 ### Declared backend
 
-A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](16-stubs.md) — the feature's `stubs/` facade, exactly the form `api`/`job` use:
+A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](16-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
 // specs/mobile/mobile.specification.ts
@@ -230,7 +230,7 @@ afterAll(cleanup);
 
 ```typescript
 // specs/mobile/events/feed.spec.ts
-import newsroom from './stubs/newsroom.stubs.js';
+import newsroom from './_setup/stubs/newsroom.stubs.js';
 
 describe('feed', () => {
     test('renders the events feed from the declared backend', async () => {
@@ -277,7 +277,7 @@ specs/mobile/
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── _expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
-    └── stubs/               # what the declared backend serves — with the `backend` option
+    └── _setup/stubs/        # what the declared backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```

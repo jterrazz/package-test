@@ -93,7 +93,7 @@ describe('results', () => {
     test('a table is compared whole to its rows written in place — every column, in its order', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the whole table, its generated id through a token
@@ -196,7 +196,7 @@ describe('results', () => {
     test('table details — toBeEmpty fails on a table holding a row, naming the count', async () => {
         // Given - one user seeded
         const result = await api
-            .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
             .get('/users');
 
         // Then - the matcher refuses, and says how many rows it found

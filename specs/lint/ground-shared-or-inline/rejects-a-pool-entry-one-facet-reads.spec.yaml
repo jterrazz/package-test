@@ -1,0 +1,7 @@
+description: a pool seed two sibling routes of one facet reach for is refused where it sits
+fixture: ./_fixtures/sibling-routes/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/_shared/_seeds/two-pois.sql:1:1  jterrazz-check(ground-shared-or-inline)

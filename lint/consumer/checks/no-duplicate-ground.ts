@@ -9,7 +9,7 @@ import {
     repointSource,
 } from '../../engine/checker/repoint.js';
 import { moveKeepingHistory, treeEntries, treeKind } from '../../engine/project/git-tree.js';
-import { GROUND_DIRS, SHARED_GROUND } from '../../engine/project/ground.js';
+import { GROUND_DIRS } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import {
     findSpecsRoots,
@@ -18,8 +18,9 @@ import {
     isReferrer,
     listDirs,
     listFiles,
+    lowestCommonFolder,
     readText,
-    specsRootOfPool,
+    reservedFolderOf,
 } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
 
@@ -48,6 +49,7 @@ type CopiedGround = {
     /** Sorted: the first is the one a fix moves. */
     copies: string[];
     fingerprint: string;
+    specsRoot: string;
     /** `null` when the copies go by several names: none of them is the one to keep. */
     target: null | string;
 };
@@ -88,13 +90,16 @@ function copiedGround(rootDir: string): CopiedGround[] {
             }
             const names = new Set(copies.map((copy) => basename(copy)));
             const [name] = names;
+            const lowest = lowestCommonFolder([...leaves]) ?? specsRoot;
+            const target =
+                names.size === 1 && name !== undefined
+                    ? join(reservedFolderOf(specsRoot, lowest, role), name)
+                    : null;
             copied.push({
-                copies: copies.toSorted(),
+                copies: copies.filter((copy) => copy !== target).toSorted(),
                 fingerprint,
-                target:
-                    names.size === 1 && name !== undefined
-                        ? join(specsRoot, SHARED_GROUND, role, name)
-                        : null,
+                specsRoot,
+                target,
             });
         }
     }
@@ -133,7 +138,7 @@ export function checkNoDuplicateGround(rootDir: string): Finding[] {
 /** An entry the target already holds byte for byte deletes every copy; one holding something else, or copies of several names, are the author's call and nothing moves. */
 export function fixNoDuplicateGround(rootDir: string): string[] {
     const moved: string[] = [];
-    for (const { copies, fingerprint, target } of copiedGround(rootDir)) {
+    for (const { copies, fingerprint, specsRoot, target } of copiedGround(rootDir)) {
         if (target === null) {
             continue;
         }
@@ -141,7 +146,6 @@ export function fixNoDuplicateGround(rootDir: string): string[] {
         if (held && fingerprintOf(target) !== fingerprint) {
             continue;
         }
-        const specsRoot = specsRootOfPool(dirname(target));
         for (const file of listFiles(specsRoot, isReferrer)) {
             const from = dirname(file);
             const move = (path: string): string | undefined =>

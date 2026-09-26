@@ -50,7 +50,7 @@ Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `j
 import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 import { job } from '../job.specification.js';
-import pipeline from './stubs/pipeline.stubs.js';
+import pipeline from './_setup/stubs/pipeline.stubs.js';
 
 describe('pipeline', () => {
     test('nightly report classifies, prices and drafts', async () => {

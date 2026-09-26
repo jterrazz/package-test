@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { file } from '@jterrazz/test';
 
-import { api } from '../setup/single.specification.js';
+import { api } from './single.specification.js';
 
 describe('widget', () => {
     test('names a database when only one is declared', async () => {

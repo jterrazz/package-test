@@ -346,6 +346,26 @@ export function isWithin(directory: string, path: string): boolean {
     return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
 }
 
+export function lowestCommonFolder(folders: readonly string[]): string | undefined {
+    const [first, ...others] = folders;
+    if (first === undefined) {
+        return undefined;
+    }
+    let common = first;
+    while (!others.every((folder) => folder === common || isWithin(common, folder))) {
+        const parent = dirname(common);
+        if (parent === common) {
+            return undefined;
+        }
+        common = parent;
+    }
+    return common;
+}
+
+export function reservedFolderOf(specsRoot: string, owner: string, reserved: string): string {
+    return owner === specsRoot ? join(specsRoot, SHARED_GROUND, reserved) : join(owner, reserved);
+}
+
 export function decodeText(path: string): null | string {
     let text;
     try {

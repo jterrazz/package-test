@@ -1,0 +1,5 @@
+description: setup modules in the _setup/ of the lowest folder their readers share pass
+fixture: ./_fixtures/lowest/
+runs:
+    - command: checker .
+      exit: 0

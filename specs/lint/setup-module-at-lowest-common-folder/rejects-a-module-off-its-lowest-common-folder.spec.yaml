@@ -1,0 +1,9 @@
+description: a setup module one spec reads, one kept above its readers and one kept below them are refused
+fixture: ./_fixtures/misplaced/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/cli/_setup/format.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
+          specs/cli/_setup/rows.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
+          specs/cli/orders/_setup/clock.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)

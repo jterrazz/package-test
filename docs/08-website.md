@@ -308,10 +308,10 @@ afterAll(cleanup);
 
 `backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
 
-What the stub serves is declared per chain, as [stubs](16-stubs.md) — the feature's `stubs/` facade, exactly the form `api`/`job` use:
+What the stub serves is declared per chain, as [stubs](16-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
-import newsroom from './stubs/newsroom.stubs.js';
+import newsroom from './_setup/stubs/newsroom.stubs.js';
 
 test('renders the events feed from the declared backend', async () => {
     // Given - the backend under stub for this chain
@@ -362,7 +362,7 @@ specs/website/
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── _expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
-    └── stubs/               # what the declared backend serves — with the `backend` option
+    └── _setup/stubs/        # what the declared backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```

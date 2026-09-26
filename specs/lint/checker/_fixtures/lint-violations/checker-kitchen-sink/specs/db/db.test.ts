@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { file } from '@jterrazz/test';
 
-import { api } from '../setup/multi.specification.js';
+import { api } from './multi.specification.js';
 
 describe('db', () => {
     test('seeds without naming the database', async () => {

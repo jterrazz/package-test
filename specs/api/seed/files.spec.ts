@@ -9,7 +9,7 @@ describe('files', () => {
     test('seeds apply in the order listed, each to the database it names', async () => {
         // Given - a user, a second seeded after it, and an event in the other database
         const result = await api
-            .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('../_seeds/one-user.sql'), { database: 'db' })
             .seed(file('./_seeds/charlie.sql'), {
                 database: 'db',
             })
@@ -79,7 +79,7 @@ describe('files', () => {
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
         // Then - .seed() without a database option violates `database-named-only-when-several-at-runtime`, synchronously checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
-        expect(() => api.seed(file('../../_shared/_seeds/one-user.sql'))).toThrow(
+        expect(() => api.seed(file('../_seeds/one-user.sql'))).toThrow(
             'found: seed() names no database, and 2 databases are declared ("analyticsDb", "db")',
         );
     });
@@ -100,7 +100,7 @@ describe('files', () => {
         // Then - the chain rejects naming the unknown key
         await expect(
             untypedApi
-                .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'nonexistent-db' })
+                .seed(file('../_seeds/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow('seed() targets database "nonexistent-db" but it was not found');
     });
@@ -116,9 +116,9 @@ describe('files', () => {
 
             try {
                 // Then - the chain fails because nothing can execute the SQL
-                await expect(
-                    bareApi.seed(file('../../_shared/_seeds/one-user.sql')).get('/'),
-                ).rejects.toThrow('seed() requires a database adapter');
+                await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
+                    'seed() requires a database adapter',
+                );
             } finally {
                 await stop();
             }

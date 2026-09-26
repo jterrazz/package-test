@@ -15,7 +15,7 @@ function specsTree(paths: readonly string[]): string {
     return root;
 }
 
-describe('specs-at-declared-depth.first-level', () => {
+describe('isStrayFolder', () => {
     test('a folder of helpers holding no test is stray, at any depth below it', () => {
         // Given - a support folder of mocks and helpers beside a facet
         const root = specsTree([
@@ -34,20 +34,20 @@ describe('specs-at-declared-depth.first-level', () => {
     test('a facet, the shared ground and a suite holding tests are places a tree has', () => {
         // Given - a facet helper, the shared ground's code, a suite's tests and its helper
         const root = specsTree([
-            'api/events/events.fixtures.ts',
+            'api/events/_setup/seeded-at.ts',
             '_shared/_fixtures/app/app.ts',
             'surface/package/exports.test.ts',
-            'surface/package/package.fixtures.ts',
+            'surface/package/_setup/packed-tree.ts',
             'guards/rules/rules.spec.yaml',
-            'guards/rules/rules.fixtures.ts',
+            'guards/rules/_setup/rule-rows.ts',
         ]);
 
         // Then - none of them is stray
         expect([
-            isStrayFolder(root, ['api', 'events', 'events.fixtures.ts']),
+            isStrayFolder(root, ['api', 'events', '_setup', 'seeded-at.ts']),
             isStrayFolder(root, ['_shared', '_fixtures', 'app', 'app.ts']),
-            isStrayFolder(root, ['surface', 'package', 'package.fixtures.ts']),
-            isStrayFolder(root, ['guards', 'rules', 'rules.fixtures.ts']),
+            isStrayFolder(root, ['surface', 'package', '_setup', 'packed-tree.ts']),
+            isStrayFolder(root, ['guards', 'rules', '_setup', 'rule-rows.ts']),
         ]).toStrictEqual([false, false, false, false]);
     });
 

@@ -1,0 +1,5 @@
+description: a helper in the _setup/ of the folder its specs share passes
+fixture: ./_fixtures/in-setup/
+runs:
+    - command: checker .
+      exit: 0

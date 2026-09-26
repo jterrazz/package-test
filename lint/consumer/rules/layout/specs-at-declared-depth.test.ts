@@ -129,7 +129,6 @@ ruleTester.run(
                 filename: `${SUITES}/tree/tree.specification.ts`,
                 options: [{ depth: 'facet' }],
             },
-            // Still out of scope under src/.
             {
                 code: 'const x = 1;',
                 filename: '/repo/src/specification/matching/match.test.ts',
@@ -158,6 +157,14 @@ ruleTester.run(
                 filename: '/repo/specs/posts/add/creation.test.ts',
                 options: [{ depth: 'mirror' }],
             },
+            ...['/repo/specs/cli.specification.ts', `${SUITES}/posts/add/add.specification.ts`].map(
+                (filename) => ({
+                    code: 'const x = 1;',
+                    errors: [{ messageId: 'specNotAtFacetRoot' }],
+                    filename,
+                    options: [{ depth: 'mirror' }],
+                }),
+            ),
         ],
         valid: [
             // One directory deep — a top-level leaf.
@@ -178,18 +185,11 @@ ruleTester.run(
                 filename: '/repo/specs/a/b/c/c.test.ts',
                 options: [{ depth: 'mirror' }],
             },
-            // A mirror has no facet level, so specification files are unconstrained.
             {
                 code: 'const x = 1;',
-                filename: '/repo/specs/cli.specification.ts',
+                filename: `${SUITES}/posts/posts.specification.ts`,
                 options: [{ depth: 'mirror' }],
             },
-            {
-                code: 'const x = 1;',
-                filename: `${SUITES}/posts/add/add.specification.ts`,
-                options: [{ depth: 'mirror' }],
-            },
-            // Still out of scope under src/.
             {
                 code: 'const x = 1;',
                 filename: '/repo/src/specification/matching/match.test.ts',
@@ -216,6 +216,8 @@ const CODE_GROUND = groundTree({
     'cli/_fixtures/binary/binary.ts': '',
     'cli/_fixtures/binary/orphan.test.ts': '',
     'cli/_fixtures/binary/binary.specification.ts': '',
+    'api/_setup/pagination.ts': '',
+    'api/_setup/pagination.test.ts': '',
     // A first-level folder of helpers and a runner, holding no test.
     'support/next-cursor.ts': '',
     'support/support.specification.ts': '',
@@ -255,8 +257,8 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
             errors: [{ messageId: 'strayFolder' }],
             filename: `${CODE_GROUND}/support/support.specification.ts`,
         },
-        // The four names are reserved: a domain named with one is ground, and refused.
-        ...['_expected', '_fixtures', '_requests', '_seeds'].map((reserved) => ({
+        // The reserved names hold no spec: a spec under one, `_setup/` included, is refused.
+        ...['_expected', '_fixtures', '_requests', '_seeds', '_setup'].map((reserved) => ({
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
             filename: `${CODE_GROUND}/api/${reserved}/${reserved}.spec.ts`,
@@ -265,6 +267,7 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
     valid: [
         // `test-beside-its-module`'s pairing inside its ground: the depth rules never reach it.
         { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.test.ts` },
+        { code: 'const x = 1;', filename: `${CODE_GROUND}/api/_setup/pagination.test.ts` },
         {
             code: 'const x = 1;',
             filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.test.ts`,
@@ -277,24 +280,18 @@ ruleTester.run(
     'specs-at-declared-depth (depth: off)',
     specsAtDeclaredDepth as unknown as OxlintRule,
     {
-        invalid: [],
-        valid: [
-            // The tree's shape is declared guarded elsewhere: everything is accepted.
+        invalid: [
             {
                 code: 'const x = 1;',
-                filename: '/repo/specs/job/job.test.ts',
-                options: [{ depth: 'off' }],
-            },
-            {
-                code: 'const x = 1;',
-                filename: '/repo/specs/cli/check/linter/linter.test.ts',
-                options: [{ depth: 'off' }],
-            },
-            {
-                code: 'const x = 1;',
+                errors: [{ messageId: 'specNotAtFacetRoot' }],
                 filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
                 options: [{ depth: 'off' }],
             },
         ],
+        valid: [
+            '/repo/specs/job/job.test.ts',
+            '/repo/specs/cli/check/linter/linter.test.ts',
+            '/repo/specs/api/intercepts.specification.ts',
+        ].map((filename) => ({ code: 'const x = 1;', filename, options: [{ depth: 'off' }] })),
     },
 );

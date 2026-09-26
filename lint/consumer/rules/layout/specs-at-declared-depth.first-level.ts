@@ -1,10 +1,7 @@
 import { FACETS } from '../../../engine/project/facets.js';
 import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
 import { isGroundName, SHARED_GROUND } from '../../../engine/project/ground.js';
-
-export function declaresTests(name: string): boolean {
-    return /\.(?:test\.tsx?|spec\.ts|spec\.yaml)$/u.test(name);
-}
+import { declaresTests } from '../../../engine/project/specs-modules.js';
 
 function holdsATest(folder: string): boolean {
     return (listDirectory(folder) ?? []).some((name) => {

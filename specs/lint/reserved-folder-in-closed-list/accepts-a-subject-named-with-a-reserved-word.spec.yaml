@@ -1,0 +1,5 @@
+description: a subject folder named with a reserved word, holding its spec, passes
+fixture: ./_fixtures/reserved/
+runs:
+    - command: checker .
+      exit: 0

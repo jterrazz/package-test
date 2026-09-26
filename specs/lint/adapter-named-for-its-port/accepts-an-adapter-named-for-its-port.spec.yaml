@@ -1,0 +1,5 @@
+description: a test adapter named <port>.adapter.ts passes, whatever its class is called
+fixture: ./_fixtures/named/
+runs:
+    - command: checker .
+      exit: 0

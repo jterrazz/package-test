@@ -1,0 +1,7 @@
+description: a test adapter named for its class rather than the port it implements is refused at the class
+fixture: ./_fixtures/misnamed/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/cli/_setup/fixed-ticker.ts:3:1  jterrazz-check(adapter-named-for-its-port)

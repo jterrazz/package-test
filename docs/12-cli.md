@@ -228,7 +228,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the specs root's shared ground, `specs/_shared/_fixtures/`, reached by the path that climbs to it. That law holds for all four ground roles, not for fixtures alone, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
+A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span facets, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
 
 ### The chain never reaches a real system
 

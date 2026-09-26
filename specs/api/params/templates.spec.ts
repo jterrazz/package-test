@@ -7,7 +7,7 @@ describe('templates', () => {
     test('a user is read back by its id', async () => {
         // Given - one user, numbered 1 by the reset
         const result = await api
-            .seed(file('../../_shared/_seeds/alice.sql'), {
+            .seed(file('../_seeds/alice.sql'), {
                 database: 'db',
             })
             .get('/users/:id', { params: { id: 1 } });

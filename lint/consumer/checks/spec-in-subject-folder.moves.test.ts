@@ -41,12 +41,12 @@ describe('fixSpecInSubjectFolder', () => {
                 '',
             ].join('\n'),
         );
-        // Then - the list file keeps its helper, and names the golden from where it now stands
+        // Then - the list file keeps its helper, and its golden moves beside it, its one reader
         const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
         expect({
-            golden: existsSync(join(root, '_shared/_expected/listed.http')),
+            golden: existsSync(join(root, 'api/orders/list/_expected/listed.http')),
             helper: listed.includes('function listed(result)'),
-            path: listed.includes("file('../../../_shared/_expected/listed.http')"),
+            path: listed.includes("file('./_expected/listed.http')"),
             unread: listed.includes('ORDER'),
         }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
     });
@@ -369,24 +369,24 @@ describe('fixSpecInSubjectFolder', () => {
         // When - the fix splits it
         fixSpecInSubjectFolder(root);
 
-        // Then - the helper's types live in the fixtures module, exported; the test's own type is copied
-        const fixtures = readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8');
+        // Then - the helper's types live in the _setup module, exported; the test's own type is copied
+        const setup = readFileSync(join(root, 'api/orders/_setup/orders.ts'), 'utf8');
         const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
         const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
         const deleted = readFileSync(join(root, 'api/orders/delete/orders.spec.ts'), 'utf8');
         expect({
             clauses: [
-                listed.includes("import { type Answer, answered } from '../orders.fixtures.js';"),
-                deleted.includes("import type { Answer } from '../orders.fixtures.js';"),
+                listed.includes("import { type Answer, answered } from '../_setup/orders.js';"),
+                deleted.includes("import type { Answer } from '../_setup/orders.js';"),
             ],
-            answer: fixtures.includes('export interface Answer {'),
-            imported: created.includes("import { answered } from '../orders.fixtures.js';"),
+            answer: setup.includes('export interface Answer {'),
+            imported: created.includes("import { answered } from '../_setup/orders.js';"),
             order: [
-                fixtures.includes('Order'),
+                setup.includes('Order'),
                 created.includes('type Order = { item: string };'),
                 listed.includes('type Order = { item: string };'),
             ],
-            status: fixtures.includes('export type Status = number;'),
+            status: setup.includes('export type Status = number;'),
             typesLeft: created.includes('Answer') || created.includes('Status'),
         }).toStrictEqual({
             answer: true,
@@ -398,7 +398,7 @@ describe('fixSpecInSubjectFolder', () => {
         });
     });
 
-    test('subject-moves — a helper the split leaves to several files moves once into the leaf fixtures module', () => {
+    test('subject-moves — a helper the split leaves to several files moves once into the _setup module of the folder they share', () => {
         // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -439,7 +439,7 @@ describe('fixSpecInSubjectFolder', () => {
         fixSpecInSubjectFolder(root);
 
         // Then - the helper and its constant live once, exported, and the file()-building helper stays copied
-        expect(readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8')).toBe(
+        expect(readFileSync(join(root, 'api/orders/_setup/orders.ts'), 'utf8')).toBe(
             [
                 "import { expect } from 'vitest';",
                 '',
@@ -455,17 +455,17 @@ describe('fixSpecInSubjectFolder', () => {
         const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
         expect({
             copy: created.includes('function listed(result)'),
-            imported: created.includes("import { answered } from '../orders.fixtures.js';"),
+            imported: created.includes("import { answered } from '../_setup/orders.js';"),
             moved: created.includes('function answered'),
         }).toStrictEqual({ copy: true, imported: true, moved: false });
     });
 
-    test("subject-moves — the split leaves an author's fixtures module as written, and each file keeps its own copy", () => {
-        // Given - two routes sharing a helper, beside a fixtures module the author wrote
+    test("subject-moves — the split leaves an author's _setup module as written, and each file keeps its own copy", () => {
+        // Given - two routes sharing a helper, beside a _setup module the author wrote
         const authored = "export const SEEDED = 'the author wrote this';\n";
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
-            'api/orders/orders.fixtures.ts': authored,
+            'api/orders/_setup/orders.ts': authored,
             'api/orders/orders.spec.ts': [
                 "import { expect, test } from 'vitest';",
                 '',
@@ -495,7 +495,7 @@ describe('fixSpecInSubjectFolder', () => {
                 (file) =>
                     readFileSync(join(root, file), 'utf8').includes('function answered(result)'),
             ),
-            module: readFileSync(join(root, 'api/orders/orders.fixtures.ts'), 'utf8'),
+            module: readFileSync(join(root, 'api/orders/_setup/orders.ts'), 'utf8'),
         }).toStrictEqual({ copies: [true, true], module: authored });
     });
 

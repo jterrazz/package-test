@@ -1,5 +1,5 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { dirname, join, relative, resolve, sep } from 'node:path';
 
 import { repointModuleTests } from '../../engine/checker/repoint.js';
 import {
@@ -8,7 +8,7 @@ import {
     treeEntries,
     treeKind,
 } from '../../engine/project/git-tree.js';
-import { GROUND_DIRS, SHARED_GROUND } from '../../engine/project/ground.js';
+import { GROUND_DIRS, SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     aspectOf,
     lineEnd,
@@ -23,7 +23,7 @@ import {
 } from '../../engine/project/spec-subjects.js';
 import type { Span, SpecRead } from '../../engine/project/spec-subjects.js';
 import { closingOf, literalEnd, withoutComments } from '../../engine/project/subject.js';
-import { listFiles } from '../../engine/project/tree.js';
+import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../engine/project/tree.js';
 
 type ImportClause = Span & {
     defaultName: string | undefined;
@@ -316,7 +316,9 @@ function liftGround(specsRoot: string, leaf: string): string[] {
             if (readers.every(({ file }) => dirname(file) === leaf)) {
                 continue;
             }
-            const destination = join(specsRoot, SHARED_GROUND, role, entry.name);
+            const lowest =
+                lowestCommonFolder(readers.map(({ file }) => dirname(file))) ?? specsRoot;
+            const destination = join(reservedFolderOf(specsRoot, lowest, role), entry.name);
             // The pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
             if (existsSync(destination)) {
                 continue;
@@ -398,18 +400,6 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
     return declarations.filter((d) => moved.has(d.name));
 }
 
-function commonFolder(paths: readonly string[]): string {
-    const [first = [], ...rest] = paths.map((path) => path.split(sep));
-    let depth = first.length;
-    for (const parts of rest) {
-        depth = Math.min(depth, parts.length);
-        while (depth > 0 && parts.slice(0, depth).join(sep) !== first.slice(0, depth).join(sep)) {
-            depth -= 1;
-        }
-    }
-    return first.slice(0, depth).join(sep);
-}
-
 function exported(code: string): string {
     const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(withoutComments(code));
     return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
@@ -431,8 +421,12 @@ function importLine(read: readonly string[], types: ReadonlySet<string>, from: s
     return `import { ${names.join(', ')} } from '${from}';`;
 }
 
-/** A module already at `<folder>/<folder>.fixtures.ts` is the author's: the copies stay. */
-function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; fixtures?: Draft } {
+/** A module already at `<folder>/_setup/<aspect>.ts` is the author's: the copies stay. */
+function withSharedHelpers(
+    specsRoot: string,
+    spec: SpecRead,
+    drafts: Draft[],
+): { drafts: Draft[]; setup?: Draft } {
     const moved = movedDeclarations(spec, drafts);
     if (moved.length === 0) {
         return { drafts };
@@ -441,8 +435,13 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
     const types = new Set(moved.filter((d) => d.type).map((d) => d.name));
     const holds = (draft: Draft): boolean =>
         declarationsOf(draft.text).some((d) => names.has(d.name));
-    const folder = commonFolder(drafts.filter(holds).map((draft) => dirname(draft.target)));
-    const module = join(folder, `${basename(folder)}.fixtures.ts`);
+    const folder =
+        lowestCommonFolder(drafts.filter(holds).map((draft) => dirname(draft.target))) ??
+        dirname(spec.file);
+    const module = join(
+        reservedFolderOf(specsRoot, folder, SETUP_FOLDER),
+        `${aspectOf(spec.file)}.ts`,
+    );
     if (existsSync(module)) {
         return { drafts };
     }
@@ -450,9 +449,9 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
         .map((clause) => spec.text.slice(clause.start, clause.end))
         .join('');
     const body = moved.map((d) => exported(spec.text.slice(d.start, d.end))).join('\n');
-    const fixtures = {
+    const setup = {
         target: module,
-        text: pruned(rebased(`${imports}\n${body}`, dirname(spec.file), folder)).replace(
+        text: pruned(rebased(`${imports}\n${body}`, dirname(spec.file), dirname(module))).replace(
             /^\n+/u,
             '',
         ),
@@ -473,7 +472,7 @@ function withSharedHelpers(spec: SpecRead, drafts: Draft[]): { drafts: Draft[]; 
                 text: pruned(withImportLine(kept, importLine(read, types, specifier))),
             };
         }),
-        fixtures,
+        setup,
     };
 }
 
@@ -560,13 +559,13 @@ function writeSplit(
     keepsFile: boolean,
     drafts: Draft[],
 ): string[] {
-    const shared = withSharedHelpers(spec, drafts);
+    const shared = withSharedHelpers(specsRoot, spec, drafts);
     const [opening] = shared.drafts;
     if (opening !== undefined && !keepsFile && opening.target !== spec.file) {
         mkdirSync(dirname(opening.target), { recursive: true });
         moveKeepingHistory(spec.file, opening.target);
     }
-    const written = [...shared.drafts, ...(shared.fixtures === undefined ? [] : [shared.fixtures])];
+    const written = [...shared.drafts, ...(shared.setup === undefined ? [] : [shared.setup])];
     for (const { target, text } of written) {
         mkdirSync(dirname(target), { recursive: true });
         writeFileSync(target, text);

@@ -1,11 +1,11 @@
-description: --fix moves a helper two of the split files read into the leaf fixtures module, once
+description: --fix moves a helper two of the split files read into the _setup/ of the folder they share
 fixture: ./_fixtures/shared-helper/
 runs:
     - command: checker . --fix
       exit: 0
       files:
           specs/api/orders/orders.spec.ts: absent
-          specs/api/orders/orders.fixtures.ts:
+          specs/api/orders/_setup/orders.ts:
               equals: |
                   export const ITEM = 'book';
 
@@ -14,9 +14,9 @@ runs:
                       return { item: ITEM };
                   }
           specs/api/orders/create/orders.spec.ts:
-              contains: import { order } from '../orders.fixtures.js';
+              contains: import { order } from '../_setup/orders.js';
           specs/api/orders/update/orders.spec.ts:
-              contains: import { order } from '../orders.fixtures.js';
+              contains: import { order } from '../_setup/orders.js';
     - command: checker .
       exit: 0
     - command: .
