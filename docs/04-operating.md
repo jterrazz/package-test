@@ -149,8 +149,8 @@ has run. What it leaves to the reader:
   `defineStubs(…)` composite is not rewritten — the property is not an import —
   and the compiler names each read.
 - **Every rule and pass is named, not coded.** 17.0 renames each letter-coded
-  id to the requirement it states — `jterrazz/c31-describe-names-file` is
-  `jterrazz/one-describe-per-file`, a `jterrazz-check/<code>` is
+  id to the requirement it states — `jterrazz/one-describe-per-file` was
+  `c31-describe-names-file`, a `jterrazz-check/<code>` is
   `jterrazz-check/<name>`. `make fix` rewrites every `oxlint-disable…` and
   `checker-disable…` directive, every config override and every key of the
   `test` baseline section. A code several passes shared (`c8`, `d4`, `d4b`)
