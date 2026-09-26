@@ -1,1 +1,3 @@
-export const ROWS = [{ item: 'book' }];
+import { CURRENCY } from './currency.js';
+
+export const ROWS = [{ currency: CURRENCY, item: 'book' }];

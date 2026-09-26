@@ -1,4 +1,4 @@
-description: --fix moves a module kept above or below its readers to their lowest folder, and the imports with it
+description: --fix moves a module to its readers' lowest folder, _shared/ across facets, and the imports with it
 fixture: ./_fixtures/misplaced/
 runs:
     - command: checker . --fix
@@ -6,12 +6,18 @@ runs:
       stderr: |
           specs/cli/_setup/format.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
       files:
+          specs/_shared/_setup/tenant.ts: exists
           specs/cli/_setup/clock.ts: exists
-          specs/cli/orders/_setup/rows.ts: exists
+          specs/cli/_setup/currency.ts: exists
+          specs/cli/orders/_setup/rows.ts:
+              contains: from '../../_setup/currency.js'
           specs/cli/_setup/rows.ts: absent
+          specs/cli/_setup/tenant.ts: absent
           specs/cli/orders/_setup/clock.ts: absent
           specs/cli/users/listing.spec.ts:
               contains: from '../_setup/clock.js'
+          specs/job/refresh/refresh.spec.ts:
+              contains: from '../../_shared/_setup/tenant.js'
           specs/cli/orders/listing.spec.ts:
               contains: from './_setup/rows.js'
           specs/cli/orders/empty.spec.ts:
