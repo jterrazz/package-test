@@ -2,38 +2,12 @@ import {
     child,
     childList,
     identifierName,
-    propertyKeyName,
+    isNamedKey,
+    isReference,
     stringValue,
+    unwrapped,
 } from '../../../engine/project/ast.js';
 import type { AstNode } from '../../../engine/project/ast.js';
-
-export function unwrapped(node: AstNode | undefined): AstNode | undefined {
-    return node?.type === 'TSAsExpression' ||
-        node?.type === 'TSSatisfiesExpression' ||
-        node?.type === 'ParenthesizedExpression'
-        ? unwrapped(child(node, 'expression'))
-        : node;
-}
-
-export function isNamedKey(property: AstNode): boolean {
-    return propertyKeyName(property) !== undefined;
-}
-
-export function isReference(node: AstNode | undefined): boolean {
-    const read = unwrapped(node);
-    return (
-        read?.type === 'Identifier' ||
-        (read?.type === 'MemberExpression' &&
-            (read.computed !== true || stringValue(child(read, 'property')) !== undefined) &&
-            isReference(child(read, 'object')))
-    );
-}
-
-/** `config.jobs` → `config`. */
-export function rootOf(node: AstNode | undefined): string | undefined {
-    const read = unwrapped(node);
-    return read?.type === 'MemberExpression' ? rootOf(child(read, 'object')) : identifierName(read);
-}
 
 /** `config.jobs ?? []` counts. */
 function isPlainValue(node: AstNode | undefined): boolean {

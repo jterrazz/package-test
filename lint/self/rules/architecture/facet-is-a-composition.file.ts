@@ -3,18 +3,15 @@ import {
     childList,
     findProperty,
     identifierName,
-    propertyKeyName,
-    stringValue,
-} from '../../../engine/project/ast.js';
-import type { AstNode } from '../../../engine/project/ast.js';
-import {
-    isAdapter,
     isNamedKey,
     isReference,
-    isRow,
+    propertyKeyName,
     rootOf,
+    stringValue,
     unwrapped,
-} from './facet-is-a-composition.values.js';
+} from '../../../engine/project/ast.js';
+import type { AstNode } from '../../../engine/project/ast.js';
+import { isAdapter, isRow } from './facet-is-a-composition.values.js';
 
 export type FacetFinding = {
     readonly data?: Record<string, string>;

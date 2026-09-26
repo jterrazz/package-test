@@ -448,3 +448,74 @@ export function goldenOf(node: AstNode): DiskCall | undefined {
     }
     return diskCallOf(childList(node, 'arguments')[0]);
 }
+
+export function isDescribeCallee(callee: AstNode | undefined): boolean {
+    if (callee?.type === 'Identifier') {
+        return identifierName(callee) === 'describe';
+    }
+    if (callee?.type === 'MemberExpression') {
+        return isDescribeCallee(child(callee, 'object'));
+    }
+    return callee?.type === 'CallExpression' && isDescribeCallee(child(callee, 'callee'));
+}
+
+export function calleeOf(statement: AstNode): AstNode | undefined {
+    const expression = child(statement, 'expression');
+    return expression?.type === 'CallExpression' ? child(expression, 'callee') : undefined;
+}
+
+export function firstArgumentOf(statement: AstNode): AstNode | undefined {
+    return childList(child(statement, 'expression'), 'arguments')[0];
+}
+
+export function groupBodyOf(group: AstNode): AstNode | undefined {
+    if (identifierName(calleeOf(group)) !== 'describe') {
+        return undefined;
+    }
+    const run = childList(child(group, 'expression'), 'arguments')[1];
+    const body = child(run, 'body');
+    return body?.type === 'BlockStatement' ? body : undefined;
+}
+
+export function escapedFor(title: AstNode, text: string): string {
+    const raw = typeof title.raw === 'string' ? title.raw : "'";
+    const delimiter = title.type === 'TemplateLiteral' ? '`' : raw.charAt(0);
+    const escaped = text.replaceAll('\\', String.raw`\\`).replaceAll(delimiter, `\\${delimiter}`);
+    return delimiter === '`' ? escaped.replaceAll('${', '\\${') : escaped;
+}
+
+export function isGroup(statement: AstNode): boolean {
+    return isDescribeCallee(calleeOf(statement));
+}
+
+export function isTest(statement: AstNode): boolean {
+    return isTestCallee(calleeOf(statement));
+}
+
+export function unwrapped(node: AstNode | undefined): AstNode | undefined {
+    return node?.type === 'TSAsExpression' ||
+        node?.type === 'TSSatisfiesExpression' ||
+        node?.type === 'ParenthesizedExpression'
+        ? unwrapped(child(node, 'expression'))
+        : node;
+}
+
+export function isNamedKey(property: AstNode): boolean {
+    return propertyKeyName(property) !== undefined;
+}
+
+export function isReference(node: AstNode | undefined): boolean {
+    const read = unwrapped(node);
+    return (
+        read?.type === 'Identifier' ||
+        (read?.type === 'MemberExpression' &&
+            (read.computed !== true || stringValue(child(read, 'property')) !== undefined) &&
+            isReference(child(read, 'object')))
+    );
+}
+
+/** `config.jobs` → `config`. */
+export function rootOf(node: AstNode | undefined): string | undefined {
+    const read = unwrapped(node);
+    return read?.type === 'MemberExpression' ? rootOf(child(read, 'object')) : identifierName(read);
+}

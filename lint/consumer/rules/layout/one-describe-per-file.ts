@@ -1,23 +1,25 @@
 import type { Context, FixFn } from '@oxlint/plugins';
 
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
-import { childList, nodeEnd, nodeStart, stringValue } from '../../../engine/project/ast.js';
+import {
+    calleeOf,
+    childList,
+    escapedFor,
+    firstArgumentOf,
+    groupBodyOf,
+    isGroup,
+    isTest,
+    nodeEnd,
+    nodeStart,
+    stringValue,
+} from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { testTitle } from '../../../engine/project/test-title.js';
 import { consumerRows } from '../../catalogue/manifest.js';
-import {
-    calleeOf,
-    escapedFor,
-    firstArgumentOf,
-    flattenedGroup,
-    groupBodyOf,
-    isGroup,
-    isTest,
-    mergeFix,
-} from './one-describe-per-file.merge.js';
+import { flattenedGroup, mergeFix } from './one-describe-per-file.merge.js';
 
 function runFinding(members: AstNode[]): undefined | { messageId: string; node: AstNode } {
     const [only, second] = members.filter((statement) => isGroup(statement));

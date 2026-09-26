@@ -3,7 +3,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { afterAll, describe, expect, test } from 'vitest';
 
-import { isUnderSpecs, specsAnchor } from './ast.js';
+import { child, childList, isNamedKey, isNode, isUnderSpecs, specsAnchor } from './ast.js';
+import type { AstNode } from './ast.js';
+import { parseProgram } from './module-parser.js';
 
 /** The anchor probes the real filesystem for `package.json`, so the fixtures are real directories. */
 const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
@@ -26,6 +28,12 @@ writeFileSync(join(underSpecs, 'package.json'), '{}');
 afterAll(() => {
     rmSync(root, { force: true, recursive: true });
 });
+
+function propertiesOf(expression: string): AstNode[] {
+    const program = parseProgram('value.ts', `const value = ${expression};`);
+    const [statement] = isNode(program) ? childList(program, 'body') : [];
+    return childList(child(childList(statement, 'declarations')[0], 'init'), 'properties');
+}
 
 describe('ast', () => {
     test('specsAnchor — anchors a spec on its specs/ directory and lists the way down', () => {
@@ -89,5 +97,13 @@ describe('ast', () => {
         // Then - the walk simply runs out of ancestors, and the specs dir wins
         expect(specsAnchor(file)?.directory).toBe('/nowhere/repo/specs');
         expect(specsAnchor(file)?.relative).toStrictEqual(['lint', 'hygiene', 'title.test.ts']);
+    });
+
+    test('isNamedKey — a key is named when it is written as it is, never when it is computed', () => {
+        // Given - a bare key, a string key and a computed one
+        const keys = propertiesOf("{ root: 1, 'as-written': 2, [String(3)]: 3 }");
+
+        // Then - the computed key runs an expression
+        expect(keys.map(isNamedKey)).toStrictEqual([true, true, false]);
     });
 });

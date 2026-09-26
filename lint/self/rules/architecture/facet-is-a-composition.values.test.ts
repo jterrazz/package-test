@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { child, childList, isNode } from '../../../engine/project/ast.js';
 import type { AstNode } from '../../../engine/project/ast.js';
 import { parseProgram } from '../../../engine/project/module-parser.js';
-import { isAdapter, isNamedKey, isRow } from './facet-is-a-composition.values.js';
+import { isAdapter, isRow } from './facet-is-a-composition.values.js';
 
 function expressionOf(expression: string): AstNode | undefined {
     const program = parseProgram('value.ts', `const value = ${expression};`);
@@ -11,19 +11,7 @@ function expressionOf(expression: string): AstNode | undefined {
     return child(childList(statement, 'declarations')[0], 'init');
 }
 
-function propertiesOf(expression: string): AstNode[] {
-    return childList(expressionOf(expression), 'properties');
-}
-
 describe('facet-is-a-composition.values', () => {
-    test('facet-values — facet values — a key is named when it is written as it is, never when it is computed', () => {
-        // Given - a bare key, a string key and a computed one
-        const keys = propertiesOf("{ root: 1, 'as-written': 2, [String(3)]: 3 }");
-
-        // Then - the computed key runs an expression
-        expect(keys.map(isNamedKey)).toStrictEqual([true, true, false]);
-    });
-
     test('facet-values — facet values — a matrix row is string literals under keys written as they are', () => {
         // Given - a row of literals, one with a computed value, one with a computed key
         const rows = [
