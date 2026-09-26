@@ -61,8 +61,6 @@ export function readText(path: string): string {
     }
 }
 
-// Styles and key order live only in the AST.
-
 export function documentMap(file: SpecFile): null | YAMLMap {
     const root = file.source.document.contents;
     return isMap(root) ? root : null;
