@@ -1,9 +1,8 @@
 import { existsSync } from 'node:fs';
-import { dirname, join, relative, resolve } from 'node:path';
+import { dirname, relative, resolve } from 'node:path';
 
 import type { Teaching } from '../../engine/catalogue/lesson.js';
 import { treeKind } from '../../engine/project/git-tree.js';
-import { SHARED_FOLDER } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import {
@@ -11,7 +10,7 @@ import {
     collectFixtureReferences,
     DISK_CALL,
     findSpecsRoots,
-    listReferrers,
+    listReaders,
     readText,
 } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
@@ -91,8 +90,6 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
 
 export function checkNamedPathExists(rootDir: string): Finding[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
-        listReferrers(specsRoot, join(specsRoot, SHARED_FOLDER)).flatMap((file) =>
-            checkNamedPathExistsIn(file, rootDir),
-        ),
+        listReaders(specsRoot).flatMap((file) => checkNamedPathExistsIn(file, rootDir)),
     );
 }

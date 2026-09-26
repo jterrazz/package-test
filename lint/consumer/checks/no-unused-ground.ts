@@ -17,6 +17,7 @@ import {
     GROUND_SUBDIRS,
     isConventionalSubdir,
     isReferrer,
+    isSharedFolder,
     isWithin,
     listDirs,
     listFiles,
@@ -153,7 +154,7 @@ function entryReferenced(path: string, references: References): boolean {
 export function checkNoUnusedGround(rootDir: string): Finding[] {
     const violations: Finding[] = [];
     for (const dir of listDirs(rootDir)) {
-        if (basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER) {
+        if (basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER || isSharedFolder(dir)) {
             continue;
         }
         let entries;

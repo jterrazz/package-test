@@ -14,7 +14,7 @@ const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
 export const GROUND_SUBDIRS = new Set<string>(GROUND_DIRS);
 
-function isSharedFolder(dir: string): boolean {
+export function isSharedFolder(dir: string): boolean {
     return basename(dir) === SHARED_FOLDER && basename(dirname(dir)) === 'specs';
 }
 
@@ -28,7 +28,7 @@ export function specsRootOfPool(pool: string): string {
 
 /** A fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it. */
 function isPruned(dir: string): boolean {
-    return PRUNED.has(basename(dir)) || isGroundName(basename(dir)) || isSharedFolder(dir);
+    return PRUNED.has(basename(dir)) || isGroundName(basename(dir));
 }
 
 export function listFiles(dir: string, predicate: (path: string) => boolean): string[] {
@@ -291,11 +291,14 @@ function stringMask(text: string): boolean[] {
     return mask;
 }
 
+export function listReaders(specsRoot: string): string[] {
+    return listFiles(specsRoot, (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION));
+}
+
 export function listReferrers(specsRoot: string, pool: string): string[] {
-    return listFiles(
-        specsRoot,
-        (path) => path.endsWith('.ts') || path.endsWith(SPEC_EXTENSION),
-    ).filter((file) => !file.startsWith(`${pool}/`) && !file.startsWith(`${pool}\\`));
+    return listReaders(specsRoot).filter(
+        (file) => !file.startsWith(`${pool}/`) && !file.startsWith(`${pool}\\`),
+    );
 }
 
 export function removeIfEmpty(folder: string): void {

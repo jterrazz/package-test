@@ -16,6 +16,7 @@ import {
     findSpecsRoots,
     isDir,
     isWithin,
+    listReaders,
     listReferrers,
     readText,
     removeIfEmpty,
@@ -59,7 +60,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                 severity: 'error',
             });
         }
-        for (const file of listReferrers(specsRoot, join(specsRoot, SHARED_FOLDER))) {
+        for (const file of listReaders(specsRoot)) {
             const leaf = dirname(file);
             for (const { column, line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);

@@ -16,6 +16,7 @@ import {
     isConventionalSubdir,
     isDir,
     isReferrer,
+    isSharedFolder,
     listDirs,
     listFiles,
     lowestCommonFolder,
@@ -59,7 +60,7 @@ function leafGroundOf(
 ): Map<string, { copies: string[]; fingerprint: string; role: string }> {
     const groups = new Map<string, { copies: string[]; fingerprint: string; role: string }>();
     for (const dir of listDirs(specsRoot)) {
-        if (dir === specsRoot) {
+        if (dir === specsRoot || isSharedFolder(dir)) {
             continue;
         }
         for (const role of GROUND_DIRS) {
