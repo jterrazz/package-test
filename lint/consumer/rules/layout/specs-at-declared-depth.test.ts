@@ -228,19 +228,19 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
         // A test in ground with no module beside it is a spec that wandered in.
         {
             code: 'const x = 1;',
-            errors: [{ messageId: 'specInGround' }],
+            errors: [{ messageId: 'specInReserved' }],
             filename: `${CODE_GROUND}/cli/_fixtures/binary/orphan.test.ts`,
         },
         // A runner never belongs to the ground, module beside it or not.
         {
             code: 'const x = 1;',
-            errors: [{ messageId: 'specInGround' }],
+            errors: [{ messageId: 'specInReserved' }],
             filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.specification.ts`,
         },
         // The clause holds in every mode, `off` included.
         {
             code: 'const x = 1;',
-            errors: [{ messageId: 'specInGround' }],
+            errors: [{ messageId: 'specInReserved' }],
             filename: `${CODE_GROUND}/cli/_fixtures/binary/orphan.test.ts`,
             options: [{ depth: 'off' }],
         },
@@ -260,7 +260,7 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
         // The reserved names hold no spec: a spec under one, `_setup/` included, is refused.
         ...['_expected', '_fixtures', '_requests', '_seeds', '_setup'].map((reserved) => ({
             code: 'const x = 1;',
-            errors: [{ messageId: 'specInGround' }],
+            errors: [{ messageId: 'specInReserved' }],
             filename: `${CODE_GROUND}/api/${reserved}/${reserved}.spec.ts`,
         })),
     ],

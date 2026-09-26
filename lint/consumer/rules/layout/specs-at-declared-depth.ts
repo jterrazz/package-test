@@ -42,7 +42,6 @@ function testsItsNeighbour(filename: string): boolean {
     return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
 }
 
-/** The ground clause, `_shared/` reserved directly under `specs/`, and the first-level clause hold in every `depth` mode, `off` included: they are no question of depth. */
 export const specsAtDeclaredDepth: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -66,12 +65,12 @@ export const specsAtDeclaredDepth: LintRule = {
                 const nesting = anchor.relative.length - 1;
 
                 if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
-                    const ground = anchor.relative
+                    const folder = anchor.relative
                         .slice(0, -1)
                         .find((segment) => isGroundName(segment) || segment === SETUP_FOLDER);
-                    if (ground !== undefined) {
+                    if (folder !== undefined) {
                         if (!testsItsNeighbour(context.filename)) {
-                            context.report({ data: { ground }, messageId: 'specInGround', node });
+                            context.report({ data: { folder }, messageId: 'specInReserved', node });
                         }
                         // A ground module's test answers to `test-beside-its-module`, not to depth.
                         return;
@@ -138,9 +137,9 @@ export const specsAtDeclaredDepth: LintRule = {
         messages: lessonsAt(
             rowNamed(consumerRows, 'specs-at-declared-depth'),
             {
-                specInGround: {
-                    found: 'a spec under `{{ground}}/`, a reserved folder that is no subject',
-                    fix: 'move the spec out of `{{ground}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+                specInReserved: {
+                    found: 'a spec under `{{folder}}/`, a reserved folder that is no subject',
+                    fix: 'move the spec out of `{{folder}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
                 },
                 specInShared: {
                     found: 'a spec under `specs/_shared/`, the ground several leaves share',
