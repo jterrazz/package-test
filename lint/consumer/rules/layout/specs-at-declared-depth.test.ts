@@ -62,8 +62,8 @@ ruleTester.run('specs-at-declared-depth', specsAtDeclaredDepth as unknown as Oxl
         // Specifications at the facet root.
         { code: 'const x = 1;', filename: '/repo/specs/api/api.specification.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/cli/cli.specification.ts' },
-        // `shared` is reserved only directly under `specs/`: deeper, a domain or a
-        // route's segment takes the word (`GET /shared` files under `api/shared/get/`).
+        // Only the `_` names are reserved: a domain or a route's segment takes any word,
+        // `shared` included (`GET /shared` files under `api/shared/get/`).
         { code: 'const x = 1;', filename: '/repo/specs/integration/shared/shared.spec.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/api/shared/get/listed.spec.ts' },
         { code: 'const x = 1;', filename: '/repo/specs/api/documents/shared/sharing.spec.ts' },

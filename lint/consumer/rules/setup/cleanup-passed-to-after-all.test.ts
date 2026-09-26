@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-const SPEC_FILE = '/repo/specs/setup/cli.specification.ts';
+const SPEC_FILE = '/repo/specs/cli/cli.specification.ts';
 
 ruleTester.run('cleanup-passed-to-after-all', cleanupPassedToAfterAll as unknown as OxlintRule, {
     invalid: [

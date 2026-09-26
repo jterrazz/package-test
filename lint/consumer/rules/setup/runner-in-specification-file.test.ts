@@ -22,14 +22,14 @@ ruleTester.run('runner-in-specification-file', runnerInSpecificationFile as unkn
         {
             code: 'await specification.app({});',
             errors: 1,
-            filename: '/repo/specs/setup/runner.ts',
+            filename: '/repo/specs/api/_setup/runner.ts',
         },
     ],
     valid: [
         // The sanctioned home.
         {
             code: 'const { cli, cleanup } = await specification.cli("./bin");',
-            filename: '/repo/specs/setup/cli.specification.ts',
+            filename: '/repo/specs/cli/cli.specification.ts',
         },
         // Unrelated member call on another object.
         {

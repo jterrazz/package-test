@@ -92,7 +92,7 @@ ruleTester.run('no-framework-internals', noFrameworkInternals as unknown as Oxli
         // Every subpath the package's own `exports` map publishes is exempt.
         {
             code: 'import plugin from "@jterrazz/test/oxlint";',
-            filename: '/repo/specs/setup/api.specification.ts',
+            filename: '/repo/specs/api/api.specification.ts',
         },
         // `/vitest` — what a specs-tree vitest.config.ts imports the preset from.
         {
@@ -112,7 +112,7 @@ ruleTester.run('no-framework-internals', noFrameworkInternals as unknown as Oxli
         // Consumer form — the ROOT entry is what `no-framework-internals` points a spec at.
         {
             code: 'import { specification } from "@jterrazz/test";',
-            filename: '/repo/specs/setup/api.specification.ts',
+            filename: '/repo/specs/api/api.specification.ts',
         },
     ],
 });

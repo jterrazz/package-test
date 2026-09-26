@@ -78,8 +78,8 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         refused('import golden from "../_expected/user.json";', 'reach'),
         refused('import body from "./_requests/create.js";', 'reach'),
         refused('import rows from "./_seeds/rows.js";', 'reach'),
-        refused('import { users } from "../../specs/_fixtures/users.js";', 'reach'),
-        refused('import { seed } from "../../specs/setup/seed.js";', 'reach'),
+        refused('import { users } from "../../specs/_shared/_fixtures/users.js";', 'reach'),
+        refused('import { seed } from "../../specs/_shared/_setup/seed.js";', 'reach'),
         // Stubs: the facade, and a unit of the folder it makes a stubs folder.
         refused('import { news } from "./news.stubs.js";', 'reach'),
         refused('import { news } from "../features/stubs/news.stubs.js";', 'reach'),
@@ -161,7 +161,7 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         { code: 'import { expectTypeOf } from "vitest";', filename: join(ROOT, 'src/a.test-d.ts') },
         {
             code: 'import { specification } from "@jterrazz/test";',
-            filename: join(ROOT, 'specs/setup/api.specification.ts'),
+            filename: join(ROOT, 'specs/api/api.specification.ts'),
         },
         // A tool's config is the toolchain's, and a separate test root is `test-beside-its-module`'s.
         {
