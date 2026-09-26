@@ -4,7 +4,7 @@ import { existsSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { GROUND_DIRS } from '../../src/kernel/files/ground.js';
-import { oxlintOf } from './baseline.js';
+import { oxlintOf } from './oxlint-run.js';
 
 const CONFIG_NAMES: readonly string[] = configNames;
 

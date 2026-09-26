@@ -2932,7 +2932,7 @@ How the conflicts were settled:
   updated in `8146284c`.
 - The oxlint config-name list is not exported by the installed toolchain
   (`0a024e8` has no `./oxlint-config-names` subpath), so the `CONFIG_NAMES`
-  copy in `lint/ratchet/own-fixes.ts` stays. It matches the toolchain's
+  copy in `lint/checks/own-fixes.ts` stays. It matches the toolchain's
   `oxlint-config-names.json` today. Swap it once the typescript
   drift-and-names unit lands.
 - This batch rewrapped two lines of the typescript batches above. oxfmt
@@ -3057,7 +3057,7 @@ conflict. @jterrazz/test was reinstalled from package-test `2d54d941`
     tracked file under an unswept build folder) and `b955029`, `95bb352`
     (the ignore-pattern documents). What stays open:
     - The CONFIG_NAMES swap in this package (lint/checks/checker.cli.ts,
-      lint/checks/members.ts, lint/ratchet/own-fixes.ts): import the new
+      lint/checks/members.ts, lint/checks/own-fixes.ts): import the new
       subpath once a @jterrazz/typescript carrying `6b5fd94` is installable.
     - docs/06-quality-checks.md:361 does not match check-drift.js for the
       test section: an absent section prints no row (not `nothing held`),
@@ -3102,7 +3102,7 @@ The toolchain was reinstalled from package-typescript `7fc5dcd` (`npm ci`
 there and here). `make fix` exit 0, `make check` exit 0 (558 files, 2549
 tests).
 
-- **The config-name swap** (`340a0909`). `lint/ratchet/own-fixes.ts`
+- **The config-name swap** (`340a0909`). `lint/checks/own-fixes.ts`
   imports `@jterrazz/typescript/oxlint-config-names`, bundled inline into
   `dist/checker.js`. Its fix test runs once per listed name, so a
   narrowed list is red. This closes the **Toolchain owner** row for that

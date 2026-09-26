@@ -19,13 +19,10 @@ import {
     countsOf,
     judge,
     keepsBaseline,
-    pluginDiagnostics,
     readBaseline,
     writeBaseline,
 } from '../ratchet/baseline.js';
-import type { PluginDiagnostic } from '../ratchet/baseline.js';
 import { tightened } from '../ratchet/fix.js';
-import { applyOwnFixes } from '../ratchet/own-fixes.js';
 import { packageRootOf, projectRootOf } from '../reading/role.js';
 import {
     CHECKER_PASS_IDS,
@@ -42,6 +39,9 @@ import { fixGroundSharing } from './ground-shared-or-inline.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
 import { fixCopiedGround } from './no-duplicate-ground.js';
 import { fixRootGround } from './no-reach-into-sibling-ground.js';
+import { applyOwnFixes } from './own-fixes.js';
+import { pluginDiagnostics } from './oxlint-run.js';
+import type { PluginDiagnostic } from './oxlint-run.js';
 import { fixSubjects } from './subject-moves.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
