@@ -3998,11 +3998,11 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | Old id                                    | Name                                          | Family       |
 | ----------------------------------------- | --------------------------------------------- | ------------ |
 | `e6-component-project-helper`             | `browser-project-from-component`              | setup        |
-| `j9-checker-suppression-reason`           | `checker-suppression-states-a-reason`         | setup        |
 | `a4-cleanup-afterall`                     | `cleanup-passed-to-after-all`                 | setup        |
 | `g3-docker-aware-capture`                 | `containers-removed-with-the-run`             | setup        |
 | `a7-database-property`                    | `database-named-only-when-several`            | setup        |
 | `a7-database-runtime`                     | `database-named-only-when-several-at-runtime` | setup        |
+| `b5-await-using-inference`                | `docker-exec-bound-with-await-using`          | setup        |
 | `c8-spec-registered-name`                 | `document-env-and-serve-registered`           | setup        |
 | `e1-env-allowlist`                        | `environment-read-allow-listed`               | setup        |
 | `m1-constructor-has-a-tree`               | `every-constructor-has-specs`                 | setup        |
@@ -4025,7 +4025,6 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `b9w-product-command`                     | `cli-runs-the-product-binary`                 | chain        |
 | `b2-a-file-is-named-by-its-path`          | `disk-named-by-relative-path`                 | chain        |
 | `b2-relative-path-runtime`                | `disk-named-by-relative-path-at-runtime`      | chain        |
-| `b5-await-using-inference`                | `docker-exec-bound-with-await-using`          | chain        |
 | `b4-given-then`                           | `given-and-then-markers-present`              | chain        |
 | `j6w-given-in-the-test`                   | `given-in-the-test`                           | chain        |
 | `b11-marker-one-line`                     | `marker-on-one-line`                          | chain        |
@@ -4039,6 +4038,7 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `b6-url-injection`                        | `service-urls-injected`                       | chain        |
 | `b8-kebab-trigger`                        | `trigger-name-in-kebab-case`                  | chain        |
 | `b10-when-between-markers`                | `when-between-given-and-then`                 | chain        |
+| `j9-checker-suppression-reason`           | `checker-suppression-states-a-reason`         | layout       |
 | `j5-spec-description`                     | `document-description-reads-as-a-title`       | layout       |
 | `j4-spec-description-unique`              | `document-description-unique`                 | layout       |
 | `c20-facet-folder`                        | `facet-folder-has-specification`              | layout       |
