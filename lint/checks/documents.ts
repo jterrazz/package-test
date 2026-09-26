@@ -19,7 +19,6 @@ import {
     keyName,
     listSpecFiles,
     pairsOf,
-    readText,
     runMaps,
     streamScalars,
 } from './document-model.js';
@@ -29,6 +28,7 @@ import { checkNoEmptyExpectedStream } from './no-empty-expected-stream.js';
 import { checkNoSilentRefusal } from './no-silent-refusal.js';
 import { checkNoVolatileLiteral } from './no-volatile-literal.js';
 import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
+import { readText } from './tree.js';
 
 /** A document the grammar refuses yields nothing here: `document-follows-its-grammar` already reported it. */
 export function checkDocument(text: string, rel: string, path: string): Finding[] {

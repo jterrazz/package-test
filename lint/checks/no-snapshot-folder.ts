@@ -2,8 +2,8 @@ import { join, relative, sep } from 'node:path';
 
 import { treeEntries, treeKind, treeNames } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
+import { SKIPPED } from '../reading/module-tests.js';
 import type { Finding } from './checker.js';
-import { SKIPPED } from './member-manifest.js';
 
 /** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
 const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);

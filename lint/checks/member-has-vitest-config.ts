@@ -1,9 +1,9 @@
 import { join } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
+import { SKIPPED } from '../reading/module-tests.js';
 import { isTestFileName } from '../reading/role.js';
 import type { Finding } from './checker.js';
-import { SKIPPED } from './member-manifest.js';
 import type { Manifest } from './member-manifest.js';
 
 /** A directory carrying its own `package.json` is another package's tree, and its tests are its own to configure. */

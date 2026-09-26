@@ -2,8 +2,9 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
+import { SKIPPED } from '../reading/module-tests.js';
 import type { Finding } from './checker.js';
-import { MEMBER_DEPTH, readManifest, SKIPPED, workspacePatterns } from './member-manifest.js';
+import { MEMBER_DEPTH, readManifest, workspacePatterns } from './member-manifest.js';
 import type { Manifest } from './member-manifest.js';
 
 /** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */

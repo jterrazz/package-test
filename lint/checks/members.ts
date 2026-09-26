@@ -2,11 +2,11 @@ import { spawnSync } from 'node:child_process';
 import { basename, join, relative, sep } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
-import { moduleTestsOf } from '../reading/module-tests.js';
+import { moduleTestsOf, SKIPPED } from '../reading/module-tests.js';
 import type { Finding } from './checker.js';
 import { checkFileSuffixMatchesPlaceInMember } from './file-suffix-matches-place.js';
 import { checkMemberHasVitestConfig } from './member-has-vitest-config.js';
-import { MEMBER_DEPTH, readManifest, SKIPPED, workspacePatterns } from './member-manifest.js';
+import { MEMBER_DEPTH, readManifest, workspacePatterns } from './member-manifest.js';
 import { checkNamedPathExistsIn } from './named-path-exists.js';
 import { checkNoRedundantTestDependency } from './no-redundant-test-dependency.js';
 import { checkNoSimulatedDomInConfig } from './no-simulated-dom-in-config.js';

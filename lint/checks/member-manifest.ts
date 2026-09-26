@@ -6,8 +6,6 @@ import { treeKind } from '../../src/kernel/files/git-tree.js';
 /** The toolchain's bound, to the segment. */
 export const MEMBER_DEPTH = 6;
 
-export const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
-
 export type Manifest = {
     dependencies?: Record<string, string>;
     devDependencies?: Record<string, string>;

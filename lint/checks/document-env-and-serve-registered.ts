@@ -2,8 +2,9 @@ import { dirname, join } from 'node:path';
 
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
 import { treeNames } from '../../src/kernel/files/git-tree.js';
-import { finding, readText } from './document-model.js';
+import { finding } from './document-model.js';
 import type { DocumentFinding } from './document-model.js';
+import { readText } from './tree.js';
 
 /** Read by depth, not by parsing. */
 function objectKeys(source: string, from: number): { end: number; keys: string[] } {

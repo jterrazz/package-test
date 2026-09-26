@@ -1,4 +1,3 @@
-import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js';
@@ -10,6 +9,7 @@ import { isMap, isScalar, isSeq } from '../../src/kernel/yaml/document.js';
 import type { Node, Pair, Scalar, YAMLMap } from '../../src/kernel/yaml/document.js';
 import type { Teaching } from '../catalogue/lesson.js';
 import type { CheckerPassId, Severity } from './checker.js';
+import { readText } from './tree.js';
 
 export type DocumentFinding = Teaching & {
     line: number;
@@ -51,14 +51,6 @@ export function listSpecFiles(dir: string): string[] {
     };
     visit(dir);
     return out;
-}
-
-export function readText(path: string): string {
-    try {
-        return readFileSync(path, 'utf8');
-    } catch {
-        return '';
-    }
 }
 
 export function documentMap(file: SpecFile): null | YAMLMap {

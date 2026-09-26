@@ -4,7 +4,7 @@ import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
 import { isTestFileName } from './role.js';
 
-const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
+export const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
 /** Never ground (a fixture project's tests are an input) nor a nested package; `specs/` is the tree passes'. */
 export function moduleTestsOf(member: string): string[] {

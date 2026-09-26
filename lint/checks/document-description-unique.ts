@@ -2,7 +2,8 @@ import { dirname, relative } from 'node:path';
 
 import { readSpecFile } from '../../src/facets/cli/documents/spec-document.js';
 import type { Finding } from './checker.js';
-import { listSpecFiles, readText } from './document-model.js';
+import { listSpecFiles } from './document-model.js';
+import { readText } from './tree.js';
 
 export function checkDocumentDescriptionUnique(rootDir: string): Finding[] {
     const byDirectory = new Map<string, Map<string, string>>();
