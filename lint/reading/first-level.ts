@@ -1,5 +1,5 @@
 import { isGroundName, SHARED_GROUND } from '../../src/kernel/files/ground.js';
-import { FACETS } from './config-shape.js';
+import { FACETS } from './facets.js';
 import { isDirectory, listDirectory } from './fs-cache.js';
 
 export function declaresTests(name: string): boolean {

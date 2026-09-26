@@ -4,12 +4,10 @@ import { join, relative } from 'node:path';
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
 import { isUnderSpecs } from '../reading/ast.js';
+import { FACETS, reachesRunner } from '../reading/facets.js';
 import type { TokenViolation } from './checker.js';
-import { reachesRunner } from './facets.js';
 
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
-
-const FACETS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
 
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 

@@ -2,12 +2,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
-import {
-    collectedSegments,
-    facetOfSegments,
-    FACETS,
-    projectLiterals,
-} from '../../reading/config-shape.js';
+import { collectedSegments, facetOfSegments, projectLiterals } from '../../reading/config-shape.js';
+import { FACETS } from '../../reading/facets.js';
 import { identityOf } from '../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../rule.js';
 

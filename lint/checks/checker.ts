@@ -26,8 +26,10 @@ import {
     checkSpecDescriptionsUnique,
     volatileLiteralIn,
 } from './documents.js';
-import { checkFacetFolder, checkGroundOwnedByOne, checkModuleTestUnderFacet } from './facets.js';
+import { checkFacetFolder } from './facet-folder-has-specification.js';
+import { checkModuleTestUnderFacet } from './facet-test-uses-its-runner.js';
 import { checkTestUnderFacet } from './file-suffix-matches-place.js';
+import { checkGroundOwnedByOne } from './ground-beside-its-only-reader.js';
 import { checkGroundSharing } from './ground-shared-or-inline.js';
 import { checkDiskTargetsExist } from './named-path-exists.js';
 import { checkCopiedGround } from './no-duplicate-ground.js';
