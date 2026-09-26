@@ -33,9 +33,9 @@ export function runAtZero(registry: AtZeroRegistry, cliArguments: readonly strin
     }
     const errors = findings.filter((finding) => finding.severity === 'error').length;
     if (errors > 0) {
-        console.error(`\nself checker: ${errors} error(s) found under ${root}`);
+        console.error(`\n${registry.label}: ${errors} error(s) found under ${root}`);
         stop(1);
     }
-    console.log(`self checker: no error under ${root} (${registry.passIds.join(', ')})`);
+    console.log(`${registry.label}: no error under ${root} (${registry.passIds.join(', ')})`);
     stop(0);
 }

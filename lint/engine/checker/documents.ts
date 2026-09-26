@@ -18,7 +18,6 @@ import type { Node, Pair, YAMLMap } from '../project/yaml-document.js';
 import type { Finding } from './finding.js';
 import type { GroundPasses } from './registry.js';
 
-/** A document the grammar refuses yields nothing here: `document-follows-its-grammar` already reported it. */
 export function runDocument(
     text: string,
     rel: string,

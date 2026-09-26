@@ -28,7 +28,6 @@ const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
 const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
 const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
 
-/** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
 type TokenSite = { line: number; token: string };

@@ -27,7 +27,6 @@ const CHANNEL_ORDER: Record<Row['channel'], number> = {
     process: 6,
 };
 
-/** A table row is not a heading: the anchor rides inside the Rule cell, so `docs/19-linting.md#<name>` in a rule message resolves to the row. */
 export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }

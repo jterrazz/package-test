@@ -49,6 +49,7 @@ export type CheckerRegistry = {
 
 export type AtZeroRegistry = {
     chapter: string;
+    label: string;
     passIds: readonly string[];
     rows: readonly Row[];
     source: readonly ((root: string) => Finding[])[];

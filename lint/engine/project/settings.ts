@@ -7,7 +7,6 @@ export type TestSettings = {
     collections?: readonly string[];
     /** Routes the api takes on any method (`app.all('/mcp', …)`), by path. */
     methodless?: readonly string[];
-    /** Test packages a production module legitimately runs, each with its reason; `no-test-code-in-production` honours them. */
     production?: { allow: Readonly<Record<string, string>> };
     /** Path to an OpenAPI document (JSON or YAML) declaring the routes, when the app carries no route table. */
     routes?: string;

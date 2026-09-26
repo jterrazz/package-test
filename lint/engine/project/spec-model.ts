@@ -61,7 +61,6 @@ export type SpecModel = {
     dockerAware: boolean;
     file: string;
     runnerExports: Set<string>;
-    /** `null` when the record is absent or not a plain literal: `database-named-only-when-several` cannot be decided then. */
     sqlDatabaseCount: null | number;
 };
 

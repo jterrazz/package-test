@@ -20,7 +20,6 @@ const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SE
 /** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-// A spec document is the scenario, not ground, so it is checked wherever the walk finds it; `no-document-in-ground` says where that is.
 function documentFindings(entry: GroundEntry, passes: GroundPasses): Finding[] {
     const text = decodeText(entry.path);
     return [

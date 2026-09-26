@@ -15,7 +15,6 @@ import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from './yaml-document.j
 
 export const SPEC_EXTENSION = '.spec.yaml';
 
-/** The canonical order, enforced and rewritten by `document-keys-in-canonical-order`. */
 export const DOCUMENT_KEYS = ['description', 'fixture', 'env', 'serve', 'runs'] as const;
 
 export const RUN_KEYS = [
@@ -476,7 +475,6 @@ type PathRole = {
     key: string;
 };
 
-/** Judged by the law of `file()` and `directory()`: relative, in the folder its key reads (`verb-reads-its-ground-folder`). */
 function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {
     const at = (message: string): never => {
         throw new SpecSyntaxError(context.fileName, line, message);
@@ -688,7 +686,6 @@ function presenceOf(shape: PresenceShape): SchemaNode {
     };
 }
 
-/** Built from the constants above; committed as `schema/spec.schema.json` by `npm run docs`. Key order is `document-keys-in-canonical-order`'s, which JSON Schema cannot state. */
 type SchemaNode = Record<string, unknown>;
 
 export type SpecSchema = {

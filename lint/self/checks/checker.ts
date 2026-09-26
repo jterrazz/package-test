@@ -21,6 +21,7 @@ export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
 
 export const SELF_CHECKER: AtZeroRegistry = {
     chapter: SELF_CHAPTER,
+    label: 'self checker',
     passIds: SELF_CHECKER_PASS_IDS,
     rows: selfRows,
     source: [

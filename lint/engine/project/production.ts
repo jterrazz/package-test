@@ -18,8 +18,6 @@ import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js
 import { withoutComments } from './subject.js';
 import { testSettingsAt } from './test-settings.js';
 
-/** One reader for `no-test-code-in-production`, `fixtures-imported-by-tests-only` and `import-within-declared-layers`. A local module that is neither production nor test material is parsed and walked through; a production module on the way ends the walk, since it is judged for its own references. */
-
 const SOURCE = /\.[cm]?[jt]sx?$/u;
 
 const TEST_SUFFIX = /\.(?:test|spec|test-d|spec-d|specification|fixtures)\.[cm]?[jt]sx?$/u;
@@ -41,7 +39,6 @@ const TEST_PACKAGES = new Set([
 
 const TEST_PACKAGE_PREFIXES = ['@testing-library/', '@vitest/', 'vitest-browser-'];
 
-/** Zero-runtime and tool-facing (`no-unpublished-subpath`). */
 const TOOL_ENTRY = '@jterrazz/test/oxlint';
 
 export type MaterialKind =
