@@ -1,0 +1,8 @@
+description: a reader importing a rule, and a pass importing the mover, are refused at the import
+fixture: ./fixtures/upward/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          lint/checks/tree.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)
+          lint/reading/role.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)

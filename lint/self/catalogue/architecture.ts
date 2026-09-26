@@ -103,4 +103,18 @@ export const ARCHITECTURE_PASSES: CatalogEntry[] = [
         reach: 'module',
         severity: 'error',
     },
+    {
+        audience: 'self',
+        channel: 'checker',
+        convention:
+            'The folders of `lint/` import in one direction: `reading/` imports only itself; `catalogue/` itself and `reading/`; `rules/` those two; `checks/` and `ratchet/` those two, `checks/` the ratchet too; `rulebook/` the rules and those two; the entry `lint/index.ts` any of them; `migration/` every shipped folder; and nothing but `self/` imports `self/`, nor anything but `lint/checks/checker.cli.ts` imports `migration/`. Tests are exempt. An error at the import.',
+        facet: 'model',
+        family: 'architecture',
+        fix: 'Move what the importer needs into a folder it may import, or move the importer up the tree.',
+        name: 'lint-imports-follow-the-direction',
+        rationale:
+            '`import-within-declared-layers` sees `lint/` as one layer, so a reader reaching a rule, a pass reaching the mover 17.1 deletes, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
+        reach: 'module',
+        severity: 'error',
+    },
 ];

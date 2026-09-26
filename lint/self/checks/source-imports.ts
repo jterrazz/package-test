@@ -177,3 +177,53 @@ export function checkEngineOwner(root: string): TokenViolation<SelfPassId>[] {
         })
         .toSorted(byPosition);
 }
+
+const LINT_DIRECTION: Record<string, readonly string[]> = {
+    catalogue: ['catalogue', 'reading'],
+    checks: ['checks', 'catalogue', 'ratchet', 'reading'],
+    index: ['catalogue', 'reading', 'rulebook', 'rules'],
+    migration: ['migration', 'catalogue', 'checks', 'ratchet', 'reading', 'rulebook', 'rules'],
+    ratchet: ['ratchet', 'catalogue', 'reading'],
+    reading: ['reading'],
+    rulebook: ['rulebook', 'catalogue', 'reading', 'rules'],
+    rules: ['rules', 'catalogue', 'reading'],
+};
+
+const MIGRATION_ENTRY = 'lint/checks/checker.cli.ts';
+
+function lintFolderOf(path: string): string | undefined {
+    const [tree, folder, next] = path.split('/');
+    if (tree !== 'lint' || folder === undefined) {
+        return undefined;
+    }
+    return next === undefined ? 'index' : folder;
+}
+
+export function checkLintDirection(root: string): TokenViolation<SelfPassId>[] {
+    return productionReferences(root)
+        .filter(({ reference }) => reference.specifier.startsWith('.'))
+        .flatMap(({ from, reference }) => {
+            const own = lintFolderOf(from);
+            const target = targetOf(from, reference.specifier);
+            const into = lintFolderOf(target);
+            const allowed = own === undefined ? undefined : LINT_DIRECTION[own];
+            if (allowed === undefined || into === undefined || allowed.includes(into)) {
+                return [];
+            }
+            if (into === 'migration' && from === MIGRATION_ENTRY) {
+                return [];
+            }
+            return [
+                finding(
+                    'lint-imports-follow-the-direction',
+                    from,
+                    {
+                        fix: `move what \`${own}/\` needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
+                        found: `\`${from}\` imports \`${target}\`, from \`${into}/\`, which \`${own}/\` sits below`,
+                    },
+                    reference,
+                ),
+            ];
+        })
+        .toSorted(byPosition);
+}

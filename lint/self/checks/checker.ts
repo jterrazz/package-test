@@ -1,5 +1,5 @@
 import type { TokenViolation } from '../../checks/checker.js';
-import { checkEngineOwner, checkFacetIsolation } from './source-imports.js';
+import { checkEngineOwner, checkFacetIsolation, checkLintDirection } from './source-imports.js';
 import { checkFolderShape, checkSourceRoot } from './source-tree.js';
 import { checkCapabilityFolder } from './specimen-filed-by-capability.js';
 
@@ -10,6 +10,7 @@ export const SELF_PASS_IDS = [
     'no-cross-facet-import',
     'one-owner-per-engine',
     'folder-named-for-a-concept',
+    'lint-imports-follow-the-direction',
 ] as const;
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];
@@ -24,5 +25,6 @@ export function runSelfSourceChecks(root: string): TokenViolation<SelfPassId>[] 
         ...checkFacetIsolation(root),
         ...checkEngineOwner(root),
         ...checkFolderShape(root),
+        ...checkLintDirection(root),
     ];
 }

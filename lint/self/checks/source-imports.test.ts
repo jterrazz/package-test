@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { checkEngineOwner, checkFacetIsolation } from './source-imports.js';
+import { checkEngineOwner, checkFacetIsolation, checkLintDirection } from './source-imports.js';
 import { located, ROOT, treeOf } from './source-tree.fixtures.js';
 
 /** The self checker passes `no-cross-facet-import` (`no-cross-facet-import`) and `one-owner-per-engine` (`one-owner-per-engine`). */
@@ -38,6 +38,25 @@ describe('source-imports', () => {
         expect(located(checkEngineOwner(misplaced))).toStrictEqual([
             'src/facets/api/api.handle.ts:2:12 one-owner-per-engine: `playwright` is imported outside `src/facets/website/`, the one slice that owns it',
             'src/kernel/chain/state.ts:1:1 one-owner-per-engine: `pg` is imported outside `src/world/services/postgres/`, the one slice that owns it',
+        ]);
+    });
+
+    test('`lint-imports-follow-the-direction` — a lint folder imports only the folders below it, and migration only from the checker entry', () => {
+        // Given - the package's own tree, and one where a reader reaches a rule, a pass reaches the mover and a rule a self module
+        const upward = treeOf({
+            'lint/checks/checker.cli.ts': "import { migrateTo17 } from '../migration/mover.js';\n",
+            'lint/checks/tree.ts': "import { migrateTo17 } from '../migration/mover.js';\n",
+            'lint/reading/role.ts': "import type { LintRule } from '../rules/rule.js';\n",
+            'lint/rules/rule.ts': "import type { SelfPassId } from '../self/checks/checker.js';\n",
+            'lint/rules/rule.test.ts': "import { selfPlugin } from '../self/rules/plugin.js';\n",
+        });
+
+        // Then - the package holds none; each upward edge is named at the import, the entry and the test pass
+        expect(checkLintDirection(ROOT)).toStrictEqual([]);
+        expect(located(checkLintDirection(upward))).toStrictEqual([
+            'lint/checks/tree.ts:1:1 lint-imports-follow-the-direction: `lint/checks/tree.ts` imports `lint/migration/mover.ts`, from `migration/`, which `checks/` sits below',
+            'lint/reading/role.ts:1:1 lint-imports-follow-the-direction: `lint/reading/role.ts` imports `lint/rules/rule.ts`, from `rules/`, which `reading/` sits below',
+            'lint/rules/rule.ts:1:1 lint-imports-follow-the-direction: `lint/rules/rule.ts` imports `lint/self/checks/checker.ts`, from `self/`, which `rules/` sits below',
         ]);
     });
 });
