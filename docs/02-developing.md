@@ -343,10 +343,11 @@ specs/
 │   ├── api.specification.ts
 │   └── users/create/              # POST /users — the subject's standard folder (rules `one-subject-per-spec`, `spec-in-subject-folder`)
 │       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules `one-describe-per-file`, `spec-named-for-its-aspect`)
-│       ├── _seeds/                 # *.sql
-│       ├── _requests/              # what it sends: *.http complete requests, and body files (*.json, …)
-│       ├── stubs/             # <name>.stubs.ts facade + <kind>/<name>.ts units + their data
-│       └── _expected/              # every golden it reads — incl. response *.http, each named by file(…)
+│       ├── _seeds/                # *.sql
+│       ├── _requests/             # what it sends: *.http complete requests, and body files (*.json, …)
+│       ├── _fixtures/             # the payloads its stubs serve (*.json)
+│       ├── _setup/stubs/          # code alone: <name>.stubs.ts facade + <kind>/<name>.ts units
+│       └── _expected/             # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule `specs-at-declared-depth`)
     └── help/                      # the `help` command

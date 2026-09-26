@@ -276,8 +276,8 @@ specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── _expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
-    └── _setup/stubs/        # what the declared backend serves — with the `backend` option
+    ├── _expected/              # ALL expected fixtures, FLAT (*.screen.json, …)
+    └── _setup/stubs/           # the stubs declaring what the backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```

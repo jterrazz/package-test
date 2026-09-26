@@ -361,8 +361,8 @@ specs/website/
 ├── website.specification.ts    # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── _expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
-    └── _setup/stubs/        # what the declared backend serves — with the `backend` option
+    ├── _expected/              # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
+    └── _setup/stubs/           # the stubs declaring what the backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```
