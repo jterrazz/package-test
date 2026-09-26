@@ -7,8 +7,8 @@ describe('databases', () => {
     test('each database is seeded on its own, and each holds only its rows', async () => {
         // Given - two users in one database, two events in the other
         const result = await api
-            .seed(file('../../shared/seeds/two-users.sql'), { database: 'db' })
-            .seed(file('../../shared/seeds/two-events.sql'), { database: 'analyticsDb' })
+            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../_shared/_seeds/two-events.sql'), { database: 'analyticsDb' })
             .get('/events');
 
         // Then - the events the app reads, and the users table untouched by them

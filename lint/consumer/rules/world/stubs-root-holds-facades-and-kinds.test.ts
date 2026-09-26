@@ -107,7 +107,7 @@ ruleTester.run(
             {
                 code: 'test("x", () => {});',
                 errors: 2,
-                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/fixtures/violation/specs/app/widget/widget.test.ts`,
+                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/_fixtures/violation/specs/app/widget/widget.test.ts`,
             },
         ],
         valid: [
@@ -174,7 +174,7 @@ ruleTester.run(
             // The compliant fixture tree — the layout half stays silent.
             {
                 code: 'test("x", () => {});',
-                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/fixtures/compliant/specs/app/widget/widget.test.ts`,
+                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/_fixtures/compliant/specs/app/widget/widget.test.ts`,
             },
             // The framework's own stubs module is not a feature tree.
             {

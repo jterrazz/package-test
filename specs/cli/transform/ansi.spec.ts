@@ -14,9 +14,9 @@ import { file } from '../../../src/index.js';
 import { cli as asymmetricCli } from '../asymmetric-transform-cli.specification.js';
 import { cli as transformCli } from '../transform-cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
-/** Git keeps no empty folder, so `expected/` goes with its last golden. */
+/** Git keeps no empty folder, so `_expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -53,7 +53,7 @@ describe('ansi', () => {
             expect(result.stdout.raw).toContain('\u001B[0m');
 
             // Then - comparison passes because the transform stripped ANSI from the actual
-            expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
+            expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, fixtureName));
         }
@@ -110,7 +110,7 @@ describe('ansi', () => {
             const result = await asymmetricCli.exec('ansi');
 
             // Then - passes only because the fixture is authoritative — NOT transformed
-            expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
+            expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`));
             expect(readFileSync(fixturePath, 'utf8')).not.toContain(' plain');
         } finally {
             removeGolden(fixturePath);
@@ -124,7 +124,7 @@ describe('ansi', () => {
         try {
             const result = await transformCli.exec('ansi');
             inUpdateMode(() => {
-                expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
+                expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`));
             });
 
             // Then - no ANSI in the fixture — transform ran before write

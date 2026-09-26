@@ -211,7 +211,7 @@ describe('own-fixes', () => {
             'node_modules/pkg/oxlint.config.ts': 'export default {};\n',
             'oxlint.config.ts': 'export default {};\n',
             'plain/index.ts': 'export {};\n',
-            'specs/cli/fixtures/project/.oxlintrc.json': '{}\n',
+            'specs/cli/_fixtures/project/.oxlintrc.json': '{}\n',
             'sub/deeper/.oxlintrc.json': '{}\n',
             'sub/oxlint.config.ts': 'export default {};\n',
         });

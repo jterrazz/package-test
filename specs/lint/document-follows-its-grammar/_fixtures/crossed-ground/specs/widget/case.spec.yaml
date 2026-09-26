@@ -1,0 +1,5 @@
+description: lays its fixture from the folder the goldens live in
+fixture: ./_expected/shop/
+runs:
+    - command: build
+      exit: 0

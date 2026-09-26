@@ -1,5 +1,5 @@
 description: a spec file over 400 lines is refused at its first line
-fixture: ./fixtures/long/
+fixture: ./_fixtures/long/
 runs:
     - command: .
       exit: 1

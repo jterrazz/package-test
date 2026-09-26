@@ -1,5 +1,5 @@
 description: warns on a wrapped negative toMatch without frozen
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

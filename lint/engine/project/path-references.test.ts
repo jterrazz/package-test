@@ -50,17 +50,17 @@ describe('path-references', () => {
         // Given - one module using each form
         const source = [
             'const here = import.meta.dirname;',
-            "const a = new URL('./fixtures/a.json', import.meta.url);",
-            "const b = join(here, 'seeds', name);",
-            `const c = \`\${__dirname}/expected/c.txt\`;`,
+            "const a = new URL('./_fixtures/a.json', import.meta.url);",
+            "const b = join(here, '_seeds', name);",
+            `const c = \`\${__dirname}/_expected/c.txt\`;`,
             "const d = readFileSync('./specs/d.sql');",
         ].join('\n');
 
         // Then - the four paths, each resolved where the module or the project sits
         expect(pathsIn(source)).toStrictEqual([
-            join(ROOT, 'src/fixtures/a.json'),
-            join(ROOT, 'src/seeds'),
-            join(ROOT, 'src/expected/c.txt'),
+            join(ROOT, 'src/_fixtures/a.json'),
+            join(ROOT, 'src/_seeds'),
+            join(ROOT, 'src/_expected/c.txt'),
             join(ROOT, 'specs/d.sql'),
         ]);
     });
@@ -68,7 +68,7 @@ describe('path-references', () => {
     test('pathReferenceVisitor — names no path built from a root the caller hands in', () => {
         // Given - paths that do not start where the module sits
         const source = [
-            "const a = join(root, 'fixtures');",
+            "const a = join(root, '_fixtures');",
             "const b = new URL('./x', base);",
             'const c = readFileSync(name);',
         ].join('\n');
@@ -80,18 +80,18 @@ describe('path-references', () => {
     test('literalPathVisitor — hands every piece of a path built from the directory with literals alone', () => {
         // Given - each anchor, each builder, one piece and several, and a URL
         const source = [
-            "const a = join(import.meta.dirname, 'expected', 'x.txt');",
-            "const b = resolve(__dirname, '..', 'fixtures', 'gone');",
-            "const c = path.join(import.meta.dirname, './seeds/rows.sql');",
-            "const d = new URL('./fixtures/a.json', import.meta.url);",
+            "const a = join(import.meta.dirname, '_expected', 'x.txt');",
+            "const b = resolve(__dirname, '..', '_fixtures', 'gone');",
+            "const c = path.join(import.meta.dirname, './_seeds/rows.sql');",
+            "const d = new URL('./_fixtures/a.json', import.meta.url);",
         ].join('\n');
 
         // Then - the pieces of each, as written
         expect(literalPathsIn(source)).toStrictEqual([
-            ['expected', 'x.txt'],
-            ['..', 'fixtures', 'gone'],
-            ['./seeds/rows.sql'],
-            ['./fixtures/a.json'],
+            ['_expected', 'x.txt'],
+            ['..', '_fixtures', 'gone'],
+            ['./_seeds/rows.sql'],
+            ['./_fixtures/a.json'],
         ]);
     });
 
@@ -99,8 +99,8 @@ describe('path-references', () => {
         // Given - a computed piece, a binding of the directory, a file for an anchor
         const source = [
             'const here = import.meta.dirname;',
-            "const a = join(import.meta.dirname, 'fixtures', name);",
-            "const b = join(here, 'fixtures');",
+            "const a = join(import.meta.dirname, '_fixtures', name);",
+            "const b = join(here, '_fixtures');",
             "const c = resolve(import.meta.filename, 'x');",
             'const d = resolve(import.meta.dirname);',
         ].join('\n');

@@ -115,7 +115,7 @@ describe('subject', () => {
         const source = [
             "import { api } from '../api.specification.js';",
             "const events = api.with({ clock: '2026-01-01T00:00:00Z' });",
-            "test('a', async () => { await api.seed(file('./seeds/x.sql')).get('/events/42'); });",
+            "test('a', async () => { await api.seed(file('./_seeds/x.sql')).get('/events/42'); });",
             `test('b', async () => { await events.intercept(http.get('https://x.test/')).post(\`/events/\${id}/publish\`, {}); });`,
             "// await api.delete('/events/1');",
         ].join('\n');
@@ -172,13 +172,13 @@ describe('subject', () => {
         // Given - a request named by file(), and the disk that holds it
         const source = [
             "import { api } from '../api.specification.js';",
-            "await api.request(file('./requests/create.http'));",
+            "await api.request(file('./_requests/create.http'));",
         ].join('\n');
 
         // Then - its method and path are the subject
         expect(
             subjectsOf(source, (path) =>
-                path === './requests/create.http' ? 'POST /events\n\n{}' : undefined,
+                path === './_requests/create.http' ? 'POST /events\n\n{}' : undefined,
             ).map(({ subject }) => subjectName(subject)),
         ).toStrictEqual(['POST /events']);
     });

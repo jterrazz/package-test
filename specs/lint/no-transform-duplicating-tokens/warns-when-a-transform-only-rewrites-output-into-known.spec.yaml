@@ -1,5 +1,5 @@
 description: warns when a transform only rewrites output into known tokens
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

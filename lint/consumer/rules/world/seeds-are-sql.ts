@@ -11,7 +11,7 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** Anchored on the visited test file, reading the listing of its sibling `seeds/`. */
+/** Anchored on the visited test file, reading the listing of its sibling `_seeds/`. */
 export const seedsAreSql: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -35,8 +35,8 @@ export const seedsAreSql: LintRule = {
             rowNamed(consumerRows, 'seeds-are-sql'),
             {
                 notSql: {
-                    found: '`seeds/{{entry}}` is not a `.sql` file',
-                    fix: 'move it to `fixtures/` and lay it with `.fixture(file(…))`; `seeds/` holds database state only',
+                    found: '`_seeds/{{entry}}` is not a `.sql` file',
+                    fix: 'move it to `_fixtures/` and lay it with `.fixture(file(…))`; `_seeds/` holds database state only',
                 },
             },
             CATALOGUE_CHAPTER,

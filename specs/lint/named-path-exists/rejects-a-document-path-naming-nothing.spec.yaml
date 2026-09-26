@@ -1,5 +1,5 @@
 description: every path a document names is judged where it is written, entry by entry
-fixture: ./fixtures/document-missing/
+fixture: ./_fixtures/document-missing/
 runs:
     - command: checker .
       exit: 1

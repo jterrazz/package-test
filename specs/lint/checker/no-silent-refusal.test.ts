@@ -8,7 +8,7 @@ describe('no-silent-refusal', () => {
     test('warns about a non-zero exit with neither stream', async () => {
         // Given - a refusal the document never quotes
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/no-silent-refusal/'))
+            .fixture(directory('./_fixtures/lint-violations/no-silent-refusal/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -21,11 +21,11 @@ describe('no-silent-refusal', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

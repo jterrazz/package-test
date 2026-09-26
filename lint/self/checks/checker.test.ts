@@ -22,7 +22,7 @@ function specsTree(files: Record<string, string>): string {
 /** What `specimen-filed-by-capability` refuses. */
 const MISFILED = {
     'api/api.specification.ts':
-        "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
+        "import { createApp } from '../_shared/_fixtures/specimen-api/app.js';\n",
     'api/users/list/listing.spec.ts': "import { api } from '../../api.specification.js';\n",
 };
 

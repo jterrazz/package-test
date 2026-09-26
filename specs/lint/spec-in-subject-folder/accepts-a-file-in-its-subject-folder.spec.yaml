@@ -1,5 +1,5 @@
 description: a spec of GET /orders filed under orders/list/ passes
-fixture: ./fixtures/filed/
+fixture: ./_fixtures/filed/
 runs:
     - command: checker .
       exit: 0

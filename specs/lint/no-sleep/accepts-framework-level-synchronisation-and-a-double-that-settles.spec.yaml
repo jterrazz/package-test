@@ -1,5 +1,5 @@
 description: accepts framework-level synchronisation, and a double that settles late
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

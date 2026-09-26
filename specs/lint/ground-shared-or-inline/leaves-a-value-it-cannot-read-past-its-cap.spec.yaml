@@ -1,5 +1,5 @@
 description: --fix writes no file for a value past its cap it cannot read, and leaves the spec as written
-fixture: ./fixtures/past-cap-unreadable/
+fixture: ./_fixtures/past-cap-unreadable/
 runs:
     - command: checker . --fix
       exit: 1

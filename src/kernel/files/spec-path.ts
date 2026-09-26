@@ -143,17 +143,17 @@ export function requireDiskTarget(verb: string, value: unknown): DiskTarget {
 
 function exampleOf(verb: string, extension: string): string {
     const folder: Record<string, string> = {
-        fixture: 'fixtures/config.json',
-        request: 'requests/create.http',
+        fixture: '_fixtures/config.json',
+        request: '_requests/create.http',
         run: 'case.spec.yaml',
-        seed: 'seeds/rows.sql',
+        seed: '_seeds/rows.sql',
     };
-    return folder[verb] ?? `expected/output${extension || '.txt'}`;
+    return folder[verb] ?? `_expected/output${extension || '.txt'}`;
 }
 
 function asRelative(path: unknown): string {
     const bare = typeof path === 'string' ? path.replace(/^\/+/u, '') : '';
-    return `./${bare === '' ? 'expected/output.txt' : bare}`;
+    return `./${bare === '' ? '_expected/output.txt' : bare}`;
 }
 
 export function requireRelativePath(call: string, path: unknown): asserts path is string {

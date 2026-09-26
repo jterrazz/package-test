@@ -35,16 +35,16 @@ describe('fixture', () => {
         // Given - a caller the compiler does not see, handing a path as a value
 
         // Then - the setup is refused as it is stated, and names file() and directory()
-        expect(() => chain().fixture('./fixtures/shop/' as never)).toThrow(
-            /^found: fixture\("\.\/fixtures\/shop\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
+        expect(() => chain().fixture('./_fixtures/shop/' as never)).toThrow(
+            /^found: fixture\("\.\/_fixtures\/shop\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,
         );
     });
 
     test(".fixture() — the file state a chain stands on — spreads a directory's contents and copies a file under its own name, in order", async () => {
         // Given - a directory and a file this test stands on
         const laid = await chain()
-            .fixture(directory('./fixtures/shop/'))
-            .fixture(file('./fixtures/config.json'))
+            .fixture(directory('./_fixtures/shop/'))
+            .fixture(file('./_fixtures/config.json'))
             .list();
 
         // Then - the directory's file and the file itself, side by side in the working directory
@@ -56,11 +56,11 @@ describe('fixture', () => {
 
         // Then - each is refused when the chain is armed, with the kind on disk
         // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: each path names the other kind on purpose
-        await expect(chain().fixture(directory('./fixtures/config.json/')).list()).rejects.toThrow(
+        await expect(chain().fixture(directory('./_fixtures/config.json/')).list()).rejects.toThrow(
             /names a file\n.*\nfix: drop the \//u,
         );
         // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: each path names the other kind on purpose
-        await expect(chain().fixture(file('./fixtures/shop')).list()).rejects.toThrow(
+        await expect(chain().fixture(file('./_fixtures/shop')).list()).rejects.toThrow(
             /names a directory\n.*\nfix: end its path in \//u,
         );
     });

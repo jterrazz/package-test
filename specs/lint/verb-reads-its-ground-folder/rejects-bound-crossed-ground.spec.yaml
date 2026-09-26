@@ -1,5 +1,5 @@
 description: a file bound to a const is followed to the verb it reaches, and refused where it is handed over
-fixture: ./fixtures/bound/
+fixture: ./_fixtures/bound/
 runs:
     - command: .
       exit: 1

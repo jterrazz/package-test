@@ -1,5 +1,5 @@
 description: stays silent for non-URL env variables
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

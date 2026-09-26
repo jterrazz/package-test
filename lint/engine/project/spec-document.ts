@@ -489,7 +489,7 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
     }
     const found = groundOf(value);
     if (found !== role.folder) {
-        const where = `./${role.folder}/ beside the document, or in specs/shared/${role.folder}/ if several leaves share it`;
+        const where = `./${role.folder}/ beside the document, or in specs/_shared/${role.folder}/ if several leaves share it`;
         at(
             `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
         );
@@ -777,7 +777,7 @@ export const SPEC_SCHEMA: SpecSchema = {
         },
         fixture: {
             description:
-                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is fixtures/ — ./fixtures/ beside the document, or specs/shared/fixtures/ reached by the path that climbs to it.",
+                "Fixture paths copied into the working directory, layering in order — each relative to this document (`./…`, `../…`), in the two forms the chain's `file()` and `directory()` take: a trailing `/` names a directory whose contents are spread, without it one file is copied under its own name. The first ground folder a path passes through is _fixtures/ — ./_fixtures/ beside the document, or specs/_shared/_fixtures/ reached by the path that climbs to it.",
             ...oneOrMany(fixturePath()),
         },
         runs: {

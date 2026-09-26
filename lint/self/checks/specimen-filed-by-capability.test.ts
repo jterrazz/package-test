@@ -17,7 +17,7 @@ function specsTree(files: Record<string, string>): string {
     return root;
 }
 
-const SPECIMEN = "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n";
+const SPECIMEN = "import { createApp } from '../_shared/_fixtures/specimen-api/app.js';\n";
 
 function spec(depth: number): string {
     return `import { api } from '${'../'.repeat(depth)}api.specification.js';\n`;
@@ -37,9 +37,9 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ file, found }) => `${file} ${found}`),
         ).toStrictEqual([
-            'api/assertions/whole.spec.ts a spec of the specimen `shared/fixtures/specimen-api`, filed under `api/assertions/`',
-            'api/seed/nominal/nominal.spec.ts a spec of the specimen `shared/fixtures/specimen-api`, filed under `api/seed/nominal/`',
-            'api/users/list/listing.spec.ts a spec of the specimen `shared/fixtures/specimen-api`, filed under `api/users/list/`',
+            'api/assertions/whole.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/assertions/`',
+            'api/seed/nominal/nominal.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/seed/nominal/`',
+            'api/users/list/listing.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/users/list/`',
         ]);
     });
 
@@ -47,7 +47,7 @@ describe('checkSpecimenFiledByCapability', () => {
         // Given - a cli spec of a specimen filed under `appium/`, a capability of the mobile column
         const root = specsTree({
             'cli/cli.specification.ts':
-                "const BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');\n",
+                "const BIN = resolve(import.meta.dirname, '../_shared/_fixtures/specimen-cli/cli.sh');\n",
             'cli/appium/session.spec.ts': "import { cli } from '../cli.specification.js';\n",
         });
 
@@ -96,7 +96,7 @@ describe('checkSpecimenFiledByCapability', () => {
         const suite = "import { surface } from '../surface.specification.js';\n";
         const root = specsTree({
             'surface/surface.specification.ts':
-                "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
+                "import { createApp } from '../_shared/_fixtures/specimen-api/app.js';\n",
             'surface/seed/nominal.spec.ts': suite,
             'surface/appium/session.spec.ts': suite,
             'surface/misc/grab-bag.spec.ts': suite,
@@ -114,7 +114,7 @@ describe('checkSpecimenFiledByCapability', () => {
         const root = specsTree({
             'integration/pure.specification.ts':
                 'export const { integration } = await specification.integration();\n',
-            'integration/timekeeping/imported.spec.ts': `import { stamp } from '../../shared/fixtures/orders/stamp.js';\n${runner}`,
+            'integration/timekeeping/imported.spec.ts': `import { stamp } from '../../_shared/_fixtures/orders/stamp.js';\n${runner}`,
             'integration/timekeeping/inline.spec.ts': `${runner}const stamp = () => ({ at: new Date() });\n`,
         });
 

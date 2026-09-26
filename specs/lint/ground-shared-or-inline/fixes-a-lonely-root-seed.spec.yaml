@@ -1,11 +1,11 @@
-description: --fix moves the seed one leaf's two tests share into its seeds/ and removes the emptied folder
-fixture: ./fixtures/lonely-seed/
+description: --fix moves the seed one leaf's two tests share into its _seeds/ and removes the emptied folder
+fixture: ./_fixtures/lonely-seed/
 runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/shared/seeds/one-user.sql: absent
-          specs/shared/seeds: absent
-          specs/api/users/seeds/one-user.sql: exists
+          specs/_shared/_seeds/one-user.sql: absent
+          specs/_shared/seeds: absent
+          specs/api/users/_seeds/one-user.sql: exists
           specs/api/users/listed.spec.ts:
-              contains: file('./seeds/one-user.sql')
+              contains: file('./_seeds/one-user.sql')

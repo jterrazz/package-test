@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { discoverMembers, discoverSpecRoots } from './members.js';
 
-const WORKSPACE = resolve(import.meta.dirname, '../../../specs/shared/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 
 describe('members', () => {
     test('members — where the member pass looks — discovers every member the root manifest declares, and the root', () => {

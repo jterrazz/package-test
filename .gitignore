@@ -8,10 +8,10 @@ dist
 *.tgz
 
 # The stub oxlint a checker spec runs in place of the project's own.
-!specs/lint/checker/fixtures/lint-violations/checker-oxlint-run/node_modules/
+!specs/lint/checker/_fixtures/lint-violations/checker-oxlint-run/node_modules/
 # The oxlint a checker spec's project runs: the repository's own, behind a stub.
-!specs/lint/checker/fixtures/lint-violations/checker-own-fixes/node_modules/
+!specs/lint/checker/_fixtures/lint-violations/checker-own-fixes/node_modules/
 # The oxlint of a checker spec's JSON-configured project, which lays its configs down.
-!specs/lint/checker/fixtures/lint-violations/checker-own-fixes-json/node_modules/
+!specs/lint/checker/_fixtures/lint-violations/checker-own-fixes-json/node_modules/
 # The Appium a spawned-server mobile run starts: a stub serving the protocol double.
-!specs/mobile/appium/fixtures/mobile-spawned-session/app/node_modules/
+!specs/mobile/appium/_fixtures/mobile-spawned-session/app/node_modules/

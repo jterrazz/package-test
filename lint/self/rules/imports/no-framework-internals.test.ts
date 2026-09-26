@@ -97,7 +97,7 @@ ruleTester.run('no-framework-internals', noFrameworkInternals as unknown as Oxli
         // `/vitest` — what a specs-tree vitest.config.ts imports the preset from.
         {
             code: 'import { defineSpecConfig } from "@jterrazz/test/vitest";',
-            filename: '/repo/specs/cli/fixtures/app/vitest.config.ts',
+            filename: '/repo/specs/cli/_fixtures/app/vitest.config.ts',
         },
         // `/schema` — the published JSON schema of a <case>.spec.yaml document.
         {

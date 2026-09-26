@@ -1,5 +1,5 @@
 description: a file-level expectation one test reads is refused at its declaration
-fixture: ./fixtures/one-reader/
+fixture: ./_fixtures/one-reader/
 runs:
     - command: .
       exit: 1

@@ -1,5 +1,5 @@
 description: a path naming nothing, wrapped or built from pieces, or a directory as a file, is refused
-fixture: ./fixtures/missing/
+fixture: ./_fixtures/missing/
 runs:
     - command: checker .
       exit: 1

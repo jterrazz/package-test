@@ -1,5 +1,5 @@
 description: a pool fixture one leaf and a module test outside specs/ both read is shared, and passes
-fixture: ./fixtures/module-read/
+fixture: ./_fixtures/module-read/
 runs:
     - command: checker .
       exit: 0

@@ -1,5 +1,5 @@
 description: warns on a scenario that ends on the action
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

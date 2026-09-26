@@ -22,7 +22,7 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `fixtures/`. */
+/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `_fixtures/`. */
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {
     fixture: { argument: 0, grounds: [GROUND_FIXTURES] },
     post: { argument: 1, grounds: [GROUND_REQUESTS] },
@@ -101,7 +101,7 @@ export const verbReadsItsGroundFolder: LintRule = {
                         where:
                             reads === undefined
                                 ? 'the folder its verb reads'
-                                : `./${reads}/ beside the test, or in specs/shared/${reads}/ if several leaves share it`,
+                                : `./${reads}/ beside the test, or in specs/_shared/${reads}/ if several leaves share it`,
                     },
                     messageId: 'crossed',
                     node: argument?.type === 'Identifier' ? argument : disk.node,

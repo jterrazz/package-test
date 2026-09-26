@@ -1,5 +1,5 @@
 description: a value past its cap the fixer cannot read — a name, a hole, a matcher — is refused
-fixture: ./fixtures/past-cap-unreadable/
+fixture: ./_fixtures/past-cap-unreadable/
 runs:
     - command: checker .
       exit: 1

@@ -33,7 +33,7 @@ expect(result.response).toMatch(`
     {"id": "{{uuid}}", "name": "Alice"}
 `);
 await expect(result.table('users')).toMatch([[1, 'Alice', 'alice@test.com']]);
-expect(result.stdout).toMatch(file('./expected/help.txt'));
+expect(result.stdout).toMatch(file('./_expected/help.txt'));
 ```
 
 | Subject                                                   | The value written in place                                               | On disk             |
@@ -49,10 +49,10 @@ A text written in place that opens on a line break is read without it, without t
 
 The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule `paths-named-in-the-test`); the type refuses a bare string where a file is meant (rule `disk-named-by-relative-path`):
 
-- `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule `golden-path-has-extension`); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule `golden-path-creates-folders`).
-- `toMatch(directory('./expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
+- `toMatch(file('./_expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule `golden-path-has-extension`); a path may name a subfolder, `./_expected/build/verbose.txt`, and update mode creates it (rule `golden-path-creates-folders`).
+- `toMatch(directory('./_expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
 
-Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule `golden-read-from-its-path`). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
+Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule `golden-read-from-its-path`). By convention it sits in `_expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
 
 `toContain` handed a stream accessor does not compile: a stream is no list, and vitest would search an empty one — its text is `result.stdout.text`, the comparable text (ANSI stripped, the runner's `transform` applied, the text its golden compares).
 
@@ -80,10 +80,10 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 
 ## `result.response` — HTTP response (api)
 
-| Matcher                     | Sync/async | Example                                                                 |
-| --------------------------- | ---------- | ----------------------------------------------------------------------- |
-| `toMatch(<.http text>)`     | sync       | ``expect(result.response).toMatch(`HTTP/1.1 201 Created …`)``           |
-| `toMatch(file('./….http'))` | sync       | `expect(result.response).toMatch(file('./expected/user-created.http'))` |
+| Matcher                     | Sync/async | Example                                                                  |
+| --------------------------- | ---------- | ------------------------------------------------------------------------ |
+| `toMatch(<.http text>)`     | sync       | ``expect(result.response).toMatch(`HTTP/1.1 201 Created …`)``            |
+| `toMatch(file('./….http'))` | sync       | `expect(result.response).toMatch(file('./_expected/user-created.http'))` |
 
 Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule `expected-headers-are-a-subset`), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
 
@@ -97,14 +97,14 @@ Location: /orders/{{uuid#order}}
 On mismatch the failure shows which part diverged. A status mismatch is a three-line message naming the fixture:
 
 ```
-Response status mismatch (./expected/user-created.http)
+Response status mismatch (./_expected/user-created.http)
   expected: 201
   received: 500
 ```
 
 A header mismatch has the same shape (`Response header mismatch (name)`, with `header:` / `expected:` / `received:` lines; a missing header shows `received: (absent)`). A body mismatch prints a line-by-line structural diff (`Response mismatch (name)`, `- Expected` / `+ Received`) of the expected body — with matchers and tokens rendered as their placeholder text (`{{uuid#order}}`) — against the actual body: a JSON value as its pretty-printed lines, and a text body — when both sides are text — as its own lines, so an HTML page or an event stream reads as written. The diff is literal: it does not annotate captured ref values, and a failed `{{uuid#order}}` re-occurrence surfaces only as the two differing lines.
 
-`.not`: `expect(result.response).not.toMatch(file('./expected/user-created.http'))` passes when any part diverges. Rarely useful — prefer positive fixtures.
+`.not`: `expect(result.response).not.toMatch(file('./_expected/user-created.http'))` passes when any part diverges. Rarely useful — prefer positive fixtures.
 
 ## `result.table(name, { database }?)` — database tables (api, job, cli)
 
@@ -138,7 +138,7 @@ Streams are compared **after ANSI stripping** ([15 § Where tokens work](15-toke
 | Matcher                    | Sync/async | Example                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------- |
 | `toMatch(<text>)`          | sync       | `expect(result.stdout).toMatch('built in {{duration}}\n')`             |
-| `toMatch(file('./….txt'))` | sync       | `expect(result.stdout).toMatch(file('./expected/help.txt'))`           |
+| `toMatch(file('./….txt'))` | sync       | `expect(result.stdout).toMatch(file('./_expected/help.txt'))`          |
 | `toContain('needle')`      | sync       | `expect(result.stderr.text).toContain("Unknown command 'frobnicate'")` |
 | `toMatch(/pattern/)`       | sync       | `expect(result.stdout.text).toMatch(/built in \d+ms/u)`                |
 
@@ -152,7 +152,7 @@ Streams are compared **after ANSI stripping** ([15 § Where tokens work](15-toke
 // .grep() returns a TextAccessor — chainable and snapshot-able, so the same
 // Token grammar applies as on the stream itself.
 expect(result.stdout.grep('products/ok.yaml').text).not.toContain('error'); // absence probe
-expect(result.stdout.grep('products/broken.yaml')).toMatch(file('./expected/broken-block.txt')); // snapshot a block
+expect(result.stdout.grep('products/broken.yaml')).toMatch(file('./_expected/broken-block.txt')); // snapshot a block
 ```
 
 ## `text(value)` — any string as a stream subject
@@ -161,10 +161,10 @@ expect(result.stdout.grep('products/broken.yaml')).toMatch(file('./expected/brok
 
 The product surface of a test framework **is** its error messages and reports; golden them in full instead of reconstructing them with a cluster of `toContain` probes.
 
-| Matcher                    | Sync/async | Example                                                             |
-| -------------------------- | ---------- | ------------------------------------------------------------------- |
-| `toMatch(file('./….txt'))` | sync       | `expect(text(message)).toMatch(file('./expected/parse-error.txt'))` |
-| `toContain('needle')`      | sync       | `expect(text(message).text).toContain('did you mean')`              |
+| Matcher                    | Sync/async | Example                                                              |
+| -------------------------- | ---------- | -------------------------------------------------------------------- |
+| `toMatch(file('./….txt'))` | sync       | `expect(text(message)).toMatch(file('./_expected/parse-error.txt'))` |
+| `toContain('needle')`      | sync       | `expect(text(message).text).toContain('did you mean')`               |
 
 ```typescript
 import { text } from '@jterrazz/test';
@@ -180,10 +180,10 @@ async function catchMessage(assertion: () => unknown): Promise<string> {
 }
 
 const message = await catchMessage(() =>
-    expect(result.response).toMatch(file('./expected/wrong-body.http')),
+    expect(result.response).toMatch(file('./_expected/wrong-body.http')),
 );
 // Volatile fragments (paths, durations, ids) go through tokens: {{path}}, {{duration}}, {{uuid}}…
-expect(text(message)).toMatch(file('./expected/errors/wrong-body-error.txt'));
+expect(text(message)).toMatch(file('./_expected/errors/wrong-body-error.txt'));
 ```
 
 ## `result.json` — parsed stdout (cli)
@@ -191,7 +191,7 @@ expect(text(message)).toMatch(file('./expected/errors/wrong-body-error.txt'));
 | Matcher                     | Sync/async | Example                                                           |
 | --------------------------- | ---------- | ----------------------------------------------------------------- |
 | `toMatch(<value>)`          | sync       | `expect(result.json).toMatch({ name: 'shoply', id: '{{uuid}}' })` |
-| `toMatch(file('./….json'))` | sync       | `expect(result.json).toMatch(file('./expected/config.json'))`     |
+| `toMatch(file('./….json'))` | sync       | `expect(result.json).toMatch(file('./_expected/config.json'))`    |
 
 Deep-equal against the value in place or the JSON golden — every key, both ways; the fixture may embed tokens (`"id": "{{uuid}}"`). Failure prints a structural object diff (missing keys, extra keys, per-key value mismatches). For partial checks, read `.value` and use native `toMatchObject`.
 
@@ -206,18 +206,18 @@ A pure read accessor — no framework matcher; assert on its properties with nat
 
 ## `result.directory(name)` — tree snapshots (cli)
 
-| Matcher                      | Sync/async | Example                                                                                     |
-| ---------------------------- | ---------- | ------------------------------------------------------------------------------------------- |
-| `toMatch(directory('./…/'))` | **async**  | `await expect(result.directory('my-shop')).toMatch(directory('./expected/shop-scaffold/'))` |
+| Matcher                      | Sync/async | Example                                                                                      |
+| ---------------------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `toMatch(directory('./…/'))` | **async**  | `await expect(result.directory('my-shop')).toMatch(directory('./_expected/shop-scaffold/'))` |
 
-Compares the tree rooted at `<cwd>/name` against the golden directory `./expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in the golden), `removed` (in the golden, not on disk), `changed` (content mismatch, with a per-file diff). The path ends in `/` — the type and the matcher both refuse one that does not.
+Compares the tree rooted at `<cwd>/name` against the golden directory `./_expected/shop-scaffold/` — structure _and_ file contents (contents honour tokens). Failure is a structured diff in three groups: `added` (on disk, not in the golden), `removed` (in the golden, not on disk), `changed` (content mismatch, with a per-file diff). The path ends in `/` — the type and the matcher both refuse one that does not.
 
 ## `result.filesystem` — the whole cwd (cli)
 
-| Matcher / accessor           | Sync/async | Example                                                                           |
-| ---------------------------- | ---------- | --------------------------------------------------------------------------------- |
-| `toMatch(directory('./…/'))` | **async**  | `await expect(result.filesystem).toMatch(directory('./expected/upgraded-shop/'))` |
-| `.files()`                   | async read | `expect(await result.filesystem.files()).toContain('shoply.lock')`                |
+| Matcher / accessor           | Sync/async | Example                                                                            |
+| ---------------------------- | ---------- | ---------------------------------------------------------------------------------- |
+| `toMatch(directory('./…/'))` | **async**  | `await expect(result.filesystem).toMatch(directory('./_expected/upgraded-shop/'))` |
+| `.files()`                   | async read | `expect(await result.filesystem.files()).toContain('shoply.lock')`                 |
 
 Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` returns the sorted recursive file list — a read, so follow it with native matchers.
 
@@ -245,10 +245,10 @@ The one golden a rendered surface wants. It is the outline a screen reader walks
 
 ```typescript
 // A website page: the capture is already on the node side.
-expect(result.tree).toMatch(file('./expected/home.aria.yaml'));
+expect(result.tree).toMatch(file('./_expected/home.aria.yaml'));
 
 // A component: the capture is read INSIDE the page, so the read is IO.
-await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
+await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
 ```
 
 The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
@@ -270,14 +270,14 @@ Reach for it after the tree, not instead of it. A test that asserts only on mark
 `result.value` is a **JSON accessor** when the call returned an object and a **text accessor** when it returned a string, so the same golden vocabulary reaches both:
 
 ```typescript
-expect(result.value).toMatch(file('./expected/found.json'));
+expect(result.value).toMatch(file('./_expected/found.json'));
 expect(result.value.text).toContain('Alice');
 ```
 
 `result.error` is what the call THREW, read as a subject of its own — a refusal is an answer, and it deserves a golden like any other:
 
 ```typescript
-expect(result.error).toMatch(file('./expected/refused.txt'));
+expect(result.error).toMatch(file('./_expected/refused.txt'));
 expect(result.error.text).toBe(''); // nothing was thrown
 ```
 
@@ -331,8 +331,8 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 - **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-read-only`). Write `expect(result.stdout.text).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule `io-matcher-awaited`).
 - **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is the toolchain error [above](#sync-vs-async). The sync/async split is the contract `io-matcher-awaited` states and the types carry.
-- **`file('./expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./expected/help/')`.
-- **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule `one-verb-per-meaning`).
+- **`file('./_expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./_expected/help/')`.
+- **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./_expected/help.txt')` (rule `one-verb-per-meaning`).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rules `disk-named-by-relative-path`, `disk-named-by-relative-path-at-runtime`).
 - **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([15 § Where tokens work](15-tokens.md#where-tokens-work)) — and a substring check on it warns (`no-raw-bypass`).
 - **`database:` on a single-database project** (or missing on a multi-database one) — [17 § The `database:` rule (`database-named-only-when-several`)](17-services.md#the-database-rule).

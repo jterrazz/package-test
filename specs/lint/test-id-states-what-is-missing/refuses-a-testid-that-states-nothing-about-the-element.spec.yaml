@@ -1,5 +1,5 @@
 description: refuses a testId() that states nothing about the element
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

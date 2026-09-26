@@ -95,7 +95,7 @@ export type RequestSignature = ChainSignature & {
             body?: unknown,
             ...options: RouteArguments<Path>
         ) => Promise<HttpResult>;
-        /** Send a complete request: its `.http` text written in the test, or `file('./requests/<name>.http')`. */
+        /** Send a complete request: its `.http` text written in the test, or `file('./_requests/<name>.http')`. */
         request: (source: DiskFile<'.http'> | string) => Promise<HttpResult>;
     };
 };

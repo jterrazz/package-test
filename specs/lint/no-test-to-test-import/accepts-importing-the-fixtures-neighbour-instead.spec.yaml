@@ -1,5 +1,5 @@
 description: accepts importing the fixtures neighbour instead
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

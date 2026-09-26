@@ -42,7 +42,7 @@ export const goldenPathHasExtension: LintRule = {
             {
                 missingExtension: {
                     found: '`toMatch(file("{{name}}"))` names a golden with no extension',
-                    fix: 'add the extension to the path (`"./expected/help.txt"`), or compare a tree with `toMatch(directory("./expected/<name>/"))`',
+                    fix: 'add the extension to the path (`"./_expected/help.txt"`), or compare a tree with `toMatch(directory("./_expected/<name>/"))`',
                 },
             },
             CATALOGUE_CHAPTER,

@@ -1,5 +1,5 @@
 description: production code importing vitest is refused
-fixture: ./fixtures/vitest-import/
+fixture: ./_fixtures/vitest-import/
 runs:
     - command: .
       exit: 1

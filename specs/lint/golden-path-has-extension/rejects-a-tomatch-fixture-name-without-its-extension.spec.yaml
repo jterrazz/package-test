@@ -1,5 +1,5 @@
 description: rejects a toMatch fixture name without its extension
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

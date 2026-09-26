@@ -5,7 +5,7 @@ import { runMember } from '../../engine/checker/member-run.js';
 import { checkerMessage } from '../../engine/checker/tree-run.js';
 import { CHECKER } from './checker.js';
 
-const WORKSPACE = resolve(import.meta.dirname, '../../../specs/shared/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 describe('checkNoSimulatedDomInConfig', () => {

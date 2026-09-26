@@ -85,7 +85,7 @@ A convention this package states is held by a **channel**, and every row of the 
 
 - **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `lint/consumer/rules/<family>/`, the folder of its catalogue family — AST analysis, one diagnostic per file.
 - **upstream** — a convention an oxlint vitest-plugin rule already holds, set as an OPTION from the `testing` fragment rather than duplicated as a rule of ours ([ADR-005](decisions/005-the-doubles-ladder-is-closed.md)).
-- **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `requests/` and `expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.
+- **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.
 - **runtime** — the framework refuses incorrect usage as it executes, where static analysis abstains (a non-literal argument) or cannot reach (the network, a container lifecycle).
 - **type** — what the compiler refuses with no rule at all, proven by `src/type-channel.test-d.ts`.
 - **meta** — what the framework's own suite holds about itself: the catalogue's freshness, its completeness, the reach of its rules — [03 — Testing](03-testing.md) owns the channel.

@@ -50,4 +50,4 @@ check: node_modules/.install
 
 # Needs Xcode and a simulator: no CI job runs it, and `check` never calls it.
 test-mobile: build
-	node specs/shared/fixtures/specimen-mobile/on-simulator.mjs
+	node specs/_shared/_fixtures/specimen-mobile/on-simulator.mjs

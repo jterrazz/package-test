@@ -1,5 +1,5 @@
 description: a clock every chain of a file pins alike is a warning at the first chain
-fixture: ./fixtures/repeated/
+fixture: ./_fixtures/repeated/
 runs:
     - command: .
       exit: 0

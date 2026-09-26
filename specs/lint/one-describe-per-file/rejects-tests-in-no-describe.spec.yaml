@@ -1,5 +1,5 @@
 description: a spec whose tests stand in no describe is refused at its first test
-fixture: ./fixtures/no-describe/
+fixture: ./_fixtures/no-describe/
 runs:
     - command: .
       exit: 1

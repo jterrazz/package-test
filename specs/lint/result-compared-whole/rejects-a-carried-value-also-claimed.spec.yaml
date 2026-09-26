@@ -1,5 +1,5 @@
 description: a carried value also claimed is a read, and a later result only probed is refused
-fixture: ./fixtures/cursor-claimed/
+fixture: ./_fixtures/cursor-claimed/
 runs:
     - command: .
       exit: 1

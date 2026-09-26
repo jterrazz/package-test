@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import nestedApp from './_fixtures/nested-app/vitest.config.js';
 import { component } from './component.project.js';
-import nestedApp from './fixtures/nested-app/vitest.config.js';
 
 function testOf(
     project: TestProjectInlineConfiguration,
@@ -120,7 +120,7 @@ describe('component', () => {
 
     test('component() — the browser project — reads a relative path against the config that stated it, not the cwd', () => {
         // Given - the config of an app in a subdirectory, loaded from the package root the way knip and the type-checker load every config
-        const nested = resolve(import.meta.dirname, 'fixtures/nested-app');
+        const nested = resolve(import.meta.dirname, '_fixtures/nested-app');
         const project = testOf(nestedApp);
 
         // Then - both of its relative paths landed beside it, and neither here

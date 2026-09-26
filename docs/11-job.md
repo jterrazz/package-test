@@ -41,7 +41,7 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
+Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
@@ -56,7 +56,7 @@ describe('pipeline', () => {
     test('nightly report classifies, prices and drafts', async () => {
         // Given - one pending article + the world the pipeline reaches out to
         const result = await job
-            .seed(file('./seeds/one-pending-article.sql'), { database: 'db' })
+            .seed(file('./_seeds/one-pending-article.sql'), { database: 'db' })
             .intercept(pipeline)
             .trigger('nightly-report');
 
@@ -80,7 +80,7 @@ Selection is **first non-exhausted match wins**, so a multi-call scenario is a f
 test('retries then recovers from provider rate-limit', async () => {
     // Given - the first call is rate-limited, everything after it succeeds
     const result = await job
-        .seed(file('./seeds/pending-articles.sql'), { database: 'db' })
+        .seed(file('./_seeds/pending-articles.sql'), { database: 'db' })
         .intercept([
             { request: openai.chat(), response: openai.error(429), times: 1 },
             { request: openai.chat(), response: openai.reply({ category: 'BOOKS' }) },

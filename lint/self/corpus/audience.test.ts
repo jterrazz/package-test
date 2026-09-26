@@ -170,7 +170,7 @@ describe('audience', () => {
         const bins = Object.entries(manifestOf(installed).bin ?? {});
         const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${name})`);
         const trees = SELF_CHECKER_PASSES.flatMap(({ name }) => {
-            const fixtures = resolve(ROOT, 'specs/lint', name, 'fixtures');
+            const fixtures = resolve(ROOT, 'specs/lint', name, '_fixtures');
             return readdirSync(fixtures).map((tree) => resolve(fixtures, tree));
         });
         const printed = bins.flatMap(([bin, target]) =>

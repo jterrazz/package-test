@@ -1,5 +1,5 @@
 description: warns when the cli binary is a third-party node_modules/.bin
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

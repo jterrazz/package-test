@@ -1,5 +1,5 @@
 description: rejects an expect() inside a visit scenario
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

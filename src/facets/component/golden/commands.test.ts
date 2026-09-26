@@ -23,7 +23,7 @@ describe('COMPONENT_COMMANDS', () => {
         // When - the page reads it
         const read = await COMPONENT_COMMANDS.goldenRead(
             contextOf(join(directory, 'card.test.tsx')),
-            './expected/card.aria.yaml',
+            './_expected/card.aria.yaml',
         );
 
         // Then - no content, and no error
@@ -31,18 +31,18 @@ describe('COMPONENT_COMMANDS', () => {
     });
 
     test('goldenWrite — a golden under a folder that does not exist — creates the folder beside the test and answers the path it wrote', async () => {
-        // Given - a test file with no expected/ folder beside it
+        // Given - a test file with no _expected/ folder beside it
         const directory = scratchDirectory('golden-write-');
 
         // When - update mode writes the golden
         const written = await COMPONENT_COMMANDS.goldenWrite(
             contextOf(join(directory, 'card.test.tsx')),
-            './expected/card.aria.yaml',
+            './_expected/card.aria.yaml',
             '- button "Save"\n',
         );
 
         // Then - the file sits beside the test, holding what was written
-        const path = join(directory, 'expected', 'card.aria.yaml');
+        const path = join(directory, '_expected', 'card.aria.yaml');
         expect(written).toBe(path);
         expect(readFileSync(path, 'utf8')).toBe('- button "Save"\n');
     });
@@ -53,7 +53,7 @@ describe('COMPONENT_COMMANDS', () => {
 
         // When - the page reads a golden through it
         const read = (): unknown =>
-            COMPONENT_COMMANDS.goldenRead(context, './expected/card.aria.yaml');
+            COMPONENT_COMMANDS.goldenRead(context, './_expected/card.aria.yaml');
 
         // Then - the refusal names what is missing
         expect(read).toThrow(

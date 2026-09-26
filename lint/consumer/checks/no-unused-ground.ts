@@ -103,7 +103,7 @@ function hasNonLiteralFixtureArg(text: string): boolean {
 /** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
 type References = { paths: Set<string>; patterns: LiteralPattern[] };
 
-/** A source's other literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/shared/fixtures/app/server.mjs`). */
+/** A source's other literals are read word by word from the file and from the project root too: a path may be bound to a name first, or run by a process service (`node specs/_shared/_fixtures/app/server.mjs`). */
 function referencesOf(file: string, into: References): void {
     const from = dirname(file);
     if (file.endsWith(SPEC_EXTENSION)) {

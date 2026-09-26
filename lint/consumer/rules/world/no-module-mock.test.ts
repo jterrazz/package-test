@@ -99,7 +99,7 @@ ruleTester.run('no-module-mock', noModuleMock as unknown as OxlintRule, {
             filename: '/repo/src/specification/config.ts',
         },
         // A spec under specs/ reads real files by design: the asset clause is the module role's alone.
-        { code: 'import seed from "./seeds/users.sql";', filename: SPEC },
+        { code: 'import seed from "./_seeds/users.sql";', filename: SPEC },
         // The allow-list clears the native module in both spellings, string and dynamic import.
         {
             code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',

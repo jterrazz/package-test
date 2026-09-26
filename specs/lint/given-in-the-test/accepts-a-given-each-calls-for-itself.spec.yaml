@@ -1,5 +1,5 @@
 description: accepts a Given each test calls for itself
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

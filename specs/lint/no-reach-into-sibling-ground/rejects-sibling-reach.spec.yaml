@@ -1,5 +1,5 @@
 description: a leaf reaching into a sibling leaf's ground is refused where the path is written
-fixture: ./fixtures/sibling-reach/
+fixture: ./_fixtures/sibling-reach/
 runs:
     - command: checker .
       exit: 1

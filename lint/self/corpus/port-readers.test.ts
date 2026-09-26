@@ -30,16 +30,16 @@ describe('portReaders', () => {
         const root = tree({
             'src/world/services/process/serve.test.ts':
                 'run(\'node -e "console.log(process.env.PORT)"\');\n',
-            'specs/fixtures/app/Dockerfile': 'FROM node\n',
-            'specs/fixtures/app/server.ts': 'listen(process.env.PORT);\n',
-            'specs/fixtures/site/server.mjs': 'server.listen(Number(process.env.PORT));\n',
+            'specs/_fixtures/app/Dockerfile': 'FROM node\n',
+            'specs/_fixtures/app/server.ts': 'listen(process.env.PORT);\n',
+            'specs/_fixtures/site/server.mjs': 'server.listen(Number(process.env.PORT));\n',
             'src/serve.test.ts': "run('bin/serve --port $PORT');\n",
             'src/serve.ts': 'listen(process.env.PORT);\n',
         });
 
         // Then - the two host readers are named, the container, the module and the proof are not
         expect(portReaders(root)).toStrictEqual([
-            'specs/fixtures/site/server.mjs',
+            'specs/_fixtures/site/server.mjs',
             'src/serve.test.ts',
         ]);
     });

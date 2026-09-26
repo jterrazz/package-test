@@ -5,9 +5,9 @@ import { describe, expect, test, vi } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
-/** Git keeps no empty folder, so `expected/` goes with its last golden. */
+/** Git keeps no empty folder, so `_expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -30,7 +30,7 @@ describe('failure', () => {
     test('text exposes stderr content', async () => {
         // Given - a failing run
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('fail');
 
         // Then - stderr text is readable
@@ -42,17 +42,17 @@ describe('failure', () => {
         const fixtureName = `stderr-transient-${Date.now()}.txt`;
         try {
             const a = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('fail');
             inUpdateMode(() => {
-                expect(a.stderr).toMatch(file(`./expected/${fixtureName}`));
+                expect(a.stderr).toMatch(file(`./_expected/${fixtureName}`));
             });
 
             // Then - a second identical run matches
             const b = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('fail');
-            expect(b.stderr).toMatch(file(`./expected/${fixtureName}`));
+            expect(b.stderr).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, fixtureName));
         }

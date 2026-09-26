@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
-import { tally } from '../../shared/fixtures/orders/tally.js';
+import { tally } from '../../_shared/_fixtures/orders/tally.js';
 import { integration } from '../pure.specification.js';
 
 /** Golden names in a template literal: the shape `no-unused-ground` must read as a reference rather than silence. */
@@ -17,7 +17,7 @@ describe('table', () => {
         const result = await integration.call(() => tally(of));
 
         // Then - the golden the row names is the oracle
-        expect(result.value).toMatch(file(`./expected/${name}.json`));
+        expect(result.value).toMatch(file(`./_expected/${name}.json`));
         expect(result.error.text).toBe('');
     });
 

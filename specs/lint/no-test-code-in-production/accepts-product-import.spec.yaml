@@ -1,5 +1,5 @@
 description: production code importing production code passes
-fixture: ./fixtures/product/
+fixture: ./_fixtures/product/
 runs:
     - command: .
       exit: 0

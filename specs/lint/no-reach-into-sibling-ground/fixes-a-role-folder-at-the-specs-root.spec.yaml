@@ -1,21 +1,21 @@
-description: --fix moves a root role folder under shared/ and every path to it, a module test's too
-fixture: ./fixtures/root-ground/
+description: --fix moves a root role folder under _shared/ and every path to it, a module test's too
+fixture: ./_fixtures/root-ground/
 runs:
     - command: checker . --fix
       exit: 0
       files:
           specs/seeds: absent
           specs/fixtures: absent
-          specs/shared/seeds/catalog.sql: exists
-          specs/shared/fixtures/stub/main.js: exists
-          specs/api/orders/seeds/delta.sql: exists
+          specs/_shared/_seeds/catalog.sql: exists
+          specs/_shared/_fixtures/stub/main.js: exists
+          specs/api/orders/_seeds/delta.sql: exists
           specs/api/users/users.spec.ts:
-              contains: file('../../shared/seeds/catalog.sql')
+              contains: file('../../_shared/_seeds/catalog.sql')
           specs/api/orders/listed-over-the-catalog.spec.ts:
-              contains: file('../../shared/seeds/catalog.sql')
+              contains: file('../../_shared/_seeds/catalog.sql')
           specs/tool/widget/renders.spec.yaml:
-              contains: 'fixture: ../../shared/fixtures/stub/'
+              contains: 'fixture: ../../_shared/_fixtures/stub/'
           src/stub/stub.test.ts:
               contains:
-                  - resolve(import.meta.dirname, '../../specs/shared/fixtures/stub/main.js')
-                  - "'node specs/fixtures/stub/main.js'"
+                  - resolve(import.meta.dirname, '../../specs/_shared/_fixtures/stub/main.js')
+                  - "'node specs/_fixtures/stub/main.js'"

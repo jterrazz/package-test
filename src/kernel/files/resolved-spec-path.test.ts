@@ -8,11 +8,11 @@ describe('resolveSpecPath', () => {
         const specDir = '/repo/specs/cli/build';
 
         // Then - both resolve from the spec, never from the working directory
-        expect(resolveSpecPath('seed', './seeds/users.sql', specDir)).toBe(
-            '/repo/specs/cli/build/seeds/users.sql',
+        expect(resolveSpecPath('seed', './_seeds/users.sql', specDir)).toBe(
+            '/repo/specs/cli/build/_seeds/users.sql',
         );
-        expect(resolveSpecPath('fixture', '../../fixtures/shop/', specDir)).toBe(
-            '/repo/specs/fixtures/shop',
+        expect(resolveSpecPath('fixture', '../../_fixtures/shop/', specDir)).toBe(
+            '/repo/specs/_fixtures/shop',
         );
     });
 

@@ -6,7 +6,7 @@ A stub states what the provider replies, and nothing runs it against the provide
 
 ## The principle
 
-> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`requests/`, `expected/`) — never a mock format.
+> **TypeScript is behavior. `.json` is data. `.http` is a document at the boundary of YOUR OWN api** (`_requests/`, `_expected/`) — never a mock format.
 
 A stub is behavior: it decides what matches and what is served, it can count, it can be required, it can compose. That belongs in TypeScript, where the type checker and the app's own builders are reachable. A 200-line payload is not behavior — it is data, and it goes to a sibling `.json` the stub imports. And `.http` keeps the one role it is good at: a complete, readable document of a request your api receives or a response your api returns.
 
@@ -141,7 +141,7 @@ The rules, enforced by [`stubs-root-holds-facades-and-kinds`](19-linting.md#stub
 - A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
 - **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
-- Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `shared/` folder.
+- Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `_shared/` folder.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 

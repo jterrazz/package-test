@@ -1,5 +1,5 @@
-description: rejects a non-.sql file under seeds/
-fixture: ./fixtures/violation/
+description: rejects a non-.sql file under _seeds/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

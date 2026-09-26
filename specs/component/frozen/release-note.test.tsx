@@ -40,7 +40,7 @@ describe('ReleaseNote', () => {
 
         // Then - it fails rather than passes, and never sends the author to TEST_UPDATE=1, a run that writes nothing for a frozen golden
         await expect(
-            expect(result.tree).toMatch(file('./expected/absent.aria.yaml'), { frozen: true }),
+            expect(result.tree).toMatch(file('./_expected/absent.aria.yaml'), { frozen: true }),
         ).rejects.toThrow(/does not exist beside this test\.\nThis golden is `\{ frozen \}`/u);
     });
 });

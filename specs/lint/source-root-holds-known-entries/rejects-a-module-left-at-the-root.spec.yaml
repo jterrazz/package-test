@@ -1,5 +1,5 @@
 description: a module and a folder left at the source root are each refused at the entry
-fixture: ./fixtures/stray/
+fixture: ./_fixtures/stray/
 runs:
     - command: self-checker .
       exit: 1

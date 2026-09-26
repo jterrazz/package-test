@@ -179,7 +179,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. Under `facet-domain` and `facet`, a `.spec.ts` of the api or cli facet sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which `spec-in-subject-folder` judges. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `fixtures/`, `expected/`, `requests/` or `seeds/` is GROUND, never a facet, domain or suite folder — no spec lives inside one, so a domain named with a reserved word is refused. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is `test-beside-its-module`). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. `shared` is reserved beside the four: `specs/shared/` is the one folder the specs root keeps beside its facets, holding the ground several leaves share, so a spec or a specification under it is refused in every mode. The word is reserved only there: deeper, a domain or a route’s segment takes it (`<specs>/api/shared/get/` for `GET /shared`). A first-level folder is a facet, `shared/`, or a repository suite, which holds tests of its own — one test is enough: a module in one that is none of the three (a `support/` of helpers and mocks), a runner included, is refused in every mode, `off` included — a runner lives at the root of the facet it builds, a test helper beside the tests it serves, a fixture under `specs/shared/fixtures/`. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — `test-beside-its-module` holds its neighbourhood.',
+            'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth, a `*.specification.ts` at the facet root), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. Under `facet-domain` and `facet`, a `.spec.ts` of the api or cli facet sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which `spec-in-subject-folder` judges. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` is GROUND, never a facet, domain or suite folder — no spec lives inside one, so a domain named with a reserved word is refused. One exception, and only one: ground may be CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is `test-beside-its-module`). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. `shared` is reserved beside the four: `specs/_shared/` is the one folder the specs root keeps beside its facets, holding the ground several leaves share, so a spec or a specification under it is refused in every mode. The word is reserved only there: deeper, a domain or a route’s segment takes it (`<specs>/api/shared/get/` for `GET /shared`). A first-level folder is a facet, `_shared/`, or a repository suite, which holds tests of its own — one test is enough: a module in one that is none of the three (a `support/` of helpers and mocks), a runner included, is refused in every mode, `off` included — a runner lives at the root of the facet it builds, a test helper beside the tests it serves, a fixture under `specs/_shared/_fixtures/`. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — `test-beside-its-module` holds its neighbourhood.',
         facet: 'model',
         family: 'layout',
         fix: 'Move the file to the depth the tree declares, or declare the depth the tree actually has; move a runner out of a first-level folder holding no test to its facet root, and a helper to the tests it serves.',
@@ -220,7 +220,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            '`requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.',
+            '`_requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.',
         facet: 'api',
         family: 'layout',
         fix: "Name the file with its extension: `.http` for a whole request, the body's own format otherwise.",
@@ -248,7 +248,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A golden `file()`'s path carries its extension (`toMatch(file('./expected/help.txt'))`, `'./expected/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A tree golden is `toMatch(directory(…))`, whose path ends in `/`.",
+            "A golden `file()`'s path carries its extension (`toMatch(file('./_expected/help.txt'))`, `'./_expected/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A tree golden is `toMatch(directory(…))`, whose path ends in `/`.",
         facet: 'model',
         family: 'layout',
         fix: "Write the fixture's full name, extension included.",
@@ -261,10 +261,10 @@ export const STATIQUE_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'statique',
-        convention: '`seeds/` holds `*.sql` files only; any other file is an error.',
+        convention: '`_seeds/` holds `*.sql` files only; any other file is an error.',
         facet: 'model',
         family: 'world',
-        fix: 'Write the seed as SQL, or move the file to `fixtures/` as the material it is.',
+        fix: 'Write the seed as SQL, or move the file to `_fixtures/` as the material it is.',
         name: 'seeds-are-sql',
         rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
         reach: 'ground',
@@ -274,13 +274,13 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "The verb and the ground folder agree: `seed()` reads `seeds/`, `request()` and a request body (`post`/`put`) read `requests/`, `fixture()` reads `fixtures/`, a golden `toMatch(file|directory(…))` reads `expected/`, and `run()` reads a document beside the test, under no ground folder — or under `fixtures/` for a document that is an input a negative spec runs. The same four folders under the specs root's `shared/` hold what several leaves share, so a shared seed is `<specs>/shared/seeds/x.sql` (`../../shared/seeds/x.sql`), never `<specs>/shared/fixtures/seeds/x.sql` — the role folder under `shared/` is the first ground folder the path passes through, and it is the one judged. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `fixtures/` by its grammar (`document-follows-its-grammar`).",
+            "The verb and the ground folder agree: `seed()` reads `_seeds/`, `request()` and a request body (`post`/`put`) read `_requests/`, `fixture()` reads `_fixtures/`, a golden `toMatch(file|directory(…))` reads `_expected/`, and `run()` reads a document beside the test, under no ground folder — or under `_fixtures/` for a document that is an input a negative spec runs. The same four folders under the specs root's `_shared/` hold what several leaves share, so a shared seed is `<specs>/_shared/_seeds/x.sql` (`../../_shared/_seeds/x.sql`), never `<specs>/_shared/_fixtures/_seeds/x.sql` — the role folder under `_shared/` is the first ground folder the path passes through, and it is the one judged. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `_fixtures/` by its grammar (`document-follows-its-grammar`).",
         facet: 'model',
         family: 'layout',
-        fix: "Move the file into the folder its verb reads — the leaf's own, or the specs root's under `shared/` when several leaves share it — and spell the path through it.",
+        fix: "Move the file into the folder its verb reads — the leaf's own, or the specs root's under `_shared/` when several leaves share it — and spell the path through it.",
         name: 'verb-reads-its-ground-folder',
         rationale:
-            'Four reserved names are a vocabulary only if each means one thing: a seed parked in `fixtures/` or a golden in `requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
+            'Four reserved names are a vocabulary only if each means one thing: a seed parked in `_fixtures/` or a golden in `_requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
         reach: 'tests',
         severity: 'error',
     },
@@ -417,7 +417,7 @@ export const STATIQUE_RULES: Row[] = [
             'Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch(file(…))` on it is a warning. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.',
         facet: 'model',
         family: 'expectations',
-        fix: "Golden the subject: `expect(result.stdout).toMatch(file('./expected/<case>.txt'))`, tokens for what moves.",
+        fix: "Golden the subject: `expect(result.stdout).toMatch(file('./_expected/<case>.txt'))`, tokens for what moves.",
         name: 'no-probe-cluster',
         rationale:
             'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
@@ -553,7 +553,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
+            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./_expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
         facet: 'api',
         family: 'expectations',
         fix: 'Assert what the response carries, not only the code it came back with.',
@@ -573,7 +573,7 @@ export const STATIQUE_RULES: Row[] = [
         fix: "Start from `defineSpecConfig()` — budgets, the artefact dir and the ground exclusion are the preset's.",
         name: 'vitest-config-from-define-spec-config',
         rationale:
-            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `fixtures/` as specs — none of it visible in the file that caused it.",
+            "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `_fixtures/` as specs — none of it visible in the file that caused it.",
         reach: 'config',
         severity: 'error',
     },
@@ -679,7 +679,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a separate test root (`__tests__/`, a root `test/` or `tests/`, `test-beside-its-module`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
+            "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a separate test root (`__tests__/`, a root `test/` or `tests/`, `test-beside-its-module`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
         facet: 'model',
         family: 'imports',
         fix: 'Move the code that needs the reference into a test, move what production needs out of the test material, or inject it as a port.',
@@ -862,7 +862,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A `<case>.spec.yaml` is a SPEC, not ground: a document under `expected/`, `requests/`, `seeds/` or `fixtures/` is an error.',
+            'A `<case>.spec.yaml` is a SPEC, not ground: a document under `_expected/`, `_requests/`, `_seeds/` or `_fixtures/` is an error.',
         facet: 'cli',
         family: 'layout',
         fix: 'Move the document beside the test that runs it.',
@@ -876,7 +876,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `fixtures/`, `expected/`, `requests/` or `seeds/` folder is a spec, a `.test.ts` under `expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a facet: a specification with no module to sit beside and no runner to reach lives in a repository suite there.',
+            'A test under `specs/<facet>/`, where the facet root holds a `*.specification.ts(x)`, imports that module or constructs a runner itself. Ground is out of reach — nothing under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder is a spec, a `.test.ts` under `_expected/` being the GOLDEN a fixer writes. So is any first-level folder that is not a facet: a specification with no module to sit beside and no runner to reach lives in a repository suite there.',
         facet: 'model',
         family: 'layout',
         fix: 'Import `{ <facet> }` from `<facet>.specification.js`, move a module test beside its module, or move a repository suite to a first-level folder of its own under `specs/`.',
@@ -904,7 +904,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "A `seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
+            "A `_seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
         facet: 'model',
         family: 'world',
         fix: "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
@@ -988,7 +988,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'Every `{{token}}` in an `expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.',
+            'Every `{{token}}` in an `_expected/` fixture — or in an expected stream of a `<case>.spec.yaml` document — belongs to the frozen vocabulary; an unknown token is an error.',
         facet: 'model',
         family: 'expectations',
         fix: 'Write a token the grammar knows; the message prints the full list.',
@@ -1002,7 +1002,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `expected/` is an error.',
+            'A malformed ref of a known kind (`{{iso8601#}}`, `{{uuid #id}}`) in a text file under `_expected/` is an error.',
         facet: 'model',
         family: 'expectations',
         fix: 'Write `{{kind#name}}` with no space, and a name for the ref.',
@@ -1015,7 +1015,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `requests/`, a status line (`HTTP/1.1 <status>`) under `expected/`.',
+            'The first line of a depth-1 `.http` follows its grammar: a request line (`METHOD /path`) under `_requests/`, a status line (`HTTP/1.1 <status>`) under `_expected/`.',
         facet: 'api',
         family: 'expectations',
         fix: 'Write the opening line the folder calls for, or move the file to the other one.',
@@ -1029,7 +1029,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A `<case>.spec.yaml` document follows its grammar: closed keys — `description`, `fixture`, `env`, `serve`, `runs` — and closed keys inside a run; `description:` and `runs:` required; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every `fixture:` path relative, reaching `fixtures/`.',
+            'A `<case>.spec.yaml` document follows its grammar: closed keys — `description`, `fixture`, `env`, `serve`, `runs` — and closed keys inside a run; `description:` and `runs:` required; `command:` and `exit:` required in every run, `exit:` an integer literal, `waitFor:` only on the last run and never with `stdin:`, a `files:` path relative and under the workdir; every `fixture:` path relative, reaching `_fixtures/`.',
         facet: 'cli',
         family: 'expectations',
         fix: 'Write the key the grammar names; the message prints the accepted set.',
@@ -1112,7 +1112,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `fixtures/` is excluded before it is judged.',
+            'No expected output carries a literal volatile value: a loopback origin with a port (`127.0.0.1:8080`, `localhost:3000`), an absolute temporary path (`/tmp/`, `/private/tmp/`, `/var/folders/`) or a home path (`/Users/…`, `/home/…`). Both halves of the ground are judged by the one list — an expected stream of a `<case>.spec.yaml`, and every text file under `_expected/`. A `{{token}}` is not a literal, and neither is a value the DOCUMENT pinned: in a stream, a word the same document states in a command argument, an `env:`/`serve:` value, a `stdin:`, a `fixture:` it names or its own sibling `_fixtures/` is excluded before it is judged.',
         facet: 'cli',
         family: 'expectations',
         fix: 'Write the token the message names — `{{workdir}}`, `{{url}}` — in place of the literal.',
@@ -1126,7 +1126,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 18 carries.",
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 18 carries.",
         facet: 'cli',
         family: 'expectations',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
@@ -1181,7 +1181,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A known token in a file under `requests/` → warning: requests are inputs, never matched.',
+            'A known token in a file under `_requests/` → warning: requests are inputs, never matched.',
         facet: 'api',
         family: 'expectations',
         fix: 'Write the literal value the request actually sends.',
@@ -1195,7 +1195,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "No dead fixtures: every file under `seeds/`/`requests/`/`fixtures/` and every top-level entry of `expected/` must be referenced — a leaf's, and the specs root's shared four under `<specs>/shared/`; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./seeds/x.sql` in a leaf vouches for that leaf's `seeds/x.sql`, and not for `<specs>/shared/seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
+            "No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced — a leaf's, and the specs root's shared four under `<specs>/_shared/`; a feature directory with no test file and no `*.spec.yaml` is an orphan (a warning when the argument is not a literal). A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./_seeds/x.sql` in a leaf vouches for that leaf's `_seeds/x.sql`, and not for `<specs>/_shared/_seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
         facet: 'model',
         family: 'layout',
         fix: 'Reference it from the spec it stands under, or delete it.',
@@ -1209,7 +1209,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "A ground file exists only if it is shared, and a value lives in a test only while it stays short. The checker counts the TESTS that read each file of the specs trees — a `test()`/`it()` whose body names it with a literal `file()`/`directory()`, a document — and judges its level. Read by ONE test, and named by no module test of the member, a file of `expected/` or `requests/` is an error where the test names it: it belongs in the test, written in place — a golden as the value `toMatch` compares, a request as its text or its body value — unless it is a directory tree, a binary file, or longer than its role's cap: 30 lines for `requests/`, 150 for `expected/` (a JSON file counted as the value it becomes). The caps hold the other way too: a request or a body written in the test past 30 lines, an expectation past 150, is an error where it is written, and belongs in a file beside the test. `seeds/` has no form in place — SQL is never written in a test, and SQL tagged in one is an error where the tag stands: a seed is a `.sql` file, beside its test in `./seeds/` when one test reads it, never an error for being unshared. `fixtures/` is file state a program reads, never a value, and stays a file. Read by several tests of ONE leaf, a file lives beside them: an entry of the specs root's shared ground (`<specs>/shared/seeds/`, …) one leaf alone reaches is an error where it sits, and belongs in the leaf's folder of the same role — unless a module test of the member names it — by a relative literal, or by the literal pieces `named-path-exists` reads: a module test reads from outside every leaf, so the entry is shared. Read from several leaves, it lives in the specs root's shared ground — `no-reach-into-sibling-ground` refuses the path that leaves a leaf for a sibling's, and `no-duplicate-ground` finds copies — unless one of them encloses the others: a route and the routes under it (`map/pois/` and `map/pois/detail/`) share it in the route's own folder of that role, which each reaches. A reference outside every test — a `const` of the file, a specification, a helper — counts as shared, and zero references is `no-unused-ground`'s. Fixed by `--fix`: SQL a test holds is written to `./seeds/<name>.sql` beside it — named by its first `--` comment, kebab-cased, else by the first four meaningful words of its test's title — and named with `file()`; a value past its cap is written to `./requests/` or `./expected/` beside its test, named by the test's title, and named with `file()` — never one a plain value is compared to (`expect(message).toMatch(…)`, a name or a string literal as the subject): a string has no golden, and the finding names `text()` to wrap it with; a single-use file whose one reference is a literal `file()` handed to `.request(`, `.post(`/`.put(` or `toMatch(` is written in place and deleted (a `file` import no longer used dropped, an emptied ground folder removed); an entry of the shared ground one leaf alone reaches — or one leaf and the leaves inside it — is moved into that leaf's ground (a `git mv` in a work tree) and the literals rewritten from each referrer.",
+            "A ground file exists only if it is shared, and a value lives in a test only while it stays short. The checker counts the TESTS that read each file of the specs trees — a `test()`/`it()` whose body names it with a literal `file()`/`directory()`, a document — and judges its level. Read by ONE test, and named by no module test of the member, a file of `_expected/` or `_requests/` is an error where the test names it: it belongs in the test, written in place — a golden as the value `toMatch` compares, a request as its text or its body value — unless it is a directory tree, a binary file, or longer than its role's cap: 30 lines for `_requests/`, 150 for `_expected/` (a JSON file counted as the value it becomes). The caps hold the other way too: a request or a body written in the test past 30 lines, an expectation past 150, is an error where it is written, and belongs in a file beside the test. `_seeds/` has no form in place — SQL is never written in a test, and SQL tagged in one is an error where the tag stands: a seed is a `.sql` file, beside its test in `./_seeds/` when one test reads it, never an error for being unshared. `_fixtures/` is file state a program reads, never a value, and stays a file. Read by several tests of ONE leaf, a file lives beside them: an entry of the specs root's shared ground (`<specs>/_shared/_seeds/`, …) one leaf alone reaches is an error where it sits, and belongs in the leaf's folder of the same role — unless a module test of the member names it — by a relative literal, or by the literal pieces `named-path-exists` reads: a module test reads from outside every leaf, so the entry is shared. Read from several leaves, it lives in the specs root's shared ground — `no-reach-into-sibling-ground` refuses the path that leaves a leaf for a sibling's, and `no-duplicate-ground` finds copies — unless one of them encloses the others: a route and the routes under it (`map/pois/` and `map/pois/detail/`) share it in the route's own folder of that role, which each reaches. A reference outside every test — a `const` of the file, a specification, a helper — counts as shared, and zero references is `no-unused-ground`'s. Fixed by `--fix`: SQL a test holds is written to `./_seeds/<name>.sql` beside it — named by its first `--` comment, kebab-cased, else by the first four meaningful words of its test's title — and named with `file()`; a value past its cap is written to `./_requests/` or `./_expected/` beside its test, named by the test's title, and named with `file()` — never one a plain value is compared to (`expect(message).toMatch(…)`, a name or a string literal as the subject): a string has no golden, and the finding names `text()` to wrap it with; a single-use file whose one reference is a literal `file()` handed to `.request(`, `.post(`/`.put(` or `toMatch(` is written in place and deleted (a `file` import no longer used dropped, an emptied ground folder removed); an entry of the shared ground one leaf alone reaches — or one leaf and the leaves inside it — is moved into that leaf's ground (a `git mv` in a work tree) and the literals rewritten from each referrer.",
         facet: 'model',
         family: 'layout',
         fix: 'Run `jterrazz-test-check <root> --fix`: it writes SQL and a value past its cap to a file beside the test, writes a single-use file into its one test and deletes it, and moves a specs-root entry one leaf reaches beside that leaf. A test whose subject IS the file form keeps it, with a reasoned `checker-disable-next-line ground-shared-or-inline`.',
@@ -1223,7 +1223,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (`GET /events/:id`, the request line of a `.http` a `.request(file())` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens. A file reaching several is an error at the first chain that reaches a second. Fixed by `--fix`: each test goes to the file of its subject — the subject’s standard folder under the facet, as `spec-in-subject-folder` names it, the file keeping its aspect’s name; beside the file, named for the subject, where the subject has none — keeping the imports and the file-level declarations it reads, and a hook (`beforeEach`, `afterEach`, …) only where the file’s tests read what it sets or clears — a declaration two of the new files read, and every declaration it reads in turn — a type alias or an interface among them — moves once into the fixtures module of the folder they share (`<folder>/<folder>.fixtures.ts`), exported and imported by each, unless it builds a `file()` or a `directory()` (`paths-named-in-the-test`) or the module already exists, and then it stays copied; the paths the code names keep pointing where they pointed, and the old leaf’s ground another leaf reads goes up to the specs root’s shared ground (`<specs>/shared/<role>/`), a module test’s relative literal naming it following, where `ground-shared-or-inline` moves it down to the one leaf that reads it when no module test reads it too. A test whose own chains reach two subjects is reported and left. A spec of a SPECIMEN is out of reach — one whose runner drives an app under `<specs>/shared/fixtures/`, its specification module (or the one that module imports a runner from) naming the shared fixtures in a literal: its routes, jobs and commands are no subject of the project.',
+            'Every chain of a spec file reaches ONE subject, read statically: an api chain its method and route template (`GET /events/:id`, the request line of a `.http` a `.request(file())` sends), a job chain the job it triggers, a cli chain its command words, a website chain the page it visits, a mobile chain the journey it opens. A file reaching several is an error at the first chain that reaches a second. Fixed by `--fix`: each test goes to the file of its subject — the subject’s standard folder under the facet, as `spec-in-subject-folder` names it, the file keeping its aspect’s name; beside the file, named for the subject, where the subject has none — keeping the imports and the file-level declarations it reads, and a hook (`beforeEach`, `afterEach`, …) only where the file’s tests read what it sets or clears — a declaration two of the new files read, and every declaration it reads in turn — a type alias or an interface among them — moves once into the fixtures module of the folder they share (`<folder>/<folder>.fixtures.ts`), exported and imported by each, unless it builds a `file()` or a `directory()` (`paths-named-in-the-test`) or the module already exists, and then it stays copied; the paths the code names keep pointing where they pointed, and the old leaf’s ground another leaf reads goes up to the specs root’s shared ground (`<specs>/_shared/<role>/`), a module test’s relative literal naming it following, where `ground-shared-or-inline` moves it down to the one leaf that reads it when no module test reads it too. A test whose own chains reach two subjects is reported and left. A spec of a SPECIMEN is out of reach — one whose runner drives an app under `<specs>/_shared/_fixtures/`, its specification module (or the one that module imports a runner from) naming the shared fixtures in a literal: its routes, jobs and commands are no subject of the project.',
         facet: 'model',
         family: 'layout',
         fix: 'Run `make fix`: it splits the file, one per subject. A test reaching two subjects states what it stands on with a seed instead of a second action.',
@@ -1251,7 +1251,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is a warning on every copy; it belongs in the specs root's shared folder of its role (`<specs>/shared/seeds/<name>`), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a shared folder already holding the name with other content, are left to the author.",
+            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is a warning on every copy; it belongs in the specs root's shared folder of its role (`<specs>/_shared/_seeds/<name>`), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a shared folder already holding the name with other content, are left to the author.",
         facet: 'model',
         family: 'layout',
         fix: 'Run `jterrazz-test-check <root> --fix`, or keep the copies apart on purpose and record them in the ratchet.',
@@ -1265,10 +1265,10 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "A path leaves its leaf only into the specs root's shared ground, `<specs>/shared/<role>/`, or into the ground of a leaf that encloses it: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory, nor under one of `<specs>/shared/fixtures/`, `<specs>/shared/seeds/`, `<specs>/shared/requests/`, `<specs>/shared/expected/` — the four roles under the one folder the specs root keeps beside its facets — nor under the four of a folder above it that holds tests of its own (a route's, reached from a route under it: `map/pois/detail/` reads `../seeds/` of `map/pois/`), is an error; ground shared by several leaves goes there, in the folder of its role (`verb-reads-its-ground-folder` judges which). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too. A role folder at the specs root itself (`<specs>/seeds/`) is shared ground outside `shared/`, an error at the folder; fixed by `--fix`, which moves each entry into `<specs>/shared/<role>/` — a `git mv` in a work tree — and rewrites every whole relative literal that named it: a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the entry has moved (an entry `shared/` already holds by that name stays, for the author).",
+            "A path leaves its leaf only into the specs root's shared ground, `<specs>/_shared/<role>/`, or into the ground of a leaf that encloses it: a path a `file()`, a `directory()` or any path key of a document names, whose target is neither under the spec's own directory, nor under one of `<specs>/_shared/_fixtures/`, `<specs>/_shared/_seeds/`, `<specs>/_shared/_requests/`, `<specs>/_shared/_expected/` — the four roles under the one folder the specs root keeps beside its facets — nor under the four of a folder above it that holds tests of its own (a route's, reached from a route under it: `map/pois/detail/` reads `../_seeds/` of `map/pois/`), is an error; ground shared by several leaves goes there, in the folder of its role (`verb-reads-its-ground-folder` judges which). A leaf's ground reached from a sibling leaf is one such path, so this row holds the sibling case too. A role folder at the specs root itself (`<specs>/_seeds/`) is shared ground outside `_shared/`, an error at the folder; fixed by `--fix`, which moves each entry into `<specs>/_shared/<role>/` — a `git mv` in a work tree — and rewrites every whole relative literal that named it: a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the entry has moved (an entry `_shared/` already holds by that name stays, for the author).",
         facet: 'model',
         family: 'layout',
-        fix: "Copy it under this leaf's own ground, or promote it to the specs root's shared folder of its role — `<specs>/shared/seeds/` for a seed, `<specs>/shared/fixtures/` for file state; `make fix` moves a role folder at the specs root into `<specs>/shared/`.",
+        fix: "Copy it under this leaf's own ground, or promote it to the specs root's shared folder of its role — `<specs>/_shared/_seeds/` for a seed, `<specs>/_shared/_fixtures/` for file state; `make fix` moves a role folder at the specs root into `<specs>/_shared/`.",
         name: 'no-reach-into-sibling-ground',
         rationale:
             "A leaf reaching into a neighbour's fixtures is the pool through another door, without the pool's visibility: the neighbour breaks a spec two folders away without knowing.",
@@ -1279,7 +1279,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's `fixture:` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. So does a path a test resolves from its own directory with literal pieces alone — `resolve(import.meta.dirname, …)`, `join(…)` alike, `__dirname` alike, `new URL('…', import.meta.url)` — of either kind: several pieces are read joined (`resolve(import.meta.dirname, '..', 'fixtures', 'gone')`), one piece only when it is spelled `./` or `../`, as a `file()` is — a lone bare piece (`resolve(import.meta.dirname, 'expected')`) is an output folder a test makes as often as a path it reads, and is not read. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed piece leaves its whole path out of reach, as a computed path is, a path spelled into a command a process runs is the author's, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
+            "Every `file()` and `directory()` a test names with a literal path — a spec under `specs/` and a module test beside its module alike — and every path a document's `fixture:` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a `file()` naming a directory or a `directory()` naming a file is an error, reported where the path is written. So does a path a test resolves from its own directory with literal pieces alone — `resolve(import.meta.dirname, …)`, `join(…)` alike, `__dirname` alike, `new URL('…', import.meta.url)` — of either kind: several pieces are read joined (`resolve(import.meta.dirname, '..', '_fixtures', 'gone')`), one piece only when it is spelled `./` or `../`, as a `file()` is — a lone bare piece (`resolve(import.meta.dirname, '_expected')`) is an output folder a test makes as often as a path it reads, and is not read. The tree pass reads the `specs/` trees, the member pass every other test of the member. A computed piece leaves its whole path out of reach, as a computed path is, a path spelled into a command a process runs is the author's, and the runtime refuses it with the path it resolved to; a call written inside a string is text, and is not read.",
         facet: 'model',
         family: 'layout',
         fix: 'Create the entry (out of `.gitignore`), or fix the path — the message names what it resolved to.',
@@ -1293,13 +1293,13 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'One word per meaning: a folder named `snapshots/`, `__snapshots__/`, `golden/` or `goldens/` is an error anywhere in a member when a test would stand on it — any such folder under `specs/`, and elsewhere one that holds no module of code (a `goldens/` folder of matcher source is named for what its code does). What it would hold is what a test asserts, and that is `expected/`. Ground is not entered: a fixture project may carry the word on purpose.',
+            'One word per meaning: a folder named `snapshots/`, `__snapshots__/`, `golden/` or `goldens/` is an error anywhere in a member when a test would stand on it — any such folder under `specs/`, and elsewhere one that holds no module of code (a `goldens/` folder of matcher source is named for what its code does). What it would hold is what a test asserts, and that is `_expected/`. Ground is not entered: a fixture project may carry the word on purpose.',
         facet: 'model',
         family: 'layout',
-        fix: 'Rename the folder `expected/`, and the paths that name it.',
+        fix: 'Rename the folder `_expected/`, and the paths that name it.',
         name: 'no-snapshot-folder',
         rationale:
-            'Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `expected/` never see it.',
+            'Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `_expected/` never see it.',
         reach: 'all',
         severity: 'error',
     },
@@ -1352,10 +1352,10 @@ export const TYPE_ROWS: Row[] = [
         audience: 'consumer',
         channel: 'type',
         convention:
-            "A string is a value and the disk is `file()` or `directory()`: `seed('./seeds/x.sql')` (a bare string where a file is meant), `seed(file('./seeds/x.json'))` (the wrong extension), `file('x.sql')` (not a relative path), `directory('./fixtures/shop')` (a directory without its `/`), `get(file(…))` (a file where a value is meant) and `toMatch(directory(…))` on a stream do not compile.",
+            "A string is a value and the disk is `file()` or `directory()`: `seed('./_seeds/x.sql')` (a bare string where a file is meant), `seed(file('./_seeds/x.json'))` (the wrong extension), `file('x.sql')` (not a relative path), `directory('./_fixtures/shop')` (a directory without its `/`), `get(file(…))` (a file where a value is meant) and `toMatch(directory(…))` on a stream do not compile.",
         facet: 'model',
         family: 'chain',
-        fix: "Name the disk from the spec file: `file('./seeds/users.sql')`, `file('./expected/help.txt')`, `directory('../../shared/fixtures/shop/')`.",
+        fix: "Name the disk from the spec file: `file('./_seeds/users.sql')`, `file('./_expected/help.txt')`, `directory('../../_shared/_fixtures/shop/')`.",
         name: 'disk-named-by-relative-path',
         rationale:
             'A bare name resolved against a hidden folder is a convention the reader has to know; a relative path is read where it is written, and the compiler refuses the other form at the call.',
@@ -1460,7 +1460,7 @@ export const UPSTREAM_RULES: Row[] = [
             'No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `testing` fragment sets (ADR-005).',
         facet: 'model',
         family: 'expectations',
-        fix: "Write the golden: `expect(subject).toMatch(file('./expected/<name>.<ext>'))`; under `src/` compare to a literal with `toStrictEqual`.",
+        fix: "Write the golden: `expect(subject).toMatch(file('./_expected/<name>.<ext>'))`; under `src/` compare to a literal with `toStrictEqual`.",
         name: 'no-vitest-snapshot',
         rationale:
             'A snapshot is written by the run that was supposed to be judged by it: nobody reads the diff, and a wrong answer becomes the expectation the moment someone re-records.',
@@ -1528,7 +1528,7 @@ export const RUNTIME_RULES: Row[] = [
         audience: 'consumer',
         channel: 'runtime',
         convention:
-            'An `expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
+            'An `_expected/*.http` starts with a status line, and its headers are matched as a SUBSET: the ones listed must match, unlisted response headers are unconstrained.',
         facet: 'api',
         family: 'expectations',
         fix: 'List the headers the case is about; leave the rest out.',
@@ -1541,7 +1541,7 @@ export const RUNTIME_RULES: Row[] = [
         audience: 'consumer',
         channel: 'runtime',
         convention:
-            "A golden's path may name a subfolder (`./expected/build/verbose.txt`): the path is the file, and update mode creates the folders it names.",
+            "A golden's path may name a subfolder (`./_expected/build/verbose.txt`): the path is the file, and update mode creates the folders it names.",
         facet: 'model',
         family: 'layout',
         fix: 'Name the subfolder in the path.',
@@ -1557,7 +1557,7 @@ export const RUNTIME_RULES: Row[] = [
             "Every golden reads the `file()` or `directory()` it is given, from the spec file's directory — response, stream, json, tree alike — and `request()` reads a request the same way. Nothing resolves against a folder the line does not name.",
         facet: 'model',
         family: 'expectations',
-        fix: "Name the golden from the spec: `file('./expected/<case>.<ext>')`.",
+        fix: "Name the golden from the spec: `file('./_expected/<case>.<ext>')`.",
         name: 'golden-read-from-its-path',
         rationale:
             'One resolution rule, written on the line, means a reader knows where a golden lives without knowing any convention or which accessor produced it.',
@@ -1606,7 +1606,7 @@ export const RUNTIME_RULES: Row[] = [
         convention: `${REFUSAL_WHY['disk-named-by-relative-path-at-runtime']} The framework refuses at run time a verb that reads the disk (\`seed\`, \`request\`, \`fixture\`, \`run\`) handed anything but a \`file()\`/\`directory()\` — a bare string names the wrapper to write — and a \`file()\`, \`directory()\` or document \`fixture:\` whose path does not start with \`./\` or \`../\`. The trailing \`/\` says which of the two a path is, and the disk must agree: a directory named without it, or a file named with it, is refused, and so is a path that names nothing, with the path it resolved to.`,
         facet: 'model',
         family: 'chain',
-        fix: "Name the disk from the spec file: `file('./seeds/users.sql')`, `directory('../../shared/fixtures/shop/')`.",
+        fix: "Name the disk from the spec file: `file('./_seeds/users.sql')`, `directory('../../_shared/_fixtures/shop/')`.",
         name: 'disk-named-by-relative-path-at-runtime',
         rationale:
             'The type refuses a bare name at the call; the runtime keeps the law for a caller the compiler does not see — a JavaScript spec, a cast, a document.',
@@ -1642,7 +1642,7 @@ export const RUNTIME_RULES: Row[] = [
         convention: `${REFUSAL_WHY['one-verb-per-meaning']} Its argument says where the expectation lives: a value written in place — a stream's text, a response's \`.http\` text, a json's value, a table's rows (awaited) — or a \`file()\`/\`directory()\` golden. On a plain string it is vitest's own — a string or a RegExp — and a \`file()\` or a \`directory()\` handed to it is refused, a runner started or none (the path object would otherwise read as the pattern \`[object Object]\`); a string is goldened wrapped, \`expect(text(value)).toMatch(file(…))\`, and a stream's text is \`result.stdout.text\`. A value of the wrong shape — a RegExp on a stream, a response or a json, anything but rows on a table — does not compile, and past the compiler it is refused in both builds, naming the form that takes it; a directory, the working directory and a container take no value, and are refused naming \`directory()\` or \`toBeRunning()\`; a golden handed a subject that has none of its kind is refused, naming the wrapper the subject takes. An empty stream is an empty text: \`toBeEmpty\` is a table's matcher, and handed a stream it is refused in both builds, naming \`expect(<stream>.text).toBe('')\`.`,
         facet: 'model',
         family: 'expectations',
-        fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
+        fix: "Write the whole result in place, ``toMatch(`…`)``, or `toMatch(file('./_expected/<case>.<ext>'))` when it lives on disk; a part of a text is vitest's, on `.text`.",
         name: 'one-verb-per-meaning',
         rationale:
             "A result is not a string, so vitest's substring meaning never applied to it: one verb compares it whole, the value in place when the test is its only reader, a branded `file()` when the expectation lives on disk — and the runtime refuses the crossed form a type cannot see (a cast, a JavaScript spec).",

@@ -69,7 +69,7 @@ ruleTester.run('result-compared-whole', resultComparedWhole as unknown as Oxlint
         },
         // A golden is a whole comparison too, and so is a table's emptiness.
         {
-            code: "test('t', async () => { const result = await api.get('/users'); expect(result.response).toMatch(file('./expected/listed.http')); await expect(result.table('users')).toBeEmpty(); });",
+            code: "test('t', async () => { const result = await api.get('/users'); expect(result.response).toMatch(file('./_expected/listed.http')); await expect(result.table('users')).toBeEmpty(); });",
             filename: SPEC,
         },
         // A status alone is `no-status-only-test`'s, never this rule's.

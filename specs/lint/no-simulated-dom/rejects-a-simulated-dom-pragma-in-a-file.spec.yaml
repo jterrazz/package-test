@@ -1,5 +1,5 @@
 description: rejects a simulated-DOM pragma in a test file
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

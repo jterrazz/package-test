@@ -1,13 +1,14 @@
 import { join, relative } from 'node:path';
 
 import { treeEntries } from './git-tree.js';
+import { GROUND_FIXTURES } from './ground.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import { parseYamlSource } from './yaml-document.js';
 
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
 export function isFixture(file: string): boolean {
-    return file.split('/').includes('fixtures');
+    return file.split('/').includes(GROUND_FIXTURES);
 }
 
 export function specDocuments(root: string): string[] {

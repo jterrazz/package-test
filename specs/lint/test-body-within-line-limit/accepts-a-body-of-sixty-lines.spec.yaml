@@ -1,5 +1,5 @@
 description: a test whose body spans sixty lines of gestures passes
-fixture: ./fixtures/short/
+fixture: ./_fixtures/short/
 runs:
     - command: .
       exit: 0

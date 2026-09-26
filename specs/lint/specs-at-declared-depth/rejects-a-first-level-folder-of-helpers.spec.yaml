@@ -1,5 +1,5 @@
 description: a first-level folder of modules alone is refused, its runner too; a single test makes a suite
-fixture: ./fixtures/first-level/
+fixture: ./_fixtures/first-level/
 runs:
     - command: .
       exit: 1

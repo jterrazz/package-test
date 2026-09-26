@@ -9,8 +9,8 @@ describe('copied', () => {
     test('copies fixture file into working dir before exec', async () => {
         // Given - fixture file that triggers check failure
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
-            .fixture(file('./fixtures/invalid.ts'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(file('./_fixtures/invalid.ts'))
             .exec('check');
 
         // Then - check detected the invalid file
@@ -21,7 +21,7 @@ describe('copied', () => {
     test('clean project has no invalid files', async () => {
         // Given - the pristine project fixture
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('check');
 
         // Then - check passes

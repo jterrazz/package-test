@@ -7,7 +7,7 @@ ruleTester().run('no-imported-expectation', asOxlintRule(noImportedExpectation),
     invalid: [
         // An expectation written in another module.
         {
-            code: "import { FIRST_PAGE } from '../shared/pages.js';\ntest('a', () => { expect(result.response).toMatch(FIRST_PAGE); });",
+            code: "import { FIRST_PAGE } from '../_setup/pages.js';\ntest('a', () => { expect(result.response).toMatch(FIRST_PAGE); });",
             errors: [{ messageId: 'imported' }],
             filename: SPEC,
         },
@@ -21,7 +21,7 @@ ruleTester().run('no-imported-expectation', asOxlintRule(noImportedExpectation),
     valid: [
         // A helper is called: what it builds is the test's own.
         {
-            code: "import { page } from '../shared/pages.js';\ntest('a', () => { expect(result.json).toMatch(page(1)); });",
+            code: "import { page } from '../_setup/pages.js';\ntest('a', () => { expect(result.json).toMatch(page(1)); });",
             filename: SPEC,
         },
         // The runner and the stubs are imported by design.

@@ -1,5 +1,5 @@
 description: a facet file holding logic, and a constructor running a step, are refused
-fixture: ./fixtures/logic/
+fixture: ./_fixtures/logic/
 runs:
     - command: .
       exit: 1

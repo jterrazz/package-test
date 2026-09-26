@@ -98,7 +98,7 @@ tester.run('no-second-test-runtime', asOxlintRule(noSecondTestRuntime), {
         // A fixture project's own config has to name the provider it runs on.
         {
             code: 'import { playwright } from "@vitest/browser-playwright";',
-            filename: '/repo/specs/fixtures/app/vitest.config.ts',
+            filename: '/repo/specs/_fixtures/app/vitest.config.ts',
         },
         // In a `.test.tsx` a server render is a legitimate thing for a component to do.
         {

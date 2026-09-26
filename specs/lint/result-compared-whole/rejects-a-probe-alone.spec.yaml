@@ -1,5 +1,5 @@
 description: a test probing its response and never comparing it whole is refused at the read
-fixture: ./fixtures/probe-alone/
+fixture: ./_fixtures/probe-alone/
 runs:
     - command: .
       exit: 1

@@ -7,7 +7,7 @@ import { cli } from '../lint.specification.js';
 async function reachRun(): Promise<string> {
     const result = await cli
         .env({ LINT_CONFIG: 'oxlint.reach.json' })
-        .fixture(directory('./fixtures/lint-reach/'))
+        .fixture(directory('./_fixtures/lint-reach/'))
         .exec('.');
     return result.stdout.text;
 }

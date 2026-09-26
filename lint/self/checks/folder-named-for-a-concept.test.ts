@@ -8,7 +8,7 @@ describe('checkFolderNamedForAConcept', () => {
         // Given - the package's own tree, and one with role folders, a lone file and a stray file at a facet's root
         const misshapen = treeOf({
             'src/facets/api/api.facet.ts': '',
-            'src/facets/api/fixtures/one.json': '',
+            'src/facets/api/_fixtures/one.json': '',
             'src/facets/api/request/request.action.test.ts': '',
             'src/facets/api/request/request.action.ts': '',
             'src/facets/api/route.ts': '',

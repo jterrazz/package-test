@@ -133,8 +133,8 @@ describe('yaml-document', () => {
         // Given - a four-space document whose one list is written in flow, and a key added to it
         const text = [
             'seed:',
-            '    - { file: ./seeds/one.sql, database: db }',
-            '    - { file: ./seeds/two.sql, database: db }',
+            '    - { file: ./_seeds/one.sql, database: db }',
+            '    - { file: ./_seeds/two.sql, database: db }',
             '',
         ].join('\n');
         const source = parseYamlSource(text);

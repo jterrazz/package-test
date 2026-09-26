@@ -1,5 +1,5 @@
 description: accepts a test importing the stubs facade
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

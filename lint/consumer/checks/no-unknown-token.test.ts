@@ -7,7 +7,7 @@ import { CHECKER } from './checker.js';
 
 const FIXTURES = resolve(
     import.meta.dirname,
-    '../../../specs/lint/checker/fixtures/lint-violations',
+    '../../../specs/lint/checker/_fixtures/lint-violations',
 );
 
 function groundFindings(root: string): Finding[] {
@@ -16,13 +16,13 @@ function groundFindings(root: string): Finding[] {
 
 describe('noUnknownTokenFindings', () => {
     test('ground-walk — ground-files — the ground walk (`no-unknown-token`) — walks a specs tree and reports unknown tokens in fixture files', () => {
-        // Given - the violation fixture tree ({{userid}} in expected/out.txt)
+        // Given - the violation fixture tree ({{userid}} in _expected/out.txt)
         const violations = groundFindings(resolve(FIXTURES, 'no-unknown-token'));
 
         // Then - the finding names the relative file, line, token and severity
         expect(violations).toStrictEqual([
             expect.objectContaining({
-                file: 'specs/widget/expected/out.txt',
+                file: 'specs/widget/_expected/out.txt',
                 line: 1,
                 severity: 'error',
                 token: '{{userid}}',
@@ -31,7 +31,7 @@ describe('noUnknownTokenFindings', () => {
 
         // Then - the rendering carries file, token and the known vocabulary
         const rendered = violations.map((violation) => checkerLine(CHECKER, violation)).join('\n');
-        expect(rendered).toContain('specs/widget/expected/out.txt:1');
+        expect(rendered).toContain('specs/widget/_expected/out.txt:1');
         expect(rendered).toContain('{{userid}}');
         expect(rendered).toContain('uuid');
     });

@@ -1,5 +1,5 @@
 description: a spec of a specimen filed by the route it reaches is refused at its first line
-fixture: ./fixtures/misfiled/
+fixture: ./_fixtures/misfiled/
 runs:
     - command: self-checker .
       exit: 1

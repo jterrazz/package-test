@@ -1,5 +1,5 @@
-description: goldens kept in expected/ pass, and a folder of code named for goldens is no ground
-fixture: ./fixtures/expected/
+description: goldens kept in _expected/ pass, and a folder of code named for goldens is no ground
+fixture: ./_fixtures/_expected/
 runs:
     - command: checker .
       exit: 0

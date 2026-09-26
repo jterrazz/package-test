@@ -1,5 +1,5 @@
 description: rejects vi.mock and data-asset imports under src/
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

@@ -1,5 +1,5 @@
 description: a helper, a stub or a specification building a file is refused where it builds it
-fixture: ./fixtures/builds/
+fixture: ./_fixtures/builds/
 runs:
     - command: .
       exit: 1

@@ -1,10 +1,10 @@
 import { afterAll } from 'vitest';
 
 import { postgres, redis, specification } from '../../src/index.js';
-import { createApp } from '../shared/fixtures/specimen-api/app.js';
+import { createApp } from '../_shared/_fixtures/specimen-api/app.js';
 
 export const { api, cleanup } = await specification.api({
-    root: '../shared/fixtures/specimen-api',
+    root: '../_shared/_fixtures/specimen-api',
     server: ({ analyticsDb, cache, db }) =>
         createApp({
             analyticsDatabaseUrl: analyticsDb.connectionString,

@@ -20,7 +20,7 @@ export function e2eOptions(configPath: string): Map<string, unknown[]> {
 }
 
 export function corpusOf(rule: string, lintSpecs: string): string[] {
-    const fixtures = join(lintSpecs, rule, 'fixtures');
+    const fixtures = join(lintSpecs, rule, '_fixtures');
     let entries: string[];
     try {
         entries = readdirSync(fixtures, { recursive: true }).map(String);

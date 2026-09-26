@@ -8,7 +8,9 @@ describe('document-description-reads-as-a-title', () => {
     test('rejects a description that is a capitalised sentence', async () => {
         // Given - a description: starting on a capital and ending on a period
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/document-description-reads-as-a-title/'))
+            .fixture(
+                directory('./_fixtures/lint-violations/document-description-reads-as-a-title/'),
+            )
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -24,11 +26,11 @@ describe('document-description-reads-as-a-title', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

@@ -1,5 +1,5 @@
 description: an expectation imported from another module is refused where the test hands it over
-fixture: ./fixtures/imported/
+fixture: ./_fixtures/imported/
 runs:
     - command: .
       exit: 1

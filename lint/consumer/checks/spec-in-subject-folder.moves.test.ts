@@ -12,7 +12,7 @@ describe('fixSpecInSubjectFolder', () => {
         // Given - the same file, and the golden its GET test reads through a helper
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
-            'api/orders/expected/listed.http': 'HTTP/1.1 200 OK\n',
+            'api/orders/_expected/listed.http': 'HTTP/1.1 200 OK\n',
             'api/orders/orders.spec.ts': TWO_ROUTES,
         });
 
@@ -44,9 +44,9 @@ describe('fixSpecInSubjectFolder', () => {
         // Then - the list file keeps its helper, and names the golden from where it now stands
         const listed = readFileSync(join(root, 'api/orders/list/orders.spec.ts'), 'utf8');
         expect({
-            golden: existsSync(join(root, 'shared/expected/listed.http')),
+            golden: existsSync(join(root, '_shared/_expected/listed.http')),
             helper: listed.includes('function listed(result)'),
-            path: listed.includes("file('../../../shared/expected/listed.http')"),
+            path: listed.includes("file('../../../_shared/_expected/listed.http')"),
             unread: listed.includes('ORDER'),
         }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
     });
@@ -218,11 +218,11 @@ describe('fixSpecInSubjectFolder', () => {
         // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
-            'api/orders/requests/x.http': 'GET /orders\n',
+            'api/orders/_requests/x.http': 'GET /orders\n',
             'api/orders/listing.spec.ts': [
                 "import { api } from '../api.specification.js';",
-                "test('a', async () => { await api.request(file('./requests/nonexistent.http')); });",
-                "test('b', async () => { await expect(api.get('/orders')).rejects.toThrow('file(\"./requests/x.http\")'); });",
+                "test('a', async () => { await api.request(file('./_requests/nonexistent.http')); });",
+                "test('b', async () => { await expect(api.get('/orders')).rejects.toThrow('file(\"./_requests/x.http\")'); });",
                 '',
             ].join('\n'),
         });
@@ -233,8 +233,8 @@ describe('fixSpecInSubjectFolder', () => {
         // Then - both read as they did: the missing file is missing from anywhere, the string is text
         const moved = readFileSync(join(root, 'api/orders/list/listing.spec.ts'), 'utf8');
         expect({
-            missing: moved.includes("file('./requests/nonexistent.http')"),
-            quoted: moved.includes('file("./requests/x.http")'),
+            missing: moved.includes("file('./_requests/nonexistent.http')"),
+            quoted: moved.includes('file("./_requests/x.http")'),
         }).toStrictEqual({ missing: true, quoted: true });
     });
 
@@ -307,7 +307,7 @@ describe('fixSpecInSubjectFolder', () => {
         // Given - a runner driving a specimen, and a spec under seed/ reaching two of its routes
         const root = specsTree({
             'api/api.specification.ts':
-                "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
+                "import { createApp } from '../_shared/_fixtures/specimen-api/app.js';\n",
             'api/seed/ordering.spec.ts': [
                 "import { api } from '../api.specification.js';",
                 "test('a', async () => { await api.get('/users'); });",
@@ -402,7 +402,7 @@ describe('fixSpecInSubjectFolder', () => {
         // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
-            'api/orders/expected/listed.http': 'HTTP/1.1 200 OK\n',
+            'api/orders/_expected/listed.http': 'HTTP/1.1 200 OK\n',
             'api/orders/orders.spec.ts': [
                 "import { file } from '@jterrazz/test';",
                 "import { expect, test } from 'vitest';",
@@ -417,7 +417,7 @@ describe('fixSpecInSubjectFolder', () => {
                 '}',
                 '',
                 'function listed(result) {',
-                "    expect(result.response).toMatch(file('./expected/listed.http'));",
+                "    expect(result.response).toMatch(file('./_expected/listed.http'));",
                 '}',
                 '',
                 "test('lists', async () => {",

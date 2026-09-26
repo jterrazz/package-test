@@ -1,5 +1,5 @@
 description: a facet file holding its composition alone, and a constructor that opens it, pass
-fixture: ./fixtures/composed/
+fixture: ./_fixtures/composed/
 runs:
     - command: .
       exit: 0

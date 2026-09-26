@@ -4,14 +4,14 @@ import { afterAll } from 'vitest';
 import { specification } from '../../src/index.js';
 
 /** A document names its ground by word (`env`, `serve`); how that ground is built stays here, once. */
-const CLI_BIN = resolve(import.meta.dirname, '../shared/fixtures/specimen-cli/cli.sh');
+const CLI_BIN = resolve(import.meta.dirname, '../_shared/_fixtures/specimen-cli/cli.sh');
 
 export const { cleanup, cli } = await specification.cli(CLI_BIN, {
     env: {
         frozen: { MY_VAR: 'from-the-frozen-set', TZ: 'UTC' },
     },
     // A served command runs from the project root, so the server's own folder is stated.
-    root: '../shared/fixtures/specimen-cli-literate',
+    root: '../_shared/_fixtures/specimen-cli-literate',
     serve: {
         echo: {
             command: 'node server.mjs',

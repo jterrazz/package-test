@@ -1,5 +1,5 @@
 description: a golden of blank lines alone is refused where its one test reads it, like any other single-use file
-fixture: ./fixtures/blank-golden/
+fixture: ./_fixtures/blank-golden/
 runs:
     - command: checker .
       exit: 1

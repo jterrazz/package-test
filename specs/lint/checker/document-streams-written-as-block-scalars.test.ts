@@ -9,7 +9,7 @@ describe('document-streams-written-as-block-scalars', () => {
         // Given - a stdout: spelled with backslash-n escapes
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/document-streams-written-as-block-scalars/'),
+                directory('./_fixtures/lint-violations/document-streams-written-as-block-scalars/'),
             )
             .exec('.');
 
@@ -25,11 +25,11 @@ describe('document-streams-written-as-block-scalars', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

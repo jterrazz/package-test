@@ -39,7 +39,7 @@ ruleTester.run('cli-runs-the-product-binary', cliRunsTheProductBinary as unknown
         },
         // A local fixture binary, not a dependency.
         {
-            code: "const { cli } = await specification.cli('../fixtures/cli-app/cli.sh');",
+            code: "const { cli } = await specification.cli('../_fixtures/cli-app/cli.sh');",
             filename: '/repo/specs/cli/cli.specification.ts',
         },
         // Outside a specification file the runner is `runner-in-specification-file`'s to refuse, not this rule's.

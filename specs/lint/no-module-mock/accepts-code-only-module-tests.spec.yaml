@@ -1,5 +1,5 @@
 description: accepts code-only module tests
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

@@ -1,5 +1,5 @@
 description: a path that leaves specs/ for anything but the pool is refused where it is written
-fixture: ./fixtures/leaves-specs/
+fixture: ./_fixtures/leaves-specs/
 runs:
     - command: checker .
       exit: 1

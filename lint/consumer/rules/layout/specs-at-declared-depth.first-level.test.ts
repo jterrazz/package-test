@@ -35,7 +35,7 @@ describe('specs-at-declared-depth.first-level', () => {
         // Given - a facet helper, the shared ground's code, a suite's tests and its helper
         const root = specsTree([
             'api/events/events.fixtures.ts',
-            'shared/fixtures/app/app.ts',
+            '_shared/_fixtures/app/app.ts',
             'surface/package/exports.test.ts',
             'surface/package/package.fixtures.ts',
             'guards/rules/rules.spec.yaml',
@@ -45,7 +45,7 @@ describe('specs-at-declared-depth.first-level', () => {
         // Then - none of them is stray
         expect([
             isStrayFolder(root, ['api', 'events', 'events.fixtures.ts']),
-            isStrayFolder(root, ['shared', 'fixtures', 'app', 'app.ts']),
+            isStrayFolder(root, ['_shared', '_fixtures', 'app', 'app.ts']),
             isStrayFolder(root, ['surface', 'package', 'package.fixtures.ts']),
             isStrayFolder(root, ['guards', 'rules', 'rules.fixtures.ts']),
         ]).toStrictEqual([false, false, false, false]);
@@ -53,7 +53,7 @@ describe('specs-at-declared-depth.first-level', () => {
 
     test('a test under a ground folder makes no suite', () => {
         // Given - a folder whose only test is a fixture tree's
-        const root = specsTree(['support/fixtures/tree/tree.test.ts', 'support/helper.ts']);
+        const root = specsTree(['support/_fixtures/tree/tree.test.ts', 'support/helper.ts']);
 
         // Then - the folder holds no test of its own
         expect(isStrayFolder(root, ['support', 'helper.ts'])).toBe(true);

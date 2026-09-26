@@ -35,22 +35,22 @@ ruleTester.run('specs-at-declared-depth', specsAtDeclaredDepth as unknown as Oxl
             errors: [{ messageId: 'specNotAtFacetRoot' }],
             filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
         },
-        // `shared/` is the shared ground, never a facet: no spec and no specification under it.
+        // `_shared/` is the shared ground, never a facet: no spec and no specification under it.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInShared' }],
-            filename: '/repo/specs/shared/users/listed.spec.ts',
+            filename: '/repo/specs/_shared/users/listed.spec.ts',
         },
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInShared' }],
-            filename: '/repo/specs/shared/shared.specification.ts',
+            filename: '/repo/specs/_shared/shared.specification.ts',
         },
         // The facet level is reserved whatever depth the tree declares.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInShared' }],
-            filename: '/repo/specs/shared/tree/tree.spec.ts',
+            filename: '/repo/specs/_shared/tree/tree.spec.ts',
             options: [{ depth: 'off' }],
         },
     ],
@@ -212,10 +212,10 @@ function groundTree(files: Record<string, string>): string {
 
 const CODE_GROUND = groundTree({
     // Ground that is code: the subject's build, its unit test, and a stray spec.
-    'cli/fixtures/binary/binary.test.ts': '',
-    'cli/fixtures/binary/binary.ts': '',
-    'cli/fixtures/binary/orphan.test.ts': '',
-    'cli/fixtures/binary/binary.specification.ts': '',
+    'cli/_fixtures/binary/binary.test.ts': '',
+    'cli/_fixtures/binary/binary.ts': '',
+    'cli/_fixtures/binary/orphan.test.ts': '',
+    'cli/_fixtures/binary/binary.specification.ts': '',
     // A first-level folder of helpers and a runner, holding no test.
     'support/next-cursor.ts': '',
     'support/support.specification.ts': '',
@@ -227,19 +227,19 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/fixtures/binary/orphan.test.ts`,
+            filename: `${CODE_GROUND}/cli/_fixtures/binary/orphan.test.ts`,
         },
         // A runner never belongs to the ground, module beside it or not.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/fixtures/binary/binary.specification.ts`,
+            filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.specification.ts`,
         },
         // The clause holds in every mode, `off` included.
         {
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
-            filename: `${CODE_GROUND}/cli/fixtures/binary/orphan.test.ts`,
+            filename: `${CODE_GROUND}/cli/_fixtures/binary/orphan.test.ts`,
             options: [{ depth: 'off' }],
         },
         // A module in a first-level folder holding no test, in every mode.
@@ -256,7 +256,7 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
             filename: `${CODE_GROUND}/support/support.specification.ts`,
         },
         // The four names are reserved: a domain named with one is ground, and refused.
-        ...['expected', 'fixtures', 'requests', 'seeds'].map((reserved) => ({
+        ...['_expected', '_fixtures', '_requests', '_seeds'].map((reserved) => ({
             code: 'const x = 1;',
             errors: [{ messageId: 'specInGround' }],
             filename: `${CODE_GROUND}/api/${reserved}/${reserved}.spec.ts`,
@@ -264,10 +264,10 @@ ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unkno
     ],
     valid: [
         // `test-beside-its-module`'s pairing inside its ground: the depth rules never reach it.
-        { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts` },
+        { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.test.ts` },
         {
             code: 'const x = 1;',
-            filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts`,
+            filename: `${CODE_GROUND}/cli/_fixtures/binary/binary.test.ts`,
             options: [{ depth: 'mirror' }],
         },
     ],

@@ -1,5 +1,5 @@
 description: accepts the canonical destructured names
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

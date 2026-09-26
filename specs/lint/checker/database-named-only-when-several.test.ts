@@ -8,7 +8,7 @@ describe('database-named-only-when-several', () => {
     test('rejects a .seed() without { database } when two databases are declared', async () => {
         // Given - a spec with two SQL databases and a test that omits { database }
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/database-named-only-when-several/'))
+            .fixture(directory('./_fixtures/lint-violations/database-named-only-when-several/'))
             .exec('.');
 
         // Then - the checker fails with the full cross-file diagnostic
@@ -23,19 +23,19 @@ describe('database-named-only-when-several', () => {
     test('accepts seeds that name their database under a multi-database spec', async () => {
         // Given - the compliant twin (every seed names { database })
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/database-named-only-when-several-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/database-named-only-when-several-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 
     test('rejects a .seed() naming { database } when only one database is declared', async () => {
         // Given - a spec with a single SQL database and a seed that redundantly names it
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/database-named-only-when-several-single/'),
+                directory('./_fixtures/lint-violations/database-named-only-when-several-single/'),
             )
             .exec('.');
 
@@ -53,13 +53,13 @@ describe('database-named-only-when-several', () => {
         const result = await cli
             .fixture(
                 directory(
-                    './fixtures/lint-violations/database-named-only-when-several-suppressed/',
+                    './_fixtures/lint-violations/database-named-only-when-several-suppressed/',
                 ),
             )
             .exec('.');
 
         // Then - the suppression clears the finding: a clean pass
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

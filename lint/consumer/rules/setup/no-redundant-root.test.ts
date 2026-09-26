@@ -17,7 +17,7 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees (the
 // violation fixture has a package.json at its root, so the walk-up derives it).
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
-const SPEC_FILE = `${SPECS_LINT}/no-redundant-root/fixtures/violation/specs/cli/rooted.specification.ts`;
+const SPEC_FILE = `${SPECS_LINT}/no-redundant-root/_fixtures/violation/specs/cli/rooted.specification.ts`;
 
 const IGNORED_MARKER = checkoutUnder('work', ['pkg/specs']);
 writeFileSync(join(IGNORED_MARKER, 'pkg/package.json'), '{}\n');
@@ -55,7 +55,7 @@ ruleTester.run('no-redundant-root', noRedundantRoot as unknown as OxlintRule, {
         },
         // Root pointing somewhere else is a real override.
         {
-            code: 'await specification.cli("./bin", { root: "../fixtures/app" });',
+            code: 'await specification.cli("./bin", { root: "../_fixtures/app" });',
             filename: SPEC_FILE,
         },
         // No root — the convention resolves it.

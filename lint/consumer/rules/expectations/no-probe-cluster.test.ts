@@ -45,7 +45,7 @@ ruleTester().run('no-probe-cluster', asOxlintRule(noProbeCluster), {
         {
             code: `test('builds', async () => {
                 const result = await cli.exec('build');
-                expect(result.stdout).toMatch(file('./expected/build.txt'));
+                expect(result.stdout).toMatch(file('./_expected/build.txt'));
                 expect(result.stdout).toContain('compiled');
                 expect(result.stdout).toContain('2 files');
                 expect(result.stdout).toContain('done');

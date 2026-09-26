@@ -92,8 +92,8 @@ describe('sending', () => {
         // Given - a body named by directory()
         // Then - the chain rejects before a request is sent: a body is one file
         // checker-disable-next-line named-path-exists -- negative spec: the refusal fires before the disk is read
-        await expect(api.post('/users', directory('./requests/'))).rejects.toThrow(
-            '.post("/users", directory("./requests/")): a body is one file — name it with file().',
+        await expect(api.post('/users', directory('./_requests/'))).rejects.toThrow(
+            '.post("/users", directory("./_requests/")): a body is one file — name it with file().',
         );
     });
 
@@ -101,6 +101,6 @@ describe('sending', () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT
         // checker-disable-next-line named-path-exists -- negative spec: the missing file IS the behaviour under test
-        await expect(api.request(file('./requests/nonexistent.http'))).rejects.toThrow('ENOENT');
+        await expect(api.request(file('./_requests/nonexistent.http'))).rejects.toThrow('ENOENT');
     });
 });

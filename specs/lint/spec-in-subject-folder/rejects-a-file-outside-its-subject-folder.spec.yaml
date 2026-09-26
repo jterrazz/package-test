@@ -1,5 +1,5 @@
 description: a spec of GET /orders filed anywhere but orders/list/ is refused at its first line
-fixture: ./fixtures/misfiled/
+fixture: ./_fixtures/misfiled/
 runs:
     - command: checker .
       exit: 1

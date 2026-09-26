@@ -17,30 +17,30 @@ ruleTester.run('paths-named-in-the-test', pathsNamedInTheTest as unknown as Oxli
     invalid: [
         // A shared helper that builds the path it hands on.
         {
-            code: `${IMPORT}export const seeded = () => api.seed(file('./seeds/orders.sql'));`,
+            code: `${IMPORT}export const seeded = () => api.seed(file('./_seeds/orders.sql'));`,
             errors: 1,
             filename: HELPER,
         },
         {
-            code: `${IMPORT}export const shop = directory('../../fixtures/shop/');`,
+            code: `${IMPORT}export const shop = directory('../../_fixtures/shop/');`,
             errors: 1,
             filename: HELPER,
         },
         // A specification file is no test either.
         {
-            code: `${IMPORT}export const golden = file('./expected/x.txt');`,
+            code: `${IMPORT}export const golden = file('./_expected/x.txt');`,
             errors: 1,
             filename: '/repo/specs/api/api.specification.ts',
         },
         // An alias is the same call.
         {
-            code: "import { file as disk } from '@jterrazz/test';\nexport const rows = disk('./seeds/rows.sql');",
+            code: "import { file as disk } from '@jterrazz/test';\nexport const rows = disk('./_seeds/rows.sql');",
             errors: 1,
             filename: HELPER,
         },
         // This repository's own entry, reached by path.
         {
-            code: "import { file } from '../../../src/index.js';\nexport const rows = file('./seeds/rows.sql');",
+            code: "import { file } from '../../../src/index.js';\nexport const rows = file('./_seeds/rows.sql');",
             errors: 1,
             filename: HELPER,
         },
@@ -48,19 +48,19 @@ ruleTester.run('paths-named-in-the-test', pathsNamedInTheTest as unknown as Oxli
     valid: [
         // Built in the test, on the line a reader reads.
         {
-            code: `${IMPORT}api.seed(file('./seeds/orders.sql'));`,
+            code: `${IMPORT}api.seed(file('./_seeds/orders.sql'));`,
             filename: '/repo/specs/api/orders/orders.spec.ts',
         },
         {
-            code: `${IMPORT}expect(x).toMatch(file('./expected/x.txt'));`,
+            code: `${IMPORT}expect(x).toMatch(file('./_expected/x.txt'));`,
             filename: '/repo/src/report/report.test.ts',
         },
         {
-            code: `${IMPORT}expect(x).toMatch(file('./expected/x.aria.yaml'));`,
+            code: `${IMPORT}expect(x).toMatch(file('./_expected/x.aria.yaml'));`,
             filename: '/repo/src/panel.test.tsx',
         },
         {
-            code: `${IMPORT}const f = file('./expected/x.txt');`,
+            code: `${IMPORT}const f = file('./_expected/x.txt');`,
             filename: '/repo/src/type-channel.test-d.ts',
         },
         // A helper that takes it as a parameter.

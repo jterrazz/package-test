@@ -1,5 +1,5 @@
 description: a describe titled with anything but the file's aspect is refused at its title
-fixture: ./fixtures/wrong-title/
+fixture: ./_fixtures/wrong-title/
 runs:
     - command: .
       exit: 1

@@ -1,5 +1,5 @@
 description: a test whose body spans more than sixty lines of gestures is refused at its function
-fixture: ./fixtures/long/
+fixture: ./_fixtures/long/
 runs:
     - command: .
       exit: 1

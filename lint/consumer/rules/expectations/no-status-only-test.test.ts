@@ -37,7 +37,7 @@ ruleTester.run('no-status-only-test', noStatusOnlyTest as unknown as OxlintRule,
         {
             code: `test('created', async () => {
                 expect(result.status).toBe(201);
-                expect(result.response).toMatch(file('./expected/created.http'));
+                expect(result.response).toMatch(file('./_expected/created.http'));
             });`,
             filename: SPEC,
         },
@@ -67,7 +67,7 @@ ruleTester.run('no-status-only-test', noStatusOnlyTest as unknown as OxlintRule,
         // The golden form — no status probe at all.
         {
             code: `test('golden', async () => {
-                expect(result.response).toMatch(file('./expected/created.http'));
+                expect(result.response).toMatch(file('./_expected/created.http'));
             });`,
             filename: SPEC,
         },

@@ -15,7 +15,7 @@ describe('written', () => {
     test('reads the files the app wrote to disk, at the path it answered', async () => {
         // Given - two users, exported by the app
         const result = await api
-            .seed(file('../../shared/seeds/two-users.sql'), { database: 'db' })
+            .seed(file('../../_shared/_seeds/two-users.sql'), { database: 'db' })
             .post('/exports');
         const exported = exportedTo(result.response.body);
 
@@ -26,7 +26,7 @@ describe('written', () => {
 
         {"directory": "{{path}}"}
     `);
-        await expect(result.directory(exported)).toMatch(directory('./expected/export/'));
+        await expect(result.directory(exported)).toMatch(directory('./_expected/export/'));
         expect(result.file(join(exported, 'users.json')).exists).toBe(true);
     });
 });

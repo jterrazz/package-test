@@ -8,7 +8,7 @@ describe('checker-suppression-states-a-reason', () => {
     test('rejects a checker suppression with no reason', async () => {
         // Given - a tree violating \`checker-suppression-states-a-reason\`
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/checker-suppression-states-a-reason/'))
+            .fixture(directory('./_fixtures/lint-violations/checker-suppression-states-a-reason/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -24,7 +24,7 @@ describe('checker-suppression-states-a-reason', () => {
         // Given - the compliant twin
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/checker-suppression-states-a-reason-ok/'),
+                directory('./_fixtures/lint-violations/checker-suppression-states-a-reason-ok/'),
             )
             .exec('specs');
 

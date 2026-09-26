@@ -1,5 +1,5 @@
 description: rejects a non-kebab-case job name in .trigger()
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

@@ -1,5 +1,5 @@
 description: accepts an awaited IO matcher
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

@@ -8,7 +8,7 @@ describe('document-description-unique', () => {
     test('rejects two documents of one directory sharing a description', async () => {
         // Given - two .spec.yaml files whose description: is the same sentence
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/document-description-unique/'))
+            .fixture(directory('./_fixtures/lint-violations/document-description-unique/'))
             .exec('.');
 
         // Then - the second one is named, with the first it collides with
@@ -23,11 +23,11 @@ describe('document-description-unique', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

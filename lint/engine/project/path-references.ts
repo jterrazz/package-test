@@ -85,7 +85,7 @@ function literalTail(pieces: AstNode[]): string[] {
     return tail;
 }
 
-/** `join(import.meta.dirname, 'fixtures', name)` names `<here>/fixtures`. */
+/** `join(import.meta.dirname, '_fixtures', name)` names `<here>/_fixtures`. */
 function anchoredPath(node: AstNode, here: string, anchors: Set<string>): string | undefined {
     if (node.type === 'CallExpression' && PATH_BUILDERS.has(calleeName(node) ?? '')) {
         const [first, ...rest] = argumentsOf(node);

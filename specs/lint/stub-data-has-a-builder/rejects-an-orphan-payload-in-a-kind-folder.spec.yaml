@@ -1,5 +1,5 @@
 description: rejects an orphan payload in a kind folder
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

@@ -1,5 +1,5 @@
 description: production code importing what a test stands on is refused, from each of the four ground folders
-fixture: ./fixtures/ground/
+fixture: ./_fixtures/ground/
 runs:
     - command: .
       exit: 1

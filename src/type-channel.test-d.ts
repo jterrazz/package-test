@@ -63,44 +63,47 @@ export async function typeRows(): Promise<void> {
     api.label('the happy path');
 
     // @ts-expect-error disk-named-by-relative-path — a bare string is a value, not a file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
-    api.seed('./seeds/x.sql');
-    // @ts-expect-error disk-named-by-relative-path — a seed's path ends in `.sql` [`Type '"./seeds/x.json"' is not assignable to type 'RelativePath<".sql">'`]
-    api.seed(file('./seeds/x.json'));
+    api.seed('./_seeds/x.sql');
+    // @ts-expect-error disk-named-by-relative-path — a seed's path ends in `.sql` [`Type '"./_seeds/x.json"' is not assignable to type 'RelativePath<".sql">'`]
+    api.seed(file('./_seeds/x.json'));
     // @ts-expect-error disk-named-by-relative-path — a path is relative to the spec file [`Argument of type '"x.sql"' is not assignable to parameter of type 'RelativePath<string>'`]
     api.seed(file('x.sql'));
     // @ts-expect-error disk-named-by-relative-path — SQL is never written in the test: a seed is a `.sql` file [`Argument of type 'string' is not assignable to parameter of type 'SeedSource'`]
     api.seed(`INSERT INTO users (name) VALUES ('Ada');`);
-    // @ts-expect-error disk-named-by-relative-path — a directory's path ends in `/` [`Argument of type '"./fixtures/shop"' is not assignable to parameter of type 'RelativePath<"/">'`]
-    cli.fixture(directory('./fixtures/shop'));
-    // @ts-expect-error disk-named-by-relative-path — a path ending in `/` is a directory [`Argument of type '"./fixtures/shop/"' is not assignable to parameter of type 'never'`]
-    cli.fixture(file('./fixtures/shop/'));
+    // @ts-expect-error disk-named-by-relative-path — a directory's path ends in `/` [`Argument of type '"./_fixtures/shop"' is not assignable to parameter of type 'RelativePath<"/">'`]
+    cli.fixture(directory('./_fixtures/shop'));
+    // @ts-expect-error disk-named-by-relative-path — a path ending in `/` is a directory [`Argument of type '"./_fixtures/shop/"' is not assignable to parameter of type 'never'`]
+    cli.fixture(file('./_fixtures/shop/'));
     // @ts-expect-error disk-named-by-relative-path — a request is one `.http` file, not a directory [`is not assignable to parameter of type 'string | DiskFile<".http">'`]
-    await api.request(directory('./requests/'));
+    await api.request(directory('./_requests/'));
     // @ts-expect-error disk-named-by-relative-path — a document is a `.spec.yaml` file [`Argument of type 'FileAt<"./case.yaml">' is not assignable to parameter of type 'DiskFile<".spec.yaml">'`]
     await cli.run(file('./case.yaml'));
-    // @ts-expect-error disk-named-by-relative-path — a path is a value where a verb takes one [`Argument of type 'FileAt<"./requests/orders.http">' is not assignable to parameter of type 'string'`]
-    await api.get(file('./requests/orders.http'));
-    // @ts-expect-error disk-named-by-relative-path — a command is a value where a verb takes one [`Argument of type 'FileAt<"./fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
-    await cli.exec(file('./fixtures/args.txt'));
+    // @ts-expect-error disk-named-by-relative-path — a path is a value where a verb takes one [`Argument of type 'FileAt<"./_requests/orders.http">' is not assignable to parameter of type 'string'`]
+    await api.get(file('./_requests/orders.http'));
+    // @ts-expect-error disk-named-by-relative-path — a command is a value where a verb takes one [`Argument of type 'FileAt<"./_fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
+    await cli.exec(file('./_fixtures/args.txt'));
 
     const out = await cli.exec();
-    // @ts-expect-error one-verb-per-meaning — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
-    expect('abc').toMatch(file('./expected/abc.txt'));
+    // @ts-expect-error one-verb-per-meaning — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./_expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
+    expect('abc').toMatch(file('./_expected/abc.txt'));
     // @ts-expect-error one-verb-per-meaning — a stream's golden is a file [`is not assignable to parameter of type 'string | DiskFile'`]
-    expect(out.stdout).toMatch(directory('./expected/out/'));
-    // @ts-expect-error one-verb-per-meaning — a tree's golden is a directory [`Argument of type 'FileAt<"./expected/tree.txt">' is not assignable to parameter of type 'DiskDirectory'`]
-    await expect(out.filesystem).toMatch(file('./expected/tree.txt'));
-    expect(out.stdout).toMatch(file('./expected/out.txt'));
+    expect(out.stdout).toMatch(directory('./_expected/out/'));
+    // @ts-expect-error one-verb-per-meaning — a tree's golden is a directory [`Argument of type 'FileAt<"./_expected/tree.txt">' is not assignable to parameter of type 'DiskDirectory'`]
+    await expect(out.filesystem).toMatch(file('./_expected/tree.txt'));
+    expect(out.stdout).toMatch(file('./_expected/out.txt'));
     expect(out.stdout.text).toMatch(/built/u);
-    await expect(out.filesystem).toMatch(directory('./expected/tree/'));
+    await expect(out.filesystem).toMatch(directory('./_expected/tree/'));
 
-    await api.seed(file('./seeds/orders.sql')).post('/orders', file('./requests/order.json'));
-    await cli.fixture(directory('../../fixtures/shop/')).fixture(file('./fixtures/a.json')).exec();
+    await api.seed(file('./_seeds/orders.sql')).post('/orders', file('./_requests/order.json'));
+    await cli
+        .fixture(directory('../../_fixtures/shop/'))
+        .fixture(file('./_fixtures/a.json'))
+        .exec();
 
     const result = await api.get('/orders/1');
 
     await api.get('/orders/:id/lines/:line?full=1', { params: { id: 1, line: 'a' } });
-    await api.post('/orders/:id/lines', file('./requests/line.json'), { params: { id: 1 } });
+    await api.post('/orders/:id/lines', file('./_requests/line.json'), { params: { id: 1 } });
     await api.get('/orders/latest', { params: {} });
     // @ts-expect-error route-written-as-template — a template's params are handed with it [`Expected 2 arguments, but got 1`]
     await api.get('/orders/:id');
@@ -175,7 +178,7 @@ export async function treeMatcherRows(): Promise<void> {
     await expect(out.filesystem).toMatch('scaffolded');
     // @ts-expect-error one-verb-per-meaning — a directory is matched against its directory(), never a value [`Argument of type 'RegExp' is not assignable to parameter of type 'DiskDirectory'`]
     await expect(out.directory('out')).toMatch(/index/u);
-    await expect(out.directory('out')).toMatch(directory('./expected/out/'));
+    await expect(out.directory('out')).toMatch(directory('./_expected/out/'));
 }
 
 export async function assertedSubjectMatcherRows(): Promise<void> {
@@ -189,6 +192,6 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
     // @ts-expect-error one-verb-per-meaning — a container is asserted running, never a value [`is not assignable to method's 'this' of type 'SubjectIsNoValue'`]
     expect(out.container('db')).toMatch('up');
     await expect(result.table('orders')).toMatch([['{{int}}', 'ORD-1']]);
-    expect(result.response).toMatch(file('./expected/order.http'));
-    expect(out.json).toMatch(file('./expected/out.json'));
+    expect(result.response).toMatch(file('./_expected/order.http'));
+    expect(out.json).toMatch(file('./_expected/out.json'));
 }

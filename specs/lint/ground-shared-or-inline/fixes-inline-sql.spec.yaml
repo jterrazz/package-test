@@ -1,17 +1,17 @@
 description: --fix writes each SQL to a seed beside its spec, named by its comment or four words of its test
-fixture: ./fixtures/inline-sql/
+fixture: ./_fixtures/inline-sql/
 runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/api/users/seeds/two-users-one-admin.sql:
+          specs/api/users/_seeds/two-users-one-admin.sql:
               equals: |
                   -- Two users, one admin
                   INSERT INTO users (name, admin) VALUES ('Ada', true), ('Grace', false);
-          specs/api/users/seeds/lists-users.sql:
+          specs/api/users/_seeds/lists-users.sql:
               equals: |
                   INSERT INTO users (name) VALUES ('Linus');
-          specs/api/users/seeds/lists-users-2.sql:
+          specs/api/users/_seeds/lists-users-2.sql:
               equals: |-
                   INSERT INTO users (name) VALUES ('Joan');
           specs/api/users/listed.spec.ts:
@@ -25,8 +25,8 @@ runs:
                   test('lists the users', async () => {
                       // Given - two users, the first named by its comment, the second by this test's title, its filler dropped — a name another seed holds
                       const result = await api
-                          .seed(file('./seeds/two-users-one-admin.sql'))
-                          .seed(file('./seeds/lists-users-2.sql'))
+                          .seed(file('./_seeds/two-users-one-admin.sql'))
+                          .seed(file('./_seeds/lists-users-2.sql'))
                           .get('/users');
 
                       // Then - the users
@@ -35,7 +35,7 @@ runs:
 
                   test('lists the user its seed file holds', async () => {
                       // Given - one user, from the seed this test alone reads
-                      const result = await api.seed(file('./seeds/lists-users.sql')).get('/users');
+                      const result = await api.seed(file('./_seeds/lists-users.sql')).get('/users');
 
                       // Then - the user
                       expect(result.response).toMatch('HTTP/1.1 200 OK');

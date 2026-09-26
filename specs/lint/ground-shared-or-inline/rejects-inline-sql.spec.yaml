@@ -1,5 +1,5 @@
 description: SQL written in a test is refused where its tag stands
-fixture: ./fixtures/inline-sql/
+fixture: ./_fixtures/inline-sql/
 runs:
     - command: checker .
       exit: 1

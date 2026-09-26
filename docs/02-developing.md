@@ -120,7 +120,7 @@ afterAll(cleanup);
 ```
 
 ```http
-### specs/api/users/create/requests/create-user.http — the COMPLETE request
+### specs/api/users/create/_requests/create-user.http — the COMPLETE request
 POST /users
 Content-Type: application/json
 
@@ -128,7 +128,7 @@ Content-Type: application/json
 ```
 
 ```http
-### specs/api/users/create/expected/user-created.http — status + header subset + body
+### specs/api/users/create/_expected/user-created.http — status + header subset + body
 HTTP/1.1 201 Created
 Content-Type: application/json
 
@@ -144,10 +144,10 @@ import { api } from '../../api.specification.js';
 describe('shape', () => {
     test('creates a user', async () => {
         // Given - empty database
-        const result = await api.request(file('./requests/create-user.http'));
+        const result = await api.request(file('./_requests/create-user.http'));
 
         // Then - response matches the fixture; row landed in the database
-        expect(result.response).toMatch(file('./expected/user-created.http'));
+        expect(result.response).toMatch(file('./_expected/user-created.http'));
         await expect(result.table('users')).toMatch([[1, 'Alice']]);
     });
 });
@@ -181,15 +181,15 @@ describe('usage', () => {
         // Given
         const result = await cli.exec('help');
 
-        // Then - full snapshot of stdout against expected/help.txt
+        // Then - full snapshot of stdout against _expected/help.txt
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/help.txt'));
+        expect(result.stdout).toMatch(file('./_expected/help.txt'));
     });
 });
 ```
 
 ```
-### specs/cli/help/expected/help.txt — tokens work in text snapshots too
+### specs/cli/help/_expected/help.txt — tokens work in text snapshots too
 my-cli v{{semver}}
 Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
@@ -233,21 +233,21 @@ What every helper accepts, on top of the project it already is:
 
 #### What the preset sets
 
-| Setting                          | Value                                                          | Why                                                                                                                                                                                                                                                                                                    |
-| -------------------------------- | -------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `cacheDir`                       | `.artifacts/vitest`                                            | The artefact convention below — vite's transform cache leaves `node_modules/`                                                                                                                                                                                                                          |
-| `test.coverage.reportsDirectory` | [the artefact path](#artefacts-live-under-artifacts)           | Where a tool writes what it generates is the toolchain's convention ([`@jterrazz/typescript` — Developing](https://github.com/jterrazz/package-typescript/blob/main/docs/02-developing.md)); the preset sets it so no consumer writes it. The **provider is yours to install** (`@vitest/coverage-v8`) |
-| `test.testTimeout`               | `30_000`                                                       | Vitest's 5s never survived a container boot, a `prisma db push` or a `next build`                                                                                                                                                                                                                      |
-| `test.hookTimeout`               | `30_000`                                                       | Same reason, for the `beforeAll` that starts the infrastructure                                                                                                                                                                                                                                        |
-| `test.exclude`                   | vitest's defaults + `**/{expected,fixtures,requests,seeds}/**` | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples                                                                                                                                                                                                  |
-| `test.attachmentsDir`            | `.artifacts/vitest/attachments`                                | Vitest 5 writes `context.annotate()` attachments to `.vitest/` at the repository root                                                                                                                                                                                                                  |
-| `test.outputFile`                | `.artifacts/vitest/{json,junit,html,blob}`                     | Vitest 5 turned the json and junit reporters into FILE writers; all four are artefacts. The blob is one file per run under `blob/`, named for its shard when the run is one, so `--merge-reports .artifacts/vitest/blob` reads a split run back whole                                                  |
-| `test.retry`                     | `0`                                                            | A flaky test is fixed or deleted — a retry turns a real defect into a slow one and hides it                                                                                                                                                                                                            |
-| `test.restoreMocks`              | `true`                                                         | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                                                                                                                                                                                                                  |
-| `test.unstubGlobals`             | `true`                                                         | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule `given-in-the-test`)                                                                                                                                                                                     |
-| `test.unstubEnvs`                | `true`                                                         | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule `no-raw-env-write`)                                                                                                                                                                                          |
-| `test.globalSetup`               | the update-mode setup, the temp-root setup                     | Update mode writes a value in place after the run is reported, so a failure's code frame reads the lines the run loaded ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)); the temp root is [below](#scratch-lives-in-the-runs-temp-root)                                         |
-| `plugins`                        | `literate()`, when `literate:` is given                        | Turns every matching `<case>.spec.yaml` into a test file (see [20 — Spec documents](20-documents.md))                                                                                                                                                                                                  |
+| Setting                          | Value                                                              | Why                                                                                                                                                                                                                                                                                                    |
+| -------------------------------- | ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `cacheDir`                       | `.artifacts/vitest`                                                | The artefact convention below — vite's transform cache leaves `node_modules/`                                                                                                                                                                                                                          |
+| `test.coverage.reportsDirectory` | [the artefact path](#artefacts-live-under-artifacts)               | Where a tool writes what it generates is the toolchain's convention ([`@jterrazz/typescript` — Developing](https://github.com/jterrazz/package-typescript/blob/main/docs/02-developing.md)); the preset sets it so no consumer writes it. The **provider is yours to install** (`@vitest/coverage-v8`) |
+| `test.testTimeout`               | `30_000`                                                           | Vitest's 5s never survived a container boot, a `prisma db push` or a `next build`                                                                                                                                                                                                                      |
+| `test.hookTimeout`               | `30_000`                                                           | Same reason, for the `beforeAll` that starts the infrastructure                                                                                                                                                                                                                                        |
+| `test.exclude`                   | vitest's defaults + `**/{_expected,_fixtures,_requests,_seeds}/**` | What a spec stands on is an input, never a suite — a repository must not run its own counter-examples                                                                                                                                                                                                  |
+| `test.attachmentsDir`            | `.artifacts/vitest/attachments`                                    | Vitest 5 writes `context.annotate()` attachments to `.vitest/` at the repository root                                                                                                                                                                                                                  |
+| `test.outputFile`                | `.artifacts/vitest/{json,junit,html,blob}`                         | Vitest 5 turned the json and junit reporters into FILE writers; all four are artefacts. The blob is one file per run under `blob/`, named for its shard when the run is one, so `--merge-reports .artifacts/vitest/blob` reads a split run back whole                                                  |
+| `test.retry`                     | `0`                                                                | A flaky test is fixed or deleted — a retry turns a real defect into a slow one and hides it                                                                                                                                                                                                            |
+| `test.restoreMocks`              | `true`                                                             | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                                                                                                                                                                                                                  |
+| `test.unstubGlobals`             | `true`                                                             | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule `given-in-the-test`)                                                                                                                                                                                     |
+| `test.unstubEnvs`                | `true`                                                             | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule `no-raw-env-write`)                                                                                                                                                                                          |
+| `test.globalSetup`               | the update-mode setup, the temp-root setup                         | Update mode writes a value in place after the run is reported, so a failure's code frame reads the lines the run loaded ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)); the temp root is [below](#scratch-lives-in-the-runs-temp-root)                                         |
+| `plugins`                        | `literate()`, when `literate:` is given                            | Turns every matching `<case>.spec.yaml` into a test file (see [20 — Spec documents](20-documents.md))                                                                                                                                                                                                  |
 
 It deliberately sets **nothing else**. `fileParallelism` is a per-project truth (a container-lifecycle suite is serial, an isolated one is not), stated by the project rather than by the preset — a helper states it for you when you pass `serial`, and a hand-written project states it itself; so do `reporters`, `environment`, `env`, every other `globalSetup` — the preset's own is ADDED to a project's, vite concatenating the lists — and every `include`: a preset that guessed those would be wrong more often than right.
 
@@ -296,7 +296,7 @@ Swap the import, drop what the preset already says, keep what is yours:
                  test: {
                      name: 'api',
                      include: ['specs/api/**/*.spec.ts'],
--                    exclude: [...configDefaults.exclude, '**/fixtures/**', 'specs/api/heavy/**'],
+-                    exclude: [...configDefaults.exclude, '**/_fixtures/**', 'specs/api/heavy/**'],
 +                    exclude: ['specs/api/heavy/**'],
 -                    testTimeout: 30_000,
                  },
@@ -343,10 +343,10 @@ specs/
 │   ├── api.specification.ts
 │   └── users/create/              # POST /users — the subject's standard folder (rules `one-subject-per-spec`, `spec-in-subject-folder`)
 │       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules `one-describe-per-file`, `spec-named-for-its-aspect`)
-│       ├── seeds/                 # *.sql
-│       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
+│       ├── _seeds/                 # *.sql
+│       ├── _requests/              # what it sends: *.http complete requests, and body files (*.json, …)
 │       ├── stubs/             # <name>.stubs.ts facade + <kind>/<name>.ts units + their data
-│       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
+│       └── _expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
     ├── cli.specification.ts       # runner at the facet root (rule `specs-at-declared-depth`)
     └── help/                      # the `help` command

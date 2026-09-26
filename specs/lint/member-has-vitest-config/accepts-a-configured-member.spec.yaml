@@ -1,5 +1,5 @@
 description: a member whose tests run on a config of its own passes, and so does a root delegating its tests
-fixture: ../../shared/fixtures/member-workspace/
+fixture: ../../_shared/_fixtures/member-workspace/
 runs:
     - command: checker --member packages/clean .
       exit: 0

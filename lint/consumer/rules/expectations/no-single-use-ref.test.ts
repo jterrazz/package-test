@@ -16,7 +16,7 @@ const ruleTester = new RuleTester();
 // Built at module load: the rule reads the fixtures on disk before the cases run.
 const featureDir = mkdtempSync(join(tmpdir(), 'no-single-use-ref-'));
 const specsFeatureDir = join(featureDir, 'specs', 'app', 'widget');
-const expectedDir = join(specsFeatureDir, 'expected');
+const expectedDir = join(specsFeatureDir, '_expected');
 mkdirSync(expectedDir, { recursive: true });
 // A fixture whose only capture ref appears exactly once, nowhere in code.
 writeFileSync(join(expectedDir, 'lonely.txt'), 'id: {{uuid#lonely}}\n');
@@ -41,7 +41,7 @@ ruleTester.run('no-single-use-ref', noSingleUseRef as unknown as OxlintRule, {
         // A ref that lives ONLY in a referenced fixture, used once: reported on
         // the referencing toMatch node (the rule enhancement — no code site).
         {
-            code: 'expect(result.stdout).toMatch(file("./expected/lonely.txt"));',
+            code: 'expect(result.stdout).toMatch(file("./_expected/lonely.txt"));',
             errors: 1,
             filename: WIDGET,
         },
@@ -54,7 +54,7 @@ ruleTester.run('no-single-use-ref', noSingleUseRef as unknown as OxlintRule, {
         },
         // A code ref (once) plus the same ref in a referenced fixture (once) = two uses.
         {
-            code: 'expect(a).toEqual(match.ref("order")); expect(result.stdout).toMatch(file("./expected/shared.txt"));',
+            code: 'expect(a).toEqual(match.ref("order")); expect(result.stdout).toMatch(file("./_expected/shared.txt"));',
             filename: WIDGET,
         },
         // No capture refs at all.

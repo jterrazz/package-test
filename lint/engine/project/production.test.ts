@@ -13,22 +13,22 @@ import {
 } from './production.js';
 
 const ROOT = packageWith({
-    'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/fixtures/*' } } }),
+    'package.json': JSON.stringify({ imports: { '#data/*': { default: './specs/_fixtures/*' } } }),
     'src/stubs/engine.ts': 'export const engine = 1;\n',
     'src/domain/order.ts': 'export const order = 1;\n',
     'src/news/stubs/http/events.ts': 'export default {};\n',
     'src/news/stubs/news.stubs.ts': 'export const news = {};\n',
     'tests/anchored.ts':
-        "export const rows = new URL('../specs/fixtures/rows.json', import.meta.url);\n",
+        "export const rows = new URL('../specs/_fixtures/rows.json', import.meta.url);\n",
     'tests/named.ts': [
-        "// import { users } from '../specs/fixtures/users.js';",
-        'const note = "import { x } from \'../specs/fixtures/x.js\'";',
+        "// import { users } from '../specs/_fixtures/users.js';",
+        'const note = "import { x } from \'../specs/_fixtures/x.js\'";',
         'export { note };',
     ].join('\n'),
     'tests/read.ts':
-        "import { readFileSync } from 'node:fs';\nexport const sql = readFileSync('./specs/seeds/a.sql');\n",
+        "import { readFileSync } from 'node:fs';\nexport const sql = readFileSync('./specs/_seeds/a.sql');\n",
     'tests/typed.ts':
-        "import type { Row } from '../specs/fixtures/row.js';\nexport type { Row };\n",
+        "import type { Row } from '../specs/_fixtures/row.js';\nexport type { Row };\n",
     'tools/a.ts': "import { b } from './b.js';\nexport { b };\n",
     'tools/b.ts': "import { a } from './a.js';\nexport { a };\n",
     'tsconfig.json': '{ "compilerOptions": { "baseUrl": "./src", "paths": { "@/*": ["*"] } } }',
@@ -51,7 +51,7 @@ const EXTENDED = packageWith({
     }),
     'package.json': '{}',
     'tsconfig.base.json': JSON.stringify({
-        compilerOptions: { paths: { '@data/*': ['specs/fixtures/*'] } },
+        compilerOptions: { paths: { '@data/*': ['specs/_fixtures/*'] } },
         extends: './tsconfig.json',
     }),
     'tsconfig.json': JSON.stringify({ extends: './tsconfig.base.json' }),
@@ -63,7 +63,7 @@ function helperPackage(): { from: (name: string) => string; later: () => void } 
         later: () => {
             writeFileSync(
                 join(root, 'tests/helper.ts'),
-                "export { users } from '../specs/fixtures/users.js';\n",
+                "export { users } from '../specs/_fixtures/users.js';\n",
             );
         },
     };
@@ -74,7 +74,7 @@ describe('production', () => {
         { path: 'lint/rule.ts', production: true },
         { path: 'src/domain/order.test.ts', production: false },
         { path: 'src/domain/order.fixtures.ts', production: false },
-        { path: 'src/domain/fixtures/app.ts', production: false },
+        { path: 'src/domain/_fixtures/app.ts', production: false },
         { path: 'src/news/stubs/http/events.ts', production: false },
         { path: 'scripts/seed.ts', production: true },
         { path: 'bin/cli.js', production: true },
@@ -96,7 +96,7 @@ describe('production', () => {
         { kind: 'a test file', path: 'src/a.test-d.ts' },
         { kind: 'a test file', path: 'specs/api/api.specification.ts' },
         { kind: 'the specs tree', path: 'specs/setup/seed.ts' },
-        { kind: 'ground', path: 'src/requests/create.http' },
+        { kind: 'ground', path: 'src/_requests/create.http' },
         { kind: 'a stub', path: 'src/news/stubs/http/events.ts' },
         { kind: undefined, path: 'src/stubs/engine.ts' },
     ])('materialAt — `$path` is $kind', ({ kind, path }) => {
@@ -108,8 +108,8 @@ describe('production', () => {
     test('materialAt — reads a folder as a folder', () => {
         // Given - a path that ends on a ground folder
         // Then - as a file it is a module named `seeds`, as a folder it is ground
-        expect(materialAt(join(ROOT, 'src/seeds'))).toBeUndefined();
-        expect(materialAt(join(ROOT, 'src/seeds'), true)).toBe('ground');
+        expect(materialAt(join(ROOT, 'src/_seeds'))).toBeUndefined();
+        expect(materialAt(join(ROOT, 'src/_seeds'), true)).toBe('ground');
     });
 
     test.each([
@@ -131,7 +131,7 @@ describe('production', () => {
 
         // Then - the repository base's alias, read from the app's own baseUrl; a cycle ends; the earlier base is overridden
         expect(resolveSpecifier(from, '@data/users.js')).toStrictEqual([
-            join(EXTENDED, 'apps/web/specs/fixtures/users.js'),
+            join(EXTENDED, 'apps/web/specs/_fixtures/users.js'),
         ]);
         expect(resolveSpecifier(from, '@shared/x.js')).toStrictEqual([]);
     });
@@ -160,7 +160,7 @@ describe('production', () => {
         expect(resolveSpecifier(from, './order.js')).toStrictEqual([from]);
         expect(resolveSpecifier(from, '@/domain/order')).toStrictEqual([from]);
         expect(resolveSpecifier(from, '#data/users.js')).toStrictEqual([
-            join(ROOT, 'specs/fixtures/users.js'),
+            join(ROOT, 'specs/_fixtures/users.js'),
         ]);
     });
 
@@ -176,9 +176,9 @@ describe('production', () => {
     });
 
     test.each([
-        { module: 'anchored', what: 'specs/fixtures/rows.json' },
-        { module: 'read', what: 'specs/seeds/a.sql' },
-        { module: 'typed', what: 'specs/fixtures/row.js' },
+        { module: 'anchored', what: 'specs/_fixtures/rows.json' },
+        { module: 'read', what: 'specs/_seeds/a.sql' },
+        { module: 'typed', what: 'specs/_fixtures/row.js' },
     ])(
         'reachOf — sees what the non-production module `$module` names, parsed',
         ({ module, what }) => {
@@ -238,7 +238,7 @@ describe('production', () => {
 
         // Then - the folder's next question is walked again
         expect(reachOf(from('b.ts'), '../tests/helper.js')?.what).toMatch(
-            /specs\/fixtures\/users\.js$/u,
+            /specs\/_fixtures\/users\.js$/u,
         );
     });
 

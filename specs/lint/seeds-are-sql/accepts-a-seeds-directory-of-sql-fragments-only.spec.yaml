@@ -1,5 +1,5 @@
-description: accepts a seeds/ directory of .sql fragments only
-fixture: ./fixtures/compliant/
+description: accepts a _seeds/ directory of .sql fragments only
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

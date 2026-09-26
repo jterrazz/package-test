@@ -41,8 +41,8 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Finding
                 found.push({
                     file: join(label, relative(memberDir, path), '/'),
                     line: 1,
-                    fix: `rename \`${entry.name}/\` to \`expected/\`, beside the test that reads it`,
-                    found: `\`${entry.name}/\`, a synonym of \`expected/\``,
+                    fix: `rename \`${entry.name}/\` to \`_expected/\`, beside the test that reads it`,
+                    found: `\`${entry.name}/\`, a synonym of \`_expected/\``,
                     rule: 'no-snapshot-folder',
                     severity: 'error',
                 });

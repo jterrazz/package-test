@@ -1,5 +1,5 @@
 description: --fix inlines a golden of blank lines as the value in place, not a quoted escape of it
-fixture: ./fixtures/blank-golden/
+fixture: ./_fixtures/blank-golden/
 runs:
     - command: checker . --fix
       exit: 0

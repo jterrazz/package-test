@@ -1,5 +1,5 @@
 description: stays silent when the negative fixture is frozen
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

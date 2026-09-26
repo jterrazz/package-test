@@ -1,0 +1,5 @@
+description: renders the widget from the gadget's ground
+fixture: ../gadget/_fixtures/gadget-stub/
+runs:
+    - command: widget
+      exit: 0

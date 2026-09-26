@@ -8,12 +8,12 @@ import { fixPoolGround } from './ground-shared-or-inline.pool.js';
 
 function singleReaderPool(git: boolean): string {
     const root = mkdtempSync(join(tmpdir(), 'pool-'));
-    mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });
+    mkdirSync(join(root, 'specs', '_shared', '_fixtures', 'app'), { recursive: true });
     mkdirSync(join(root, 'specs', 'api'), { recursive: true });
-    writeFileSync(join(root, 'specs', 'shared', 'fixtures', 'app', 'index.txt'), 'app\n');
+    writeFileSync(join(root, 'specs', '_shared', '_fixtures', 'app', 'index.txt'), 'app\n');
     writeFileSync(
         join(root, 'specs', 'api', 'boot.spec.ts'),
-        "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
+        "await api.fixture(directory('../_shared/_fixtures/app/')).get('/');\n",
     );
     if (git) {
         execFileSync('git', ['init', '--quiet'], { cwd: root });
@@ -33,8 +33,8 @@ describe('ground-shared-or-inline.pool', () => {
         // Then - the index holds the new path and not the old one
         const indexed = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' });
         expect(indexed.split('\n').filter(Boolean).toSorted()).toStrictEqual([
+            'specs/api/_fixtures/app/index.txt',
             'specs/api/boot.spec.ts',
-            'specs/api/fixtures/app/index.txt',
         ]);
     });
 
@@ -46,7 +46,7 @@ describe('ground-shared-or-inline.pool', () => {
         fixPoolGround(join(root, 'specs'));
 
         // Then - the disk holds it at its new place only
-        expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);
-        expect(existsSync(join(root, 'specs', 'shared'))).toBe(false);
+        expect(existsSync(join(root, 'specs', 'api', '_fixtures', 'app', 'index.txt'))).toBe(true);
+        expect(existsSync(join(root, 'specs', '_shared'))).toBe(false);
     });
 });

@@ -117,7 +117,7 @@ describe('schema-documents', () => {
         expect(read.filter(({ schema }) => schema.length > 0)).toStrictEqual([]);
     });
 
-    test('the published schema validates every document of the tree (meta-test) — a document the parser refuses is an input, kept under fixtures/', () => {
+    test('the published schema validates every document of the tree (meta-test) — a document the parser refuses is an input, kept under _fixtures/', () => {
         // Given - every document the parser refuses
         const refused = schemaVerdicts(ROOT, schemaValidator()).filter(
             ({ parser }) => parser !== null,
@@ -161,16 +161,16 @@ describe('schema-documents', () => {
     });
 
     test.each([
-        ['cli', 'a document with no runs', 'description: x\nfixture: ./fixtures/shop/\n'],
+        ['cli', 'a document with no runs', 'description: x\nfixture: ./_fixtures/shop/\n'],
         [
             'cli',
-            'a fixture whose first ground folder is seeds/',
-            'description: x\nfixture: ./seeds/fixtures/shop/\nruns:\n    - command: build\n      exit: 0\n',
+            'a fixture whose first ground folder is _seeds/',
+            'description: x\nfixture: ./_seeds/_fixtures/shop/\nruns:\n    - command: build\n      exit: 0\n',
         ],
         [
             'cli',
             'a key no document reads',
-            'description: x\nseed: ./seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
+            'description: x\nseed: ./_seeds/one.sql\nruns:\n    - command: build\n      exit: 0\n',
         ],
         [
             'cli',
@@ -200,7 +200,7 @@ describe('schema-documents', () => {
         ['cli', 'description: x\nruns:\n    - command: build\n      exit: 0\n'],
         [
             'cli',
-            'description: x\nfixture: [./fixtures/, ../../fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
+            'description: x\nfixture: [./_fixtures/, ../../_fixtures/shop/]\nruns:\n    - command: build\n      exit: 0\n',
         ],
     ])(
         'the published schema refuses a wrong document — %s: the well-formed twin validates',

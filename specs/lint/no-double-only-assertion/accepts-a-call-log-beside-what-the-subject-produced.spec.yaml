@@ -1,5 +1,5 @@
 description: accepts a call log beside what the subject produced
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

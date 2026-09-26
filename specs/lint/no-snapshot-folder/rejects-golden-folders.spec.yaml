@@ -1,5 +1,5 @@
 description: a folder named for goldens in any other word is refused, in specs/ and beside a module alike
-fixture: ./fixtures/synonyms/
+fixture: ./_fixtures/synonyms/
 runs:
     - command: checker .
       exit: 1

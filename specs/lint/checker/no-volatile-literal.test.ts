@@ -8,7 +8,7 @@ describe('no-volatile-literal', () => {
     test('rejects a loopback origin pinned in a stream', async () => {
         // Given - a golden carrying the port one run happened to get
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/no-volatile-literal/'))
+            .fixture(directory('./_fixtures/lint-violations/no-volatile-literal/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -20,43 +20,45 @@ describe('no-volatile-literal', () => {
         `);
     });
 
-    test('rejects the same literal under `expected/`, which is the other half of the reach', async () => {
+    test('rejects the same literal under `_expected/`, which is the other half of the reach', async () => {
         // Given - a golden file pinning a temp directory and a loopback port
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/no-volatile-literal-in-ground/'))
+            .fixture(directory('./_fixtures/lint-violations/no-volatile-literal-in-ground/'))
             .exec('.');
 
         // Then - ground is judged by the list documents are judged by: one rule, one reach
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/cli/report/expected/summary.txt:1:1: error jterrazz-check(no-volatile-literal): found: "/tmp/", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} where "/tmp/" stands · read: docs/19-linting.md#no-volatile-literal
-            specs/cli/report/expected/summary.txt:2:1: error jterrazz-check(no-volatile-literal): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#no-volatile-literal
+            specs/cli/report/_expected/summary.txt:1:1: error jterrazz-check(no-volatile-literal): found: "/tmp/", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} where "/tmp/" stands · read: docs/19-linting.md#no-volatile-literal
+            specs/cli/report/_expected/summary.txt:2:1: error jterrazz-check(no-volatile-literal): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#no-volatile-literal
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);
     });
 
     test('accepts every literal the document itself pinned', async () => {
-        // Given - the estate's own shape: a document whose command carries the instant and the work directory it then asserts, a pool `fixture:` holding the stamp, and a sibling `fixtures/` holding the origin
+        // Given - the estate's own shape: a document whose command carries the instant and the work directory it then asserts, a pool `fixture:` holding the stamp, and a sibling `_fixtures/` holding the origin
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/no-volatile-literal-pinned-by-the-document/'),
+                directory(
+                    './_fixtures/lint-violations/no-volatile-literal-pinned-by-the-document/',
+                ),
             )
             .exec('.');
 
         // Then - nothing is reported by either half: the defect is not the literal, it is the literal nobody pinned
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

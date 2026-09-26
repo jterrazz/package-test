@@ -9,7 +9,7 @@ describe('in-place', () => {
     test('a scratch test holding empty values is filled with what it compared, and the next run reads them back', async () => {
         // Given - a scratch test comparing a stream and a json to empty values, run twice under update mode
         const result = await vitestCli
-            .fixture(directory('./fixtures/in-place/'))
+            .fixture(directory('./_fixtures/in-place/'))
             .env({ TEST_UPDATE: '1' })
             .exec(['run', 'run']);
 
@@ -38,7 +38,7 @@ describe('in-place', () => {
     test('a failure after a value was written in place frames its own line, and the value lands once the run is reported', async () => {
         // Given - a scratch test recording a value of several lines, then failing below it, run under update mode and the preset's setup
         const result = await vitestCli
-            .fixture(directory('./fixtures/in-place-failure/'))
+            .fixture(directory('./_fixtures/in-place-failure/'))
             .env({ TEST_UPDATE: '1' })
             .exec('run');
 

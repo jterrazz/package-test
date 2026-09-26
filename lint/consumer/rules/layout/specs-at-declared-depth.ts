@@ -41,7 +41,7 @@ function testsItsNeighbour(filename: string): boolean {
     return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
 }
 
-/** The ground clause, `shared/` reserved directly under `specs/`, and the first-level clause hold in every `depth` mode, `off` included: they are no question of depth. */
+/** The ground clause, `_shared/` reserved directly under `specs/`, and the first-level clause hold in every `depth` mode, `off` included: they are no question of depth. */
 export const specsAtDeclaredDepth: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -146,16 +146,16 @@ export const specsAtDeclaredDepth: LintRule = {
                     fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
                 },
                 specInShared: {
-                    found: 'a spec under `specs/shared/`, the ground several leaves share',
-                    fix: 'move it into its facet: `specs/shared/` holds only `fixtures/`, `seeds/`, `requests/` and `expected/`',
+                    found: 'a spec under `specs/_shared/`, the ground several leaves share',
+                    fix: 'move it into its facet: `specs/_shared/` holds only `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
                 },
                 specNotAtFacetRoot: {
                     found: 'a `*.specification.ts` below its facet root',
                     fix: 'move it to `specs/<facet>/<name>.specification.ts`',
                 },
                 strayFolder: {
-                    found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `shared/`, and holds no test of its own',
-                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
+                    found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `_shared/`, and holds no test of its own',
+                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/_shared/_fixtures/`; then remove `specs/{{folder}}/`',
                 },
                 testAtFacetRoot: {
                     found: 'a spec directly at its facet root',

@@ -1,5 +1,5 @@
 description: a library imported by the one slice that owns it passes
-fixture: ./fixtures/owned/
+fixture: ./_fixtures/owned/
 runs:
     - command: self-checker .
       exit: 0

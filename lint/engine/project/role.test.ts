@@ -47,14 +47,14 @@ describe('role', () => {
     test('roleOf — the kind a path states — ground is what a spec stands on, and it swallows what sits inside it', () => {
         // Given - a fixture project's own source file
         // Then - it is ground, never a member of the row
-        expect(roleOf('/repo/specs/fixtures/app/server.ts').role).toBe('ground');
-        expect(roleOf('/repo/specs/api/users/expected/user.http').role).toBe('ground');
+        expect(roleOf('/repo/specs/_fixtures/app/server.ts').role).toBe('ground');
+        expect(roleOf('/repo/specs/api/users/_expected/user.http').role).toBe('ground');
     });
 
     test("roleOf — the kind a path states — a ground module's own test keeps its kind — `test-beside-its-module`'s one pairing", () => {
         // Given - a `<module>.test.ts` inside ground
         // Then - the suffix wins: it is a module test, not inert material
-        expect(roleOf('/repo/specs/fixtures/app/server.test.ts').role).toBe('module');
+        expect(roleOf('/repo/specs/_fixtures/app/server.test.ts').role).toBe('module');
     });
 
     test('roleOf — the kind a path states — a stubs/ unit is its own role — the half `stubs-imported-through-facade` keeps internal', () => {
@@ -92,8 +92,8 @@ describe('role', () => {
     });
 
     test('roleOf — read below the project root — a checkout under a folder named like ground, a stub or a stray test root is none of them', () => {
-        // Given - three packages checked out under `fixtures/`, `stubs/` and `__tests__/`
-        const under = ['fixtures', 'stubs', '__tests__'].map((folder) => checkoutUnder(folder));
+        // Given - three packages checked out under `_fixtures/`, `stubs/` and `__tests__/`
+        const under = ['_fixtures', 'stubs', '__tests__'].map((folder) => checkoutUnder(folder));
 
         // Then - a module of each is the project's own code, and its test sits under no stray test root
         expect(under.map((root) => roleOf(join(root, 'src/widget.ts')).role)).toStrictEqual([
@@ -107,19 +107,19 @@ describe('role', () => {
     });
 
     test('roleOf — read below the project root — the folders inside the project still say what they are', () => {
-        // Given - the same checkout under `fixtures/`, with its own ground, stubs and stray test root
-        const root = checkoutUnder('fixtures');
+        // Given - the same checkout under `_fixtures/`, with its own ground, stubs and stray test root
+        const root = checkoutUnder('_fixtures');
 
         // Then - ground, stub and `__tests__` are read where the project names them
-        expect(roleOf(join(root, 'specs/api/orders/fixtures/app.ts')).role).toBe('ground');
+        expect(roleOf(join(root, 'specs/api/orders/_fixtures/app.ts')).role).toBe('ground');
         expect(roleOf(join(root, 'specs/api/orders/stubs/http/latest.ts')).role).toBe('stub');
         expect(strayTestRootOf(join(root, 'src/__tests__/widget.test.ts'))).toBe('__tests__');
         expect(strayTestRootOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
     });
 
     test('roleOf — read below the project root — a file outside every package is read below its repository root', () => {
-        // Given - two repositories holding no package.json, checked out under `fixtures/` and `specs/`, one a worktree
-        const underGround = repositoryUnder('fixtures');
+        // Given - two repositories holding no package.json, checked out under `_fixtures/` and `specs/`, one a worktree
+        const underGround = repositoryUnder('_fixtures');
         const underSpecs = repositoryUnder('specs', [], 'file');
 
         // Then - the segments start at the repository, and no folder above it answers

@@ -9,8 +9,8 @@ describe('layered', () => {
     test('layers a shared project and a feature-local file tree into the cwd', async () => {
         // Given - the shared cli-app project spread first, then a feature-local tree (spwn.yaml + spwn/agents/…) laid out exactly as the cwd should look
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
-            .fixture(directory('./fixtures/spwn-seed/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('./_fixtures/spwn-seed/'))
             .exec('read-seed');
 
         // Then - the CLI saw both layers as one merged tree: the config file and the nested tree

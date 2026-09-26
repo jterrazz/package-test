@@ -1,5 +1,5 @@
 description: warns on a raw process.env assignment in a test
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

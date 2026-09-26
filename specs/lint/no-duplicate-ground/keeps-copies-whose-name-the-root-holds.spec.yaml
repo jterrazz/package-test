@@ -1,13 +1,13 @@
 description: --fix moves nothing when the specs root holds another file of the copies' name
-fixture: ./fixtures/taken/
+fixture: ./_fixtures/taken/
 runs:
     - command: checker . --fix
       exit: 0
       stderr: |
-          specs/api/orders/seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
-          specs/api/users/seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
+          specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
+          specs/api/users/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
       files:
-          specs/api/users/seeds/two-users.sql: exists
-          specs/api/orders/seeds/two-users.sql: exists
-          specs/shared/seeds/two-users.sql:
+          specs/api/users/_seeds/two-users.sql: exists
+          specs/api/orders/_seeds/two-users.sql: exists
+          specs/_shared/_seeds/two-users.sql:
               contains: Carol

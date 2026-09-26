@@ -1,5 +1,5 @@
 description: a file handed to a verb that reads another ground folder is refused where it is named
-fixture: ./fixtures/crossed/
+fixture: ./_fixtures/crossed/
 runs:
     - command: .
       exit: 1

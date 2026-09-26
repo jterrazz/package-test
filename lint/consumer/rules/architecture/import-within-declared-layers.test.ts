@@ -183,7 +183,7 @@ ruleTester.run('import-within-declared-layers (a declared map)', rule, {
         },
         {
             code: 'import { Client } from "pg";',
-            filename: '/repo/src/model/matching/fixtures/app.ts',
+            filename: '/repo/src/model/matching/_fixtures/app.ts',
             options: framework,
         },
         // A file under no declared layer is out of scope — here, the

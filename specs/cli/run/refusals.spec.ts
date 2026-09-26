@@ -7,7 +7,7 @@ import { file, text } from '../../../src/index.js';
 import type { DiskFile, RelativePath } from '../../../src/index.js';
 import { cli } from '../literate-cli.specification.js';
 
-/** Every scenario runs through both doors, the plugin and `cli.run`; the `fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */
+/** Every scenario runs through both doors, the plugin and `cli.run`; the `_fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */
 
 function scratchFile(content: string): string {
     const dir = mkdtempSync(resolve(tmpdir(), 'spec-document-'));
@@ -47,7 +47,7 @@ function frames(error: Error): string[] {
 describe('refusals', () => {
     test('a key outside the closed set names the key, the line and the vocabulary', async () => {
         // Given - a `when:` line
-        const message = await failureOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
+        const message = await failureOf(cli.run(file('./_fixtures/unknown-key.spec.yaml')));
 
         // Then - the closed vocabulary is spelled out in the refusal
         expect(message).toContain('unknown key "when:"');
@@ -58,7 +58,7 @@ describe('refusals', () => {
     test('a wrong stdout renders the description, the command and a line diff', async () => {
         // Given - a golden nobody updated (frozen: its mismatch IS the subject)
         const message = await failureOf(
-            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+            cli.run(file('./_fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
         );
 
         // Then - the whole rendering, tokens covering the path and the run cwd
@@ -82,14 +82,14 @@ describe('refusals', () => {
             +   check   Check code quality
               
 
-            specs/cli/run/fixtures/wrong-stdout.spec.yaml:3
+            specs/cli/run/_fixtures/wrong-stdout.spec.yaml:3
             Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
         // Given - a golden claiming a failing command succeeds
         const message = await failureOf(
-            cli.run(file('./fixtures/wrong-exit.spec.yaml'), { frozen: true }),
+            cli.run(file('./_fixtures/wrong-exit.spec.yaml'), { frozen: true }),
         );
 
         // Then - the whole rendering, stderr included
@@ -108,14 +108,14 @@ describe('refusals', () => {
             Starting...
             Fatal: something went wrong
 
-            specs/cli/run/fixtures/wrong-exit.spec.yaml:3
+            specs/cli/run/_fixtures/wrong-exit.spec.yaml:3
             Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
         // Given - a contains that does not, an absent that is there, and a missing file that should exist
         const message = await failureOf(
-            cli.run(file('./fixtures/wrong-files.spec.yaml'), { frozen: true }),
+            cli.run(file('./_fixtures/wrong-files.spec.yaml'), { frozen: true }),
         );
 
         // Then - the whole rendering, one line per rejected assertion
@@ -132,30 +132,30 @@ describe('refusals', () => {
               out/go.mod: expected absent, got a file
               out/nothing.txt: expected to exist, got nothing at that path
 
-            specs/cli/run/fixtures/wrong-files.spec.yaml:3
+            specs/cli/run/_fixtures/wrong-files.spec.yaml:3
             Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {
         // Given - a golden whose run is deliberately wrong
         const error = await errorOf(
-            cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
+            cli.run(file('./_fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
         );
 
         // Then - no runner frames, no generated-module frame: the `command:` line, which is what the message names too
         expect(frames(error)).toStrictEqual([
-            `at ${resolve(import.meta.dirname, 'fixtures/wrong-stdout.spec.yaml')}:3:1`,
+            `at ${resolve(import.meta.dirname, '_fixtures/wrong-stdout.spec.yaml')}:3:1`,
         ]);
-        expect(error.message).toContain('fixtures/wrong-stdout.spec.yaml:3');
+        expect(error.message).toContain('_fixtures/wrong-stdout.spec.yaml:3');
     });
 
     test('a grammar refusal points at the offending line, not at the runner', async () => {
         // Given - a document carrying a key outside the closed set (line 2)
-        const error = await errorOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
+        const error = await errorOf(cli.run(file('./_fixtures/unknown-key.spec.yaml')));
 
         // Then - the frame is that line, not a parser frame
         expect(frames(error)).toStrictEqual([
-            `at ${resolve(import.meta.dirname, 'fixtures/unknown-key.spec.yaml')}:2:1`,
+            `at ${resolve(import.meta.dirname, '_fixtures/unknown-key.spec.yaml')}:2:1`,
         ]);
     });
 

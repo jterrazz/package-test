@@ -1,5 +1,5 @@
 description: a checkout under a folder named __tests__ is no stray test root, and its module test passes
-fixture: ./fixtures/under-a-tests-root/
+fixture: ./_fixtures/under-a-tests-root/
 runs:
     - command: __tests__/checkout
       exit: 0

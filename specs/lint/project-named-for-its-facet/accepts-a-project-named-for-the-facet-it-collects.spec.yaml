@@ -1,5 +1,5 @@
 description: accepts a project named for the facet it collects
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

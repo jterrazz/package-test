@@ -44,8 +44,8 @@ function goldenDir(content: string): { dir: string; read: () => string } {
     onTestFinished(() => {
         rmSync(dir, { force: true, recursive: true });
     });
-    mkdirSync(join(dir, 'expected'));
-    const path = join(dir, 'expected', 'count.http');
+    mkdirSync(join(dir, '_expected'));
+    const path = join(dir, '_expected', 'count.http');
     writeFileSync(path, content);
     return { dir, read: () => readFileSync(path, 'utf8') };
 }
@@ -360,7 +360,7 @@ describe('matchers', () => {
         // Then - the refusal names the wrapper a tree takes
         expect(() => {
             // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
-            expect(subject).toMatch(file('./expected/tree.txt'), { frozen: true });
+            expect(subject).toMatch(file('./_expected/tree.txt'), { frozen: true });
         }).toThrow(/a directory or the working directory is `await toMatch\(directory\(…\)\)`/u);
     });
 
@@ -371,7 +371,7 @@ describe('matchers', () => {
         // Then - the file is refused, naming the subjects a file golden compares against
         expect(() => {
             // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
-            expect(subject).toMatch(file('./expected/abc.txt'));
+            expect(subject).toMatch(file('./_expected/abc.txt'));
         }).toThrow(/fix: compare a stream, a json or a response to its file/u);
     });
 
@@ -382,7 +382,7 @@ describe('matchers', () => {
         // Then - the refusal is awaited like the golden it stands for
         await expect(
             // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
-            expect(subject).toMatch(directory('./expected/out/'), { frozen: true }),
+            expect(subject).toMatch(directory('./_expected/out/'), { frozen: true }),
         ).rejects.toThrow(/on a subject that is no tree/u);
     });
 
@@ -390,12 +390,12 @@ describe('matchers', () => {
         // Given - a json subject and a fixture name that does not exist on disk
         const scratch = updateModeScratch();
         const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
-        const fixturePath = resolve(scratch, 'expected', 'frozen.json');
+        const fixturePath = resolve(scratch, '_expected', 'frozen.json');
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(accessor).toMatch(file('./expected/frozen.json'), { frozen: true });
+            expect(accessor).toMatch(file('./_expected/frozen.json'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
@@ -403,15 +403,15 @@ describe('matchers', () => {
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — json: a frozen wrong fixture keeps its content and throws its diff', () => {
         // Given - a deliberately-wrong committed json fixture
         const scratch = updateModeScratch();
-        const fixturePath = resolve(scratch, 'expected', 'wrong.json');
-        mkdirSync(resolve(scratch, 'expected'), { recursive: true });
+        const fixturePath = resolve(scratch, '_expected', 'wrong.json');
+        mkdirSync(resolve(scratch, '_expected'), { recursive: true });
         writeFileSync(fixturePath, '{\n    "id": 999\n}\n');
         const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(accessor).toMatch(file('./expected/wrong.json'), { frozen: true });
+            expect(accessor).toMatch(file('./_expected/wrong.json'), { frozen: true });
         }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
@@ -420,11 +420,11 @@ describe('matchers', () => {
         // Given - the same missing fixture, but NOT frozen
         const scratch = updateModeScratch();
         const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
-        const fixturePath = resolve(scratch, 'expected', 'written.json');
+        const fixturePath = resolve(scratch, '_expected', 'written.json');
 
         // Then - update mode writes it and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        expect(accessor).toMatch(file('./expected/written.json'));
+        expect(accessor).toMatch(file('./_expected/written.json'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -435,12 +435,12 @@ describe('matchers', () => {
             { body: { ok: true }, headers: { 'content-type': 'application/json' }, status: 200 },
             scratch,
         );
-        const fixturePath = resolve(scratch, 'expected', 'frozen.http');
+        const fixturePath = resolve(scratch, '_expected', 'frozen.http');
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(accessor).toMatch(file('./expected/frozen.http'), { frozen: true });
+            expect(accessor).toMatch(file('./_expected/frozen.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
@@ -452,11 +452,11 @@ describe('matchers', () => {
             { body: { ok: true }, headers: { 'content-type': 'application/json' }, status: 200 },
             scratch,
         );
-        const fixturePath = resolve(scratch, 'expected', 'written.http');
+        const fixturePath = resolve(scratch, '_expected', 'written.http');
 
         // Then - update mode writes and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        expect(accessor).toMatch(file('./expected/written.http'));
+        expect(accessor).toMatch(file('./_expected/written.http'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
@@ -467,12 +467,12 @@ describe('matchers', () => {
         mkdirSync(actualRoot, { recursive: true });
         writeFileSync(resolve(actualRoot, 'file.txt'), 'hello\n');
         const accessor = new DirectoryAccessor(actualRoot, scratch);
-        const fixtureDir = resolve(scratch, 'expected', 'frozen-tree');
+        const fixtureDir = resolve(scratch, '_expected', 'frozen-tree');
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
         await expect(
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(accessor).toMatch(directory('./expected/frozen-tree/'), { frozen: true }),
+            expect(accessor).toMatch(directory('./_expected/frozen-tree/'), { frozen: true }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixtureDir)).toBeFalsy();
     });
@@ -484,11 +484,11 @@ describe('matchers', () => {
         mkdirSync(actualRoot, { recursive: true });
         writeFileSync(resolve(actualRoot, 'file.txt'), 'hello\n');
         const accessor = new DirectoryAccessor(actualRoot, scratch);
-        const fixtureFile = resolve(scratch, 'expected', 'written-tree', 'file.txt');
+        const fixtureFile = resolve(scratch, '_expected', 'written-tree', 'file.txt');
 
         // Then - update mode copies the tree and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        await expect(accessor).toMatch(directory('./expected/written-tree/'));
+        await expect(accessor).toMatch(directory('./_expected/written-tree/'));
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
 
@@ -529,13 +529,13 @@ describe('matchers', () => {
             onTestFinished(() => {
                 rmSync(scratch, { force: true, recursive: true });
             });
-            mkdirSync(resolve(scratch, 'expected'));
-            const fixturePath = resolve(scratch, 'expected', name);
+            mkdirSync(resolve(scratch, '_expected'));
+            const fixturePath = resolve(scratch, '_expected', name);
             writeFileSync(fixturePath, '');
 
             // Then - update mode writes it as if it were missing, and passes
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(subject(scratch)).toMatch(file(`./expected/${name}` as const));
+            expect(subject(scratch)).toMatch(file(`./_expected/${name}` as const));
             expect(readFileSync(fixturePath, 'utf8')).toContain(written);
         },
     );
@@ -595,7 +595,7 @@ describe('matchers', () => {
         // Then - both read the golden's 42 as text, and match
         expect(plainCount('/tmp')).toMatch('HTTP/1.1 200 OK\n\n42');
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'), { frozen: true });
+        expect(plainCount(golden.dir)).toMatch(file('./_expected/count.http'), { frozen: true });
     });
 
     test("a golden that states no content-type reads its body by the actual response's — update mode writes a text/plain reply back as its bare text, by file and in place", async () => {
@@ -609,7 +609,7 @@ describe('matchers', () => {
 
         // When - the reply is compared to each
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'));
+        expect(plainCount(golden.dir)).toMatch(file('./_expected/count.http'));
         void wholeOf(plainCount('/tmp'))('HTTP/1.1 200 OK\n\n41', undefined, scratch.stack);
 
         // Then - both hold the text 42, never the JSON string "42"
@@ -631,7 +631,7 @@ describe('matchers', () => {
 
         // When - the golden is re-recorded
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-        expect(reply).toMatch(file('./expected/count.http'));
+        expect(reply).toMatch(file('./_expected/count.http'));
 
         // Then - the text still matched its token, so the token stays
         expect(golden.read()).toBe('HTTP/1.1 200 OK\n\n["{{int}}"]\n');
@@ -645,7 +645,7 @@ describe('matchers', () => {
         // Then - update mode is where it comes from
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(subject).toMatch(file('./expected/nowhere.txt'));
+            expect(subject).toMatch(file('./_expected/nowhere.txt'));
         }).toThrow('Run with TEST_UPDATE=1');
     });
 
@@ -657,7 +657,7 @@ describe('matchers', () => {
         // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
-            expect(subject).toMatch(file('./expected/nowhere.txt'), { frozen: true });
+            expect(subject).toMatch(file('./_expected/nowhere.txt'), { frozen: true });
         }).toThrow('Write the file by hand');
     });
 

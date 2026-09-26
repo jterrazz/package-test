@@ -1,16 +1,16 @@
 description: --fix writes each single-use golden, body and request in place, and leaves a seed a file
-fixture: ./fixtures/single-use/
+fixture: ./_fixtures/single-use/
 runs:
     - command: checker . --fix
       exit: 1
       stderr: |
           specs/api/users/created.spec.ts:41:37  jterrazz-check(ground-shared-or-inline)
       files:
-          specs/api/users/seeds/ada.sql: exists
+          specs/api/users/_seeds/ada.sql: exists
           specs/api/users/requests: absent
-          specs/api/users/expected/created.http: absent
-          specs/api/users/expected/line.txt: absent
-          specs/api/users/expected/twice.http: exists
+          specs/api/users/_expected/created.http: absent
+          specs/api/users/_expected/line.txt: absent
+          specs/api/users/_expected/twice.http: exists
           specs/api/users/created.spec.ts:
               equals: |
                   import { file, text } from '@jterrazz/test';
@@ -21,7 +21,7 @@ runs:
                   describe('created', () => {
                   test('a user is created over its seed', async () => {
                       // Given - one user, and a second posted
-                      const result = await api.seed(file('./seeds/ada.sql')).post('/users', {
+                      const result = await api.seed(file('./_seeds/ada.sql')).post('/users', {
                           "name": "Grace"
                       });
 
@@ -53,7 +53,7 @@ runs:
 
                       // Then - the line in place; the twice-read golden reported, and left to the author
                       expect(text('one line')).toMatch(`one line`);
-                      expect(result.response).toMatch(file('./expected/twice.http'));
-                      expect(result.response).not.toMatch(file('./expected/twice.http'));
+                      expect(result.response).toMatch(file('./_expected/twice.http'));
+                      expect(result.response).not.toMatch(file('./_expected/twice.http'));
                   });
                   });

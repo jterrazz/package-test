@@ -1,5 +1,5 @@
 description: a role folder, a one-file folder and a stray file at a facet root are each refused where they sit
-fixture: ./fixtures/roles/
+fixture: ./_fixtures/roles/
 runs:
     - command: self-checker .
       exit: 1

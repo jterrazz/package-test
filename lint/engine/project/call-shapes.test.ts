@@ -14,10 +14,10 @@ describe('call-shapes', () => {
     test('the matrix reads a call probe as a shape of the syntax tree — a call counts however a formatter splits it across lines', () => {
         // Given - the same golden call, on one line and split after each paren
         const source = [
-            "expect(result.filesystem).toMatch(directory('./expected/tree/'));",
+            "expect(result.filesystem).toMatch(directory('./_expected/tree/'));",
             'expect(result.filesystem).toMatch(',
             '    directory(',
-            "        '../../shared/fixtures/a-long-enough-name/that-the-formatter-breaks/',",
+            "        '../../_shared/_fixtures/a-long-enough-name/that-the-formatter-breaks/',",
             '    ),',
             ');',
         ].join('\n');
@@ -39,8 +39,8 @@ describe('call-shapes', () => {
     test('the matrix reads a call probe as a shape of the syntax tree — the first argument is read as written: a call, a string and its opening, an object, an array', () => {
         // Given - one call of each argument, a type assertion around one
         const source = [
-            "api.seed(file('./seeds/a.sql') as never);",
-            "api.seed('./seeds/a.sql');",
+            "api.seed(file('./_seeds/a.sql') as never);",
+            "api.seed('./_seeds/a.sql');",
             `api.get('/users'); api.get(\`/users/\${id}\`); api.get('users');`,
             'api.with({ headers: {} });',
             "expect(result.table('users')).toMatch([[1]]);",

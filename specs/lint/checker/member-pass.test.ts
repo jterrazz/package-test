@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../checker.specification.js';
 
-const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../_shared/_fixtures/member-workspace');
 const member = (name: string): string => `${WORKSPACE}/packages/${name}`;
 
 describe('member-pass', () => {

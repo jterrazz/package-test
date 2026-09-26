@@ -1,5 +1,5 @@
 description: accepts a test that needs no environment at all
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

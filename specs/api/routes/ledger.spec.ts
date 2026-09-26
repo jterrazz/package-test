@@ -25,7 +25,7 @@ describe('ledger', () => {
 
         // When - one request is sent, and the specification cleans up
         const { api, cleanup } = await specification.api({
-            root: '../../shared/fixtures/specimen-api',
+            root: '../../_shared/_fixtures/specimen-api',
             server: () => app,
         });
         await api.get('/ping');

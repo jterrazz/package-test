@@ -60,16 +60,16 @@ describe('seed', () => {
         // When - the chain is armed
         await chain
             // checker-disable-next-line named-path-exists -- the driver is a double that echoes the path it would read: no file is opened
-            .seed(file('./seeds/users.sql'), { database: 'db' })
+            .seed(file('./_seeds/users.sql'), { database: 'db' })
             // checker-disable-next-line named-path-exists -- the driver is a double that echoes the path it would read: no file is opened
-            .seed(file('./seeds/events.sql'), { database: 'analytics' })
+            .seed(file('./_seeds/events.sql'), { database: 'analytics' })
             .settle();
 
         // Then - one reset, then each file where it was sent, read from the test's directory
         expect(log).toStrictEqual([
             'reset',
-            'db ← /specs/users/./seeds/users.sql',
-            'analytics ← /specs/users/./seeds/events.sql',
+            'db ← /specs/users/./_seeds/users.sql',
+            'analytics ← /specs/users/./_seeds/events.sql',
         ]);
     });
 
@@ -90,7 +90,7 @@ describe('seed', () => {
 
         // Then - the seed is refused before any chain is armed
         // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
-        expect(() => chain.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
+        expect(() => chain.seed(file('./_seeds/users.sql'))).toThrow('2 databases are declared');
     });
 
     test('.seed() — the SQL files a chain runs first — refuses a named seed when one database is declared, the option being redundant (`database-named-only-when-several-at-runtime`)', () => {
@@ -99,7 +99,7 @@ describe('seed', () => {
 
         // Then - the seed is refused before any chain is armed
         // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
-        expect(() => chain.seed(file('./seeds/users.sql'), { database: 'db' })).toThrow(
+        expect(() => chain.seed(file('./_seeds/users.sql'), { database: 'db' })).toThrow(
             'found: seed() names a database, and "db" is the only one declared',
         );
     });
@@ -109,18 +109,18 @@ describe('seed', () => {
         const chain = chainOver([], {});
 
         // Then - a path or a statement as a value, a directory and another extension are each refused as stated
-        expect(() => chain.seed('./seeds/rows.sql' as never)).toThrow(
-            /^found: seed\("\.\/seeds\/rows\.sql"\), a value where a file is read\n.*\nfix: name one file: seed\(file\(/u,
+        expect(() => chain.seed('./_seeds/rows.sql' as never)).toThrow(
+            /^found: seed\("\.\/_seeds\/rows\.sql"\), a value where a file is read\n.*\nfix: name one file: seed\(file\(/u,
         );
         expect(() => chain.seed("INSERT INTO users (name) VALUES ('Ada');" as never)).toThrow(
-            /^found: seed\("INSERT INTO users \(name\) VALUES \('Ada'\);"\), a value where a file is read\n.*\nfix: name one file: seed\(file\('\.\/seeds\/rows\.sql'\)\)\n/u,
+            /^found: seed\("INSERT INTO users \(name\) VALUES \('Ada'\);"\), a value where a file is read\n.*\nfix: name one file: seed\(file\('\.\/_seeds\/rows\.sql'\)\)\n/u,
         );
         // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
-        expect(() => chain.seed(directory('./seeds/') as never)).toThrow(
+        expect(() => chain.seed(directory('./_seeds/') as never)).toThrow(
             /a directory where one file is read/u,
         );
         // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
-        expect(() => chain.seed(file('./seeds/rows.json') as never)).toThrow(
+        expect(() => chain.seed(file('./_seeds/rows.json') as never)).toThrow(
             /a file not ending in \.sql/u,
         );
     });

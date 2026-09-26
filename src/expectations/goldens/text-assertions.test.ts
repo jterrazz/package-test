@@ -61,7 +61,7 @@ describe('text-assertions', () => {
 
         // When - a file, a string and a RegExp reach toMatch
         // checker-disable-next-line named-path-exists -- the routing under test hands the path to a recorder: nothing reads the disk
-        toMatch.call(chai.Assertion.prototype, file('./expected/out.txt'));
+        toMatch.call(chai.Assertion.prototype, file('./_expected/out.txt'));
         toMatch.call(chai.Assertion.prototype, 'out');
         toMatch.call(chai.Assertion.prototype, /out/u);
 
@@ -80,7 +80,7 @@ describe('text-assertions', () => {
 
         // When - a file reaches toMatch
         // checker-disable-next-line named-path-exists -- the routing under test hands the path to a recorder: nothing reads the disk
-        toMatch.call(chai.Assertion.prototype, file('./expected/out.txt'));
+        toMatch.call(chai.Assertion.prototype, file('./_expected/out.txt'));
 
         // Then - the golden answered it, and a value is refused before vitest is asked
         expect(answered).toStrictEqual(['golden']);

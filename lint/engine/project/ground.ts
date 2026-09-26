@@ -1,7 +1,7 @@
-export const GROUND_EXPECTED = 'expected';
-export const GROUND_FIXTURES = 'fixtures';
-export const GROUND_REQUESTS = 'requests';
-export const GROUND_SEEDS = 'seeds';
+export const GROUND_EXPECTED = '_expected';
+export const GROUND_FIXTURES = '_fixtures';
+export const GROUND_REQUESTS = '_requests';
+export const GROUND_SEEDS = '_seeds';
 
 export const GROUND_DIRS = [
     GROUND_EXPECTED,
@@ -13,7 +13,7 @@ export const GROUND_DIRS = [
 export const GROUND_GLOB = `**/{${GROUND_DIRS.join(',')}}/**`;
 
 /** Reserved directly under the specs root only; deeper the name is free. */
-export const SHARED_GROUND = 'shared';
+export const SHARED_GROUND = '_shared';
 
 export function isGroundName(name: string): boolean {
     return (GROUND_DIRS as readonly string[]).includes(name);

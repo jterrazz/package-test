@@ -1,5 +1,5 @@
 description: the engine importing a rule, and a check importing a rule, are refused at the import
-fixture: ./fixtures/upward/
+fixture: ./_fixtures/upward/
 runs:
     - command: self-checker .
       exit: 1

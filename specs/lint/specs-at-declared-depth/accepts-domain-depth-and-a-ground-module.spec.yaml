@@ -1,5 +1,5 @@
 description: tests at facet/domain depth, in a domain named shared, and a ground module beside its test pass
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

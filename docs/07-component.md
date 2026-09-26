@@ -113,7 +113,7 @@ describe('PostTable', () => {
         });
 
         // Then - the table is qualified by what it is not showing
-        await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
+        await expect(result.tree).toMatch(file('./_expected/one-of-two-hundred.aria.yaml'));
         expect(result.console.text).toBe('');
     });
 });
@@ -155,12 +155,12 @@ The scenario is the When, and assertions stay in the Then (rule `no-expect-in-sc
 `toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
-await expect(result.tree).toMatch(file('./expected/two-of-two-hundred.aria.yaml'));
+await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
 expect(result.html.text).toContain('row row--live');
 expect(result.errors.text).toBe('');
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
+The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
 
 ## Unique here
 
@@ -238,7 +238,7 @@ const result = await component.render((container) => {
 - **Hand-rolling `browser:` in a config.** Rule `browser-project-from-component` refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-elements.md#modifiers) says what asserts it.
-- **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
+- **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./_expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
 - **Reading the `descriptor-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.

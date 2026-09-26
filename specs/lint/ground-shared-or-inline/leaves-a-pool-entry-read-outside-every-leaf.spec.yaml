@@ -1,10 +1,10 @@
 description: --fix leaves a pool fixture a module test reads where it is, and the module test as written
-fixture: ./fixtures/module-read/
+fixture: ./_fixtures/module-read/
 runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/shared/fixtures/lonely-stub/main.js: exists
+          specs/_shared/_fixtures/lonely-stub/main.js: exists
           specs/widget/fixtures: absent
           src/stub/stub.test.ts:
               equals: |
@@ -12,7 +12,7 @@ runs:
                   import { describe, expect, test } from 'vitest';
 
                   /** The stub, named from this module test. */
-                  const STUB = resolve(import.meta.dirname, '../../specs/shared/fixtures/lonely-stub/');
+                  const STUB = resolve(import.meta.dirname, '../../specs/_shared/_fixtures/lonely-stub/');
 
                   describe('stub', () => {
                   test('names the stub', () => {

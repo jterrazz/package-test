@@ -1,5 +1,5 @@
 description: seeds, a body past its cap, a tree, a fixture and a golden named outside a test stay files
-fixture: ./fixtures/kept/
+fixture: ./_fixtures/kept/
 runs:
     - command: checker .
       exit: 0

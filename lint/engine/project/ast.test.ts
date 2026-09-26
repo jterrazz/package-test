@@ -12,10 +12,10 @@ const root = mkdtempSync(resolve(tmpdir(), 'specs-anchor-'));
 
 const project = join(root, 'project');
 const underSpecs = join(root, 'specs', 'project');
-const nested = join(project, 'specs', 'fixtures', 'lint-violations', 'case', 'specs');
+const nested = join(project, 'specs', '_fixtures', 'lint-violations', 'case', 'specs');
 
 for (const dir of [
-    join(project, 'specs', 'api', 'requests'),
+    join(project, 'specs', 'api', '_requests'),
     join(project, 'src', 'core'),
     join(nested, 'integrations'),
     join(underSpecs, 'src'),
@@ -38,12 +38,12 @@ function propertiesOf(expression: string): AstNode[] {
 describe('ast', () => {
     test('specsAnchor — anchors a spec on its specs/ directory and lists the way down', () => {
         // Given - a test at facet/domain depth
-        const file = join(project, 'specs', 'api', 'requests', 'headers.test.ts');
+        const file = join(project, 'specs', 'api', '_requests', 'headers.test.ts');
 
         // Then - the anchor is the specs dir, and the relative segments are [facet, domain, basename] — the depth `specs-at-declared-depth` measures
         const anchor = specsAnchor(file);
         expect(anchor?.directory).toBe(join(project, 'specs'));
-        expect(anchor?.relative).toStrictEqual(['api', 'requests', 'headers.test.ts']);
+        expect(anchor?.relative).toStrictEqual(['api', '_requests', 'headers.test.ts']);
     });
 
     test('specsAnchor — returns undefined for a file outside any specs tree', () => {

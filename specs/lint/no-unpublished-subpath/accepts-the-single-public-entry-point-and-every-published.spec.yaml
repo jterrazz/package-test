@@ -1,5 +1,5 @@
 description: accepts the single public entry point and every published subpath
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

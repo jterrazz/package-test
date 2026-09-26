@@ -5,7 +5,10 @@ import { directory } from '../../../src/index.js';
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
 /** It prints the sessions it saw when the run is over. */
-const DOUBLE_SETUP = resolve(import.meta.dirname, '../../shared/fixtures/appium-double/per-run.ts');
+const DOUBLE_SETUP = resolve(
+    import.meta.dirname,
+    '../../_shared/_fixtures/appium-double/per-run.ts',
+);
 
 const ON_THE_DOUBLE = { DOUBLE_SETUP, TEST_MOBILE_APPIUM_URL: null };
 
@@ -13,7 +16,7 @@ describe('session', () => {
     test('a mobile() run of two files drives one driver session, ended once the run is over', async () => {
         // Given - a scratch project whose two files each start a mobile runner on the run's one double
         const result = await vitestCli
-            .fixture(directory('./fixtures/mobile-session/'))
+            .fixture(directory('./_fixtures/mobile-session/'))
             .env(ON_THE_DOUBLE)
             .exec('run --configLoader runner');
 
@@ -26,7 +29,7 @@ describe('session', () => {
     test('a run whose project declares the device spawns one server, and its files drive one session', async () => {
         // Given - a scratch project declaring its simulator and appium root, and two files naming no device and spawning no server
         const result = await vitestCli
-            .fixture(directory('./fixtures/mobile-spawned-session/'))
+            .fixture(directory('./_fixtures/mobile-spawned-session/'))
             .env(ON_THE_DOUBLE)
             .exec('run --configLoader runner');
 

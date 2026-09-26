@@ -66,7 +66,7 @@ function runtimeMarkers(): Set<string> {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
             if (
                 (!path.endsWith('.spec.ts') && !path.endsWith('.test.ts')) ||
-                path.includes('fixtures/')
+                path.includes('_fixtures/')
             ) {
                 continue;
             }
@@ -93,7 +93,7 @@ function metaProofs(): Set<string> {
     ];
     for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {
         const path = String(entry).replaceAll('\\', '/');
-        if (path.endsWith('.test.ts') && !path.includes('fixtures/')) {
+        if (path.endsWith('.test.ts') && !path.includes('_fixtures/')) {
             sources.push(read(`specs/lint/${path}`));
         }
     }
@@ -215,7 +215,7 @@ const e2eSpecIds = new Set([
     ...withDocuments,
     ...entries
         // A spec's own ground is named for what it is, not for a rule.
-        .filter((entry) => entry.endsWith('.test.ts') && !entry.includes('fixtures/'))
+        .filter((entry) => entry.endsWith('.test.ts') && !entry.includes('_fixtures/'))
         .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
 ]);
 
@@ -666,8 +666,8 @@ describe('manifest', () => {
             // Then - its documents in specs/lint/<id>/, and the trees they lint beside them
             expect(withDocuments.has(id), `${id} has no documents in specs/lint/${id}/`).toBe(true);
             expect(
-                existsSync(resolve(ROOT, 'specs/lint', id, 'fixtures')),
-                `${id} has no fixtures/`,
+                existsSync(resolve(ROOT, 'specs/lint', id, '_fixtures')),
+                `${id} has no _fixtures/`,
             ).toBe(true);
         }
     });
@@ -721,13 +721,13 @@ describe('manifest', () => {
 
         // Then - the reach fixture is judged by the SAME catalogue; only `specs-at-declared-depth`'s declared depth differs, which is what the fixture is there to state
         expect(
-            rulesOf('specs/shared/fixtures/lint-cli/oxlint.reach.json').toSorted(),
-        ).toStrictEqual(rulesOf('specs/shared/fixtures/lint-cli/oxlint.e2e.json').toSorted());
+            rulesOf('specs/_shared/_fixtures/lint-cli/oxlint.reach.json').toSorted(),
+        ).toStrictEqual(rulesOf('specs/_shared/_fixtures/lint-cli/oxlint.e2e.json').toSorted());
     });
 
     test('conventions catalogue — E2E inventory (meta-test) — the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {
         // Given - the standalone oxlint config the checker E2E specs lint their violation fixtures with
-        const config = JSON.parse(read('specs/shared/fixtures/lint-cli/oxlint.e2e.json')) as {
+        const config = JSON.parse(read('specs/_shared/_fixtures/lint-cli/oxlint.e2e.json')) as {
             rules: Record<string, unknown>;
         };
 

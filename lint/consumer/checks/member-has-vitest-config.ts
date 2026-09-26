@@ -63,7 +63,7 @@ export function checkMemberHasVitestConfig(
             file: join(label, 'package.json'),
             line: 1,
             fix: `write ${join(label, 'vitest.config.ts')}: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\``,
-            found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` are running its tests`,
+            found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` are running its tests`,
             rule: 'member-has-vitest-config',
             severity: 'error',
         },

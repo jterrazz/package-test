@@ -1,7 +1,7 @@
 description: a pool seed only a route and its sub-route reach for is refused where it sits
-fixture: ./fixtures/nested-route/
+fixture: ./_fixtures/nested-route/
 runs:
     - command: checker .
       exit: 1
       stderr: |
-          specs/shared/seeds/single-base.sql:1:1  jterrazz-check(ground-shared-or-inline)
+          specs/_shared/_seeds/single-base.sql:1:1  jterrazz-check(ground-shared-or-inline)

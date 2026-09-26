@@ -177,7 +177,7 @@ export function readSource(path: string): string {
     return blankComments(readText(path));
 }
 
-/** A document counts: a rendered unit's ARIA golden sits in the same `expected/` as a spec's. */
+/** A document counts: a rendered unit's ARIA golden sits in the same `_expected/` as a spec's. */
 export function isReferrer(name: string): boolean {
     return isTestFileName(name) || name.endsWith(SPEC_EXTENSION);
 }
@@ -311,7 +311,7 @@ export function isLeaf(directory: string): boolean {
     );
 }
 
-/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, '../expected')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
+/** A lone piece counts only when spelled `./` or `../`: a bare one (`resolve(import.meta.dirname, '../_expected')`) is as often an output folder as a path read; a piece opening on `/` restarts the path. */
 export function anchoredPaths(
     file: string,
 ): { column: number; line: number; named: string; target: string }[] {

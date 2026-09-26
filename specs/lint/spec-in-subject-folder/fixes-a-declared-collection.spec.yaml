@@ -1,5 +1,5 @@
 description: --fix lists a collection jterrazz.config.ts declares, where no plural names it
-fixture: ./fixtures/declared-collection/
+fixture: ./_fixtures/declared-collection/
 runs:
     - command: checker . --fix
       exit: 0

@@ -1,5 +1,5 @@
 description: a colocated test titled with its module's role suffix is refused
-fixture: ./fixtures/role-suffix/
+fixture: ./_fixtures/role-suffix/
 runs:
     - command: .
       exit: 1

@@ -126,11 +126,11 @@ describe('spec-document', () => {
     );
 
     test.each([
-        ['./expected/tree/', 'names expected/'],
-        ['./tree/', 'names no fixtures/ folder'],
-        ['./seeds/fixtures/tree/', 'names seeds/'],
+        ['./_expected/tree/', 'names _expected/'],
+        ['./tree/', 'names no _fixtures/ folder'],
+        ['./_seeds/_fixtures/tree/', 'names _seeds/'],
     ])(
-        'spec document — reading — a fixture whose first ground folder is not fixtures/ is refused on its line (`verb-reads-its-ground-folder`): %s',
+        'spec document — reading — a fixture whose first ground folder is not _fixtures/ is refused on its line (`verb-reads-its-ground-folder`): %s',
         (path, names) => {
             // Given - a path whose first ground folder is another role's, or none
             const source = [
@@ -144,15 +144,15 @@ describe('spec-document', () => {
 
             // Then - the first ground folder is the one judged, as for every other path key
             expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
-                `case.spec.yaml:2: fixture: reads fixtures/, and "${path}" ${names} — put the file in ./fixtures/ beside the document, or in specs/shared/fixtures/ if several leaves share it (verb-reads-its-ground-folder)`,
+                `case.spec.yaml:2: fixture: reads _fixtures/, and "${path}" ${names} — put the file in ./_fixtures/ beside the document, or in specs/_shared/_fixtures/ if several leaves share it (verb-reads-its-ground-folder)`,
             );
         },
     );
 
-    test.each(['./fixtures/', './fixtures/tree/', '../../fixtures/seeds/one.sql'])(
-        'spec document — reading — a fixture whose first ground folder is fixtures/ is read: %s',
+    test.each(['./_fixtures/', './_fixtures/tree/', '../../_fixtures/_seeds/one.sql'])(
+        'spec document — reading — a fixture whose first ground folder is _fixtures/ is read: %s',
         (path) => {
-            // Given - file state named through fixtures/, whatever it holds below
+            // Given - file state named through _fixtures/, whatever it holds below
             const source = [
                 'description: states its ground',
                 `fixture: ${path}`,
@@ -172,7 +172,7 @@ describe('spec-document', () => {
         const document = parseSpecDocument(
             [
                 'description: states its ground',
-                'fixture: ../../fixtures/stub/',
+                'fixture: ../../_fixtures/stub/',
                 'env:',
                 '  - frozen',
                 '  - ORIGIN=http://127.0.0.1:9',
@@ -189,7 +189,7 @@ describe('spec-document', () => {
 
         // Then - a bare word is a registered set, KEY=value is inline, and a mapping entry names one server plus the env it is started with
         expect(document.fixtures.map((fixture) => fixture.path)).toStrictEqual([
-            '../../fixtures/stub/',
+            '../../_fixtures/stub/',
         ]);
         expect(document.env).toStrictEqual([
             { kind: 'set', line: 4, name: 'frozen' },

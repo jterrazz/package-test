@@ -5,13 +5,13 @@ import { afterAll } from 'vitest';
 export const { cleanup, website } = await specification.website({
     server: ({ api }) =>
         processService({
-            command: 'node specs/shared/fixtures/specimen-website/server.mjs',
+            command: 'node specs/_shared/_fixtures/specimen-website/server.mjs',
             env: { API_URL: api.connectionString },
             ready: /listening on port (?<port>\d+)/u,
         }),
     services: {
         api: processService({
-            command: 'node specs/shared/fixtures/specimen-website-backend/server.mjs',
+            command: 'node specs/_shared/_fixtures/specimen-website-backend/server.mjs',
             ready: /listening on port (?<port>\d+)/u,
         }),
     },

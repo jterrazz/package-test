@@ -5,29 +5,29 @@ import { describe, expect, test, vi } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
 describe('tokens', () => {
     test('matches dynamic values via typed tokens including {{workdir}}', async () => {
         // Given - output mixing a semver, a uuid, a timestamp, the cwd, and a duration
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('version');
 
         // Then - the committed fixture matches through the token grammar
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/version.txt'));
+        expect(result.stdout).toMatch(file('./_expected/version.txt'));
     });
 
     test('{{workdir}} is the exact cwd of the spec — a different path fails', async () => {
         // Given - two runs, each with its own temp cwd
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('version');
 
         // Then - the fixture matched THIS run's cwd (fresh cwd per spec means A stale literal path could never pass — the token is exact)
         expect(result.stdout.text).toContain('cwd /');
-        expect(result.stdout).toMatch(file('./expected/version.txt'));
+        expect(result.stdout).toMatch(file('./_expected/version.txt'));
     });
 
     test('update mode substitutes the workdir and preserves tokens (rule `no-volatile-literal`)', async () => {
@@ -36,11 +36,11 @@ describe('tokens', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const result = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('version');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
-                expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
+                expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`));
             } finally {
                 vi.unstubAllEnvs();
             }
@@ -52,9 +52,9 @@ describe('tokens', () => {
 
             // Then - a second run (different cwd) matches the updated fixture
             const second = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('version');
-            expect(second.stdout).toMatch(file(`./expected/${fixtureName}`));
+            expect(second.stdout).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             rmSync(fixturePath, { force: true });
         }
@@ -74,11 +74,11 @@ describe('tokens', () => {
 
             // When - update mode rewrites from actual output
             const result = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('version');
             vi.stubEnv('TEST_UPDATE', '1');
             try {
-                expect(result.stdout).toMatch(file(`./expected/${fixtureName}`));
+                expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`));
             } finally {
                 vi.unstubAllEnvs();
             }

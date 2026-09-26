@@ -16,7 +16,7 @@ export type TextComparison = {
 export function requireExtension(name: string, subject: string): void {
     if (!/\.[A-Za-z0-9]+$/u.test(name)) {
         throw new Error(
-            `toMatch(file("${name}")): the extension is part of the path and is required for ${subject} subjects (e.g. file('./expected/help.txt')).`,
+            `toMatch(file("${name}")): the extension is part of the path and is required for ${subject} subjects (e.g. file('./_expected/help.txt')).`,
         );
     }
 }

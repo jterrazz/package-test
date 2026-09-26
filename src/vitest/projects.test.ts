@@ -106,7 +106,7 @@ describe('projects', () => {
         // Then - all three are the repository's, the name stays canonical
         expect(stated.include).toStrictEqual(['suites/api/**/*.test.ts']);
         expect(stated.exclude).toContain('specs/api/slow/**');
-        expect(stated.exclude).toContain('**/{expected,fixtures,requests,seeds}/**');
+        expect(stated.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
         expect(stated.testTimeout).toBe(90_000);
         expect(stated.name).toBe('api');
     });

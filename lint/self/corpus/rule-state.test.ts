@@ -7,7 +7,7 @@ import { corpusOf, e2eOptions, ROOT, ruleSources, session, unresetState } from '
 
 const LINT_SPECS = join(ROOT, 'specs/lint');
 
-const OPTIONS = e2eOptions(join(ROOT, 'specs/shared/fixtures/lint-cli/oxlint.e2e.json'));
+const OPTIONS = e2eOptions(join(ROOT, 'specs/_shared/_fixtures/lint-cli/oxlint.e2e.json'));
 
 describe('rule-state', () => {
     test('a rule built once judges each file as if it were the only one — what a rule keeps for one file is reset when the next one opens', () => {

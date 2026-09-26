@@ -1,5 +1,5 @@
 description: a key no document reads is refused on its line
-fixture: ./fixtures/unknown-key/
+fixture: ./_fixtures/unknown-key/
 runs:
     - command: checker .
       exit: 1

@@ -19,7 +19,7 @@ ruleTester.run('io-matcher-awaited', ioMatcherAwaited as unknown as OxlintRule, 
         // Negated form is still IO.
         { code: "expect(result.table('users')).not.toMatch([[1, 'Ada']]);", errors: 1 },
         // A tree golden walks the disk, whatever its subject.
-        { code: "expect(result.filesystem).toMatch(directory('./expected/tree/'));", errors: 1 },
+        { code: "expect(result.filesystem).toMatch(directory('./_expected/tree/'));", errors: 1 },
     ],
     valid: [
         // The two matchers typed `Promise<void>` whatever their argument are the
@@ -35,7 +35,7 @@ ruleTester.run('io-matcher-awaited', ioMatcherAwaited as unknown as OxlintRule, 
         { code: 'expect(result.stdout).toMatch(`built`);' },
         // Returned.
         { code: "const f = () => expect(result.table('users')).toMatch([]);" },
-        { code: "function f() { return expect(tree).toMatch(directory('./expected/tree/')); }" },
+        { code: "function f() { return expect(tree).toMatch(directory('./_expected/tree/')); }" },
         // Sync matcher — not this rule's concern.
         { code: 'expect(a).toBe(b);' },
         // Not an expect subject.

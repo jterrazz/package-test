@@ -5,9 +5,9 @@ import { describe, expect, test, vi } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-const EXPECTED_DIR = resolve(import.meta.dirname, 'expected');
+const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');
 
-/** Git keeps no empty folder, so `expected/` goes with its last golden. */
+/** Git keeps no empty folder, so `_expected/` goes with its last golden. */
 function removeGolden(path: string): void {
     rmSync(path, { force: true, recursive: true });
     if (existsSync(EXPECTED_DIR) && readdirSync(EXPECTED_DIR).length === 0) {
@@ -22,12 +22,12 @@ describe('workdir', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const result = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('json-cwd');
             const rawCwd = (result.json.value as { cwd: string }).cwd;
             vi.stubEnv('TEST_UPDATE', '1');
             try {
-                expect(result.json).toMatch(file(`./expected/${fixtureName}`));
+                expect(result.json).toMatch(file(`./_expected/${fixtureName}`));
             } finally {
                 vi.unstubAllEnvs();
             }
@@ -40,9 +40,9 @@ describe('workdir', () => {
 
             // Then - a second run (different cwd) matches the updated fixture
             const second = await cli
-                .fixture(directory('../../shared/fixtures/specimen-cli/'))
+                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
                 .exec('json-cwd');
-            expect(second.json).toMatch(file(`./expected/${fixtureName}`));
+            expect(second.json).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(fixturePath);
         }

@@ -1,5 +1,5 @@
 description: a golden one test reads and a module test reads too is shared, and passes
-fixture: ./fixtures/module-read-golden/
+fixture: ./_fixtures/module-read-golden/
 runs:
     - command: checker .
       exit: 0

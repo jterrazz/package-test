@@ -1,5 +1,5 @@
 description: rejects three probes on one stream with no golden
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
-import { stamp } from '../../shared/fixtures/orders/stamp.js';
+import { stamp } from '../../_shared/_fixtures/orders/stamp.js';
 import { integration } from '../pure.specification.js';
 
 describe('branch', () => {
@@ -14,6 +14,6 @@ describe('branch', () => {
         const result = await pinned.call(stamp);
 
         // Then - the module read the chain's own instant, never the branch's
-        expect(result.value).toMatch(file('./expected/stamped.json'));
+        expect(result.value).toMatch(file('./_expected/stamped.json'));
     });
 });

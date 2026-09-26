@@ -51,11 +51,11 @@ describe('shape', () => {
     test('creates a user', async () => {
         // Given - one existing user
         const result = await api
-            .seed(file('./seeds/one-user.sql'))
-            .request(file('./requests/create-user.http'));
+            .seed(file('./_seeds/one-user.sql'))
+            .request(file('./_requests/create-user.http'));
 
         // Then - the response and the row it wrote
-        expect(result.response).toMatch(file('./expected/user-created.http'));
+        expect(result.response).toMatch(file('./_expected/user-created.http'));
         await expect(result.table('users')).toMatch([[1, 'Alice']]);
     });
 });
@@ -69,27 +69,27 @@ describe('shape', () => {
 
 What a test stands on is named by one of two calls, with the path relative to the spec file spelled in full; the verbs keep simple names and the type refuses a bare string where a file is meant:
 
-| Call                                                                     | Reads                                                |
-| ------------------------------------------------------------------------ | ---------------------------------------------------- |
-| `.seed(file('./seeds/users.sql'))`                                       | database state, before the action — never SQL inline |
-| `.request(file('./requests/create.http'))`                               | a complete request — the terminal action             |
-| `.post('/orders', file('./requests/order.json'))`                        | a request body, sent as the file holds it            |
-| `.fixture(file('./fixtures/config.toml'))`                               | one file, copied into the working directory          |
-| `.fixture(directory('../../shared/fixtures/shop/'))`                     | a directory's contents, spread into it               |
-| `cli.run(file('./build.spec.yaml'))`                                     | a cli document, run from a test                      |
-| `expect(x).toMatch(file('./expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                 |
-| `await expect(result.filesystem).toMatch(directory('./expected/tree/'))` | a golden tree                                        |
+| Call                                                                      | Reads                                                |
+| ------------------------------------------------------------------------- | ---------------------------------------------------- |
+| `.seed(file('./_seeds/users.sql'))`                                       | database state, before the action — never SQL inline |
+| `.request(file('./_requests/create.http'))`                               | a complete request — the terminal action             |
+| `.post('/orders', file('./_requests/order.json'))`                        | a request body, sent as the file holds it            |
+| `.fixture(file('./_fixtures/config.toml'))`                               | one file, copied into the working directory          |
+| `.fixture(directory('../../_shared/_fixtures/shop/'))`                    | a directory's contents, spread into it               |
+| `cli.run(file('./build.spec.yaml'))`                                      | a cli document, run from a test                      |
+| `expect(x).toMatch(file('./_expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                 |
+| `await expect(result.filesystem).toMatch(directory('./_expected/tree/'))` | a golden tree                                        |
 
-`toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `fixtures/`, `expected/`, `requests/`, `seeds/` — each verb reads its own, and the same four under the specs root's one `shared/` folder (`specs/shared/fixtures/`, `specs/shared/seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
+`toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` — each verb reads its own, and the same four under the specs root's one `_shared/` folder (`specs/_shared/_fixtures/`, `specs/_shared/_seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 
 ## Pitfalls
 
-- **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./seeds/users.sql')`.
+- **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./_seeds/users.sql')`.
 - **A filled path where the route has parameters** — `.get('/indicators/btc/chart')` hides that `btc` is a value. Write the route as the app declares it, the values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })` — the template types the params, files the spec and is what route coverage reads.
 - **A probe where the whole result belongs** — a test reading a response, a json or a table compares it WHOLE, its value written in place (``toMatch(`HTTP/1.1 200 OK …`)``), then adds a precise assertion only if one property is the subject.
 - **A domain named `fixtures`, `expected`, `requests` or `seeds`, or a facet named `shared`** — the four are reserved for ground, and `shared` directly under `specs/` for the specs root's shared ground (deeper, a domain may take it); `specs-at-declared-depth` refuses a spec under one.
-- **Reaching into a sibling leaf** — a path may leave its leaf only into the specs root's shared ground, `specs/shared/<role>/`, or into the ground of a leaf that encloses it — a route's, from a route under it (`no-reach-into-sibling-ground`). Shared ground goes there, in the folder of its role.
-- **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./expected/help.txt'))`. A part of a result is no comparison of it either: `expect(result.response).toMatch(/200/)` does not compile — a response takes its whole `.http` text or its `file()`, a json its value, a table its rows, a tree its `directory()`.
+- **Reaching into a sibling leaf** — a path may leave its leaf only into the specs root's shared ground, `specs/_shared/<role>/`, or into the ground of a leaf that encloses it — a route's, from a route under it (`no-reach-into-sibling-ground`). Shared ground goes there, in the folder of its role.
+- **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./_expected/help.txt'))`. A part of a result is no comparison of it either: `expect(result.response).toMatch(/200/)` does not compile — a response takes its whole `.http` text or its `file()`, a json its value, a table its rows, a tree its `directory()`.
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (`io-matcher-awaited`).
 - **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.

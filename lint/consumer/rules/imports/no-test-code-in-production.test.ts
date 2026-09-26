@@ -8,24 +8,24 @@ import { noTestCodeInProduction } from './no-test-code-in-production.js';
 // reference passes through are read from the tree beside the linted file.
 const ROOT = packageWith({
     'package.json': JSON.stringify({
-        imports: { '#domain/*': './src/domain/*', '#fixtures/*': './specs/fixtures/*' },
+        imports: { '#domain/*': './src/domain/*', '#fixtures/*': './specs/_fixtures/*' },
         name: 'app',
     }),
-    'specs/fixtures/users.ts': 'export const users = [];\n',
+    'specs/_fixtures/users.ts': 'export const users = [];\n',
     'src/domain/helpers.ts': "import { user } from './user.fixtures.js';\nexport { user };\n",
     'src/features/stubs/http/events.ts': 'export default {};\n',
     'src/features/stubs/news.stubs.ts': 'export const news = {};\n',
     'src/model/stubs/network.ts': 'export const network = {};\n',
-    'tests/data.ts': "export * from '../specs/fixtures/users.js';\n",
+    'tests/data.ts': "export * from '../specs/_fixtures/users.js';\n",
     'tests/render.ts': "export { render } from '@testing-library/react';\n",
     'tests/format.ts': 'export const format = String;\n',
     'tests/rows.ts':
-        "export const rows = new URL('../specs/fixtures/rows.json', import.meta.url);\n",
+        "export const rows = new URL('../specs/_fixtures/rows.json', import.meta.url);\n",
     'tsconfig.json': [
         '{',
         '    // The aliases a module may be reached by.',
         '    "compilerOptions": {',
-        '        "paths": { "@app/*": ["./src/*"], "@test-data/*": ["./specs/fixtures/*"] },',
+        '        "paths": { "@app/*": ["./src/*"], "@test-data/*": ["./specs/_fixtures/*"] },',
         '    },',
         '}',
     ].join('\n'),
@@ -74,11 +74,11 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         refused('import { data } from "./user.fixtures.js";', 'reach'),
         refused('import type { Row } from "./user.test-d.js";', 'reach'),
         // Ground, wherever it sits, and the specs tree.
-        refused('import rows from "./fixtures/rows.js";', 'reach'),
-        refused('import golden from "../expected/user.json";', 'reach'),
-        refused('import body from "./requests/create.js";', 'reach'),
-        refused('import rows from "./seeds/rows.js";', 'reach'),
-        refused('import { users } from "../../specs/fixtures/users.js";', 'reach'),
+        refused('import rows from "./_fixtures/rows.js";', 'reach'),
+        refused('import golden from "../_expected/user.json";', 'reach'),
+        refused('import body from "./_requests/create.js";', 'reach'),
+        refused('import rows from "./_seeds/rows.js";', 'reach'),
+        refused('import { users } from "../../specs/_fixtures/users.js";', 'reach'),
         refused('import { seed } from "../../specs/setup/seed.js";', 'reach'),
         // Stubs: the facade, and a unit of the folder it makes a stubs folder.
         refused('import { news } from "./news.stubs.js";', 'reach'),
@@ -99,19 +99,19 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         refused('import { users } from "@test-data/users";', 'reach'),
         refused('import { users } from "#fixtures/users.js";', 'reach'),
         // A path the module builds from where it sits, or reads.
-        refused('const rows = new URL("./fixtures/rows.json", import.meta.url);', 'pathRead'),
-        refused('const rows = new URL("../../specs/fixtures/", import.meta.url);', 'pathRead'),
-        refused('const rows = readFileSync("./specs/fixtures/rows.json", "utf8");', 'pathRead'),
+        refused('const rows = new URL("./_fixtures/rows.json", import.meta.url);', 'pathRead'),
+        refused('const rows = new URL("../../specs/_fixtures/", import.meta.url);', 'pathRead'),
+        refused('const rows = readFileSync("./specs/_fixtures/rows.json", "utf8");', 'pathRead'),
         refused('const app = readFileSync("./specs/api/app.ts", "utf8");', 'pathRead'),
         refused(
-            'const rows = readFileSync(join(import.meta.dirname, "fixtures", "rows.json"));',
+            'const rows = readFileSync(join(import.meta.dirname, "_fixtures", "rows.json"));',
             'pathRead',
         ),
         refused(
-            'const here = dirname(fileURLToPath(import.meta.url));\nconst all = readdirSync(join(here, "..", "seeds", name));',
+            'const here = dirname(fileURLToPath(import.meta.url));\nconst all = readdirSync(join(here, "..", "_seeds", name));',
             'pathRead',
         ),
-        refused(`const golden = \`\${__dirname}/expected/out.txt\`;`, 'pathRead'),
+        refused(`const golden = \`\${__dirname}/_expected/out.txt\`;`, 'pathRead'),
         // A reach through a module that is not production — a separate test root: the barrel re-exports it.
         refused('export * from "../tests/render.js";', 'reachThrough', BARREL),
         refused('export { users } from "../tests/data.js";', 'reachThrough', BARREL),
@@ -121,7 +121,7 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         refused('import { it } from "vitest";', 'reach', join(ROOT, 'lint/rule.ts')),
         refused('import { expect } from "vitest";', 'reach', join(ROOT, 'scripts/seed.ts')),
         refused(
-            'import { users } from "./specs/fixtures/users.js";',
+            'import { users } from "./specs/_fixtures/users.js";',
             'reach',
             join(ROOT, 'index.ts'),
         ),
@@ -149,12 +149,12 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         // A module that is not production and reaches nothing.
         { code: 'export * from "../tests/format.js";', filename: BARREL },
         // A path built from a root the caller hands in is not the module's own tree.
-        { code: 'const all = readdirSync(join(root, "fixtures"));', filename: PROD },
+        { code: 'const all = readdirSync(join(root, "_fixtures"));', filename: PROD },
         { code: 'const asset = new URL("./assets/logo.png", import.meta.url);', filename: PROD },
         { code: 'const config = readFileSync("./config.json", "utf8");', filename: PROD },
         // A test reads its ground, and imports test artefacts freely.
         {
-            code: 'import rows from "./fixtures/rows.js";',
+            code: 'import rows from "./_fixtures/rows.js";',
             filename: join(ROOT, 'src/user.test.ts'),
         },
         { code: 'import { mockOf } from "@jterrazz/test";', filename: join(ROOT, 'src/a.test.ts') },

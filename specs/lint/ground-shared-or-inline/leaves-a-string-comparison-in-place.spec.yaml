@@ -1,5 +1,5 @@
 description: --fix never writes a string's comparison to a file, a string having no golden
-fixture: ./fixtures/past-cap-string/
+fixture: ./_fixtures/past-cap-string/
 runs:
     - command: checker . --fix
       exit: 1

@@ -22,7 +22,7 @@ describe('suppressedLines', () => {
         const text = [
             '// checker-disable-next-line named-path-exists -- reason',
             '// oxlint-disable-next-line jterrazz/golden-path-has-extension -- reason',
-            "expect(out).toMatch(file('./expected/help'));",
+            "expect(out).toMatch(file('./_expected/help'));",
         ].join('\n');
 
         // Then - the statement is the suppressed line, not the second directive

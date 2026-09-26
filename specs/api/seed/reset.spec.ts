@@ -8,8 +8,8 @@ describe('reset', () => {
     test('resets all databases before each spec', async () => {
         // Given - data in both databases from a previous spec
         await api
-            .seed(file('../../shared/seeds/one-user.sql'), { database: 'db' })
-            .seed(file('./seeds/one-event.sql'), { database: 'analyticsDb' })
+            .seed(file('../../_shared/_seeds/one-user.sql'), { database: 'db' })
+            .seed(file('./_seeds/one-event.sql'), { database: 'analyticsDb' })
             .get('/users');
 
         // When - new spec resets all databases
@@ -23,7 +23,7 @@ describe('reset', () => {
     test('seeding one database leaves the other empty', async () => {
         // Given - only seed analytics-db
         const result = await api
-            .seed(file('./seeds/one-event.sql'), { database: 'analyticsDb' })
+            .seed(file('./_seeds/one-event.sql'), { database: 'analyticsDb' })
             .get('/users');
 
         // Then - default db is empty, analytics has data

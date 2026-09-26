@@ -7,7 +7,7 @@ const CONFIG = '/repo/vitest.config.ts';
 
 const UNDER_A_SPECS_PATH = resolve(
     import.meta.dirname,
-    '../../../../specs/lint/project-named-for-its-facet/fixtures/compliant/vitest.config.ts',
+    '../../../../specs/lint/project-named-for-its-facet/_fixtures/compliant/vitest.config.ts',
 );
 
 ruleTester().run('project-named-for-its-facet', asOxlintRule(projectNamedForItsFacet), {

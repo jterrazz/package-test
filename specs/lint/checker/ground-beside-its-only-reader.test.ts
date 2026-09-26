@@ -8,7 +8,7 @@ describe('ground-beside-its-only-reader', () => {
     test('warns on ground a single spec of the leaf reads', async () => {
         // Given - a tree violating `ground-beside-its-only-reader`
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/ground-beside-its-only-reader/'))
+            .fixture(directory('./_fixtures/lint-violations/ground-beside-its-only-reader/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -17,7 +17,7 @@ describe('ground-beside-its-only-reader', () => {
             jterrazz.baseline.json › test: nothing held
         `);
         expect(result.stderr).toMatch(`
-            integration/orders/expected:1:1: warning jterrazz-check(ground-beside-its-only-reader): found: \`expected/\`, read by \`total.spec.ts\` alone of the tests beside it · why: Ground in a leaf holding ≥ 2 node tests (\`.test.ts\`, \`.spec.ts\`) that a single one of them reads is a warning. · fix: give \`total.spec.ts\` a domain folder of its own, and move \`expected/\` into it · read: docs/19-linting.md#ground-beside-its-only-reader
+            integration/orders/_expected:1:1: warning jterrazz-check(ground-beside-its-only-reader): found: \`_expected/\`, read by \`total.spec.ts\` alone of the tests beside it · why: Ground in a leaf holding ≥ 2 node tests (\`.test.ts\`, \`.spec.ts\`) that a single one of them reads is a warning. · fix: give \`total.spec.ts\` a domain folder of its own, and move \`_expected/\` into it · read: docs/19-linting.md#ground-beside-its-only-reader
         `);
     });
 
@@ -25,7 +25,9 @@ describe('ground-beside-its-only-reader', () => {
         // Given - two specs of GET /orders/:id in its standard folder, one of them reading the golden
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/ground-beside-its-only-reader-subject-leaf/'),
+                directory(
+                    './_fixtures/lint-violations/ground-beside-its-only-reader-subject-leaf/',
+                ),
             )
             .exec('specs');
 
@@ -37,7 +39,7 @@ describe('ground-beside-its-only-reader', () => {
     test('accepts ground that sits beside the spec that reads it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/ground-beside-its-only-reader-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/ground-beside-its-only-reader-ok/'))
             .exec('specs');
 
         // Then - the clean summary

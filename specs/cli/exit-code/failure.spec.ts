@@ -9,7 +9,7 @@ describe('failure', () => {
     test('captures non-zero exit code', async () => {
         // Given - a command that exits 2
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('fail');
 
         // Then - the exit code is preserved
@@ -19,7 +19,7 @@ describe('failure', () => {
     test('multi-exec — stops on first failure', async () => {
         // Given - fail then build (fail exits non-zero, build should not run)
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec(['fail', 'build']);
 
         // Then - stopped at fail

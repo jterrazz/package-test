@@ -1,5 +1,5 @@
 description: accepts the public entry import
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

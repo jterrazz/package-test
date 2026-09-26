@@ -1,5 +1,5 @@
 description: --fix files a command under every leading word its runner declares
-fixture: ./fixtures/declared-commands/
+fixture: ./_fixtures/declared-commands/
 runs:
     - command: checker . --fix
       exit: 0

@@ -1,5 +1,5 @@
-description: accepts a requests/ directory holding a .http request and a .json body
-fixture: ./fixtures/compliant/
+description: accepts a _requests/ directory holding a .http request and a .json body
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

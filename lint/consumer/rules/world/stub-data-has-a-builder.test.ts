@@ -34,19 +34,19 @@ ruleTester.run('stub-data-has-a-builder', stubDataHasABuilder as unknown as Oxli
         {
             code: 'test("x", () => {});',
             errors: [{ messageId: 'orphan' }],
-            filename: `${SPECS_LINT}/stub-data-has-a-builder/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // Both payloads pair with events.ts (stem = name up to the first dot).
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/stub-data-has-a-builder/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // A feature with no stubs/ sibling.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/request-file-extension-known/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

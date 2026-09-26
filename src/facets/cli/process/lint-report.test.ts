@@ -42,15 +42,15 @@ describe('lintReport', () => {
     test("lintReport — a report as a golden keeps it — keeps the checker's report line the same way, and drops its summary", () => {
         // Given - two checker findings, an error and a warning, and the summary line
         const report = [
-            'specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): a path may leave its leaf only into specs/fixtures/',
-            'specs/api/requests/x.http:3:1: warning jterrazz-check(no-token-in-request): a token in a request',
+            'specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): a path may leave its leaf only into specs/_fixtures/',
+            'specs/api/_requests/x.http:3:1: warning jterrazz-check(no-token-in-request): a token in a request',
             '',
             'conventions checker: 1 error(s) found under /tmp/x',
         ].join('\n');
 
         // Then - both channels golden alike
         expect(lintReport(report)).toBe(
-            'specs/api/orders/create.spec.ts:7:5  jterrazz-check(no-reach-into-sibling-ground)\nspecs/api/requests/x.http:3:1  jterrazz-check(no-token-in-request)\n',
+            'specs/api/_requests/x.http:3:1  jterrazz-check(no-token-in-request)\nspecs/api/orders/create.spec.ts:7:5  jterrazz-check(no-reach-into-sibling-ground)\n',
         );
     });
 

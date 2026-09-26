@@ -19,21 +19,21 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
-const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/seeds']);
-writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.json'), '[]\n');
-writeFileSync(join(TWO_STRAYS, 'specs/app/widget/seeds/users.csv'), 'id\n');
+const TWO_STRAYS = checkoutUnder('work', ['specs/app/widget/_seeds']);
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/_seeds/users.json'), '[]\n');
+writeFileSync(join(TWO_STRAYS, 'specs/app/widget/_seeds/users.csv'), 'id\n');
 
-const UNTRACKED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
-writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
-writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
+const UNTRACKED_STRAY = checkoutUnder('work', ['specs/app/widget/_seeds']);
+writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/_seeds/users.sql'), 'select 1;\n');
+writeFileSync(join(UNTRACKED_STRAY, 'specs/app/widget/_seeds/users.json'), '[]\n');
 execFileSync('git', ['init', '--quiet'], { cwd: UNTRACKED_STRAY });
-execFileSync('git', ['add', 'package.json', 'specs/app/widget/seeds/users.sql'], {
+execFileSync('git', ['add', 'package.json', 'specs/app/widget/_seeds/users.sql'], {
     cwd: UNTRACKED_STRAY,
 });
 
-const IGNORED_STRAY = checkoutUnder('work', ['specs/app/widget/seeds']);
-writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
-writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
+const IGNORED_STRAY = checkoutUnder('work', ['specs/app/widget/_seeds']);
+writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/_seeds/users.sql'), 'select 1;\n');
+writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/_seeds/users.json'), '[]\n');
 writeFileSync(join(IGNORED_STRAY, '.gitignore'), '*.json\n');
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
 
@@ -55,19 +55,19 @@ ruleTester.run('seeds-are-sql', seedsAreSql as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // Only .sql fragments in the compliant twin.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
-        // No seeds/ directory at this level (the feature has no seeds/ sibling).
+        // No _seeds/ directory at this level (the feature has no _seeds/ sibling).
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/compliant/specs/app/app.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/compliant/specs/app/app.test.ts`,
         },
         // A file `.gitignore` names is on no checkout: it violates nothing.
         {
@@ -107,16 +107,16 @@ function lintPass(file: string): string[] {
 
 describe('seedsAreSql', () => {
     test('seeds-are-sql — the editor lints again in one process — a stray written after a first pass is seen by the second', () => {
-        // Given - a git checkout whose seeds/ holds one `.sql`, linted once
-        const root = checkoutUnder('work', ['specs/app/widget/seeds']);
-        writeFileSync(join(root, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');
+        // Given - a git checkout whose _seeds/ holds one `.sql`, linted once
+        const root = checkoutUnder('work', ['specs/app/widget/_seeds']);
+        writeFileSync(join(root, 'specs/app/widget/_seeds/users.sql'), 'select 1;\n');
         execFileSync('git', ['init', '--quiet'], { cwd: root });
         execFileSync('git', ['add', '.'], { cwd: root });
         const file = join(root, 'specs/app/widget/widget.test.ts');
         expect(lintPass(file)).toStrictEqual([]);
 
         // When - a stray is written beside it, and nothing restarts the host
-        writeFileSync(join(root, 'specs/app/widget/seeds/users.json'), '[]\n');
+        writeFileSync(join(root, 'specs/app/widget/_seeds/users.json'), '[]\n');
 
         // Then - the next pass reports it
         expect(lintPass(file)).toStrictEqual(['users.json']);

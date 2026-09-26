@@ -1,5 +1,5 @@
 description: a facet reaching its own concept folder, entered from outside by its face, passes
-fixture: ./fixtures/isolated/
+fixture: ./_fixtures/isolated/
 runs:
     - command: self-checker .
       exit: 0

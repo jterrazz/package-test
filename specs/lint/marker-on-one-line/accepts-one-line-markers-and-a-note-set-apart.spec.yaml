@@ -1,5 +1,5 @@
 description: accepts one-line markers and a note set apart by a blank line
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

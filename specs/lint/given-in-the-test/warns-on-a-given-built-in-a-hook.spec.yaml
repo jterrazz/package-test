@@ -1,5 +1,5 @@
 description: warns on a Given built in a hook
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 0

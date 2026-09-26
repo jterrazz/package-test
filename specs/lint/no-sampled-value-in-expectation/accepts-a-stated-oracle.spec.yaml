@@ -1,5 +1,5 @@
 description: accepts an oracle the test states
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

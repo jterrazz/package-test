@@ -8,7 +8,7 @@ describe('facet-folder-has-specification', () => {
     test('rejects a facet folder with no specification', async () => {
         // Given - a tree violating `facet-folder-has-specification`
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/facet-folder-has-specification/'))
+            .fixture(directory('./_fixtures/lint-violations/facet-folder-has-specification/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
@@ -23,7 +23,7 @@ describe('facet-folder-has-specification', () => {
     test('accepts a facet folder holding the runner it promises', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/facet-folder-has-specification-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/facet-folder-has-specification-ok/'))
             .exec('specs');
 
         // Then - the clean summary

@@ -52,7 +52,7 @@ export class HonoAdapter implements ServerPort {
         };
 
         if (body !== undefined) {
-            // Strings are pre-serialized (a `requests/*.http` body); everything else is JSON.
+            // Strings are pre-serialized (a `_requests/*.http` body); everything else is JSON.
             init.body = typeof body === 'string' ? body : JSON.stringify(body);
         }
 

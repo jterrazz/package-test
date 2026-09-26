@@ -1,5 +1,5 @@
 description: rejects an oracle that samples the clock
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

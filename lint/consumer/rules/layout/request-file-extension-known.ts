@@ -11,7 +11,7 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** Anchored on the visited test file: its sibling `requests/` is probed, and a file with no extension is reported there. */
+/** Anchored on the visited test file: its sibling `_requests/` is probed, and a file with no extension is reported there. */
 export const requestFileExtensionKnown: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -35,8 +35,8 @@ export const requestFileExtensionKnown: LintRule = {
             rowNamed(consumerRows, 'request-file-extension-known'),
             {
                 noExtension: {
-                    found: '`requests/{{entry}}` carries no extension',
-                    fix: 'name it by how it is sent — `requests/{{entry}}.http` for a whole request, `requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+                    found: '`_requests/{{entry}}` carries no extension',
+                    fix: 'name it by how it is sent — `_requests/{{entry}}.http` for a whole request, `_requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
                 },
             },
             CATALOGUE_CHAPTER,

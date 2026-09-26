@@ -69,7 +69,7 @@ describe('matrix', () => {
             writeFileSync(join(root, 'vitest.config.ts'), 'export default {};\n');
             writeFileSync(
                 join(root, 'specs/cli/build/tree.spec.ts'),
-                "expect(result.filesystem).toMatch(\n    directory(\n        '../../shared/fixtures/tree/',\n    ),\n);\n",
+                "expect(result.filesystem).toMatch(\n    directory(\n        '../../_shared/_fixtures/tree/',\n    ),\n);\n",
             );
             const golden = matrixRows(root).find(
                 (row) => row.capability.name === 'toMatch(directory())',

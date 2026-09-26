@@ -17,9 +17,9 @@ const ruleTester = new RuleTester();
 // Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.
 const FIXTURES = resolve(
     import.meta.dirname,
-    '../../../../specs/lint/test-beside-its-module/fixtures',
+    '../../../../specs/lint/test-beside-its-module/_fixtures',
 );
-const OWN = resolve(import.meta.dirname, '../../../../specs/lint/test-beside-its-module/fixtures');
+const OWN = resolve(import.meta.dirname, '../../../../specs/lint/test-beside-its-module/_fixtures');
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../../..');
 

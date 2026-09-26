@@ -1,5 +1,5 @@
 description: --fix moves the spec to its subject's folder, and the ground it stands on with it
-fixture: ./fixtures/moved/
+fixture: ./_fixtures/moved/
 runs:
     - command: checker . --fix
       exit: 0
@@ -7,7 +7,7 @@ runs:
           specs/api/orders/listing.spec.ts: absent
           specs/api/orders/seeds: absent
           specs/api/orders/expected: absent
-          specs/api/orders/list/seeds/orders.sql: exists
-          specs/api/orders/list/expected/listed.http: exists
+          specs/api/orders/list/_seeds/orders.sql: exists
+          specs/api/orders/list/_expected/listed.http: exists
           specs/api/orders/list/listing.spec.ts:
               contains: import { api } from '../../api.specification.js';

@@ -46,7 +46,7 @@ describe('tokens', () => {
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
-    test('findKnownTokens (`no-token-in-request`) — reports known tokens (the requests/ leak signal)', () => {
+    test('findKnownTokens (`no-token-in-request`) — reports known tokens (the _requests/ leak signal)', () => {
         // Given - a request body carrying a token
         // Then - the known token is surfaced (an unknown one is not this signal)
         expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toStrictEqual([

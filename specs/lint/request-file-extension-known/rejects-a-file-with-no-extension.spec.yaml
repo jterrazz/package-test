@@ -1,5 +1,5 @@
-description: rejects a file under requests/ that carries no extension
-fixture: ./fixtures/violation/
+description: rejects a file under _requests/ that carries no extension
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

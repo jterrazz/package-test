@@ -1,5 +1,5 @@
 description: --fix moves a helper two of the split files read into the leaf fixtures module, once
-fixture: ./fixtures/shared-helper/
+fixture: ./_fixtures/shared-helper/
 runs:
     - command: checker . --fix
       exit: 0

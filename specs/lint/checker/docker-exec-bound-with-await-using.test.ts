@@ -8,7 +8,7 @@ describe('docker-exec-bound-with-await-using', () => {
     test('rejects a docker runner result bound without await using', async () => {
         // Given - a docker-aware spec and a test binding its result with const
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/docker-exec-bound-with-await-using/'))
+            .fixture(directory('./_fixtures/lint-violations/docker-exec-bound-with-await-using/'))
             .exec('.');
 
         // Then - the checker fails with the full diagnostic naming the runner
@@ -23,11 +23,13 @@ describe('docker-exec-bound-with-await-using', () => {
     test('accepts a docker runner result bound with await using', async () => {
         // Given - the compliant twin (await using)
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/docker-exec-bound-with-await-using-ok/'))
+            .fixture(
+                directory('./_fixtures/lint-violations/docker-exec-bound-with-await-using-ok/'),
+            )
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 });

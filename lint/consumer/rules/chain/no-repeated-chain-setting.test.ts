@@ -11,7 +11,7 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
             code: [
                 IMPORT,
                 "test('a', async () => { await api.clock('2026-01-01T00:00:00Z').get('/events'); });",
-                "test('b', async () => { await api.seed(file('./seeds/x.sql')).clock('2026-01-01T00:00:00Z').get('/events?page=2'); });",
+                "test('b', async () => { await api.seed(file('./_seeds/x.sql')).clock('2026-01-01T00:00:00Z').get('/events?page=2'); });",
             ].join('\n'),
             errors: [{ messageId: 'repeated' }],
             filename: SPEC,
@@ -20,7 +20,7 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
                 '',
                 "const events = api.with({ clock: '2026-01-01T00:00:00Z' });",
                 "test('a', async () => { await events.get('/events'); });",
-                "test('b', async () => { await events.seed(file('./seeds/x.sql')).get('/events?page=2'); });",
+                "test('b', async () => { await events.seed(file('./_seeds/x.sql')).get('/events?page=2'); });",
             ].join('\n'),
         },
         // The message spells the view it would write.

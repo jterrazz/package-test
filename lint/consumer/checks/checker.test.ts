@@ -39,7 +39,7 @@ function findings(root: string, rule: string): string[] {
         .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
-const WORKSPACE = resolve(import.meta.dirname, '../../../specs/shared/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 function codes(dir: string, root = WORKSPACE): string[] {
@@ -65,40 +65,40 @@ describe('checker', () => {
         // Given - a spec naming three goldens on disk: tracked, new, and ignored
         const root = repository(
             [
-                'specs/api/expected/added.txt',
-                'specs/api/expected/new.txt',
-                'specs/api/expected/local.txt',
+                'specs/api/_expected/added.txt',
+                'specs/api/_expected/new.txt',
+                'specs/api/_expected/local.txt',
             ],
-            ['specs/api/expected/added.txt'],
+            ['specs/api/_expected/added.txt'],
             'local.txt\n',
         );
         writeFileSync(
             join(root, 'specs', 'api', 'boot.spec.ts'),
             [
-                "expect(a).toMatch(file('./expected/added.txt'));",
-                "expect(b).toMatch(file('./expected/new.txt'));",
-                "expect(c).toMatch(file('./expected/local.txt'));",
+                "expect(a).toMatch(file('./_expected/added.txt'));",
+                "expect(b).toMatch(file('./_expected/new.txt'));",
+                "expect(c).toMatch(file('./_expected/local.txt'));",
                 '',
             ].join('\n'),
         );
 
         // Then - only the ignored golden names nothing a checkout holds
         expect(findings(root, 'named-path-exists')).toStrictEqual([
-            "api/boot.spec.ts:3: file('./expected/local.txt') names nothing — api/expected/local.txt is ignored by git",
+            "api/boot.spec.ts:3: file('./_expected/local.txt') names nothing — api/_expected/local.txt is ignored by git",
         ]);
     });
 
     test('the single paths the checker probes — through the same tree — an ignored pool directory is no fixture to move (`ground-shared-or-inline`)', () => {
         // Given - a pool directory `.gitignore` names, reached from one leaf
         const root = repository(
-            ['specs/shared/fixtures/app/index.txt', 'specs/shared/fixtures/kept.txt'],
+            ['specs/_shared/_fixtures/app/index.txt', 'specs/_shared/_fixtures/kept.txt'],
             [],
-            'specs/shared/fixtures/app/\n',
+            'specs/_shared/_fixtures/app/\n',
         );
         mkdirSync(join(root, 'specs', 'api'));
         writeFileSync(
             join(root, 'specs', 'api', 'boot.spec.ts'),
-            "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
+            "await api.fixture(directory('../_shared/_fixtures/app/')).get('/');\n",
         );
 
         // Then - `named-path-exists` names the path, and `ground-shared-or-inline` has nothing to move
@@ -136,7 +136,7 @@ describe('checker', () => {
         // Given - two documents asserting a temp path their `fixture:` holds, one of the two fixtures ignored
         const document = [
             'description: prints where it wrote',
-            'fixture: ./fixtures/where.txt',
+            'fixture: ./_fixtures/where.txt',
             'runs:',
             '    - command: widget where',
             '      exit: 0',
@@ -146,16 +146,16 @@ describe('checker', () => {
         ].join('\n');
         const root = repository(
             [
-                'specs/kept/fixtures/where.txt',
-                'specs/local/fixtures/where.txt',
+                'specs/kept/_fixtures/where.txt',
+                'specs/local/_fixtures/where.txt',
                 'specs/kept/prints-where.spec.yaml',
                 'specs/local/prints-where.spec.yaml',
             ],
             [],
-            'specs/local/fixtures/where.txt\n',
+            'specs/local/_fixtures/where.txt\n',
         );
         for (const leaf of ['kept', 'local']) {
-            writeFileSync(join(root, 'specs', leaf, 'fixtures', 'where.txt'), '/tmp/widget/out\n');
+            writeFileSync(join(root, 'specs', leaf, '_fixtures', 'where.txt'), '/tmp/widget/out\n');
             writeFileSync(join(root, 'specs', leaf, 'prints-where.spec.yaml'), document);
         }
 

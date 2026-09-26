@@ -4,14 +4,14 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-const WORKSPACE = resolve(import.meta.dirname, '../../shared/fixtures/member-workspace');
+const WORKSPACE = resolve(import.meta.dirname, '../../_shared/_fixtures/member-workspace');
 
 describe('file-suffix-matches-place', () => {
     // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a case name that only repeats its directory', async () => {
         // Given - specs/rm/rm.spec.yaml
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/file-suffix-matches-place/'))
+            .fixture(directory('./_fixtures/lint-violations/file-suffix-matches-place/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
@@ -26,18 +26,18 @@ describe('file-suffix-matches-place', () => {
     test('accepts a document that holds the convention', async () => {
         // Given - the compliant twin every document pass shares
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('.');
 
         // Then - the clean summary (0 warnings) on stdout
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/clean.txt'));
+        expect(result.stdout).toMatch(file('./_expected/clean.txt'));
     });
 
     test('renames a `.test.ts` that sits under a facet folder', async () => {
         // Given - a tree holding `specs/api/users/creation.test.ts`
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/file-suffix-matches-place-placement/'))
+            .fixture(directory('./_fixtures/lint-violations/file-suffix-matches-place-placement/'))
             .exec('specs');
 
         // Then - the facet folder already says what it specifies; only the word is wrong
@@ -53,7 +53,7 @@ describe('file-suffix-matches-place', () => {
     test('renames the spec, and leaves the two files that are not its own', async () => {
         // Given - the same tree, where `specs/build/` is a repository suite and `specs/api/helpers/normalize.test.ts` reaches no runner
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/file-suffix-matches-place-placement/'))
+            .fixture(directory('./_fixtures/lint-violations/file-suffix-matches-place-placement/'))
             .exec('specs --fix');
 
         // Then - one rename; the glob and the literal entry it broke, and nothing else: not the commented-out glob, not the `src/` one whose files it never touched, not the repository suite's
@@ -74,7 +74,7 @@ describe('file-suffix-matches-place', () => {
         // Given - a tree whose runner sits at its ROOT: the folders below it are domains, not facets
         const result = await cli
             .fixture(
-                directory('./fixtures/lint-violations/file-suffix-matches-place-rooted-facet/'),
+                directory('./_fixtures/lint-violations/file-suffix-matches-place-rooted-facet/'),
             )
             .exec('specs');
 

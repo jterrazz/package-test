@@ -1,5 +1,5 @@
 description: a precise assertion beside the whole comparison passes
-fixture: ./fixtures/whole-and-probe/
+fixture: ./_fixtures/whole-and-probe/
 runs:
     - command: .
       exit: 0

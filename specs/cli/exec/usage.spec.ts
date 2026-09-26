@@ -9,7 +9,7 @@ describe('usage', () => {
     test('surfaces the whole usage banner on stdout', async () => {
         // Given - the help command
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('help');
 
         // Then - the whole usage banner is surfaced on stdout
@@ -26,7 +26,7 @@ describe('usage', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — returns non-zero when the process exits without matching', async () => {
         // Given - help exits immediately without matching pattern
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('help', { timeout: 5000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 1 (pattern not matched before process exited)

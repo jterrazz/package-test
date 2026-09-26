@@ -1,5 +1,5 @@
 description: rejects a specification.cli() call outside a *.specification.ts file
-fixture: ./fixtures/violation/
+fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1

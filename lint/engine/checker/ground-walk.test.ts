@@ -7,7 +7,7 @@ import type { GroundPasses } from './registry.js';
 
 const TREE = resolve(
     import.meta.dirname,
-    '../../../specs/lint/checker/fixtures/lint-violations/no-unknown-token',
+    '../../../specs/lint/checker/_fixtures/lint-violations/no-unknown-token',
 );
 
 function visited(kind: string, rel: string): Finding {
@@ -24,10 +24,10 @@ const RECORDING: GroundPasses = {
 
 describe('walkGround', () => {
     test('hands each ground file to the pass of the folder it sits in, and leaves a test file alone', () => {
-        // Given - a specs tree holding one test and one file under expected/
+        // Given - a specs tree holding one test and one file under _expected/
         // Then - the one ground file reaches the expected pass, at the top of its folder, and the test reaches none
         expect(walkGround(resolve(TREE, 'specs'), RECORDING)).toStrictEqual([
-            visited('expected at top', 'widget/expected/out.txt'),
+            visited('expected at top', 'widget/_expected/out.txt'),
         ]);
     });
 

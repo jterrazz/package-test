@@ -1,15 +1,15 @@
 description: --fix deletes the copies of a seed the specs root already holds, and names the root's
-fixture: ./fixtures/pooled/
+fixture: ./_fixtures/pooled/
 runs:
     - command: checker . --fix
       exit: 0
       files:
-          specs/shared/seeds/two-users.sql:
+          specs/_shared/_seeds/two-users.sql:
               equals: |
                   INSERT INTO users (name) VALUES ('Alice'), ('Bob');
-          specs/api/users/seeds/two-users.sql: absent
-          specs/api/orders/seeds/two-users.sql: absent
+          specs/api/users/_seeds/two-users.sql: absent
+          specs/api/orders/_seeds/two-users.sql: absent
           specs/api/users/listed.spec.ts:
-              contains: file('../../shared/seeds/two-users.sql')
+              contains: file('../../_shared/_seeds/two-users.sql')
           specs/api/orders/orders.spec.ts:
-              contains: file('../../shared/seeds/two-users.sql')
+              contains: file('../../_shared/_seeds/two-users.sql')

@@ -1,5 +1,5 @@
 description: the React Native testing library passes where jest runs the member's tests
-fixture: ../../shared/fixtures/member-workspace/
+fixture: ../../_shared/_fixtures/member-workspace/
 runs:
     - command: checker --member packages/rn-jest .
       exit: 0

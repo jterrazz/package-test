@@ -1,5 +1,5 @@
 description: rejects Given declared after Then
-fixture: ./fixtures/position/
+fixture: ./_fixtures/position/
 runs:
     - command: .
       exit: 1

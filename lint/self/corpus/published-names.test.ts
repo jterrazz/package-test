@@ -18,7 +18,7 @@ describe('published-names', () => {
         const published = renderPublishedNames(ROOT);
 
         // Then - a name that appears or disappears is a change of the public surface, recorded here
-        expect(text(published)).toMatch(file('./expected/published-names.txt'));
+        expect(text(published)).toMatch(file('./_expected/published-names.txt'));
     });
 
     test("published names — the surface a consumer imports, by name — a chain refuses, under a consumer's compiler options, a setting its facet does not share", () => {

@@ -1,5 +1,5 @@
 description: stays silent for a plain matcher
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

@@ -13,8 +13,8 @@ type MaterialReaders = { materialAt: typeof materialAt; testPackageOf: typeof te
 function answersOf(readers: MaterialReaders): unknown[] {
     return [
         readers.materialAt(resolve(ROOT, 'src/index.test.ts')),
-        readers.materialAt(resolve(ROOT, 'specs/shared/fixtures/api-app/app.ts')),
-        readers.materialAt(resolve(ROOT, 'specs/shared'), true),
+        readers.materialAt(resolve(ROOT, 'specs/_shared/_fixtures/api-app/app.ts')),
+        readers.materialAt(resolve(ROOT, 'specs/_shared'), true),
         readers.materialAt(resolve(ROOT, 'src/index.ts')),
         readers.testPackageOf('vitest/config'),
         readers.testPackageOf('@testing-library/react'),
@@ -46,7 +46,7 @@ describe('index', () => {
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — declares no `categories` — every rule it ships is decided by name', () => {
-        // Given - the fragment, top level and every override entry (the `categories` block in specs/shared/fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
+        // Given - the fragment, top level and every override entry (the `categories` block in specs/_shared/_fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
         const layers: Record<string, unknown>[] = [
             testing as unknown as Record<string, unknown>,
             ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),

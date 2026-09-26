@@ -48,11 +48,11 @@ describe('find', () => {
     test('finds the post the migration wrote', async () => {
         // Given - a seeded database
         const result = await integration
-            .seed(file('./seeds/posts.sql'))
+            .seed(file('./_seeds/posts.sql'))
             .call(({ db }) => findPost(db, 'p-1'));
 
         // Then - the row comes back as the repository shapes it
-        expect(result.value).toMatch(file('./expected/found.json'));
+        expect(result.value).toMatch(file('./_expected/found.json'));
     });
 });
 ```
@@ -79,7 +79,7 @@ describe('PostTable', () => {
         });
 
         // Then - the table is qualified by what it is not showing
-        await expect(result.tree).toMatch(file('./expected/one-of-two-hundred.aria.yaml'));
+        await expect(result.tree).toMatch(file('./_expected/one-of-two-hundred.aria.yaml'));
     });
 });
 ```
@@ -170,7 +170,7 @@ import { job } from '../job.specification.js';
 describe('daily-digest', () => {
     test('writes one digest row per active subscriber', async () => {
         // Given - two subscribers, from the seed beside the test
-        const result = await job.seed(file('./seeds/two-subscribers.sql')).trigger('daily-digest');
+        const result = await job.seed(file('./_seeds/two-subscribers.sql')).trigger('daily-digest');
 
         // Then - the whole table
         await expect(result.table('digests')).toMatch([
@@ -186,7 +186,7 @@ describe('daily-digest', () => {
 ```yaml
 # specs/cli/scaffold/new-project.spec.yaml
 description: scaffolds a project into an empty directory
-fixture: ./fixtures/empty-dir/
+fixture: ./_fixtures/empty-dir/
 runs:
     - command: new my-app
       exit: 0

@@ -32,7 +32,7 @@ describe('specDocuments', () => {
         ]);
     });
 
-    test('spec-documents — reads a document as the data it states, and a path under fixtures/ as an input', () => {
+    test('spec-documents — reads a document as the data it states, and a path under _fixtures/ as an input', () => {
         // Given - a document and two paths
         // Then - the data is the plain object, and only the fixture path is an input
         expect(documentData('description: a case\nruns: []\n')).toStrictEqual({
@@ -40,7 +40,7 @@ describe('specDocuments', () => {
             runs: [],
         });
         expect([
-            isFixture('specs/lint/x/fixtures/a.spec.yaml'),
+            isFixture('specs/lint/x/_fixtures/a.spec.yaml'),
             isFixture('specs/cli/a.spec.yaml'),
         ]).toStrictEqual([true, false]);
     });

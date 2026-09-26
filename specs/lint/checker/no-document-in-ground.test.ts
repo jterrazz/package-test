@@ -8,14 +8,14 @@ describe('no-document-in-ground', () => {
     test('rejects a document filed under ground', async () => {
         // Given - a tree violating \`no-document-in-ground\`
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/no-document-in-ground/'))
+            .fixture(directory('./_fixtures/lint-violations/no-document-in-ground/'))
             .exec('specs');
 
         // Then - the pass names the file and what to do about it
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            widget/expected/builds.spec.yaml:1:1: error jterrazz-check(no-document-in-ground): found: a \`.spec.yaml\` document under a ground folder · why: A \`<case>.spec.yaml\` is a SPEC, not ground: a document under \`expected/\`, \`requests/\`, \`seeds/\` or \`fixtures/\` is an error. · fix: move builds.spec.yaml out of the ground folder, beside the test that runs it · read: docs/19-linting.md#no-document-in-ground
-            widget:1:1: error jterrazz-check(no-unused-ground): found: a domain folder holding expected and no test or document · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: write the test that stands on expected, or delete the folder · read: docs/19-linting.md#no-unused-ground
+            widget/_expected/builds.spec.yaml:1:1: error jterrazz-check(no-document-in-ground): found: a \`.spec.yaml\` document under a ground folder · why: A \`<case>.spec.yaml\` is a SPEC, not ground: a document under \`_expected/\`, \`_requests/\`, \`_seeds/\` or \`_fixtures/\` is an error. · fix: move builds.spec.yaml out of the ground folder, beside the test that runs it · read: docs/19-linting.md#no-document-in-ground
+            widget:1:1: error jterrazz-check(no-unused-ground): found: a domain folder holding _expected and no test or document · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/_shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: write the test that stands on _expected, or delete the folder · read: docs/19-linting.md#no-unused-ground
 
             conventions checker: 2 error(s) found under {{workdir}}/specs
         `);
@@ -24,7 +24,7 @@ describe('no-document-in-ground', () => {
     test('accepts a document beside the test that runs it', async () => {
         // Given - the compliant twin
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/spec-document-ok/'))
+            .fixture(directory('./_fixtures/lint-violations/spec-document-ok/'))
             .exec('specs');
 
         // Then - the clean summary

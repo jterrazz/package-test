@@ -131,7 +131,7 @@ test('shows the events feed behind its deep link', async () => {
     const result = await mobile.open('news://events');
 
     // Then - one golden covers the whole screen
-    expect(result.screen).toMatch(file('./expected/events.screen.json'));
+    expect(result.screen).toMatch(file('./_expected/events.screen.json'));
 });
 ```
 
@@ -205,7 +205,7 @@ test('renders the events feed', async () => {
     const result = await mobile.open('news://events');
 
     // Then - the whole projected tree matches one golden
-    expect(result.screen).toMatch(file('./expected/events.screen.json'));
+    expect(result.screen).toMatch(file('./_expected/events.screen.json'));
 });
 ```
 
@@ -238,7 +238,7 @@ describe('feed', () => {
         const result = await mobile.intercept(newsroom).open('news://events');
 
         // Then - the screen rendered what the stub declared
-        expect(result.screen).toMatch(file('./expected/events.screen.json'));
+        expect(result.screen).toMatch(file('./_expected/events.screen.json'));
     });
 });
 ```
@@ -276,13 +276,13 @@ specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
-    ├── expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
+    ├── _expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
     └── stubs/               # what the declared backend serves — with the `backend` option
         ├── newsroom.stubs.ts
         └── http/…
 ```
 
-No `seeds/` or `requests/` — a mobile chain has no `.seed()` and no request-file format; `.open()` calls are inline, and the golden is always `expected/<name>`.
+No `_seeds/` or `_requests/` — a mobile chain has no `.seed()` and no request-file format; `.open()` calls are inline, and the golden is always `_expected/<name>`.
 
 ## Pitfalls
 

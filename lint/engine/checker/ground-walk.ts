@@ -17,7 +17,7 @@ type Ground = typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SE
 
 const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
 
-/** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
+/** `_fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
 function documentFindings(entry: GroundEntry, passes: GroundPasses): Finding[] {

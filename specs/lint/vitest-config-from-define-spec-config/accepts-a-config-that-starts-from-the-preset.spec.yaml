@@ -1,5 +1,5 @@
 description: accepts a config that starts from the preset
-fixture: ./fixtures/compliant/
+fixture: ./_fixtures/compliant/
 runs:
     - command: .
       exit: 0

@@ -9,7 +9,7 @@ describe('checks', () => {
     test('exists check', async () => {
         // Given - build creates files
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('build');
 
         // Then - file exists and absent file doesn't
@@ -20,7 +20,7 @@ describe('checks', () => {
     test('content check', async () => {
         // Given - build creates files
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('build');
 
         // Then - file contains expected content
@@ -30,7 +30,7 @@ describe('checks', () => {
     test('chains multiple assertions on one result', async () => {
         // Given - a successful build
         const result = await cli
-            .fixture(directory('../../shared/fixtures/specimen-cli/'))
+            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
             .exec('build');
 
         // Then - several read accessors on one result

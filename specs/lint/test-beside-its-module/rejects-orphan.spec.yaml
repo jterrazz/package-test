@@ -1,5 +1,5 @@
 description: a module test with no neighbour module is refused
-fixture: ./fixtures/orphan/
+fixture: ./_fixtures/orphan/
 runs:
     - command: .
       exit: 1

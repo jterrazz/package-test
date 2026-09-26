@@ -30,7 +30,7 @@ const config = defineSpecConfig({
                     }),
                 ],
             },
-            // Depth 1 only: the deliberately-wrong twins under `run/fixtures/` stay inputs to the negative specs.
+            // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs.
             cli({
                 literate: {
                     include: ['specs/cli/run/*.spec.yaml'],
@@ -49,7 +49,7 @@ const config = defineSpecConfig({
                         globalSetup: [
                             resolve(
                                 import.meta.dirname,
-                                'specs/shared/fixtures/appium-double/per-run.ts',
+                                'specs/_shared/_fixtures/appium-double/per-run.ts',
                             ),
                         ],
                     },

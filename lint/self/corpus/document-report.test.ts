@@ -28,7 +28,7 @@ describe('silentLintFailures', () => {
     test('`lint-document-goldens-the-report` — a lint-rule document goldens its report (meta-test) — names a document that pins a failing exit with neither stdout nor stderr golden', () => {
         // Given - one document that goldens nothing, one that goldens stderr, one that stays silent on a passing run, and one under a fixture tree a violation is fed through
         const root = tree({
-            'specs/lint/specs-at-declared-depth/fixtures/violation/rejects.spec.yaml':
+            'specs/lint/specs-at-declared-depth/_fixtures/violation/rejects.spec.yaml':
                 'description: x\nruns:\n    - command: checker .\n      exit: 1\n',
             'specs/lint/specs-at-declared-depth/rejects-depth.spec.yaml':
                 'description: x\nruns:\n    - command: checker .\n      exit: 1\n',
