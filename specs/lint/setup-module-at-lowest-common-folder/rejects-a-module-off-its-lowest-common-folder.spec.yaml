@@ -5,6 +5,7 @@ runs:
       exit: 1
       stderr: |
           specs/cli/_setup/format.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
+          specs/cli/_setup/labels.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
           specs/cli/_setup/rows.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
           specs/cli/_setup/tenant.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
           specs/cli/orders/_setup/clock.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)

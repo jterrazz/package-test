@@ -5,10 +5,12 @@ runs:
       exit: 1
       stderr: |
           specs/cli/_setup/format.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
+          specs/cli/_setup/labels.ts:1:1  jterrazz-check(setup-module-at-lowest-common-folder)
       files:
           specs/_shared/_setup/tenant.ts: exists
           specs/cli/_setup/clock.ts: exists
           specs/cli/_setup/currency.ts: exists
+          specs/cli/_setup/labels.ts: exists
           specs/cli/orders/_setup/rows.ts:
               contains: from '../../_setup/currency.js'
           specs/cli/_setup/rows.ts: absent

@@ -106,6 +106,10 @@ export function importedModulesOf(file: string): string[] {
     return importsOf(file).flatMap(({ targets }) => targets);
 }
 
+export function importsThroughAlias(file: string, module: string): boolean {
+    return importsOf(file).some(({ relative, targets }) => !relative && targets.includes(module));
+}
+
 export function readersOf(modules: readonly string[]): Map<string, string[]> {
     const known = new Set(modules);
     const readers = new Map<string, string[]>();

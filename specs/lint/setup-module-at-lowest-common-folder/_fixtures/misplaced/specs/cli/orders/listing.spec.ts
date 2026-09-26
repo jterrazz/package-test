@@ -1,5 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { LABELS } from '#cli-setup/labels.js';
+
 import { cli } from '../cli.specification.js';
 import { FORMAT } from '../_setup/format.js';
 import { ROWS } from '../_setup/rows.js';
@@ -14,6 +16,7 @@ describe('listing', () => {
         expect(result.exitCode).toBe(0);
         expect(FORMAT).toBeDefined();
         expect(ROWS).toBeDefined();
+        expect(LABELS).toBeDefined();
         expect(NOW).toBeDefined();
     });
 });

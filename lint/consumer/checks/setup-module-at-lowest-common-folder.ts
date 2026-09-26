@@ -5,6 +5,7 @@ import { repointSource } from '../../engine/checker/repoint.js';
 import { moveKeepingHistory } from '../../engine/project/git-tree.js';
 import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
+    importsThroughAlias,
     isTestOrSpecName,
     lowestPlaceOf,
     MAX_SPEC_LINES,
@@ -27,6 +28,7 @@ const MODULE_EXTENSION = /\.[cm]?[jt]sx?$/u;
 
 type Misplaced =
     | {
+          aliased: boolean;
           module: string;
           kind: 'move';
           lowest: string;
@@ -82,7 +84,17 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
         const home = reservedFolderOf(specsRoot, lowest, SETUP_FOLDER);
         if (home !== setup) {
             const target = join(home, relative(setup, module));
-            found.push({ kind: 'move', lowest, module, readers: read, setup, specsRoot, target });
+            const aliased = read.some((reader) => importsThroughAlias(reader, module));
+            found.push({
+                aliased,
+                kind: 'move',
+                lowest,
+                module,
+                readers: read,
+                setup,
+                specsRoot,
+                target,
+            });
         }
     }
     return found;
@@ -104,7 +116,9 @@ function findingOf(rootDir: string, misplaced: Misplaced): Finding {
     return {
         file: relative(rootDir, module),
         line: 1,
-        fix: `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both`,
+        fix: misplaced.aliased
+            ? `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`make fix\` moves no module an alias reaches`
+            : `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both`,
         found: `\`specs/${rel}\`, whose readers share \`${shown(specsRoot, misplaced.lowest)}\`, not \`${shown(specsRoot, ownerOfSetup(specsRoot, misplaced.setup))}\``,
         rule: 'setup-module-at-lowest-common-folder',
         severity: 'error',
@@ -156,7 +170,7 @@ export function fixSetupModuleAtLowestCommonFolder(rootDir: string): string[] {
     const movedTo = new Map<string, string>();
     for (const specsRoot of findSpecsRoots(rootDir)) {
         for (const misplaced of misplacedUnder(specsRoot)) {
-            if (misplaced.kind === 'inline' || existsSync(misplaced.target)) {
+            if (misplaced.kind === 'inline' || misplaced.aliased || existsSync(misplaced.target)) {
                 continue;
             }
             const { module, readers, setup, target } = misplaced;
