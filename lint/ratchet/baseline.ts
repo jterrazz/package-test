@@ -10,18 +10,18 @@ export const BASELINE_SECTION = 'test';
 
 export const BASELINE_LABEL = `${BASELINE_FILE} › ${BASELINE_SECTION}`;
 
-export const CHECKER_NAMESPACE = 'jterrazz-check';
-
 /** `jterrazz(test-beside-its-module)` → `jterrazz/test-beside-its-module`. */
-export function keyOf(code: string): string {
-    const match = /^(?<plugin>[\w-]+)\((?<rule>[^)]+)\)$/u.exec(code);
-    return match?.groups === undefined ? code : `${match.groups.plugin}/${match.groups.rule}`;
+export function keyOf(printedRule: string): string {
+    const match = /^(?<plugin>[\w-]+)\((?<rule>[^)]+)\)$/u.exec(printedRule);
+    return match?.groups === undefined
+        ? printedRule
+        : `${match.groups.plugin}/${match.groups.rule}`;
 }
 
-export function countsOf(codes: readonly string[]): Record<string, number> {
+export function countsOf(printedRules: readonly string[]): Record<string, number> {
     const counts: Record<string, number> = {};
-    for (const code of codes) {
-        const key = keyOf(code);
+    for (const printedRule of printedRules) {
+        const key = keyOf(printedRule);
         counts[key] = (counts[key] ?? 0) + 1;
     }
     return counts;

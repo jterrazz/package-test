@@ -67,6 +67,8 @@ export const CHECKER_PASS_IDS: string[] = [
 
 export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
 
+export const CHECKER_NAMESPACE = 'jterrazz-check';
+
 export type Severity = 'error' | 'warn';
 
 export type Finding<PassId extends string = CheckerPassId> = Teaching & {
@@ -74,7 +76,7 @@ export type Finding<PassId extends string = CheckerPassId> = Teaching & {
     column?: number;
     file: string;
     line: number;
-    /** Published as `jterrazz-check(<code>)`, counted by the ratchet under `jterrazz-check/<code>`. */
+    /** Published as `jterrazz-check(<name>)`, counted by the ratchet under `jterrazz-check/<name>`. */
     rule: PassId;
     severity: Severity;
     token?: string;
@@ -109,7 +111,7 @@ export function runAllChecks(rootDir: string): Finding[] {
 export function reportLine(violation: Finding<string>, message: string): string {
     const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
-    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${rule}): ${message}`;
+    return `${file}:${line}:${column ?? 1}: ${level} ${CHECKER_NAMESPACE}(${rule}): ${message}`;
 }
 
 export function formatViolation(violation: Finding<string>): string {

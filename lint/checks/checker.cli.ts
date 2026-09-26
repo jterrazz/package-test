@@ -15,7 +15,6 @@ import type { LintConfigMove, Migration } from '../migration/mover.js';
 import {
     BASELINE_FILE,
     BASELINE_LABEL,
-    CHECKER_NAMESPACE,
     countsOf,
     judge,
     keepsBaseline,
@@ -25,6 +24,7 @@ import {
 import { tightened } from '../ratchet/fix.js';
 import { packageRootOf, projectRootOf } from '../reading/role.js';
 import {
+    CHECKER_NAMESPACE,
     CHECKER_PASS_IDS,
     formatViolation,
     MEMBER_PASS_IDS,
@@ -87,7 +87,7 @@ function judgingProject(): string | undefined {
     return keepsBaseline(process.cwd()) ? process.cwd() : undefined;
 }
 
-function codeOfFinding(violation: Finding): string {
+function printedRuleOf(violation: Finding): string {
     return `${CHECKER_NAMESPACE}(${violation.rule})`;
 }
 
@@ -119,7 +119,7 @@ function printFindings(violations: Finding[], plugin: PluginDiagnostic[] = []): 
         console.log(
             JSON.stringify(
                 violations.map((violation) => ({
-                    code: codeOfFinding(violation),
+                    code: printedRuleOf(violation),
                     file: violation.file,
                     line: violation.line,
                     message: messageOf(violation),
@@ -185,7 +185,7 @@ function ratchet({ counted, own, passes, plugin, root, what }: RatchetRun): neve
     if (keepsBaseline(root)) {
         const findings = counted();
         const counts = countsOf([
-            ...findings.map(codeOfFinding),
+            ...findings.map(printedRuleOf),
             ...plugin.map((diagnostic) => diagnostic.code),
         ]);
         const baseline = fix ? reRecorded(root, counts) : readBaseline(root);
@@ -519,7 +519,7 @@ if (recording) {
     const findings = projectFindings(root);
     const plugin = pluginDiagnostics(root, reportFile);
     const counts = countsOf([
-        ...findings.map(codeOfFinding),
+        ...findings.map(printedRuleOf),
         ...plugin.map((diagnostic) => diagnostic.code),
     ]);
     writeBaseline(root, counts);

@@ -1,13 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import {
-    BASELINE_FILE,
-    CHECKER_NAMESPACE,
-    keepsBaseline,
-    readBaseline,
-    writeBaseline,
-} from '../ratchet/baseline.js';
+import { CHECKER_NAMESPACE } from '../checks/checker.js';
+import { BASELINE_FILE, keepsBaseline, readBaseline, writeBaseline } from '../ratchet/baseline.js';
 import { PASS_NAMES, RULE_NAMES } from './names.js';
 
 export type BaselineKeysMove = {
