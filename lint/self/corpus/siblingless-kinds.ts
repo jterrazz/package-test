@@ -159,7 +159,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'lint/self/catalogue/chapters.cli.ts',
             'lint/checks/checker.cli.ts',
-            'lint/self/test-coverage/floor.cli.ts',
+            'lint/self/ratchet/coverage.cli.ts',
             'lint/self/checks/checker.cli.ts',
             'src/facets/api/routes/route-split-cli.ts',
         ),
