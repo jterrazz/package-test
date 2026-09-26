@@ -3,7 +3,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { relativeLiterals } from '../../engine/checker/repoint.js';
 import { moveKeepingHistory, treeKind } from '../../engine/project/git-tree.js';
-import { isGroundName, SHARED_GROUND } from '../../engine/project/ground.js';
+import { isGroundName, SHARED_FOLDER } from '../../engine/project/ground.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { literalSpans } from '../../engine/project/spec-values.js';
@@ -44,7 +44,7 @@ function ownerOf(specsRoot: string, ground: string): string | undefined {
     if (owner === specsRoot) {
         return undefined;
     }
-    return owner === join(specsRoot, SHARED_GROUND) ? specsRoot : owner;
+    return owner === join(specsRoot, SHARED_FOLDER) ? specsRoot : owner;
 }
 
 const WHOLE_LITERAL = /^(?:\.\/)?specs\/[^\s]*$/gu;
@@ -213,7 +213,7 @@ export function fixGroundPlacement(rootDir: string): string[] {
             }
         }
         removeIfEmpty(ground);
-        if (basename(dirname(ground)) === SHARED_GROUND) {
+        if (basename(dirname(ground)) === SHARED_FOLDER) {
             removeIfEmpty(dirname(ground));
         }
         moved.push(`${relative(rootDir, join(ground, entry))} → ${relative(rootDir, destination)}`);

@@ -3,7 +3,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:pat
 
 import { isNode, nodeStart } from './ast.js';
 import { treeEntries, treeKind } from './git-tree.js';
-import { GROUND_DIRS, isGroundName, SHARED_GROUND } from './ground.js';
+import { GROUND_DIRS, isGroundName, SHARED_FOLDER } from './ground.js';
 import { parseProgram } from './module-parser.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isRelativePath } from './relative-path.js';
@@ -15,7 +15,7 @@ const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 export const GROUND_SUBDIRS = new Set<string>(GROUND_DIRS);
 
 function isSharedFolder(dir: string): boolean {
-    return basename(dir) === SHARED_GROUND && basename(dirname(dir)) === 'specs';
+    return basename(dir) === SHARED_FOLDER && basename(dirname(dir)) === 'specs';
 }
 
 function isPool(dir: string): boolean {
@@ -363,7 +363,7 @@ export function lowestCommonFolder(folders: readonly string[]): string | undefin
 }
 
 export function reservedFolderOf(specsRoot: string, owner: string, reserved: string): string {
-    return owner === specsRoot ? join(specsRoot, SHARED_GROUND, reserved) : join(owner, reserved);
+    return owner === specsRoot ? join(specsRoot, SHARED_FOLDER, reserved) : join(owner, reserved);
 }
 
 export function decodeText(path: string): null | string {

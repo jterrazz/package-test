@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isFile } from '../../../engine/project/fs-cache.js';
-import { isGroundName, SETUP_FOLDER, SHARED_GROUND } from '../../../engine/project/ground.js';
+import { isGroundName, SETUP_FOLDER, SHARED_FOLDER } from '../../../engine/project/ground.js';
 import { specsAnchorOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { declaresTests } from '../../../engine/project/specs-modules.js';
@@ -78,7 +78,7 @@ export const specsAtDeclaredDepth: LintRule = {
                     }
                 }
                 const spec = isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX);
-                if (spec && nesting >= 1 && anchor.relative[0] === SHARED_GROUND) {
+                if (spec && nesting >= 1 && anchor.relative[0] === SHARED_FOLDER) {
                     context.report({ messageId: 'specInShared', node });
                     return;
                 }

@@ -6,7 +6,7 @@ import {
     isGroundName,
     isReservedName,
     SETUP_FOLDER,
-    SHARED_GROUND,
+    SHARED_FOLDER,
     UNMARKED_RESERVED,
 } from './ground.js';
 import { parseProgram } from './module-parser.js';
@@ -14,7 +14,7 @@ import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
 import { isWithin, readText } from './tree.js';
 
-const PRUNED = new Set(['.git', 'dist', 'node_modules']);
+export const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
 export const COMPONENT_TREE = 'component';
 
@@ -73,7 +73,7 @@ export function setupFolderOf(specsRoot: string, file: string): string | undefin
 
 export function ownerOfSetup(specsRoot: string, setup: string): string {
     const owner = dirname(setup);
-    return owner === join(specsRoot, SHARED_GROUND) ? specsRoot : owner;
+    return owner === join(specsRoot, SHARED_FOLDER) ? specsRoot : owner;
 }
 
 export function importedModulesOf(file: string): string[] {
@@ -122,7 +122,7 @@ function isRefusedReserved(specsRoot: string, folder: string): boolean {
     const name = basename(folder);
     return (
         (name.startsWith('_') && !isReservedName(name)) ||
-        (name === SHARED_GROUND && dirname(folder) !== specsRoot) ||
+        (name === SHARED_FOLDER && dirname(folder) !== specsRoot) ||
         isUnmarkedReserved(specsRoot, folder)
     );
 }

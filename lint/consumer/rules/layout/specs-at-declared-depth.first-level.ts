@@ -1,6 +1,6 @@
 import { FACETS } from '../../../engine/project/facets.js';
 import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
-import { isGroundName, SHARED_GROUND } from '../../../engine/project/ground.js';
+import { isGroundName, SHARED_FOLDER } from '../../../engine/project/ground.js';
 import { declaresTests } from '../../../engine/project/specs-modules.js';
 
 function holdsATest(folder: string): boolean {
@@ -18,7 +18,7 @@ export function isStrayFolder(specs: string, relative: readonly string[]): boole
     return (
         relative.length > 1 &&
         !FACETS.has(first) &&
-        first !== SHARED_GROUND &&
+        first !== SHARED_FOLDER &&
         !holdsATest(`${specs}/${first}`)
     );
 }

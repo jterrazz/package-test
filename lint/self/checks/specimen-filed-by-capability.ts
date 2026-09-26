@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 import type { Finding } from '../../engine/checker/finding.js';
-import { SHARED_GROUND } from '../../engine/project/ground.js';
+import { SHARED_FOLDER } from '../../engine/project/ground.js';
 import { specimenOf } from '../../engine/project/specimen.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { listFiles } from '../../engine/project/tree.js';
@@ -106,7 +106,7 @@ export function checkSpecimenFiledByCapability(specsRoot: string): Finding<SelfP
 function checkSpecimenSpecs(specsRoot: string): Finding<SelfPassId>[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
         const [facet = ''] = relative(specsRoot, file).split(sep);
-        if (facet === SHARED_GROUND) {
+        if (facet === SHARED_FOLDER) {
             return [];
         }
         const text = readFileSync(file, 'utf8');

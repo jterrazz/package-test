@@ -8,7 +8,7 @@ import {
     repointSource,
 } from '../../engine/checker/repoint.js';
 import { moveKeepingHistory, treeEntries } from '../../engine/project/git-tree.js';
-import { GROUND_DIRS, SHARED_GROUND } from '../../engine/project/ground.js';
+import { GROUND_DIRS, SHARED_FOLDER } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import {
     collectFixtureReferences,
@@ -23,7 +23,7 @@ import {
 import type { Finding } from './checker.js';
 
 export function poolsOf(specsRoot: string): string[] {
-    return GROUND_DIRS.map((ground) => join(specsRoot, SHARED_GROUND, ground));
+    return GROUND_DIRS.map((ground) => join(specsRoot, SHARED_FOLDER, ground));
 }
 
 /** `map/pois/` holds the ground `map/pois/detail/` shares with it. */
@@ -53,13 +53,13 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
             violations.push({
                 file: relative(rootDir, folder),
                 line: 1,
-                fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_GROUND, role))}/ — \`make fix\` moves it and rewrites every path that names it`,
-                found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_GROUND))}/`,
+                fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_FOLDER, role))}/ — \`make fix\` moves it and rewrites every path that names it`,
+                found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/`,
                 rule: 'no-reach-into-sibling-ground',
                 severity: 'error',
             });
         }
-        for (const file of listReferrers(specsRoot, join(specsRoot, SHARED_GROUND))) {
+        for (const file of listReferrers(specsRoot, join(specsRoot, SHARED_FOLDER))) {
             const leaf = dirname(file);
             for (const { column, line, path } of collectFixtureReferences(file, DISK_CALL)) {
                 const target = resolve(leaf, path);
@@ -75,7 +75,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                     column,
                     file: rel,
                     line,
-                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${relative(rootDir, join(specsRoot, SHARED_GROUND))}/<role>/ when they span facets`,
+                    fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/<role>/ when they span facets`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
                     rule: 'no-reach-into-sibling-ground',
                     severity: 'error',
@@ -91,7 +91,7 @@ export function fixNoReachIntoSiblingGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         for (const folder of rootGroundOf(specsRoot)) {
-            const shared = join(specsRoot, SHARED_GROUND, basename(folder));
+            const shared = join(specsRoot, SHARED_FOLDER, basename(folder));
             const moves = treeEntries(folder)
                 .map((entry) => ({
                     copy: join(folder, entry.name),

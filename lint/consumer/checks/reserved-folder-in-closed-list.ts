@@ -6,14 +6,12 @@ import {
     isReservedName,
     RESERVED_FOLDERS,
     SETUP_FOLDER,
-    SHARED_GROUND,
+    SHARED_FOLDER,
     UNMARKED_RESERVED,
 } from '../../engine/project/ground.js';
-import { isUnmarkedReserved } from '../../engine/project/specs-modules.js';
+import { isUnmarkedReserved, PRUNED } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
-
-const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
 const CLOSED_LIST = RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ');
 
@@ -43,12 +41,12 @@ function judged(
             `rename it to the reserved folder that says what it holds — ${CLOSED_LIST} — or drop the \`_\` if it is a subject`,
         );
     }
-    if (name === SHARED_GROUND && !atRoot) {
+    if (name === SHARED_FOLDER && !atRoot) {
         return finding(
             rootDir,
             folder,
-            `\`${SHARED_GROUND}/\` below the specs root`,
-            `move what it holds into the reserved folders of \`${relative(specsRoot, dirname(folder))}/\` itself — what a folder's leaves share sits in that folder's \`${SETUP_FOLDER}/\` or ground; \`${SHARED_GROUND}/\` exists only as \`specs/${SHARED_GROUND}/\`, for what facets share`,
+            `\`${SHARED_FOLDER}/\` below the specs root`,
+            `move what it holds into the reserved folders of \`${relative(specsRoot, dirname(folder))}/\` itself — what a folder's leaves share sits in that folder's \`${SETUP_FOLDER}/\` or ground; \`${SHARED_FOLDER}/\` exists only as \`specs/${SHARED_FOLDER}/\`, for what facets share`,
         );
     }
     const marked = UNMARKED_RESERVED[name];
@@ -82,7 +80,7 @@ function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
                         rootDir,
                         path,
                         `\`${relative(specsRoot, path)}\`, which is no reserved folder`,
-                        `\`specs/${SHARED_GROUND}/\` holds reserved folders alone — code in \`${SHARED_GROUND}/${SETUP_FOLDER}/\`, data in the ground folder of its role`,
+                        `\`specs/${SHARED_FOLDER}/\` holds reserved folders alone — code in \`${SHARED_FOLDER}/${SETUP_FOLDER}/\`, data in the ground folder of its role`,
                     ),
                 );
                 continue;
@@ -92,7 +90,7 @@ function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
             }
             const refused = judged(rootDir, specsRoot, path, entry.name);
             if (refused === undefined) {
-                visit(path, dir === specsRoot && entry.name === SHARED_GROUND);
+                visit(path, dir === specsRoot && entry.name === SHARED_FOLDER);
             } else {
                 found.push(refused);
             }

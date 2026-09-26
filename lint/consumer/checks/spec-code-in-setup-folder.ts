@@ -28,13 +28,13 @@ function isUnitUnderTest(file: string): boolean {
     return TEST_BESIDE.some((suffix) => existsSync(`${stem}${suffix}`));
 }
 
-function holdsASpec(folder: string): boolean {
+function holdsASpecDirectly(folder: string): boolean {
     return treeNames(folder).some((name) => declaresTests(name));
 }
 
 function subjectOf(specsRoot: string, file: string): string {
     let folder = dirname(file);
-    while (folder !== specsRoot && dirname(folder) !== specsRoot && !holdsASpec(folder)) {
+    while (folder !== specsRoot && dirname(folder) !== specsRoot && !holdsASpecDirectly(folder)) {
         folder = dirname(folder);
     }
     return folder;
