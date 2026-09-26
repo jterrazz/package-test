@@ -1,21 +1,16 @@
 import type { Context } from '@oxlint/plugins';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { parseSync } from 'oxc-parser';
-import { describe, expect, test } from 'vitest';
 
-import { child, childList, identifierName, isNode, walk } from '../reading/ast.js';
-import type { AstNode } from '../reading/ast.js';
-import selfPlugin from '../self/rules/plugin.js';
-import plugin from './plugin.js';
-import type { LintRule, Visitor } from './rule.js';
+import { child, childList, identifierName, isNode, walk } from '../../reading/ast.js';
+import type { AstNode } from '../../reading/ast.js';
+import { parsedModule } from '../../reading/module-parser.js';
+import type { LintRule, Visitor } from '../../rules/rule.js';
 
-const ROOT = resolve(import.meta.dirname, '../..');
+export const ROOT = resolve(import.meta.dirname, '../../..');
 
-function e2eOptions(): Map<string, unknown[]> {
-    const config: unknown = JSON.parse(
-        readFileSync(join(ROOT, 'specs/shared/fixtures/lint-cli/oxlint.e2e.json'), 'utf8'),
-    );
+export function e2eOptions(configPath: string): Map<string, unknown[]> {
+    const config: unknown = JSON.parse(readFileSync(configPath, 'utf8'));
     const rules =
         typeof config === 'object' && config !== null && 'rules' in config ? config.rules : {};
     const settings = typeof rules === 'object' && rules !== null ? Object.entries(rules) : [];
@@ -24,10 +19,8 @@ function e2eOptions(): Map<string, unknown[]> {
     );
 }
 
-const E2E_OPTIONS = e2eOptions();
-
-function corpusOf(rule: string): string[] {
-    const fixtures = join(ROOT, 'specs/lint', rule, 'fixtures');
+export function corpusOf(rule: string, lintSpecs: string): string[] {
+    const fixtures = join(lintSpecs, rule, 'fixtures');
     let entries: string[];
     try {
         entries = readdirSync(fixtures, { recursive: true }).map(String);
@@ -67,7 +60,11 @@ function visit(node: AstNode, parent: AstNode | null, handlers: Visitor): void {
 }
 
 /** One visitor per rule, handed file after file, as oxlint does with a `createOnce` rule. */
-function session(rule: LintRule, id: string): (file: string) => Verdict[] {
+export function session(
+    rule: LintRule,
+    id: string,
+    options: ReadonlyMap<string, unknown[]>,
+): (file: string) => Verdict[] {
     const state: { file: string; source: object; verdicts: Verdict[] } = {
         file: '',
         source: {},
@@ -79,7 +76,7 @@ function session(rule: LintRule, id: string): (file: string) => Verdict[] {
         },
         id: `jterrazz/${id}`,
         get options() {
-            return E2E_OPTIONS.get(`jterrazz/${id}`) ?? [];
+            return options.get(`jterrazz/${id}`) ?? [];
         },
         get physicalFilename() {
             return state.file;
@@ -100,7 +97,7 @@ function session(rule: LintRule, id: string): (file: string) => Verdict[] {
     const handlers = rule.createOnce(context as unknown as Context);
     return (file) => {
         const text = readFileSync(file, 'utf8');
-        const parsed = parseSync(file, text);
+        const parsed = parsedModule(file, text);
         const { comments } = parsed;
         const program: unknown = parsed.program;
         state.file = file;
@@ -122,7 +119,7 @@ function session(rule: LintRule, id: string): (file: string) => Verdict[] {
     };
 }
 
-function ruleSources(): string[] {
+export function ruleSources(): string[] {
     return readdirSync(join(ROOT, 'lint/rules'), { recursive: true })
         .map(String)
         .filter((entry) => entry.endsWith('.ts') && !entry.endsWith('.test.ts'))
@@ -146,8 +143,8 @@ function assignedUnder(node: AstNode): string[] {
 }
 
 /** Each `let` its body declares that neither `before` nor the `Program` handler assigns. */
-function unresetState(source: string): string[] {
-    const program: unknown = parseSync(source, readFileSync(source, 'utf8')).program;
+export function unresetState(source: string): string[] {
+    const program: unknown = parsedModule(source, readFileSync(source, 'utf8')).program;
     if (!isNode(program)) {
         return [`${source}: does not parse`];
     }
@@ -175,38 +172,3 @@ function unresetState(source: string): string[] {
     });
     return unreset.map((name) => `${source.slice(ROOT.length + 1)}: ${name}`);
 }
-
-describe('rule', () => {
-    test('rule-shape — a rule built once judges each file as if it were the only one — what a rule keeps for one file is reset when the next one opens', () => {
-        // Given - every rule module, and the state its `createOnce` keeps between hooks
-        const unreset = ruleSources().flatMap((source) => unresetState(source));
-
-        // Then - `before` (or the `Program` handler, the first node of a file) writes each of them afresh
-        expect(unreset).toStrictEqual([]);
-    });
-
-    test('rule-shape — a rule built once judges each file as if it were the only one — every rule draws the same verdicts from a file, alone or after its whole corpus', () => {
-        // Given - each rule's E2E fixture corpus, linted file by file with a visitor of their own, then twice through ONE visitor
-        const drifted: string[] = [];
-        let verdicts = 0;
-        for (const [id, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
-            const files = corpusOf(id);
-            const alone = files.map((file) => session(rule, id)(file));
-            const lint = session(rule, id);
-            for (const file of files) {
-                lint(file);
-            }
-            const sequenced = files.map((file) => lint(file));
-            verdicts += alone.flat().length;
-            for (const [index, file] of files.entries()) {
-                if (JSON.stringify(sequenced[index]) !== JSON.stringify(alone[index])) {
-                    drifted.push(`${id}: ${file.slice(ROOT.length + 1)}`);
-                }
-            }
-        }
-
-        // Then - what one file left in the visitor never reaches the next one, and the corpus was judged at all
-        expect(drifted).toStrictEqual([]);
-        expect(verdicts).toBeGreaterThan(0);
-    });
-});

@@ -90,10 +90,10 @@ The package proves itself in five layers, and they are meant to be read from the
 | Layer                   | Where                                               | What it judges                                                           | Files |
 | ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 124   |
-| Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
+| Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 62    |
 | The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 163   |
 | The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 174   |
-| Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 20    |
+| Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
 <!-- /GENERATED:layers -->
 
@@ -180,12 +180,12 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **151 modules** have no sibling test, and every one of them is claimed:
+Today **152 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                  | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                      |
 | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | composition root or barrel (12)       | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                                                                               |
-| type-only declaration (23)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                   |
+| type-only declaration (24)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                   |
 | constant data (11)                    | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `source-imports.test.ts` and `layers.test.ts` for the engine owners) |
 | a facet's vitest project (3)          | `projects.test.ts` builds every one of them and asserts the project it produces                                                                                                                                                                                                                                                                                                                                                        |
 | a module that runs only in a page (2) | it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                        |
@@ -439,11 +439,11 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**21 files** are the channel — every `*.test.ts` directly under `lint/` or `lint/self/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**24 files** are the channel — every `*.test.ts` directly under `lint/` or `lint/self/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |
-| `lint/self/catalogue/manifest.test.ts`       | manifest           | 33    |
+| `lint/self/catalogue/manifest.test.ts`       | manifest           | 34    |
 | `lint/self/corpus/architecture.test.ts`      | architecture       | 4     |
 | `lint/self/corpus/audience.test.ts`          | audience           | 10    |
 | `lint/self/corpus/compositions.test.ts`      | compositions       | 4     |
@@ -454,10 +454,13 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/makefile.test.ts`          | makefile           | 5     |
 | `lint/self/corpus/matrix-calls.test.ts`      | matrix-calls       | 5     |
 | `lint/self/corpus/matrix.test.ts`            | matrix             | 12    |
+| `lint/self/corpus/messages.test.ts`          | messages           | 4     |
 | `lint/self/corpus/meta-tests.test.ts`        | metaTests          | 3     |
 | `lint/self/corpus/oxlint-pin.test.ts`        | oxlint-pin         | 2     |
+| `lint/self/corpus/package-exports.test.ts`   | package-exports    | 6     |
 | `lint/self/corpus/port-readers.test.ts`      | portReaders        | 2     |
 | `lint/self/corpus/published-names.test.ts`   | published-names    | 3     |
+| `lint/self/corpus/rule-state.test.ts`        | rule-state         | 2     |
 | `lint/self/corpus/schema-documents.test.ts`  | schema-documents   | 9     |
 | `lint/self/corpus/siblings.test.ts`          | siblings           | 5     |
 | `lint/self/corpus/skill.test.ts`             | skill              | 6     |

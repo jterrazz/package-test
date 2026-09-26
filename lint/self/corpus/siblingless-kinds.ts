@@ -56,6 +56,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/stubs/exchange/exchange.ts',
             'lint/reading/config-shape.ts',
             'lint/catalogue/row.ts',
+            'lint/rules/rule.ts',
         ),
         name: 'type-only declaration',
         why: 'it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse',

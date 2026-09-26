@@ -1,21 +1,9 @@
-import { readFileSync } from 'node:fs';
-import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { FORK, spliceFork } from './fork.js';
-
-const ROOT = resolve(import.meta.dirname, '../..');
+import { FORK } from './fork.js';
 
 describe('fork', () => {
-    test('the fork — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
-        // Given - the committed constitution
-        const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
-
-        // Then - splicing a fresh table changes nothing
-        expect(spliceFork(committed)).toBe(committed);
-    });
-
-    test('the fork — generation freshness (meta-test) — asks nine questions, one per kind, the module alone second to last', () => {
+    test('asks nine questions, one per kind, the module alone second to last', () => {
         // Given - the rows of the fork, in the order they are asked
         const kinds = FORK.map((row) => row.kind);
 

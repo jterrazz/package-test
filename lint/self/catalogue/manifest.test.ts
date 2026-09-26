@@ -7,6 +7,7 @@ import { lessonParts } from '../../../src/kernel/refusals/lesson.js';
 import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
 import { anchor, spliceCatalog } from '../../catalogue/chapter.js';
 import { FAMILIES } from '../../catalogue/families.js';
+import { spliceFork } from '../../catalogue/fork.js';
 import {
     CHECKER_PASSES,
     consumerCatalog,
@@ -83,7 +84,7 @@ function metaProofs(): Set<string> {
         read('lint/self/corpus/audience.test.ts'),
         read('lint/self/corpus/document-report.test.ts'),
         read('lint/self/corpus/env-allowlist.test.ts'),
-        read('lint/catalogue/lesson.test.ts'),
+        read('lint/self/corpus/messages.test.ts'),
         read('lint/self/corpus/matrix.test.ts'),
         read('lint/self/corpus/port-readers.test.ts'),
         read('lint/self/corpus/siblings.test.ts'),
@@ -296,6 +297,14 @@ describe('manifest', () => {
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
         expect(spliceCatalog(committed)).toBe(committed);
+    });
+
+    test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
+        // Given - the committed constitution
+        const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
+
+        // Then - splicing a fresh table changes nothing
+        expect(spliceFork(committed)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the docs/03 table of the self rows is byte-identical to a fresh generation', () => {

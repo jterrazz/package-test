@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { parseProgram } from './module-parser.js';
 
-describe('parseProgram', () => {
-    test('parses a module into the ESTree shape a rule reads', () => {
+describe('module-parser', () => {
+    test('parseProgram — parses a module into the ESTree shape a rule reads', () => {
         // Given - a typed module naming another
         const program = parseProgram(
             'a.ts',
@@ -20,7 +20,7 @@ describe('parseProgram', () => {
         });
     });
 
-    test('answers nothing for a source that does not parse', () => {
+    test('parseProgram — answers nothing for a source that does not parse', () => {
         // Given - a module cut in the middle of a statement
         // Then - no program to walk
         expect(parseProgram('a.ts', 'export const = ;')).toBeUndefined();
