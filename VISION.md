@@ -203,10 +203,6 @@ commit, prototype plumbing that never reaches the release.
 
 ### Deferred in package-test
 
-- **The toolchain's checker floor.** `CHECKER_FLOOR` in `@jterrazz/typescript`
-  stays `15.3.0` for the prototype, and becomes `17.0.0` at the release: the
-  `--oxlint-report` flag and the judging run's log are 17's.
-
 - **`lint/` one folder per rule.** The rules moved to the root as they were,
   `lint/consumer/rules/<family>/<rule>.ts` beside its test.
 - **The lint rule specs still to convert in the refactor** — the checker's,
@@ -1430,8 +1426,8 @@ The api/jobs documents turned into indexes of links (a 6-line document pointing 
 ## The exit plan — no legacy, a perfect end state (owner, 2026-09-23)
 
 1. The real refactor starts from `main` in clean commits (never replaying vision/17's history): every tried-then-dropped form is absent — `…File` verbs, api/jobs documents, `--summary`, `toMatchRows`, transitional forms; the prototype plumbing (file: links, install-links .npmrc) never lands; VISION.md becomes chapters + ADRs then is deleted; VISION-signews-api.md deleted. Releases: @jterrazz/typescript 11.0, then @jterrazz/test 17.0.
-2. The wave keeps, temporarily, only what moves a repository from 16 to 17: the mover (C13 --fix), the rule-rename maps, the leftover-baseline finding.
-3. Right after the wave: @jterrazz/test 17.1 and @jterrazz/typescript 11.1 delete the mover, C13, the rename maps, the leftover-file detection, CHECKER_FLOOR, and every rule whose only job was to recognise the old world. Then a closing audit: no code, chapter, spec, estate wiki page or session memory names a retired form.
+2. No legacy ships (owner revision, 2026-09-26): the mover, C13, the rename maps, the leftover-file detection, CHECKER_FLOOR and every rule whose only job was to recognise the old world are deleted in vision/17 itself; consumers move from 16 to 17 by hand or through agents during the wave.
+3. A closing audit follows the wave: no code, chapter, spec, estate wiki page or session memory names a retired form.
 
 ## Iteration 15 — the calls on 88–93 (2026-09-23)
 
