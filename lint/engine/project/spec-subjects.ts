@@ -209,10 +209,9 @@ export function secondSubjectAt(spec: SpecRead): { column: number; line: number 
     return positionOf(spec.text, second?.index ?? 0);
 }
 
-export function silenced(spec: SpecRead): boolean {
-    return spec.subjects.size > 1
-        ? suppressedLines(spec.text, 'one-subject-per-spec').has(secondSubjectAt(spec).line)
-        : suppressedLines(spec.text, 'spec-in-subject-folder').has(1);
+export function silenced(spec: SpecRead, rule: string): boolean {
+    const line = spec.subjects.size > 1 ? secondSubjectAt(spec).line : 1;
+    return suppressedLines(spec.text, rule).has(line);
 }
 
 export function shown(specsRoot: string, path: string): string {

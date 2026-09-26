@@ -580,7 +580,8 @@ function writeSplit(
 export function fixSpecInSubjectFolder(specsRoot: string): string[] {
     const done: string[] = [];
     for (const spec of subjectSpecs(specsRoot)) {
-        if (spec.subjects.size === 0 || silenced(spec)) {
+        const rule = spec.subjects.size > 1 ? 'one-subject-per-spec' : 'spec-in-subject-folder';
+        if (spec.subjects.size === 0 || silenced(spec, rule)) {
             continue;
         }
         const plan = splitPlan(specsRoot, spec);

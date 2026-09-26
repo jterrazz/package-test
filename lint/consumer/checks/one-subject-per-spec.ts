@@ -28,7 +28,7 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
 
 export function checkOneSubjectPerSpec(specsRoot: string): Finding[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
-        if (spec.subjects.size < 2 || silenced(spec)) {
+        if (spec.subjects.size < 2 || silenced(spec, 'one-subject-per-spec')) {
             return [];
         }
         const names = [...spec.subjects.keys()];

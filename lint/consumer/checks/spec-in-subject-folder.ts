@@ -36,7 +36,11 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Finding |
 export function checkSpecInSubjectFolder(specsRoot: string): Finding[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         const [only] = [...spec.subjects.keys()];
-        if (spec.subjects.size !== 1 || only === undefined || silenced(spec)) {
+        if (
+            spec.subjects.size !== 1 ||
+            only === undefined ||
+            silenced(spec, 'spec-in-subject-folder')
+        ) {
             return [];
         }
         const ambiguity = ambiguityOf(specsRoot, spec, only);
