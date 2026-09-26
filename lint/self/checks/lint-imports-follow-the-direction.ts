@@ -43,6 +43,12 @@ function placeOf(path: string): string | undefined {
     return next === undefined ? `${audience}/index` : `${audience}/${folder}`;
 }
 
+const isIndex = (place: string): boolean => place === 'index' || place.endsWith('/index');
+
+function shownPlace(place: string, file: string): string {
+    return isIndex(place) ? file : `${place}/`;
+}
+
 export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)
         .filter(({ reference }) => reference.specifier.startsWith('.'))
@@ -52,6 +58,7 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
             const into = placeOf(target);
             const allowed = own === undefined ? undefined : LINT_DIRECTION[own];
             if (
+                own === undefined ||
                 allowed === undefined ||
                 into === undefined ||
                 into === 'src' ||
@@ -67,8 +74,8 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
                         fix:
                             allowed.length === 0
                                 ? 'take what `src/` needs from `src/` itself: `lint/` reads the product, never the reverse'
-                                : `move what \`${own}/\` needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
-                        found: `\`${from}\` imports \`${target}\`, from \`${into}/\`, which \`${own}/\` sits below`,
+                                : `move what \`${shownPlace(own, from)}\` needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
+                        found: `\`${from}\` imports \`${target}\`, from \`${shownPlace(into, target)}\`, which \`${shownPlace(own, from)}\` sits below`,
                     },
                     reference,
                 ),

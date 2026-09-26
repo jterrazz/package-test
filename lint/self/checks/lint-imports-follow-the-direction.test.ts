@@ -44,7 +44,7 @@ describe('checkLintImportsFollowTheDirection', () => {
 
         // Then - the rule and the engine are its to import; self, and the product reaching lint/, are named at the import
         expect(located(checkLintImportsFollowTheDirection(entry))).toStrictEqual([
-            'lint/index.ts:3:1 lint-imports-follow-the-direction: `lint/index.ts` imports `lint/self/rules/plugin.ts`, from `self/rules/`, which `index/` sits below',
+            'lint/index.ts:3:1 lint-imports-follow-the-direction: `lint/index.ts` imports `lint/self/rules/plugin.ts`, from `self/rules/`, which `lint/index.ts` sits below',
             'src/kernel/files/ground.ts:1:1 lint-imports-follow-the-direction: `src/kernel/files/ground.ts` imports `lint/engine/project/role.ts`, from `engine/`, which `src/` sits below',
         ]);
     });
