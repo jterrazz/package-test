@@ -2312,13 +2312,13 @@ The four questions of the overnight summary, and 129 and 130 raised above.
 ## Iteration 30 — the shared pool has a name (owner, 2026-09-24)
 
 The specs root holds only its facets and ONE more folder, `<specs>/shared/`,
-which holds the shared ground: `specs/shared/{fixtures,seeds,requests,expected}/`.
-A path leaves its leaf only to reach `specs/shared/<role>/` (C15); a pool
+which holds the shared ground: `<specs>/shared/{fixtures,seeds,requests,expected}/`.
+A path leaves its leaf only to reach `<specs>/shared/<role>/` (C15); a pool
 entry one leaf uses moves beside it (C14, now C28's level half); identical
-copies across leaves move to `specs/shared/<role>/` (C27); C24 judges the
+copies across leaves move to `<specs>/shared/<role>/` (C27); C24 judges the
 role folder under `shared/`. `shared` is a reserved name under `specs/` (C1:
 no facet or domain named `shared`). The mover and the fixers move
-`specs/<role>/` → `specs/shared/<role>/` and rewrite every path; leaves keep
+`specs/<role>/` → `<specs>/shared/<role>/` and rewrite every path; leaves keep
 their ground beside them (`./seeds/`…). The toolchain allows the name
 `shared` (package-typescript `1bbb661`, installed here with `npm ci`).
 
@@ -2337,7 +2337,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
   over such a spec (exit 1, C8 at the path the move left behind).
 - **The shared ground** (`577a150e`). `SHARED_GROUND` in
   `src/model/chain/ground.ts`; C9, C15, C27, C28 and C29 read and write
-  `specs/shared/<role>/`, and the walks prune `<specs>/shared/` whole. A role
+  `<specs>/shared/<role>/`, and the walks prune `<specs>/shared/` whole. A role
   folder at the specs root is refused as a folder (C15), and `--fix` moves
   its entries under `shared/` and rewrites every source literal and document
   key of the specs tree that named one. This package's own tree moved with
@@ -2759,7 +2759,7 @@ held`.
 - **A spec is filed by what it specifies** (iteration 34, `8228d20`…`6ddd18c`,
   6 commits). What it closed: C1 refuses a first-level folder that holds no
   test. C30 files a method-less route under its segments. The fixture apps
-  are specimens (`specs/shared/fixtures/specimen-<facet>…`), a spec of a
+  are specimens (`<specs>/shared/fixtures/specimen-<facet>…`), a spec of a
   specimen is no subject for C29 or C30, and C35 files it under a
   capability of the matrix. The domain vocabulary file is retired. What stays open:
     - With the domain vocabulary retired, nothing guards integration's folder names:
