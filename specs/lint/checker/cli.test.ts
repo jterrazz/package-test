@@ -130,7 +130,7 @@ describe('cli', () => {
 
         // Then - both breaches, and the command that records the new state
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
+        expect(result.stderr).toMatch(file('./expected/new-debt-and-a-cleared-entry.txt'));
     });
 
     test("lint — checker CLI contract — a broken ratchet prints its own findings, and counts the plugin's in one line", async () => {
@@ -160,7 +160,7 @@ describe('cli', () => {
 
         // Then - the verdict and its evidence, the same log the path-less run prints
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(file('./expected/checker-ratchet.txt'));
+        expect(result.stderr).toMatch(file('./expected/new-debt-and-a-cleared-entry.txt'));
     });
 
     test('lint — checker CLI contract — with no ratchet, the root member run judges and prints only its own findings', async () => {

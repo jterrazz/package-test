@@ -28,7 +28,7 @@ describe('facet-test-uses-its-runner', () => {
 
         // Then - ground is ground whichever of the four names it carries: nothing under an underscored folder reaches a runner
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/facet-test-uses-its-runner-ok.txt'));
+        expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 
     test('accepts a spec that imports the runner of its facet', async () => {
@@ -39,6 +39,6 @@ describe('facet-test-uses-its-runner', () => {
 
         // Then - the clean summary: the import SOURCE is what reaches the runner, however it spells the extension
         expect(result.exitCode).toBe(0);
-        expect(result.stdout).toMatch(file('./expected/facet-test-uses-its-runner-ok.txt'));
+        expect(result.stdout).toMatch(file('./expected/clean.txt'));
     });
 });
