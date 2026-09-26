@@ -1,4 +1,3 @@
-/* Typed as oxlint's own config, so `compose(<profile>, testing)` type-checks: an inferred `rules` widens every severity to `string`. */
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 import { specificationEndsOnItsCleanup } from './rulebook/import.js';
@@ -11,6 +10,7 @@ export type { MaterialKind } from './reading/production.js';
 
 export { default, recommendedRules } from './rules/plugin.js';
 
+/* Typed as oxlint's own config, so `compose(<profile>, testing)` type-checks: an inferred `rules` widens every severity to `string`. */
 export const testing: OxlintConfig = {
     jsPlugins: ['@jterrazz/test/oxlint'],
     overrides: [specificationEndsOnItsCleanup, vitestOnTests],

@@ -6,10 +6,9 @@ import { join, relative } from 'node:path';
 import { GROUND_DIRS } from '../../src/kernel/files/ground.js';
 import { oxlintOf } from './baseline.js';
 
-/** The plugin's autofixes run before the ratchet counts, so a diagnostic a fix settles is never counted as debt. The wrapper arms this plugin's rules alone, so no other rulebook's fixer writes a byte; it sits beside the config it wraps, since oxlint resolves `jsPlugins` and globs against that directory. `-c` turns nested discovery off, so each nested config's subtree gets a run of its own. */
-
 const CONFIG_NAMES: readonly string[] = configNames;
 
+/** The plugin's autofixes run before the ratchet counts, so a diagnostic a fix settles is never counted as debt. The wrapper arms this plugin's rules alone, so no other rulebook's fixer writes a byte; it sits beside the config it wraps, since oxlint resolves `jsPlugins` and globs against that directory. `-c` turns nested discovery off, so each nested config's subtree gets a run of its own. */
 export const OWN_FIXES_WRAPPER = 'oxlint.test-fix.config.mjs';
 
 /** A `.js`, `.mjs` or `.cjs` config governs only where it is the root's. */

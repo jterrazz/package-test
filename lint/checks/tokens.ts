@@ -1,11 +1,10 @@
 import { TOKEN_KINDS } from '../../src/expectations/tokens/match.js';
 
-/** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
-
 export const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
 const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
 export const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
 
+/** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
 const KNOWN = new Set<string>(TOKEN_KINDS);
 
 /** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored. */

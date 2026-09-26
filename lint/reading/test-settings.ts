@@ -6,15 +6,12 @@ import type { TestSettings } from '../../src/kernel/config/settings.js';
 import { testSettingsOf } from '../../src/kernel/config/test-section.js';
 
 /** Node loads the file synchronously, types stripped, since every pass is sync; the runtime's reader reads it, so the run and the checker agree. A file that does not load is no settings: the toolchain already reports it. */
-
-export type CheckerSettings = TestSettings;
-
 const loadModule = createRequire(import.meta.url);
 
 /** Node loads a module once per process. */
-const read = new Map<string, CheckerSettings>();
+const read = new Map<string, TestSettings>();
 
-export function testSettingsAt(root: string): CheckerSettings {
+export function testSettingsAt(root: string): TestSettings {
     const path = join(root, 'jterrazz.config.ts');
     if (!existsSync(path)) {
         return {};
@@ -23,7 +20,7 @@ export function testSettingsAt(root: string): CheckerSettings {
     if (known !== undefined) {
         return known;
     }
-    let settings: CheckerSettings = {};
+    let settings: TestSettings = {};
     try {
         settings = testSettingsOf(loadModule(path));
     } catch {
