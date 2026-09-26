@@ -10,6 +10,7 @@ import {
 import { FACETS } from '../../../engine/project/facets.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** Read from the glob and the config's place in its package, never the absolute path: a checkout under a folder called `specs` collects nothing of the kind. */
@@ -52,20 +53,24 @@ export const projectNamedForItsFacet: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'project-named-for-its-facet'),
-        messages: lessonsAt(rowNamed(consumerRows, 'project-named-for-its-facet'), {
-            nameTheFacet: {
-                found: 'the project `{{name}}` collects `specs/{{facet}}/**`',
-                fix: 'name it `{{facet}}`, so `--project {{facet}}` means the same in every repository',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'project-named-for-its-facet'),
+            {
+                nameTheFacet: {
+                    found: 'the project `{{name}}` collects `specs/{{facet}}/**`',
+                    fix: 'name it `{{facet}}`, so `--project {{facet}}` means the same in every repository',
+                },
+                rootTheFacet: {
+                    found: 'the project `{{name}}` carries a facet name and collects elsewhere',
+                    fix: 'root its `include` at `specs/{{name}}/`, or call the project something else',
+                },
+                unitOutsideSpecs: {
+                    found: 'the `unit` project collects under `specs/`',
+                    fix: 'move the specs tree to the project of the facet that owns it; `unit` collects the tests beside their modules',
+                },
             },
-            rootTheFacet: {
-                found: 'the project `{{name}}` carries a facet name and collects elsewhere',
-                fix: 'root its `include` at `specs/{{name}}/`, or call the project something else',
-            },
-            unitOutsideSpecs: {
-                found: 'the `unit` project collects under `specs/`',
-                fix: 'move the specs tree to the project of the facet that owns it; `unit` collects the tests beside their modules',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

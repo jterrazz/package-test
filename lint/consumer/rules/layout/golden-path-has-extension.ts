@@ -6,6 +6,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A tree is `toMatch(directory(…))`, whose path ends in `/`: out of reach. */
@@ -36,12 +37,16 @@ export const goldenPathHasExtension: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'golden-path-has-extension'),
-        messages: lessonsAt(rowNamed(consumerRows, 'golden-path-has-extension'), {
-            missingExtension: {
-                found: '`toMatch(file("{{name}}"))` names a golden with no extension',
-                fix: 'add the extension to the path (`"./expected/help.txt"`), or compare a tree with `toMatch(directory("./expected/<name>/"))`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'golden-path-has-extension'),
+            {
+                missingExtension: {
+                    found: '`toMatch(file("{{name}}"))` names a golden with no extension',
+                    fix: 'add the extension to the path (`"./expected/help.txt"`), or compare a tree with `toMatch(directory("./expected/<name>/"))`',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

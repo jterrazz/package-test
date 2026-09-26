@@ -4,6 +4,7 @@ import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { propertyKeyName, specificationMember } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
@@ -49,12 +50,16 @@ export const noRunnerAlias: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-runner-alias'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-runner-alias'), {
-            aliased: {
-                found: '`{ {{key}}: {{alias}} }` renames the handle',
-                fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-runner-alias'),
+            {
+                aliased: {
+                    found: '`{ {{key}}: {{alias}} }` renames the handle',
+                    fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

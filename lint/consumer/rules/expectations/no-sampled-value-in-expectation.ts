@@ -16,6 +16,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
@@ -88,12 +89,16 @@ export const noSampledValueInExpectation: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-sampled-value-in-expectation'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-sampled-value-in-expectation'), {
-            sampledOracle: {
-                found: 'a sampled value under `expect`',
-                fix: "pin it with `clock.at('2026-01-01T00:00:00Z')`, or match it with an `iso8601` token or `match.uuid`",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-sampled-value-in-expectation'),
+            {
+                sampledOracle: {
+                    found: 'a sampled value under `expect`',
+                    fix: "pin it with `clock.at('2026-01-01T00:00:00Z')`, or match it with an `iso8601` token or `match.uuid`",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

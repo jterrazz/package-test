@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { lessonParts } from './lesson-parts.js';
-import { refusal, REFUSAL_WHY } from './refusal.js';
+import { lessonParts } from './engine/catalogue/lesson-parts.js';
+import { refusal, REFUSAL_WHY } from './index.refusal.js';
 
-describe('refusal', () => {
-    test('a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
+describe('index.refusal', () => {
+    test('refusal — a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
         // Given - a refusal of the disk law, for one call
         const message = refusal('disk-named-by-relative-path-at-runtime', {
             fix: "start it with ./ or ../: file('./out.txt')",

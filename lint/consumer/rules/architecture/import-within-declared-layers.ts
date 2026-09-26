@@ -8,6 +8,7 @@ import { isProductionFile } from '../../../engine/project/linted-file.js';
 import { moduleReferenceVisitor } from '../../../engine/project/production.js';
 import { projectRootOf, projectSegments } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 export type LayerOptions = {
@@ -116,16 +117,20 @@ export const importWithinDeclaredLayers: LintRule = {
     meta: {
         defaultOptions: [{ layers: {} }],
         docs: rowNamed(consumerRows, 'import-within-declared-layers'),
-        messages: lessonsAt(rowNamed(consumerRows, 'import-within-declared-layers'), {
-            crossLayer: {
-                found: 'the layer "{{layer}}" imports "{{source}}", outside the edges its map declares',
-                fix: 'reach it through a layer the map allows, or declare the edge in the layer map with the reason',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'import-within-declared-layers'),
+            {
+                crossLayer: {
+                    found: 'the layer "{{layer}}" imports "{{source}}", outside the edges its map declares',
+                    fix: 'reach it through a layer the map allows, or declare the edge in the layer map with the reason',
+                },
+                foreignDependency: {
+                    found: '"{{source}}" is not a dependency the layer "{{layer}}" declares',
+                    fix: 'import it from the seam that owns it, or declare it on the layer with the reason',
+                },
             },
-            foreignDependency: {
-                found: '"{{source}}" is not a dependency the layer "{{layer}}" declares',
-                fix: 'import it from the seam that owns it, or declare it on the layer with the reason',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         schema: [
             {
                 additionalProperties: false,

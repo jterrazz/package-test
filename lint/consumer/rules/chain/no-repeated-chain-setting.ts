@@ -16,6 +16,7 @@ import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { subjectFolder, subjectsOf } from '../../../engine/project/subject.js';
 import type { Subject } from '../../../engine/project/subject.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const SETTINGS: Record<string, readonly string[]> = {
@@ -234,12 +235,16 @@ export const noRepeatedChainSetting: LintRule = {
     meta: {
         docs: rowNamed(consumerRows, 'no-repeated-chain-setting'),
         fixable: 'code',
-        messages: lessonsAt(rowNamed(consumerRows, 'no-repeated-chain-setting'), {
-            repeated: {
-                found: 'all {{count}} chains of this file state `{{setting}}` alike',
-                fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `make fix` writes it',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-repeated-chain-setting'),
+            {
+                repeated: {
+                    found: 'all {{count}} chains of this file state `{{setting}}` alike',
+                    fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `make fix` writes it',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

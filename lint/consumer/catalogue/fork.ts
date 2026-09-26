@@ -1,7 +1,7 @@
 import { cell, table } from '../../engine/catalogue/chapter.js';
 import type { Markers } from '../../engine/catalogue/chapter.js';
 
-/** Generated into chapter 18, the one page that states it. */
+export const FORK_CHAPTER = 'docs/18-conventions.md';
 
 export const FORK_MARKERS: Markers = {
     end: '<!-- /GENERATED:fork -->',

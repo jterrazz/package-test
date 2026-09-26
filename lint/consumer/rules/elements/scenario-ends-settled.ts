@@ -13,6 +13,7 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
@@ -122,12 +123,16 @@ export const scenarioEndsSettled: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'scenario-ends-settled'),
-        messages: lessonsAt(rowNamed(consumerRows, 'scenario-ends-settled'), {
-            unsettled: {
-                found: 'a scenario that acts and ends without reading the screen',
-                fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'scenario-ends-settled'),
+            {
+                unsettled: {
+                    found: 'a scenario that acts and ends without reading the screen',
+                    fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

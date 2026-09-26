@@ -25,7 +25,7 @@ const LINT_DIRECTION: Record<string, readonly string[]> = {
     'self/corpus': SELF_READS,
     'self/index': SELF_READS,
     'self/rules': SELF_READS,
-    src: ['src', 'engine'],
+    src: ['src', 'engine', 'index'],
 };
 
 function placeOf(path: string): string | undefined {
@@ -74,7 +74,7 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
                     {
                         fix:
                             into === 'src'
-                                ? 'move what it needs out of `src/` into `lint/engine/`, and let `src/` import it from there: the shipped `lint/` never reads the product'
+                                ? 'move what it needs out of `src/` into `lint/engine/`, or compose it in a `lint/` index, and let `src/` import it from there: the shipped `lint/` never reads the product'
                                 : `move what \`${shownPlace(own, from)}\` needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
                         found: `\`${from}\` imports \`${target}\`, from \`${shownPlace(into, target)}\`, which \`${shownPlace(own, from)}\` sits below`,
                     },

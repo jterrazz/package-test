@@ -1,4 +1,4 @@
-import { refusal } from '../../../../lint/engine/catalogue/refusal.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { formatElement } from '../../../elements/spelling.js';
 import type { MobileElementMatch, MobileElementRef } from './device.port.js';
 

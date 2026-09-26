@@ -6,6 +6,7 @@ import type { Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { FileRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A group's message is its fix: a ban with no destination is an argument. */
@@ -93,12 +94,16 @@ export const noSecondTestRuntime: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-second-test-runtime'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-second-test-runtime'), {
-            foreignRuntime: {
-                found: '`{{source}}` is a second test runtime in a test file',
-                fix: '{{fix}}',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-second-test-runtime'),
+            {
+                foreignRuntime: {
+                    found: '`{{source}}` is a second test runtime in a test file',
+                    fix: '{{fix}}',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

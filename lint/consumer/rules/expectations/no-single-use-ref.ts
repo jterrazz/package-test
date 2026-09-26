@@ -14,6 +14,7 @@ import { identityOf } from '../../../engine/project/linted-file.js';
 import { isRelativePath } from '../../../engine/project/relative-path.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function goldenPathOf(node: AstNode): string | undefined {
@@ -109,12 +110,16 @@ export const noSingleUseRef: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-single-use-ref'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-single-use-ref'), {
-            singleUse: {
-                found: 'the capture ref "{{ref}}" is used once in this spec',
-                fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-single-use-ref'),
+            {
+                singleUse: {
+                    found: 'the capture ref "{{ref}}" is used once in this spec',
+                    fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

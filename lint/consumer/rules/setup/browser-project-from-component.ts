@@ -5,6 +5,7 @@ import { child, identifierName, propertyKeyName, walk } from '../../../engine/pr
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function isRunnerBrowserBlock(node: AstNode): boolean {
@@ -58,12 +59,16 @@ export const browserProjectFromComponent: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'browser-project-from-component'),
-        messages: lessonsAt(rowNamed(consumerRows, 'browser-project-from-component'), {
-            handRolled: {
-                found: 'a hand-rolled `browser:` block in a vitest config',
-                fix: "replace it with `component({ vite: './vite.config.ts' })`, which sets the provider, the worker and the pipeline",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'browser-project-from-component'),
+            {
+                handRolled: {
+                    found: 'a hand-rolled `browser:` block in a vitest config',
+                    fix: "replace it with `component({ vite: './vite.config.ts' })`, which sets the provider, the worker and the pipeline",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

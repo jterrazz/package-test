@@ -10,6 +10,7 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { TOKEN_KINDS } from '../../../engine/project/tokens.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(
@@ -66,12 +67,16 @@ export const noTransformDuplicatingTokens: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-transform-duplicating-tokens'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-transform-duplicating-tokens'), {
-            tokenEquivalent: {
-                found: 'a `transform` that only rewrites output into token literals',
-                fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-transform-duplicating-tokens'),
+            {
+                tokenEquivalent: {
+                    found: 'a `transform` that only rewrites output into token literals',
+                    fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

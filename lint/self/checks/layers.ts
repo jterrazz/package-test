@@ -11,7 +11,7 @@ export const FRAMEWORK_LAYERS = {
             files: ['vitest'],
             refusals: [],
         },
-        imports: ['kernel/', 'lint/engine/'],
+        imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
     },
     world: {
         folders: {
@@ -21,7 +21,7 @@ export const FRAMEWORK_LAYERS = {
             services: [...librariesOwnedIn('src/world/services/'), 'vitest'],
             stubs: librariesOwnedIn('src/world/stubs/'),
         },
-        imports: ['kernel/', 'lint/engine/'],
+        imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
         seams: {
             // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
             'world/stubs/exchange/queue.ts': ['expectations/tokens/'],
@@ -29,8 +29,11 @@ export const FRAMEWORK_LAYERS = {
             'world/stubs/http/http.ts': ['expectations/tokens/'],
         },
     },
-    elements: { imports: ['kernel/', 'elements/', 'lint/engine/'] },
-    expectations: { imports: ['kernel/', 'expectations/', 'lint/engine/'], packages: ['vitest'] },
+    elements: { imports: ['kernel/', 'elements/', 'lint/engine/', 'lint/index.refusal'] },
+    expectations: {
+        imports: ['kernel/', 'expectations/', 'lint/engine/', 'lint/index.refusal'],
+        packages: ['vitest'],
+    },
     // A folder owns its files, and no facet lists another.
     facets: {
         folders: {
@@ -42,7 +45,14 @@ export const FRAMEWORK_LAYERS = {
             mobile: librariesOwnedIn('src/facets/mobile/'),
             website: librariesOwnedIn('src/facets/website/'),
         },
-        imports: ['kernel/', 'world/', 'elements/', 'expectations/', 'lint/engine/'],
+        imports: [
+            'kernel/',
+            'world/',
+            'elements/',
+            'expectations/',
+            'lint/engine/',
+            'lint/index.refusal',
+        ],
         packages: ['vitest'],
         seams: {
             'facets/specification.ts': [

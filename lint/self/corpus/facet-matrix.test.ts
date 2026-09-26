@@ -14,7 +14,11 @@ import type {
 } from '../../../src/facets/mobile/index.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/index.js';
 import type { JobResult } from '../../../src/index.js';
-import { FACET_MATRIX_CAPABILITIES, FACET_MATRIX_COLUMNS, facetMatrixMember } from './facet-matrix.js';
+import {
+    FACET_MATRIX_CAPABILITIES,
+    FACET_MATRIX_COLUMNS,
+    facetMatrixMember,
+} from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
 import { matrixCapabilities } from './matrix.js';
 

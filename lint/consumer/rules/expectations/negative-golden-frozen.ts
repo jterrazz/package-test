@@ -14,6 +14,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function hasFrozenOption(args: AstNode[]): boolean {
@@ -173,12 +174,16 @@ export const negativeGoldenFrozen: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'negative-golden-frozen'),
-        messages: lessonsAt(rowNamed(consumerRows, 'negative-golden-frozen'), {
-            unfrozenNegativeFixture: {
-                found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
-                fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'negative-golden-frozen'),
+            {
+                unfrozenNegativeFixture: {
+                    found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
+                    fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

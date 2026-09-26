@@ -9,6 +9,7 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const TEXT_MATCHERS = new Set(['toContain']);
@@ -57,12 +58,16 @@ export const noRawBypass: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-raw-bypass'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-raw-bypass'), {
-            rawBypass: {
-                found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
-                fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-raw-bypass'),
+            {
+                rawBypass: {
+                    found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
+                    fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

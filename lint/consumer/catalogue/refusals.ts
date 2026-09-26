@@ -1,8 +1,3 @@
-import { lessonBlock } from './lesson-parts.js';
-
-export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
-
-/** `lint/consumer/catalogue/manifest.ts` reads each sentence from here, so a refusal and its catalogue row say one thing. */
 export const REFUSAL_WHY = {
     'database-named-only-when-several-at-runtime':
         'With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
@@ -21,12 +16,3 @@ export const REFUSAL_WHY = {
 } as const;
 
 export type RefusalRow = keyof typeof REFUSAL_WHY;
-
-export function refusal(row: RefusalRow, { fix, found }: { fix: string; found: string }): string {
-    return lessonBlock({
-        fix,
-        found,
-        read: `${CATALOGUE_CHAPTER}#${row}`,
-        why: REFUSAL_WHY[row],
-    });
-}

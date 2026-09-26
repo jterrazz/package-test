@@ -5,6 +5,7 @@ import { specificationMember, stringValue, walk } from '../../../engine/project/
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const THIRD_PARTY_BIN = /node_modules[/\\]\.bin[/\\]/u;
@@ -64,12 +65,16 @@ export const cliRunsTheProductBinary: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'cli-runs-the-product-binary'),
-        messages: lessonsAt(rowNamed(consumerRows, 'cli-runs-the-product-binary'), {
-            thirdPartyBinary: {
-                found: '`specification.cli()` points at a third-party binary under `node_modules/.bin`',
-                fix: "point it at the product's own command (`bin/<product>`), or suppress with a reason when the product genuinely is this binary",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'cli-runs-the-product-binary'),
+            {
+                thirdPartyBinary: {
+                    found: '`specification.cli()` points at a third-party binary under `node_modules/.bin`',
+                    fix: "point it at the product's own command (`bin/<product>`), or suppress with a reason when the product genuinely is this binary",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

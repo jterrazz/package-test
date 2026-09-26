@@ -39,6 +39,7 @@ export type GroundPasses = {
 };
 
 export type CheckerRegistry = {
+    chapter: string;
     fixes: readonly ((root: string) => string[])[];
     member: Judge<MemberRead>;
     memberPassIds: readonly string[];

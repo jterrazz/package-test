@@ -2,12 +2,13 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
+import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
+import type { RefusalRow } from '../../consumer/catalogue/refusals.js';
 import { CHECKER_PASS_IDS } from '../../consumer/checks/checker.js';
 import plugin from '../../consumer/rules/plugin.js';
 import { lessonParts, missingParts } from '../../engine/catalogue/lesson-parts.js';
 import { lessonAt, readAt, whyOf } from '../../engine/catalogue/lesson.js';
-import { refusal, REFUSAL_WHY } from '../../engine/catalogue/refusal.js';
-import type { RefusalRow } from '../../engine/catalogue/refusal.js';
+import { refusal } from '../../index.refusal.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import selfPlugin from '../rules/plugin.js';
 import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from './messages.js';

@@ -5,6 +5,7 @@ import { memberPropertyName, stringValue } from '../../../engine/project/ast.js'
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { toKebabCase } from '../../../engine/project/record-key.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -38,12 +39,16 @@ export const triggerNameInKebabCase: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'trigger-name-in-kebab-case'),
-        messages: lessonsAt(rowNamed(consumerRows, 'trigger-name-in-kebab-case'), {
-            notKebab: {
-                found: 'the job name "{{name}}" is not kebab-case',
-                fix: 'rename the job "{{kebab}}", in the app and in its tests alike',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'trigger-name-in-kebab-case'),
+            {
+                notKebab: {
+                    found: 'the job name "{{name}}" is not kebab-case',
+                    fix: 'rename the job "{{kebab}}", in the app and in its tests alike',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

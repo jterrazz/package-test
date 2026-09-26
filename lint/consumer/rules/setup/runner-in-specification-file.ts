@@ -5,6 +5,7 @@ import { specificationMember } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A `wrap` written in JSX needs the `x`. */
@@ -31,12 +32,16 @@ export const runnerInSpecificationFile: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'runner-in-specification-file'),
-        messages: lessonsAt(rowNamed(consumerRows, 'runner-in-specification-file'), {
-            outsideSpecification: {
-                found: '`specification.{{member}}()` called outside a `*.specification.ts` file',
-                fix: 'move the call into `specs/{{member}}/{{member}}.specification.ts` and import the handle it exports',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'runner-in-specification-file'),
+            {
+                outsideSpecification: {
+                    found: '`specification.{{member}}()` called outside a `*.specification.ts` file',
+                    fix: 'move the call into `specs/{{member}}/{{member}}.specification.ts` and import the handle it exports',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

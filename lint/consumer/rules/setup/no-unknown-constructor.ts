@@ -4,6 +4,7 @@ import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { memberPropertyName } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
@@ -25,12 +26,16 @@ export const noUnknownConstructor: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-unknown-constructor'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-unknown-constructor'), {
-            unknownConstructor: {
-                found: '`specification.{{member}}` is no constructor',
-                fix: 'call `specification.api()`, `.job()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-unknown-constructor'),
+            {
+                unknownConstructor: {
+                    found: '`specification.{{member}}` is no constructor',
+                    fix: 'call `specification.api()`, `.job()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

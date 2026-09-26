@@ -1,8 +1,8 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { refusal } from '../../../../lint/engine/catalogue/refusal.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity.js';
 import { formatElement } from '../../../elements/spelling.js';
 import { openSession } from '../session/driver-session.js';

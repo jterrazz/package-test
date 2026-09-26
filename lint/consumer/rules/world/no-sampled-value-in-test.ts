@@ -16,6 +16,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const STRUCTURAL_MATCHERS = new Set(['toEqual', 'toMatch', 'toMatchObject', 'toStrictEqual']);
@@ -82,12 +83,16 @@ export const noSampledValueInTest: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-sampled-value-in-test'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-sampled-value-in-test'), {
-            ambientValue: {
-                found: 'time or randomness sampled in the test',
-                fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-sampled-value-in-test'),
+            {
+                ambientValue: {
+                    found: 'time or randomness sampled in the test',
+                    fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

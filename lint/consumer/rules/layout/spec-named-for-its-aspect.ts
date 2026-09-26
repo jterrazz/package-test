@@ -5,6 +5,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { aspectOf } from '../../../engine/project/test-title.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
@@ -52,16 +53,20 @@ export const specNamedForItsAspect: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'spec-named-for-its-aspect'),
-        messages: lessonsAt(rowNamed(consumerRows, 'spec-named-for-its-aspect'), {
-            generic: {
-                found: 'the aspect "{{aspect}}" names no question about the subject',
-                fix: 'rename the file for what its tests ask — `pagination`, `filters`, `validation`, `not-found`, `auth`, `shape` — and split it when they ask several',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'spec-named-for-its-aspect'),
+            {
+                generic: {
+                    found: 'the aspect "{{aspect}}" names no question about the subject',
+                    fix: 'rename the file for what its tests ask — `pagination`, `filters`, `validation`, `not-found`, `auth`, `shape` — and split it when they ask several',
+                },
+                notKebab: {
+                    found: 'the aspect "{{aspect}}" is not kebab-case',
+                    fix: 'rename the file `{{kebab}}.spec.ts`',
+                },
             },
-            notKebab: {
-                found: 'the aspect "{{aspect}}" is not kebab-case',
-                fix: 'rename the file `{{kebab}}.spec.ts`',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

@@ -5,6 +5,7 @@ import type { CheckerRegistry, GroundPasses, MemberRead } from '../../engine/che
 import type { DocumentFinding as CheckerDocumentFinding } from '../../engine/project/document-model.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import type { Scalar } from '../../engine/project/yaml-document.js';
+import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows } from '../catalogue/manifest.js';
 import { checkCheckerSuppressionStatesAReason } from './checker-suppression-states-a-reason.js';
 import { checkDatabaseNamedOnlyWhenSeveral } from './database-named-only-when-several.js';
@@ -167,6 +168,7 @@ function specFilesRewritten(root: string): string[] {
 }
 
 export const CHECKER: CheckerRegistry = {
+    chapter: CATALOGUE_CHAPTER,
     fixes: [
         (root) =>
             fixNoReachIntoSiblingGround(root).map(

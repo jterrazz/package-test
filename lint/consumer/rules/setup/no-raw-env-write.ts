@@ -6,6 +6,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A replacement of the whole object outlasts the test exactly as a variable does. */
@@ -39,12 +40,16 @@ export const noRawEnvWrite: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-raw-env-write'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-raw-env-write'), {
-            rawAssignment: {
-                found: 'the test writes the process environment directly',
-                fix: "write `vi.stubEnv('<NAME>', '<value>')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-raw-env-write'),
+            {
+                rawAssignment: {
+                    found: 'the test writes the process environment directly',
+                    fix: "write `vi.stubEnv('<NAME>', '<value>')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

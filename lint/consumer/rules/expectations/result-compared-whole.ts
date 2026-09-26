@@ -16,6 +16,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { isCarried } from './result-compared-whole.carried.js';
 
@@ -136,12 +137,16 @@ export const resultComparedWhole: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'result-compared-whole'),
-        messages: lessonsAt(rowNamed(consumerRows, 'result-compared-whole'), {
-            partialOracle: {
-                found: 'the test reads {{subject}} and never compares it whole',
-                fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'result-compared-whole'),
+            {
+                partialOracle: {
+                    found: 'the test reads {{subject}} and never compares it whole',
+                    fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

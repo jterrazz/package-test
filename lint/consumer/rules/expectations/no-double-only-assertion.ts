@@ -15,6 +15,7 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DOUBLE_FACTORIES = new Set(['mockOf', 'vi.fn', 'vi.spyOn']);
@@ -96,12 +97,16 @@ export const noDoubleOnlyAssertion: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-double-only-assertion'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-double-only-assertion'), {
-            doubleOnly: {
-                found: 'every assertion reads a double this test built',
-                fix: 'assert the value the subject returned, or the state it left',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-double-only-assertion'),
+            {
+                doubleOnly: {
+                    found: 'every assertion reads a double this test built',
+                    fix: 'assert the value the subject returned, or the state it left',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 
-import { resolveSpecPath } from '../../../kernel/files/spec-path.js';
+import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';
 

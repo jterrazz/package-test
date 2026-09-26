@@ -19,6 +19,7 @@ import {
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `fixtures/`. */
@@ -118,12 +119,16 @@ export const verbReadsItsGroundFolder: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'verb-reads-its-ground-folder'),
-        messages: lessonsAt(rowNamed(consumerRows, 'verb-reads-its-ground-folder'), {
-            crossed: {
-                found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
-                fix: 'move the file to {{where}}, and name it from there',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'verb-reads-its-ground-folder'),
+            {
+                crossed: {
+                    found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
+                    fix: 'move the file to {{where}}, and name it from there',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

@@ -5,6 +5,7 @@ import { importSourceVisitor } from '../../../engine/project/ast.js';
 import type { Visitor } from '../../../engine/project/ast.js';
 import { declaredSubpaths } from '../../../engine/project/package-exports.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const PACKAGE = '@jterrazz/test';
@@ -31,12 +32,16 @@ export const noUnpublishedSubpath: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-unpublished-subpath'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-unpublished-subpath'), {
-            subpath: {
-                found: 'the import "{{source}}" names a subpath the package does not publish',
-                fix: 'import from "@jterrazz/test"; the published subpaths are {{published}}',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-unpublished-subpath'),
+            {
+                subpath: {
+                    found: 'the import "{{source}}" names a subpath the package does not publish',
+                    fix: 'import from "@jterrazz/test"; the published subpaths are {{published}}',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

@@ -5,6 +5,7 @@ import { child, childList, identifierName, walk } from '../../../engine/project/
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const PRESET = 'defineSpecConfig';
@@ -77,12 +78,16 @@ export const vitestConfigFromDefineSpecConfig: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'vitest-config-from-define-spec-config'),
-        messages: lessonsAt(rowNamed(consumerRows, 'vitest-config-from-define-spec-config'), {
-            offPreset: {
-                found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
-                fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'vitest-config-from-define-spec-config'),
+            {
+                offPreset: {
+                    found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
+                    fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

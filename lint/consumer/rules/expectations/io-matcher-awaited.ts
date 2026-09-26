@@ -10,6 +10,7 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function expectCallOf(node: AstNode | undefined): AstNode | undefined {
@@ -101,12 +102,16 @@ export const ioMatcherAwaited: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'io-matcher-awaited'),
-        messages: lessonsAt(rowNamed(consumerRows, 'io-matcher-awaited'), {
-            mustAwait: {
-                found: '`expect(…).{{matcher}}` not awaited — it returns a promise',
-                fix: 'write `await expect(…).{{matcher}}(…)`, or return it',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'io-matcher-awaited'),
+            {
+                mustAwait: {
+                    found: '`expect(…).{{matcher}}` not awaited — it returns a promise',
+                    fix: 'write `await expect(…).{{matcher}}(…)`, or return it',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

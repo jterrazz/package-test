@@ -4,6 +4,7 @@ import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { memberPropertyName } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const SYNC_MATCHERS = new Set(['toBe', 'toContain', 'toEqual', 'toHaveLength']);
@@ -55,12 +56,16 @@ export const noAwaitOnSyncMatcher: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-await-on-sync-matcher'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-await-on-sync-matcher'), {
-            redundantAwait: {
-                found: '`await` on the synchronous `expect(…).{{matcher}}(…)`',
-                fix: 'delete the `await`; only an IO matcher is awaited — a table compared whole, `toMatch(directory(…))`, `toBeEmpty`, `toBeRunning`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-await-on-sync-matcher'),
+            {
+                redundantAwait: {
+                    found: '`await` on the synchronous `expect(…).{{matcher}}(…)`',
+                    fix: 'delete the `await`; only an IO matcher is awaited — a table compared whole, `toMatch(directory(…))`, `toBeEmpty`, `toBeRunning`',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

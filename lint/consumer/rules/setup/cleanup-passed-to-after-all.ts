@@ -5,6 +5,7 @@ import { propertyKeyName, specificationMember, walk } from '../../../engine/proj
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function destructuresCleanup(node: AstNode): boolean {
@@ -69,12 +70,16 @@ export const cleanupPassedToAfterAll: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'cleanup-passed-to-after-all'),
-        messages: lessonsAt(rowNamed(consumerRows, 'cleanup-passed-to-after-all'), {
-            unregistered: {
-                found: '`cleanup` is destructured and never handed to `afterAll`',
-                fix: 'add `afterAll(cleanup);` at the end of the specification file',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'cleanup-passed-to-after-all'),
+            {
+                unregistered: {
+                    found: '`cleanup` is destructured and never handed to `afterAll`',
+                    fix: 'add `afterAll(cleanup);` at the end of the specification file',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

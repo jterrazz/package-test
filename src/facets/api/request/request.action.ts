@@ -5,12 +5,8 @@ import { defineAction } from '../../../kernel/chain/action.js';
 import type { SliceReader } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow, Run } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
-import {
-    isDiskDirectory,
-    isDiskFile,
-    requireDiskFile,
-    resolveSpecPath,
-} from '../../../kernel/files/spec-path.js';
+import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
+import { isDiskDirectory, isDiskFile, requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';
 import type { ServerPort } from '../server/server.port.js';
 import { HttpResult } from './http.result.js';

@@ -5,6 +5,7 @@ import { child, isTestCallee, testName, walk } from '../../../engine/project/ast
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 export const MAX_SPEC_LINES = 400;
@@ -56,12 +57,16 @@ export const specFileWithinLineLimit: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'spec-file-within-line-limit'),
-        messages: lessonsAt(rowNamed(consumerRows, 'spec-file-within-line-limit'), {
-            tooLong: {
-                found: 'a spec file of {{lines}} lines, over {{max}}',
-                fix: 'cut it along its tests’ groups — {{groups}} — one aspect per file',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'spec-file-within-line-limit'),
+            {
+                tooLong: {
+                    found: 'a spec file of {{lines}} lines, over {{max}}',
+                    fix: 'cut it along its tests’ groups — {{groups}} — one aspect per file',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

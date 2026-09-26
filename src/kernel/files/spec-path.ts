@@ -1,7 +1,5 @@
-import { resolve } from 'node:path';
-
-import { refusal } from '../../../lint/engine/catalogue/refusal.js';
 import { isRelativePath } from '../../../lint/engine/project/relative-path.js';
+import { refusal } from '../../../lint/index.refusal.js';
 
 /** A path relative to the spec file; `Extension` narrows its tail. */
 export type RelativePath<Extension extends string = string> =
@@ -167,9 +165,4 @@ export function requireRelativePath(call: string, path: unknown): asserts path i
             }),
         );
     }
-}
-
-export function resolveSpecPath(verb: string, path: string, specDir: string): string {
-    requireRelativePath(verb, path);
-    return resolve(specDir, path);
 }

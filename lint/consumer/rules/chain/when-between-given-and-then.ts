@@ -13,6 +13,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 export const whenBetweenGivenAndThen: LintRule = {
@@ -46,16 +47,20 @@ export const whenBetweenGivenAndThen: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'when-between-given-and-then'),
-        messages: lessonsAt(rowNamed(consumerRows, 'when-between-given-and-then'), {
-            afterThen: {
-                found: '`// When -` written after `// Then -`',
-                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'when-between-given-and-then'),
+            {
+                afterThen: {
+                    found: '`// When -` written after `// Then -`',
+                    fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+                },
+                beforeGiven: {
+                    found: '`// When -` written before `// Given -`',
+                    fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
+                },
             },
-            beforeGiven: {
-                found: '`// When -` written before `// Given -`',
-                fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

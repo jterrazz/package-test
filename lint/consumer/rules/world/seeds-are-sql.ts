@@ -8,6 +8,7 @@ import { GROUND_SEEDS } from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** Anchored on the visited test file, reading the listing of its sibling `seeds/`. */
@@ -30,12 +31,16 @@ export const seedsAreSql: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'seeds-are-sql'),
-        messages: lessonsAt(rowNamed(consumerRows, 'seeds-are-sql'), {
-            notSql: {
-                found: '`seeds/{{entry}}` is not a `.sql` file',
-                fix: 'move it to `fixtures/` and lay it with `.fixture(file(…))`; `seeds/` holds database state only',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'seeds-are-sql'),
+            {
+                notSql: {
+                    found: '`seeds/{{entry}}` is not a `.sql` file',
+                    fix: 'move it to `fixtures/` and lay it with `.fixture(file(…))`; `seeds/` holds database state only',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

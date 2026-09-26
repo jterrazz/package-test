@@ -13,6 +13,7 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** Order is judged on first occurrences; an expect before the Then is allowed (preconditions, update-mode writes). A `test.each` table is judged once, on the table, where its narration interpolates `$label`. */
@@ -48,16 +49,20 @@ export const givenAndThenMarkersPresent: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'given-and-then-markers-present'),
-        messages: lessonsAt(rowNamed(consumerRows, 'given-and-then-markers-present'), {
-            givenAfterThen: {
-                found: '`// Given -` written after `// Then -`',
-                fix: 'move the Given marker above the setup it narrates, before the Then',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'given-and-then-markers-present'),
+            {
+                givenAfterThen: {
+                    found: '`// Given -` written after `// Then -`',
+                    fix: 'move the Given marker above the setup it narrates, before the Then',
+                },
+                missing: {
+                    found: 'the test has no `// {{marker}} -` marker',
+                    fix: 'write `// {{marker}} - <a sentence about the subject>` — every test carries a Given, then a Then',
+                },
             },
-            missing: {
-                found: 'the test has no `// {{marker}} -` marker',
-                fix: 'write `// {{marker}} - <a sentence about the subject>` — every test carries a Given, then a Then',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

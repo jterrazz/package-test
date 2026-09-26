@@ -6,6 +6,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const REASON = /\/\/\s*testId:\s*\S/u;
@@ -77,12 +78,16 @@ export const testIdStatesWhatIsMissing: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'test-id-states-what-is-missing'),
-        messages: lessonsAt(rowNamed(consumerRows, 'test-id-states-what-is-missing'), {
-            unexplainedTestId: {
-                found: '`testId()` with no line saying what the element lacks',
-                fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|…>` on this line or the one above',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'test-id-states-what-is-missing'),
+            {
+                unexplainedTestId: {
+                    found: '`testId()` with no line saying what the element lacks',
+                    fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|…>` on this line or the one above',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

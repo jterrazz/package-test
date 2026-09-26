@@ -13,6 +13,7 @@ import {
     reachOf,
 } from '../../../engine/project/production.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** This repository's runner coupling (`import-within-declared-layers`) turns the rule off by path in its own oxlint config. */
@@ -62,20 +63,24 @@ export const noTestCodeInProduction: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-test-code-in-production'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-test-code-in-production'), {
-            pathRead: {
-                found: 'production code names the path "{{path}}", {{kind}}',
-                fix: 'move what production reads out of the test material, or have the caller hand it in',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-test-code-in-production'),
+            {
+                pathRead: {
+                    found: 'production code names the path "{{path}}", {{kind}}',
+                    fix: 'move what production reads out of the test material, or have the caller hand it in',
+                },
+                reach: {
+                    found: 'production code references "{{source}}", {{kind}} ({{what}})',
+                    fix: 'move the reference into a test — specs, `*.test.ts`, `*.fixtures.ts` or `*.specification.ts` — or move what production needs out of the test material',
+                },
+                reachThrough: {
+                    found: 'production code references "{{source}}", which reaches {{kind}} ({{what}}) through {{through}}',
+                    fix: 'cut the edge that leaves production for test material: move what production needs out of it, or the reference into a test',
+                },
             },
-            reach: {
-                found: 'production code references "{{source}}", {{kind}} ({{what}})',
-                fix: 'move the reference into a test — specs, `*.test.ts`, `*.fixtures.ts` or `*.specification.ts` — or move what production needs out of the test material',
-            },
-            reachThrough: {
-                found: 'production code references "{{source}}", which reaches {{kind}} ({{what}}) through {{through}}',
-                fix: 'cut the edge that leaves production for test material: move what production needs out of it, or the reference into a test',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

@@ -15,6 +15,7 @@ import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js'
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { isStubKind, STUB_KINDS } from '../../../engine/project/stub-kinds.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
@@ -347,56 +348,60 @@ export const stubsRootHoldsFacadesAndKinds: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'),
-        messages: lessonsAt(rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'), {
-            badKindDir: {
-                found: '`stubs/{{entry}}/` is no stub kind',
-                fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'),
+            {
+                badKindDir: {
+                    found: '`stubs/{{entry}}/` is no stub kind',
+                    fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
+                },
+                badName: {
+                    found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
+                    fix: 'rename it in kebab-case, without the kind — the folder carries it',
+                },
+                exportsNothing: {
+                    found: 'the stub facade "{{base}}" exports nothing',
+                    fix: 'export its builders and sets by name',
+                },
+                missingDefault: {
+                    found: 'the stub unit "{{base}}" has no default export',
+                    fix: 'default-export `defineStub(…)`, or a factory returning one',
+                },
+                notDefineStub: {
+                    found: "a stub unit's default export is not a stub",
+                    fix: 'default-export `defineStub(…)`, or a factory returning one',
+                },
+                notDefineStubs: {
+                    found: 'the default export of "{{base}}" is not built from stubs',
+                    fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
+                },
+                foreignBuilder: {
+                    found: 'a stub under `stubs/{{kind}}/` calls the `{{used}}` builder',
+                    fix: 'move it to `stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
+                },
+                kindEntry: {
+                    found: '`stubs/{{kind}}/{{child}}` is neither a `*.ts` stub nor a `*.response.json` payload',
+                    fix: 'make it one of the two, or move it out of `stubs/`',
+                },
+                kindSubfolder: {
+                    found: '`stubs/{{kind}}/{{child}}/` nests a folder in a kind folder',
+                    fix: 'move its files up into `stubs/{{kind}}/`',
+                },
+                rootEntry: {
+                    found: '`stubs/{{entry}}` at the stubs root',
+                    fix: 'move it into the kind folder of the stub it pairs with',
+                },
+                rootFile: {
+                    found: 'the stub unit "{{base}}" sits at the `stubs/` root',
+                    fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
+                },
+                tooDeep: {
+                    found: 'the stub file "{{base}}" is nested below `stubs/<kind>/`',
+                    fix: 'move it up into its kind folder',
+                },
             },
-            badName: {
-                found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
-                fix: 'rename it in kebab-case, without the kind — the folder carries it',
-            },
-            exportsNothing: {
-                found: 'the stub facade "{{base}}" exports nothing',
-                fix: 'export its builders and sets by name',
-            },
-            missingDefault: {
-                found: 'the stub unit "{{base}}" has no default export',
-                fix: 'default-export `defineStub(…)`, or a factory returning one',
-            },
-            notDefineStub: {
-                found: "a stub unit's default export is not a stub",
-                fix: 'default-export `defineStub(…)`, or a factory returning one',
-            },
-            notDefineStubs: {
-                found: 'the default export of "{{base}}" is not built from stubs',
-                fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
-            },
-            foreignBuilder: {
-                found: 'a stub under `stubs/{{kind}}/` calls the `{{used}}` builder',
-                fix: 'move it to `stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
-            },
-            kindEntry: {
-                found: '`stubs/{{kind}}/{{child}}` is neither a `*.ts` stub nor a `*.response.json` payload',
-                fix: 'make it one of the two, or move it out of `stubs/`',
-            },
-            kindSubfolder: {
-                found: '`stubs/{{kind}}/{{child}}/` nests a folder in a kind folder',
-                fix: 'move its files up into `stubs/{{kind}}/`',
-            },
-            rootEntry: {
-                found: '`stubs/{{entry}}` at the stubs root',
-                fix: 'move it into the kind folder of the stub it pairs with',
-            },
-            rootFile: {
-                found: 'the stub unit "{{base}}" sits at the `stubs/` root',
-                fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
-            },
-            tooDeep: {
-                found: 'the stub file "{{base}}" is nested below `stubs/<kind>/`',
-                fix: 'move it up into its kind folder',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

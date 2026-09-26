@@ -6,6 +6,7 @@ import { isFile } from '../../../engine/project/fs-cache.js';
 import { isGroundName, SHARED_GROUND } from '../../../engine/project/ground.js';
 import { specsAnchorOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { declaresTests, isStrayFolder } from './specs-at-declared-depth.first-level.js';
 
@@ -137,48 +138,52 @@ export const specsAtDeclaredDepth: LintRule = {
     meta: {
         defaultOptions: [{ depth: DEFAULT_DEPTH }],
         docs: rowNamed(consumerRows, 'specs-at-declared-depth'),
-        messages: lessonsAt(rowNamed(consumerRows, 'specs-at-declared-depth'), {
-            specInGround: {
-                found: 'a spec under `{{ground}}/`, a reserved ground name',
-                fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'specs-at-declared-depth'),
+            {
+                specInGround: {
+                    found: 'a spec under `{{ground}}/`, a reserved ground name',
+                    fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
+                },
+                specInShared: {
+                    found: 'a spec under `specs/shared/`, the ground several leaves share',
+                    fix: 'move it into its facet: `specs/shared/` holds only `fixtures/`, `seeds/`, `requests/` and `expected/`',
+                },
+                specNotAtFacetRoot: {
+                    found: 'a `*.specification.ts` below its facet root',
+                    fix: 'move it to `specs/<facet>/<name>.specification.ts`',
+                },
+                strayFolder: {
+                    found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `shared/`, and holds no test of its own',
+                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
+                },
+                testAtFacetRoot: {
+                    found: 'a spec directly at its facet root',
+                    fix: 'move it into a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts`',
+                },
+                testAtSpecsRoot: {
+                    found: 'a spec at the specs root, under `depth: "mirror"`',
+                    fix: 'move it into the directory it mirrors',
+                },
+                testNotMirroringDirectory: {
+                    found: 'a spec not named after its directory, under `depth: "mirror"`',
+                    fix: 'rename it `{{directory}}/{{directory}}.spec.ts`',
+                },
+                testOutsideFacet: {
+                    found: 'a spec outside every facet folder, under `depth: "facet"`',
+                    fix: 'move it to `specs/<facet>/<aspect>.spec.ts`, or one domain deeper',
+                },
+                testTooDeep: {
+                    found: 'a spec nested below its domain folder',
+                    fix: 'move it up to `specs/<facet>/<domain>/<aspect>.spec.ts`',
+                },
+                testTooDeepForFacet: {
+                    found: 'a spec more than one folder below its facet, under `depth: "facet"`',
+                    fix: 'move it to `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`',
+                },
             },
-            specInShared: {
-                found: 'a spec under `specs/shared/`, the ground several leaves share',
-                fix: 'move it into its facet: `specs/shared/` holds only `fixtures/`, `seeds/`, `requests/` and `expected/`',
-            },
-            specNotAtFacetRoot: {
-                found: 'a `*.specification.ts` below its facet root',
-                fix: 'move it to `specs/<facet>/<name>.specification.ts`',
-            },
-            strayFolder: {
-                found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `shared/`, and holds no test of its own',
-                fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper beside the tests it serves (`<leaf>/<leaf>.fixtures.ts`), and a fixture under `specs/shared/fixtures/`; then remove `specs/{{folder}}/`',
-            },
-            testAtFacetRoot: {
-                found: 'a spec directly at its facet root',
-                fix: 'move it into a domain folder: `specs/<facet>/<domain>/<aspect>.spec.ts`',
-            },
-            testAtSpecsRoot: {
-                found: 'a spec at the specs root, under `depth: "mirror"`',
-                fix: 'move it into the directory it mirrors',
-            },
-            testNotMirroringDirectory: {
-                found: 'a spec not named after its directory, under `depth: "mirror"`',
-                fix: 'rename it `{{directory}}/{{directory}}.spec.ts`',
-            },
-            testOutsideFacet: {
-                found: 'a spec outside every facet folder, under `depth: "facet"`',
-                fix: 'move it to `specs/<facet>/<aspect>.spec.ts`, or one domain deeper',
-            },
-            testTooDeep: {
-                found: 'a spec nested below its domain folder',
-                fix: 'move it up to `specs/<facet>/<domain>/<aspect>.spec.ts`',
-            },
-            testTooDeepForFacet: {
-                found: 'a spec more than one folder below its facet, under `depth: "facet"`',
-                fix: 'move it to `specs/<facet>/<aspect>.spec.ts` or `specs/<facet>/<domain>/<aspect>.spec.ts`',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         schema: [
             {
                 additionalProperties: false,

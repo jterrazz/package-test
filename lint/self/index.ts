@@ -2,8 +2,9 @@
 import { readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { CATALOGUE_CHAPTER, CATALOGUE_MARKERS } from '../consumer/catalogue/chapter.js';
 import { FAMILIES } from '../consumer/catalogue/families.js';
-import { FORK_MARKERS, forkTable } from '../consumer/catalogue/fork.js';
+import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../consumer/catalogue/fork.js';
 import { consumerRows } from '../consumer/catalogue/manifest.js';
 import { catalogueBody, spliceBetween } from '../engine/catalogue/chapter.js';
 import type { Markers } from '../engine/catalogue/chapter.js';
@@ -11,6 +12,7 @@ import { runAtZero } from '../engine/checker/at-zero.js';
 import { runCoverageFloor } from '../engine/checker/coverage-run.js';
 import { exitCodeOf } from '../engine/checker/stop.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './catalogue/chapter.js';
+import { SELF_CHAPTER } from './catalogue/manifest.js';
 import { SELF_CHECKER } from './checks/checker.js';
 import { checkCoverageFloor } from './checks/coverage-floor.js';
 import {
@@ -26,23 +28,18 @@ import { renderSiblings, SIBLINGS_MARKERS } from './corpus/siblings.js';
 
 type Chapter = { markers: Markers; page: string; render: (root: string) => string };
 
-const CATALOGUE_MARKERS: Markers = {
-    end: '<!-- /GENERATED:catalogue -->',
-    start: '<!-- GENERATED:catalogue — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/manifest.ts -->',
-};
-
 export const CHAPTERS: readonly Chapter[] = [
     {
         markers: CATALOGUE_MARKERS,
-        page: 'docs/19-linting.md',
+        page: CATALOGUE_CHAPTER,
         render: () => catalogueBody(consumerRows, FAMILIES),
     },
-    { markers: MATRIX_MARKERS, page: 'docs/03-testing.md', render: renderMatrixBody },
-    { markers: MATRIX_LAYERS_MARKERS, page: 'docs/03-testing.md', render: renderMatrixLayers },
-    { markers: SIBLINGS_MARKERS, page: 'docs/03-testing.md', render: renderSiblings },
-    { markers: META_TESTS_MARKERS, page: 'docs/03-testing.md', render: renderMetaTests },
-    { markers: SELF_CHAPTER_MARKERS, page: 'docs/03-testing.md', render: selfChapterTable },
-    { markers: FORK_MARKERS, page: 'docs/18-conventions.md', render: () => forkTable().join('\n') },
+    { markers: MATRIX_MARKERS, page: SELF_CHAPTER, render: renderMatrixBody },
+    { markers: MATRIX_LAYERS_MARKERS, page: SELF_CHAPTER, render: renderMatrixLayers },
+    { markers: SIBLINGS_MARKERS, page: SELF_CHAPTER, render: renderSiblings },
+    { markers: META_TESTS_MARKERS, page: SELF_CHAPTER, render: renderMetaTests },
+    { markers: SELF_CHAPTER_MARKERS, page: SELF_CHAPTER, render: selfChapterTable },
+    { markers: FORK_MARKERS, page: FORK_CHAPTER, render: () => forkTable().join('\n') },
 ];
 
 export function chapterAt(root: string, page: string, existing: string): string {

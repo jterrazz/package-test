@@ -13,6 +13,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
@@ -61,12 +62,16 @@ export const noExistenceOnlyAssertion: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-existence-only-assertion'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-existence-only-assertion'), {
-            existenceOnly: {
-                found: "`{{matcher}}()` is this test's only oracle, and passes for almost anything",
-                fix: 'assert the value itself — `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-existence-only-assertion'),
+            {
+                existenceOnly: {
+                    found: "`{{matcher}}()` is this test's only oracle, and passes for almost anything",
+                    fix: 'assert the value itself — `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

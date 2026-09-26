@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 
 import { isRelativePath } from './relative-path.js';
 
-describe('relative-path', () => {
-    test('isRelativePath — a path is relative when it starts where the spec file is', () => {
+describe('isRelativePath', () => {
+    test('relative-path — isRelativePath — a path is relative when it starts where the spec file is', () => {
         // Given - paths from the spec file, a bare name, a marker and an absolute path
         const paths = ['./expected/out.txt', '../fixtures/shop/', 'out.txt', '$FIXTURES/x', '/abs'];
 

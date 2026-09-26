@@ -14,6 +14,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** Folding a suppression into the marker line would disable it: `-disable`/`-enable`, and the formatters' `-ignore` (`oxfmt-ignore` is the estate's). */
@@ -81,12 +82,16 @@ export const markerOnOneLine: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'marker-on-one-line'),
-        messages: lessonsAt(rowNamed(consumerRows, 'marker-on-one-line'), {
-            wrapped: {
-                found: 'a marker continued on the comment line under it',
-                fix: "fold the continuation into the marker's one line, or separate the two with a blank line",
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'marker-on-one-line'),
+            {
+                wrapped: {
+                    found: 'a marker continued on the comment line under it',
+                    fix: "fold the continuation into the marker's one line, or separate the two with a blank line",
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

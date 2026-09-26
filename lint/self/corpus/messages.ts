@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { CATALOGUE_CHAPTER } from '../../engine/catalogue/refusal.js';
+import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
 import { allRows, SELF_CHAPTER } from '../catalogue/manifest.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');

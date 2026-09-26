@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../../../../lint/engine/catalogue/refusal.js';
+import { REFUSAL_WHY } from '../../../../lint/index.refusal.js';
 import { button, content, testId, within } from '../../../elements/elements.js';
 import { describeMobileAmbiguity } from './ambiguity.js';
 import type { MobileElementMatch } from './device.port.js';

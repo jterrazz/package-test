@@ -39,7 +39,11 @@ describe('lesson', () => {
 
     test('every message teaches: found, why, fix, read (meta-test) — `message-has-four-parts` — a message lacking a part is refused, naming the part', () => {
         // Given - a rule whose fix was left empty, and one written as a plain sentence
-        const withoutFix = lessonsAt(ROW, { sleep: { fix: '', found: 'a sleep' } }).sleep;
+        const withoutFix = lessonsAt(
+            ROW,
+            { sleep: { fix: '', found: 'a sleep' } },
+            'docs/19-linting.md',
+        ).sleep;
 
         // Then - the meta-test's reader names what each one lacks
         expect(missingParts(withoutFix)).toStrictEqual(['fix']);

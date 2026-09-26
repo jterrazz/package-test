@@ -8,6 +8,7 @@ import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintedFile } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const WRAPPERS = new Set(['directory', 'file']);
@@ -56,12 +57,16 @@ export const pathsNamedInTheTest: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'paths-named-in-the-test'),
-        messages: lessonsAt(rowNamed(consumerRows, 'paths-named-in-the-test'), {
-            builtOutsideTest: {
-                found: '`{{name}}()` called outside a test',
-                fix: 'take the `{{name}}()` as a parameter, and build it in the test that stands on it',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'paths-named-in-the-test'),
+            {
+                builtOutsideTest: {
+                    found: '`{{name}}()` called outside a test',
+                    fix: 'take the `{{name}}()` as a parameter, and build it in the test that stands on it',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

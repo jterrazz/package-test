@@ -13,6 +13,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DOUBLE_FACTORIES = new Set(['fn', 'mockImplementation', 'mockImplementationOnce', 'mockOf']);
@@ -95,16 +96,20 @@ export const noSleep: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-sleep'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-sleep'), {
-            sleep: {
-                found: 'an arbitrary sleep in a test',
-                fix: 'wait on what the sleep stands for: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-sleep'),
+            {
+                sleep: {
+                    found: 'an arbitrary sleep in a test',
+                    fix: 'wait on what the sleep stands for: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
+                },
+                timersImport: {
+                    found: 'a timer-based sleep imported into a test',
+                    fix: 'delete the import and wait on the condition: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
+                },
             },
-            timersImport: {
-                found: 'a timer-based sleep imported into a test',
-                fix: 'delete the import and wait on the condition: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

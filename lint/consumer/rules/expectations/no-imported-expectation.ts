@@ -13,6 +13,7 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf, specsAnchorOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 function isRunnerOrStub(source: string): boolean {
@@ -83,12 +84,16 @@ export const noImportedExpectation: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-imported-expectation'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-imported-expectation'), {
-            imported: {
-                found: 'the expectation `{{name}}`, imported from "{{source}}"',
-                fix: 'write the expected value in this test — in place, or `file(…)` when several tests of this leaf share it — and stop importing `{{name}}`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-imported-expectation'),
+            {
+                imported: {
+                    found: 'the expectation `{{name}}`, imported from "{{source}}"',
+                    fix: 'write the expected value in this test — in place, or `file(…)` when several tests of this leaf share it — and stop importing `{{name}}`',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

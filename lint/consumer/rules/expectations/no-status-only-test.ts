@@ -11,6 +11,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const MIN_STATUS = 100;
@@ -92,12 +93,16 @@ export const noStatusOnlyTest: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-status-only-test'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-status-only-test'), {
-            statusOnlyProbe: {
-                found: "the test's only assertions probe the HTTP status",
-                fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 …`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-status-only-test'),
+            {
+                statusOnlyProbe: {
+                    found: "the test's only assertions probe the HTTP status",
+                    fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 …`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

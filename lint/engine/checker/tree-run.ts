@@ -8,7 +8,7 @@ export function runTree(specsRoot: string, registry: CheckerRegistry): Finding[]
 }
 
 export function checkerMessage(registry: CheckerRegistry, finding: Finding): string {
-    return lessonAt(rowNamed(registry.rows, finding.rule), finding);
+    return lessonAt(rowNamed(registry.rows, finding.rule), finding, registry.chapter);
 }
 
 export function checkerLine(registry: CheckerRegistry, finding: Finding): string {

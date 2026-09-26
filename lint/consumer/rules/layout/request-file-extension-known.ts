@@ -8,6 +8,7 @@ import { GROUND_REQUESTS } from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** Anchored on the visited test file: its sibling `requests/` is probed, and a file with no extension is reported there. */
@@ -30,12 +31,16 @@ export const requestFileExtensionKnown: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'request-file-extension-known'),
-        messages: lessonsAt(rowNamed(consumerRows, 'request-file-extension-known'), {
-            noExtension: {
-                found: '`requests/{{entry}}` carries no extension',
-                fix: 'name it by how it is sent — `requests/{{entry}}.http` for a whole request, `requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'request-file-extension-known'),
+            {
+                noExtension: {
+                    found: '`requests/{{entry}}` carries no extension',
+                    fix: 'name it by how it is sent — `requests/{{entry}}.http` for a whole request, `requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

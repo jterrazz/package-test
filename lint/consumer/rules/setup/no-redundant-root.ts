@@ -7,6 +7,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isFile } from '../../../engine/project/fs-cache.js';
 import { findRoot } from '../../../engine/project/resolve.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 /** The framework's own walk-up, run against this layer's fs probe: the rule and the runner must share one function. */
@@ -41,12 +42,16 @@ export const noRedundantRoot: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-redundant-root'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-redundant-root'), {
-            redundant: {
-                found: '`root: "{{root}}"` names the directory the walk already finds',
-                fix: 'delete the `root` option',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-redundant-root'),
+            {
+                redundant: {
+                    found: '`root: "{{root}}"` names the directory the walk already finds',
+                    fix: 'delete the `root` option',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

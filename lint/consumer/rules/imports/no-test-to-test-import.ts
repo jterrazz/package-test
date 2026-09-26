@@ -4,6 +4,7 @@ import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { importSourceVisitor } from '../../../engine/project/ast.js';
 import type { Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
@@ -22,12 +23,16 @@ export const noTestToTestImport: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-test-to-test-import'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-test-to-test-import'), {
-            testToTest: {
-                found: 'a test file imports the test file "{{source}}"',
-                fix: 'share the data through a `*.fixtures.ts` neighbour, or the runner through a `*.specification.ts`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-test-to-test-import'),
+            {
+                testToTest: {
+                    found: 'a test file imports the test file "{{source}}"',
+                    fix: 'share the data through a `*.fixtures.ts` neighbour, or the runner through a `*.specification.ts`',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

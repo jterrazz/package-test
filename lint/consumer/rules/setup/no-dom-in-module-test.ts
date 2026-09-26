@@ -5,6 +5,7 @@ import { child, identifierName, isNode, walk } from '../../../engine/project/ast
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DOM_GLOBALS = new Set(['document', 'HTMLElement', 'navigator', 'window']);
@@ -101,12 +102,16 @@ export const noDomInModuleTest: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-dom-in-module-test'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-dom-in-module-test'), {
-            domGlobal: {
-                found: '`{{name}}` in a module test, where no DOM exists',
-                fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-dom-in-module-test'),
+            {
+                domGlobal: {
+                    found: '`{{name}}` in a module test, where no DOM exists',
+                    fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

@@ -12,6 +12,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
@@ -146,20 +147,24 @@ export const noModuleMock: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'no-module-mock'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-module-mock'), {
-            assetImport: {
-                found: 'a module test imports the data asset "{{source}}"',
-                fix: 'write the data as code in a `*.fixtures.ts` neighbour, or move the test under `specs/` as a `.spec.ts`',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-module-mock'),
+            {
+                assetImport: {
+                    found: 'a module test imports the data asset "{{source}}"',
+                    fix: 'write the data as code in a `*.fixtures.ts` neighbour, or move the test under `specs/` as a `.spec.ts`',
+                },
+                bannedDir: {
+                    found: 'a `{{dir}}/` directory',
+                    fix: 'write the doubles as code — `mockOf<Port>()` inline, payloads in a `*.fixtures.ts` neighbour — and delete the directory',
+                },
+                viMock: {
+                    found: '`vi.mock` doubles a module for every importer',
+                    fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list, with its reason',
+                },
             },
-            bannedDir: {
-                found: 'a `{{dir}}/` directory',
-                fix: 'write the doubles as code — `mockOf<Port>()` inline, payloads in a `*.fixtures.ts` neighbour — and delete the directory',
-            },
-            viMock: {
-                found: '`vi.mock` doubles a module for every importer',
-                fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list, with its reason',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         schema: [
             {
                 additionalProperties: false,

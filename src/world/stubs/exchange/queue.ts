@@ -1,6 +1,6 @@
 /** The first unexhausted stub in declaration order answers; `times: n` is spent after n serves. No match is a 501 and the chain fails (`network-strict-after-first-stub`); a chain of zero stubs is unguarded. */
 
-import { refusal } from '../../../../lint/engine/catalogue/refusal.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { CaptureScope } from '../../../expectations/tokens/match.js';
 import {
     hasPlaceholders,

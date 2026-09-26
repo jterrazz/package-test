@@ -5,8 +5,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
 import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
-import { CATALOGUE_CHAPTER, REFUSAL_WHY } from '../../engine/catalogue/refusal.js';
+import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
 import { filesUnder } from '../../engine/project/files-under.js';
 import { allRows, SELF_CHECKER_PASSES, selfRows } from '../catalogue/manifest.js';
 import {

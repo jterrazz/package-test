@@ -3,9 +3,10 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { refusal } from '../../../lint/engine/catalogue/refusal.js';
 import { dedent } from '../../../lint/engine/project/dedent.js';
-import { isDiskDirectory, isDiskFile, resolveSpecPath } from '../../kernel/files/spec-path.js';
+import { refusal } from '../../../lint/index.refusal.js';
+import { resolveSpecPath } from '../../kernel/files/resolved-spec-path.js';
+import { isDiskDirectory, isDiskFile } from '../../kernel/files/spec-path.js';
 import { ContainerAccessor } from '../command/container.js';
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../disk/directory.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';

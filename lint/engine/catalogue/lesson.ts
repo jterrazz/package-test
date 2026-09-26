@@ -1,6 +1,5 @@
 import { lessonLine } from './lesson-parts.js';
 import type { Lesson } from './lesson-parts.js';
-import { CATALOGUE_CHAPTER } from './refusal.js';
 import type { Row } from './row.js';
 
 /** `why` and `read` come from the row, so a message and the catalogue never say two things. */
@@ -40,11 +39,11 @@ export function rowNamed<Entry extends Row>(rows: readonly Entry[], name: string
     return row;
 }
 
-export function readAt(row: Row, chapter = CATALOGUE_CHAPTER): string {
+export function readAt(row: Row, chapter: string): string {
     return `${chapter}#${row.name}`;
 }
 
-export function lessonAt(row: Row, teaching: Teaching, chapter = CATALOGUE_CHAPTER): string {
+export function lessonAt(row: Row, teaching: Teaching, chapter: string): string {
     return lessonLine({ ...teaching, read: readAt(row, chapter), why: whyOf(row.convention) });
 }
 
@@ -52,7 +51,7 @@ export function lessonAt(row: Row, teaching: Teaching, chapter = CATALOGUE_CHAPT
 export function lessonsAt<Key extends string>(
     row: Row,
     messages: Record<Key, Teaching>,
-    chapter = CATALOGUE_CHAPTER,
+    chapter: string,
 ): Record<Key, string> {
     return Object.fromEntries(
         Object.entries<Teaching>(messages).map(([key, teaching]) => [

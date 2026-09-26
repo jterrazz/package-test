@@ -6,6 +6,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const BUILDERS = new Set(['beforeAll', 'beforeEach']);
@@ -68,16 +69,20 @@ export const givenInTheTest: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'given-in-the-test'),
-        messages: lessonsAt(rowNamed(consumerRows, 'given-in-the-test'), {
-            givenInAHook: {
-                found: '`{{hook}}` moves the Given out of the tests',
-                fix: 'write the Given in each test — a shared value is a function each test calls, and `clock.at()` restores itself',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'given-in-the-test'),
+            {
+                givenInAHook: {
+                    found: '`{{hook}}` moves the Given out of the tests',
+                    fix: 'write the Given in each test — a shared value is a function each test calls, and `clock.at()` restores itself',
+                },
+                teardownDoesMore: {
+                    found: '`{{hook}}` does more than give back what the test took',
+                    fix: 'keep the restores in `{{hook}}`, and move the rest into the tests',
+                },
             },
-            teardownDoesMore: {
-                found: '`{{hook}}` does more than give back what the test took',
-                fix: 'keep the restores in `{{hook}}`, and move the rest into the tests',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

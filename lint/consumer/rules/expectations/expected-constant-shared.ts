@@ -15,6 +15,7 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 type Span = { end: number; start: number };
@@ -155,12 +156,16 @@ export const expectedConstantShared: LintRule = {
     meta: {
         docs: rowNamed(consumerRows, 'expected-constant-shared'),
         fixable: 'code',
-        messages: lessonsAt(rowNamed(consumerRows, 'expected-constant-shared'), {
-            singleReader: {
-                found: 'the expectation `{{name}}`, declared for the file and read by one test',
-                fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'expected-constant-shared'),
+            {
+                singleReader: {
+                    found: 'the expectation `{{name}}`, declared for the file and read by one test',
+                    fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'suggestion',
     },
 };

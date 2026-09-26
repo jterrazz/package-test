@@ -29,8 +29,8 @@ describe('checkLintImportsFollowTheDirection', () => {
         ]);
     });
 
-    test('lint-imports-follow-the-direction — the entry composes consumer with the engine and never self; the product reads the engine alone, and the shipped lint/ never reads the product', () => {
-        // Given - an entry reaching a rule, the engine and a self module; the product reaching the engine and a rule; the engine and a self meta-test reaching the product
+    test('lint-imports-follow-the-direction — the entry composes consumer with the engine and never self; the product reads the engine and the lint indexes alone, and the shipped lint/ never reads the product', () => {
+        // Given - an entry reaching a rule, the engine and a self module; the product reaching the engine, an index and a rule; the engine and a self meta-test reaching the product
         const entry = treeOf({
             'lint/engine/project/ground.ts':
                 "import { facet } from '../../../src/facets/api/api.facet.js';\n",
@@ -45,6 +45,7 @@ describe('checkLintImportsFollowTheDirection', () => {
             'src/kernel/files/scratch.ts': [
                 "import { GROUND_DIRS } from '../../../lint/engine/project/ground.js';",
                 "import { noSleep } from '../../../lint/consumer/rules/world/no-sleep.js';",
+                "import { refusal } from '../../../lint/index.refusal.js';",
                 '',
             ].join('\n'),
         });

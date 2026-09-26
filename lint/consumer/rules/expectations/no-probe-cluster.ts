@@ -15,6 +15,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DEFAULT_THRESHOLD = 3;
@@ -96,12 +97,16 @@ export const noProbeCluster: LintRule = {
     meta: {
         defaultOptions: [{ threshold: DEFAULT_THRESHOLD }],
         docs: rowNamed(consumerRows, 'no-probe-cluster'),
-        messages: lessonsAt(rowNamed(consumerRows, 'no-probe-cluster'), {
-            cluster: {
-                found: '{{count}} probes on `{{subject}}`',
-                fix: 'compare it whole — ``expect({{subject}}).toMatch(`…`)``, `TEST_UPDATE=1` writing the value — with tokens for what moves',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'no-probe-cluster'),
+            {
+                cluster: {
+                    found: '{{count}} probes on `{{subject}}`',
+                    fix: 'compare it whole — ``expect({{subject}}).toMatch(`…`)``, `TEST_UPDATE=1` writing the value — with tokens for what moves',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         schema: [
             {
                 additionalProperties: false,

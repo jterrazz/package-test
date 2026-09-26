@@ -2,6 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
 import { FAMILIES } from '../../consumer/catalogue/families.js';
 import { FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
 import {
@@ -14,11 +15,10 @@ import {
     UPSTREAM_RULES,
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
-import plugin, { recommendedRules } from '../../index.js';
 import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
 import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
-import { CATALOGUE_CHAPTER } from '../../engine/catalogue/refusal.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
+import plugin, { recommendedRules } from '../../index.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { chapterAt } from '../index.js';
 import selfPlugin, { selfPluginRules } from '../rules/plugin.js';

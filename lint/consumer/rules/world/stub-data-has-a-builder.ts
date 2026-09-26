@@ -8,6 +8,7 @@ import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { STUB_KINDS } from '../../../engine/project/stub-kinds.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DATA_SUFFIXES = ['.request.ts', '.response.json'];
@@ -52,12 +53,16 @@ export const stubDataHasABuilder: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'stub-data-has-a-builder'),
-        messages: lessonsAt(rowNamed(consumerRows, 'stub-data-has-a-builder'), {
-            orphan: {
-                found: '`stubs/{{kind}}/{{entry}}` has no stub beside it',
-                fix: 'write `stubs/{{kind}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'stub-data-has-a-builder'),
+            {
+                orphan: {
+                    found: '`stubs/{{kind}}/{{entry}}` has no stub beside it',
+                    fix: 'write `stubs/{{kind}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',
+                },
             },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };

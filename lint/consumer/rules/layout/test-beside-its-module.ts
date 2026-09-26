@@ -6,6 +6,7 @@ import { isFile } from '../../../engine/project/fs-cache.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { FileIdentity } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
@@ -63,24 +64,28 @@ export const testBesideItsModule: LintRule = {
     },
     meta: {
         docs: rowNamed(consumerRows, 'test-beside-its-module'),
-        messages: lessonsAt(rowNamed(consumerRows, 'test-beside-its-module'), {
-            orphanComponent: {
-                found: 'a component test with no neighbour "{{expected}}"',
-                fix: 'move it next to what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
+        messages: lessonsAt(
+            rowNamed(consumerRows, 'test-beside-its-module'),
+            {
+                orphanComponent: {
+                    found: 'a component test with no neighbour "{{expected}}"',
+                    fix: 'move it next to what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',
+                },
+                orphanTest: {
+                    found: 'a module test with no neighbour "{{expected}}"',
+                    fix: 'move it next to the module it tests; a test needing more than its module is a spec — move it under `specs/` as a `.spec.ts`',
+                },
+                rootTests: {
+                    found: 'a package-level `{{directory}}/` directory',
+                    fix: 'move each module test beside its module under `src/`, and each product specification under `specs/`',
+                },
+                testsDir: {
+                    found: 'a `__tests__/` directory',
+                    fix: 'move each test beside its module: the test of `<file>.ts` is `<file>.test.ts`',
+                },
             },
-            orphanTest: {
-                found: 'a module test with no neighbour "{{expected}}"',
-                fix: 'move it next to the module it tests; a test needing more than its module is a spec — move it under `specs/` as a `.spec.ts`',
-            },
-            rootTests: {
-                found: 'a package-level `{{directory}}/` directory',
-                fix: 'move each module test beside its module under `src/`, and each product specification under `specs/`',
-            },
-            testsDir: {
-                found: 'a `__tests__/` directory',
-                fix: 'move each test beside its module: the test of `<file>.ts` is `<file>.test.ts`',
-            },
-        }),
+            CATALOGUE_CHAPTER,
+        ),
         type: 'problem',
     },
 };
