@@ -4,9 +4,10 @@ import {
     SpecSyntaxError,
 } from '../../src/facets/cli/documents/spec-document.js';
 import type { Finding } from './checker.js';
+import { malformedRefFindings } from './no-malformed-ref.js';
 import { unknownTokenFindings } from './no-unknown-token.js';
 
-/** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
+/** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` and `no-malformed-ref` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
 export function checkSpecFile(text: string, rel: string): Finding[] {
     let document;
     try {
@@ -28,6 +29,8 @@ export function checkSpecFile(text: string, rel: string): Finding[] {
     }
 
     return assertedStreams(document).flatMap((stream) =>
-        unknownTokenFindings(stream.text, rel, stream.line),
+        unknownTokenFindings(stream.text, rel, stream.line).concat(
+            malformedRefFindings(stream.text, rel, stream.line),
+        ),
     );
 }

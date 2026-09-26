@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { findKnownTokens, findUnknownTokens } from './tokens.js';
+import { findKnownTokens, findMalformedRefs, findUnknownTokens } from './tokens.js';
 
 describe('tokens', () => {
     test('findUnknownTokens (`no-unknown-token`) — flags an identifier-shaped token outside the vocabulary', () => {
@@ -19,13 +19,13 @@ describe('tokens', () => {
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
-    test('findUnknownTokens (`no-malformed-ref`) — flags a malformed ref on a known kind (empty ref, spaced)', () => {
+    test('findMalformedRefs (`no-malformed-ref`) — flags a malformed ref on a known kind (empty ref, spaced)', () => {
         // Given - two malformed captures of otherwise-known kinds
         // Then - both are reported (they are not well-formed tokens)
-        expect(findUnknownTokens('{{iso8601#}}')).toStrictEqual([
+        expect(findMalformedRefs('{{iso8601#}}')).toStrictEqual([
             { line: 1, token: '{{iso8601#}}' },
         ]);
-        expect(findUnknownTokens('{{uuid #id}}')).toStrictEqual([
+        expect(findMalformedRefs('{{uuid #id}}')).toStrictEqual([
             { line: 1, token: '{{uuid #id}}' },
         ]);
     });

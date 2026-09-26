@@ -13,6 +13,7 @@ import { checkSpecFile } from './document-follows-its-grammar.js';
 import { checkSpecConventions } from './documents.js';
 import { requestLineFindings, statusLineFindings } from './http-first-line-follows-its-grammar.js';
 import { documentInGroundFindings } from './no-document-in-ground.js';
+import { malformedRefFindings } from './no-malformed-ref.js';
 import { tokenInRequestFindings } from './no-token-in-request.js';
 import { unknownTokenFindings } from './no-unknown-token.js';
 import { volatileLiteralsInGround } from './no-volatile-literal.js';
@@ -99,6 +100,7 @@ export function checkConventionFiles(rootDir: string): Finding[] {
             // `no-volatile-literal` reaches ground as well as documents: the same volatile literal in the other half of the tree.
             violations.push(
                 ...unknownTokenFindings(text, rel),
+                ...malformedRefFindings(text, rel),
                 ...volatileLiteralsInGround(rel, text),
             );
         }

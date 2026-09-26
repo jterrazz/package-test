@@ -198,6 +198,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/checks/no-snapshot-folder.ts',
             'lint/checks/no-token-in-request.ts',
             'lint/checks/no-unknown-token.ts',
+            'lint/checks/no-malformed-ref.ts',
             'lint/checks/seeds-state-absolute-time.ts',
             'lint/checks/document-description-reads-as-a-title.ts',
             'lint/checks/document-description-unique.ts',
