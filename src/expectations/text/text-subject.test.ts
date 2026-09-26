@@ -11,10 +11,10 @@ describe('text', () => {
     });
 
     test('toMatch resolves against expected/ next to the calling test', () => {
-        // Given - a message goldened at expected/text-basic.txt
+        // Given - a one-line message
         // Then - the fixture next to THIS test file resolves via caller detection
         expect(text('the operation could not complete\n')).toMatch(
-            file('./expected/text-basic.txt'),
+            file('./expected/could-not-complete.txt'),
         );
     });
 
@@ -26,7 +26,7 @@ describe('text', () => {
         // oxlint-disable-next-line jterrazz/no-raw-bypass -- proving text().raw preserves the ANSI the matcher strips: the raw accessor IS the subject
         expect(text(coloured).raw).toContain('\u001B[31m');
         expect(text(coloured).text).toBe('red plain\n');
-        expect(text(coloured)).toMatch(file('./expected/text-ansi.txt'));
+        expect(text(coloured)).toMatch(file('./expected/red-plain.txt'));
     });
 
     test('supports the {{token}} grammar in the fixture', () => {
@@ -34,7 +34,7 @@ describe('text', () => {
         const message = 'failed at /tmp/spec-abc123/out.txt after 42ms\n';
 
         // Then - {{path}}/{{number}} placeholders absorb the volatile parts
-        expect(text(message)).toMatch(file('./expected/text-tokens.txt'));
+        expect(text(message)).toMatch(file('./expected/failed-after-duration.txt'));
     });
 
     test('.grep() composes and stays snapshot-able', () => {
@@ -43,6 +43,6 @@ describe('text', () => {
 
         // Then - grep keeps only the matching block, still a TextAccessor
         expect(text(report).grep('error')).toBeInstanceOf(TextAccessor);
-        expect(text(report).grep('error')).toMatch(file('./expected/text-grep.txt'));
+        expect(text(report).grep('error')).toMatch(file('./expected/error-block.txt'));
     });
 });
