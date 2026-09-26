@@ -3,6 +3,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import type { Severity } from '../../engine/checker/finding.js';
 import { specsAnchor } from '../../engine/project/ast.js';
 import { treeEntries } from '../../engine/project/git-tree.js';
+import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     documentPaths,
     parseSpecDocument,
@@ -152,7 +153,7 @@ function entryReferenced(path: string, references: References): boolean {
 export function checkNoUnusedGround(rootDir: string): Finding[] {
     const violations: Finding[] = [];
     for (const dir of listDirs(rootDir)) {
-        if (basename(dir) === 'specs') {
+        if (basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER) {
             continue;
         }
         let entries;

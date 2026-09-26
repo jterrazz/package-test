@@ -1,5 +1,4 @@
 import type { Context } from '@oxlint/plugins';
-import { dirname, join } from 'node:path';
 
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
@@ -11,7 +10,6 @@ import {
     walk,
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { isStubKind, STUB_KINDS } from '../../../engine/project/stub-kinds.js';
@@ -20,16 +18,12 @@ import { consumerRows } from '../../catalogue/manifest.js';
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');
 
-const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
-const SOURCE_FILE = /\.[cm]?[jt]sx?$/u;
-/** `stubs/<kebab>.stubs.ts`. */
+/** `_setup/stubs/<kebab>.stubs.ts`. */
 const COMPOSITE_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.stubs\.[cm]?ts$/u;
-/** `stubs/<kind>/<kebab>.ts`. */
+/** `_setup/stubs/<kind>/<kebab>.ts`. */
 const UNIT_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.[cm]?ts$/u;
-/** `stubs/<kind>/<stem>.request.ts`. */
+/** `_setup/stubs/<kind>/<stem>.request.ts`. */
 const REQUEST_DATA_FILE = /^[a-z0-9]+(?:-[a-z0-9]+)*\.request\.[cm]?ts$/u;
-/** `stubs/<kind>/<stem>[.<qualifier>].response.json`. */
-const RESPONSE_DATA_FILE = /\.response\.json$/u;
 
 function exportsDefault(node: AstNode): boolean {
     const specifiers = (node.specifiers as AstNode[] | undefined) ?? [];
@@ -113,42 +107,6 @@ function kindReached(node: AstNode, bindings: EntryBindings): string | undefined
     return bindings.namespaces.has(object) && property !== undefined && isStubKind(property)
         ? property
         : undefined;
-}
-
-/** Oxlint never visits a `.json`, a directory that is no kind, nor an empty one, so the layout is walked from the owning test file. */
-function checkLayout(context: Context, node: AstNode, stubsDir: string): void {
-    const entries = listDirectory(stubsDir);
-    if (entries === null) {
-        return;
-    }
-    for (const entry of entries) {
-        const path = join(stubsDir, entry);
-        if (!isDirectory(path)) {
-            if (!SOURCE_FILE.test(entry)) {
-                context.report({ data: { entry }, messageId: 'rootEntry', node });
-            }
-            continue;
-        }
-        if (!isStubKind(entry)) {
-            context.report({ data: { entry, kinds: KIND_FOLDERS }, messageId: 'badKindDir', node });
-            continue;
-        }
-        for (const inner of listDirectory(path) ?? []) {
-            if (isDirectory(join(path, inner))) {
-                context.report({
-                    data: { child: inner, kind: entry },
-                    messageId: 'kindSubfolder',
-                    node,
-                });
-            } else if (!/\.[cm]?ts$/u.test(inner) && !inner.endsWith('.response.json')) {
-                context.report({
-                    data: { child: inner, kind: entry },
-                    messageId: 'kindEntry',
-                    node,
-                });
-            }
-        }
-    }
 }
 
 const FACADE_SOURCE = /\.stubs(?:\.[cm]?[jt]s)?$/u;
@@ -297,7 +255,6 @@ function checkUnit(context: Context, program: AstNode, base: string, kind: strin
 type Check = (node: AstNode) => void;
 
 function checkOf(context: Context): Check | undefined {
-    const file = context.physicalFilename;
     const parts = segmentsOf(context);
     // `src/**/stubs/` is the framework's own stub module: only specs carry the convention.
     if (!identityOf(context).inSpecs) {
@@ -305,11 +262,7 @@ function checkOf(context: Context): Check | undefined {
     }
     const stubsIndex = parts.lastIndexOf('stubs');
     if (stubsIndex === -1) {
-        return TEST_FILE.test(file)
-            ? (node) => {
-                  checkLayout(context, node, join(dirname(file), 'stubs'));
-              }
-            : undefined;
+        return undefined;
     }
     const base = parts.at(-1) ?? '';
     const depth = parts.length - 1 - stubsIndex;
@@ -320,12 +273,17 @@ function checkOf(context: Context): Check | undefined {
     }
     if (depth === 2) {
         const kind = parts[stubsIndex + 1] ?? '';
-        // A folder that is no kind is reported once, by the layout half.
         return isStubKind(kind)
             ? (node) => {
                   checkUnit(context, node, base, kind);
               }
-            : undefined;
+            : (node) => {
+                  context.report({
+                      data: { entry: kind, kinds: KIND_FOLDERS },
+                      messageId: 'badKindDir',
+                      node,
+                  });
+              };
     }
     return (node) => {
         context.report({ data: { base }, messageId: 'tooDeep', node });
@@ -352,7 +310,7 @@ export const stubsRootHoldsFacadesAndKinds: LintRule = {
             rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'),
             {
                 badKindDir: {
-                    found: '`stubs/{{entry}}/` is no stub kind',
+                    found: '`_setup/stubs/{{entry}}/` is no stub kind',
                     fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
                 },
                 badName: {
@@ -376,27 +334,15 @@ export const stubsRootHoldsFacadesAndKinds: LintRule = {
                     fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
                 },
                 foreignBuilder: {
-                    found: 'a stub under `stubs/{{kind}}/` calls the `{{used}}` builder',
-                    fix: 'move it to `stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
-                },
-                kindEntry: {
-                    found: '`stubs/{{kind}}/{{child}}` is neither a `*.ts` stub nor a `*.response.json` payload',
-                    fix: 'make it one of the two, or move it out of `stubs/`',
-                },
-                kindSubfolder: {
-                    found: '`stubs/{{kind}}/{{child}}/` nests a folder in a kind folder',
-                    fix: 'move its files up into `stubs/{{kind}}/`',
-                },
-                rootEntry: {
-                    found: '`stubs/{{entry}}` at the stubs root',
-                    fix: 'move it into the kind folder of the stub it pairs with',
+                    found: 'a stub under `_setup/stubs/{{kind}}/` calls the `{{used}}` builder',
+                    fix: 'move it to `_setup/stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
                 },
                 rootFile: {
-                    found: 'the stub unit "{{base}}" sits at the `stubs/` root',
+                    found: 'the stub unit "{{base}}" sits at the `_setup/stubs/` root',
                     fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
                 },
                 tooDeep: {
-                    found: 'the stub file "{{base}}" is nested below `stubs/<kind>/`',
+                    found: 'the stub file "{{base}}" is nested below `_setup/stubs/<kind>/`',
                     fix: 'move it up into its kind folder',
                 },
             },

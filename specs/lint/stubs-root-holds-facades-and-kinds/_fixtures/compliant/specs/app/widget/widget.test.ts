@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../../setup/api.specification.js';
-import world from './stubs/newsroom.stubs.js';
+import world from './_setup/stubs/newsroom.stubs.js';
 
 describe('widget', () => {
 test('serves the declared newsroom world', async () => {

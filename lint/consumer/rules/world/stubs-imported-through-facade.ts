@@ -21,7 +21,7 @@ export const stubsImportedThroughFacade: LintRule = {
             }),
             before() {
                 const { inSpecs, role } = identityOf(context);
-                // Inside `stubs/` the internal half is the file's own business.
+                // Inside `_setup/stubs/` the internal half is the file's own business.
                 return inSpecs && role !== 'stub';
             },
         };
@@ -33,7 +33,7 @@ export const stubsImportedThroughFacade: LintRule = {
             {
                 internal: {
                     found: 'the import "{{source}}" reaches into a stub kind folder',
-                    fix: 'export a named scenario from the `stubs/*.stubs.ts` facade, and import that',
+                    fix: 'export a named scenario from the `_setup/stubs/*.stubs.ts` facade, and import that',
                 },
             },
             CATALOGUE_CHAPTER,

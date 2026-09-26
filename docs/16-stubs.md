@@ -119,13 +119,13 @@ The file layout follows the same split: a **public facade** per feature, **inter
 ```
 specs/<facet>/<feature>/
 ├── <feature>.test.ts
+├── _fixtures/
+│   └── events.json                    the payload a unit serves
 └── _setup/
     └── stubs/
         ├── newsroom.stubs.ts          PUBLIC — the world and its scenarios, by name
         ├── http/
         │   ├── events.ts                  a unit stub
-        │   ├── events.response.json       the payload it serves
-        │   ├── events.fr.response.json    a qualified payload — same owner
         │   └── article-gone.ts            a factory: (id) => Stub
         ├── openai/
         │   ├── classify-article.ts
@@ -134,21 +134,21 @@ specs/<facet>/<feature>/
             └── draft-reply.ts
 ```
 
-Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([18 — Conventions § The naming recap](18-conventions.md#the-naming-recap)).
+Stubs are TypeScript that prepares specs, so their root sits in a `_setup/` — the one of the lowest folder the specs using them share ([18 — Conventions § The naming recap](18-conventions.md#the-naming-recap)). A payload is data, and `_setup/` holds code alone: it sits in the `_fixtures/` beside that `_setup/`, placed like any ground.
 
 The rules, enforced by [`stubs-root-holds-facades-and-kinds`](19-linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](19-linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](19-linting.md#stub-data-has-a-builder):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
 - A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
-- Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
+- Data with real mass goes to a payload in `_fixtures/` (served), which the unit imports, or to a sibling `.request.ts` (matched). The stem before the FIRST dot pairs a `.request.ts` with its stub: `classify-article.request.ts` belongs to `classify-article.ts`, and an orphan one is an error.
 - **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
-- Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies.
+- Shared data has ONE owner: a second stub imports the same `_fixtures/events.json`. No copies.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
 
 ```typescript
-// stubs/newsroom.stubs.ts — the facade a test imports
+// _setup/stubs/newsroom.stubs.ts — the facade a test imports
 import { defineStubs } from '@jterrazz/test';
 
 import articleGone from './http/article-gone.js';
@@ -160,10 +160,10 @@ export const withArticleGone = (id: string) => newsroom.with(articleGone(id));
 ```
 
 ```typescript
-// stubs/http/events.ts — a unit, with its payload beside it
+// _setup/stubs/http/events.ts — a unit, serving its payload from _fixtures/
 import { defineStub, http } from '@jterrazz/test';
 
-import payload from './events.response.json' with { type: 'json' };
+import payload from '../../../_fixtures/events.json' with { type: 'json' };
 
 export default defineStub({
     request: http.get('/events'),
@@ -440,7 +440,7 @@ Two scoping notes:
 - **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
 - **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route — outside `.with()`, order is yours to get right.
 - **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one stub is declared, `network-strict-after-first-stub` turns a stray call into a failure.
-- **Duplicating a payload.** The 45-line article exists ONCE, as a `.response.json`; the second stub imports it.
+- **Duplicating a payload.** The 45-line article exists ONCE, as a file of `_fixtures/`; the second stub imports it.
 
 ## Related
 

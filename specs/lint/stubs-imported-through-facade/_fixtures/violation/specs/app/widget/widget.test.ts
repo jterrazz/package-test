@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { api } from '../../setup/api.specification.js';
-import world from './stubs/http/events.js';
+import world from './_setup/stubs/http/events.js';
 
 describe('widget', () => {
 test('reaches past the stub facade', async () => {

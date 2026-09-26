@@ -1,6 +1,6 @@
 {
     "typescript": {
-        "comments/comment-lines-held-by-the-baseline": 2505,
+        "comments/comment-lines-held-by-the-baseline": 2492,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 26,
         "eslint/max-classes-per-file": 1,
@@ -15,7 +15,7 @@
         "eslint/no-loop-func": 1,
         "eslint/no-plusplus": 15,
         "eslint/no-promise-executor-return": 1,
-        "eslint/no-unused-vars": 2,
+        "eslint/no-unused-vars": 1,
         "eslint/no-use-before-define": 1,
         "eslint/prefer-destructuring": 3,
         "import/no-cycle": 2,

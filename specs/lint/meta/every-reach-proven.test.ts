@@ -61,13 +61,13 @@ describe('every-reach-proven', () => {
 
         // Then - the config INSIDE `specs/` is still a config (spwn's shape), the stub answers for itself, and the ground answers through the spec that owns it — oxlint never opens a `.json`
         expect(about(output, 'specs/vitest.config.ts')).toContain('project-named-for-its-facet');
-        expect(about(output, 'specs/api/orders/stubs/rates.ts')).toContain(
+        expect(about(output, 'specs/api/orders/_setup/stubs/rates.ts')).toContain(
             'stubs-root-holds-facades-and-kinds',
         );
         expect(about(output, 'specs/api/orders/total.spec.ts')).toContain(
             'request-file-extension-known',
         );
-        expect(about(output, 'specs/api/orders/stubs/rates.ts')).not.toContain('no-sleep');
+        expect(about(output, 'specs/api/orders/_setup/stubs/rates.ts')).not.toContain('no-sleep');
     });
 
     test('the specification and the config are judged by their own rules alone', async () => {

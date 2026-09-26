@@ -92,7 +92,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 115   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 62    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 163   |
-| The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 168   |
+| The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 169   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 22    |
 
 <!-- /GENERATED:layers -->

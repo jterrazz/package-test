@@ -1,10 +1,8 @@
-import { existsSync } from 'node:fs';
-import { basename, dirname, join, relative, sep } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
-import { treeNames } from '../../engine/project/git-tree.js';
+import { treeKind, treeNames } from '../../engine/project/git-tree.js';
 import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
-    COMPONENT_TREE,
     declaresTests,
     isRunnerName,
     isTestOrSpecName,
@@ -17,15 +15,10 @@ import type { Finding } from './checker.js';
 
 const FIXTURES_MODULE = /\.fixtures\.[cm]?[jt]sx?$/u;
 
-const TEST_BESIDE = ['.test.ts', '.test.tsx'];
+const RENDERED_BY = '.test.tsx';
 
-function stemOf(name: string): string {
-    return name.replace(/\.[cm]?[jt]sx?$/u, '');
-}
-
-function isUnitUnderTest(file: string): boolean {
-    const stem = join(dirname(file), stemOf(basename(file)));
-    return TEST_BESIDE.some((suffix) => existsSync(`${stem}${suffix}`));
+function isRenderedUnit(file: string): boolean {
+    return treeKind(`${file.replace(/\.[cm]?[jt]sx?$/u, '')}${RENDERED_BY}`) === 'file';
 }
 
 function holdsASpecDirectly(folder: string): boolean {
@@ -71,10 +64,9 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
             isTestOrSpecName(name) ||
             isRunnerName(name) ||
             dirname(file) === specsRoot ||
-            rel.split(sep)[0] === COMPONENT_TREE ||
             setupFolderOf(specsRoot, file) !== undefined ||
             refusedReservedAbove(specsRoot, file) !== undefined ||
-            isUnitUnderTest(file)
+            isRenderedUnit(file)
         ) {
             continue;
         }

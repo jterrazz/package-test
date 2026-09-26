@@ -1,4 +1,4 @@
-description: a subject folder named with a reserved word, holding its spec, passes
+description: a subject named with a reserved word, and code named so inside a _setup/, pass
 fixture: ./_fixtures/reserved/
 runs:
     - command: checker .

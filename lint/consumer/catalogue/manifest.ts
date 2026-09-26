@@ -192,7 +192,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Outside `specs/**/stubs/`, an import resolving into a kind folder (`stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.',
+            'Outside `specs/**/_setup/stubs/`, an import resolving into a kind folder (`_setup/stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.',
         facet: 'model',
         family: 'world',
         fix: 'Add a named scenario export to the facade and import that instead.',
@@ -206,10 +206,10 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Inside a kind folder, every `*.response.json` and every `*.request.ts` has a `<stem>.ts` sibling — the stem is the name up to the FIRST dot (`events.fr.response.json` → `events.ts`). Orphan data is an error.',
+            'Inside a kind folder of `_setup/stubs/`, every `*.request.ts` — the exact request a unit matches — has a `<stem>.ts` sibling, the stem the name up to the FIRST dot (`classify-article.request.ts` → `classify-article.ts`). Orphan data is an error, reported on the orphan itself. A payload a unit serves is data, so it sits in the ground beside the `_setup/` (`_fixtures/<name>.json`), which `_setup/` never holds (`reserved-folder-in-closed-list`).',
         facet: 'model',
         family: 'world',
-        fix: 'Write the stub that serves the payload, or delete the payload.',
+        fix: 'Write the stub that matches the request, or delete the request.',
         name: 'stub-data-has-a-builder',
         rationale:
             'Data exists only as served by a stub — a file with no owner is dead weight no test ever loads.',
@@ -234,13 +234,13 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Under `specs/**/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat and holds only `*.ts` and `*.response.json`.',
+            'Under `specs/**/_setup/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat — a file nested below it is an error — and a folder under the root that is no kind is an error at each unit it holds; each file is judged on its own, and a file that is no module is `reserved-folder-in-closed-list`’s.',
         facet: 'model',
         family: 'world',
         fix: 'Move the file to the half it belongs to: a facade at the root, a unit under the folder of the builder it calls.',
         name: 'stubs-root-holds-facades-and-kinds',
         rationale:
-            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the kind — filenames go back to being domain words, a unit reads as one kind of outside world, and bulky data sits beside the stub that serves it. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
+            'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the kind — filenames go back to being domain words, and a unit reads as one kind of outside world. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
         reach: 'stub',
         severity: 'error',
     },
@@ -876,7 +876,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A folder under a specs tree whose name starts with `_` is never a subject, and the `_` names form a closed list: `_setup/` (the TypeScript that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (the ground), and `_shared/` directly under the specs root. Any other `_` name is an error, a `_shared/` anywhere deeper too, and so is an entry of `specs/_shared/` that is none of the other five. A folder with a reserved name but no `_` — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, `shared/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its `_` spelling (`doubles/` → `_setup/`); one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Ground is never entered: what a fixture holds is its own.',
+            'A folder under a specs tree whose name starts with `_` is never a subject, and the `_` names form a closed list: `_setup/` (the TypeScript that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (the ground), and `_shared/` directly under the specs root. Any other `_` name is an error, a `_shared/` anywhere deeper too, and so is an entry of `specs/_shared/` that is none of the other five. A folder with a reserved name but no `_` — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, `shared/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its `_` spelling (`doubles/` → `_setup/`) — a `shared/` below the root excepted, whose fix is a `_shared/` there’s: the reserved folders of the folder that encloses it; one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Inside a `_setup/` the names are the code’s own and no bare reserved name is judged, but `_setup/` holds code alone: a ground folder in it is an error, and so is any file that is no module (`.ts`, `.tsx`, `.js`, `.mjs`, a `.d.ts` and their kin), the fix naming the ground folder of its role beside that `_setup/` — `_seeds/` for a `.sql`, `_requests/` for a `.http`, `_expected/` for what a test compares against, `_fixtures/` for any other input. Ground is never entered: what a fixture holds is its own.',
         facet: 'model',
         family: 'layout',
         fix: 'Rename the folder to the reserved name that says what it holds, and the paths that name it; drop the `_` from a subject.',
@@ -890,7 +890,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'Under a specs tree, a module — `.ts`, `.tsx`, `.js`, `.mjs` and their kin — that is no spec (`*.spec.ts`), no test (`*.test.ts`, `*.test.tsx`) and no runner (`*.specification.ts`) sits under a `_setup/`: a test adapter, a shared value, a helper, a stub facade and its kind folders (`_setup/stubs/`). Ground is out of reach, and so is the unit a `*.test.ts(x)` of the same name sits beside (`test-beside-its-module`), and the component tree, `specs/component/`, which is the app its tests render. A `*.fixtures.ts` is an error anywhere under the tree, `_setup/` included: a fixture is input data — a file in `_fixtures/` — so a module that prepares specs is named for what it holds. A file directly at the specs root is `specs-root-holds-facets-and-shared`’s.',
+            'Under a specs tree, a module — `.ts`, `.tsx`, `.js`, `.mjs` and their kin — that is no spec (`*.spec.ts`), no test (`*.test.ts`, `*.test.tsx`) and no runner (`*.specification.ts`) sits under a `_setup/`: a test adapter, a shared value, a helper, a stub facade and its kind folders (`_setup/stubs/`). Ground is out of reach, and so is a rendered unit — the `.tsx`, or the `.ts` of a hook — beside the `*.test.tsx` of the same name that renders it (`test-beside-its-module`): it is that test’s subject, not code that prepares it. A `*.fixtures.ts` is an error anywhere under the tree, `_setup/` included: a fixture is input data — a file in `_fixtures/` — so a module that prepares specs is named for what it holds. A file directly at the specs root is `specs-root-holds-facets-and-shared`’s.',
         facet: 'model',
         family: 'layout',
         fix: 'Move the module into the `_setup/` of the lowest folder its readers share, named for what it holds, and the paths that import it.',

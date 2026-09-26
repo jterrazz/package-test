@@ -14,7 +14,7 @@ const ruleTester = new RuleTester();
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
-const FEATURE = '/repo/specs/api/feature/stubs';
+const FEATURE = '/repo/specs/api/feature/_setup/stubs';
 
 const UNDER_STUBS = checkoutUnder('stubs', ['specs/api/feature']);
 const FACADE = `${FEATURE}/newsroom.stubs.ts`;
@@ -25,7 +25,7 @@ ruleTester.run(
     stubsRootHoldsFacadesAndKinds as unknown as OxlintRule,
     {
         invalid: [
-            // A unit stub left at the stubs/ root.
+            // A unit stub left at the _setup/stubs/ root.
             {
                 code: `import { defineStub, http } from '@jterrazz/test';\nexport default defineStub({ request: http.get('u'), response: http.json({}) });`,
                 errors: [{ messageId: 'rootFile' }],
@@ -91,7 +91,7 @@ ruleTester.run(
                 errors: [{ messageId: 'foreignBuilder' }, { messageId: 'foreignBuilder' }],
                 filename: UNIT,
             },
-            // A namespace import reaches a builder too: `t.http` under `stubs/openai/` is the http kind.
+            // A namespace import reaches a builder too: `t.http` under `_setup/stubs/openai/` is the http kind.
             {
                 code: `import * as t from '@jterrazz/test';\nexport default t.defineStub({ request: t.openai.chat({ user: 'u' }), response: t.http.error(500) });`,
                 errors: [{ messageId: 'foreignBuilder' }],
@@ -103,11 +103,10 @@ ruleTester.run(
                 errors: [{ messageId: 'tooDeep' }],
                 filename: `${FEATURE}/http/nested/events.ts`,
             },
-            // The layout half: a stray .json at the root and a folder that is no stub kind.
             {
-                code: 'test("x", () => {});',
-                errors: 2,
-                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/_fixtures/violation/specs/app/widget/widget.test.ts`,
+                code: `export default 1;`,
+                errors: [{ messageId: 'badKindDir' }],
+                filename: `${FEATURE}/grpc/thing.ts`,
             },
         ],
         valid: [
@@ -171,10 +170,9 @@ ruleTester.run(
                 code: `export const PROMPT = 'Classify the article';`,
                 filename: `${FEATURE}/openai/classify.request.ts`,
             },
-            // The compliant fixture tree — the layout half stays silent.
             {
                 code: 'test("x", () => {});',
-                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/_fixtures/compliant/specs/app/widget/widget.test.ts`,
+                filename: `${SPECS_LINT}/stubs-root-holds-facades-and-kinds/_fixtures/violation/specs/app/widget/widget.test.ts`,
             },
             // The framework's own stubs module is not a feature tree.
             {

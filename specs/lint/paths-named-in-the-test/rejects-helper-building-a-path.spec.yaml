@@ -5,6 +5,6 @@ runs:
       exit: 1
       stdout: |
           specs/api/api.specification.ts:4:25  jterrazz(paths-named-in-the-test)
+          specs/api/orders/_setup/stubs/http/stock.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/api/orders/_setup/stubs/http/stock.ts:4:12  jterrazz(paths-named-in-the-test)
           specs/api/orders/seeded.ts:5:21  jterrazz(paths-named-in-the-test)
-          specs/api/orders/stubs/http/stock.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
-          specs/api/orders/stubs/http/stock.ts:4:12  jterrazz(paths-named-in-the-test)
