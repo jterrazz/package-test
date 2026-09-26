@@ -76,11 +76,18 @@ describe('FRAMEWORK_LAYERS', () => {
                     filename: '/repo/src/elements/descriptors/roles.ts',
                     options: own,
                 },
-                // A facet reaches the project kit only from its project, never from test code.
+                // A facet reaches the runner config only from its project, never from test code.
                 {
-                    code: 'import { onProjectDefaults } from "../../../vitest/project-kit.js";',
+                    code: 'import { onProjectDefaults } from "../../../vitest/project.js";',
                     errors: [{ messageId: 'crossLayer' }],
                     filename: '/repo/src/facets/api/request/route.ts',
+                    options: own,
+                },
+                // The runner config knows no facet: the entry assembles the facets' projects.
+                {
+                    code: 'import { literate } from "../facets/cli/cli.project.js";',
+                    errors: [{ messageId: 'crossLayer' }],
+                    filename: '/repo/src/vitest/preset.ts',
                     options: own,
                 },
                 // A facet folder owns its own library, not a sibling's.
@@ -99,15 +106,9 @@ describe('FRAMEWORK_LAYERS', () => {
                 },
             ],
             valid: [
-                // The runner config assembles each facet's project.
+                // A facet's project builds on the runner config: the one declared seam.
                 {
-                    code: 'import { api } from "../facets/api/api.project.js";',
-                    filename: '/repo/src/vitest/projects.ts',
-                    options: own,
-                },
-                // A facet's project builds on the project kit: the one declared seam.
-                {
-                    code: 'import { onProjectDefaults } from "../../vitest/project-kit.js";',
+                    code: 'import { onProjectDefaults } from "../../vitest/project.js";',
                     filename: '/repo/src/facets/api/api.project.ts',
                     options: own,
                 },

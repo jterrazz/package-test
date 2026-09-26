@@ -4,7 +4,7 @@ import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
 
 describe('source-root-holds-known-entries', () => {
-    test('source-root-holds-known-entries — the source root holds the two entries and the six trees, and nothing else', () => {
+    test('source-root-holds-known-entries — the source root holds the three entries and the six trees, and nothing else', () => {
         // Given - the package's own tree, and one with a module and a folder left at its root
         const stray = treeOf({
             'src/index.ts': '',
@@ -16,8 +16,8 @@ describe('source-root-holds-known-entries', () => {
         // Then - the package holds none, and each stray entry is named at itself
         expect(checkSourceRootHoldsKnownEntries(ROOT)).toStrictEqual([]);
         expect(located(checkSourceRootHoldsKnownEntries(stray))).toStrictEqual([
-            'src/model:1:1 source-root-holds-known-entries: the folder `src/model` at the source root, which holds the two entries and the six trees alone',
-            'src/settings.ts:1:1 source-root-holds-known-entries: the file `src/settings.ts` at the source root, which holds the two entries and the six trees alone',
+            'src/model:1:1 source-root-holds-known-entries: the folder `src/model` at the source root, which holds the three entries and the six trees alone',
+            'src/settings.ts:1:1 source-root-holds-known-entries: the file `src/settings.ts` at the source root, which holds the three entries and the six trees alone',
         ]);
     });
 });

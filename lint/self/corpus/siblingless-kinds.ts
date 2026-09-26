@@ -88,7 +88,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
         name: "a facet's vitest project",
-        why: '`projects.test.ts` builds every one of them and asserts the project it produces',
+        why: '`index.vitest.test.ts` builds them through the entry, or `<facet>.project.test.ts` beside it, and asserts the project it produces',
     },
     {
         claims: oneOf(
@@ -241,7 +241,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/kernel/database-option.ts',
             'src/world/services/startup/registry.ts',
             'src/kernel/pause.ts',
-            'src/vitest/project-kit.ts',
+            'src/vitest/project.ts',
         ),
         name: 'a chain or runner internal',
         why: 'it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to',

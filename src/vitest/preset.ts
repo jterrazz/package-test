@@ -7,15 +7,7 @@ import {
     REPORTER_OUTPUT_FILES,
 } from '../../lint/engine/project/artifacts.js';
 import { GROUND_GLOB } from '../../lint/engine/project/ground.js';
-import { literate } from '../facets/cli/cli.project.js';
-import type { LiterateOptions } from '../facets/cli/cli.project.js';
-import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project-kit.js';
-
-/** A vite/vitest config, merged over the preset's defaults, plus `literate`. */
-export type SpecConfig = ViteUserConfig & {
-    /** Turns matching `<case>.spec.yaml` files into tests; with `projects`, put the plugin in the collecting project instead. */
-    literate?: LiterateOptions;
-};
+import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project.js';
 
 /** `json-summary` is what the coverage ratchet reads; the v8 provider is an optional peer. */
 const COVERAGE = {
@@ -82,14 +74,7 @@ function withProjectDefaults(project: TestProjectConfiguration): TestProjectConf
     return onProjectDefaults(project);
 }
 
-/** The shared vitest config: what you pass is merged over the defaults. */
-export function defineSpecConfig(config: SpecConfig = {}): ViteUserConfig {
-    const { literate: literateOptions, ...userConfig } = config;
-
-    const stated = literateOptions
-        ? (mergeConfig({ plugins: [literate(literateOptions)] }, userConfig) as ViteUserConfig)
-        : userConfig;
-
+export function presetConfig(stated: ViteUserConfig = {}): ViteUserConfig {
     const merged = mergeConfig(rootDefaults(), stated) as ViteUserConfig;
     const root = merged.test === undefined ? undefined : statedOnce(merged.test);
     if (root === undefined) {

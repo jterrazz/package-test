@@ -22,6 +22,7 @@ const config: OxlintConfig = defineConfig(
             },
             {
                 files: [
+                    'src/index.vitest.ts',
                     'src/vitest/**',
                     'src/facets/*/*.project.ts',
                     'src/facets/api/routes/**',

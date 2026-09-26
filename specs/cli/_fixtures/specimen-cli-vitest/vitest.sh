@@ -9,6 +9,6 @@ root="$(cd "$(dirname "$0")/../../../.." && pwd)"
 [ -e node_modules ] || ln -s "$root/node_modules" node_modules
 IN_PLACE_ENTRY="$root/src/index.ts"
 IN_PLACE_SETUP="$root/src/expectations/in-place/in-place-setup.ts"
-RUNNER_ENTRY="$root/src/vitest/index.ts"
+RUNNER_ENTRY="$root/src/index.vitest.ts"
 export IN_PLACE_ENTRY IN_PLACE_SETUP RUNNER_ENTRY
 exec node "$root/node_modules/vitest/vitest.mjs" "$@"

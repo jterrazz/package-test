@@ -7,8 +7,8 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/project/artifacts.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { callerFrames } from '../../kernel/files/caller.js';
-import type { FacetProjectOptions } from '../../vitest/project-kit.js';
-import { onProjectDefaults } from '../../vitest/project-kit.js';
+import type { FacetProjectOptions } from '../../vitest/project.js';
+import { onProjectDefaults } from '../../vitest/project.js';
 import { mswWorkerScript } from '../../world/stubs/network/worker-script.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
 

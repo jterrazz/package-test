@@ -18,7 +18,7 @@ export default defineConfig([
             schema: 'src/facets/cli/documents/schema-cli.ts',
             'services-setup': 'src/world/services/containers/run-setup.ts',
             'temp-root': 'src/kernel/files/temp-root.ts',
-            vitest: 'src/vitest/index.ts',
+            vitest: 'src/index.vitest.ts',
         },
         format: ['esm'],
         hash: false,

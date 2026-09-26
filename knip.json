@@ -2,7 +2,7 @@
     "$schema": "https://unpkg.com/knip@6/schema.json",
     "entry": [
         "src/index.ts",
-        "src/vitest/index.ts",
+        "src/index.vitest.ts",
         "lint/index.ts",
         "lint/self/rules/plugin.ts",
         "lint/index.checker.ts",

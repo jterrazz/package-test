@@ -1,8 +1,8 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { facetProject } from '../../vitest/project-kit.js';
-import type { FacetProjectOptions } from '../../vitest/project-kit.js';
+import { facetProject } from '../../vitest/project.js';
+import type { FacetProjectOptions } from '../../vitest/project.js';
 import type { MobileDevice } from './device/device.port.js';
 import { mobileSessionSetup } from './session/mobile-session.js';
 

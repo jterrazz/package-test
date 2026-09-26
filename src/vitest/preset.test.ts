@@ -8,10 +8,10 @@ import {
 } from '../../lint/engine/project/artifacts.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import { tempRootSetup } from '../kernel/files/temp-root.js';
-import { defineSpecConfig, reporterOutputFiles } from './preset.js';
-import { unit } from './projects.js';
+import { presetConfig, reporterOutputFiles } from './preset.js';
+import { unit } from './unit.project.js';
 
-function excludeOf(config: ReturnType<typeof defineSpecConfig>): string[] {
+function excludeOf(config: ReturnType<typeof presetConfig>): string[] {
     const [project] = config.test?.projects ?? [];
     if (typeof project !== 'object' || project === null || !('test' in project)) {
         return [];
@@ -19,9 +19,9 @@ function excludeOf(config: ReturnType<typeof defineSpecConfig>): string[] {
     return project.test?.exclude ?? [];
 }
 describe('preset', () => {
-    test('defineSpecConfig() — artefact paths — sends the vite cache and the coverage report under .artifacts/vitest', () => {
+    test('presetConfig() — artefact paths — sends the vite cache and the coverage report under .artifacts/vitest', () => {
         // Given - the preset alone, nothing stated
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - both writers point inside the one artefact folder, and the coverage block names the provider the ratchet reads (`json-summary`)
         expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
@@ -32,9 +32,9 @@ describe('preset', () => {
         });
     });
 
-    test('defineSpecConfig() — artefact paths — routes every path Vitest 5 pins under .artifacts/vitest', () => {
+    test('presetConfig() — artefact paths — routes every path Vitest 5 pins under .artifacts/vitest', () => {
         // Given - the preset alone: the attachments a test annotates, the failure screenshots, and the four reporters that became file writers
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - none of them lands on `.vitest/` at the repository root, which is the one folder the estate's artefact rule does not cover
         expect(config.test?.attachmentsDir).toBe(ATTACHMENTS_DIR);
@@ -46,7 +46,7 @@ describe('preset', () => {
         ).toBe(true);
     });
 
-    test('defineSpecConfig() — artefact paths — names the blob of a shard for its shard, so the shards of one run land side by side', () => {
+    test('presetConfig() — artefact paths — names the blob of a shard for its shard, so the shards of one run land side by side', () => {
         // Given - the arguments of a whole run, and of two shards spelled both ways
         const whole = reporterOutputFiles(['node', 'vitest', 'run']);
         const first = reporterOutputFiles(['node', 'vitest', 'run', '--shard=1/3']);
@@ -60,9 +60,9 @@ describe('preset', () => {
         ]);
     });
 
-    test('defineSpecConfig() — artefact paths — gives a project the attachments directory too', () => {
+    test('presetConfig() — artefact paths — gives a project the attachments directory too', () => {
         // Given - a config with one inline project
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
@@ -71,9 +71,9 @@ describe('preset', () => {
         expect(project).toMatchObject({ test: { attachmentsDir: ATTACHMENTS_DIR } });
     });
 
-    test('defineSpecConfig() — artefact paths — gives every inline project the cache dir too', () => {
+    test('presetConfig() — artefact paths — gives every inline project the cache dir too', () => {
         // Given - a config with projects (each is resolved as its own vite config, inheriting nothing from the root)
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
@@ -82,27 +82,27 @@ describe('preset', () => {
         expect(project).toMatchObject({ cacheDir: VITEST_ARTIFACTS_DIR });
     });
 
-    test('defineSpecConfig() — defaults — raises the test and hook budgets to 30s', () => {
+    test('presetConfig() — defaults — raises the test and hook budgets to 30s', () => {
         // Given - the preset alone
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - vitest's 5s/10s defaults are replaced by the ecosystem's
         expect(config.test?.testTimeout).toBe(30_000);
         expect(config.test?.hookTimeout).toBe(30_000);
     });
 
-    test('defineSpecConfig() — defaults — excludes what a spec stands on — ground is an input, not a suite', () => {
+    test('presetConfig() — defaults — excludes what a spec stands on — ground is an input, not a suite', () => {
         // Given - the preset alone
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - the four ground folders never get collected
         expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
         expect(config.test?.exclude).toContain('**/node_modules/**');
     });
 
-    test('defineSpecConfig() — defaults — carries the same budgets and exclusions into a project', () => {
+    test('presetConfig() — defaults — carries the same budgets and exclusions into a project', () => {
         // Given - a project that states only its own include
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
@@ -116,26 +116,26 @@ describe('preset', () => {
         );
     });
 
-    test('defineSpecConfig() — what the consumer states wins — a stated timeout replaces the default instead of adding to it', () => {
+    test('presetConfig() — what the consumer states wins — a stated timeout replaces the default instead of adding to it', () => {
         // Given - a config raising the budget for a slow simulator suite
-        const config = defineSpecConfig({ test: { testTimeout: 240_000 } });
+        const config = presetConfig({ test: { testTimeout: 240_000 } });
 
         // Then - the stated value is the one vitest sees
         expect(config.test?.testTimeout).toBe(240_000);
     });
 
-    test('defineSpecConfig() — what the consumer states wins — a stated exclude ADDS to the preset list rather than replacing it', () => {
+    test('presetConfig() — what the consumer states wins — a stated exclude ADDS to the preset list rather than replacing it', () => {
         // Given - a config excluding one heavy spec
-        const config = defineSpecConfig({ test: { exclude: ['specs/smoke/**'] } });
+        const config = presetConfig({ test: { exclude: ['specs/smoke/**'] } });
 
         // Then - vite concatenates: the preset's exclusions survive, so a consumer never has to spread `configDefaults.exclude` by hand
         expect(config.test?.exclude).toContain('specs/smoke/**');
         expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
     });
 
-    test('defineSpecConfig() — what the consumer states wins — a project overrides the preset per project', () => {
+    test('presetConfig() — what the consumer states wins — a project overrides the preset per project', () => {
         // Given - one sequential project among defaults
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: {
                 projects: [
                     { test: { fileParallelism: false, name: 'integrations', testTimeout: 60_000 } },
@@ -151,17 +151,17 @@ describe('preset', () => {
         });
     });
 
-    test('defineSpecConfig() — what the consumer states wins — a project declared as a glob string is handed back untouched', () => {
+    test('presetConfig() — what the consumer states wins — a project declared as a glob string is handed back untouched', () => {
         // Given - vitest's other project form: a path glob
-        const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
+        const config = presetConfig({ test: { projects: ['packages/*'] } });
 
         // Then - there is no object to merge into, so nothing is invented
         expect(config.test?.projects).toStrictEqual(['packages/*']);
     });
 
-    test('defineSpecConfig() — every glob stated once — a helper built on the defaults does not carry them twice', () => {
+    test('presetConfig() — every glob stated once — a helper built on the defaults does not carry them twice', () => {
         // Given - the canonical config: one helper project, which is built ON the defaults and then merged INTO them
-        const config = defineSpecConfig({ test: { projects: [unit()] } });
+        const config = presetConfig({ test: { projects: [unit()] } });
 
         // Then - vite concatenates the two lists, and the result names each glob once
         expect(excludeOf(config)).toStrictEqual([
@@ -173,41 +173,41 @@ describe('preset', () => {
         ]);
     });
 
-    test('defineSpecConfig() — every glob stated once — the root drops the exclusions every project already states', () => {
+    test('presetConfig() — every glob stated once — the root drops the exclusions every project already states', () => {
         // Given - the same config: with projects, the root collects nothing and its list only travels into them, where vitest concatenates it
-        const config = defineSpecConfig({ test: { projects: [unit()] } });
+        const config = presetConfig({ test: { projects: [unit()] } });
 
         // Then - nothing of the preset's is left to travel, so the banner prints one copy
         expect(config.test?.exclude).toStrictEqual([]);
     });
 
-    test('defineSpecConfig() — every glob stated once — what the consumer states at the root still reaches the projects', () => {
+    test('presetConfig() — every glob stated once — what the consumer states at the root still reaches the projects', () => {
         // Given - a root exclusion no project holds a copy of
-        const config = defineSpecConfig({ test: { exclude: ['heavy/**'], projects: [unit()] } });
+        const config = presetConfig({ test: { exclude: ['heavy/**'], projects: [unit()] } });
 
         // Then - it stays where vitest will read it
         expect(config.test?.exclude).toStrictEqual(['heavy/**']);
     });
 
-    test('defineSpecConfig() — every glob stated once — a project named by a glob keeps the root exclusions it depends on', () => {
+    test('presetConfig() — every glob stated once — a project named by a glob keeps the root exclusions it depends on', () => {
         // Given - a project this preset never merged into: its config is another file's
-        const config = defineSpecConfig({ test: { projects: ['packages/*'] } });
+        const config = presetConfig({ test: { projects: ['packages/*'] } });
 
         // Then - the root is the only place its exclusions can come from, so nothing is dropped
         expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
     });
 
-    test('defineSpecConfig() — the hygiene a suite does not have to write — never retries: a flaky test is fixed or deleted', () => {
+    test('presetConfig() — the hygiene a suite does not have to write — never retries: a flaky test is fixed or deleted', () => {
         // Given - the preset alone
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - the policy is the default, so no repository has to state it
         expect(config.test?.retry).toBe(0);
     });
 
-    test('defineSpecConfig() — the hygiene a suite does not have to write — gives back what a test took — the spies, the globals, the environment', () => {
+    test('presetConfig() — the hygiene a suite does not have to write — gives back what a test took — the spies, the globals, the environment', () => {
         // Given - the preset alone
-        const config = defineSpecConfig();
+        const config = presetConfig();
 
         // Then - the three restores are on, which is what lets `clock.at()` and `vi.stubEnv()` be written with no teardown hook (`given-in-the-test`)
         expect(config.test?.restoreMocks).toBe(true);
@@ -215,9 +215,9 @@ describe('preset', () => {
         expect(config.test?.unstubEnvs).toBe(true);
     });
 
-    test('defineSpecConfig() — the hygiene a suite does not have to write — carries the same hygiene into a project', () => {
+    test('presetConfig() — the hygiene a suite does not have to write — carries the same hygiene into a project', () => {
         // Given - a project that states only its own include
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
@@ -228,17 +228,17 @@ describe('preset', () => {
         });
     });
 
-    test('defineSpecConfig() — the hygiene a suite does not have to write — what a config states wins over all of it', () => {
+    test('presetConfig() — the hygiene a suite does not have to write — what a config states wins over all of it', () => {
         // Given - a repository whose subject IS the retry
-        const config = defineSpecConfig({ test: { retry: 2 } });
+        const config = presetConfig({ test: { retry: 2 } });
 
         // Then - the preset is a default, not a ceiling
         expect(config.test?.retry).toBe(2);
     });
 
-    test("defineSpecConfig() — the run's global setups — the root and every inline project carry the update-mode setup and the temp-root setup", () => {
+    test("presetConfig() — the run's global setups — the root and every inline project carry the update-mode setup and the temp-root setup", () => {
         // Given - a config with one inline project
-        const config = defineSpecConfig({
+        const config = presetConfig({
             test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
         });
 
@@ -248,25 +248,5 @@ describe('preset', () => {
         expect(project).toMatchObject({ test: { globalSetup: [inPlaceSetup(), tempRootSetup()] } });
         expect(inPlaceSetup()).toMatch(/in-place-setup\.ts$/u);
         expect(tempRootSetup()).toMatch(/temp-root\.ts$/u);
-    });
-
-    test('defineSpecConfig() — the literate plugin — registers the plugin when a specification is given', () => {
-        // Given - a config naming the runner its spec documents run through
-        const config = defineSpecConfig({
-            literate: { specification: './specs/cli/cli.specification.ts' },
-        });
-
-        // Then - the plugin is in place, and `literate` never leaks as a vite key
-        expect(config.plugins).toHaveLength(1);
-        expect(config.plugins?.[0]).toMatchObject({ name: 'jterrazz-test:literate' });
-        expect(config).not.toHaveProperty('literate');
-    });
-
-    test('defineSpecConfig() — the literate plugin — leaves plugins alone when no specification is given', () => {
-        // Given - a plain config
-        const config = defineSpecConfig({ test: { include: ['src/**'] } });
-
-        // Then - no plugin was invented
-        expect(config.plugins).toBeUndefined();
     });
 });

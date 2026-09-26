@@ -12,7 +12,7 @@ import {
     mobile,
     unit,
     website,
-} from './src/vitest/index.js';
+} from './src/index.vitest.js';
 
 const config = defineSpecConfig({
     test: {

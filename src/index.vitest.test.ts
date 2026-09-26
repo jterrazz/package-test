@@ -1,8 +1,12 @@
+import { existsSync } from 'node:fs';
+import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import { servicesSetup } from '../world/services/containers/run-setup.js';
-import { api, cli, integration, job, mobile, unit } from './projects.js';
+import { api, cli, defineSpecConfig, integration, job, mobile } from './index.vitest.js';
+import { servicesSetup } from './world/services/containers/run-setup.js';
+
+const ROOT = resolve(import.meta.dirname, '..');
 
 function testOf(
     project: TestProjectInlineConfiguration,
@@ -10,56 +14,32 @@ function testOf(
     return project.test ?? {};
 }
 
-describe('projects', () => {
-    test('unit() — module tests, and only module tests — collects .test.ts outside specs/ and leaves .test.tsx to the browser', () => {
-        // Given - the canonical project, stated by nobody
-        const project = testOf(unit());
+type ProjectHelper = () => { test?: { globalSetup?: string | string[] } };
 
-        // Then - a rendered thing is not a module test, and specs/ is another kind
-        expect(project.include).toStrictEqual(['**/*.test.ts']);
-        expect(project.exclude).toContain('**/*.test.tsx');
-        expect(project.exclude).toContain('specs/**');
-        expect(project.name).toBe('unit');
-    });
+describe('index.vitest', () => {
+    test('@jterrazz/test/vitest — a built project names setups the bundle ships — every global setup a built project helper names is a file of dist/', async () => {
+        // Given - the built runner-config entry, whose helpers resolve their setups beside the bundle (`npm run build` first)
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed specifier resolves to `any`: the helpers are what this reads of it
+        const built = (await import(resolve(ROOT, 'dist/vitest.js'))) as Record<string, unknown>;
+        const helpers = ['api', 'integration', 'job', 'mobile', 'unit'] as const;
 
-    test('unit() — module tests, and only module tests — carries the preset budget, and the one a project states instead', () => {
-        // Given - a project that needs longer than the shared 30s
-        const stated = testOf(unit({ timeout: 60_000 }));
+        // When - each helper builds its project, as a consumer's config calls it
+        const setups = helpers.flatMap((name) => {
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed entry is `any`: this is the helper shape the config calls
+            const project = (built[name] as ProjectHelper)();
+            return [project.test?.globalSetup ?? []].flat();
+        });
 
-        // Then - the budget is the project's, the rest stays the preset's
-        expect(stated.testTimeout).toBe(60_000);
-        expect(testOf(unit()).testTimeout).toBe(30_000);
-    });
-
-    test('unit() — module tests, and only module tests — takes the globs a project states over the canonical ones', () => {
-        // Given - a repository whose modules do not sit at the root
-        const project = testOf(unit({ exclude: [], include: ['packages/**/*.test.ts'] }));
-
-        // Then - what it states is what it collects
-        expect(project.include).toStrictEqual(['packages/**/*.test.ts']);
-    });
-
-    test('unit() — module tests, and only module tests — turns the trees a repository names into the globs that collect them', () => {
-        // Given - a repository whose modules live under two roots
-        const project = testOf(unit({ roots: ['packages', 'apps/'] }));
-
-        // Then - each root is a glob, and the trailing slash is not a second one
-        expect(project.include).toStrictEqual(['packages/**/*.test.ts', 'apps/**/*.test.ts']);
-    });
-
-    test('unit() — module tests, and only module tests — shares one module graph per worker when a pure project says so, and isolates otherwise', () => {
-        // Given - a project whose tests leave no state behind, and one stated by nobody
-        const shared = testOf(unit({ isolate: false }));
-
-        // Then - the pure one runs its files in one graph per worker, the other is vitest's default
-        expect(shared.isolate).toBe(false);
-        expect(testOf(unit())).not.toHaveProperty('isolate');
-    });
-
-    test('unit() — module tests, and only module tests — runs before either browser project', () => {
-        // Given - the canonical project
-        // Then - node first (0), the page facets after
-        expect(testOf(unit()).sequence).toStrictEqual({ groupOrder: 0 });
+        // Then - each names its entry in dist/, and the file is there: a renamed entry would fail every consumer's run at startup
+        const named = [...new Set(setups.map((setup) => relative(ROOT, setup)))].toSorted();
+        expect(named).toStrictEqual([
+            'dist/in-place-setup.js',
+            'dist/mobile-session.js',
+            'dist/route-coverage.js',
+            'dist/services-setup.js',
+            'dist/temp-root.js',
+        ]);
+        expect(named.filter((setup) => !existsSync(resolve(ROOT, setup)))).toStrictEqual([]);
     });
 
     test('the node facet helpers — one canonical project per kind — each collects its own facet tree, under its own name', () => {
@@ -131,5 +111,25 @@ describe('projects', () => {
             false,
         ]);
         expect(testOf(cli({ literate: false, serial: true })).fileParallelism).toBe(false);
+    });
+
+    test('defineSpecConfig() — the literate plugin — registers the plugin when a specification is given', () => {
+        // Given - a config naming the runner its spec documents run through
+        const config = defineSpecConfig({
+            literate: { specification: './specs/cli/cli.specification.ts' },
+        });
+
+        // Then - the plugin is in place, and `literate` never leaks as a vite key
+        expect(config.plugins).toHaveLength(1);
+        expect(config.plugins?.[0]).toMatchObject({ name: 'jterrazz-test:literate' });
+        expect(config).not.toHaveProperty('literate');
+    });
+
+    test('defineSpecConfig() — the literate plugin — leaves plugins alone when no specification is given', () => {
+        // Given - a plain config
+        const config = defineSpecConfig({ test: { include: ['src/**'] } });
+
+        // Then - no plugin was invented
+        expect(config.plugins).toBeUndefined();
     });
 });

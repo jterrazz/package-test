@@ -11,6 +11,8 @@ export const SOURCE_ROOT = [
     'index.browser.ts',
     'index.test.ts',
     'index.ts',
+    'index.vitest.test.ts',
+    'index.vitest.ts',
     'kernel',
     'type-channel.test-d.ts',
     'vitest',
@@ -24,7 +26,7 @@ export function checkSourceRootHoldsKnownEntries(root: string): Finding<SelfPass
         .map(({ directory, path }) =>
             finding('source-root-holds-known-entries', path, {
                 fix: 'move it into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`)',
-                found: `the ${directory ? 'folder' : 'file'} \`${path}\` at the source root, which holds the two entries and the six trees alone`,
+                found: `the ${directory ? 'folder' : 'file'} \`${path}\` at the source root, which holds the three entries and the six trees alone`,
             }),
         )
         .toSorted(byPosition);

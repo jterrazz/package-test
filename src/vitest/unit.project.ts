@@ -1,26 +1,7 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
-import type { FacetProjectOptions } from './project-kit.js';
-import { onProjectDefaults } from './project-kit.js';
-
-export { api, type ApiProjectOptions } from '../facets/api/api.project.js';
-export {
-    cli,
-    type CliProjectOptions,
-    literate,
-    type LiterateDoor,
-    type LiterateOptions,
-    type LiteratePlugin,
-} from '../facets/cli/cli.project.js';
-export { component, type ComponentProjectOptions } from '../facets/component/component.project.js';
-export {
-    integration,
-    type IntegrationProjectOptions,
-} from '../facets/integration/integration.project.js';
-export { job, type JobProjectOptions } from '../facets/job/job.project.js';
-export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.project.js';
-export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
-export { type FacetProjectOptions } from './project-kit.js';
+import type { FacetProjectOptions } from './project.js';
+import { onProjectDefaults } from './project.js';
 
 /** `unit()` — module tests, beside the modules they cover (rule `test-beside-its-module`). */
 export type UnitProjectOptions = FacetProjectOptions & {

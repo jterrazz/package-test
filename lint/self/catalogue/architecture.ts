@@ -54,7 +54,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the entry\u2019s test `index.test.ts`, the type channel `type-channel.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
+            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, the entries\u2019 tests `index.test.ts` and `index.vitest.test.ts`, the type channel `type-channel.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move the module into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`).',
@@ -68,7 +68,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module enters it by its face (`index.ts`, `index.browser.ts`); each other root file has its one reader — the project `vitest/`, the handle `facets/specification.ts`, the composition `lint/self/corpus/compositions.ts` — and a concept folder is never reached, but for the modules reached by one tree for their reason: the cli\u2019s literate plugin, which `vitest/` wires, and the route ratchet and the `.spec.yaml` grammar `lint/` reads with the runner. An error at the import.',
+            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module enters it by its face (`index.ts`, `index.browser.ts`); each other root file has its one reader — the runner-config entry `index.vitest.ts` for each `<facet>.project.ts` (the cli\u2019s carries its literate plugin), the handle `facets/specification.ts`, the composition `lint/self/corpus/compositions.ts` — and a concept folder is never reached, but for the modules reached by one tree for their reason: the route ratchet and the `.spec.yaml` grammar `lint/` reads with the runner. An error at the import.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move what two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and export what the entries publish from the facet\u2019s `index.ts`.',

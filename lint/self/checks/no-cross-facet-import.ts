@@ -32,9 +32,14 @@ function facetEdges(): { path: string; reader: string }[] {
     return edges.filter(({ path }) => path.startsWith('facets/'));
 }
 
-/** The face (`index.ts`, `index.browser.ts`) serves anyone; each other root file has the one reader the layer map grants it. */
+const RUNNER_CONFIG_ENTRY = 'src/index.vitest.ts';
+
+/** The face (`index.ts`, `index.browser.ts`) serves anyone, and `<facet>.project.ts` the runner-config entry; each other root file has the one reader the layer map grants it. */
 function entersByTheFace(from: string, facet: string, name: string): boolean {
     if (name === 'index.ts' || name === 'index.browser.ts') {
+        return true;
+    }
+    if (from === RUNNER_CONFIG_ENTRY && name === `${facet}.project.ts`) {
         return true;
     }
     const target = `facets/${facet}/${name.replace(/\.ts$/u, '')}`;

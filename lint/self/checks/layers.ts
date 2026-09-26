@@ -1,7 +1,7 @@
 import type { LayerOptions } from '../../consumer/rules/architecture/import-within-declared-layers.js';
 import { librariesOwnedIn } from './libraries.js';
 
-/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_CHECKER_PASS_IDS` in `checker.ts`; library ownership is read off `OWNERS_OF_LIBRARIES`. */
+/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← vitest ← facets ← the entries`. What a map cannot express is the self checker's, `SELF_CHECKER_PASS_IDS` in `checker.ts`; library ownership is read off `OWNERS_OF_LIBRARIES`. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
@@ -63,27 +63,20 @@ export const FRAMEWORK_LAYERS = {
                 'facets/mobile/mobile.handle',
                 'facets/website/website.handle',
             ],
-            // The project kit runs in the Vitest main process only, never in test code.
-            'facets/api/api.project.ts': ['vitest/project-kit'],
-            'facets/cli/cli.project.ts': ['vitest/project-kit'],
-            'facets/component/component.project.ts': ['vitest/project-kit'],
-            'facets/integration/integration.project.ts': ['vitest/project-kit'],
-            'facets/job/job.project.ts': ['vitest/project-kit'],
-            'facets/mobile/mobile.project.ts': ['vitest/project-kit'],
-            'facets/website/website.project.ts': ['vitest/project-kit'],
+            // A facet reaches the runner config from its project alone: it runs in the Vitest main process, never in test code.
+            'facets/api/api.project.ts': ['vitest/project'],
+            'facets/cli/cli.project.ts': ['vitest/project'],
+            'facets/component/component.project.ts': ['vitest/project'],
+            'facets/integration/integration.project.ts': ['vitest/project'],
+            'facets/job/job.project.ts': ['vitest/project'],
+            'facets/mobile/mobile.project.ts': ['vitest/project'],
+            'facets/website/website.project.ts': ['vitest/project'],
         },
     },
     vitest: {
         imports: [
             'vitest/',
             'kernel/',
-            'facets/api/api.project',
-            'facets/cli/cli.project',
-            'facets/component/component.project',
-            'facets/integration/integration.project',
-            'facets/job/job.project',
-            'facets/mobile/mobile.project',
-            'facets/website/website.project',
             // Update mode's global setup, which every project carries.
             'expectations/in-place/in-place-setup',
             'lint/engine/',

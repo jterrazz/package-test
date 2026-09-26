@@ -71,7 +71,7 @@ export function skillFindings(skillPath: string, root: string): SkillFindings {
     const skill = readFileSync(skillPath, 'utf8');
     const published: Record<string, Set<string>> = {
         '@jterrazz/test': exportedNames(resolve(root, 'src/index.ts')),
-        '@jterrazz/test/vitest': exportedNames(resolve(root, 'src/vitest/index.ts')),
+        '@jterrazz/test/vitest': exportedNames(resolve(root, 'src/index.vitest.ts')),
     };
     const known = new Set(VITEST);
     for (const names of Object.values(published)) {
