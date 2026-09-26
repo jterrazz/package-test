@@ -6,7 +6,6 @@ import { dedent } from '../../src/expectations/text/dedent.js';
 import { forgetTree, treeKind } from '../../src/kernel/files/git-tree.js';
 import { GROUND_EXPECTED, GROUND_REQUESTS, isGroundName } from '../../src/kernel/files/ground.js';
 import { isRelativePath } from '../../src/kernel/files/spec-path.js';
-import { withEntryImport, withoutEntryImport } from '../migration/mover.js';
 import { isInside, literalSpans, nameAround } from '../reading/spec-values.js';
 import type { Span } from '../reading/spec-values.js';
 import { closingOf, literalEnd, withoutComments } from '../reading/subject.js';
@@ -20,6 +19,7 @@ import {
     pathsModuleTestsName,
     suppressedLines,
 } from './crossfile.js';
+import { withEntryImport, withoutEntryImport } from './entry-import.js';
 import { checkInlineSeeds, fixInlineSeeds } from './ground-shared-or-inline.seeds.js';
 
 /** A role absent here is never written in place. */
