@@ -208,7 +208,7 @@ commit, prototype plumbing that never reaches the release.
   `--oxlint-report` flag and the judging run's log are 17's.
 
 - **`lint/` one folder per rule.** The rules moved to the root as they were,
-  `lint/rules/<family>/<rule>.ts` beside its test.
+  `lint/consumer/rules/<family>/<rule>.ts` beside its test.
 - **The lint rule specs still to convert in the refactor** — the checker's,
   `specs/lint/checker/<pass>.test.ts` over the twins in
   `specs/lint/checker/fixtures/lint-violations/`, each to become
@@ -739,7 +739,7 @@ implementation (the commits say what was broken).
   `git rev-parse --show-cdup` succeeding there — not by a `.git` probe,
   which the rule tests fake with an empty folder — and one where it fails
   is walked on disk: every copied E2E fixture and scratch tree. A `git mv`
-  of the fixers drops the listing. lint/tracked.test.ts (since split between `src/seams/git/tree.test.ts` and `lint/checks/checker.test.ts`) proves an
+  of the fixers drops the listing. lint/tracked.test.ts (since split between `src/seams/git/tree.test.ts` and `lint/consumer/checks/checker.test.ts`) proves an
   untracked C12 document is never reported and a tracked one is.
 - **`<search>`.** Playwright 1.63 maps the element itself, so the website
   needed only its spec. Browser Mode's role engine gives the element no
@@ -766,7 +766,7 @@ implementation (the commits say what was broken).
     run next, until the author stages it. Move it through `git mv`, as
     C12 and C13 already do?
 47. The listing covers the checker's WALKS. The oxlint plugin's
-    disk-anchored rules (`lint/reading/fs-cache.ts`: A9w, C2, C6, C7, I2) and the
+    disk-anchored rules (`lint/engine/project/fs-cache.ts`: A9w, C2, C6, C7, I2) and the
     checker's single-path probes (C8's target exists) still read the disk,
     so an untracked sibling still answers them. Hold them to the listing
     too, or is a probe of a path the test names out of the law's reach?
@@ -800,7 +800,7 @@ implementation (the commits say what was broken).
   C14 all call it; the C14 line no longer asks the author to stage.
 - **The listing answers single paths.** `trackedKind(path)` in
   lint/tracked.ts (now `src/seams/git/tree.ts`) gives the disk's kind, or nothing when the path is
-  off disk or not in its parent's tracked names. `lint/reading/fs-cache.ts`
+  off disk or not in its parent's tracked names. `lint/engine/project/fs-cache.ts`
   answers `listDirectory`, `isFile`, `isDirectory` and `readFileCached`
   through it, so EVERY rule importing the cache follows — C1, C4, C11,
   C13, D9w, E7w, E8, I1 as well as the five the question named — and the
@@ -863,7 +863,7 @@ implementation (the commits say what was broken).
   is its dependency, so it is a seam folder of its own, with no npm
   package. Every move drops it, a plain rename included: an untracked
   file is in the listing now. Every reader follows — the checker walks,
-  `lint/reading/fs-cache.ts`, C8 (whose message says `is ignored by git`), the
+  `lint/engine/project/fs-cache.ts`, C8 (whose message says `is ignored by git`), the
   moves, and the siblings meta-test (K7), which walked the disk.
 - **One root (50).** `discoverRoot` hands `findRoot` the same probe A9w
   does: a `.gitignore`d `package.json` marks no root for either, a new one
@@ -923,7 +923,7 @@ implementation (the commits say what was broken).
 
 ### What the package-test branch decided (iteration 7)
 
-- **The `test` section of the ratchet.** `lint/ratchet/baseline.ts` reads and
+- **The `test` section of the ratchet.** `lint/engine/baseline/ratchet.ts` reads and
   judges `test` alone and splices it into the file's text on a recording
   — replacing its value where it stood, or closing the object with it —
   so every other section keeps its bytes; it refuses to record over a
@@ -989,7 +989,7 @@ implementation (the commits say what was broken).
   `after` are per file), so the listing takes the fallback: a work tree
   records its index file and when its listing began, and is listed again
   when the index, or the directory a question reads, changed after that.
-  `lint/reading/fs-cache.ts` keeps no listing of its own any more, and a file's
+  `lint/engine/project/fs-cache.ts` keeps no listing of its own any more, and a file's
   text only while its mtime holds.
 - **The PORT form (56),** proven without a child binding what it is
   handed, so 53 holds: a child prints the port it got and the adapter's
@@ -1497,7 +1497,7 @@ The api/jobs documents turned into indexes of links (a 6-line document pointing 
 The eight S-rules took these ids, all free in the catalogue: S1 `c29-one-subject`, S2 `c30-subject-folder`, S3 `c31-describe-names-file`, S4 `c32-aspect-name`, S5 `c33-file-size`, S6 `d28-shared-expectation`, S7 `d29-no-foreign-expectation`, S8 `b16w-file-context`; the message meta-test is K11 `k11-messages-teach`.
 
 1. **Every message teaches** (`b1f1ff1`, `da00f1b`). A diagnostic is ONE line, parts joined by `·` — probed on oxlint 1.83: the `unix` reporter prints the rule tag after a multi-line message's last line, so a line break would cut the rule from every problem matcher and from `lintReport`; `agent` folds breaks into spaces anyway; the graphical reporter wraps a long line. The checker keeps `file:line:column: severity jterrazz-check(<id>): …`. A thrown refusal is a block, a part per line (an ambiguity's candidates take several). `why` and `read` are never typed: `lessons()` builds a rule's messages from its `{ found, fix }` and the row; a checker finding carries `found`/`fix` and a full pass name (`CheckerPassId`, closed); the six refusing runtime rows open on a sentence `REFUSAL_WHY` owns (`src/model/lesson/refusal.ts`), which the manifest builds the row from. The generated `(ID — docs/…)` tail is gone; K3 is restated on the `read:` part. K11 holds every plugin message, one rendered finding per pass, every checker line a spec goldens, and every runtime refusal row.
-2. **The subject reader** (`4da14ec`, `c390955`): `lint/reading/subject.ts`, the derived-folder table pinned row by row. Two readings the table left open are decided there: a GET on one segment lists a plural noun and gets anything else (`status`, `address` are singletons); a segment is a parameter when it is a hole or anything but lowercase words. A cli sequence is one session, its subject the command it opens on.
+2. **The subject reader** (`4da14ec`, `c390955`): `lint/engine/project/subject.ts`, the derived-folder table pinned row by row. Two readings the table left open are decided there: a GET on one segment lists a plural noun and gets anything else (`status`, `address` are singletons); a segment is a parameter when it is a hole or anything but lowercase words. A cli sequence is one session, its subject the command it opens on.
 3. **The rules** (`f2011e0`, `ee04764`, `b8cb6f1`, `87a8fb1`). Static where one file is enough (C31–C33, D28, D29, B16w — the first rows of the `spec` reach, proven by K4); checker passes where the fix writes other files (C29, C30). C29/C30's fix (before C27/C28's) splits by the subject each test OPENS on, keeps each test's imports, constants and helpers (pruned to a fixpoint, strings and other import clauses no read), merges the file's describes into one titled with the aspect, rebases every relative path that names something (a missing file and a call spelled in a string stay as written), and lifts the old leaf's ground another leaf reads to the specs root, where C28 moves it down. A journey test goes with its opening subject and C29 keeps naming it. C1 lets an api/cli spec sit as deep as its subject's name; C21w no longer judges api, cli and jobs (`b9fb811`), where a leaf IS its subject and its advice ("a domain folder of its own") contradicted C30.
 4. **`with()`** (`22a92a9`): `api.with({ clock, headers })`, `jobs.with({ clock })`, `integration.with({ clock })`, `cli.with({ env })`, `website.with({ clock, headers })` — settings only (`ChainContext`), a chain's own setup merging over them. B16w's fix writes it.
 5. **This package's specs** (`f2e49de`, `a912353`): migrated by `make fix`, finished by hand — five journeys carry a reasoned `checker-disable-next-line c29`, the literate spec was cut along its describes, raw env writes moved onto `vi.stubEnv` (E9w 39 → 10). The domain vocabulary covers integration and website only. Chapter 18 owns the laws ("A message teaches", "One file, one subject"), 19 the rows; the skill and the examples follow.
@@ -1544,7 +1544,7 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
   it to `./seeds/<name>.sql` beside the spec, named by its first `--`
   comment, else its test's title, else `seed`, a taken name suffixed `-2`
   and one holding the same bytes reused. That gesture lives alone in
-  `lint/checks/ground-shared-or-inline.seeds.ts`: no release shipped the tag, so it serves
+  `lint/consumer/checks/ground-shared-or-inline.seeds.ts`: no release shipped the tag, so it serves
   the vision trees and leaves with the prototype.
 - **Per-role caps, both ways.** `requests/` 30 lines (a whole request or a
   body), `expected/` 150 (`INLINE_CAPS`), a JSON file counted as the value
@@ -1622,8 +1622,8 @@ Other rules' input trees stand in folders that ARE their rule's case: 34 fixture
      signews-api.
 109. Coverage fell from 84.65 % to 84.11 % of statements across the two
      iterations (8540/10088 → 8734/10383; the floor held). The coverage
-     report says where: `lint/checks/ground-shared-or-inline.seeds.ts` is 22.8 % covered and
-     `lint/checks/ground-shared-or-inline.ts` 36.6 %, because the documents that prove
+     report says where: `lint/consumer/checks/ground-shared-or-inline.seeds.ts` is 22.8 % covered and
+     `lint/consumer/checks/ground-shared-or-inline.ts` 36.6 %, because the documents that prove
      them run `dist/checker.js` in a child process coverage never sees.
      Give those passes in-process unit tests, or count the documents'
      child runs?
@@ -1693,7 +1693,7 @@ aliases on `<specs>/fixtures/`; the reach through a non-production module on
 a package and on a `specs/` file. The `dist/` row stays `—`: it is the
 toolchain's (below).
 
-**One reader, `lint/reading/production.ts`.** A production module is a source
+**One reader, `lint/engine/project/production.ts`.** A production module is a source
 module under a `src/` or a `lint/` folder, below the project root that
 holds it, that is no test material. Test material: the suffixes
 `.test` `.spec` `.test-d` `.spec-d` `.specification` `.fixtures`; ground
@@ -2145,7 +2145,7 @@ playwright: 'the gate drives a browser in production' } } }` — and F2
 
 - **123** (`9b0b6fe`). `lintBegins` resets the reach cache when a file's
   own folder answers a tree listing differently than the last time this
-  run asked it (`folderChanged`, `lint/reading/fs-cache.ts`), reading the tree
+  run asked it (`folderChanged`, `lint/engine/project/fs-cache.ts`), reading the tree
   seam's own freshness stamp (`treeStamp`, `src/seams/git/tree.ts` — the
   same git index and directory modification times its own staleness
   check already reads). The file-linted-twice and walked-then-linted
@@ -2165,7 +2165,7 @@ playwright: 'the gate drives a browser in production' } } }` — and F2
   `invalid` cases, 2).
 - **Verdicts unchanged.** `oxlint --type-aware --format=json` reports the
   same 1370 diagnostics before and after, byte-identical but for one
-  message (`lint/reading/production.ts`'s grown line count, from the added code).
+  message (`lint/engine/project/production.ts`'s grown line count, from the added code).
   `npx vitest --run --project unit`: 389 files, 2016 tests, green across
   all three commits. `make fix` then `make check` exit 0 (2362 tests
   passed, 1 skipped).
@@ -2306,7 +2306,7 @@ The four questions of the overnight summary, and 129 and 130 raised above.
 - **130** (`ace65760`). A chain held whole in a declarator is a request
   when the test awaits that name after it; held and never awaited, the
   read stays a read. The carry analysis moved to a module of its own, today
-  `lint/rules/expectations/result-compared-whole.carried.ts` (the rule file
+  `lint/consumer/rules/expectations/result-compared-whole.carried.ts` (the rule file
   was at the 300-line cap). Red: the previous rule (the
   accepting rule-tester case and the accepting document, 2 of 15); the
   awaited-later check forced true (the never-awaited case, 1 of 15).
@@ -2372,7 +2372,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
      facet level only?
 132. The root-ground fixer rewrites the relative literals of the specs
      tree. It does not reach a module test outside `specs/` that names the
-     pool (`lint/checks/members.test.ts` here), nor a path spelled from the
+     pool (`lint/consumer/checks/checker.members.test.ts` here), nor a path spelled from the
      project root inside a string (`command: 'node specs/fixtures/…'` in
      three website specifications): both were moved by hand here, and C8
      does not see either. Extend the fixer to the member's module tests and
@@ -2411,7 +2411,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
 - **132** (`f36b282b`). Every fixer that moves ground — C15's root ground,
   C27, C28's level half, C29's lift, the mover's renames — rewrites the
   relative literals of the member's module tests that named the moved entry
-  (one walk of them, `lint/reading/module-tests.ts`). C8 reads a path a test
+  (one walk of them, `lint/engine/project/module-tests.ts`). C8 reads a path a test
   resolves from its own directory with one `./`/`../` literal —
   `resolve`/`join` from `import.meta.dirname` or `__dirname`, `new URL('…',
 import.meta.url)` — for existence; a bare literal and a command string are
@@ -2421,7 +2421,7 @@ import.meta.url)` — for existence; a bare literal and a command string are
   two levels above the repository since `89782e41` moved the file; fixed in
   the same commit.
 - **133** (`b105ff64`). A call probe keeps its spelling and is read as a
-  shape in a closed grammar (`lint/self/corpus/matrix-calls.ts`): the callee (bare, a
+  shape in a closed grammar (`lint/engine/project/call-shapes.ts`): the callee (bare, a
   method on any object, on one identifier), the first argument (a call of a
   name, a string and its opening, an object, an array), a leading `))`. Each
   file is parsed once; a type assertion around an argument is transparent.
@@ -2430,7 +2430,7 @@ import.meta.url)` — for existence; a bare literal and a command string are
   each part of the shape ignored in turn.
 - **134** (`29414cfe`). `judge` breaks on a count below its entry; the
   ratchet run under `--fix` lowers every entry that fell and drops one at
-  zero (`lint/ratchet/fix.ts`), never raising one nor adding a key, names
+  zero (`lint/engine/baseline/fix.ts`), never raising one nor adding a key, names
   each, then judges. `routes/unreached` is judged by the run that counts
   it: the api teardown now fails a run whose unreached count is below the
   entry, and `TEST_UPDATE=1` records it; the checker keeps leaving the key
@@ -2743,7 +2743,7 @@ ratchet. `make fix` exit 0, `make check` exit 0 (555 files, 2496 tests).
       Nested-config subtrees are ignored by the pass but counted by the
       ratchet, so they settle only on the second `make fix`. docs/19:522
       states neither.
-    - The C27 and C15 rows in `lint/catalogue/manifest.ts` still say "every path"
+    - The C27 and C15 rows in `lint/consumer/catalogue/manifest.ts` still say "every path"
       is rewritten. That file is hand-authored, not generated output, so
       edit the rows and run `npm run docs`.
     - `runDevice` compares `os` strictly, so `'iOS 26.5'` and `'26.5'`
@@ -2933,7 +2933,7 @@ How the conflicts were settled:
   updated in `8146284c`.
 - The oxlint config-name list is not exported by the installed toolchain
   (`0a024e8` has no `./oxlint-config-names` subpath), so the `CONFIG_NAMES`
-  copy in `lint/checks/own-fixes.ts` stays. It matches the toolchain's
+  copy in `lint/engine/checker/own-fixes.ts` stays. It matches the toolchain's
   `oxlint-config-names.json` today. Swap it once the typescript
   drift-and-names unit lands.
 - This batch rewrapped two lines of the typescript batches above. oxfmt
@@ -3103,11 +3103,11 @@ The toolchain was reinstalled from package-typescript `7fc5dcd` (`npm ci`
 there and here). `make fix` exit 0, `make check` exit 0 (558 files, 2549
 tests).
 
-- **The config-name swap** (`340a0909`). `lint/checks/own-fixes.ts`
+- **The config-name swap** (`340a0909`). `lint/engine/checker/own-fixes.ts`
   imports `@jterrazz/typescript/oxlint-config-names`, bundled inline into
   `dist/checker.js`. Its fix test runs once per listed name, so a
   narrowed list is red. This closes the **Toolchain owner** row for that
-  file. The lists in `lint/checks/checker.cli.ts` and `lint/checks/members.ts`
+  file. The lists in `lint/consumer/checks/checker.cli.ts` and `lint/consumer/checks/checker.members.ts`
   name vitest configs, not oxlint's, so they were never copies of it.
 - `c450aa6c` splits the typescript batch's 14-line drift bullet, which
   failed the Markdown pass at HEAD.
@@ -3943,8 +3943,8 @@ judge's five points:
 C31 then reached every test file (`89d5b9f5`, `1237d257`, `2c97d241`,
 `373be835`): each holds one `describe`, a spec titled with its aspect, a
 colocated test with its subject, the export of the module beside it
-(`lint/reading/test-title.ts`); `make fix` retitled, wrapped or merged the 234
-files it reached (`lint/rules/layout/one-describe-per-file.merge.ts`).
+(`lint/engine/project/test-title.ts`); `make fix` retitled, wrapped or merged the 234
+files it reached (`lint/consumer/rules/layout/one-describe-per-file.merge.ts`).
 
 A second review pass applied its 52 findings, each verified, in 29
 commits, all green:
@@ -3995,7 +3995,7 @@ Open, **for the owner**:
 
 ## Rule names (2026-09-26): test
 
-Every rule, checker pass, self lock and review principle answers to one name that states its requirement: the letter code and the `w` suffix are gone, a family is a word (the folder `lint/rules/<family>/`, the section of chapter 19), and the warn tier is the row's `severity`. A checker finding prints and keys under its pass's name (`jterrazz-check(no-unused-ground)`), and a code that covered several passes (`c8`, `d4`, `d4b`, `d5`) is one name per pass. `make fix` carries a consumer across: the mover renames `oxlint-disable` directives, lint-config overrides, `checker-disable` directives (a shared code to all of its passes) and the `jterrazz.baseline.json` › `test` keys (a shared code left for `jterrazz-test-check baseline`); its map went with the mover. The iterations above keep the codes they were written with; this table reads them.
+Every rule, checker pass, self lock and review principle answers to one name that states its requirement: the letter code and the `w` suffix are gone, a family is a word (the folder `lint/consumer/rules/<family>/`, the section of chapter 19), and the warn tier is the row's `severity`. A checker finding prints and keys under its pass's name (`jterrazz-check(no-unused-ground)`), and a code that covered several passes (`c8`, `d4`, `d4b`, `d5`) is one name per pass. `make fix` carries a consumer across: the mover renames `oxlint-disable` directives, lint-config overrides, `checker-disable` directives (a shared code to all of its passes) and the `jterrazz.baseline.json` › `test` keys (a shared code left for `jterrazz-test-check baseline`); its map went with the mover. The iterations above keep the codes they were written with; this table reads them.
 
 | Old id                                    | Name                                          | Family       |
 | ----------------------------------------- | --------------------------------------------- | ------------ |
