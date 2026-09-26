@@ -3,7 +3,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import type { Severity } from '../../engine/checker/finding.js';
 import { specsAnchor } from '../../engine/project/ast.js';
 import { treeEntries } from '../../engine/project/git-tree.js';
-import { SETUP_FOLDER } from '../../engine/project/ground.js';
+import { isGroundName, SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     documentPaths,
     parseSpecDocument,
@@ -14,7 +14,6 @@ import {
     collectFixtureReferences,
     DISK_CALL,
     findPools,
-    GROUND_SUBDIRS,
     isConventionalSubdir,
     isReferrer,
     isSharedFolder,
@@ -167,7 +166,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
             .filter(
                 (entry) =>
                     entry.isDirectory() &&
-                    GROUND_SUBDIRS.has(entry.name) &&
+                    isGroundName(entry.name) &&
                     isConventionalSubdir(join(dir, entry.name)),
             )
             .map((entry) => entry.name);

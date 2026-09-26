@@ -1,3 +1,5 @@
+export const PRUNED: ReadonlySet<string> = new Set(['.git', 'dist', 'node_modules']);
+
 export const GROUND_EXPECTED = '_expected';
 export const GROUND_FIXTURES = '_fixtures';
 export const GROUND_REQUESTS = '_requests';

@@ -8,12 +8,13 @@ import {
     GROUND_SEEDS,
     isGroundName,
     isReservedName,
+    PRUNED,
     RESERVED_FOLDERS,
     SETUP_FOLDER,
     SHARED_FOLDER,
     UNMARKED_RESERVED,
 } from '../../engine/project/ground.js';
-import { isModuleName, isUnmarkedReserved, PRUNED } from '../../engine/project/specs-modules.js';
+import { isModuleName, isUnmarkedReserved } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
 

@@ -3,16 +3,12 @@ import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:pat
 
 import { isNode, nodeStart } from './ast.js';
 import { treeEntries, treeKind } from './git-tree.js';
-import { GROUND_DIRS, isGroundName, SHARED_FOLDER } from './ground.js';
+import { isGroundName, PRUNED, SHARED_FOLDER } from './ground.js';
 import { parseProgram } from './module-parser.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isRelativePath } from './relative-path.js';
 import { isTestFileName } from './role.js';
 import { documentPaths, parseSpecDocument, SPEC_EXTENSION } from './spec-document.js';
-
-const PRUNED = new Set(['.git', 'dist', 'node_modules']);
-
-export const GROUND_SUBDIRS = new Set<string>(GROUND_DIRS);
 
 export function isSharedFolder(dir: string): boolean {
     return basename(dir) === SHARED_FOLDER && basename(dirname(dir)) === 'specs';
@@ -218,7 +214,7 @@ export function isConventionalSubdir(path: string): boolean {
     } catch {
         return false;
     }
-    return !children.some((child) => child.isDirectory() && GROUND_SUBDIRS.has(child.name));
+    return !children.some((child) => child.isDirectory() && isGroundName(child.name));
 }
 
 type FixtureReference = {

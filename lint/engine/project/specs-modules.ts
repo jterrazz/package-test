@@ -5,6 +5,7 @@ import { treeEntries } from './git-tree.js';
 import {
     isGroundName,
     isReservedName,
+    PRUNED,
     SETUP_FOLDER,
     SHARED_FOLDER,
     UNMARKED_RESERVED,
@@ -13,8 +14,6 @@ import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
 import { isWithin, readText } from './tree.js';
-
-export const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 
 export const COMPONENT_TREE = 'component';
 

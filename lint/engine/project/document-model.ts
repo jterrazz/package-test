@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import type { Teaching } from '../catalogue/lesson.js';
 import type { Severity } from '../checker/finding.js';
 import { treeEntries, treeKind, treeNames } from './git-tree.js';
-import { GROUND_FIXTURES } from './ground.js';
+import { GROUND_FIXTURES, PRUNED } from './ground.js';
 import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import type { SpecDocument, SpecFile } from './spec-document.js';
@@ -27,7 +27,7 @@ export function finding<PassId extends string>(
 }
 
 /** `_fixtures/` holds inputs, never scenarios. */
-const PRUNED = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
+const UNLISTED: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
 
 export function listSpecFiles(dir: string): string[] {
     const out: string[] = [];
@@ -41,7 +41,7 @@ export function listSpecFiles(dir: string): string[] {
         for (const entry of entries) {
             const path = join(current, entry.name);
             if (entry.isDirectory()) {
-                if (!PRUNED.has(entry.name)) {
+                if (!UNLISTED.has(entry.name)) {
                     visit(path);
                 }
             } else if (entry.name.endsWith(SPEC_EXTENSION)) {
