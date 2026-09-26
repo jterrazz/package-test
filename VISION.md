@@ -2368,7 +2368,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
      facet level only?
 132. The root-ground fixer rewrites the relative literals of the specs
      tree. It does not reach a module test outside `specs/` that names the
-     pool (`lint/consumer/checks/checker.members.test.ts` here), nor a path spelled from the
+     pool (`lint/engine/checker/member-run.test.ts` here), nor a path spelled from the
      project root inside a string (`command: 'node specs/fixtures/…'` in
      three website specifications): both were moved by hand here, and C8
      does not see either. Extend the fixer to the member's module tests and
@@ -3103,7 +3103,7 @@ tests).
   imports `@jterrazz/typescript/oxlint-config-names`, bundled inline into
   `dist/checker.js`. Its fix test runs once per listed name, so a
   narrowed list is red. This closes the **Toolchain owner** row for that
-  file. The lists in `lint/consumer/checks/checker.cli.ts` and `lint/consumer/checks/checker.members.ts`
+  file. The lists in `lint/engine/checker/cli.ts` and `lint/engine/checker/member-run.ts`
   name vitest configs, not oxlint's, so they were never copies of it.
 - `c450aa6c` splits the typescript batch's 14-line drift bullet, which
   failed the Markdown pass at HEAD.

@@ -1,4 +1,5 @@
-import type { Finding } from '../../engine/checker/finding.js';
+import type { AtZeroRegistry } from '../../engine/checker/registry.js';
+import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
@@ -18,16 +19,16 @@ export const SELF_PASS_IDS = [
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];
 
-export function runSelfSpecsChecker(specsRoot: string): Finding<SelfPassId>[] {
-    return checkSpecimenFiledByCapability(specsRoot);
-}
-
-export function runSelfSourceChecker(root: string): Finding<SelfPassId>[] {
-    return [
-        ...checkSourceRootHoldsKnownEntries(root),
-        ...checkNoCrossFacetImport(root),
-        ...checkOneOwnerPerEngine(root),
-        ...checkFolderNamedForAConcept(root),
-        ...checkLintImportsFollowTheDirection(root),
-    ];
-}
+export const SELF_CHECKER: AtZeroRegistry = {
+    chapter: SELF_CHAPTER,
+    passIds: SELF_PASS_IDS,
+    rows: selfRows,
+    source: [
+        checkSourceRootHoldsKnownEntries,
+        checkNoCrossFacetImport,
+        checkOneOwnerPerEngine,
+        checkFolderNamedForAConcept,
+        checkLintImportsFollowTheDirection,
+    ],
+    specs: [checkSpecimenFiledByCapability],
+};

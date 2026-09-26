@@ -1,24 +1,54 @@
-import { lessonAt, rowNamed } from '../../engine/catalogue/lesson.js';
-import { reportLine } from '../../engine/checker/finding.js';
+import { fixSpecFiles } from '../../engine/checker/documents.js';
 import type { Finding as CheckerFinding } from '../../engine/checker/finding.js';
+import { walkGround } from '../../engine/checker/ground-walk.js';
+import type { CheckerRegistry, GroundPasses, MemberRead } from '../../engine/checker/registry.js';
 import type { DocumentFinding as CheckerDocumentFinding } from '../../engine/project/document-model.js';
+import { moduleTestsOf } from '../../engine/project/module-tests.js';
+import type { Scalar } from '../../engine/project/yaml-document.js';
 import { consumerRows } from '../catalogue/manifest.js';
 import { checkCheckerSuppressionStatesAReason } from './checker-suppression-states-a-reason.js';
-import { checkGroundAndDocuments } from './checker.ground.js';
 import { checkDatabaseNamedOnlyWhenSeveral } from './database-named-only-when-several.js';
 import { checkDockerExecBoundWithAwaitUsing } from './docker-exec-bound-with-await-using.js';
+import { checkDocumentDescriptionReadsAsATitle } from './document-description-reads-as-a-title.js';
 import { checkDocumentDescriptionUnique } from './document-description-unique.js';
+import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';
+import { checkDocumentFollowsItsGrammar } from './document-follows-its-grammar.js';
+import { checkDocumentKeysInCanonicalOrder } from './document-keys-in-canonical-order.js';
+import { checkDocumentStreamsWrittenAsBlockScalars } from './document-streams-written-as-block-scalars.js';
 import { checkFacetFolderHasSpecification } from './facet-folder-has-specification.js';
 import { checkFacetTestUsesItsRunner } from './facet-test-uses-its-runner.js';
-import { checkFileSuffixMatchesPlace } from './file-suffix-matches-place.js';
+import {
+    checkFileSuffixMatchesPlace,
+    checkFileSuffixMatchesPlaceInMember,
+    checkFileSuffixMatchesPlaceOfDocument,
+    fixFileSuffixMatchesPlace,
+} from './file-suffix-matches-place.js';
 import { checkGroundBesideItsOnlyReader } from './ground-beside-its-only-reader.js';
-import { checkGroundSharedOrInline } from './ground-shared-or-inline.js';
-import { checkNamedPathExists } from './named-path-exists.js';
-import { checkNoDuplicateGround } from './no-duplicate-ground.js';
-import { checkNoReachIntoSiblingGround } from './no-reach-into-sibling-ground.js';
+import { checkGroundSharedOrInline, fixGroundSharedOrInline } from './ground-shared-or-inline.js';
+import { checkHttpFirstLineFollowsItsGrammar } from './http-first-line-follows-its-grammar.js';
+import { checkMemberHasVitestConfig } from './member-has-vitest-config.js';
+import { checkNamedPathExists, checkNamedPathExistsIn } from './named-path-exists.js';
+import { noDocumentInGroundFindings } from './no-document-in-ground.js';
+import { checkNoDuplicateGround, fixNoDuplicateGround } from './no-duplicate-ground.js';
+import { checkNoEmptyExpectedStream } from './no-empty-expected-stream.js';
+import { noMalformedRefFindings } from './no-malformed-ref.js';
+import {
+    checkNoReachIntoSiblingGround,
+    fixNoReachIntoSiblingGround,
+} from './no-reach-into-sibling-ground.js';
+import { checkNoRedundantTestDependency } from './no-redundant-test-dependency.js';
+import { checkNoSilentRefusal } from './no-silent-refusal.js';
+import { checkNoSimulatedDomInConfig } from './no-simulated-dom-in-config.js';
+import { checkNoSnapshotFolder } from './no-snapshot-folder.js';
+import { noTokenInRequestFindings } from './no-token-in-request.js';
+import { noUnknownTokenFindings } from './no-unknown-token.js';
 import { checkNoUnusedGround } from './no-unused-ground.js';
+import { checkNoVolatileLiteral, noVolatileLiteralsInGround } from './no-volatile-literal.js';
 import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
+import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
+import { checkSeedsStateAbsoluteTime } from './seeds-state-absolute-time.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
+import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
@@ -74,35 +104,104 @@ export type Finding<PassId extends string = CheckerPassId> = CheckerFinding<Pass
 
 export type DocumentFinding = CheckerDocumentFinding<CheckerPassId>;
 
-export function checkerMessage(violation: Finding<string>): string {
-    return lessonAt(rowNamed(consumerRows, violation.rule), violation);
-}
+const GROUND: GroundPasses = {
+    document: ({ name, rel, text }) => [
+        ...noDocumentInGroundFindings(rel, name),
+        ...(text === null ? [] : checkDocumentFollowsItsGrammar(text, rel)),
+    ],
+    // `no-volatile-literal` reaches ground as well as documents: the same volatile literal in the other half of the tree.
+    expected: ({ atTop, name, rel, text }) => [
+        ...(atTop && name.endsWith('.http')
+            ? checkHttpFirstLineFollowsItsGrammar(rel, name, text, 'response')
+            : []),
+        ...noUnknownTokenFindings(text, rel),
+        ...noMalformedRefFindings(text, rel),
+        ...noVolatileLiteralsInGround(rel, text),
+    ],
+    read: ({ dir, file, lineAt, rel }) => [
+        ...checkDocumentKeysInCanonicalOrder(file, (pair) => lineAt(pair.key as unknown as Scalar)),
+        ...checkDocumentStreamsWrittenAsBlockScalars(file, (scalar) => lineAt(scalar)),
+        ...checkFileSuffixMatchesPlaceOfDocument(rel),
+        ...checkDocumentDescriptionReadsAsATitle(file.document),
+        ...checkNoVolatileLiteral(file.document, dir),
+        ...checkPinnedValueFromTheInput(file.document, dir),
+        ...checkNoEmptyExpectedStream(file.document),
+        ...checkNoSilentRefusal(file.document),
+        ...checkDocumentEnvAndServeRegistered(file.document, dir),
+    ],
+    // `request-file-extension-known` (oxlint) owns the extension rule.
+    request: ({ atTop, name, rel, text }) =>
+        name.endsWith('.http')
+            ? [
+                  ...(atTop ? checkHttpFirstLineFollowsItsGrammar(rel, name, text, 'request') : []),
+                  ...noTokenInRequestFindings(rel, text),
+              ]
+            : [],
+    seed: ({ name, path, rel }) => checkSeedsStateAbsoluteTime(path, rel, name),
+};
 
-export function runChecker(rootDir: string): Finding[] {
+function memberFindings({
+    anchored,
+    config,
+    label,
+    manifest,
+    memberDir,
+    rootDir,
+    subject,
+}: MemberRead): CheckerFinding[] {
     return [
-        ...checkFileSuffixMatchesPlace(rootDir),
-        ...checkFacetFolderHasSpecification(rootDir),
-        ...checkFacetTestUsesItsRunner(rootDir),
-        ...checkGroundBesideItsOnlyReader(rootDir),
-        ...checkCheckerSuppressionStatesAReason(rootDir),
-        ...checkGroundAndDocuments(rootDir),
-        ...checkDocumentDescriptionUnique(rootDir),
-        ...checkNoUnusedGround(rootDir),
-        ...checkGroundSharedOrInline(rootDir),
-        ...checkOneSubjectPerSpec(rootDir),
-        ...checkSpecInSubjectFolder(rootDir),
-        ...checkNoDuplicateGround(rootDir),
-        ...checkNoReachIntoSiblingGround(rootDir),
-        ...checkNamedPathExists(rootDir),
-        ...checkDockerExecBoundWithAwaitUsing(rootDir),
-        ...checkDatabaseNamedOnlyWhenSeveral(rootDir),
+        ...(config === null ? checkMemberHasVitestConfig(manifest, memberDir, label, subject) : []),
+        ...(config === null ? [] : checkNoSimulatedDomInConfig(config, rootDir)),
+        ...checkNoRedundantTestDependency({ label, manifest, memberDir, subject }),
+        // Only a walk of the member sees a `.spec.ts` that never reached a `specs/` tree.
+        ...anchored(checkFileSuffixMatchesPlaceInMember(memberDir)),
+        ...checkNoSnapshotFolder(memberDir, label),
+        // The tree pass reads the tests under `specs/`.
+        ...moduleTestsOf(memberDir).flatMap((test) => checkNamedPathExistsIn(test, rootDir)),
     ];
 }
 
-export function checkerLine(violation: Finding<string>): string {
-    return reportLine(violation, checkerMessage(violation));
+function specFilesRewritten(root: string): string[] {
+    const written = fixSpecFiles(root);
+    return written.length > 0 ? [`rewrote ${written.length} spec document(s)`] : [];
 }
 
-export function checkerLines(violations: Finding<string>[]): string {
-    return violations.map(checkerLine).join('\n');
-}
+export const CHECKER: CheckerRegistry = {
+    fixes: [
+        (root) =>
+            fixNoReachIntoSiblingGround(root).map(
+                (move) => `moved ${move} (no-reach-into-sibling-ground)`,
+            ),
+        fixFileSuffixMatchesPlace,
+        specFilesRewritten,
+        (root) =>
+            fixSpecInSubjectFolder(root).map(
+                (change) => `moved ${change} (one-subject-per-spec, spec-in-subject-folder)`,
+            ),
+        (root) => fixNoDuplicateGround(root).map((move) => `moved ${move} (no-duplicate-ground)`),
+        (root) =>
+            fixGroundSharedOrInline(root).map((change) => `${change} (ground-shared-or-inline)`),
+    ],
+    member: memberFindings,
+    memberPassIds: MEMBER_PASS_IDS,
+    rows: consumerRows,
+    tree: [
+        checkFileSuffixMatchesPlace,
+        checkFacetFolderHasSpecification,
+        checkFacetTestUsesItsRunner,
+        checkGroundBesideItsOnlyReader,
+        checkCheckerSuppressionStatesAReason,
+        (root) => walkGround(root, GROUND),
+        checkDocumentDescriptionUnique,
+        checkNoUnusedGround,
+        checkGroundSharedOrInline,
+        checkOneSubjectPerSpec,
+        checkSpecInSubjectFolder,
+        checkNoDuplicateGround,
+        checkNoReachIntoSiblingGround,
+        checkNamedPathExists,
+        checkDockerExecBoundWithAwaitUsing,
+        checkDatabaseNamedOnlyWhenSeveral,
+    ],
+    treePassIds: TREE_PASS_IDS,
+};

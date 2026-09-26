@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { cell, table } from '../../engine/catalogue/chapter.js';
+import type { Markers } from '../../engine/catalogue/chapter.js';
 import type { AstNode } from '../../engine/project/ast.js';
 import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
@@ -293,9 +294,10 @@ export function matrixRows(root: string): MatrixRow[] {
     }));
 }
 
-export const MATRIX_START =
-    '<!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->';
-export const MATRIX_END = '<!-- /GENERATED:matrix -->';
+export const MATRIX_MARKERS: Markers = {
+    end: '<!-- /GENERATED:matrix -->',
+    start: '<!-- GENERATED:matrix — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
+};
 
 function cellOf(count: null | number): string {
     return count === null ? '—' : String(count);
@@ -340,21 +342,10 @@ export function renderMatrixBody(root: string): string {
     return [intro, ...sections, '### Exemptions', notes.join('\n')].join('\n\n');
 }
 
-export function spliceMatrix(existing: string, root: string): string {
-    const start = existing.indexOf(MATRIX_START);
-    const end = existing.indexOf(MATRIX_END);
-    if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/03-testing.md is missing the GENERATED:matrix markers (${MATRIX_START} … ${MATRIX_END})`,
-        );
-    }
-    const inner = `${MATRIX_START}\n\n${renderMatrixBody(root)}\n\n`;
-    return existing.slice(0, start) + inner + existing.slice(end);
-}
-
-export const LAYERS_START =
-    '<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->';
-export const LAYERS_END = '<!-- /GENERATED:layers -->';
+export const MATRIX_LAYERS_MARKERS: Markers = {
+    end: '<!-- /GENERATED:layers -->',
+    start: '<!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->',
+};
 
 type Layer = { count: number; judges: string; layer: string; where: string };
 
@@ -428,7 +419,7 @@ export function layers(root: string): Layer[] {
     ];
 }
 
-export function renderLayers(root: string): string {
+export function renderMatrixLayers(root: string): string {
     const rows = layers(root).map((layer) => [
         layer.layer,
         cell(layer.where),
@@ -436,16 +427,4 @@ export function renderLayers(root: string): string {
         String(layer.count),
     ]);
     return table(['Layer', 'Where', 'What it judges', 'Files'], rows).join('\n');
-}
-
-export function spliceMatrixLayers(existing: string, root: string): string {
-    const start = existing.indexOf(LAYERS_START);
-    const end = existing.indexOf(LAYERS_END);
-    if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/03-testing.md is missing the GENERATED:layers markers (${LAYERS_START} … ${LAYERS_END})`,
-        );
-    }
-    const inner = `${LAYERS_START}\n\n${renderLayers(root)}\n\n`;
-    return existing.slice(0, start) + inner + existing.slice(end);
 }

@@ -1,10 +1,12 @@
 import { cell, table } from '../../engine/catalogue/chapter.js';
+import type { Markers } from '../../engine/catalogue/chapter.js';
 
 /** Generated into chapter 18, the one page that states it. */
 
-export const FORK_START =
-    '<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->';
-export const FORK_END = '<!-- /GENERATED:fork -->';
+export const FORK_MARKERS: Markers = {
+    end: '<!-- /GENERATED:fork -->',
+    start: '<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/fork.ts -->',
+};
 
 type ForkRow = {
     constructor: string;
@@ -81,7 +83,7 @@ export const FORK: ForkRow[] = [
     },
 ];
 
-function forkTable(): string[] {
+export function forkTable(): string[] {
     return table(
         ['Question', 'Kind', 'Lives at', 'Constructor', 'Project'],
         FORK.map((row) => [
@@ -92,16 +94,4 @@ function forkTable(): string[] {
             cell(row.project),
         ]),
     );
-}
-
-export function spliceFork(existing: string): string {
-    const start = existing.indexOf(FORK_START);
-    const end = existing.indexOf(FORK_END);
-    if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/18-conventions.md is missing the GENERATED:fork markers (${FORK_START} … ${FORK_END})`,
-        );
-    }
-    const inner = [FORK_START, '', ...forkTable(), '', FORK_END].join('\n');
-    return existing.slice(0, start) + inner + existing.slice(end + FORK_END.length);
 }

@@ -3,14 +3,17 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { spliceBetween } from '../../engine/catalogue/chapter.js';
 import { COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
     layers,
+    MATRIX_LAYERS_MARKERS,
+    MATRIX_MARKERS,
     matrixCapabilityFolders,
     matrixRows,
-    spliceMatrix,
-    spliceMatrixLayers,
+    renderMatrixBody,
+    renderMatrixLayers,
 } from './matrix.js';
 import { metaTests } from './meta-tests.js';
 
@@ -114,15 +117,27 @@ describe('matrix', () => {
     test('capability matrix (meta-test `every-capability-exercised`) — the committed projection is byte-identical to a fresh generation', () => {
         // Given - the matrix `npm run docs` splices into chapter 03
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
-        expect(spliceMatrix(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
+        expect(
+            spliceBetween(
+                read('docs/03-testing.md'),
+                MATRIX_MARKERS,
+                renderMatrixBody(ROOT),
+                'docs/03-testing.md',
+            ),
+        ).toBe(read('docs/03-testing.md'));
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — the layered reading is byte-identical to a fresh generation', () => {
         // Given - the layers block chapter 03 carries
         // Then - regenerating reproduces it exactly, counts included
-        expect(spliceMatrixLayers(read('docs/03-testing.md'), ROOT)).toBe(
-            read('docs/03-testing.md'),
-        );
+        expect(
+            spliceBetween(
+                read('docs/03-testing.md'),
+                MATRIX_LAYERS_MARKERS,
+                renderMatrixLayers(ROOT),
+                'docs/03-testing.md',
+            ),
+        ).toBe(read('docs/03-testing.md'));
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — every layer of the reading carries files', () => {

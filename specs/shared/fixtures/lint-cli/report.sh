@@ -2,7 +2,7 @@
 # The report a lint rule's `<case>.spec.yaml` reads: `report.sh [args]` runs
 # the real oxlint with this package's plugin (lint.sh), `report.sh checker
 # [args]` runs the conventions checker (check.sh), `report.sh self-checker
-# [args]` the passes only this package runs (dist/self-checker.js). One
+# [args]` the passes only this package runs (dist/self.js check). One
 # binary, so one runner serves every rule document, whichever channel the
 # rule lives in.
 set -e
@@ -14,6 +14,6 @@ if [ "$1" = "checker" ]; then
 fi
 if [ "$1" = "self-checker" ]; then
   shift
-  exec node "$SCRIPT_DIR/../../../../dist/self-checker.js" "${@:-.}"
+  exec node "$SCRIPT_DIR/../../../../dist/self.js" check "${@:-.}"
 fi
 exec bash "$SCRIPT_DIR/lint.sh" "$@"

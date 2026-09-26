@@ -9,25 +9,22 @@ import {
     pairsOf,
     runMaps,
     streamScalars,
-} from '../../engine/project/document-model.js';
-import { DOCUMENT_KEYS, readSpecFile, RUN_KEYS } from '../../engine/project/spec-document.js';
-import type { SpecFile } from '../../engine/project/spec-document.js';
-import { readText } from '../../engine/project/tree.js';
-import { isScalar, renderYamlSource, Scalar } from '../../engine/project/yaml-document.js';
-import type { Node, Pair, YAMLMap } from '../../engine/project/yaml-document.js';
-import type { Finding } from './checker.js';
-import { checkDocumentDescriptionReadsAsATitle } from './document-description-reads-as-a-title.js';
-import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';
-import { checkDocumentKeysInCanonicalOrder } from './document-keys-in-canonical-order.js';
-import { checkDocumentStreamsWrittenAsBlockScalars } from './document-streams-written-as-block-scalars.js';
-import { checkFileSuffixMatchesPlaceOfDocument } from './file-suffix-matches-place.js';
-import { checkNoEmptyExpectedStream } from './no-empty-expected-stream.js';
-import { checkNoSilentRefusal } from './no-silent-refusal.js';
-import { checkNoVolatileLiteral } from './no-volatile-literal.js';
-import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
+} from '../project/document-model.js';
+import { DOCUMENT_KEYS, readSpecFile, RUN_KEYS } from '../project/spec-document.js';
+import type { SpecFile } from '../project/spec-document.js';
+import { readText } from '../project/tree.js';
+import { isScalar, renderYamlSource, Scalar } from '../project/yaml-document.js';
+import type { Node, Pair, YAMLMap } from '../project/yaml-document.js';
+import type { Finding } from './finding.js';
+import type { GroundPasses } from './registry.js';
 
 /** A document the grammar refuses yields nothing here: `document-follows-its-grammar` already reported it. */
-export function checkDocument(text: string, rel: string, path: string): Finding[] {
+export function runDocument(
+    text: string,
+    rel: string,
+    path: string,
+    read: GroundPasses['read'],
+): Finding[] {
     let file: SpecFile;
     try {
         file = readSpecFile(text, rel);
@@ -40,26 +37,9 @@ export function checkDocument(text: string, rel: string, path: string): Finding[
         const target = range ?? (isScalar(key) && Array.isArray(key.range) ? key.range : undefined);
         return target === undefined ? 1 : file.source.lineAt(target[0]);
     };
-    const dir = dirname(path);
-    const findings = [
-        ...checkDocumentKeysInCanonicalOrder(file, (pair) => lineAt(pair.key as unknown as Scalar)),
-        ...checkDocumentStreamsWrittenAsBlockScalars(file, (scalar) => lineAt(scalar)),
-        ...checkFileSuffixMatchesPlaceOfDocument(rel),
-        ...checkDocumentDescriptionReadsAsATitle(file.document),
-        ...checkNoVolatileLiteral(file.document, dir),
-        ...checkPinnedValueFromTheInput(file.document, dir),
-        ...checkNoEmptyExpectedStream(file.document),
-        ...checkNoSilentRefusal(file.document),
-        ...checkDocumentEnvAndServeRegistered(file.document, dir),
-    ];
-    return findings.map(({ fix, found, line, rule, severity }) => ({
-        file: rel,
-        fix,
-        found,
-        line,
-        rule,
-        severity,
-    }));
+    return read({ dir: dirname(path), file, lineAt, rel }).map(
+        ({ fix, found, line, rule, severity }) => ({ file: rel, fix, found, line, rule, severity }),
+    );
 }
 
 function reorder(map: YAMLMap, order: readonly string[]): void {

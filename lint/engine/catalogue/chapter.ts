@@ -1,10 +1,6 @@
 import type { Row } from './row.js';
 
-/** Rendered from `manifest.ts` and deterministic: `self/catalogue/manifest.test.ts` asserts the committed chapters are reproduced byte for byte. */
-
-export const DOCS_START =
-    '<!-- GENERATED:catalogue — do not edit by hand; run `npm run docs`. Source: lint/consumer/catalogue/manifest.ts -->';
-export const DOCS_END = '<!-- /GENERATED:catalogue -->';
+export type Markers = { end: string; start: string };
 
 export function cell(text: string): string {
     return text.replaceAll('|', String.raw`\|`);
@@ -81,7 +77,7 @@ function catalogueSections(published: Row[], families: Record<string, string>): 
     });
 }
 
-function renderCatalogue(published: Row[], families: Record<string, string>): string {
+export function catalogueBody(published: Row[], families: Record<string, string>): string {
     const c = counts(published);
     // A channel with no rows yet is not announced with a zero: a reader would go looking for it.
     const named = [
@@ -98,25 +94,19 @@ function renderCatalogue(published: Row[], families: Record<string, string>): st
         .map(([count, label]) => label.replace(' (', ` — ${String(count)} (`))
         .join(', ');
     const intro = `Every rule a project using the framework meets, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
-    const inner = [intro, ...catalogueSections(published, families)].join('\n\n');
-    return `${DOCS_START}\n\n${inner}\n\n${DOCS_END}`;
+    return [intro, ...catalogueSections(published, families)].join('\n\n');
 }
 
-export function spliceCatalogue(
+export function spliceBetween(
     existing: string,
-    published: Row[],
-    families: Record<string, string>,
+    markers: Markers,
+    body: string,
+    page: string,
 ): string {
-    const start = existing.indexOf(DOCS_START);
-    const end = existing.indexOf(DOCS_END);
+    const start = existing.indexOf(markers.start);
+    const end = existing.indexOf(markers.end);
     if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/19-linting.md is missing the GENERATED:catalogue markers (${DOCS_START} … ${DOCS_END})`,
-        );
+        throw new Error(`${page} is missing its markers (${markers.start} … ${markers.end})`);
     }
-    return (
-        existing.slice(0, start) +
-        renderCatalogue(published, families) +
-        existing.slice(end + DOCS_END.length)
-    );
+    return `${existing.slice(0, start)}${markers.start}\n\n${body}\n\n${existing.slice(end)}`;
 }

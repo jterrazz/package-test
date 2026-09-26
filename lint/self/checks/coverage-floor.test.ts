@@ -2,8 +2,8 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-describe('coverage-floor', () => {
-    test('what the count reaches — the child processes the suite spawns (meta-test) — every child is counted, and judged on the source its bundle maps back to', async () => {
+describe('checkCoverageFloor', () => {
+    test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — every child is counted, and judged on the source its bundle maps back to', async () => {
         // Given - this repository's own config, which the documents running `dist/checker.js` run under
         const { default: config } = await import('../../../vitest.config.js');
         const coverage = config.test?.coverage;
@@ -20,7 +20,7 @@ describe('coverage-floor', () => {
         ).toStrictEqual({ afterRemap: true, attached: true, distRead: true });
     });
 
-    test('what the count reaches — the child processes the suite spawns (meta-test) — every bundle carries the map back to its modules, and the tarball none of them', async () => {
+    test('coverage-floor — what the count reaches — the child processes the suite spawns (meta-test) — every bundle carries the map back to its modules, and the tarball none of them', async () => {
         // Given - the build groups, and the files the package publishes
         const { default: groups } = await import('../../../tsdown.config.js');
         const manifest: unknown = JSON.parse(

@@ -30,9 +30,9 @@
     },
     "files": [
         "dist",
-        "!dist/catalogue.*",
-        "!dist/coverage.*",
         "!dist/route-split.*",
+        "!dist/schema.*",
+        "!dist/self.*",
         "!dist/self-*",
         "!dist/**/*.map",
         "docs",
@@ -69,11 +69,11 @@
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
         "build:cached": "rm -rf dist && TURBO_TELEMETRY_DISABLED=1 turbo run build --output-logs=new-only",
-        "docs": "npm run build:cached && node dist/catalogue.js",
-        "lint": "typescript check && node dist/checker.js && node dist/self-checker.js",
+        "docs": "npm run build:cached && node dist/self.js chapters && node dist/schema.js",
+        "lint": "typescript check && node dist/checker.js && node dist/self.js check",
         "test": "vitest --run",
-        "coverage": "npm run build:cached && vitest --run --coverage && node dist/coverage.js --write",
-        "coverage:check": "node dist/coverage.js",
+        "coverage": "npm run build:cached && vitest --run --coverage && node dist/self.js coverage --write",
+        "coverage:check": "node dist/self.js coverage",
         "test:repeat": "vitest --run --repeats 10"
     },
     "dependencies": {

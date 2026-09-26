@@ -4,8 +4,9 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { runTree } from '../../engine/checker/tree-run.js';
 import { readManifest } from '../../engine/project/member-manifest.js';
-import { runChecker } from './checker.js';
+import { CHECKER } from './checker.js';
 import { checkFileSuffixMatchesPlaceInMember } from './file-suffix-matches-place.js';
 
 const REPEATED_NAME = [
@@ -31,7 +32,7 @@ function repository(files: string[], add: string[], ignore = ''): string {
     return root;
 }
 function findings(root: string, rule: string): string[] {
-    return runChecker(join(root, 'specs'))
+    return runTree(join(root, 'specs'), CHECKER)
         .filter((violation) => violation.rule === rule)
         .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();

@@ -1,0 +1,79 @@
+import { join, relative } from 'node:path';
+
+import { treeEntries } from '../project/git-tree.js';
+import {
+    GROUND_EXPECTED,
+    GROUND_FIXTURES,
+    GROUND_REQUESTS,
+    GROUND_SEEDS,
+} from '../project/ground.js';
+import { SPEC_EXTENSION } from '../project/spec-document.js';
+import { decodeText } from '../project/tree.js';
+import { runDocument } from './documents.js';
+import type { Finding } from './finding.js';
+import type { GroundEntry, GroundPasses } from './registry.js';
+
+type Ground = typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SEEDS;
+
+const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
+
+/** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
+const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
+
+// A spec document is the scenario, not ground, so it is checked wherever the walk finds it; `no-document-in-ground` says where that is.
+function documentFindings(entry: GroundEntry, passes: GroundPasses): Finding[] {
+    const text = decodeText(entry.path);
+    return [
+        ...passes.document({ name: entry.name, rel: entry.rel, text }),
+        ...(text === null ? [] : runDocument(text, entry.rel, entry.path, passes.read)),
+    ];
+}
+
+function groundFindings(
+    entry: GroundEntry,
+    inside: Ground,
+    atTop: boolean,
+    passes: GroundPasses,
+): Finding[] {
+    if (inside === GROUND_SEEDS) {
+        return passes.seed(entry);
+    }
+    const text = decodeText(entry.path);
+    if (text === null) {
+        return [];
+    }
+    const file = { ...entry, atTop, text };
+    return inside === GROUND_REQUESTS ? passes.request(file) : passes.expected(file);
+}
+
+function nextGround(name: string, inside: Ground | null): Ground | null {
+    return GROUND_DIRS.has(name) ? (name as Ground) : inside;
+}
+
+export function walkGround(rootDir: string, passes: GroundPasses): Finding[] {
+    const findings: Finding[] = [];
+    const visit = (dir: string, inside: Ground | null): void => {
+        let entries;
+        try {
+            entries = treeEntries(dir);
+        } catch {
+            return;
+        }
+        for (const entry of entries) {
+            const path = join(dir, entry.name);
+            const found = { name: entry.name, path, rel: relative(rootDir, path) };
+            if (entry.isDirectory()) {
+                if (!SKIPPED_DIRS.has(entry.name)) {
+                    visit(path, nextGround(entry.name, inside));
+                }
+            } else if (entry.name.endsWith(SPEC_EXTENSION)) {
+                findings.push(...documentFindings(found, passes));
+            } else if (inside !== null) {
+                const atTop = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
+                findings.push(...groundFindings(found, inside, atTop, passes));
+            }
+        }
+    };
+    visit(rootDir, null);
+    return findings;
+}

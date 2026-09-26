@@ -2,6 +2,7 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { cell, table } from '../../engine/catalogue/chapter.js';
+import type { Markers } from '../../engine/catalogue/chapter.js';
 
 /** A row says what the file's own top-level `describe` titles say, never a second description kept beside them. */
 
@@ -41,9 +42,10 @@ export function metaTests(root: string): MetaTest[] {
     });
 }
 
-export const META_TESTS_START =
-    '<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->';
-export const META_TESTS_END = '<!-- /GENERATED:meta-tests -->';
+export const META_TESTS_MARKERS: Markers = {
+    end: '<!-- /GENERATED:meta-tests -->',
+    start: '<!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->',
+};
 
 export function renderMetaTests(root: string): string {
     const rows = metaTests(root).map((entry) => [
@@ -57,16 +59,4 @@ export function renderMetaTests(root: string): string {
         '',
         ...table(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');
-}
-
-export function spliceMetaTests(existing: string, root: string): string {
-    const start = existing.indexOf(META_TESTS_START);
-    const end = existing.indexOf(META_TESTS_END);
-    if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/03-testing.md is missing the GENERATED:meta-tests markers (${META_TESTS_START} … ${META_TESTS_END})`,
-        );
-    }
-    const inner = `${META_TESTS_START}\n\n${renderMetaTests(root)}\n\n`;
-    return existing.slice(0, start) + inner + existing.slice(end);
 }

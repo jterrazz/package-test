@@ -3,9 +3,10 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { runChecker } from '../../consumer/checks/checker.js';
+import { CHECKER } from '../../consumer/checks/checker.js';
+import { runTree } from '../../engine/checker/tree-run.js';
 import { forgetTree } from '../../engine/project/git-tree.js';
-import { runSelfSpecsChecker, SELF_PASS_IDS } from './checker.js';
+import { SELF_CHECKER, SELF_PASS_IDS } from './checker.js';
 
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'self-checks-'));
@@ -31,9 +32,11 @@ describe('checker', () => {
         const root = specsTree(MISFILED);
 
         // Then - the self checker names it, under its own pass
-        expect(runSelfSpecsChecker(root).map(({ file, rule }) => `${file} ${rule}`)).toStrictEqual([
-            'api/users/list/listing.spec.ts specimen-filed-by-capability',
-        ]);
+        expect(
+            SELF_CHECKER.specs
+                .flatMap((pass) => pass(root))
+                .map(({ file, rule }) => `${file} ${rule}`),
+        ).toStrictEqual(['api/users/list/listing.spec.ts specimen-filed-by-capability']);
     });
 
     test('checker — the self checker — the passes only this package runs — the published checker runs no self pass', () => {
@@ -42,6 +45,6 @@ describe('checker', () => {
         const selfPasses = new Set<string>(SELF_PASS_IDS);
 
         // Then - no finding belongs to a self pass: a consumer's run never meets this package's own discipline
-        expect(runChecker(root).filter(({ rule }) => selfPasses.has(rule))).toStrictEqual([]);
+        expect(runTree(root, CHECKER).filter(({ rule }) => selfPasses.has(rule))).toStrictEqual([]);
     });
 });

@@ -1,6 +1,7 @@
 import { join, resolve } from 'node:path';
 
 import { cell, table } from '../../engine/catalogue/chapter.js';
+import type { Markers } from '../../engine/catalogue/chapter.js';
 import { treeEntries } from '../../engine/project/git-tree.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import type { SiblinglessKind } from './siblingless-kinds.js';
@@ -48,9 +49,10 @@ export function classified(root: string): { kind: SiblinglessKind | undefined; p
     }));
 }
 
-export const SIBLINGS_START =
-    '<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->';
-export const SIBLINGS_END = '<!-- /GENERATED:siblings -->';
+export const SIBLINGS_MARKERS: Markers = {
+    end: '<!-- /GENERATED:siblings -->',
+    start: '<!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->',
+};
 
 export function renderSiblings(root: string): string {
     const rows = classified(root);
@@ -64,15 +66,4 @@ export function renderSiblings(root: string): string {
         '',
         ...table(['Kind', 'Proven instead by'], body),
     ].join('\n');
-}
-
-export function spliceSiblings(existing: string, root: string): string {
-    const start = existing.indexOf(SIBLINGS_START);
-    const end = existing.indexOf(SIBLINGS_END);
-    if (start === -1 || end === -1) {
-        throw new Error(
-            `docs/03-testing.md is missing the GENERATED:siblings markers (${SIBLINGS_START} … ${SIBLINGS_END})`,
-        );
-    }
-    return `${existing.slice(0, start) + SIBLINGS_START}\n\n${renderSiblings(root)}\n\n${existing.slice(end)}`;
 }

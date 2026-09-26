@@ -4,8 +4,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { spliceBetween } from '../../engine/catalogue/chapter.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
-import { classified, siblingless, spliceSiblings } from './siblings.js';
+import { classified, renderSiblings, siblingless, SIBLINGS_MARKERS } from './siblings.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -74,6 +75,8 @@ describe('siblings', () => {
         const chapter = readFileSync(resolve(ROOT, 'docs/03-testing.md'), 'utf8');
 
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
-        expect(spliceSiblings(chapter, ROOT)).toBe(chapter);
+        expect(
+            spliceBetween(chapter, SIBLINGS_MARKERS, renderSiblings(ROOT), 'docs/03-testing.md'),
+        ).toBe(chapter);
     });
 });

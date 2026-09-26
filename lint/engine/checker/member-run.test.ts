@@ -2,28 +2,29 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkoutUnder } from '../../engine/testing/package-tree.fixtures.js';
-import { checkerMessage } from './checker.js';
-import { checkMember, checkMembers } from './checker.members.js';
+import { CHECKER } from '../../consumer/checks/checker.js';
+import { checkoutUnder } from '../testing/package-tree.fixtures.js';
+import { runMember, runMembers } from './member-run.js';
+import { checkerMessage } from './tree-run.js';
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/shared/fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
 
 function codes(dir: string, root = WORKSPACE): string[] {
-    return checkMember(dir, root).map((violation) => violation.rule);
+    return runMember(dir, root, CHECKER).map((violation) => violation.rule);
 }
 
-describe('checker.members', () => {
+describe('member-run', () => {
     test('members — members — the member pass — what a workspace member owes — a member with tests and no config is told what it is running on (`member-has-vitest-config`)', () => {
         // Given - a member declaring a test script and carrying no config
-        const [violation] = checkMember(memberAt('tested-no-config'), WORKSPACE);
+        const [violation] = runMember(memberAt('tested-no-config'), WORKSPACE, CHECKER);
 
         // Then - the finding names the budget and the fixtures that are running
         expect(violation?.rule).toBe('member-has-vitest-config');
-        expect(violation === undefined ? '' : checkerMessage(violation)).toContain(
+        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
             'no vitest.config.ts',
         );
-        expect(violation === undefined ? '' : checkerMessage(violation)).toContain(
+        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
             'defineSpecConfig()',
         );
     });
@@ -42,32 +43,32 @@ describe('checker.members', () => {
 
     test('members — members — the member pass — what a workspace member owes — a config that gives every file it collects a drawing of a browser (`no-simulated-dom-in-config`)', () => {
         // Given - a member whose config names happy-dom
-        const [violation] = checkMember(memberAt('simulated-dom'), WORKSPACE);
+        const [violation] = runMember(memberAt('simulated-dom'), WORKSPACE, CHECKER);
 
         // Then - the finding names the line and the move
         expect(violation?.rule).toBe('no-simulated-dom-in-config');
         expect(violation?.line).toBe(5);
-        expect(violation === undefined ? '' : checkerMessage(violation)).toContain(
+        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
             'a drawing of a browser',
         );
     });
 
     test('members — members — the member pass — what a workspace member owes — a dependency the framework carries, and a seam it replaced (`no-redundant-test-dependency`)', () => {
         // Given - a member declaring msw, a testing-library package, and the optional peer a consumer declares on purpose
-        const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
+        const found = runMember(memberAt('seam-dependency'), WORKSPACE, CHECKER);
 
         // Then - the two are named, each by what it actually is, and playwright - an optional peer a consumer declares - is not
         expect(found.map((violation) => violation.rule)).toStrictEqual([
             'no-redundant-test-dependency',
             'no-redundant-test-dependency',
         ]);
-        expect(found[0] === undefined ? '' : checkerMessage(found[0])).toContain(
+        expect(found[0] === undefined ? '' : checkerMessage(CHECKER, found[0])).toContain(
             '@testing-library/react',
         );
-        expect(found[0] === undefined ? '' : checkerMessage(found[0])).toContain(
+        expect(found[0] === undefined ? '' : checkerMessage(CHECKER, found[0])).toContain(
             'is a seam `@jterrazz/test` replaced',
         );
-        expect(found[1] === undefined ? '' : checkerMessage(found[1])).toContain(
+        expect(found[1] === undefined ? '' : checkerMessage(CHECKER, found[1])).toContain(
             '`msw` is a transitive of `@jterrazz/test`',
         );
         expect(found.every((violation) => !violation.found.includes('playwright'))).toBe(true);
@@ -75,7 +76,7 @@ describe('checker.members', () => {
 
     test('members — members — the member pass — what a workspace member owes — a finding points at the line the declaration is written on (`no-redundant-test-dependency`)', () => {
         // Given - the same member, whose manifest spells msw on its own line
-        const found = checkMember(memberAt('seam-dependency'), WORKSPACE);
+        const found = runMember(memberAt('seam-dependency'), WORKSPACE, CHECKER);
 
         // Then - the anchor is the declaration, not the opening brace
         expect(found.map((violation) => violation.line)).toStrictEqual([4, 5]);
@@ -140,7 +141,7 @@ describe('checker.members', () => {
 
     test('members — members — the member pass — what a workspace member owes — every member is judged in one run', () => {
         // Given - the whole fixture workspace
-        const found = checkMembers(WORKSPACE).map((violation) => violation.rule);
+        const found = runMembers(WORKSPACE, CHECKER).map((violation) => violation.rule);
 
         // Then - one `member-has-vitest-config`, one `no-simulated-dom-in-config`, three `no-redundant-test-dependency` and one `file-suffix-matches-place`, whatever the order they walk in
         expect(found.toSorted()).toStrictEqual([

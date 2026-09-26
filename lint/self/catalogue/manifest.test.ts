@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { FAMILIES } from '../../consumer/catalogue/families.js';
-import { spliceFork } from '../../consumer/catalogue/fork.js';
+import { FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
 import {
     CHECKER_PASSES,
     consumerRows,
@@ -15,13 +15,14 @@ import {
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
 import plugin, { recommendedRules } from '../../consumer/rules/plugin.js';
-import { anchor, spliceCatalogue } from '../../engine/catalogue/chapter.js';
+import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
 import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
 import { CATALOGUE_CHAPTER } from '../../engine/catalogue/refusal.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { SELF_PASS_IDS } from '../checks/checker.js';
+import { chapterAt } from '../index.js';
 import selfPlugin, { selfRules } from '../rules/plugin.js';
-import { chapterWithSelfRules } from './chapter.js';
+import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { SELF_FAMILIES } from './families.js';
 import {
     allRows,
@@ -283,7 +284,7 @@ describe('manifest', () => {
         const committed = read('docs/19-linting.md');
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
-        expect(spliceCatalogue(committed, consumerRows, FAMILIES)).toBe(committed);
+        expect(chapterAt(ROOT, 'docs/19-linting.md', committed)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
@@ -291,7 +292,14 @@ describe('manifest', () => {
         const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
 
         // Then - splicing a fresh table changes nothing
-        expect(spliceFork(committed)).toBe(committed);
+        expect(
+            spliceBetween(
+                committed,
+                FORK_MARKERS,
+                forkTable().join('\n'),
+                'docs/18-conventions.md',
+            ),
+        ).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the docs/03 table of the self rows is byte-identical to a fresh generation', () => {
@@ -299,7 +307,9 @@ describe('manifest', () => {
         const committed = read(SELF_CHAPTER);
 
         // Then - re-splicing the self rows changes nothing (run `npm run docs`)
-        expect(chapterWithSelfRules(committed)).toBe(committed);
+        expect(
+            spliceBetween(committed, SELF_CHAPTER_MARKERS, selfChapterTable(), SELF_CHAPTER),
+        ).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — a row is listed in the chapter of its audience, and only there', () => {
@@ -356,7 +366,7 @@ describe('manifest', () => {
 
     test('conventions catalogue — completeness (meta-test) — every checker-channel manifest entry maps to a pass of the checker its audience runs', () => {
         // Given - the checker channel of the manifest, split by audience
-        // Then - a consumer row names a pass dist/checker.js runs, a self row one dist/self-checker.js runs, and neither checker runs a pass of the other audience
+        // Then - a consumer row names a pass dist/checker.js runs, a self row one `dist/self.js check` runs, and neither checker runs a pass of the other audience
         expect(checkerRowsOf('consumer')).toStrictEqual([...CHECKER_PASS_IDS].toSorted());
         expect(checkerRowsOf('self')).toStrictEqual([...SELF_PASSES].toSorted());
     });
@@ -679,7 +689,7 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — E2E inventory (meta-test) — every checker pass has a specs/lint E2E spec that runs the built checker', () => {
-        // Given - each pass dist/checker.js runs, tree and member alike, and each dist/self-checker.js runs
+        // Given - each pass dist/checker.js runs, tree and member alike, and each `dist/self.js check` runs
         for (const id of [...CHECKER_PASS_IDS, ...SELF_PASSES]) {
             // Then - its documents in specs/lint/<id>/, or its own test under specs/lint/checker/: a pass the registry names and no spec runs is a sentence with nothing behind it
             expect(

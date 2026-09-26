@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { fixSpecDocument } from './checker.documents.js';
+import { fixSpecDocument } from './documents.js';
 
 /** The passes themselves are proven end to end in `specs/lint/checker/`, against the real binary. */
 
-describe('checker.documents', () => {
+describe('documents', () => {
     test('documents — fixSpecDocument — key order and block scalars — moves the keys back into the canonical order, each with its comment', () => {
         // Given - a document whose runs sit above its description, and whose exit follows its stdout
         const source = [

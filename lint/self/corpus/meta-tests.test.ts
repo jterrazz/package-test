@@ -2,7 +2,8 @@ import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { META_TESTS_END, META_TESTS_START, metaTests, spliceMetaTests } from './meta-tests.js';
+import { spliceBetween } from '../../engine/catalogue/chapter.js';
+import { META_TESTS_MARKERS, metaTests, renderMetaTests } from './meta-tests.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -38,8 +39,8 @@ describe('metaTests', () => {
         const chapter = readFileSync(resolve(ROOT, CHAPTER), 'utf8');
 
         // Then - regenerating reproduces it: a hand edit between the markers fails here, correctly
-        expect(spliceMetaTests(chapter, ROOT)).toBe(chapter);
-        expect(chapter).toContain(META_TESTS_START);
-        expect(chapter).toContain(META_TESTS_END);
+        expect(spliceBetween(chapter, META_TESTS_MARKERS, renderMetaTests(ROOT), CHAPTER)).toBe(
+            chapter,
+        );
     });
 });
