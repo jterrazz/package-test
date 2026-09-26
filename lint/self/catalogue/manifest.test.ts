@@ -171,9 +171,6 @@ const TICK = '`';
 
 const CITED = `${TICK}${NAME}${TICK}`;
 
-/** The letters the retired codes were written with: a code cited again resolves to no row. */
-const CODE = String.raw`[ABCDEFGIJKMW]\d+b?w?`;
-
 const citationPatterns = (): RegExp[] => [
     new RegExp(String.raw`\brules?\s+(${CITED}(?:\s*(?:,|and|or|/)\s*${CITED})*)`, 'gu'),
     new RegExp(String.raw`(?<![@\w./-])jterrazz(?:-self)?/(${NAME})(?![\w/-])`, 'gu'),
@@ -182,12 +179,6 @@ const citationPatterns = (): RegExp[] => [
         String.raw`checker-disable(?:-next)?-line\s+((?:${NAME}|\*)(?:,\s*(?:${NAME}|\*))*)(?=\s+--|\s*$|${TICK})`,
         'giu',
     ),
-    new RegExp(
-        String.raw`\b(?:rules?|CONVENTIONS)\s+(${CODE}(?:\s*(?:,|and|/)\s*${CODE})*)\b`,
-        'gu',
-    ),
-    new RegExp(String.raw`\((${CODE})(?:\s+—[^)]*)?\)`, 'gu'),
-    new RegExp(String.raw`\b(${CODE})'s\b`, 'gu'),
 ];
 
 const idsCitedIn = (line: string): string[] =>
@@ -527,22 +518,16 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — `cited-rules-exist` — a citation that resolves to nothing is caught, in every shape it takes', () => {
-        // Given - a false name in each shape a rule is cited by, beside a true one, and the retired letter codes in the shapes they took
+        // Given - a false name in each shape a rule is cited by, beside a true one
         const ids = [
             'see rule `gone-rule`, rules `no-sleep` and `lost-rule`,',
             '`jterrazz/retired-rule`, `jterrazz-check(lost-pass)`, @jterrazz/test',
             '// checker-disable-next-line no-sleep, stale-pass -- a reason',
-            "and rule C99, (C98 — gone), CONVENTIONS C97/C12, C96's reach",
         ].flatMap(idsCitedIn);
         const unresolved = new Set(ids.filter((id) => !knownNames().has(id)));
 
-        // Then - exactly the false ones resolve to nothing, every letter code among them
+        // Then - exactly the false ones resolve to nothing
         expect([...unresolved].toSorted()).toStrictEqual([
-            'C12',
-            'C96',
-            'C97',
-            'C98',
-            'C99',
             'gone-rule',
             'lost-pass',
             'lost-rule',
@@ -556,10 +541,6 @@ describe('manifest', () => {
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
             for (const line of text.split('\n')) {
-                // A migration sentence names what it retired: those names are gone by design.
-                if (line.includes('no longer exist')) {
-                    continue;
-                }
                 for (const id of idsCitedIn(line)) {
                     cited.set(id, where);
                 }

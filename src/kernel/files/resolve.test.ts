@@ -147,7 +147,7 @@ describe('resolve', () => {
     });
 
     test('spec path resolution — a bare name is refused before anything is read', () => {
-        // Given - the 16 form, a name resolved against a hidden folder
+        // Given - a bare name, resolved against no folder the call shows
         // Then - refused with the verb
         expect(() => resolveSpecPath('request', 'create.http', '/repo/specs')).toThrow(
             /^found: request\("create\.http"\), a path that is not relative to the spec file/u,

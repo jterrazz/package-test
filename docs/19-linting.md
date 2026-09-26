@@ -88,9 +88,9 @@ The same listing answers every single path a pass probes — `named-path-exists`
 
 This catalogue holds only what no upstream rule already holds. Oxlint ships a `vitest` plugin, and `@jterrazz/typescript` turns it on over the test globs in every profile — so a consumer composing `compose(<profile>, testing)` gets both layers and each convention is enforced exactly once.
 
-Four hygiene rules used to live here and now live there: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`). The ids `jterrazz/j1-no-only-skip`, `jterrazz/j3-no-expectless-test`, `jterrazz/j4-unique-test-names` and `jterrazz/j5-lowercase-title` no longer exist; a config still naming one fails oxlint's unknown-rule check.
+Four hygiene rules are that plugin's: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`).
 
-One behaviour does not carry over, and nothing restores it. `prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`), which the deleted lowercase-title rule exempted; the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. An existing title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Enabling the plugin](#enabling-the-plugin) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
+`prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`); the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. A title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Enabling the plugin](#enabling-the-plugin) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
 
 ## What a finding says
 
@@ -406,7 +406,6 @@ This package records and judges its own debt. The family keeps one ratchet file 
 - **It is EXACT.** An entry states where the project stands, never a ceiling, so a count below its entry breaks it as an entry at zero does.
 - **`jterrazz-test-check baseline [root]` writes it** from where the project stands, and leaves every other section byte for byte. A count that rose and a key with no entry are written by `baseline` alone, never by a fix.
 - **`routes/unreached` is the run's key.** The api run counts the routes and alone judges it, as exactly ([10 — Api § Route coverage](10-api.md#route-coverage)); its one recorder is a test run under `TEST_UPDATE=1`, and the checker's recordings — `--fix`, and so `make fix`, included — keep it as the run left it, even when the count fell.
-- **The retired `test.baseline.json` is never read**; `typescript check` refuses a leftover one (`baseline-legacy`), since the file is the toolchain's.
 
 #### What `--fix` does to it
 

@@ -149,7 +149,7 @@ describe('comparison', () => {
 
     // RUNTIME disk-named-by-relative-path-at-runtime — a string is a value: a verb that reads the disk takes file() or directory(), and a bare string is refused where it is written.
     test('a fixture named by a bare string is refused where it is written', () => {
-        // Given - the 16 spelling, a name resolved against a folder the line does not show
+        // Given - a bare name, resolved against a folder the line does not show
         // Then - refused at the call, naming the wrapper to write
         expect(() => cli.fixture('cli-app/' as never)).toThrow(
             /^found: fixture\("cli-app\/"\), a value where the disk is read\n.*\nfix: name the disk: fixture\(file/u,

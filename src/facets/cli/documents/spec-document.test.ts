@@ -107,7 +107,7 @@ describe('spec-document', () => {
     test.each(['$FIXTURES/stub/', 'stub/', '/abs/stub/'])(
         'spec document — reading — a fixture that is not a relative path is refused on its line: %s',
         (path) => {
-            // Given - the 16 spellings: a marker, a bare name, an absolute path
+            // Given - a marker, a bare name, an absolute path
             const source = [
                 'description: states its ground',
                 'fixture:',
