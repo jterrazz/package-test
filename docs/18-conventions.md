@@ -242,7 +242,7 @@ The questions are asked IN ORDER, and the first yes is the kind. The answer fixe
 | Is it a binary?                                                        | cli              | `specs/cli/<command>/` (+ `<case>.spec.yaml`)    | `specification.cli(bin)`      | `cli`         |
 | Is it a module that needs a real service, or whose oracle is a golden? | integration      | `specs/integration/<domain>/<aspect>.spec.ts`    | `specification.integration()` | `integration` |
 | Is it a module alone?                                                  | module           | `<file>.test.ts` beside `<file>.ts`              | none                          | `unit`        |
-| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<family>/<aspect>.test.ts`                | none                          | any name      |
+| Is it the repository itself — a suite over several apps?               | repository suite | `specs/<suite>/<domain>/<aspect>.test.ts`        | none                          | any name      |
 
 <!-- /GENERATED:fork -->
 

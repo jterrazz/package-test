@@ -75,7 +75,7 @@ export const FORK: ForkRow[] = [
     {
         constructor: 'none',
         kind: 'repository suite',
-        livesAt: '`specs/<family>/<aspect>.test.ts`',
+        livesAt: '`specs/<suite>/<domain>/<aspect>.test.ts`',
         project: 'any name',
         question: 'Is it the repository itself — a suite over several apps?',
     },
