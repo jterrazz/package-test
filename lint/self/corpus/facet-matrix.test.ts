@@ -14,7 +14,7 @@ import type {
 } from '../../../src/facets/mobile/index.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/index.js';
 import type { JobResult } from '../../../src/index.js';
-import { CAPABILITIES, COLUMNS, facetMatrixMember } from './facet-matrix.js';
+import { FACET_MATRIX_CAPABILITIES, FACET_MATRIX_COLUMNS, facetMatrixMember } from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
 import { matrixCapabilities } from './matrix.js';
 
@@ -240,8 +240,8 @@ describe('facet-matrix', () => {
     test('facet capability declaration (`discovery-grows-a-guard` guard) — every declared column is one the matrix has', () => {
         // Given - the declaration, whose columns drive every projection
         // Then - no row names a column the table cannot render
-        const unknown = CAPABILITIES.flatMap((capability) =>
-            capability.columns.filter((column) => !COLUMNS.includes(column)),
+        const unknown = FACET_MATRIX_CAPABILITIES.flatMap((capability) =>
+            capability.columns.filter((column) => !FACET_MATRIX_COLUMNS.includes(column)),
         );
         expect(unknown).toStrictEqual([]);
     });

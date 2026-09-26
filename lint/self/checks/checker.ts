@@ -8,7 +8,7 @@ import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entr
 import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 
 /** `dist/checker.js` imports nothing from here, so no consumer run can reach a self pass. */
-export const SELF_PASS_IDS = [
+export const SELF_CHECKER_PASS_IDS = [
     'specimen-filed-by-capability',
     'source-root-holds-known-entries',
     'no-cross-facet-import',
@@ -17,11 +17,11 @@ export const SELF_PASS_IDS = [
     'lint-imports-follow-the-direction',
 ] as const;
 
-export type SelfPassId = (typeof SELF_PASS_IDS)[number];
+export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
 
 export const SELF_CHECKER: AtZeroRegistry = {
     chapter: SELF_CHAPTER,
-    passIds: SELF_PASS_IDS,
+    passIds: SELF_CHECKER_PASS_IDS,
     rows: selfRows,
     source: [
         checkSourceRootHoldsKnownEntries,

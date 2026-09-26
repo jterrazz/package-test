@@ -11,7 +11,7 @@ const selfPlugin: LintPlugin = {
     },
 };
 
-export const selfRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
+export const selfPluginRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
     Object.entries(selfPlugin.rules).map(([name, rule]) => [
         `jterrazz-self/${name}`,
         rule.meta.docs.severity ?? 'error',

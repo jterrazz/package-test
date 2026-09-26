@@ -8,7 +8,7 @@
 The source trees hold each third-party library to exactly one slice, and a
 truly shared library (git, yaml, oxc-parser, process spawning) lives behind a
 port in `kernel/` or in the ONE slice that needs it ([01 — Architecture § The
-source trees](../01-architecture.md#the-source-trees)). `one-owner-per-library` (`lint/self/checks/one-owner-per-library.ts`, over `LIBRARY_OWNERS` in `lint/self/checks/libraries.ts`) holds the
+source trees](../01-architecture.md#the-source-trees)). `one-owner-per-library` (`lint/self/checks/one-owner-per-library.ts`, over `OWNERS_OF_LIBRARIES` in `lint/self/checks/libraries.ts`) holds the
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
 `facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun
@@ -24,7 +24,7 @@ forbids.
 
 ## Decision
 
-- A node builtin is not a library in I11's sense: `LIBRARY_OWNERS` lists
+- A node builtin is not a library in I11's sense: `OWNERS_OF_LIBRARIES` lists
   third-party packages, and the one-slice-per-library rule is read that way.
 - A slice spawns only the program its own concept owns, from within that one
   concept folder: the cli facet its subject, the mobile server the simulator

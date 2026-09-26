@@ -3,13 +3,13 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 // Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: `npm run build` precedes lint.
 import { testing } from './dist/oxlint.js';
-import { FRAMEWORK_LAYERS, selfRules } from './dist/self-oxlint.js';
+import { FRAMEWORK_LAYERS, selfPluginRules } from './dist/self-oxlint.js';
 
 // This repository is the package the fragment names, so it lints itself from the bundle it just built, plus the self plugin.
 const selfTesting = {
     ...testing,
     jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js'],
-    rules: { ...testing.rules, ...selfRules },
+    rules: { ...testing.rules, ...selfPluginRules },
 };
 
 const config: OxlintConfig = defineConfig(

@@ -9,9 +9,9 @@ import type { Markers } from '../../engine/catalogue/chapter.js';
 export type MetaTest = { file: string; holds: string[]; tests: number };
 
 /** `specs/lint/meta/` runs the real binary, so it sits with the end-to-end suite. */
-export const META_LAYER_ROOTS = ['lint/self/catalogue', 'lint/self/corpus'];
+export const META_TESTS_LAYER_ROOTS = ['lint/self/catalogue', 'lint/self/corpus'];
 
-const ROOTS = [...META_LAYER_ROOTS, 'specs/lint/meta'];
+const ROOTS = [...META_TESTS_LAYER_ROOTS, 'specs/lint/meta'];
 
 function testFilesIn(root: string, relative: string): string[] {
     try {
@@ -55,7 +55,7 @@ export function renderMetaTests(root: string): string {
     ]);
     const total = rows.length;
     return [
-        `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
+        `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_TESTS_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
         '',
         ...table(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');

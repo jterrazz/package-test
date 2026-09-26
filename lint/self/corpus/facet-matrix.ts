@@ -1,6 +1,6 @@
 /** A facet's own rows are stated by its composition's definitions (`self/compositions.ts`), never here; zero framework imports, so the lint layer stays runtime-free (`import-within-declared-layers`). */
 
-export const COLUMNS = [
+export const FACET_MATRIX_COLUMNS = [
     'api',
     'job',
     'cli',
@@ -11,7 +11,7 @@ export const COLUMNS = [
     'module',
 ] as const;
 
-export type Column = (typeof COLUMNS)[number];
+export type Column = (typeof FACET_MATRIX_COLUMNS)[number];
 
 export type CapabilityGroup =
     | 'Constructor option'
@@ -44,7 +44,7 @@ export function facetMatrixMember(capability: Pick<Capability, 'member' | 'name'
 const IN_PLACE =
     "every golden of this facet's tree is read by one test, so it is written in place (`ground-shared-or-inline`); the file form is proven where goldens are shared";
 
-export const CAPABILITIES: Capability[] = [
+export const FACET_MATRIX_CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
         exempt: { website: IN_PLACE },

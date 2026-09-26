@@ -6,7 +6,7 @@ import { SHARED_GROUND } from '../../engine/project/ground.js';
 import { specimenOf } from '../../engine/project/specimen.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { listFiles } from '../../engine/project/tree.js';
-import { COLUMNS } from '../corpus/facet-matrix.js';
+import { FACET_MATRIX_COLUMNS } from '../corpus/facet-matrix.js';
 import { matrixCapabilityFolders } from '../corpus/matrix.js';
 import type { SelfPassId } from './checker.js';
 
@@ -29,12 +29,12 @@ const EXAMPLES = [
 
 /** A first-level folder that is no facet — a repository suite — has no column, and takes a capability of any. */
 function vocabularyOf(facet: string): Set<string> {
-    const column = COLUMNS.find((name) => name === facet && name !== 'module');
+    const column = FACET_MATRIX_COLUMNS.find((name) => name === facet && name !== 'module');
     if (column !== undefined) {
         return matrixCapabilityFolders(column);
     }
     const any = new Set<string>();
-    for (const name of COLUMNS) {
+    for (const name of FACET_MATRIX_COLUMNS) {
         for (const folder of matrixCapabilityFolders(name)) {
             any.add(folder);
         }

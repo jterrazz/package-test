@@ -1,16 +1,16 @@
 import type { Finding } from '../../engine/checker/finding.js';
 import { byPosition, finding, productionReferences } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
-import { LIBRARY_OWNERS } from './libraries.js';
+import { OWNERS_OF_LIBRARIES } from './libraries.js';
 
 export function checkOneOwnerPerLibrary(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)
         .flatMap(({ from, reference }) => {
             const { specifier } = reference;
-            const library = Object.keys(LIBRARY_OWNERS)
+            const library = Object.keys(OWNERS_OF_LIBRARIES)
                 .filter((name) => specifier === name || specifier.startsWith(`${name}/`))
                 .toSorted((one, other) => other.length - one.length)[0];
-            const owners = library === undefined ? [] : (LIBRARY_OWNERS[library] ?? []);
+            const owners = library === undefined ? [] : (OWNERS_OF_LIBRARIES[library] ?? []);
             return library === undefined || owners.some((owner) => from.startsWith(owner))
                 ? []
                 : [

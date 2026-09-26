@@ -4,7 +4,7 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { spliceBetween } from '../../engine/catalogue/chapter.js';
-import { COLUMNS } from './facet-matrix.js';
+import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
     layers,
@@ -29,7 +29,7 @@ describe('matrix', () => {
 
         // Then - no declared cell is empty without a reason stated on its row
         const holes = rows.flatMap((row) =>
-            COLUMNS.filter(
+            FACET_MATRIX_COLUMNS.filter(
                 (column) =>
                     row.cells[column] === 0 && row.capability.exempt?.[column] === undefined,
             ).map((column) => `${row.capability.name} · ${column}`),
@@ -104,7 +104,7 @@ describe('matrix', () => {
         const stale = matrixRows(ROOT)
             .filter((row) => row.capability.group !== 'Token')
             .flatMap((row) =>
-                COLUMNS.filter(
+                FACET_MATRIX_COLUMNS.filter(
                     (column) =>
                         row.capability.exempt?.[column] !== undefined && row.cells[column] !== 0,
                 ).map((column) => `${row.capability.name} · ${column}`),

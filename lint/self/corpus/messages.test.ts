@@ -8,7 +8,7 @@ import { lessonParts, missingParts } from '../../engine/catalogue/lesson-parts.j
 import { lessonAt, readAt, whyOf } from '../../engine/catalogue/lesson.js';
 import { refusal, REFUSAL_WHY } from '../../engine/catalogue/refusal.js';
 import type { RefusalRow } from '../../engine/catalogue/refusal.js';
-import { SELF_PASS_IDS } from '../checks/checker.js';
+import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import selfPlugin from '../rules/plugin.js';
 import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from './messages.js';
 
@@ -30,7 +30,7 @@ describe('messages', () => {
 
     test('`message-has-four-parts` — every checker pass renders a whole lesson from its row', () => {
         // Given - one finding of each pass a checker runs, the published one and this package's own
-        for (const pass of [...CHECKER_PASS_IDS, ...SELF_PASS_IDS]) {
+        for (const pass of [...CHECKER_PASS_IDS, ...SELF_CHECKER_PASS_IDS]) {
             const message = lessonAt(
                 rowNamed(pass),
                 { fix: 'the gesture', found: 'the finding' },

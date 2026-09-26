@@ -14,14 +14,14 @@ import {
     UPSTREAM_RULES,
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
-import plugin, { recommendedRules } from '../../consumer/rules/plugin.js';
+import plugin, { recommendedRules } from '../../index.js';
 import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
 import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
 import { CATALOGUE_CHAPTER } from '../../engine/catalogue/refusal.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
-import { SELF_PASS_IDS } from '../checks/checker.js';
+import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { chapterAt } from '../index.js';
-import selfPlugin, { selfRules } from '../rules/plugin.js';
+import selfPlugin, { selfPluginRules } from '../rules/plugin.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { SELF_FAMILIES } from './families.js';
 import {
@@ -107,7 +107,7 @@ function metaProofs(): Set<string> {
 
 const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
 
-const SELF_PASSES = new Set<string>(SELF_PASS_IDS);
+const SELF_PASSES = new Set<string>(SELF_CHECKER_PASS_IDS);
 
 function audiences(rows: { audience: string }[]): string[] {
     return [...new Set(rows.map((row) => row.audience))];
@@ -733,7 +733,7 @@ describe('manifest', () => {
 
         // Then - its rule keys match recommendedRules and the self rules exactly: no rule runs without an E2E lint pass, and no stale rule lingers in the fixture config
         expect(Object.keys(config.rules).toSorted()).toStrictEqual(
-            Object.keys({ ...recommendedRules, ...selfRules }).toSorted(),
+            Object.keys({ ...recommendedRules, ...selfPluginRules }).toSorted(),
         );
     });
 

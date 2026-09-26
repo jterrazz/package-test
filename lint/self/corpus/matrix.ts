@@ -8,9 +8,9 @@ import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes
 import { filesUnder } from '../../engine/project/files-under.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
-import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
+import { FACET_MATRIX_CAPABILITIES, FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
-import { META_LAYER_ROOTS } from './meta-tests.js';
+import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
 
 /** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
 
@@ -183,7 +183,7 @@ const FACET_GROUPS: readonly CapabilityGroup[] = [
 /** A row two facets state is one row. */
 function declaredCapabilities(): Capability[] {
     const rows: Capability[] = [];
-    for (const column of COLUMNS) {
+    for (const column of FACET_MATRIX_COLUMNS) {
         const composition = column === 'module' ? undefined : COMPOSITIONS[column];
         for (const row of composition === undefined ? [] : rowsOfCompositions(composition)) {
             const at = rows.find(
@@ -203,7 +203,7 @@ function declaredCapabilities(): Capability[] {
     const facets = rows.toSorted(
         (one, other) => FACET_GROUPS.indexOf(one.group) - FACET_GROUPS.indexOf(other.group),
     );
-    return [...facets, ...CAPABILITIES];
+    return [...facets, ...FACET_MATRIX_CAPABILITIES];
 }
 
 export function matrixCapabilities(): Capability[] {
@@ -294,7 +294,7 @@ function cellOf(count: null | number): string {
 export function exemptions(rows: MatrixRow[]): { column: Column; name: string; why: string }[] {
     const found: { column: Column; name: string; why: string }[] = [];
     for (const row of rows) {
-        for (const column of COLUMNS) {
+        for (const column of FACET_MATRIX_COLUMNS) {
             const why = row.capability.exempt?.[column];
             if (row.cells[column] === 0 && why !== undefined) {
                 found.push({ column, name: row.capability.name, why });
@@ -309,11 +309,11 @@ export function renderMatrixBody(root: string): string {
     const groups = [...new Set(rows.map((row) => row.capability.group))];
     const sections = groups.map((group) => {
         const body = table(
-            ['Capability', ...COLUMNS],
+            ['Capability', ...FACET_MATRIX_COLUMNS],
             rows
                 .filter((row) => row.capability.group === group)
                 .map((row) => {
-                    const counts = COLUMNS.map((column) => cellOf(row.cells[column]));
+                    const counts = FACET_MATRIX_COLUMNS.map((column) => cellOf(row.cells[column]));
                     counts.unshift(cell(`\`${row.capability.name}\``));
                     return counts;
                 }),
@@ -355,12 +355,12 @@ function filesDirectlyIn(dir: string, extensions: string[]): number {
 export function layers(root: string): Layer[] {
     const allModuleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
     const ruleTests = countUnder(root, ['lint/consumer/rules'], ['.test.ts']);
-    const metaTests = META_LAYER_ROOTS.reduce(
+    const metaTests = META_TESTS_LAYER_ROOTS.reduce(
         (total, tree) => total + filesDirectlyIn(resolve(root, tree), ['.test.ts']),
         0,
     );
     // A `*.specification.ts` builds a runner and asserts nothing.
-    const facetSpecs = COLUMNS.filter((column) => column !== 'module').reduce(
+    const facetSpecs = FACET_MATRIX_COLUMNS.filter((column) => column !== 'module').reduce(
         (total, column) =>
             total +
             countUnder(
@@ -402,7 +402,7 @@ export function layers(root: string): Layer[] {
             count: metaTests,
             judges: 'the corpus itself: the catalogue, the matrix, the skill, the floor',
             layer: 'Meta-tests',
-            where: META_LAYER_ROOTS.map((folder) => `\`${folder}/*.test.ts\``).join(', '),
+            where: META_TESTS_LAYER_ROOTS.map((folder) => `\`${folder}/*.test.ts\``).join(', '),
         },
     ];
 }

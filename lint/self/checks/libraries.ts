@@ -1,5 +1,5 @@
 /** The one statement of library ownership: `one-owner-per-library` holds every import to it, and the layer map grants each folder the libraries listed here. */
-export const LIBRARY_OWNERS: Readonly<Record<string, readonly string[]>> = {
+export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
     '@vitest/browser-playwright': ['src/facets/component/'],
     'better-sqlite3': ['src/world/services/sqlite/'],
@@ -21,7 +21,7 @@ export const LIBRARY_OWNERS: Readonly<Record<string, readonly string[]>> = {
 };
 
 export function librariesOwnedIn(tree: string): string[] {
-    return Object.entries(LIBRARY_OWNERS)
+    return Object.entries(OWNERS_OF_LIBRARIES)
         .filter(([, owners]) => owners.some((owner) => owner.startsWith(tree)))
         .map(([library]) => library);
 }

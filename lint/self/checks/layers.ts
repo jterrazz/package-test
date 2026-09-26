@@ -1,7 +1,7 @@
 import type { LayerOptions } from '../../consumer/rules/architecture/import-within-declared-layers.js';
 import { librariesOwnedIn } from './libraries.js';
 
-/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_PASS_IDS` in `checker.ts`; library ownership is read off `LIBRARY_OWNERS`. */
+/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_CHECKER_PASS_IDS` in `checker.ts`; library ownership is read off `OWNERS_OF_LIBRARIES`. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
