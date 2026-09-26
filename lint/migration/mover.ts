@@ -133,7 +133,7 @@ function migrateSource(text: string, file: string, root: string): string {
 const QUOTES = new Set(["'", '"', '`']);
 
 /** oxlint refuses to start on an override of a rule its plugin no longer defines. */
-const RETIRED_RULES: readonly string[] = [
+export const RETIRED_RULES: readonly string[] = [
     'b2-known-fixture-marker',
     'c13-underscored-ground',
     'c8-referenced-fixture-exists',
