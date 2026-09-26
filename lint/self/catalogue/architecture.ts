@@ -1,7 +1,7 @@
-import type { Family } from '../../consumer/catalogue/families.js';
 import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
+import type { SelfFamily } from './families.js';
 
-type Row = CatalogueRow<Family>;
+type Row = CatalogueRow<SelfFamily>;
 
 export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
     {

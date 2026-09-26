@@ -8,7 +8,6 @@ export const FAMILIES = {
     elements: 'Screens, descriptors and scenarios',
     imports: 'Who imports whom, and protecting production',
     architecture: 'Source layers',
-    catalogue: 'The catalogue holding itself',
 } as const;
 
 export type Family = keyof typeof FAMILIES;

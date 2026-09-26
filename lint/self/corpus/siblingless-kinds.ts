@@ -74,6 +74,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/checks/engines.ts',
             'lint/self/catalogue/manifest.ts',
             'lint/self/catalogue/architecture.ts',
+            'lint/self/catalogue/families.ts',
             'lint/self/corpus/siblingless-kinds.ts',
         ),
         name: 'constant data',

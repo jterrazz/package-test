@@ -22,6 +22,7 @@ import { anchor, spliceCatalogue } from '../../engine/catalogue/chapter.js';
 import { SELF_PASS_IDS } from '../checks/checker.js';
 import selfPlugin, { selfRules } from '../rules/plugin.js';
 import { chapterWithSelfRules } from './chapter.js';
+import { SELF_FAMILIES } from './families.js';
 import {
     allRows,
     META_ROWS,
@@ -400,7 +401,7 @@ describe('manifest', () => {
                 ).toBe(false);
             }
         }
-        for (const [family, title] of Object.entries(FAMILIES)) {
+        for (const [family, title] of Object.entries(SELF_FAMILIES)) {
             for (const token of FRENCH) {
                 expect(
                     carries(title, token),
@@ -640,9 +641,12 @@ describe('manifest', () => {
     test('conventions catalogue — the channels answer for themselves (meta-test) — the four channels that are not code still carry their vocabulary', () => {
         // Given - the rows the manifest holds outside the two rule channels
         // Then - each names a family the catalogue publishes, so the generated chapter has a section to put it in
-        const families = [...UPSTREAM_RULES, ...TYPE_ROWS, ...META_ROWS].map(
-            (row) => FAMILIES[row.family] ?? `${row.name} names no family`,
-        );
+        const families = [
+            ...[...UPSTREAM_RULES, ...TYPE_ROWS].map(
+                (row) => FAMILIES[row.family] ?? `${row.name} names no family`,
+            ),
+            ...META_ROWS.map((row) => SELF_FAMILIES[row.family] ?? `${row.name} names no family`),
+        ];
         expect(families.filter((title) => title.includes('names no family'))).toStrictEqual([]);
     });
 

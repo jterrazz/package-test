@@ -1,4 +1,3 @@
-import type { Family } from '../../consumer/catalogue/families.js';
 import { consumerRows } from '../../consumer/catalogue/manifest.js';
 import { ordered } from '../../engine/catalogue/row.js';
 import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
@@ -7,8 +6,9 @@ import {
     ARCHITECTURE_PASSES,
     ARCHITECTURE_STATIQUE_RULES,
 } from './architecture.js';
+import type { SelfFamily } from './families.js';
 
-type Row = CatalogueRow<Family>;
+type Row = CatalogueRow<SelfFamily>;
 
 /** No published entry imports this module: the published bundles read `consumerRows` alone. */
 
