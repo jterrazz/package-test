@@ -43,7 +43,7 @@ tester.run('no-dom-in-module-test', asOxlintRule(noDomInModuleTest), {
         { code: 'test("x", () => { capture.window; });', filename: MODULE_TEST },
         // A binding of that name is the test's own.
         { code: 'test("x", () => { const document = parse(html); });', filename: MODULE_TEST },
-        // Production code is `no-test-code-in-production`/I4's, never `no-dom-in-module-test`'s.
+        // Production code is for `no-test-code-in-production` and `no-module-mock`, never `no-dom-in-module-test`.
         { code: 'document.title;', filename: '/repo/src/ui/post-client.ts' },
     ],
 });

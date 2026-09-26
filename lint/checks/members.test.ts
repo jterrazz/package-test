@@ -147,7 +147,7 @@ describe('members', () => {
         expect(codes(resolve(WORKSPACE, 'specs'))).toStrictEqual([]);
     });
 
-    test('checker-member — the member pass — what a workspace member owes — a member whose own root is the specs tree is a specs root (`file-suffix-matches-place`/C18/C21w)', () => {
+    test('checker-member — the member pass — what a workspace member owes — a member whose own root is the specs tree is a specs root (`file-suffix-matches-place`, `facet-test-uses-its-runner`, `ground-beside-its-only-reader`)', () => {
         // Given - that member run on its own, the way the toolchain runs it
         const roots = discoverSpecRoots(resolve(WORKSPACE, 'specs'));
 

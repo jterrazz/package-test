@@ -7,7 +7,7 @@ import { it as declareCase, describe as declareSuite } from 'vitest';
 
 import type { LintRule } from './rule.js';
 
-/** A `*.fixtures.ts`: importable only from a test (`fixtures-imported-by-tests-only`), out of `no-test-code-in-production`/I1's reach. */
+/** A `*.fixtures.ts`: importable only from a test (`fixtures-imported-by-tests-only`), out of the reach of `no-test-code-in-production` and `import-within-declared-layers`. */
 
 type OxlintRule = Parameters<RuleTester['run']>[1];
 

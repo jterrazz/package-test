@@ -168,7 +168,7 @@ ruleTester.run('import-within-declared-layers (a declared map)', rule, {
             filename: '/nowhere/lint/rules/some-rule.ts',
             options: framework,
         },
-        // Module tests are exempt (`no-test-code-in-production`/I4 govern them).
+        // Module tests are exempt (`no-test-code-in-production` and `no-module-mock` govern them).
         {
             code: 'import { describe } from "vitest";',
             filename: '/repo/src/model/matching/match.test.ts',

@@ -101,7 +101,7 @@ test('starts clean between specs', async () => {
 
 ### Actions (terminal)
 
-Exactly one per chain (rule `one-terminal-action-per-chain`/B2). Each executes the spec and resolves to the result.
+Exactly one per chain (rule `one-terminal-action-per-chain`). Each executes the spec and resolves to the result.
 
 | Action                                   | Description                                                                           |
 | ---------------------------------------- | ------------------------------------------------------------------------------------- |

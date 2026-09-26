@@ -25,7 +25,7 @@ function isLeftoverContracts(dir: string, inSpecs: boolean): boolean {
     );
 }
 
-/** A tree keeping the 16 names still runs, so nothing else would say so. Anchored on the visited test file, as `request-file-extension-known`/C7/C11 are. */
+/** A tree keeping the 16 names still runs, so nothing else would say so. Anchored on the visited test file, as `request-file-extension-known`, `seeds-are-sql` and `stub-data-has-a-builder` are. */
 export const groundUsesReservedName: LintRule = {
     createOnce(context: Context): Visitor {
         return {

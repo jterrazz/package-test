@@ -84,7 +84,7 @@ ruleTester.run('no-module-mock', noModuleMock as unknown as OxlintRule, {
         { code: 'import { registry } from "@scope/kernel/plugin.registry";', filename: SRC_TEST },
         { code: 'import { schema } from "./user.schema.js";', filename: SRC_TEST },
         { code: 'import { version } from "node:process";', filename: SRC_TEST },
-        // Non-test src files may import what `no-test-code-in-production`/I1 allow — assets are not
+        // Non-test src files may import what `no-test-code-in-production` and `import-within-declared-layers` allow — assets are not
         // checked there (only vi.mock and banned dirs apply).
         {
             code: 'import data from "./payload.json";',
