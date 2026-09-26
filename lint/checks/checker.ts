@@ -35,7 +35,8 @@ import { checkDiskTargetsExist } from './named-path-exists.js';
 import { checkCopiedGround } from './no-duplicate-ground.js';
 import { checkLocalFixtureReach } from './no-reach-into-sibling-ground.js';
 import { checkDeadFixtures } from './no-unused-ground.js';
-import { checkOneSubject, checkSubjectFolder } from './subject.js';
+import { checkOneSubject } from './one-subject-per-spec.js';
+import { checkSubjectFolder } from './spec-in-subject-folder.js';
 
 /** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
 

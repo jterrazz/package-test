@@ -186,6 +186,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/checks/no-unused-ground.ts',
             'lint/checks/repoint.ts',
             'lint/checks/spec-model.ts',
+            'lint/checks/spec-subjects.ts',
             'lint/checks/tree.ts',
             'lint/rules/layout/one-describe-per-file.merge.ts',
             'lint/reading/fs-cache.ts',
