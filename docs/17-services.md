@@ -196,7 +196,7 @@ The handle's `connectionString` is its own isolation's — a postgres worker's d
 
 A redis container's 256 indexes are its own `0` and four per worker, so it serves pool ids 1 to 63 holding four redis services each; a process outside a vitest pool is worker `0` and shares pool id 1's band, since it never runs beside a pool against one project's container. A fifth service in one worker, or a pool id past 63, is refused before it connects, with the way out in the sentence. Two handles of one (worker, service) pair share its index, and the index stays theirs until the last of them releases it.
 
-On top of worker isolation, **every chain resets the databases** (rule `one-terminal-action-per-chain`): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
+On top of worker isolation, **every chain resets the databases** (rule `sequence-expressed-by-seeding`): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
 ## Root auto-discovery
 
@@ -236,7 +236,7 @@ Two more properties fall out of it: the winner builds on a private path and **re
 ## Pitfalls
 
 - **Naming the `init.sql` folder after the raw record key.** The folder is the key's **kebab-case** form: key `analyticsDb` reads `docker/analytics-db/init.sql`, not `docker/analyticsDb/`.
-- **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule `one-terminal-action-per-chain`), and workers are isolated (rule `state-isolated-per-worker`).
+- **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule `sequence-expressed-by-seeding`), and workers are isolated (rule `state-isolated-per-worker`).
 - **Passing `root` that auto-discovery would have found.** Redundant override (rule `no-redundant-root`).
 - **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached across runs, so a checkout that built it once never re-runs `db push` — a schema path that would fail on a fresh clone (or in CI) stays invisible. Delete `.artifacts/vitest/sqlite/` to test the cold path.
 - **Counting `sqlite()` + `redis()` as "2 databases" for rule `database-named-only-when-several`.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule `service-urls-injected`).

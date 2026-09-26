@@ -26,7 +26,7 @@ Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
 ```
 
-Stream comparisons strip ANSI escape sequences **before** token matching (rule `no-transform-duplicating-tokens`), so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
+Stream comparisons strip ANSI escape sequences **before** token matching, so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
 
 ## The vocabulary — all 21 tokens
 
@@ -92,7 +92,7 @@ Every token matches one value of its family at its position. The normative defin
 
 ## `#ref` captures
 
-Any token becomes a capture by suffixing `#name`: `{{uuid#order}}`. The **first occurrence captures** the actual value; every subsequent occurrence of the same ref **must be equal** (rule `no-unknown-token`). Refs are scoped to the current spec — one namespace shared by all fixture files and code-side `match.ref()` within that spec, resetting between specs.
+Any token becomes a capture by suffixing `#name`: `{{uuid#order}}`. The **first occurrence captures** the actual value; every subsequent occurrence of the same ref **must be equal**. Refs are scoped to the current spec — one namespace shared by all fixture files and code-side `match.ref()` within that spec, resetting between specs.
 
 ```http
 ### expected/order-created.http — {{uuid#order}} appears 3 times → all must be equal

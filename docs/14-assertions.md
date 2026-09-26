@@ -8,7 +8,7 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 
 ### Sync vs async
 
-`await expect(…)` is used **only** for matchers that perform IO, and this table is the whole list — the types say the same thing, so a mistaken `await` is a toolchain error (`typescript(await-thenable)`) in a consumer and a missed one is an assertion that never runs:
+`await expect(…)` is used **only** for matchers that perform IO, and this table is the whole list — the types say the same thing, so a mistaken `await` is a toolchain error (`typescript/await-thenable`) in a consumer and a missed one is an assertion that never runs:
 
 | IO matcher subjects                                                    | Why                                  |
 | ---------------------------------------------------------------------- | ------------------------------------ |
@@ -47,7 +47,7 @@ expect(result.stdout).toMatch(file('./expected/help.txt'));
 
 A text written in place that opens on a line break is read without it, without the whitespace of its closing line, and without the indentation its lines share — a block indents with the test around it. The `{{token}}` grammar and `match.*` apply to a value in place exactly as to a file, and a mismatch prints the diff the same file would. A string handed a stream is a whole text, never vitest's substring: a RegExp matches a part, and on a result subject it does not compile — past the compiler it is refused, naming the form that takes it, `expect(result.stdout.text).toMatch(/built/)`. On a plain string — `result.stdout.text` is one — `toMatch`, `toBe` and `toContain` are vitest's, untouched.
 
-The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule `paths-named-in-the-test`); the type refuses a bare string where a file is meant (rule `disk-named-by-relative-path-at-runtime`):
+The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule `paths-named-in-the-test`); the type refuses a bare string where a file is meant (rule `disk-named-by-relative-path`):
 
 - `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule `golden-path-has-extension`); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule `golden-path-creates-folders`).
 - `toMatch(directory('./expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
@@ -133,7 +133,7 @@ A failing table `toMatch` prints the expected grid against the actual rows, ever
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 
-Streams are compared **after ANSI stripping** (rule `no-transform-duplicating-tokens`): `.text` is that comparable text, `.raw` the capture as it was.
+Streams are compared **after ANSI stripping** ([15 § Where tokens work](15-tokens.md#where-tokens-work)): `.text` is that comparable text, `.raw` the capture as it was.
 
 | Matcher                    | Sync/async | Example                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------- |
@@ -298,7 +298,7 @@ const id: number = required(body.id, 'the creation reply carries the new id');
 
 `null` and `undefined` are the only values it refuses: `0`, `''` and `false` are present, and go through.
 
-**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule `no-sleep` refuses `setTimeout` under `specs/`. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
+**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule `no-sleep` refuses a sleep in any test file. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
 
 ```typescript
 import { waitUntil } from '@jterrazz/test';
@@ -330,11 +330,11 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 - **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-read-only`). Write `expect(result.stdout.text).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule `io-matcher-awaited`).
-- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract `io-matcher-awaited` states and the types carry.
+- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is the toolchain error [above](#sync-vs-async). The sync/async split is the contract `io-matcher-awaited` states and the types carry.
 - **`file('./expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./expected/help/')`.
 - **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule `one-verb-per-meaning`).
-- **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule `disk-named-by-relative-path`).
-- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule `no-transform-duplicating-tokens`) — and a substring check on it warns (`no-raw-bypass`).
+- **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rules `disk-named-by-relative-path`, `disk-named-by-relative-path-at-runtime`).
+- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([15 § Where tokens work](15-tokens.md#where-tokens-work)) — and a substring check on it warns (`no-raw-bypass`).
 - **`database:` on a single-database project** (or missing on a multi-database one) — [17 § The `database:` rule (`database-named-only-when-several`)](17-services.md#the-database-rule).
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
 - **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [15 § Frozen fixtures](15-tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).

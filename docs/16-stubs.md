@@ -134,7 +134,7 @@ specs/<facet>/<feature>/
         └── draft-reply.ts
 ```
 
-The rules, enforced by [`stubs-root-holds-facades-and-kinds`, `stubs-imported-through-facade` and `stub-data-has-a-builder`](19-linting.md):
+The rules, enforced by [`stubs-root-holds-facades-and-kinds`](19-linting.md#stubs-root-holds-facades-and-kinds), [`stubs-imported-through-facade`](19-linting.md#stubs-imported-through-facade) and [`stub-data-has-a-builder`](19-linting.md#stub-data-has-a-builder):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
 - A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.

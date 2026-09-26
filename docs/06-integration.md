@@ -59,7 +59,7 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule `n
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `disk-named-by-relative-path`).
+Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
 
 | Setup                             | Means                                                                                                  |
 | --------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -178,7 +178,7 @@ specs/integration/
 
 - **Reaching for `try`/`catch`.** A thrown error is `result.error`. A `try` around `.call()` brings back the shape where a spec passes because nothing threw.
 - **Writing a module test here.** A module alone, with no service and no golden, belongs beside its code as `<file>.test.ts` (rule `test-beside-its-module`). The folder is not a home for tests that were hard to place.
-- **Goldening a volatile value.** An id, a timestamp or a duration inside `result.value` is tokened (`{{int}}`, `{{iso8601}}`), or pinned with `.clock()`. A literal that moves is a test that fails tomorrow (rule `no-sampled-value-in-expectation`).
+- **Goldening a volatile value.** An id, a timestamp or a duration inside `result.value` is tokened (`{{int}}`, `{{iso8601}}`), or pinned with `.clock()`. A literal that moves is a test that fails tomorrow (rule `no-volatile-literal`).
 - **Asserting on a double.** The facet exists so the subject meets the real thing. A `mockOf<T>()` inside `.call()` is a module test that started a container for nothing.
 
 ## Related

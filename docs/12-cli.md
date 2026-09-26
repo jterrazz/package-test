@@ -40,7 +40,7 @@ afterAll(cleanup);
 
 ### `.exec()` — the single execution method
 
-`.exec(args?, options?)` is the **only** way to run the binary — there is no `.spawn()` (rule `disk-named-by-relative-path`). It covers short commands, long-running processes, and sequences. Called with **no arguments**, the binary runs bare (no CLI args) — clearer than the `.exec('')` idiom:
+`.exec(args?, options?)` is the **only** way to run the binary — there is no `.spawn()`. It covers short commands, long-running processes, and sequences. Called with **no arguments**, the binary runs bare (no CLI args) — clearer than the `.exec('')` idiom:
 
 ```typescript
 const result = await cli.exec(); // invoke the binary with no arguments
@@ -115,12 +115,12 @@ A fixture is named by `file()` or `directory()`, with its path from the spec fil
 
 A directory's path ends in `/`, and the type refuses one that does not; a `file()` that names a directory on disk, or a `directory()` that names a file, is refused with the form to write (rule `disk-named-by-relative-path-at-runtime`). A command that expects the project one level down gets a fixture tree shaped that way: `./fixtures/nested/shop/…`, spread. The shared pool is `specs/shared/fixtures/`, and a spec reaches it by the path that climbs to it — nothing hides behind a marker. Chained fixtures **layer** in order — a later one overwrites files from an earlier one.
 
-| Setup                                                     | Effect on the cwd                                                                                    |
-| --------------------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| _(nothing)_                                               | Empty directory                                                                                      |
-| `.fixture(directory('../../shared/fixtures/base-shop/'))` | Spread a whole shared project into the cwd                                                           |
-| `.fixture(file('./fixtures/config.toml'))`                | Copy the leaf's own `fixtures/config.toml` into the cwd                                              |
-| `.seed(file('./seeds/users.sql'))`                        | SQL into a service database (rule `database-named-only-when-several` governs the `database:` option) |
+| Setup                                                     | Effect on the cwd                                                                                                   |
+| --------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| _(nothing)_                                               | Empty directory                                                                                                     |
+| `.fixture(directory('../../shared/fixtures/base-shop/'))` | Spread a whole shared project into the cwd                                                                          |
+| `.fixture(file('./fixtures/config.toml'))`                | Copy the leaf's own `fixtures/config.toml` into the cwd                                                             |
+| `.seed(file('./seeds/users.sql'))`                        | SQL into a service database (the `database:` option: [17 § The `database:` rule](17-services.md#the-database-rule)) |
 
 ```typescript
 test('scaffolds a new shop', async () => {
@@ -348,7 +348,7 @@ test('lints a shop and reports per-file blocks', async () => {
 });
 ```
 
-`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison (rule `no-transform-duplicating-tokens`): `.text` is that comparable text — the runner's `transform` applied too — and `.raw` the capture as it was. Text operations are **closed** over the type: `.grep(pattern)` cuts the blank-line-separated blocks of the capture, its colour codes stripped and BEFORE the transform — so a pattern the transform removes still finds its block — and returns a `TextAccessor` (not a string) whose `.text` reads through the same transform, so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
+`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison ([15 § Where tokens work](15-tokens.md#where-tokens-work)): `.text` is that comparable text — the runner's `transform` applied too — and `.raw` the capture as it was. Text operations are **closed** over the type: `.grep(pattern)` cuts the blank-line-separated blocks of the capture, its colour codes stripped and BEFORE the transform — so a pattern the transform removes still finds its block — and returns a `TextAccessor` (not a string) whose `.text` reads through the same transform, so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
 
 **Tool output → snapshot per scoped use case (rule `output-asserted-as-a-golden`).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch(file('./expected/<use-case>.txt'))` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
 
@@ -448,7 +448,7 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 
 ## Pitfalls
 
-- **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method (rule `disk-named-by-relative-path`).
+- **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method.
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `expected/*.txt` — `transform` is a last resort (rule `no-transform-duplicating-tokens`).
 - **Assigning a Docker-aware result without `await using`.** Error (rule `docker-exec-bound-with-await-using`) — that is the leak-cleanup mechanism.
 - **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule `service-urls-injected`'s auto-injection, and [`no-redundant-service-url`](19-linting.md#no-redundant-service-url) warns — override only to _change_ it, `null` to remove it.

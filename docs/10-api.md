@@ -66,14 +66,14 @@ Without `root`, the framework finds the package being tested by walking up from 
 | Setup                                           | Description                                                                                                                                                              |
 | ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file — beside the test that reads it, or at the level of the tests that share it (rule `ground-shared-or-inline`) |
-| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule `database-named-only-when-several`)                                       |
+| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — [17 § The `database:` rule](17-services.md#the-database-rule)                                                                      |
 | `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                                                                |
 | `.intercept(stub)`                              | Mock an outgoing HTTP call with a declared [stub](16-stubs.md)                                                                                                           |
 | `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                                                                       |
 | `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths))                                          |
 | `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))                                                |
 
-Stubs are **strict** (rule `network-strict-after-first-stub`): once a chain declares one, every outgoing request must match a declared, non-exhausted stub or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [stubs](16-stubs.md#strict-by-construction)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
+Stubs are **strict** (rule `network-strict-after-first-stub`): once a chain declares one, an outgoing request no stub answers fails the spec ([16 § Strict by construction](16-stubs.md#strict-by-construction)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {
@@ -147,7 +147,7 @@ Accept-Language: fr
 
 Format rules:
 
-- First line: `METHOD /path` — the file must start with it (rule `request-file-extension-known`). The path is relative to the app under test.
+- First line: `METHOD /path` — the file must start with it (rule `http-first-line-follows-its-grammar`). The path is relative to the app under test.
 - Header lines: `Name: value`, one per line, immediately after the request line.
 - Blank line, then the body (optional — a GET usually has none).
 - Executed with `api.request(file('./requests/create-user.http'))` — the argument is the file's path from the spec file, spelled in full; the type refuses a bare name (rule `disk-named-by-relative-path`).
@@ -259,7 +259,7 @@ test('links the analytics event to the created order', async () => {
 });
 ```
 
-> This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule `database-named-only-when-several`). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
+> This project declares two databases, so every `.seed()` and `.table()` names one ([17 § The `database:` rule](17-services.md#the-database-rule)).
 
 ### A case, written whole
 
@@ -340,10 +340,10 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Pitfalls
 
-- **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule `database-named-only-when-several`).
+- **Getting `database:` wrong for the number of databases** — [17 § The `database:` rule](17-services.md#the-database-rule).
 - **Expecting unlisted response headers to be constrained.** Response `expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
 - **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
-- **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule `network-strict-after-first-stub`).
+- **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an outgoing request no stub answers fails the spec ([16 § Strict by construction](16-stubs.md#strict-by-construction)).
 - **Putting the request body in the test file when it has any substance.** Requests of more than a line or two belong in `requests/*.http` — inline `.post()` is for trivial cases.
 
 ## Related

@@ -41,7 +41,7 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `disk-named-by-relative-path`). No `.headers()` — there is no request.
+Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
@@ -70,7 +70,7 @@ describe('pipeline', () => {
 
 Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](16-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, any outgoing request that matches nothing — including one whose matching stubs are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [stubs](16-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, an outgoing request no stub answers fails the spec ([16 § Strict by construction](16-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
 
 ### Seeding and sequences for pipelines
 
@@ -104,7 +104,7 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 | --------------------------- | ---------------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject, compared whole — `toMatch(<rows>)` / `toBeEmpty()`, `await`ed |
 
-With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule `database-named-only-when-several`). See the [assertions reference](14-assertions.md).
+Whether `.seed()` and `.table()` name a database is [17 § The `database:` rule](17-services.md#the-database-rule).
 
 ## Unique here
 
