@@ -8,8 +8,9 @@ import { GROUND_SEEDS } from '../../src/kernel/files/ground.js';
 import { isInside, kebabName, literalSpans, titleAround } from '../reading/spec-values.js';
 import { skipString, withoutComments } from '../reading/subject.js';
 import type { TokenViolation } from './checker.js';
-import { findSpecsRoots, listFiles, suppressedLines } from './crossfile.js';
 import { importsFromEntry, withEntryImport, withoutEntryImport } from './entry-import.js';
+import { suppressedLines } from './suppression.js';
+import { findSpecsRoots, listFiles } from './tree.js';
 
 /** The seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, … */
 

@@ -3,7 +3,8 @@ import { dirname, join, relative, sep } from 'node:path';
 
 import { SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import type { TokenViolation } from '../../checks/checker.js';
-import { listFiles, suppressedLines } from '../../checks/crossfile.js';
+import { suppressedLines } from '../../checks/suppression.js';
+import { listFiles } from '../../checks/tree.js';
 import { specimenOf } from '../../reading/specimen.js';
 import { COLUMNS } from '../corpus/facet-matrix.js';
 import { capabilityFolders } from '../corpus/matrix.js';

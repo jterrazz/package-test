@@ -1,11 +1,9 @@
 import { describe, expect, test } from 'vitest';
 
-import { suppressedLines } from './crossfile.js';
+import { suppressedLines } from './suppression.js';
 
-// The cross-file passes read whole trees off disk, so they are specified in `specs/lint/checker/`; this file holds the suppression mechanism, on source strings.
-
-describe('crossfile', () => {
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
+describe('suppressedLines', () => {
+    test('checker-disable comments — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
         // Given - a directive with a blank line before the real statement
         const text = [
             '// checker-disable-next-line database-named-only-when-several -- reason',
@@ -19,7 +17,7 @@ describe('crossfile', () => {
         );
     });
 
-    test("checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — disable-next-line steps over another tool's directive to the line of code", () => {
+    test("checker-disable comments — disable-next-line steps over another tool's directive to the line of code", () => {
         // Given - a checker directive above an oxlint one, both claiming the next line
         const text = [
             '// checker-disable-next-line named-path-exists -- reason',
@@ -31,7 +29,7 @@ describe('crossfile', () => {
         expect(suppressedLines(text, 'named-path-exists')).toStrictEqual(new Set([3]));
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — disable-line suppresses its OWN line', () => {
+    test('checker-disable comments — disable-line suppresses its OWN line', () => {
         // Given - a same-line directive
         const text = [
             'const a = 1;',
@@ -44,7 +42,7 @@ describe('crossfile', () => {
         );
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — a comma/space-separated id list suppresses each listed pass', () => {
+    test('checker-disable comments — a comma/space-separated id list suppresses each listed pass', () => {
         // Given - a directive naming two passes
         const text = [
             '// checker-disable-next-line database-named-only-when-several, docker-exec-bound-with-await-using -- reason',
@@ -61,7 +59,7 @@ describe('crossfile', () => {
         expect(suppressedLines(text, 'no-unused-ground')).toStrictEqual(new Set());
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — the wildcard `*` suppresses every pass', () => {
+    test('checker-disable comments — the wildcard `*` suppresses every pass', () => {
         // Given - a wildcard directive
         const text = ['// checker-disable-next-line * -- blanket', 'code();'].join('\n');
 
@@ -72,7 +70,7 @@ describe('crossfile', () => {
         expect(suppressedLines(text, 'no-unused-ground')).toStrictEqual(new Set([2]));
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — a directive naming a different pass does not suppress the queried one', () => {
+    test('checker-disable comments — a directive naming a different pass does not suppress the queried one', () => {
         // Given - a directive naming `docker-exec-bound-with-await-using` alone
         const text = [
             '// checker-disable-next-line docker-exec-bound-with-await-using -- reason',
@@ -83,7 +81,7 @@ describe('crossfile', () => {
         expect(suppressedLines(text, 'database-named-only-when-several')).toStrictEqual(new Set());
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — the trailing `-- reason` is stripped before matching ids (reason words are not ids)', () => {
+    test('checker-disable comments — the trailing `-- reason` is stripped before matching ids (reason words are not ids)', () => {
         // Given - a reason that contains the queried id as a plain word
         const text = [
             '// checker-disable-next-line docker-exec-bound-with-await-using -- database-named-only-when-several is unrelated here',
@@ -97,7 +95,7 @@ describe('crossfile', () => {
         );
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — matching is case-insensitive (the formatter capitalizes comment leads)', () => {
+    test('checker-disable comments — matching is case-insensitive (the formatter capitalizes comment leads)', () => {
         // Given - a formatter-capitalized directive
         const text = [
             '// Checker-disable-next-line database-named-only-when-several -- reason',
@@ -110,7 +108,7 @@ describe('crossfile', () => {
         );
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — source with no directive suppresses nothing', () => {
+    test('checker-disable comments — source with no directive suppresses nothing', () => {
         // Given - plain code
         const text = ['api.seed("x.sql");', 'api.table("t");'].join('\n');
 
@@ -118,7 +116,7 @@ describe('crossfile', () => {
         expect(suppressedLines(text, 'database-named-only-when-several')).toStrictEqual(new Set());
     });
 
-    test('checker-crossfile — checker suppression — suppressedLines (checker-disable comments) — a trailing directive with no following non-blank line suppresses nothing', () => {
+    test('checker-disable comments — a trailing directive with no following non-blank line suppresses nothing', () => {
         // Given - a disable-next-line as the very last line
         const text = [
             'code();',

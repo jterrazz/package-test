@@ -3,7 +3,7 @@ import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
-import { repointSource } from '../checks/crossfile.js';
+import { repointSource } from '../checks/repoint.js';
 
 /** 16 called a declared reply a contract, 17 calls it a stub. Outside a `specs/` tree only a folder holding a `*.contracts.ts` facade moves, since a product may name a folder `contracts/`; each file is judged on its own text, so a second run finds nothing to do. */
 

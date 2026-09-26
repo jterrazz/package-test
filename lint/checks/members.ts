@@ -7,8 +7,8 @@ import { isGroundName } from '../../src/kernel/files/ground.js';
 import { moduleTestsOf } from '../reading/module-tests.js';
 import { isTestFileName } from '../reading/role.js';
 import type { TokenViolation } from './checker.js';
-import { diskTargetFindings } from './crossfile.js';
 import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
+import { diskTargetFindings } from './named-path-exists.js';
 
 /** The toolchain's bound, to the segment. */
 const MEMBER_DEPTH = 6;

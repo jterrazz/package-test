@@ -31,11 +31,12 @@ import {
     TREE_PASS_IDS,
 } from './checker.js';
 import type { TokenViolation } from './checker.js';
-import { fixCopiedGround, fixRootGround } from './crossfile.js';
 import { fixSpecFiles } from './documents.js';
 import { movesUnderFacet } from './file-suffix-matches-place.js';
 import { fixGroundSharing } from './ground-shared-or-inline.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
+import { fixCopiedGround } from './no-duplicate-ground.js';
+import { fixRootGround } from './no-reach-into-sibling-ground.js';
 import { fixSubjects } from './subject.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */

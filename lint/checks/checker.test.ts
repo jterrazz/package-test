@@ -13,8 +13,8 @@ import {
     formatViolations,
     runAllChecks,
 } from './checker.js';
-import { fixPoolFixtures } from './crossfile.js';
 import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
+import { fixPoolFixtures } from './ground-shared-or-inline.pool.js';
 import { readManifest } from './members.js';
 
 const FIXTURES = resolve(import.meta.dirname, '../../specs/lint/checker/fixtures/lint-violations');

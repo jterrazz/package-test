@@ -18,15 +18,9 @@ import {
 } from '../../src/kernel/files/ground.js';
 import { lessonOf } from '../catalogue/lesson.js';
 import type { Teaching } from '../catalogue/lesson.js';
-import {
-    checkCopiedGround,
-    checkDatabaseProperty,
-    checkDeadFixtures,
-    checkDiskTargetsExist,
-    checkDockerRunnerAwaitUsing,
-    checkLocalFixtureReach,
-    checkSuppressionReason,
-} from './crossfile.js';
+import { checkSuppressionReason } from './checker-suppression-states-a-reason.js';
+import { checkDatabaseProperty } from './database-named-only-when-several.js';
+import { checkDockerRunnerAwaitUsing } from './docker-exec-bound-with-await-using.js';
 import {
     checkSpecConventions,
     checkSpecDescriptionsUnique,
@@ -35,6 +29,10 @@ import {
 import { checkFacetFolder, checkGroundOwnedByOne, checkModuleTestUnderFacet } from './facets.js';
 import { checkTestUnderFacet } from './file-suffix-matches-place.js';
 import { checkGroundSharing } from './ground-shared-or-inline.js';
+import { checkDiskTargetsExist } from './named-path-exists.js';
+import { checkCopiedGround } from './no-duplicate-ground.js';
+import { checkLocalFixtureReach } from './no-reach-into-sibling-ground.js';
+import { checkDeadFixtures } from './no-unused-ground.js';
 import { checkOneSubject, checkSubjectFolder } from './subject.js';
 
 /** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */

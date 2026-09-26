@@ -10,17 +10,15 @@ import { isInside, literalSpans, nameAround } from '../reading/spec-values.js';
 import type { Span } from '../reading/spec-values.js';
 import { closingOf, literalEnd, withoutComments } from '../reading/subject.js';
 import type { TokenViolation } from './checker.js';
-import {
-    blankComments,
-    checkPoolFixtureSharing,
-    findSpecsRoots,
-    fixPoolFixtures,
-    listFiles,
-    pathsModuleTestsName,
-    suppressedLines,
-} from './crossfile.js';
 import { withEntryImport, withoutEntryImport } from './entry-import.js';
+import {
+    checkPoolFixtureSharing,
+    fixPoolFixtures,
+    pathsModuleTestsName,
+} from './ground-shared-or-inline.pool.js';
 import { checkInlineSeeds, fixInlineSeeds } from './ground-shared-or-inline.seeds.js';
+import { suppressedLines } from './suppression.js';
+import { blankComments, findSpecsRoots, listFiles } from './tree.js';
 
 /** A role absent here is never written in place. */
 export const INLINE_CAPS: Readonly<Record<string, number>> = {

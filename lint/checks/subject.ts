@@ -25,7 +25,9 @@ import {
 import type { Subject, SubjectReading } from '../reading/subject.js';
 import { testSettingsAt } from '../reading/test-settings.js';
 import type { TokenViolation } from './checker.js';
-import { listFiles, repointModuleTests, suppressedLines } from './crossfile.js';
+import { repointModuleTests } from './repoint.js';
+import { suppressedLines } from './suppression.js';
+import { listFiles } from './tree.js';
 
 /** A spec of a specimen (`lint/reading/specimen.ts`) is out of reach: it is filed by the capability it specifies. Every move keeps each path the code names pointing where it pointed. */
 

@@ -9,8 +9,8 @@ import {
     RENAMED_GROUND_DIRS,
     SHARED_GROUND,
 } from '../../src/kernel/files/ground.js';
-import { repointModuleTests } from '../checks/crossfile.js';
 import { entryFor, mergedIntoEntry, pathFrom, withImport } from '../checks/entry-import.js';
+import { repointModuleTests } from '../checks/repoint.js';
 import { isTestFileName } from '../reading/role.js';
 import { PASS_NAMES, RULE_NAMES } from './names.js';
 import { migrateStubs } from './stubs.js';

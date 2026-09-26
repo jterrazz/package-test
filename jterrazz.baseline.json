@@ -1,6 +1,6 @@
 {
     "typescript": {
-        "comments/no-prose-comment-line": 2584,
+        "comments/no-prose-comment-line": 2582,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 27,
         "eslint/max-classes-per-file": 1,
