@@ -21,11 +21,8 @@ import type { Teaching } from '../catalogue/lesson.js';
 import { checkSuppressionReason } from './checker-suppression-states-a-reason.js';
 import { checkDatabaseProperty } from './database-named-only-when-several.js';
 import { checkDockerRunnerAwaitUsing } from './docker-exec-bound-with-await-using.js';
-import {
-    checkSpecConventions,
-    checkSpecDescriptionsUnique,
-    volatileLiteralIn,
-} from './documents.js';
+import { checkSpecDescriptionsUnique } from './document-description-unique.js';
+import { checkSpecConventions } from './documents.js';
 import { checkFacetFolder } from './facet-folder-has-specification.js';
 import { checkModuleTestUnderFacet } from './facet-test-uses-its-runner.js';
 import { checkTestUnderFacet } from './file-suffix-matches-place.js';
@@ -35,6 +32,7 @@ import { checkDiskTargetsExist } from './named-path-exists.js';
 import { checkCopiedGround } from './no-duplicate-ground.js';
 import { checkLocalFixtureReach } from './no-reach-into-sibling-ground.js';
 import { checkDeadFixtures } from './no-unused-ground.js';
+import { volatileLiteralIn } from './no-volatile-literal.js';
 import { checkOneSubject } from './one-subject-per-spec.js';
 import { checkSubjectFolder } from './spec-in-subject-folder.js';
 

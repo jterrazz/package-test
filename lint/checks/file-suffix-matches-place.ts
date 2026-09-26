@@ -1,11 +1,14 @@
 import { readFileSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { basename, dirname, join, relative } from 'node:path';
 
+import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js';
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
 import { isUnderSpecs } from '../reading/ast.js';
 import { FACETS, reachesRunner } from '../reading/facets.js';
 import type { TokenViolation } from './checker.js';
+import { finding } from './document-model.js';
+import type { Finding } from './document-model.js';
 
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
@@ -127,4 +130,42 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         });
     }
     return moves;
+}
+
+const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
+
+const REDUNDANT_WORDS = new Set(['cli', 'spec', 'test']);
+
+export function checkFileName(rel: string): Finding[] {
+    const name = basename(rel);
+    const caseName = name.slice(0, -SPEC_EXTENSION.length);
+    const findings: Finding[] = [];
+    if (!KEBAB.test(caseName)) {
+        findings.push(
+            finding('file-suffix-matches-place', 1, {
+                fix: `rename it in kebab-case — lowercase words joined by single hyphens, \`<case>${SPEC_EXTENSION}\``,
+                found: `"${name}" is not kebab-case`,
+            }),
+        );
+        return findings;
+    }
+    const redundant = caseName.split('-').filter((word) => REDUNDANT_WORDS.has(word));
+    if (redundant.length > 0) {
+        findings.push(
+            finding('file-suffix-matches-place', 1, {
+                fix: `drop "${redundant[0]}" from the name and name the case it proves`,
+                found: `"${name}" repeats "${redundant[0]}", which the \`${SPEC_EXTENSION}\` suffix already says`,
+            }),
+        );
+    }
+    const folder = basename(dirname(rel));
+    if (caseName === folder) {
+        findings.push(
+            finding('file-suffix-matches-place', 1, {
+                fix: 'name it for what this case proves, not where it sits',
+                found: `"${name}" repeats its directory "${folder}/"`,
+            }),
+        );
+    }
+    return findings;
 }

@@ -5,7 +5,7 @@ import { fixSpecDocument } from './documents.js';
 /** The passes themselves are proven end to end in `specs/lint/checker/`, against the real binary. */
 
 describe('documents', () => {
-    test('checker-spec — fixSpecDocument — key order and block scalars — moves the keys back into the canonical order, each with its comment', () => {
+    test('fixSpecDocument — key order and block scalars — moves the keys back into the canonical order, each with its comment', () => {
         // Given - a document whose runs sit above its description, and whose exit follows its stdout
         const source = [
             '# the comment above runs',
@@ -33,7 +33,7 @@ describe('documents', () => {
         );
     });
 
-    test('checker-spec — fixSpecDocument — key order and block scalars — re-styles a quoted stream as a block scalar, keeping its bytes', () => {
+    test('fixSpecDocument — key order and block scalars — re-styles a quoted stream as a block scalar, keeping its bytes', () => {
         // Given - a golden written as a one-line quoted string
         const source =
             'description: builds the widget\nruns:\n    - command: b\n      exit: 0\n      stdout: "Built.\\nDone.\\n"\n';
@@ -44,7 +44,7 @@ describe('documents', () => {
         );
     });
 
-    test('checker-spec — fixSpecDocument — key order and block scalars — a document already holding both conventions is left untouched', () => {
+    test('fixSpecDocument — key order and block scalars — a document already holding both conventions is left untouched', () => {
         // Given - a canonical document
         const source =
             'description: builds the widget\nruns:\n    - command: b\n      exit: 0\n      stdout: |\n          Built.\n';
@@ -53,7 +53,7 @@ describe('documents', () => {
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
     });
 
-    test('checker-spec — fixSpecDocument — key order and block scalars — a document the repository formatter already styled is left untouched', () => {
+    test('fixSpecDocument — key order and block scalars — a document the repository formatter already styled is left untouched', () => {
         // Given - canonical keys and block scalars, with the flow collections spelled as oxfmt spells them: a padded mapping, an unpadded sequence, and a long one broken over lines
         const source = [
             '# the ground of the case',
@@ -77,7 +77,7 @@ describe('documents', () => {
         expect(fixSpecDocument(source, 'case.spec.yaml')).toBeNull();
     });
 
-    test('checker-spec — fixSpecDocument — key order and block scalars — a document the grammar refuses is never rewritten', () => {
+    test('fixSpecDocument — key order and block scalars — a document the grammar refuses is never rewritten', () => {
         // Given - a file that is not a spec document at all
         // Then - the fixer declines; document-follows-its-grammar is what reports it
         expect(fixSpecDocument('- just\n- a list\n', 'case.spec.yaml')).toBeNull();
