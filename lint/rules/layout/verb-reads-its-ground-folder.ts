@@ -15,10 +15,10 @@ import {
     identifierName,
     memberPropertyName,
 } from '../../reading/ast.js';
-import type { AstNode, DiskCall } from '../../reading/ast.js';
+import type { AstNode, DiskCall, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `fixtures/`. */
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {

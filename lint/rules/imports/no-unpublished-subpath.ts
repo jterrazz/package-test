@@ -2,8 +2,9 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
+import type { Visitor } from '../../reading/ast.js';
 import { declaredSubpaths } from '../../reading/package-exports.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const PACKAGE = '@jterrazz/test';
 

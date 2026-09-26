@@ -2,8 +2,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { memberPropertyName, propertyKeyName } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
 

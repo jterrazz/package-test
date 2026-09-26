@@ -2,10 +2,10 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { goldenOf } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** A tree is `toMatch(directory(…))`, whose path ends in `/`: out of reach. */
 export const goldenPathHasExtension: LintRule = {

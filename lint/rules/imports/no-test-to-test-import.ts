@@ -2,7 +2,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const TEST_IMPORT = /\.test(?:\.[cm]?[jt]sx?)?$/u;

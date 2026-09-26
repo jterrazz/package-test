@@ -3,8 +3,9 @@ import type { Context } from '@oxlint/plugins';
 import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
+import type { Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const INTERNAL_UNIT = new RegExp(`(?:^|/)stubs/(?:${STUB_KINDS.join('|')})/`, 'u');
 

@@ -2,10 +2,10 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, childList, identifierName, memberPath, walk } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const BUILDERS = new Set(['beforeAll', 'beforeEach']);
 

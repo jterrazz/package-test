@@ -2,11 +2,12 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
+import type { Visitor } from '../../reading/ast.js';
 import { isDirectory } from '../../reading/fs-cache.js';
 import { isProductionFile } from '../../reading/linted-file.js';
 import { moduleReferenceVisitor } from '../../reading/production.js';
 import { projectRootOf, projectSegments } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 export type LayerOptions = {
     /** Each key a direct child folder of the layer, its value the packages that folder may import. */

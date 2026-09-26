@@ -8,8 +8,8 @@ import {
     specificationMember,
     stringValue,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(
     `^\\{\\{(?:${TOKEN_KINDS.join('|')})(?:#[\\w.-]+)?\\}\\}$`,

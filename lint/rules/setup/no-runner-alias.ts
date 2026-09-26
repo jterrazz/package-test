@@ -2,8 +2,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { propertyKeyName, specificationMember } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     let current = node;

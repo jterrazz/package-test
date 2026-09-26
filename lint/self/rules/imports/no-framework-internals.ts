@@ -2,8 +2,9 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessonsAt } from '../../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../../reading/ast.js';
+import type { Visitor } from '../../../reading/ast.js';
 import { specsAnchorOf } from '../../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../../../rules/rule.js';
+import type { LintRule } from '../../../rules/rule.js';
 import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
 
 /** These segment names are the framework's layers in this repository alone; a spec importing its own app (`../../src/app.js`) names none of them. */

@@ -12,9 +12,9 @@ import {
     memberPath,
     walk,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const DOUBLE_FACTORIES = new Set(['mockOf', 'vi.fn', 'vi.spyOn']);
 

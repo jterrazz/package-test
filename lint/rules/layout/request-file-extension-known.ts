@@ -3,11 +3,11 @@ import { dirname, extname, join } from 'node:path';
 
 import { GROUND_REQUESTS } from '../../../src/kernel/files/ground.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { isDirectory, listDirectory } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** Anchored on the visited test file: its sibling `requests/` is probed, and a file with no extension is reported there. */
 export const requestFileExtensionKnown: LintRule = {

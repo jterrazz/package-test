@@ -2,9 +2,10 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
+import type { Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import type { FileRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** A group's message is its fix: a ban with no destination is an argument. */
 type Group = {

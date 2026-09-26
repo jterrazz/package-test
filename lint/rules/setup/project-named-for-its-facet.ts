@@ -1,11 +1,11 @@
 import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { collectedSegments, facetOfSegments, projectLiterals } from '../../reading/config-shape.js';
 import { FACETS } from '../../reading/facets.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** Read from the glob and the config's place in its package, never the absolute path: a checkout under a folder called `specs` collects nothing of the kind. */
 export const projectNamedForItsFacet: LintRule = {

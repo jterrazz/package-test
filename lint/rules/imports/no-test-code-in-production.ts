@@ -2,6 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, relative } from 'node:path';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
+import type { Visitor } from '../../reading/ast.js';
 import { isProductionFile } from '../../reading/linted-file.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../reading/path-references.js';
 import {
@@ -11,7 +12,7 @@ import {
     moduleReferenceVisitor,
     reachOf,
 } from '../../reading/production.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** This repository's runner coupling (`import-within-declared-layers`) turns the rule off by path in its own oxlint config. */
 export const noTestCodeInProduction: LintRule = {

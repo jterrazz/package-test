@@ -8,10 +8,10 @@ import {
     importSourceVisitor,
     stringValue,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf, segmentsOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 

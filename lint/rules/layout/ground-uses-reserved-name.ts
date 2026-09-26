@@ -7,10 +7,10 @@ import {
     SHARED_GROUND,
 } from '../../../src/kernel/files/ground.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { isDirectory, listDirectory } from '../../reading/fs-cache.js';
 import { specsAnchorOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 

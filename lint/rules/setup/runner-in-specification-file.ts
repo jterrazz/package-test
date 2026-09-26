@@ -2,9 +2,9 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { specificationMember } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** A `wrap` written in JSX needs the `x`. */
 const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];

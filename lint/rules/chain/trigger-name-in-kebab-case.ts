@@ -3,8 +3,8 @@ import type { Context } from '@oxlint/plugins';
 import { toKebabCase } from '../../../src/world/services/record-key.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { memberPropertyName, stringValue } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 

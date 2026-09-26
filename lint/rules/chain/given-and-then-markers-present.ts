@@ -11,8 +11,8 @@ import {
     markerComments,
     testCalleeHasModifier,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
+import type { LintRule } from '../rule.js';
 
 /** Order is judged on first occurrences; an expect before the Then is allowed (preconditions, update-mode writes). A `test.each` table is judged once, on the table, where its narration interpolates `$label`. */
 export const givenAndThenMarkersPresent: LintRule = {

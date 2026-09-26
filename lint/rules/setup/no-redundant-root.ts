@@ -4,9 +4,9 @@ import { dirname, resolve } from 'node:path';
 import { findRoot } from '../../../src/kernel/files/resolve.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { findProperty, specificationMember, stringValue } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { isFile } from '../../reading/fs-cache.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** The framework's own walk-up, run against this layer's fs probe: the rule and the runner must share one function. */
 function derivedRoot(startDir: string): string | undefined {

@@ -1,8 +1,9 @@
 import type { Context } from '@oxlint/plugins';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
+import type { Visitor } from '../../reading/ast.js';
 import { moduleReferenceVisitor } from '../../reading/production.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const TEST_FILE = /\.(?:test\.[cm]?[jt]sx?|spec\.[cm]?[jt]s)$/u;
 const FIXTURES_IMPORT = /\.fixtures(?:\.[cm]?[jt]sx?)?$/u;

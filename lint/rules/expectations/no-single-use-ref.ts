@@ -4,11 +4,11 @@ import { dirname, join, resolve } from 'node:path';
 import { isRelativePath } from '../../../src/kernel/files/spec-path.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 function goldenPathOf(node: AstNode): string | undefined {
     const name = goldenOf(node)?.path;

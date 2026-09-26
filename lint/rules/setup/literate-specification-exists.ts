@@ -2,11 +2,11 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { lessons, rowOf } from '../../catalogue/lesson.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { literateSpecifications } from '../../reading/config-shape.js';
 import { isFile } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** The config states the path relative to itself, so the check is one `stat`. */
 export const literateSpecificationExists: LintRule = {

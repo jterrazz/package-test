@@ -10,9 +10,9 @@ import {
     scenarioCallbackOf,
     walk,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const ACTIONS = new Set(['check', 'click', 'fill', 'press', 'rerender', 'select', 'tap']);
 

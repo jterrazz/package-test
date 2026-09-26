@@ -3,11 +3,11 @@ import { dirname, join } from 'node:path';
 
 import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { listDirectory } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const DATA_SUFFIXES = ['.request.ts', '.response.json'];
 

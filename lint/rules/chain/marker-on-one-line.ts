@@ -10,10 +10,10 @@ import {
     markerOf,
     nodeStart,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 /** Folding a suppression into the marker line would disable it: `-disable`/`-enable`, and the formatters' `-ignore` (`oxfmt-ignore` is the estate's). */
 const DIRECTIVE =

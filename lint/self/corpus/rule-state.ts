@@ -3,9 +3,9 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { child, childList, identifierName, isNode, walk } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { parsedModule } from '../../reading/module-parser.js';
-import type { LintRule, Visitor } from '../../rules/rule.js';
+import type { LintRule } from '../../rules/rule.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 

@@ -2,7 +2,8 @@ import type { Context } from '@oxlint/plugins';
 
 import { lessonsAt } from '../../../catalogue/lesson.js';
 import { segments } from '../../../reading/ast.js';
-import type { LintRule, Visitor } from '../../../rules/rule.js';
+import type { Visitor } from '../../../reading/ast.js';
+import type { LintRule } from '../../../rules/rule.js';
 import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
 import { facetFileFindings } from '../../reading/facet-file.js';
 import { handleFileFindings } from '../../reading/facet-handle.js';

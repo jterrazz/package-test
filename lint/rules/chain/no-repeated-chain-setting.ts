@@ -11,11 +11,11 @@ import {
     stringValue,
     walk,
 } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
+import type { AstNode, Visitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { subjectFolder, subjectsOf } from '../../reading/subject.js';
 import type { Subject } from '../../reading/subject.js';
-import type { LintRule, Visitor } from '../rule.js';
+import type { LintRule } from '../rule.js';
 
 const SETTINGS: Record<string, readonly string[]> = {
     api: ['clock', 'headers'],
