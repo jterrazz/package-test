@@ -288,7 +288,7 @@ Every rule a project using the framework meets, across its enforcement channels 
 
 A convention with no oxlint rule is held by another channel, and the Channel column above names which.
 
-Rules marked _fs-checked_ probe the filesystem, anchored on files oxlint is already visiting (a feature's sibling `requests/`, `seeds/`, `expected/`, a module test's neighbour), with per-run caching — they never scan the tree blindly.
+A statique rule that probes the filesystem anchors on a file oxlint is already visiting (a feature's sibling `requests/`, `seeds/`, `expected/`, a module test's neighbour), with per-run caching (`lint/reading/fs-cache.ts`) — it never scans the tree blindly.
 
 ## Writing the Given and Then markers under `--fix`
 
@@ -437,9 +437,9 @@ The toolchain's side of this — when the pass runs, which install it resolves t
 
 The same binary also runs the analyses oxlint structurally cannot — those that need to read **two files at once** (a `*.specification.ts` record and the `specs/` tests importing it) or a **whole feature tree** at once. They live in the checker channel and follow its doctrine: **precision over recall** — a heuristic that cannot decide stays silent (under-reports) rather than block a legitimate shape. All are string/scan based (no TS parser in the light lint bundle). The specs root's shared ground (`<specs>/shared/fixtures/`, `<specs>/shared/seeds/`, `<specs>/shared/requests/`, `<specs>/shared/expected/`) is pruned from the per-feature walks (verbatim material, the on-purpose violation trees included) and inspected only at its top level.
 
-- **`no-unused-ground` — dead fixtures & orphan dirs.** The mirror of `named-path-exists`: a fixture file no test literal references is dead weight, and a domain directory with conventional subdirs but no `*.test.ts` is an orphan. A referenced `expected/<name>/` (or `fixtures/<name>/`) tree counts entirely as used; an entry of the shared ground unreferenced across all of `specs/**` is dead. A non-literal fixture argument (a template with an expression, a variable) makes the reference set incomplete, so that feature is downgraded to **warning**.
-- **`docker-exec-bound-with-await-using` — await-using (inference).** The **primary** `docker-exec-bound-with-await-using` channel. It reads the docker-aware runners straight from the `docker:` option of the imported spec file, then flags every `<runner>….exec()` result bound without `await using`. No hand-maintained runner list — unlike the oxlint rule, which stays for explicitly-configured runners.
-- **`database-named-only-when-several` — database property.** A spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seed()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
+- **`no-unused-ground`** — the mirror of `named-path-exists`: a fixture file no test literal references is dead weight, and a domain directory with conventional subdirs but no `*.test.ts` is an orphan. A referenced `expected/<name>/` (or `fixtures/<name>/`) tree counts entirely as used; an entry of the shared ground unreferenced across all of `specs/**` is dead. A non-literal fixture argument (a template with an expression, a variable) makes the reference set incomplete, so that feature is downgraded to **warning**.
+- **`docker-exec-bound-with-await-using`** — reads the docker-aware runners from the `docker:` option of the imported specification file and flags every `<runner>….exec()` result bound without `await using`.
+- **`database-named-only-when-several`** — a spec's `services:` record fixes how many SQL databases exist; the importing tests must (≥ 2) or must not (== 1) pass `{ database }` to every `.seed()` / `.table()`. Non-literal records (a handle variable in `services`) and files importing more than one enforced runner are skipped (ambiguous). Doubled by the runtime channel (the framework throws).
 
 ## The generated catalogue (docs-as-code)
 
