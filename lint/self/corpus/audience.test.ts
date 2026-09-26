@@ -7,7 +7,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CATALOGUE_CHAPTER, REFUSAL_WHY } from '../../../src/kernel/refusals/refusal.js';
 import { RUNTIME_RULES } from '../../catalogue/manifest.js';
-import { catalog, SELF_CHECKER_PASSES } from '../catalogue/manifest.js';
+import { allRows, SELF_CHECKER_PASSES } from '../catalogue/manifest.js';
 import {
     danglingImports,
     extractTarball,
@@ -198,7 +198,7 @@ describe('audience', () => {
 
     test('a runtime, type or upstream row is a consumer row: the published surface holds it', () => {
         // Given - the channels a consumer meets through what the package publishes: its runtime's refusals, its types, its fragment's options
-        const selfOnPublished = catalog
+        const selfOnPublished = allRows
             .filter((row) => PUBLISHED_CHANNELS.has(row.channel) && row.audience === 'self')
             .map((row) => row.name);
 
@@ -208,12 +208,12 @@ describe('audience', () => {
 
     test('a meta row is a self row: it holds this package’s own suite, which no consumer runs', () => {
         // Given - every row of the meta-test channel
-        const consumerMeta = catalog
+        const consumerMeta = allRows
             .filter((row) => row.channel === 'meta' && row.audience !== 'self')
             .map((row) => row.name);
 
         // Then - none is consumer: a meta row labelled consumer would ship in the catalogue a consumer reads
-        expect(catalog.some((row) => row.channel === 'meta')).toBe(true);
+        expect(allRows.some((row) => row.channel === 'meta')).toBe(true);
         expect(consumerMeta).toStrictEqual([]);
     });
 

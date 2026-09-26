@@ -2,12 +2,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
-import { catalog, SELF_CHAPTER } from '../catalogue/manifest.js';
+import { allRows, SELF_CHAPTER } from '../catalogue/manifest.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
-export function rowNamed(name: string): (typeof catalog)[number] {
-    const row = catalog.find((entry) => entry.name === name);
+export function rowNamed(name: string): (typeof allRows)[number] {
+    const row = allRows.find((entry) => entry.name === name);
     if (row === undefined) {
         throw new Error(`no row is named ${name}`);
     }

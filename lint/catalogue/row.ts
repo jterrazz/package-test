@@ -1,6 +1,6 @@
 import type { Family } from './families.js';
 
-export type RuleDoc = {
+export type RowDocs = {
     /** `consumer` ships and is in the public catalogue; `self` is this package's own discipline, run only here. A rule that is both is two rules. */
     audience: 'consumer' | 'self';
     /** One per row: a convention enforced two ways is two rows, so a reader knows which pass a finding comes from. */
@@ -30,4 +30,9 @@ export type RuleDoc = {
         | 'tests';
     /** A `statique` or `checker` row's level: `warn` is the redundancy heuristic, every hard convention is `error`. */
     severity?: 'error' | 'warn';
+};
+
+export type Row = RowDocs & {
+    /** Unique across the catalogue. */
+    name: string;
 };

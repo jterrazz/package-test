@@ -1,17 +1,17 @@
-import { consumerCatalog, ordered } from '../../catalogue/manifest.js';
-import type { CatalogEntry } from '../../catalogue/manifest.js';
+import { consumerRows, ordered } from '../../catalogue/manifest.js';
+import type { Row } from '../../catalogue/row.js';
 import {
     ARCHITECTURE_META_ROWS,
     ARCHITECTURE_PASSES,
     ARCHITECTURE_STATIQUE_RULES,
 } from './architecture.js';
 
-/** No published entry imports this module: the published bundles read `consumerCatalog` alone. */
+/** No published entry imports this module: the published bundles read `consumerRows` alone. */
 
 /** A self rule has no row in the public catalogue, so its message routes here. */
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
-export const SELF_STATIQUE_RULES: CatalogEntry[] = [
+export const SELF_STATIQUE_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'statique',
@@ -29,7 +29,7 @@ export const SELF_STATIQUE_RULES: CatalogEntry[] = [
     ...ARCHITECTURE_STATIQUE_RULES,
 ];
 
-export const SELF_CHECKER_PASSES: CatalogEntry[] = [
+export const SELF_CHECKER_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
@@ -48,7 +48,7 @@ export const SELF_CHECKER_PASSES: CatalogEntry[] = [
 ];
 
 /** The guards that keep the other six channels honest; none reaches a consumer. */
-export const META_ROWS: CatalogEntry[] = [
+export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
@@ -221,7 +221,7 @@ export const META_ROWS: CatalogEntry[] = [
     },
 ];
 
-export const SELF_PROCESS_RULES: CatalogEntry[] = [
+export const SELF_PROCESS_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'process',
@@ -236,19 +236,19 @@ export const SELF_PROCESS_RULES: CatalogEntry[] = [
     },
 ];
 
-export const selfCatalog: CatalogEntry[] = ordered([
+export const selfRows: Row[] = ordered([
     ...SELF_STATIQUE_RULES,
     ...SELF_CHECKER_PASSES,
     ...META_ROWS,
     ...SELF_PROCESS_RULES,
 ]);
 
-export function selfRowOf(name: string): CatalogEntry {
-    const row = selfCatalog.find((entry) => entry.name === name);
+export function selfRowOf(name: string): Row {
+    const row = selfRows.find((entry) => entry.name === name);
     if (row === undefined) {
         throw new Error(`no self row is named ${name}`);
     }
     return row;
 }
 
-export const catalog: CatalogEntry[] = ordered([...consumerCatalog, ...selfCatalog]);
+export const allRows: Row[] = ordered([...consumerRows, ...selfRows]);

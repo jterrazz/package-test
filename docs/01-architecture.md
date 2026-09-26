@@ -78,7 +78,7 @@ The channel a rule sits on is not prose here: it is a field of `lint/catalogue/m
 
 ## What the tree publishes
 
-The bundle is built by `tsdown` into `dist/` and its shape follows how each entry is consumed. `index` and `vitest`, plus the `checker`/`catalog` CLIs, are ESM-only — vitest is ESM-only and the CLIs are invoked as `node dist/*.js`. The `oxlint` plugin ships dual, because oxlint loads it from a consumer project that may itself be CommonJS.
+The bundle is built by `tsdown` into `dist/` and its shape follows how each entry is consumed. `index` and `vitest`, plus the `checker`/`catalogue` CLIs, are ESM-only — vitest is ESM-only and the CLIs are invoked as `node dist/*.js`. The `oxlint` plugin ships dual, because oxlint loads it from a consumer project that may itself be CommonJS.
 
 **There are FOUR entries and no more**: `@jterrazz/test` for everything a spec uses, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`. That is rule `no-unpublished-subpath` rather than a convention of taste, and the exemption is derived from the manifest's own `exports` map (`lint/reading/package-exports.ts`), so a subpath is exempt the moment it is published and stops being exempt the moment it is withdrawn.
 

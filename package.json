@@ -30,7 +30,7 @@
     },
     "files": [
         "dist",
-        "!dist/catalog.*",
+        "!dist/catalogue.*",
         "!dist/coverage.*",
         "!dist/matrix.*",
         "!dist/route-split.*",
@@ -71,7 +71,7 @@
     "scripts": {
         "build": "tsdown --config tsdown.config.ts",
         "build:cached": "rm -rf dist && TURBO_TELEMETRY_DISABLED=1 turbo run build --output-logs=new-only",
-        "docs": "npm run build:cached && node dist/catalog.js",
+        "docs": "npm run build:cached && node dist/catalogue.js",
         "lint": "typescript check && node dist/checker.js && node dist/self-checker.js",
         "test": "vitest --run",
         "coverage": "npm run build:cached && vitest --run --coverage && node dist/coverage.js --write",

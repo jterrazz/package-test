@@ -5,12 +5,12 @@ import { describe, expect, test } from 'vitest';
 import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
 import { lessonParts } from '../../../src/kernel/refusals/lesson.js';
 import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
-import { anchor, spliceCatalog } from '../../catalogue/chapter.js';
+import { anchor, spliceCatalogue } from '../../catalogue/chapter.js';
 import { FAMILIES } from '../../catalogue/families.js';
 import { spliceFork } from '../../catalogue/fork.js';
 import {
     CHECKER_PASSES,
-    consumerCatalog,
+    consumerRows,
     PROCESS_RULES,
     RUNTIME_RULES,
     STATIQUE_RULES,
@@ -23,13 +23,13 @@ import { SELF_PASS_IDS } from '../checks/checker.js';
 import selfPlugin, { selfRules } from '../rules/plugin.js';
 import { spliceSelfRules } from './chapter.js';
 import {
-    catalog,
+    allRows,
     META_ROWS,
     SELF_CHAPTER,
     SELF_CHECKER_PASSES,
     SELF_PROCESS_RULES,
     SELF_STATIQUE_RULES,
-    selfCatalog,
+    selfRows,
 } from './manifest.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
@@ -162,7 +162,7 @@ const knownNames = (): Set<string> =>
         ...pluginRules,
         ...CHECKER_PASS_IDS,
         ...SELF_PASSES,
-        ...catalog.map((entry) => entry.name),
+        ...allRows.map((entry) => entry.name),
     ]);
 
 const NAME = String.raw`[a-z][a-z0-9]*(?:-[a-z0-9]+)*`;
@@ -291,7 +291,7 @@ describe('manifest', () => {
         const committed = read('docs/19-linting.md');
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
-        expect(spliceCatalog(committed)).toBe(committed);
+        expect(spliceCatalogue(committed)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
@@ -316,7 +316,7 @@ describe('manifest', () => {
         const own = read(SELF_CHAPTER);
 
         // Then - a consumer row is anchored in docs/19 alone, a self row in docs/03 alone: a consumer never reads a rule that holds only this package
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             const [home, away] = entry.audience === 'self' ? [own, published] : [published, own];
             expect(home, `${entry.name} is missing from its chapter`).toContain(anchor(entry.name));
             expect(away, `${entry.name} is listed outside its chapter`).not.toContain(
@@ -400,7 +400,7 @@ describe('manifest', () => {
         ];
 
         // Then - every sentence the catalogue publishes is English
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             const sentences = `${entry.convention} ${entry.rationale} ${entry.fix}`;
             for (const token of FRENCH) {
                 expect(
@@ -435,7 +435,7 @@ describe('manifest', () => {
 
     test('conventions catalogue — completeness (meta-test) — every catalogue row states its reach and its fix', () => {
         // Given - the assembled catalogue
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             // Then - a reader deciding whether a rule applies to the file in front of them never has to read its implementation
             expect(entry.reach.length, `${entry.name} reach`).toBeGreaterThan(0);
             expect(entry.fix.length, `${entry.name} fix`).toBeGreaterThan(0);
@@ -456,7 +456,7 @@ describe('manifest', () => {
         ]);
 
         // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one — any file with a `.visit/.render/.open` scenario was judged
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
@@ -473,7 +473,7 @@ describe('manifest', () => {
         const REPORTING = new Set(['checker', 'statique']);
 
         // Then - each of their rows states `error` or `warn`, since the plugin enables a rule at its row's level, and a row of any other channel states none
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             expect(entry.severity !== undefined, `${entry.name} severity`).toBe(
                 REPORTING.has(entry.channel),
             );
@@ -493,7 +493,7 @@ describe('manifest', () => {
         ]);
 
         // Then - each row says which pass a reader should expect its finding from
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             expect(CHANNELS.has(entry.channel), `${entry.name} channel`).toBe(true);
         }
     });
@@ -503,7 +503,7 @@ describe('manifest', () => {
         const AUDIENCES = new Set(['consumer', 'self']);
 
         // Then - each row says whether a project using the package meets it, or only this package's own suite does
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             expect(AUDIENCES.has(entry.audience), `${entry.name} audience`).toBe(true);
         }
     });
@@ -511,16 +511,16 @@ describe('manifest', () => {
     test('conventions catalogue — completeness (meta-test) — `rule-declares-its-audience` — a row lives in the manifest of its audience', () => {
         // Given - the two manifests: the one the published code reads, and the one no published entry imports
         // Then - the published manifest holds consumer rows alone, the self manifest self rows alone, and together they are the whole catalogue
-        expect(audiences(consumerCatalog)).toStrictEqual(['consumer']);
-        expect(audiences(selfCatalog)).toStrictEqual(['self']);
-        expect(consumerCatalog.length + selfCatalog.length).toBe(catalog.length);
+        expect(audiences(consumerRows)).toStrictEqual(['consumer']);
+        expect(audiences(selfRows)).toStrictEqual(['self']);
+        expect(consumerRows.length + selfRows.length).toBe(allRows.length);
     });
 
     test('conventions catalogue — completeness (meta-test) — every catalogue entry has a unique implementation name', () => {
         // Given - the assembled catalogue
         // Then - no two entries share a name (each maps to a distinct implementation)
         const names = new Set<string>();
-        for (const entry of catalog) {
+        for (const entry of allRows) {
             expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBeFalsy();
             names.add(entry.name);
         }
@@ -646,7 +646,7 @@ describe('manifest', () => {
 
         // Then - no row of any channel is a sentence with nothing behind it
         for (const [channel, proven] of proofs) {
-            const rows = catalog.filter((entry) => entry.channel === channel);
+            const rows = allRows.filter((entry) => entry.channel === channel);
             expect(rows.length, `${channel} has no rows`).toBeGreaterThan(0);
             for (const row of rows) {
                 expect(proven(row), `${row.name} (${channel}) has no proof`).toBe(true);

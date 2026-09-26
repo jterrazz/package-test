@@ -3,14 +3,14 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 import { renderSchema } from '../../../src/facets/cli/documents/spec-document.js';
-import { spliceCatalog } from '../../catalogue/chapter.js';
+import { spliceCatalogue } from '../../catalogue/chapter.js';
 import { spliceFork } from '../../catalogue/fork.js';
 import { spliceLayers, spliceMatrix } from '../corpus/matrix.js';
 import { spliceMetaTests } from '../corpus/meta-tests.js';
 import { spliceSiblings } from '../corpus/siblings.js';
 import { spliceSelfRules } from './chapter.js';
 
-/** `node dist/catalog.js [repoRoot]` (what `npm run docs` runs): regenerates every GENERATED table and the published schema; deterministic, and `self/catalogue/manifest.test.ts` guards freshness. */
+/** `node dist/catalogue.js [repoRoot]` (what `npm run docs` runs): regenerates every GENERATED table and the published schema; deterministic, and `self/catalogue/manifest.test.ts` guards freshness. */
 const root = resolve(process.argv[2] ?? '.');
 
 const docsPath = resolve(root, 'docs/19-linting.md');
@@ -18,7 +18,7 @@ const schemaPath = resolve(root, 'schema/spec.schema.json');
 const testingPath = resolve(root, 'docs/03-testing.md');
 
 const docs = readFileSync(docsPath, 'utf8');
-const nextDocs = spliceCatalog(docs);
+const nextDocs = spliceCatalogue(docs);
 if (nextDocs !== docs) {
     writeFileSync(docsPath, nextDocs);
 }

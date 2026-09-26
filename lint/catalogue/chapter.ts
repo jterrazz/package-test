@@ -1,14 +1,14 @@
 import { FAMILIES } from './families.js';
-import { consumerCatalog } from './manifest.js';
-import type { CatalogEntry } from './manifest.js';
+import { consumerRows } from './manifest.js';
+import type { Row } from './row.js';
 
 /** Rendered from `manifest.ts` and deterministic: `self/catalogue/manifest.test.ts` asserts the committed chapters are reproduced byte for byte. */
 
 export const DOCS_START =
-    '<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/catalogue/manifest.ts -->';
-export const DOCS_END = '<!-- /GENERATED:catalog -->';
+    '<!-- GENERATED:catalogue — do not edit by hand; run `npm run docs`. Source: lint/catalogue/manifest.ts -->';
+export const DOCS_END = '<!-- /GENERATED:catalogue -->';
 
-const published = consumerCatalog;
+const published = consumerRows;
 
 export function cell(text: string): string {
     return text.replaceAll('|', String.raw`\|`);
@@ -25,7 +25,7 @@ export function table(headers: string[], rows: string[][]): string[] {
     return [line(headers), separator, ...rows.map(line)];
 }
 
-const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
+const CHANNEL_ORDER: Record<Row['channel'], number> = {
     statique: 0,
     upstream: 1,
     checker: 2,
@@ -40,8 +40,8 @@ export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }
 
-function counts(): Record<CatalogEntry['channel'], number> {
-    const tally: Record<CatalogEntry['channel'], number> = {
+function counts(): Record<Row['channel'], number> {
+    const tally: Record<Row['channel'], number> = {
         checker: 0,
         meta: 0,
         process: 0,
@@ -58,7 +58,7 @@ function counts(): Record<CatalogEntry['channel'], number> {
 
 const COLUMNS = ['Rule', 'Facet', 'Channel', 'Severity', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
-export function rowTable(rows: CatalogEntry[]): string[] {
+export function rowTable(rows: Row[]): string[] {
     return table(
         COLUMNS,
         rows.map((entry) => [
@@ -85,7 +85,7 @@ function catalogueSections(): string[] {
     });
 }
 
-function renderDocsCatalog(): string {
+function renderCatalogue(): string {
     const c = counts();
     // A channel with no rows yet is not announced with a zero: a reader would go looking for it.
     const named = [
@@ -106,13 +106,13 @@ function renderDocsCatalog(): string {
     return `${DOCS_START}\n\n${inner}\n\n${DOCS_END}`;
 }
 
-export function spliceCatalog(existing: string): string {
+export function spliceCatalogue(existing: string): string {
     const start = existing.indexOf(DOCS_START);
     const end = existing.indexOf(DOCS_END);
     if (start === -1 || end === -1) {
         throw new Error(
-            `docs/19-linting.md is missing the GENERATED:catalog markers (${DOCS_START} … ${DOCS_END})`,
+            `docs/19-linting.md is missing the GENERATED:catalogue markers (${DOCS_START} … ${DOCS_END})`,
         );
     }
-    return existing.slice(0, start) + renderDocsCatalog() + existing.slice(end + DOCS_END.length);
+    return existing.slice(0, start) + renderCatalogue() + existing.slice(end + DOCS_END.length);
 }

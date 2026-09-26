@@ -116,7 +116,7 @@ Eight columns. **Rule** is the name, and carries the row's anchor. **Facet** is 
 
 The catalogue is grouped by **family**, a word naming what the rules judge — `setup`, `chain`, `layout`, `expectations`, `world`, `elements`, `imports`, `architecture` — and a statique rule's implementation sits in the folder of its family, `lint/rules/<family>/<name>.ts`.
 
-<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/catalogue/manifest.ts -->
+<!-- GENERATED:catalogue — do not edit by hand; run `npm run docs`. Source: lint/catalogue/manifest.ts -->
 
 Every rule a project using the framework meets, across its enforcement channels — **statique** — 62 (oxlint rules), **upstream** — 3 (options set on an upstream rule), **checker** — 34 (bundled passes), **runtime** — 14 (execution-time refusals), **type** — 9 (what the compiler refuses), **process** — 2 (review-borne rules) — sourced from one manifest so the code and the catalogue can never drift.
 
@@ -284,7 +284,7 @@ Every rule a project using the framework meets, across its enforcement channels 
 | ------------------------------------------------------------------------- | ----- | -------- | -------- | ----- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | <a id="import-within-declared-layers"></a>`import-within-declared-layers` | model | statique | error    | all   | A project DECLARES its layers under `src/` through the `layers` option (allowed packages, internal imports, one folder per dependency, seams); any import outside the declared edges is an error. With no layer map the rule is inert. | Declare the edge in the layer map, or route the import through the layer that owns it. | An architecture belongs to the project: declared boundaries are checkable, an assumed one is worked around. |
 
-<!-- /GENERATED:catalog -->
+<!-- /GENERATED:catalogue -->
 
 A convention with no oxlint rule is held by another channel, and the Channel column above names which.
 
@@ -443,7 +443,7 @@ The same binary also runs the analyses oxlint structurally cannot — those that
 
 ## The generated catalogue (docs-as-code)
 
-The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/catalogue/manifest.ts`, which holds the consumer rows; this package's own are in `lint/self/catalogue/manifest.ts`), and the two manifests assemble all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like `folder-follows-assets` and `output-asserted-as-a-golden`). A generator (`lint/catalogue/chapter.ts`, bundled as `dist/catalog.js`, what `npm run docs` runs) splices the `consumer` rows above between GENERATED markers in this file, and the `self` rows into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules), deterministically.
+The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/catalogue/manifest.ts`, which holds the consumer rows; this package's own are in `lint/self/catalogue/manifest.ts`), and the two manifests assemble all seven channels — statique (the oxlint rules), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like `folder-follows-assets` and `output-asserted-as-a-golden`). A generator splices the `consumer` rows above between GENERATED markers in this file, and the `self` rows into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules), deterministically: its entry is `lint/self/catalogue/chapters.cli.ts`, bundled as `dist/catalogue.js` and run by `npm run docs`, which splices `lint/catalogue/chapter.ts` (the consumer rows), `lint/self/catalogue/chapter.ts` (the self rows), the fork, the matrix, the meta-test and siblingless tables, and writes the published schema.
 
 The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, the enforcement channels, non-mechanizable criteria, and design rationales — no per-rule normative lines, so there is no duplication. A meta-test (`lint/self/catalogue/manifest.test.ts`) guards the contract: **freshness** (re-running the generator reproduces the committed catalogue byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
 

@@ -14,7 +14,7 @@ export default defineConfig([
         },
         dts: true,
         entry: {
-            catalog: 'lint/self/catalogue/chapters.cli.ts',
+            catalogue: 'lint/self/catalogue/chapters.cli.ts',
             checker: 'lint/checks/checker.cli.ts',
             coverage: 'lint/self/test-coverage/coverage.cli.ts',
             index: 'src/index.ts',

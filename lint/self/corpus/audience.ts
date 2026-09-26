@@ -2,14 +2,14 @@ import { execFileSync } from 'node:child_process';
 import { readdirSync, readFileSync, statSync, symlinkSync } from 'node:fs';
 import { dirname, join, normalize, relative } from 'node:path';
 
-import { catalog } from '../catalogue/manifest.js';
+import { allRows } from '../catalogue/manifest.js';
 
 export type SelfRow = {
     name: string;
 };
 
 export function selfRows(): SelfRow[] {
-    return catalog.filter((entry) => entry.audience === 'self').map(({ name }) => ({ name }));
+    return allRows.filter((entry) => entry.audience === 'self').map(({ name }) => ({ name }));
 }
 
 export function selfRuleNames(): Set<string> {

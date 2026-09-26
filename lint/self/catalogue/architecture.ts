@@ -1,6 +1,6 @@
-import type { CatalogEntry } from '../../catalogue/manifest.js';
+import type { Row } from '../../catalogue/row.js';
 
-export const ARCHITECTURE_STATIQUE_RULES: CatalogEntry[] = [
+export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'statique',
@@ -17,7 +17,7 @@ export const ARCHITECTURE_STATIQUE_RULES: CatalogEntry[] = [
     },
 ];
 
-export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
+export const ARCHITECTURE_META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
@@ -46,7 +46,7 @@ export const ARCHITECTURE_META_ROWS: CatalogEntry[] = [
     },
 ];
 
-export const ARCHITECTURE_PASSES: CatalogEntry[] = [
+export const ARCHITECTURE_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',

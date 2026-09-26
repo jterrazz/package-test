@@ -1,15 +1,10 @@
 import { REFUSAL_WHY } from '../../src/kernel/refusals/refusal.js';
-import type { RuleDoc } from './row.js';
+import type { Row } from './row.js';
 
 /** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (`import-within-declared-layers`). */
 
-export type CatalogEntry = RuleDoc & {
-    /** Unique across the catalogue. */
-    name: string;
-};
-
 /** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. The one warn tier is the row's `severity`. */
-export const STATIQUE_RULES: CatalogEntry[] = [
+export const STATIQUE_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'statique',
@@ -872,7 +867,7 @@ export const STATIQUE_RULES: CatalogEntry[] = [
 ];
 
 /** Oxlint never visits data fixtures nor reads two files at once. */
-export const CHECKER_PASSES: CatalogEntry[] = [
+export const CHECKER_PASSES: Row[] = [
     {
         audience: 'consumer',
         channel: 'checker',
@@ -1349,7 +1344,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
 ];
 
 /** Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`, naming the words of its error, which `lint/self/corpus/type-channel.test.ts` holds it to. */
-export const TYPE_ROWS: CatalogEntry[] = [
+export const TYPE_ROWS: Row[] = [
     {
         audience: 'consumer',
         channel: 'type',
@@ -1467,7 +1462,7 @@ export const TYPE_ROWS: CatalogEntry[] = [
 ];
 
 /** One owner per convention (ADR-005); a core rule whose options other owners already set is the exception, since an override replaces options rather than merging them. */
-export const UPSTREAM_RULES: CatalogEntry[] = [
+export const UPSTREAM_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'upstream',
@@ -1513,7 +1508,7 @@ export const UPSTREAM_RULES: CatalogEntry[] = [
 ];
 
 /** Where static analysis abstains (non-literal arguments) or cannot reach (network, container lifecycle). */
-export const RUNTIME_RULES: CatalogEntry[] = [
+export const RUNTIME_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'runtime',
@@ -1690,7 +1685,7 @@ export const RUNTIME_RULES: CatalogEntry[] = [
 ];
 
 /** Review-borne; listed so the catalogue is complete, the constitution keeps their rationale. */
-export const PROCESS_RULES: CatalogEntry[] = [
+export const PROCESS_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'process',
@@ -1720,11 +1715,11 @@ export const PROCESS_RULES: CatalogEntry[] = [
 ];
 
 /** Sorted so a generated chapter is byte-identical from one run to the next. */
-export function ordered(rows: CatalogEntry[]): CatalogEntry[] {
+export function ordered(rows: Row[]): Row[] {
     return rows.toSorted((a, b) => a.name.localeCompare(b.name));
 }
 
-export const consumerCatalog: CatalogEntry[] = ordered([
+export const consumerRows: Row[] = ordered([
     ...STATIQUE_RULES,
     ...UPSTREAM_RULES,
     ...TYPE_ROWS,
