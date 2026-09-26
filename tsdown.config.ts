@@ -16,7 +16,7 @@ export default defineConfig([
         entry: {
             catalog: 'lint/self/catalogue/chapters.cli.ts',
             checker: 'lint/checks/checker.cli.ts',
-            coverage: 'lint/self/floor/coverage.cli.ts',
+            coverage: 'lint/self/test-coverage/coverage.cli.ts',
             index: 'src/index.ts',
             'in-place-setup': 'src/expectations/in-place/in-place-setup.ts',
             'mobile-session': 'src/facets/mobile/session/mobile-session.ts',
