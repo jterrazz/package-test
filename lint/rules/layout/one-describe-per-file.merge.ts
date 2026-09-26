@@ -102,7 +102,8 @@ function mergedText(
             grouped += `${lead}${own}`;
         }
     }
-    return `${hoisted}describe('${named}', () => {\n${grouped.trim()}\n});`;
+    const beforeDescribe = hoisted === '' ? '' : `${hoisted}\n`;
+    return `${beforeDescribe}describe('${named}', () => {\n${grouped.trim()}\n});`;
 }
 
 function importDescribe(fixer: Fixer, statements: AstNode[]): Fix | undefined {

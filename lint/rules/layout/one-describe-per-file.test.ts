@@ -44,19 +44,19 @@ ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
             filename: SPEC,
             output: "describe('pagination', () => {\n    beforeAll(seed);\n    test('a', () => {});\n});",
         },
-        // What stands between the tests stays at module scope, above the describe.
+        // What stands between the tests stays at module scope, a blank line above the describe.
         {
             code: "import { test } from 'vitest';\ntest('a', () => {});\nconst page = 1;\ntest('b', () => { page; });",
             errors: [{ messageId: 'noDescribe' }],
             filename: SPEC,
-            output: "import { describe, test } from 'vitest';\nconst page = 1;\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('b', () => { page; });\n});",
+            output: "import { describe, test } from 'vitest';\nconst page = 1;\n\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('b', () => { page; });\n});",
         },
         // Two groups merge into one, one level deep: a group's tests carry its title.
         {
             code: "describe('pagination', () => {\n    test('a', () => {});\n});\nconst page = 1;\ndescribe('filters', () => {\n    test('by date', () => {});\n    test(`by place`, () => {});\n});",
             errors: [{ messageId: 'severalDescribes' }],
             filename: SPEC,
-            output: "const page = 1;\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('filters — by date', () => {});\n    test(`filters — by place`, () => {});\n});",
+            output: "const page = 1;\n\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('filters — by date', () => {});\n    test(`filters — by place`, () => {});\n});",
         },
         // A group title is escaped for the quotes of the test it prefixes.
         {
