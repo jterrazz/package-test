@@ -13,10 +13,10 @@ import {
     walk,
 } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
-import { isCarried } from '../../reading/carried.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
 import type { LintRule, Visitor } from '../rule.js';
+import { isCarried } from './result-compared-whole.carried.js';
 
 const WHOLE_SUBJECTS = new Set(['json', 'response']);
 

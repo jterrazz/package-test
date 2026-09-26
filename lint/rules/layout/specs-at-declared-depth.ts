@@ -3,10 +3,10 @@ import type { Context } from '@oxlint/plugins';
 import { isGroundName, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
-import { declaresTests, isStrayFolder } from '../../reading/first-level.js';
 import { isFile } from '../../reading/fs-cache.js';
 import { specsAnchorOf } from '../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../rule.js';
+import { declaresTests, isStrayFolder } from './specs-at-declared-depth.first-level.js';
 
 const NODE_TEST_SUFFIXES = ['.spec.ts', '.test.ts'];
 const TEST_SUFFIX = '.test.ts';

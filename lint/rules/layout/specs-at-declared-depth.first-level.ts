@@ -1,6 +1,6 @@
-import { isGroundName, SHARED_GROUND } from '../../src/kernel/files/ground.js';
-import { FACETS } from './facets.js';
-import { isDirectory, listDirectory } from './fs-cache.js';
+import { isGroundName, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
+import { FACETS } from '../../reading/facets.js';
+import { isDirectory, listDirectory } from '../../reading/fs-cache.js';
 
 export function declaresTests(name: string): boolean {
     return /\.(?:test\.tsx?|spec\.ts|spec\.yaml)$/u.test(name);

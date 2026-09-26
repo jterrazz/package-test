@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { isStrayFolder } from './first-level.js';
+import { isStrayFolder } from './specs-at-declared-depth.first-level.js';
 
 function specsTree(paths: readonly string[]): string {
     const scratch = mkdtempSync(join(tmpdir(), 'first-level-'));
@@ -15,7 +15,7 @@ function specsTree(paths: readonly string[]): string {
     return root;
 }
 
-describe('first-level', () => {
+describe('specs-at-declared-depth.first-level', () => {
     test('a folder of helpers holding no test is stray, at any depth below it', () => {
         // Given - a support folder of mocks and helpers beside a facet
         const root = specsTree([
