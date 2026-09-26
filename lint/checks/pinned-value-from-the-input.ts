@@ -7,7 +7,10 @@ const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{
 
 const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/u;
 
-export function checkPinnedValues(document: SpecDocument, dir: string): DocumentFinding[] {
+export function checkPinnedValueFromTheInput(
+    document: SpecDocument,
+    dir: string,
+): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
     const streams = assertedStreams(document);
     if (streams.length === 0) {

@@ -43,7 +43,7 @@ export function volatileLiteralIn(
 }
 
 /** Unless the document fixed it, the carve-out `pinned-value-from-the-input` rests on: a value the document states rather than one the run minted. */
-export function checkVolatileLiterals(document: SpecDocument, dir: string): DocumentFinding[] {
+export function checkNoVolatileLiteral(document: SpecDocument, dir: string): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
     let fixed: null | string = null;
     for (const stream of assertedStreams(document)) {

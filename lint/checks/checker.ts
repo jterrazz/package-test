@@ -8,7 +8,7 @@ import { checkFacetFolderHasSpecification } from './facet-folder-has-specificati
 import { checkFacetTestUsesItsRunner } from './facet-test-uses-its-runner.js';
 import { checkFileSuffixMatchesPlace } from './file-suffix-matches-place.js';
 import { checkGroundBesideItsOnlyReader } from './ground-beside-its-only-reader.js';
-import { checkConventionFiles } from './ground-files.js';
+import { checkGroundAndDocuments } from './ground-files.js';
 import { checkGroundSharedOrInline } from './ground-shared-or-inline.js';
 import { checkNamedPathExists } from './named-path-exists.js';
 import { checkNoDuplicateGround } from './no-duplicate-ground.js';
@@ -91,7 +91,7 @@ export function runAllChecks(rootDir: string): Finding[] {
         ...checkFacetTestUsesItsRunner(rootDir),
         ...checkGroundBesideItsOnlyReader(rootDir),
         ...checkCheckerSuppressionStatesAReason(rootDir),
-        ...checkConventionFiles(rootDir),
+        ...checkGroundAndDocuments(rootDir),
         ...checkDocumentDescriptionUnique(rootDir),
         ...checkNoUnusedGround(rootDir),
         ...checkGroundSharedOrInline(rootDir),

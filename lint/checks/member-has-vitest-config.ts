@@ -44,7 +44,7 @@ function holdsTests(dir: string): boolean {
 const DELEGATING_TEST =
     /--workspaces|(?:^|\s)-r(?:\s|$)|--recursive|turbo\s+run|nx\s+run-many|lerna\s+run/u;
 
-export function configPresent(
+export function checkMemberHasVitestConfig(
     manifest: Manifest,
     memberDir: string,
     label: string,

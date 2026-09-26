@@ -2,14 +2,14 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { formatViolations } from './checker.js';
-import { checkConventionFiles } from './ground-files.js';
+import { checkGroundAndDocuments } from './ground-files.js';
 
 const FIXTURES = resolve(import.meta.dirname, '../../specs/lint/checker/fixtures/lint-violations');
 
-describe('checkConventionFiles', () => {
-    test('ground-files — checkConventionFiles (`no-unknown-token`) — walks a specs tree and reports unknown tokens in fixture files', () => {
+describe('checkGroundAndDocuments', () => {
+    test('ground-files — checkGroundAndDocuments (`no-unknown-token`) — walks a specs tree and reports unknown tokens in fixture files', () => {
         // Given - the violation fixture tree ({{userid}} in expected/out.txt)
-        const violations = checkConventionFiles(resolve(FIXTURES, 'no-unknown-token'));
+        const violations = checkGroundAndDocuments(resolve(FIXTURES, 'no-unknown-token'));
 
         // Then - the finding names the relative file, line, token and severity
         expect(violations).toStrictEqual([
@@ -28,9 +28,9 @@ describe('checkConventionFiles', () => {
         expect(rendered).toContain('uuid');
     });
 
-    test('ground-files — checkConventionFiles (`no-unknown-token`) — passes the compliant twin', () => {
+    test('ground-files — checkGroundAndDocuments (`no-unknown-token`) — passes the compliant twin', () => {
         // Given - the -ok tree (only known tokens)
-        const violations = checkConventionFiles(resolve(FIXTURES, 'no-unknown-token-ok'));
+        const violations = checkGroundAndDocuments(resolve(FIXTURES, 'no-unknown-token-ok'));
 
         // Then - clean
         expect(violations).toStrictEqual([]);

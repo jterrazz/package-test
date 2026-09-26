@@ -5,7 +5,7 @@ import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runAllChecks } from './checker.js';
-import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
+import { checkFileSuffixMatchesPlaceInMember } from './file-suffix-matches-place.js';
 import { readManifest } from './member-manifest.js';
 
 const REPEATED_NAME = [
@@ -117,7 +117,7 @@ describe('checker', () => {
         writeFileSync(join(root, 'tools', 'package.json'), '{}\n');
 
         // Then - the folder is the member's, and its spec is reported
-        expect(checkSpecOutsideSpecs(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkFileSuffixMatchesPlaceInMember(root).map(({ file }) => file)).toStrictEqual([
             join('tools', 'boot.spec.ts'),
         ]);
     });

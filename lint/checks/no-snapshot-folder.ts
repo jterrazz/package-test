@@ -23,7 +23,7 @@ function holdsGround(path: string, memberDir: string): boolean {
 }
 
 /** The walk stops at a nested package and never enters ground: a fixture project may carry the word on purpose. */
-export function groundSynonyms(memberDir: string, label: string): Finding[] {
+export function checkNoSnapshotFolder(memberDir: string, label: string): Finding[] {
     const found: Finding[] = [];
     const walk = (dir: string): void => {
         let entries;

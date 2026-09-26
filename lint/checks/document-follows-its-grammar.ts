@@ -8,7 +8,7 @@ import { malformedRefFindings } from './no-malformed-ref.js';
 import { unknownTokenFindings } from './no-unknown-token.js';
 
 /** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` and `no-malformed-ref` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
-export function checkSpecFile(text: string, rel: string): Finding[] {
+export function checkDocumentFollowsItsGrammar(text: string, rel: string): Finding[] {
     let document;
     try {
         document = readSpecFile(text, rel).document;

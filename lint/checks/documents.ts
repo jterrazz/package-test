@@ -10,9 +10,9 @@ import type { SpecFile } from '../../src/facets/cli/documents/spec-document.js';
 import { isScalar, renderYamlSource, Scalar } from '../../src/kernel/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../../src/kernel/yaml/document.js';
 import type { Finding } from './checker.js';
-import { checkDescription } from './document-description-reads-as-a-title.js';
-import { checkRegisteredNames } from './document-env-and-serve-registered.js';
-import { checkKeyOrder } from './document-keys-in-canonical-order.js';
+import { checkDocumentDescriptionReadsAsATitle } from './document-description-reads-as-a-title.js';
+import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';
+import { checkDocumentKeysInCanonicalOrder } from './document-keys-in-canonical-order.js';
 import {
     documentMap,
     isBlock,
@@ -23,15 +23,15 @@ import {
     runMaps,
     streamScalars,
 } from './document-model.js';
-import { checkBlockScalars } from './document-streams-written-as-block-scalars.js';
-import { checkFileName } from './file-suffix-matches-place.js';
-import { checkEmptyAssertions } from './no-empty-expected-stream.js';
-import { checkSilentRefusals } from './no-silent-refusal.js';
-import { checkVolatileLiterals } from './no-volatile-literal.js';
-import { checkPinnedValues } from './pinned-value-from-the-input.js';
+import { checkDocumentStreamsWrittenAsBlockScalars } from './document-streams-written-as-block-scalars.js';
+import { checkFileSuffixMatchesPlaceOfDocument } from './file-suffix-matches-place.js';
+import { checkNoEmptyExpectedStream } from './no-empty-expected-stream.js';
+import { checkNoSilentRefusal } from './no-silent-refusal.js';
+import { checkNoVolatileLiteral } from './no-volatile-literal.js';
+import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
 
 /** A document the grammar refuses yields nothing here: `document-follows-its-grammar` already reported it. */
-export function checkSpecConventions(text: string, rel: string, path: string): Finding[] {
+export function checkDocument(text: string, rel: string, path: string): Finding[] {
     let file: SpecFile;
     try {
         file = readSpecFile(text, rel);
@@ -46,15 +46,15 @@ export function checkSpecConventions(text: string, rel: string, path: string): F
     };
     const dir = dirname(path);
     const findings = [
-        ...checkKeyOrder(file, (pair) => lineAt(pair.key as unknown as Scalar)),
-        ...checkBlockScalars(file, (scalar) => lineAt(scalar)),
-        ...checkFileName(rel),
-        ...checkDescription(file.document),
-        ...checkVolatileLiterals(file.document, dir),
-        ...checkPinnedValues(file.document, dir),
-        ...checkEmptyAssertions(file.document),
-        ...checkSilentRefusals(file.document),
-        ...checkRegisteredNames(file.document, dir),
+        ...checkDocumentKeysInCanonicalOrder(file, (pair) => lineAt(pair.key as unknown as Scalar)),
+        ...checkDocumentStreamsWrittenAsBlockScalars(file, (scalar) => lineAt(scalar)),
+        ...checkFileSuffixMatchesPlaceOfDocument(rel),
+        ...checkDocumentDescriptionReadsAsATitle(file.document),
+        ...checkNoVolatileLiteral(file.document, dir),
+        ...checkPinnedValueFromTheInput(file.document, dir),
+        ...checkNoEmptyExpectedStream(file.document),
+        ...checkNoSilentRefusal(file.document),
+        ...checkDocumentEnvAndServeRegistered(file.document, dir),
     ];
     return findings.map(({ fix, found, line, rule, severity }) => ({
         file: rel,

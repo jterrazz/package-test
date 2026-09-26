@@ -156,7 +156,7 @@ function lineOfKey(dir: string, key: string): number {
     }
 }
 
-export function seamDependencies(member: {
+export function checkNoRedundantTestDependency(member: {
     label: string;
     manifest: Manifest;
     memberDir: string;

@@ -6,7 +6,7 @@ const MAX_DESCRIPTION = 100;
 
 const SYMBOL_WORD = /^[A-Z0-9_]+$/u;
 
-export function checkDescription(document: SpecDocument): DocumentFinding[] {
+export function checkDocumentDescriptionReadsAsATitle(document: SpecDocument): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
     const text = document.description;
     const line = document.descriptionLine;

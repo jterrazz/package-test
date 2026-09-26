@@ -3,7 +3,7 @@ import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.
 import { finding } from './document-model.js';
 import type { DocumentFinding } from './document-model.js';
 
-export function checkEmptyAssertions(document: SpecDocument): DocumentFinding[] {
+export function checkNoEmptyExpectedStream(document: SpecDocument): DocumentFinding[] {
     const findings: DocumentFinding[] = [];
     for (const stream of assertedStreams(document)) {
         if (

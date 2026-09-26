@@ -54,7 +54,7 @@ export type PlacementMove = {
 };
 
 /** Only the author knows whether the file meets the product through HTTP or through a binary, so the mover leaves it. */
-export function checkSpecOutsideSpecs(memberDir: string): Finding[] {
+export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[] {
     const violations: Finding[] = [];
     for (const path of walk(memberDir, true)) {
         if (!path.endsWith('.spec.ts')) {
@@ -136,7 +136,7 @@ const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 const REDUNDANT_WORDS = new Set(['cli', 'spec', 'test']);
 
-export function checkFileName(rel: string): DocumentFinding[] {
+export function checkFileSuffixMatchesPlaceOfDocument(rel: string): DocumentFinding[] {
     const name = basename(rel);
     const caseName = name.slice(0, -SPEC_EXTENSION.length);
     const findings: DocumentFinding[] = [];

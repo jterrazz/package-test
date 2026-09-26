@@ -44,7 +44,7 @@ function crossedTarget(
     };
 }
 
-export function diskTargetFindings(file: string, rootDir: string): Finding[] {
+export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[] {
     const violations: Finding[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
@@ -92,7 +92,7 @@ export function diskTargetFindings(file: string, rootDir: string): Finding[] {
 export function checkNamedPathExists(rootDir: string): Finding[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         listReferrers(specsRoot, join(specsRoot, SHARED_GROUND)).flatMap((file) =>
-            diskTargetFindings(file, rootDir),
+            checkNamedPathExistsIn(file, rootDir),
         ),
     );
 }

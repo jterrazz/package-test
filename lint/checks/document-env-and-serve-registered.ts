@@ -95,7 +95,10 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
     }
 }
 
-export function checkRegisteredNames(document: SpecDocument, dir: string): DocumentFinding[] {
+export function checkDocumentEnvAndServeRegistered(
+    document: SpecDocument,
+    dir: string,
+): DocumentFinding[] {
     if (document.env.length === 0 && document.serve.length === 0) {
         return [];
     }

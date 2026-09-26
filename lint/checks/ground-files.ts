@@ -9,15 +9,15 @@ import {
     GROUND_SEEDS,
 } from '../../src/kernel/files/ground.js';
 import type { Finding } from './checker.js';
-import { checkSpecFile } from './document-follows-its-grammar.js';
-import { checkSpecConventions } from './documents.js';
+import { checkDocumentFollowsItsGrammar } from './document-follows-its-grammar.js';
+import { checkDocument } from './documents.js';
 import { requestLineFindings, statusLineFindings } from './http-first-line-follows-its-grammar.js';
 import { documentInGroundFindings } from './no-document-in-ground.js';
 import { malformedRefFindings } from './no-malformed-ref.js';
 import { tokenInRequestFindings } from './no-token-in-request.js';
 import { unknownTokenFindings } from './no-unknown-token.js';
 import { volatileLiteralsInGround } from './no-volatile-literal.js';
-import { checkSeedClockReads } from './seeds-state-absolute-time.js';
+import { checkSeedsStateAbsoluteTime } from './seeds-state-absolute-time.js';
 import { decodeText } from './tree.js';
 
 const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
@@ -25,7 +25,7 @@ const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_S
 /** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-export function checkConventionFiles(rootDir: string): Finding[] {
+export function checkGroundAndDocuments(rootDir: string): Finding[] {
     const violations: Finding[] = [];
     const visit = (
         dir: string,
@@ -59,8 +59,8 @@ export function checkConventionFiles(rootDir: string): Finding[] {
                 const text = decodeText(path);
                 if (text !== null) {
                     violations.push(
-                        ...checkSpecFile(text, rel),
-                        ...checkSpecConventions(text, rel, path),
+                        ...checkDocumentFollowsItsGrammar(text, rel),
+                        ...checkDocument(text, rel, path),
                     );
                 }
                 continue;
@@ -71,7 +71,7 @@ export function checkConventionFiles(rootDir: string): Finding[] {
             const depth1 = dir.endsWith(`/${inside}`) || dir.endsWith(`\\${inside}`);
 
             if (inside === GROUND_SEEDS) {
-                violations.push(...checkSeedClockReads(path, rel, entry.name));
+                violations.push(...checkSeedsStateAbsoluteTime(path, rel, entry.name));
                 continue;
             }
 

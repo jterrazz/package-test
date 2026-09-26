@@ -4,7 +4,7 @@ import type { Node, Pair, YAMLMap } from '../../src/kernel/yaml/document.js';
 import { documentMap, finding, keyName, pairsOf, runMaps } from './document-model.js';
 import type { DocumentFinding } from './document-model.js';
 
-export function checkKeyOrder(
+export function checkDocumentKeysInCanonicalOrder(
     file: SpecFile,
     lineAt: (node: Pair<Node, Node>) => number,
 ): DocumentFinding[] {

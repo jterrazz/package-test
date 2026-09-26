@@ -85,7 +85,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
 }
 
 /** An entry the shared folder already holds by that name stays, for the author. */
-export function fixRootGround(rootDir: string): string[] {
+export function fixNoReachIntoSiblingGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         for (const folder of rootGroundOf(specsRoot)) {

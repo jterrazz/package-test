@@ -38,7 +38,7 @@ import { movesUnderFacet } from './file-suffix-matches-place.js';
 import { fixGroundSharedOrInline } from './ground-shared-or-inline.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
 import { fixDuplicateGround } from './no-duplicate-ground.js';
-import { fixRootGround } from './no-reach-into-sibling-ground.js';
+import { fixNoReachIntoSiblingGround } from './no-reach-into-sibling-ground.js';
 import { applyOwnFixes } from './own-fixes.js';
 import { pluginDiagnostics } from './oxlint-run.js';
 import type { PluginDiagnostic } from './oxlint-run.js';
@@ -458,7 +458,7 @@ function reportBaselineKeysMove(file: string, { renamed, shared }: BaselineKeysM
 
 function applyFixes(root: string): void {
     reportMigration(migrateTo17(root, moveKeepingHistory));
-    for (const move of fixRootGround(root)) {
+    for (const move of fixNoReachIntoSiblingGround(root)) {
         console.log(`conventions checker: moved ${move} (no-reach-into-sibling-ground)`);
     }
     const renamed = fixSpecSuffixes(root);

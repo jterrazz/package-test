@@ -3,7 +3,7 @@ import { Scalar } from '../../src/kernel/yaml/document.js';
 import { finding, isBlock, runMaps, streamScalars } from './document-model.js';
 import type { DocumentFinding } from './document-model.js';
 
-export function checkBlockScalars(
+export function checkDocumentStreamsWrittenAsBlockScalars(
     file: SpecFile,
     lineOf: (scalar: Scalar) => number,
 ): DocumentFinding[] {
