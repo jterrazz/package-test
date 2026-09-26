@@ -106,7 +106,7 @@ The API is the types the package publishes, and nothing re-states it. What the c
 
 ## Pitfalls
 
-- **Reaching for a dependency from `kernel/`.** A new external package belongs to the ONE slice that needs it — a world area or a facet — and nowhere else. Only an engine every layer truly shares sits behind the kernel, each in the one folder `FRAMEWORK_LAYERS` grants it to: `yaml` in `yaml/`, vitest's test hooks in `files/`, the toolchain's config types in `config/`. Anything else the kernel imports is the boundary this package cannot afford to blur, and `import-within-declared-layers` and the engine-ownership rule refuse it.
+- **Reaching for a dependency from `kernel/`.** A new external package belongs to the ONE slice that needs it — a world area or a facet — and nowhere else. Only an engine every layer truly shares sits behind the kernel, each in the one folder `FRAMEWORK_LAYERS` grants it to: `yaml` in `yaml/`, vitest's test hooks in `files/`, the toolchain's config types in `config/`. Anything else the kernel imports is the boundary this package cannot afford to blur, and `import-within-declared-layers` and `one-owner-per-engine` refuse it.
 - **Adding a seventh constructor.** The six are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor — as `integration` did in [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
 - **Writing a rule's normative sentence into a chapter.** It belongs in `lint/catalogue/manifest.ts` beside the implementation; a chapter that restates it is the second copy the whole design exists to prevent.
 

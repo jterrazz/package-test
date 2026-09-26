@@ -8,7 +8,7 @@ This is the **docs-as-code inversion**: the code is the source of truth for the 
 
 Guiding aim: **most enforcement is programmatic, not manual review.**
 
-Which CHANNEL holds a given rule — static, checker, runtime, process, and the meta-test and type channels that double them — is not this chapter's: it is [01 — Architecture](01-architecture.md), where the shape of the enforcement machinery is drawn. What follows is what the rules SAY and what a reviewer must judge.
+Which CHANNEL holds a given rule — statique, checker, runtime, process, and the meta-test and type channels that double them — is not this chapter's: it is [01 — Architecture](01-architecture.md), where the shape of the enforcement machinery is drawn. What follows is what the rules SAY and what a reviewer must judge.
 
 ## The rule families
 
