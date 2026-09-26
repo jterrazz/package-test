@@ -5,16 +5,16 @@ import { repointSource } from '../../engine/checker/repoint.js';
 import { moveKeepingHistory } from '../../engine/project/git-tree.js';
 import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
-    importedModulesOf,
     isTestOrSpecName,
+    lowestPlaceOf,
     MAX_SPEC_LINES,
     modulesUnder,
     ownerOfSetup,
+    readersOf,
     setupFolderOf,
 } from '../../engine/project/specs-modules.js';
 import {
     findSpecsRoots,
-    lowestCommonFolder,
     readText,
     removeIfEmpty,
     reservedFolderOf,
@@ -36,24 +36,6 @@ type Misplaced =
           target: string;
       }
     | { module: string; only: string; specsRoot: string; kind: 'inline' };
-
-function readersOf(modules: readonly string[]): Map<string, string[]> {
-    const known = new Set(modules);
-    const readers = new Map<string, string[]>();
-    for (const file of modules) {
-        for (const target of new Set(importedModulesOf(file))) {
-            if (target !== file && known.has(target)) {
-                readers.set(target, [...(readers.get(target) ?? []), file]);
-            }
-        }
-    }
-    return readers;
-}
-
-function placeOf(specsRoot: string, reader: string): string {
-    const setup = setupFolderOf(specsRoot, reader);
-    return setup === undefined ? dirname(reader) : ownerOfSetup(specsRoot, setup);
-}
 
 function shown(specsRoot: string, folder: string): string {
     return folder === specsRoot ? `specs/` : `specs/${relative(specsRoot, folder)}/`;
@@ -93,7 +75,7 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
             found.push({ kind: 'inline', module, only, specsRoot });
             continue;
         }
-        const lowest = lowestCommonFolder(read.map((reader) => placeOf(specsRoot, reader)));
+        const lowest = lowestPlaceOf(specsRoot, read);
         if (lowest === undefined) {
             continue;
         }

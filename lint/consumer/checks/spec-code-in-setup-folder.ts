@@ -6,7 +6,9 @@ import {
     declaresTests,
     isRunnerName,
     isTestOrSpecName,
+    lowestPlaceOf,
     modulesUnder,
+    readersOf,
     refusedReservedAbove,
     setupFolderOf,
 } from '../../engine/project/specs-modules.js';
@@ -33,22 +35,26 @@ function subjectOf(specsRoot: string, file: string): string {
     return folder;
 }
 
-function setupTargetOf(specsRoot: string, file: string): string {
+function setupTargetOf(specsRoot: string, file: string, readers: readonly string[]): string {
     const subject = subjectOf(specsRoot, file);
-    const home = reservedFolderOf(specsRoot, subject, SETUP_FOLDER);
+    const owner = lowestPlaceOf(specsRoot, readers) ?? subject;
+    const home = reservedFolderOf(specsRoot, owner, SETUP_FOLDER);
     return relative(specsRoot, join(home, relative(subject, file)));
 }
 
 function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
     const found: Finding[] = [];
-    for (const file of modulesUnder(specsRoot)) {
+    const modules = modulesUnder(specsRoot);
+    const readers = readersOf(modules);
+    for (const file of modules) {
+        const read = readers.get(file) ?? [];
         const name = basename(file);
         const rel = relative(specsRoot, file);
         const shown = relative(rootDir, file);
         if (FIXTURES_MODULE.test(name)) {
             const home =
                 setupFolderOf(specsRoot, file) === undefined
-                    ? dirname(setupTargetOf(specsRoot, file))
+                    ? dirname(setupTargetOf(specsRoot, file, read))
                     : dirname(rel);
             found.push({
                 file: shown,
@@ -73,7 +79,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
         found.push({
             file: shown,
             line: 1,
-            fix: `move it to \`specs/${setupTargetOf(specsRoot, file)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it`,
+            fix: `move it to \`specs/${setupTargetOf(specsRoot, file, read)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it`,
             found: `\`${name}\`, code that prepares specs outside every \`${SETUP_FOLDER}/\``,
             rule: 'spec-code-in-setup-folder',
             severity: 'error',

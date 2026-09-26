@@ -13,8 +13,9 @@ import {
 import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
+import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-document.js';
-import { isWithin, readText } from './tree.js';
+import { isWithin, lowestCommonFolder, readText } from './tree.js';
 
 export const COMPONENT_TREE = 'component';
 
@@ -76,19 +77,50 @@ export function ownerOfSetup(specsRoot: string, setup: string): string {
     return owner === join(specsRoot, SHARED_FOLDER) ? specsRoot : owner;
 }
 
-export function importedModulesOf(file: string): string[] {
+export function placeOf(specsRoot: string, reader: string): string {
+    const setup = setupFolderOf(specsRoot, reader);
+    return setup === undefined ? dirname(reader) : ownerOfSetup(specsRoot, setup);
+}
+
+type Imported = { relative: boolean; targets: string[] };
+
+function importsOf(file: string): Imported[] {
     const program = parseProgram(file, readText(file));
     if (!isNode(program)) {
         return [];
     }
-    const targets: string[] = [];
+    const imported: Imported[] = [];
     visitProgram(
         program,
         importSourceVisitor(({ source }) => {
-            targets.push(...resolveSpecifier(file, source));
+            imported.push({
+                relative: isRelativePath(source),
+                targets: resolveSpecifier(file, source),
+            });
         }),
     );
-    return targets;
+    return imported;
+}
+
+export function importedModulesOf(file: string): string[] {
+    return importsOf(file).flatMap(({ targets }) => targets);
+}
+
+export function readersOf(modules: readonly string[]): Map<string, string[]> {
+    const known = new Set(modules);
+    const readers = new Map<string, string[]>();
+    for (const file of modules) {
+        for (const target of new Set(importedModulesOf(file))) {
+            if (target !== file && known.has(target)) {
+                readers.set(target, [...(readers.get(target) ?? []), file]);
+            }
+        }
+    }
+    return readers;
+}
+
+export function lowestPlaceOf(specsRoot: string, readers: readonly string[]): string | undefined {
+    return lowestCommonFolder(readers.map((reader) => placeOf(specsRoot, reader)));
 }
 
 export function declaresTests(name: string): boolean {

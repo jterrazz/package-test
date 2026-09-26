@@ -7,7 +7,7 @@ import { isGroundName, SHARED_FOLDER } from '../../engine/project/ground.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { literalSpans } from '../../engine/project/spec-values.js';
-import { ownerOfSetup, setupFolderOf } from '../../engine/project/specs-modules.js';
+import { placeOf } from '../../engine/project/specs-modules.js';
 import {
     anchoredPaths,
     blankComments,
@@ -84,8 +84,7 @@ function usageUnder(specsRoot: string): Map<string, Usage> {
         (path) => /\.[cm]?[jt]sx?$/u.test(path) || path.endsWith(SPEC_EXTENSION),
     );
     for (const file of referrers) {
-        const setup = setupFolderOf(specsRoot, file);
-        const place = setup === undefined ? dirname(file) : ownerOfSetup(specsRoot, setup);
+        const place = placeOf(specsRoot, file);
         for (const path of new Set(pathsNamedIn(dirname(specsRoot), file))) {
             const found = entryOf(specsRoot, path);
             if (found === undefined) {
