@@ -1,0 +1,8 @@
+description: a facet reaching the matching, and a facet taking an entry's channel pick, are refused at the import
+fixture: ./_fixtures/reaching/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          src/facets/api/api.facet.ts:2:1  jterrazz-check(stubs-reached-by-their-surface)
+          src/facets/job/job.facet.ts:1:1  jterrazz-check(stubs-reached-by-their-surface)

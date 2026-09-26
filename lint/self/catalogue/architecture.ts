@@ -120,4 +120,18 @@ export const ARCHITECTURE_PASSES: Row[] = [
         reach: 'module',
         severity: 'error',
     },
+    {
+        audience: 'self',
+        channel: 'checker',
+        convention:
+            'The stubs are entered by what they publish: from outside `src/world/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/` or of `intercept/` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a facet the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/` and the rest of `delivery/` are reached from inside the stubs alone. An error at the import.',
+        facet: 'model',
+        family: 'architecture',
+        fix: 'Import what the stubs publish; a facet that wires a delivery adapter declares the edge in `DELIVERY_READERS`, beside the pass.',
+        name: 'stubs-reached-by-their-surface',
+        rationale:
+            '`import-within-declared-layers` lets every facet reach all of `world/`, so the queue that matches a request and the msw server that serves it were one relative import away from any module: an internal reached from outside is one that can no longer move, and a delivery wired by a facet that never declared it is a second channel nobody chose.',
+        reach: 'module',
+        severity: 'error',
+    },
 ];

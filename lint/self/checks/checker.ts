@@ -6,6 +6,7 @@ import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
 import { checkOneOwnerPerLibrary } from './one-owner-per-library.js';
 import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
 import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
+import { checkStubsReachedByTheirSurface } from './stubs-reached-by-their-surface.js';
 
 /** `dist/checker.js` imports nothing from here, so no consumer run can reach a self pass. */
 export const SELF_CHECKER_PASS_IDS = [
@@ -15,6 +16,7 @@ export const SELF_CHECKER_PASS_IDS = [
     'one-owner-per-library',
     'folder-named-for-a-concept',
     'lint-imports-follow-the-direction',
+    'stubs-reached-by-their-surface',
 ] as const;
 
 export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
@@ -30,6 +32,7 @@ export const SELF_CHECKER: AtZeroRegistry = {
         checkOneOwnerPerLibrary,
         checkFolderNamedForAConcept,
         checkLintImportsFollowTheDirection,
+        checkStubsReachedByTheirSurface,
     ],
     specs: [checkSpecimenFiledByCapability],
 };
