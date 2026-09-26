@@ -148,9 +148,18 @@ has run. What it leaves to the reader:
 - **A composite's list is `.stubs`.** A file reading `.contracts` off a
   `defineStubs(…)` composite is not rewritten — the property is not an import —
   and the compiler names each read.
+- **Every rule and pass is named, not coded.** 17.0 renames each letter-coded
+  id to the requirement it states — `jterrazz/c31-describe-names-file` is
+  `jterrazz/one-describe-per-file`, a `jterrazz-check/<code>` is
+  `jterrazz-check/<name>`. `make fix` rewrites every `oxlint-disable…` and
+  `checker-disable…` directive, every config override and every key of the
+  `test` baseline section. A code several passes shared (`c8`, `d4`, `d4b`)
+  counted them together, and no count splits back into them: its key is left
+  for `jterrazz-test-check baseline` to re-record. The map
+  (`lint/migration/names.ts`) leaves with the mover in 17.1.
 - **A suppression follows the rule it names.**
-  `d8w-text-bypass`, `c2-http-only-requests`, `c4-contract-shape`, `c10-contracts-boundary` and `c11-contract-data-pairing` no longer exist under those names:
-  the mover rewrites a directive naming one to `no-raw-bypass`,
+  `d8w-text-bypass`, `c2-http-only-requests`, `c4-contract-shape`, `c10-contracts-boundary` and `c11-contract-data-pairing`, for instance,
+  are rewritten to `no-raw-bypass`,
   `request-file-extension-known`, `stubs-root-holds-facades-and-kinds`, `stubs-imported-through-facade` or
   `stub-data-has-a-builder` on every file, a tree an earlier mover already moved included, and the line a
   `-next-line` or `-line` directive naming `no-raw-bypass` covers reads `.raw` — the
