@@ -1,7 +1,8 @@
-description: rejects a fixtures module imported from a non-test file
+description: production code importing a fixtures module is refused
 fixture: ./_fixtures/violation/
 runs:
     - command: .
       exit: 1
       stdout: |
-          specs/api/widget/helper.ts:1:28  jterrazz(fixtures-imported-by-tests-only)
+          src/widget/widget.ts:1:28  jterrazz(fixtures-imported-by-tests-only)
+          src/widget/widget.ts:1:28  jterrazz(no-test-code-in-production)
