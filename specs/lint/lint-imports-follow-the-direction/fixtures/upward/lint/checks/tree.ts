@@ -1,3 +1,3 @@
-import { move } from '../migration/mover.js';
+import type { Rule } from '../rules/rule.js';
 
-export const walk = move;
+export type Walk = Rule;

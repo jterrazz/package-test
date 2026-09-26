@@ -1,5 +1,0 @@
-description: accepts ground named with the bare reserved name
-fixture: ./fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

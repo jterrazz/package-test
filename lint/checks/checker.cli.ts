@@ -3,15 +3,6 @@ import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
 import { moveKeepingHistory } from '../../src/kernel/files/git-tree.js';
-import { migrateBaselineKeys } from '../migration/baseline-keys.js';
-import type { BaselineKeysMove } from '../migration/baseline-keys.js';
-import {
-    migrateDirectives,
-    migrateLintConfig,
-    migrateModuleTestsTo17,
-    migrateTo17,
-} from '../migration/mover.js';
-import type { LintConfigMove, Migration } from '../migration/mover.js';
 import {
     BASELINE_FILE,
     BASELINE_LABEL,
@@ -38,7 +29,7 @@ import { movesUnderFacet } from './file-suffix-matches-place.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
 import { fixGroundSharedOrInline } from './ground-shared-or-inline.js';
-import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
+import { checkMember, checkMembers, discoverSpecRoots } from './members.js';
 import { fixDuplicateGround } from './no-duplicate-ground.js';
 import { fixNoReachIntoSiblingGround } from './no-reach-into-sibling-ground.js';
 import { applyOwnFixes } from './own-fixes.js';
@@ -268,23 +259,6 @@ function fixProject(root: string): void {
     for (const specsRoot of discoverSpecRoots(root)) {
         applyFixes(specsRoot);
     }
-    for (const memberDir of discoverMembers(root)) {
-        reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
-        reportMigration({
-            directives: migrateDirectives(memberDir),
-            renamed: [],
-            rewritten: [],
-            stubs: [],
-        });
-        for (const move of migrateLintConfig(memberDir, root)) {
-            reportLintConfigMove(move);
-        }
-    }
-    for (const dir of new Set([root, ...discoverMembers(root)])) {
-        for (const move of migrateBaselineKeys(dir)) {
-            reportBaselineKeysMove(relative(root, join(dir, move.file)), move);
-        }
-    }
     applyOwnFixes(root);
 }
 
@@ -313,53 +287,7 @@ function fixSpecSuffixes(root: string): Rename[] {
     return renamed;
 }
 
-function reportMigration(migration: Migration): void {
-    for (const move of migration.renamed) {
-        console.log(`conventions checker: renamed ${move} (ground-uses-reserved-name)`);
-    }
-    if (migration.rewritten.length > 0) {
-        console.log(
-            `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (ground-uses-reserved-name)`,
-        );
-    }
-    if (migration.directives.length > 0) {
-        console.log(
-            `conventions checker: renamed the directives naming a renamed rule in ${migration.directives.length} file(s)`,
-        );
-    }
-    if (migration.stubs.length > 0) {
-        console.log(
-            `conventions checker: named the stubs of ${migration.stubs.length} file(s) as 17 does — defineStub, stubs/, *.stubs.ts (ground-uses-reserved-name)`,
-        );
-    }
-}
-
-function reportLintConfigMove({ file, removed, renamed }: LintConfigMove): void {
-    for (const id of renamed) {
-        console.log(
-            `conventions checker: ${file} — the override of jterrazz/${id} names its 17 id`,
-        );
-    }
-    for (const id of removed) {
-        console.log(
-            `conventions checker: ${file} — removed the override of jterrazz/${id}, a rule 17 retired`,
-        );
-    }
-}
-
-function reportBaselineKeysMove(file: string, { renamed, shared }: BaselineKeysMove): void {
-    for (const key of renamed) {
-        console.log(`conventions checker: ${file} — ${key} is keyed by its rule's name`);
-    }
-    for (const key of shared) {
-        console.log(
-            `conventions checker: ${file} — ${key} counted several passes under one code; run 'jterrazz-test-check baseline' to record each by its name`,
-        );
-    }
-}
-
 function applyFixes(root: string): void {
-    reportMigration(migrateTo17(root, moveKeepingHistory));
     for (const move of fixNoReachIntoSiblingGround(root)) {
         console.log(`conventions checker: moved ${move} (no-reach-into-sibling-ground)`);
     }

@@ -1,7 +1,0 @@
-description: a module test standing on a 16 ground folder is refused
-fixture: ./fixtures/on-16-module/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          src/report/report.test.ts:1:1  jterrazz(ground-uses-reserved-name)

@@ -1,1 +1,0 @@
-INSERT INTO builds VALUES (1);

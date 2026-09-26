@@ -1,4 +1,4 @@
-description: a rule importing a reader, and the checker entry importing the mover, pass
+description: a rule importing a reader passes
 fixture: ./fixtures/downward/
 runs:
     - command: self-checker .

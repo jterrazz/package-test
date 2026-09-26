@@ -18,10 +18,3 @@ export const SHARED_GROUND = 'shared';
 export function isGroundName(name: string): boolean {
     return (GROUND_DIRS as readonly string[]).includes(name);
 }
-
-export const RENAMED_GROUND_DIRS: Readonly<Record<string, string>> = {
-    _expected: GROUND_EXPECTED,
-    _fixtures: GROUND_FIXTURES,
-    _requests: GROUND_REQUESTS,
-    _seeds: GROUND_SEEDS,
-};

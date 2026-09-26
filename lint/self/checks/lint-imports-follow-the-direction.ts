@@ -6,14 +6,11 @@ const LINT_DIRECTION: Record<string, readonly string[]> = {
     catalogue: ['catalogue', 'reading'],
     checks: ['checks', 'catalogue', 'ratchet', 'reading'],
     index: ['catalogue', 'checks', 'ratchet', 'reading', 'rulebook', 'rules'],
-    migration: ['migration', 'catalogue', 'checks', 'ratchet', 'reading', 'rulebook', 'rules'],
     ratchet: ['ratchet', 'catalogue', 'reading'],
     reading: ['reading'],
     rulebook: ['rulebook', 'catalogue', 'reading'],
     rules: ['rules', 'catalogue', 'reading'],
 };
-
-const MIGRATION_ENTRY = 'lint/checks/checker.cli.ts';
 
 function lintFolderOf(path: string): string | undefined {
     const [tree, folder, next] = path.split('/');
@@ -32,9 +29,6 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
             const into = lintFolderOf(target);
             const allowed = own === undefined ? undefined : LINT_DIRECTION[own];
             if (allowed === undefined || into === undefined || allowed.includes(into)) {
-                return [];
-            }
-            if (into === 'migration' && from === MIGRATION_ENTRY) {
                 return [];
             }
             return [

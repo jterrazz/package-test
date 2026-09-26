@@ -22,7 +22,6 @@
         "jterrazz/specs-at-declared-depth": "error",
         "jterrazz/stubs-imported-through-facade": "error",
         "jterrazz/stub-data-has-a-builder": "error",
-        "jterrazz/ground-uses-reserved-name": "error",
         "jterrazz/request-file-extension-known": "error",
         "jterrazz/stubs-root-holds-facades-and-kinds": "error",
         "jterrazz/golden-path-has-extension": "error",

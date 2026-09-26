@@ -1,4 +1,4 @@
-description: a reader importing a rule, and a pass importing the mover, are refused at the import
+description: a reader importing a rule, and a pass importing a rule, are refused at the import
 fixture: ./fixtures/upward/
 runs:
     - command: self-checker .

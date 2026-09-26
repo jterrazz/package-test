@@ -73,117 +73,9 @@ Nothing persistent. Inside a consuming project the framework writes only under `
 
 Containers are the one resource that outlives a process badly, which is why `afterAll(cleanup)` is a rule and not a suggestion: a suite that forgets it leaks its infrastructure into the next one.
 
-## What a 17.0 adoption meets
+## What the toolchain's flow meets
 
-`npx jterrazz-test-check --fix` is the migration: over every `specs/` tree
-and every member's module tests, it renames the four ground folders to their
-bare names, deepest first — the 16 pool, `<specs>/_fixtures/`, becomes the
-shared ground's `<specs>/shared/fixtures/` — rewrites every literal call and document to name the
-disk with `file()` or `directory()` and a full relative path —
-`.seed('x.sql')` to `.seed(file('./seeds/x.sql'))`,
-`.fixture('$FIXTURES/app/')` to `.fixture(directory('../../shared/fixtures/app/'))`,
-`toMatch('help.txt')` to `toMatch(file('./expected/help.txt'))`,
-`.run('x.spec.yaml')` to `.run(file('./x.spec.yaml'))` — and imports the two
-wrappers from the entry the specification file already uses. It reads the 17
-prototype's `…File` verbs too.
-
-A stream is a stream in 17, not a string: the mover makes one compared as a
-value read its text — `expect(result.stdout).toContain('x')` to
-`expect(result.stdout.text).toContain('x')` — and one asserted empty an empty
-text, `await expect(result.stderr).toBeEmpty()` to
-`expect(result.stderr.text).toBe('')`. A table keeps its `toBeEmpty`.
-
-A contract is a stub in 17 ([16 — Stubs](16-stubs.md)): the mover renames
-every `contracts/` folder of a `specs/` tree to `stubs/` — and, beside a
-member's module tests, every `contracts/` folder that holds a
-`*.contracts.ts` facade — and each facade `<name>.contracts.ts` to
-`<name>.stubs.ts`. It rewrites every relative literal that named one
-(`./contracts/news.contracts.js` to `./stubs/news.stubs.js`), and gives
-each name 16 published its 17 name wherever a file imports it from the
-entry: `defineContract` and `defineContracts` to `defineStub` and
-`defineStubs`, `Contract`, `Contracts` and the `Contract…` types to
-`Stub`, `Stubs` and `Stub…`. A `contracts/` folder still beside a test, in
-the same scope, is a `ground-uses-reserved-name` error that names the mover, so a tree that
-reintroduces the 16 name after the move is caught.
-
-Its gate is per file: it moves only a file `ground-uses-reserved-name` still finds 16.x-shaped — one
-with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —
-so a second run, a run over a tree already on 17, or a 17 file beside a 16 one
-in the same tree changes nothing. Two gestures run outside that gate, on
-every file of every run: the stubs move above, which finds nothing on a
-second run since 17 publishes none of the 16 names and leaves no `contracts/`
-folder; and the directive rename below, since a renamed directive no longer
-matches. It is 17.0's alone: `ground-uses-reserved-name` and its mover retire in 17.1, once the estate's wave
-has run. What it leaves to the reader:
-
-- **A `toMatch` literal with no golden behind it stays a value.** The mover
-  moves a string only when a file of that name sits in the spec's `expected/`;
-  anything else was already a substring check, and still is.
-- **The ratchet is one file, a section per owner.** `oxlint.baseline.json`,
-  `typescript.baseline.json` and `test.baseline.json` are gone:
-  `typescript baseline` records the `typescript` section of
-  `jterrazz.baseline.json` and refuses a `jterrazz/…` or `jterrazz-check/…`
-  key in it, and `jterrazz-test-check baseline` records those in its `test`
-  section — run the two gestures once, then delete the old files
-  ([19 § The ratchet](19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson)).
-  A leftover per-package file is never read again: `typescript check` names
-  it (`baseline-legacy`) until it is deleted.
-- **Family settings leave package.json.** A repository states its settings
-  for the family in `jterrazz.config.ts` at its root, a section per package,
-  typed by `defineConfig` from `@jterrazz/typescript/config`; a `jterrazz` key
-  in package.json is no longer read. This package's section is `test`, merged
-  into that interface as `TestSettings` — it holds nothing yet, so it accepts
-  `{}` and refuses any key.
-- **A helper that named ground moves where it stands.** The mover writes the
-  `file()` where the string was, inside the helper, and `paths-named-in-the-test` refuses it there:
-  a path resolves against the spec that starts the chain, so the helper takes
-  the `file()` as a parameter and each test builds its own.
-- **A 16.x file with no 16 folder beside it is not moved.** Nothing in it
-  tells a 16 string from a 17 value, so the compiler names each call the
-  types refuse, and each is written by hand.
-- **A folder of the product named `contracts/` stays.** Outside a `specs/`
-  tree the mover moves only a folder that holds a `*.contracts.ts` facade, so a
-  product's own `contracts/` domain, and a type of its own called `Contract`,
-  are left as written.
-- **A composite's list is `.stubs`.** A file reading `.contracts` off a
-  `defineStubs(…)` composite is not rewritten — the property is not an import —
-  and the compiler names each read.
-- **Every rule and pass is named, not coded.** 17.0 renames each letter-coded
-  id to the requirement it states — `jterrazz/one-describe-per-file` was
-  `c31-describe-names-file`, a `jterrazz-check/<code>` is
-  `jterrazz-check/<name>`. `make fix` rewrites every `oxlint-disable…` and
-  `checker-disable…` directive, every config override and every key of the
-  `test` baseline section. A code several passes shared (`c8`, `d4`, `d4b`)
-  counted them together, and no count splits back into them: its key is left
-  for `jterrazz-test-check baseline` to re-record. The map
-  (`lint/migration/names.ts`) leaves with the mover in 17.1.
-- **A suppression follows the rule it names.**
-  `d8w-text-bypass`, `c2-http-only-requests`, `c4-contract-shape`, `c10-contracts-boundary` and `c11-contract-data-pairing`, for instance,
-  are rewritten to `no-raw-bypass`,
-  `request-file-extension-known`, `stubs-root-holds-facades-and-kinds`, `stubs-imported-through-facade` or
-  `stub-data-has-a-builder` on every file, a tree an earlier mover already moved included, and the line a
-  `-next-line` or `-line` directive naming `no-raw-bypass` covers reads `.raw` — the
-  capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
-  and the toolchain's Suppressions pass reports it: delete it.
-- **An override follows the rule it names too.** oxlint refuses to start on a
-  config naming a rule the plugin does not define, so the mover rewrites each
-  member's oxlint config (`oxlint.config.ts`, its `.js`/`.mjs`/`.mts` forms,
-  `.oxlintrc.json`): an override of a renamed rule names its 17 id, and an
-  override of a static rule 17 retired is removed with the comment lines
-  directly above it —
-  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist, and neither does `f3-specs-public-entry`: its subpath half is `no-unpublished-subpath`'s, and the rest holds this package alone.
-  What a removed override tuned is not carried over: the rule that replaced
-  it, if any, is judged at its own defaults.
-- **A computed name is out of its reach.** A template or a variable naming a
-  seed, a fixture or a golden is left as written, and the first run names each
-  one the verb refuses.
-- **A domain named with a reserved word** (`requests/`, `fixtures/`, …) is
-  renamed by hand: `specs-at-declared-depth` refuses it, and only its author knows the subject.
-- **Element names are exact.** A partial name that 16.x widened now designates
-  nothing; write the accessible name whole, as the ARIA tree prints it.
-
-The toolchain's own flow carries three more things to know before they surprise
-a reader:
+Three things to know before they surprise a reader:
 
 - **A member whose ROOT is the specs tree** (`packages: ['specs']`) is judged by
   `jterrazz-test-check .` or by a path-less run from that member. The
@@ -191,7 +83,7 @@ a reader:
   makes the same move its Test Conventions pass reports the member findings
   alone — `TODO.md` carries the ask.
 - **An include entry that names `.test.ts`** stops collecting the moment `--fix`
-  renames a facet spec. The mover names the ones it BROKE — a glob whose prefix
+  renames a facet spec. The fix names the ones it BROKE — a glob whose prefix
   covers a file it moved, a literal naming one, and never a comment — so a
   notice is always about a file that just moved; update them in the same commit,
   and `include-points-at-a-folder` holds the class afterwards.

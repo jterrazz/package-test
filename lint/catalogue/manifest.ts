@@ -216,20 +216,6 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "The ground a test stands on carries a bare, reserved name: `fixtures/`, `expected/`, `requests/`, `seeds/` — a spec's under `specs/`, and a module test's beside its module. An `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` directory beside a test (or as the pool, `<specs>/_fixtures/`, whose 17 place is `<specs>/shared/fixtures/`) is the 16.x name — an error naming the rename — and so is a `contracts/` folder beside a test, the 16.x name of `stubs/`: any one under `specs/`, and beside a module test one holding a `*.contracts.ts` facade. The rule and its mover are the 16 → 17 migration: they retire in 17.1. The mover (`--fix`) walks every `specs/` tree and every member's module tests — a module test's relative literal naming a folder it renames under `specs/` follows the rename — and moves only a file the rule still finds 16.x-shaped — a 16 folder beside it, or a 16 pool it names by `$FIXTURES/`; a 17 file is left as it is, whatever its tree holds, and only a directive naming a renamed rule, and the stub vocabulary, are moved on every file: a `contracts/` folder — any one in a `specs/` tree, one holding a `*.contracts.ts` facade beside a module test — is `stubs/`, its facades `*.stubs.ts`, and a 16 name imported from the entry (`defineContract(s)`, `Contract`, `Contracts`, the `Contract…` types) its 17 one.",
-        facet: 'model',
-        family: 'layout',
-        fix: 'Rename the directory to its bare name, and the paths that name it (`jterrazz-test-check --fix` does both).',
-        name: 'ground-uses-reserved-name',
-        rationale:
-            'Every path names its folder in full, so the old name still runs — and a repository that keeps it speaks two dialects of one law. The rule names the rename instead of letting the two drift.',
-        reach: 'tests',
-        severity: 'error',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
             '`requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.',
         facet: 'api',
         family: 'layout',

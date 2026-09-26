@@ -107,13 +107,13 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree; the command line that runs the mover is `lint/checks/checker.cli.ts`. Tests are exempt. An error at the import.',
+            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree. Tests are exempt. An error at the import.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move what the importer needs into a folder it may import, or move the importer up the tree.',
         name: 'lint-imports-follow-the-direction',
         rationale:
-            '`import-within-declared-layers` sees `lint/` as one layer, so a reader reaching a rule, a pass reaching the mover 17.1 deletes, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
+            '`import-within-declared-layers` sees `lint/` as one layer, so a reader reaching a rule, a pass reaching a rule, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
         reach: 'module',
         severity: 'error',
     },

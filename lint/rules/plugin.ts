@@ -30,7 +30,6 @@ import { noTestCodeInProduction } from './imports/no-test-code-in-production.js'
 import { noTestToTestImport } from './imports/no-test-to-test-import.js';
 import { noUnpublishedSubpath } from './imports/no-unpublished-subpath.js';
 import { goldenPathHasExtension } from './layout/golden-path-has-extension.js';
-import { groundUsesReservedName } from './layout/ground-uses-reserved-name.js';
 import { oneDescribePerFile } from './layout/one-describe-per-file.js';
 import { pathsNamedInTheTest } from './layout/paths-named-in-the-test.js';
 import { requestFileExtensionKnown } from './layout/request-file-extension-known.js';
@@ -81,7 +80,6 @@ const plugin: LintPlugin = {
         'specs-at-declared-depth': specsAtDeclaredDepth,
         'stubs-imported-through-facade': stubsImportedThroughFacade,
         'stub-data-has-a-builder': stubDataHasABuilder,
-        'ground-uses-reserved-name': groundUsesReservedName,
         'verb-reads-its-ground-folder': verbReadsItsGroundFolder,
         'paths-named-in-the-test': pathsNamedInTheTest,
         'request-file-extension-known': requestFileExtensionKnown,

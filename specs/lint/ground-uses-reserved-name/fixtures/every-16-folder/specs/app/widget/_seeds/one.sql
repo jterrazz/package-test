@@ -1,1 +1,0 @@
-INSERT INTO widgets VALUES (1);
