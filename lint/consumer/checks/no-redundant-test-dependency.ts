@@ -20,9 +20,9 @@ const CARRIED_IN_DEV = new Set(['yaml']);
 /** `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies. */
 const FRAMEWORK = '@jterrazz/test';
 
-const RETIRED = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
+const REPLACED_SEAMS = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 
-const RETIRED_SCOPES = ['@testing-library/'];
+const REPLACED_SCOPES = ['@testing-library/'];
 
 /** React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests. */
 const JEST_ONLY_SEAM = '@testing-library/react-native';
@@ -124,28 +124,28 @@ function jestReachesMember(memberDir: string, rootDir: string): boolean {
     });
 }
 
-type Seam = { kind: 'carried' | 'retired'; name: string };
+type Seam = { kind: 'carried' | 'replaced'; name: string };
 
 function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
     if (manifest.name === FRAMEWORK) {
         return [];
     }
-    const isRetired = (name: string): boolean => {
+    const isReplaced = (name: string): boolean => {
         if (name === JEST_ONLY_SEAM && jestRuns) {
             return false;
         }
-        return RETIRED.has(name) || RETIRED_SCOPES.some((scope) => name.startsWith(scope));
+        return REPLACED_SEAMS.has(name) || REPLACED_SCOPES.some((scope) => name.startsWith(scope));
     };
     const declared = new Set([
         ...Object.keys(manifest.dependencies ?? {}).filter(
-            (name) => CARRIED.has(name) || isRetired(name),
+            (name) => CARRIED.has(name) || isReplaced(name),
         ),
         ...Object.keys(manifest.devDependencies ?? {}).filter(
-            (name) => CARRIED.has(name) || CARRIED_IN_DEV.has(name) || isRetired(name),
+            (name) => CARRIED.has(name) || CARRIED_IN_DEV.has(name) || isReplaced(name),
         ),
     ]);
     return [...declared].toSorted().map((name) => ({
-        kind: isRetired(name) ? ('retired' as const) : ('carried' as const),
+        kind: isReplaced(name) ? ('replaced' as const) : ('carried' as const),
         name,
     }));
 }

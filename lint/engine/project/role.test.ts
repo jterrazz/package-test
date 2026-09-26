@@ -91,11 +91,11 @@ describe('role', () => {
         ]).toStrictEqual([null, null, null]);
     });
 
-    test('roleOf — read below the project root — a checkout under a folder named like ground, a stub or a retired root is none of them', () => {
+    test('roleOf — read below the project root — a checkout under a folder named like ground, a stub or a stray test root is none of them', () => {
         // Given - three packages checked out under `fixtures/`, `stubs/` and `__tests__/`
         const under = ['fixtures', 'stubs', '__tests__'].map((folder) => checkoutUnder(folder));
 
-        // Then - a module of each is the project's own code, and its test sits under no retired root
+        // Then - a module of each is the project's own code, and its test sits under no stray test root
         expect(under.map((root) => roleOf(join(root, 'src/widget.ts')).role)).toStrictEqual([
             'other',
             'other',
@@ -107,7 +107,7 @@ describe('role', () => {
     });
 
     test('roleOf — read below the project root — the folders inside the project still say what they are', () => {
-        // Given - the same checkout under `fixtures/`, with its own ground, stubs and retired root
+        // Given - the same checkout under `fixtures/`, with its own ground, stubs and stray test root
         const root = checkoutUnder('fixtures');
 
         // Then - ground, stub and `__tests__` are read where the project names them
