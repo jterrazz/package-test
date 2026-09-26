@@ -5,8 +5,8 @@ import {
     identifierName,
     propertyKeyName,
     stringValue,
-} from '../../../reading/ast.js';
-import type { AstNode } from '../../../reading/ast.js';
+} from '../../reading/ast.js';
+import type { AstNode } from '../../reading/ast.js';
 import { isAdapter, isNamedKey, isReference, isRow, rootOf, unwrapped } from './facet-values.js';
 
 export type FacetFinding = {

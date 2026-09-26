@@ -7,8 +7,8 @@ import {
     propertyKeyName,
     stringValue,
     walk,
-} from '../../../reading/ast.js';
-import type { AstNode } from '../../../reading/ast.js';
+} from '../../reading/ast.js';
+import type { AstNode } from '../../reading/ast.js';
 import { importsOf, layerOf } from './facet-file.js';
 
 export type HandleFinding =

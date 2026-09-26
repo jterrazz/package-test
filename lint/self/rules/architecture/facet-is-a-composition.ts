@@ -4,8 +4,8 @@ import { lessonsAt } from '../../../catalogue/lesson.js';
 import { segments } from '../../../reading/ast.js';
 import type { LintRule, Visitor } from '../../../rules/rule.js';
 import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
-import { facetFileFindings } from './facet-file.js';
-import { handleFileFindings } from './facet-handle.js';
+import { facetFileFindings } from '../../reading/facet-file.js';
+import { handleFileFindings } from '../../reading/facet-handle.js';
 
 type FacetFile = 'composition' | 'constructor' | undefined;
 

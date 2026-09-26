@@ -4,8 +4,8 @@ import {
     identifierName,
     propertyKeyName,
     stringValue,
-} from '../../../reading/ast.js';
-import type { AstNode } from '../../../reading/ast.js';
+} from '../../reading/ast.js';
+import type { AstNode } from '../../reading/ast.js';
 
 export function unwrapped(node: AstNode | undefined): AstNode | undefined {
     return node?.type === 'TSAsExpression' ||

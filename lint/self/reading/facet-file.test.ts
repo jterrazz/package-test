@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { isNode } from '../../../reading/ast.js';
-import type { AstNode } from '../../../reading/ast.js';
-import { parseProgram } from '../../../reading/module-parser.js';
+import { isNode } from '../../reading/ast.js';
+import type { AstNode } from '../../reading/ast.js';
+import { parseProgram } from '../../reading/module-parser.js';
 import { facetFileFindings, importsOf } from './facet-file.js';
 
 function programOf(source: string): AstNode {
