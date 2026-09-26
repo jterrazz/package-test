@@ -4,7 +4,7 @@ export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = 
     '@vitest/browser-playwright': ['src/facets/component/'],
     'better-sqlite3': ['src/world/services/sqlite/'],
     hono: ['src/facets/api/'],
-    msw: ['src/world/stubs/network/'],
+    msw: ['src/world/stubs/delivery/'],
     'oxc-parser': ['lint/engine/project/module-parser.ts'],
     pg: ['src/world/services/postgres/'],
     playwright: ['src/facets/website/'],

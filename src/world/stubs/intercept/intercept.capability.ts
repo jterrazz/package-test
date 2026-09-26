@@ -1,6 +1,6 @@
 import { defineCapability } from '../../../kernel/chain/capability.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import type { StubRequest, StubResponder, StubResponse } from '../exchange/exchange.js';
+import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
 import type { InterceptPort } from './intercept.port.js';

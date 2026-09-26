@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { http } from '../http/http.js';
+import { http } from '../kinds/http.js';
 import { declared } from './declared.js';
 
 describe('declared', () => {

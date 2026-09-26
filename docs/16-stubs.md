@@ -254,6 +254,8 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 ## Three drivers, one queue
 
+A stub reaches the subject by one of three deliveries, named for where the subject runs: the same process, a browser page, or another process.
+
 | Facets                                                    | Driver                                            | Notes                                                                               |
 | --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `api`, `job`, `integration`, and a module's `intercept()` | **msw server**, in-process                        | The subject runs here, so its outgoing requests pass through this process           |

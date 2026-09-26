@@ -3,7 +3,7 @@ import type { ChainOf } from '../../kernel/chain/chain.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { stubBackend } from '../../world/stubs/backend/stub-backend.driver.js';
+import { stubBackend } from '../../world/stubs/delivery/other-process/stub-backend.adapter.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import type { MobileConfig, MobileSpecificationOptions } from './mobile.handle.js';
 import { appiumApp } from './screen/app.driver.js';

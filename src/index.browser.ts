@@ -15,7 +15,7 @@ export type * from './index.js';
 
 export { component } from './facets/component/index.browser.js';
 
-export { intercept } from './world/stubs/intercept/page-intercept.js';
+export { intercept } from './world/stubs/delivery/browser-page/intercept.js';
 
 /** The six constructors, present and refusing in a page. */
 export const specification: Specification = {
@@ -36,9 +36,9 @@ export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
 export { text } from './expectations/text/text-subject.browser.js';
 
 export { directory, file } from './kernel/files/spec-path.js';
-export { anthropic } from './world/stubs/anthropic/anthropic.js';
-export { http } from './world/stubs/http/http.js';
-export { openai } from './world/stubs/openai/openai.js';
+export { anthropic } from './world/stubs/kinds/anthropic.js';
+export { http } from './world/stubs/kinds/http.js';
+export { openai } from './world/stubs/kinds/openai.js';
 export { defineStub, defineStubs } from './world/stubs/stub.js';
 export { clock } from './world/clock/clock.js';
 export { mockOf } from './world/mocks/mock-of.js';

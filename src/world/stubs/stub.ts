@@ -1,4 +1,5 @@
-import type { StubRequest, StubResponseValue } from './exchange/exchange.js';
+import type { StubRequest, StubResponseValue } from './exchange.js';
+import { routeKeyOf } from './matching/route.js';
 
 /** A declared external interaction: what to match and what to reply. */
 export type Stub = {
@@ -40,17 +41,6 @@ export function isStub(value: unknown): value is Stub {
     return typeof value === 'object' && value !== null && 'request' in value && 'response' in value;
 }
 
-/** Same method and same declared url source (`.source` for a RegExp). */
-export function routeKeyOf(stub: Stub): string {
-    const { method, url } = stub.request;
-    return url instanceof RegExp ? `${method} re:${url.source}` : `${method} str:${url}`;
-}
-
-export function describeRoute(stub: Stub): string {
-    const { method, url } = stub.request;
-    return `${method === '*' ? 'ANY' : method} ${url instanceof RegExp ? String(url) : url}`;
-}
-
 function flatten(items: readonly StubInput[]): Stub[] {
     const flat: Stub[] = [];
     for (const item of items) {
@@ -72,8 +62,8 @@ export function defineStubs(...items: StubInput[]): Stubs {
         stubs,
         with(...overrides: StubInput[]): Stubs {
             const added = flatten(overrides);
-            const claimed = new Set(added.map(routeKeyOf));
-            const kept = stubs.filter((stub) => !claimed.has(routeKeyOf(stub)));
+            const claimed = new Set(added.map((stub) => routeKeyOf(stub.request)));
+            const kept = stubs.filter((stub) => !claimed.has(routeKeyOf(stub.request)));
             return defineStubs([...added, ...kept]);
         },
     };

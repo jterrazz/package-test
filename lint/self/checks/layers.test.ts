@@ -54,7 +54,7 @@ describe('FRAMEWORK_LAYERS', () => {
                 {
                     code: 'import { api } from "../../../facets/api/index.js";',
                     errors: [{ messageId: 'crossLayer' }],
-                    filename: '/repo/src/world/stubs/http/http.ts',
+                    filename: '/repo/src/world/stubs/kinds/http.ts',
                     options: own,
                 },
                 // The three shared layers reach the kernel, not each other.
@@ -101,7 +101,7 @@ describe('FRAMEWORK_LAYERS', () => {
                 {
                     code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
                     errors: [{ messageId: 'crossLayer' }],
-                    filename: '/repo/src/world/stubs/openai/openai.ts',
+                    filename: '/repo/src/world/stubs/kinds/openai.ts',
                     options: own,
                 },
             ],
@@ -126,7 +126,7 @@ describe('FRAMEWORK_LAYERS', () => {
                 // A stub's request filter IS an expectation on the outgoing request.
                 {
                     code: 'import { CaptureScope } from "../../../expectations/tokens/match.js";',
-                    filename: '/repo/src/world/stubs/http/http.ts',
+                    filename: '/repo/src/world/stubs/kinds/http.ts',
                     options: own,
                 },
             ],

@@ -3,10 +3,13 @@ import { describe, expect, test } from 'vitest';
 import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
 import { clock } from '../../../world/clock/clock.capability.js';
-import type { StubRequest, StubResponse } from '../../../world/stubs/exchange/exchange.js';
-import { http } from '../../../world/stubs/http/http.js';
-import { interceptThrough } from '../../../world/stubs/intercept/module-intercept.js';
-import { registerStubs, stopStubServer } from '../../../world/stubs/network/server.js';
+import {
+    registerStubs,
+    stopStubServer,
+} from '../../../world/stubs/delivery/same-process/stub-server.js';
+import type { StubRequest, StubResponse } from '../../../world/stubs/exchange.js';
+import { interceptThrough } from '../../../world/stubs/intercept/intercept.js';
+import { http } from '../../../world/stubs/kinds/http.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { rawFetch } from './fetch.action.js';
 import type { FetchResult } from './fetch.result.js';

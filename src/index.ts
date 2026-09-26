@@ -21,16 +21,16 @@ export {
     type RelativePath,
 } from './kernel/files/spec-path.js';
 
-export { anthropic } from './world/stubs/anthropic/anthropic.js';
+export { anthropic } from './world/stubs/kinds/anthropic.js';
 export {
     http,
     type HttpResponseInit,
     type HttpStreamInit,
     type HttpStubFilter,
     type SseEvent,
-} from './world/stubs/http/http.js';
-export { type TextFilter } from './world/stubs/filters.js';
-export { openai } from './world/stubs/openai/openai.js';
+} from './world/stubs/kinds/http.js';
+export { type TextFilter } from './world/stubs/kinds/text-filter.js';
+export { openai } from './world/stubs/kinds/openai.js';
 export {
     defineStub,
     defineStubs,
@@ -45,13 +45,13 @@ export type {
     StubResponder,
     StubResponse,
     StubResponseValue,
-} from './world/stubs/exchange/exchange.js';
-export { intercept } from './world/stubs/intercept/process-intercept.js';
+} from './world/stubs/exchange.js';
+export { intercept } from './world/stubs/delivery/same-process/intercept.js';
 export type {
     Intercept,
     InterceptOptions,
     InterceptScope,
-} from './world/stubs/intercept/module-intercept.js';
+} from './world/stubs/intercept/intercept.js';
 export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
 export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
 export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';

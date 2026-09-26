@@ -24,9 +24,9 @@ export const FRAMEWORK_LAYERS = {
         imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
         seams: {
             // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
-            'world/stubs/exchange/queue.ts': ['expectations/tokens/'],
-            'world/stubs/filters.ts': ['expectations/tokens/'],
-            'world/stubs/http/http.ts': ['expectations/tokens/'],
+            'world/stubs/kinds/http.ts': ['expectations/tokens/'],
+            'world/stubs/kinds/text-filter.ts': ['expectations/tokens/'],
+            'world/stubs/matching/route.ts': ['expectations/tokens/'],
         },
     },
     elements: { imports: ['kernel/', 'elements/', 'lint/engine/', 'lint/index.refusal'] },

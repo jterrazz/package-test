@@ -45,12 +45,12 @@ ruleTester.run('no-framework-internals', noFrameworkInternals as unknown as Oxli
         },
         // A capability's module and a stub builder's are internal: a spec reaches both through the entry.
         {
-            code: 'import { interceptThrough } from "../../src/world/stubs/intercept/module-intercept.js";',
+            code: 'import { interceptThrough } from "../../src/world/stubs/intercept/intercept.js";',
             errors: 1,
             filename: '/repo/specs/api/intercept/exhausted.spec.ts',
         },
         {
-            code: 'import { http } from "../../src/world/stubs/http/http.js";',
+            code: 'import { http } from "../../src/world/stubs/kinds/http.js";',
             errors: 1,
             filename: '/repo/specs/api/intercept/exhausted.spec.ts',
         },

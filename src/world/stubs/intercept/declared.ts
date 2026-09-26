@@ -1,4 +1,4 @@
-import type { StubRequest, StubResponder, StubResponse } from '../exchange/exchange.js';
+import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import { isStub, isStubs, stubsOf } from '../stub.js';
 import type { Stub, StubInput } from '../stub.js';
 

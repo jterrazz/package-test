@@ -1,4 +1,4 @@
-import { existsSync, readdirSync } from 'node:fs';
+import { readdirSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
@@ -8,8 +8,8 @@ import {
     http as publishedHttp,
     openai as publishedOpenai,
 } from '../../index.js';
-import { anthropic } from './anthropic/anthropic.js';
-import { http } from './http/http.js';
+import { anthropic } from './kinds/anthropic.js';
+import { http } from './kinds/http.js';
 import { defineStub, defineStubs } from './stub.js';
 import type { Stub } from './stub.js';
 
@@ -27,14 +27,13 @@ function tagsOf(stubs: readonly Stub[]): string[] {
     });
 }
 
-async function builderFolders(): Promise<string[]> {
-    const named = readdirSync(import.meta.dirname, { withFileTypes: true })
-        .filter((dirent) => dirent.isDirectory())
-        .map((dirent) => dirent.name)
-        .filter((name) => existsSync(join(import.meta.dirname, name, `${name}.ts`)));
+async function builderModules(): Promise<string[]> {
+    const named = readdirSync(join(import.meta.dirname, 'kinds'))
+        .filter((file) => file.endsWith('.ts') && !file.endsWith('.test.ts'))
+        .map((file) => file.replace(/\.ts$/u, ''));
     const builders = await Promise.all(
         named.map(async (name) => {
-            const loaded: unknown = await import(`./${name}/${name}.ts`);
+            const loaded: unknown = await import(`./kinds/${name}.ts`);
             return typeof loaded === 'object' && loaded !== null && name in loaded ? [name] : [];
         }),
     );
@@ -129,17 +128,17 @@ describe('stub', () => {
         expect(tagsOf(nested.stubs)).toStrictEqual(['x', 'other']);
     });
 
-    test('stub kinds — the builders a stub folder is named for — names every builder folder of the package, each a builder its entry exports', async () => {
-        // Given - the folders under src/world/stubs/ exporting the builder they are named for, and the builders the entry exports
-        const folders = await builderFolders();
+    test('stub kinds — the builders a stub folder is named for — names every builder module of `kinds/`, each a builder its entry exports', async () => {
+        // Given - the modules under src/world/stubs/kinds/ exporting the builder they are named for, and the builders the entry exports
+        const modules = await builderModules();
         const exported: Record<string, unknown> = {
             anthropic: publishedAnthropic,
             http: publishedHttp,
             openai: publishedOpenai,
         };
 
-        // Then - one kind per builder folder, and each kind is a builder the entry publishes
-        expect(STUB_KINDS).toStrictEqual(folders.toSorted());
+        // Then - one kind per builder module, and each kind is a builder the entry publishes
+        expect(STUB_KINDS).toStrictEqual(modules.toSorted());
         expect(STUB_KINDS.map((kind) => typeof exported[kind])).toStrictEqual([
             'object',
             'object',

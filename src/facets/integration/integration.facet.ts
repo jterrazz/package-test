@@ -9,8 +9,8 @@ import { processClock } from '../../world/clock/clock.driver.js';
 import { databaseSet } from '../../world/services/seed/database-set.driver.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
 import type { ServicesConfig } from '../../world/services/services.js';
+import { mswNode } from '../../world/stubs/delivery/same-process/msw-node.adapter.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
-import { mswNode } from '../../world/stubs/network/msw-node.driver.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { call } from './call.action.js';
 import type { IntegrationSpecificationOptions } from './integration.handle.js';

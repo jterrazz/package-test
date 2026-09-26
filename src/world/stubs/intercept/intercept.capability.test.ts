@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { defineAction } from '../../../kernel/chain/action.js';
 import { defineFacet } from '../../../kernel/chain/define-facet.js';
-import { http } from '../http/http.js';
+import { http } from '../kinds/http.js';
 import { defineStubs } from '../stub.js';
 import type { Stub } from '../stub.js';
 import { intercept } from './intercept.capability.js';

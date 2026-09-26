@@ -33,7 +33,7 @@ const config: OxlintConfig = defineConfig(
                     'src/facets/component/page/**',
                     'src/facets/component/golden/**',
                     'src/facets/website/browser/playwright.adapter.ts',
-                    'src/world/stubs/network/**',
+                    'src/world/stubs/delivery/**',
                     'src/world/clock/**',
                     'src/world/mocks/**',
                     'src/world/services/containers/service-container.ts',
