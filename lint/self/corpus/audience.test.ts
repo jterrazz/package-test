@@ -7,16 +7,14 @@ import { describe, expect, test } from 'vitest';
 
 import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
 import { CATALOGUE_CHAPTER, REFUSAL_WHY } from '../../engine/catalogue/refusal.js';
-import { allRows, SELF_CHECKER_PASSES } from '../catalogue/manifest.js';
+import { filesUnder } from '../../engine/project/files-under.js';
+import { allRows, SELF_CHECKER_PASSES, selfRows } from '../catalogue/manifest.js';
 import {
     danglingImports,
     extractTarball,
-    filesUnder,
     MODULE_FILE,
     selfExposures,
     selfMentions,
-    selfRows,
-    selfRuleNames,
     strandedBundles,
 } from './audience.js';
 
@@ -67,8 +65,8 @@ describe('audience', () => {
     const scratch = mkdtempSync(join(tmpdir(), 'audience-tarball-'));
     const installed = extractTarball(ROOT, scratch);
     const packed = new Set(filesUnder(installed));
-    const rows = selfRows();
-    const self = selfRuleNames();
+    const rows = selfRows;
+    const self = new Set(selfRows.map((row) => row.name));
 
     test('no byte the tarball carries names a self rule', () => {
         // Given - every file of the extracted tarball, read as text: bundles, chunks, types, pages, manifest

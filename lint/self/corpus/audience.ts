@@ -1,20 +1,6 @@
 import { execFileSync } from 'node:child_process';
-import { readdirSync, readFileSync, statSync, symlinkSync } from 'node:fs';
+import { readdirSync, readFileSync, symlinkSync } from 'node:fs';
 import { dirname, join, normalize, relative } from 'node:path';
-
-import { allRows } from '../catalogue/manifest.js';
-
-export type SelfRow = {
-    name: string;
-};
-
-export function selfRows(): SelfRow[] {
-    return allRows.filter((entry) => entry.audience === 'self').map(({ name }) => ({ name }));
-}
-
-export function selfRuleNames(): Set<string> {
-    return new Set(selfRows().map((row) => row.name));
-}
 
 /** A `node_modules` beside the extracted `package/` points at this repository's install, so an entry resolves its dependencies as in a consumer's. */
 export function extractTarball(root: string, into: string): string {
@@ -32,19 +18,12 @@ export function extractTarball(root: string, into: string): string {
     return join(into, 'package');
 }
 
-export function filesUnder(dir: string): string[] {
-    return readdirSync(dir, { recursive: true })
-        .map(String)
-        .filter((path) => statSync(join(dir, path)).isFile())
-        .toSorted();
-}
-
 /** `links-resolve` and never the start of `links-resolve-twice`. */
 function namePattern(name: string): RegExp {
     return new RegExp(String.raw`(?<![\w-])${name}(?![\w-])`, 'u');
 }
 
-export function selfMentions(text: string, rows: SelfRow[]): string[] {
+export function selfMentions(text: string, rows: readonly { name: string }[]): string[] {
     const found = text.includes('jterrazz-self') ? ['jterrazz-self'] : [];
     for (const { name } of rows) {
         if (namePattern(name).test(text)) {

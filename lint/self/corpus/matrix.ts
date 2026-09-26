@@ -5,6 +5,7 @@ import { cell, table } from '../../engine/catalogue/chapter.js';
 import type { Markers } from '../../engine/catalogue/chapter.js';
 import type { AstNode } from '../../engine/project/ast.js';
 import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
+import { filesUnder } from '../../engine/project/files-under.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
@@ -29,23 +30,10 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
     website: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/website'] },
 };
 
-function filesUnder(dir: string, extensions: string[]): string[] {
-    let entries;
-    try {
-        entries = readdirSync(dir, { withFileTypes: true });
-    } catch {
-        return [];
-    }
-    const found: string[] = [];
-    for (const entry of entries) {
-        const path = join(dir, entry.name);
-        if (entry.isDirectory()) {
-            found.push(...filesUnder(path, extensions));
-        } else if (extensions.some((extension) => entry.name.endsWith(extension))) {
-            found.push(path);
-        }
-    }
-    return found;
+function sourcesUnder(dir: string, extensions: string[]): string[] {
+    return filesUnder(dir)
+        .filter((path) => extensions.some((extension) => path.endsWith(extension)))
+        .map((path) => join(dir, path));
 }
 
 const QUOTES = new Set(['"', "'", '`']);
@@ -144,7 +132,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
         const tree = COLUMN_TREES[column];
         return [
             ...tree.roots.flatMap((relative) =>
-                filesUnder(resolve(root, relative), tree.extensions),
+                sourcesUnder(resolve(root, relative), tree.extensions),
             ),
             ...(tree.files ?? []).map((relative) => resolve(root, relative)),
         ].map((path) => {
@@ -350,7 +338,7 @@ export const MATRIX_LAYERS_MARKERS: Markers = {
 type Layer = { count: number; judges: string; layer: string; where: string };
 
 function countUnder(root: string, roots: string[], extensions: string[]): number {
-    return roots.flatMap((relative) => filesUnder(resolve(root, relative), extensions)).length;
+    return roots.flatMap((relative) => sourcesUnder(resolve(root, relative), extensions)).length;
 }
 
 function filesDirectlyIn(dir: string, extensions: string[]): number {
