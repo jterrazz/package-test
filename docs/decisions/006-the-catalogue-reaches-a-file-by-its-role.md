@@ -41,7 +41,7 @@ and the role is read from the SUFFIX: `.specification.ts(x)`, `.spec.yaml`,
 `.spec.ts`, `.test.tsx`, `.test.ts`, `vitest.config.*`, a ground ancestor, a
 `contracts/` ancestor. A statique rule reads those three fields and, where it
 must know where the file sits, the ONE package-bounded anchor every pass shares
-(`specsAnchor` in `src/lint/reading/ast.ts`) — never a bare path segment. The rules
+(`specsAnchor` in `lint/engine/project/ast.ts`) — never a bare path segment. The rules
 that need it say so: C1, C4, C8, C13, F2, F3, I1, I4. Walking a TREE is the
 checker's — C1's depth, C12, C18, C20, C21w.
 
@@ -60,9 +60,9 @@ the refusal, an `@ts-expect-error` in `src/type-channel.test-d.ts`, a named
 meta-test. One meta-test holds that contract for all seven.
 
 **English, and anchored.** Every sentence the catalogue publishes is English
-(K5 holds the line with a deny-list of the tokens the manifest actually
+(`catalogue-in-english` holds the line with a deny-list of the tokens the manifest actually
 carried), and every message the PLUGIN ships ends with a generated
-`(<ID> — <chapter>#<rule>)` tail whose anchor is asserted to exist (K3). A
+`(<ID> — <chapter>#<rule>)` tail whose anchor is asserted to exist (`links-resolve`). A
 checker finding carries its id and its chapter; several of its passes report
 under a family code (`d4`, `d4b`, `d10w`) rather than a row name, so the tail
 routes to the chapter and the id says which row.
@@ -179,7 +179,7 @@ of — and every kind chapter is rewritten on one seven-section skeleton.
 | 13  | 19  | Linting (carries the generated catalogue) |
 
 A rule message anchored at `docs/13-linting.md#<name>` now reads
-`docs/19-linting.md#<name>`; K3 holds that every one of them resolves, so a
+`docs/19-linting.md#<name>`; `links-resolve` holds that every one of them resolves, so a
 renumbering that missed a message fails the suite rather than a reader.
 
 ## What the proof holds, and what it does not

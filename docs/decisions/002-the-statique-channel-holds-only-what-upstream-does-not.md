@@ -44,6 +44,6 @@ counterpart and stays.
 - One behaviour is configuration, not code: `prefer-lowercase-title` flags an
   all-caps first word (`VALID_CATEGORIES`, `HTTP`, `DI`) that J5 exempted, and
   `allowedPrefixes` restores the exemption.
-- The rule of growth changes with it. A new mechanizable defect class (K1) is
+- The rule of growth changes with it. A new mechanizable defect class (`discovery-grows-a-guard`) is
   now searched for upstream first, and a rule is written here only where the
   search comes back empty.
