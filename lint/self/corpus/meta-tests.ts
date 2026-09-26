@@ -53,7 +53,7 @@ export function renderMetaTests(root: string): string {
     ]);
     const total = rows.length;
     return [
-        `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_LAYER_ROOTS.map((root) => `\`${root}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
+        `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
         '',
         ...table(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');

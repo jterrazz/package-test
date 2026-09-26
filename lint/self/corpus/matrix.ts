@@ -423,7 +423,7 @@ export function layers(root: string): Layer[] {
             count: metaTests,
             judges: 'the corpus itself: the catalogue, the matrix, the skill, the floor',
             layer: 'Meta-tests',
-            where: META_LAYER_ROOTS.map((root) => `\`${root}/*.test.ts\``).join(', '),
+            where: META_LAYER_ROOTS.map((folder) => `\`${folder}/*.test.ts\``).join(', '),
         },
     ];
 }
