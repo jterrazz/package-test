@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
-import { treeKind } from '../../../src/kernel/files/git-tree.js';
+import { treeKind } from './git-tree.js';
 import { projectRootOf } from './role.js';
 import { specimenOf } from './specimen.js';
 import {

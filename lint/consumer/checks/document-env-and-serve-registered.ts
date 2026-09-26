@@ -1,8 +1,8 @@
 import { dirname, join } from 'node:path';
 
-import type { SpecDocument } from '../../../src/facets/cli/documents/spec-document.js';
-import { treeNames } from '../../../src/kernel/files/git-tree.js';
 import { finding } from '../../engine/project/document-model.js';
+import { treeNames } from '../../engine/project/git-tree.js';
+import type { SpecDocument } from '../../engine/project/spec-document.js';
 import { readText } from '../../engine/project/tree.js';
 import type { DocumentFinding } from './checker.js';
 

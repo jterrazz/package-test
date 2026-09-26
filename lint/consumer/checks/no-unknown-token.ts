@@ -1,5 +1,4 @@
-import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
-import { findUnknownTokens } from '../../engine/project/tokens.js';
+import { findUnknownTokens, TOKEN_KINDS } from '../../engine/project/tokens.js';
 import type { Finding } from './checker.js';
 
 export function noUnknownTokenFindings(text: string, file: string, firstLine = 1): Finding[] {

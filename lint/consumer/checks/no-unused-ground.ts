@@ -1,13 +1,13 @@
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
+import type { Severity } from '../../engine/checker/finding.js';
+import { specsAnchor } from '../../engine/project/ast.js';
+import { treeEntries } from '../../engine/project/git-tree.js';
 import {
     documentPaths,
     parseSpecDocument,
     SPEC_EXTENSION,
-} from '../../../src/facets/cli/documents/spec-document.js';
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
-import type { Severity } from '../../engine/checker/finding.js';
-import { specsAnchor } from '../../engine/project/ast.js';
+} from '../../engine/project/spec-document.js';
 import {
     collectFixtureReferences,
     DISK_CALL,

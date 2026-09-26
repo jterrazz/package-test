@@ -12,7 +12,7 @@ source trees](../01-architecture.md#the-source-trees)). `one-owner-per-engine` (
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
 `facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun
-simctl`), `expectations/command/` (`docker` for a result's containers), `kernel/files/git-tree.ts` (what git does not ignore) and, until
+simctl`), `expectations/command/` (`docker` for a result's containers), `lint/engine/project/git-tree.ts` (what git does not ignore) and, until
 this record, `world/services/sqlite/` (`prisma db push`).
 
 These are not one engine used six times. Each spawns a different program for a

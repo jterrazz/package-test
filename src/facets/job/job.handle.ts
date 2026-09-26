@@ -1,6 +1,6 @@
+import { resolveRoot } from '../../../lint/engine/project/resolve.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { resolveRoot } from '../../kernel/files/resolve.js';
 import { declaredDatabaseKeys } from '../../world/services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';

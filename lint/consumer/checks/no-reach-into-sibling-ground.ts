@@ -1,15 +1,15 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { moveKeepingHistory, treeEntries } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_DIRS, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import {
     repointDocument,
     repointed,
     repointModuleTests,
     repointSource,
 } from '../../engine/checker/repoint.js';
+import { moveKeepingHistory, treeEntries } from '../../engine/project/git-tree.js';
+import { GROUND_DIRS, SHARED_GROUND } from '../../engine/project/ground.js';
+import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import {
     collectFixtureReferences,
     DISK_CALL,

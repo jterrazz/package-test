@@ -1,4 +1,4 @@
-import { refusal } from './refusals/refusal.js';
+import { refusal } from '../../lint/engine/catalogue/refusal.js';
 
 /** Enforces rule `database-named-only-when-several`. */
 export function validateDatabaseOption(

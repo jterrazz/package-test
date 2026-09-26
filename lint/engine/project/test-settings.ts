@@ -2,8 +2,8 @@ import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
 
-import type { TestSettings } from '../../../src/kernel/config/settings.js';
-import { testSettingsOf } from '../../../src/kernel/config/test-section.js';
+import type { TestSettings } from './settings.js';
+import { testSettingsOf } from './test-section.js';
 
 /** Node loads the file synchronously, types stripped, since every pass is sync; the runtime's reader reads it, so the run and the checker agree. A file that does not load is no settings: the toolchain already reports it. */
 const loadModule = createRequire(import.meta.url);

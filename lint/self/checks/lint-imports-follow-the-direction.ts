@@ -11,6 +11,8 @@ const CONSUMER = ['consumer/catalogue', 'consumer/rulebook', 'consumer/rules', '
 
 const SELF_ABOVE_CATALOGUE = ['self/rules', 'self/checks', 'self/corpus'];
 
+const SELF_READS = [...SELF_ABOVE_CATALOGUE, 'self/catalogue', ...CONSUMER, 'engine', 'src'];
+
 const LINT_DIRECTION: Record<string, readonly string[]> = {
     'consumer/catalogue': ['consumer/catalogue', 'engine'],
     'consumer/checks': ['consumer/checks', 'consumer/catalogue', 'engine'],
@@ -19,11 +21,11 @@ const LINT_DIRECTION: Record<string, readonly string[]> = {
     engine: ['engine'],
     index: [...CONSUMER, 'engine'],
     'self/catalogue': ['self/catalogue', ...CONSUMER, 'engine'],
-    'self/checks': [...SELF_ABOVE_CATALOGUE, 'self/catalogue', ...CONSUMER, 'engine'],
-    'self/corpus': [...SELF_ABOVE_CATALOGUE, 'self/catalogue', ...CONSUMER, 'engine'],
-    'self/index': [...SELF_ABOVE_CATALOGUE, 'self/catalogue', ...CONSUMER, 'engine'],
-    'self/rules': [...SELF_ABOVE_CATALOGUE, 'self/catalogue', ...CONSUMER, 'engine'],
-    src: [],
+    'self/checks': SELF_READS,
+    'self/corpus': SELF_READS,
+    'self/index': SELF_READS,
+    'self/rules': SELF_READS,
+    src: ['src', 'engine'],
 };
 
 function placeOf(path: string): string | undefined {
@@ -61,7 +63,6 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
                 own === undefined ||
                 allowed === undefined ||
                 into === undefined ||
-                into === 'src' ||
                 allowed.includes(into)
             ) {
                 return [];
@@ -72,8 +73,8 @@ export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPa
                     from,
                     {
                         fix:
-                            allowed.length === 0
-                                ? 'take what `src/` needs from `src/` itself: `lint/` reads the product, never the reverse'
+                            into === 'src'
+                                ? 'move what it needs out of `src/` into `lint/engine/`, and let `src/` import it from there: the shipped `lint/` never reads the product'
                                 : `move what \`${shownPlace(own, from)}\` needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
                         found: `\`${from}\` imports \`${target}\`, from \`${shownPlace(into, target)}\`, which \`${shownPlace(own, from)}\` sits below`,
                     },

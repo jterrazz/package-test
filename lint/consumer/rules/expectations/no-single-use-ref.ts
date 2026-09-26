@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
-import { isRelativePath } from '../../../../src/kernel/files/spec-path.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
@@ -12,6 +11,7 @@ import {
     readFileCached,
 } from '../../../engine/project/fs-cache.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
+import { isRelativePath } from '../../../engine/project/relative-path.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { consumerRows } from '../../catalogue/manifest.js';

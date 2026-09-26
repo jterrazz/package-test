@@ -1,7 +1,7 @@
 import { join, relative } from 'node:path';
 
-import { GROUND_DIRS } from '../../../src/kernel/files/ground.js';
 import { entriesOf, SKIPPED, textOf, walkFiles } from '../../engine/project/facet-folders.js';
+import { GROUND_DIRS } from '../../engine/project/ground.js';
 import { isNodeTestFileName } from '../../engine/project/role.js';
 import type { Finding } from './checker.js';
 

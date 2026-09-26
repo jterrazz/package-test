@@ -5,7 +5,6 @@ import {
     file,
     isDiskDirectory,
     isDiskFile,
-    isRelativePath,
     requireDiskFile,
     requireDiskTarget,
 } from './spec-path.js';
@@ -18,7 +17,6 @@ describe('spec-path', () => {
             const named = file(path as `./${string}`);
 
             // Then - the value is a file, carries its path, and is not a directory
-            expect(isRelativePath(path)).toBeTruthy();
             expect(named.path).toBe(path);
             expect(isDiskFile(named)).toBeTruthy();
             expect(isDiskDirectory(named)).toBeFalsy();

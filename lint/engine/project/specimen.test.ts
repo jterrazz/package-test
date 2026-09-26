@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { forgetTree } from '../../../src/kernel/files/git-tree.js';
+import { forgetTree } from './git-tree.js';
 import { specimenOf } from './specimen.js';
 
 function specsTree(files: Record<string, string>): string {

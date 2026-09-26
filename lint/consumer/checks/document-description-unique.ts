@@ -1,7 +1,7 @@
 import { dirname, relative } from 'node:path';
 
-import { readSpecFile } from '../../../src/facets/cli/documents/spec-document.js';
 import { listSpecFiles } from '../../engine/project/document-model.js';
+import { readSpecFile } from '../../engine/project/spec-document.js';
 import { readText } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
 

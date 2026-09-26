@@ -1,5 +1,5 @@
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { GROUND_DIRS } from '../../../src/kernel/files/ground.js';
+import { GROUND_DIRS } from '../../engine/project/ground.js';
+import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { Finding } from './checker.js';
 
 const GROUND_NAMES = new Set<string>(GROUND_DIRS);

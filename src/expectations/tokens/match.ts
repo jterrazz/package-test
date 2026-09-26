@@ -1,3 +1,5 @@
+import type { TokenKind } from '../../../lint/engine/project/tokens.js';
+
 /** The frozen token vocabulary (rule `no-unknown-token`) plus the code-only kinds. */
 export type MatcherKind =
     | 'any'
@@ -24,32 +26,6 @@ export type MatcherKind =
     | 'url'
     | 'uuid'
     | 'workdir';
-
-export const TOKEN_KINDS = [
-    'any',
-    'base64',
-    'date',
-    'duration',
-    'email',
-    'float',
-    'hex',
-    'int',
-    'ip',
-    'iso8601',
-    'number',
-    'path',
-    'port',
-    'semver',
-    'sha',
-    'string',
-    'time',
-    'ulid',
-    'url',
-    'uuid',
-    'workdir',
-] as const;
-
-export type TokenKind = (typeof TOKEN_KINDS)[number];
 
 /** A dynamic-value matcher, created through the `match` factories. */
 export class Matcher {

@@ -1,8 +1,8 @@
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 
-import { moveKeepingHistory, treeKind } from '../../../src/kernel/files/git-tree.js';
 import { relativeLiterals } from '../../engine/checker/repoint.js';
+import { moveKeepingHistory, treeKind } from '../../engine/project/git-tree.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import {
     anchoredPaths,

@@ -1,6 +1,5 @@
 import { relative } from 'node:path';
 
-import { isGroundName } from '../../../src/kernel/files/ground.js';
 import {
     facetFoldersOf,
     specificationsIn,
@@ -8,6 +7,7 @@ import {
     walkFiles,
 } from '../../engine/project/facet-folders.js';
 import { reachesRunner } from '../../engine/project/facets.js';
+import { isGroundName } from '../../engine/project/ground.js';
 import { isTestFileName } from '../../engine/project/role.js';
 import type { Finding } from './checker.js';
 

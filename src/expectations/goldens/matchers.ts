@@ -3,9 +3,10 @@
 import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { resolveSpecPath } from '../../kernel/files/resolve.js';
+import { refusal } from '../../../lint/engine/catalogue/refusal.js';
+import { dedent } from '../../../lint/engine/project/dedent.js';
+import { resolveSpecPath } from '../../../lint/engine/project/resolve.js';
 import { isDiskDirectory, isDiskFile } from '../../kernel/files/spec-path.js';
-import { refusal } from '../../kernel/refusals/refusal.js';
 import { ContainerAccessor } from '../command/container.js';
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../disk/directory.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
@@ -24,7 +25,6 @@ import { missingHint, shouldUpdateSnapshots } from '../in-place/update.js';
 import { pairRows } from '../table/rows.js';
 import type { Rows } from '../table/rows.js';
 import { TableAccessor } from '../table/table.js';
-import { dedent } from '../text/dedent.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
 import { CaptureScope } from '../tokens/match.js';

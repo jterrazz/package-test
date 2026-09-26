@@ -110,10 +110,10 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree — `engine/` imports no declaration, a consumer folder the catalogue and the engine alone, nothing shipped imports `self/` — and `src/` imports nothing of `lint/`. Tests are exempt. An error at the import.',
+            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree — `engine/` imports no declaration, a consumer folder the catalogue and the engine alone, nothing shipped imports `self/` — and the shipped `lint/` imports nothing of `src/`: what both read lives in `lint/engine/`, the one folder `src/` imports. Tests are exempt. An error at the import.',
         facet: 'model',
         family: 'architecture',
-        fix: 'Move what the importer needs into a folder it may import, or move the importer up the tree.',
+        fix: 'Move what the importer needs into a folder it may import — a module both `lint/` and `src/` read into `lint/engine/` — or move the importer up the tree.',
         name: 'lint-imports-follow-the-direction',
         rationale:
             '`import-within-declared-layers` sees `lint/` as one layer, so the engine reaching a rule, a check reaching a rule, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',

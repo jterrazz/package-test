@@ -1,10 +1,10 @@
 import { randomUUID } from 'node:crypto';
 
+import { resolveRoot } from '../../../lint/engine/project/resolve.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { resolveRoot } from '../../kernel/files/resolve.js';
 import { ProcessHandle } from '../../world/services/process/process.adapter.js';
 import type { ProcessOptions } from '../../world/services/process/process.adapter.js';
 import { ServedProcess } from '../../world/services/process/serve.js';

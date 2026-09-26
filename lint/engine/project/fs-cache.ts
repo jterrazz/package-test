@@ -1,6 +1,6 @@
 import { readFileSync, statSync } from 'node:fs';
 
-import { forgetTree, treeKind, treeNames, treeStamp } from '../../../src/kernel/files/git-tree.js';
+import { forgetTree, treeKind, treeNames, treeStamp } from './git-tree.js';
 
 /** Nothing is kept past the moment it could change: the editor's host keeps this module loaded across lint runs, and oxlint marks no run boundary a plugin can see. */
 

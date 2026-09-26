@@ -1,18 +1,14 @@
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
-import {
-    documentPaths,
-    parseSpecDocument,
-    SPEC_EXTENSION,
-} from '../../../src/facets/cli/documents/spec-document.js';
-import { treeEntries, treeKind } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_DIRS, isGroundName, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
-import { isRelativePath } from '../../../src/kernel/files/spec-path.js';
 import { isNode, nodeStart } from './ast.js';
+import { treeEntries, treeKind } from './git-tree.js';
+import { GROUND_DIRS, isGroundName, SHARED_GROUND } from './ground.js';
 import { parseProgram } from './module-parser.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
+import { isRelativePath } from './relative-path.js';
 import { isTestFileName } from './role.js';
+import { documentPaths, parseSpecDocument, SPEC_EXTENSION } from './spec-document.js';
 
 const PRUNED = new Set(['.git', 'dist', 'node_modules']);
 

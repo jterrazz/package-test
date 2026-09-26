@@ -2,14 +2,6 @@ import { writeFileSync } from 'node:fs';
 import { dirname, relative } from 'node:path';
 
 import {
-    DOCUMENT_KEYS,
-    readSpecFile,
-    RUN_KEYS,
-} from '../../../src/facets/cli/documents/spec-document.js';
-import type { SpecFile } from '../../../src/facets/cli/documents/spec-document.js';
-import { isScalar, renderYamlSource, Scalar } from '../../../src/kernel/yaml/document.js';
-import type { Node, Pair, YAMLMap } from '../../../src/kernel/yaml/document.js';
-import {
     documentMap,
     isBlock,
     keyName,
@@ -18,7 +10,11 @@ import {
     runMaps,
     streamScalars,
 } from '../../engine/project/document-model.js';
+import { DOCUMENT_KEYS, readSpecFile, RUN_KEYS } from '../../engine/project/spec-document.js';
+import type { SpecFile } from '../../engine/project/spec-document.js';
 import { readText } from '../../engine/project/tree.js';
+import { isScalar, renderYamlSource, Scalar } from '../../engine/project/yaml-document.js';
+import type { Node, Pair, YAMLMap } from '../../engine/project/yaml-document.js';
 import type { Finding } from './checker.js';
 import { checkDocumentDescriptionReadsAsATitle } from './document-description-reads-as-a-title.js';
 import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';

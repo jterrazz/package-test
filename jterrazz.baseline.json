@@ -1,6 +1,6 @@
 {
     "typescript": {
-        "comments/comment-lines-held-by-the-baseline": 2546,
+        "comments/comment-lines-held-by-the-baseline": 2534,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 27,
         "eslint/max-classes-per-file": 1,
@@ -52,7 +52,7 @@
         "unicorn/no-immediate-mutation": 4,
         "unicorn/no-lonely-if": 1,
         "vitest/max-expects": 50,
-        "vitest/prefer-strict-boolean-matchers": 266,
+        "vitest/prefer-strict-boolean-matchers": 265,
         "vitest/require-to-throw-message": 2
     },
     "test": {

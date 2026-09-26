@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { COVERAGE_DIR } from '../../../src/kernel/files/artifacts.js';
+import { COVERAGE_DIR } from '../project/artifacts.js';
 
 /** A floor that only ever rises: lowering it is an edit to a committed file, with a commit saying why. */
 

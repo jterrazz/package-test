@@ -2,7 +2,7 @@ import {
     assertedStreams,
     readSpecFile,
     SpecSyntaxError,
-} from '../../../src/facets/cli/documents/spec-document.js';
+} from '../../engine/project/spec-document.js';
 import type { Finding } from './checker.js';
 import { noMalformedRefFindings } from './no-malformed-ref.js';
 import { noUnknownTokenFindings } from './no-unknown-token.js';

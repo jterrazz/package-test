@@ -1,13 +1,13 @@
 import { join, relative } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
+import { treeEntries } from '../../engine/project/git-tree.js';
 import {
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-} from '../../../src/kernel/files/ground.js';
+} from '../../engine/project/ground.js';
+import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { decodeText } from '../../engine/project/tree.js';
 import { checkDocument } from './checker.documents.js';
 import type { Finding } from './checker.js';

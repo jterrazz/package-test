@@ -1,9 +1,9 @@
 import { configDefaults, mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import { ATTACHMENTS_DIR, VITEST_ARTIFACTS_DIR } from '../../lint/engine/project/artifacts.js';
+import { GROUND_GLOB } from '../../lint/engine/project/ground.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
-import { ATTACHMENTS_DIR, VITEST_ARTIFACTS_DIR } from '../kernel/files/artifacts.js';
-import { GROUND_GLOB } from '../kernel/files/ground.js';
 import { tempRootSetup } from '../kernel/files/temp-root.js';
 
 /** Vitest's 5s default is outlived by a container boot or a `next build`; 30s is what the ecosystem converged on. */

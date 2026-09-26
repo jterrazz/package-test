@@ -1,6 +1,18 @@
 import { readFileSync, statSync, writeFileSync } from 'node:fs';
 import { isAbsolute, relative, resolve } from 'node:path';
 
+import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
+import {
+    readSpecFile,
+    SpecSyntaxError,
+    updateSpecFile,
+} from '../../../../lint/engine/project/spec-document.js';
+import type {
+    SpecDocument,
+    SpecFile,
+    SpecFileAssertion,
+    SpecRun,
+} from '../../../../lint/engine/project/spec-document.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
@@ -11,14 +23,11 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
-import { safeRealpath } from '../../../kernel/files/resolve.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fixtures.engine.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
-import { readSpecFile, SpecSyntaxError, updateSpecFile } from './spec-document.js';
-import type { SpecDocument, SpecFile, SpecFileAssertion, SpecRun } from './spec-document.js';
 
 /** Runs a `<case>.spec.yaml`: several commands in one working directory, each judged the moment it ends. */
 

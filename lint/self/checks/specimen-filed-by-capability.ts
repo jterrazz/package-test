@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
-import { SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import type { Finding } from '../../engine/checker/finding.js';
+import { SHARED_GROUND } from '../../engine/project/ground.js';
 import { specimenOf } from '../../engine/project/specimen.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { listFiles } from '../../engine/project/tree.js';

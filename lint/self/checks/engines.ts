@@ -17,7 +17,7 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     'vitest-mock-extended': ['src/world/mocks/'],
     'vitest/browser': ['src/facets/component/'],
     webdriverio: ['src/facets/mobile/'],
-    yaml: ['src/kernel/yaml/document.ts'],
+    yaml: ['lint/engine/project/yaml-document.ts'],
 };
 
 export function enginesOwnedIn(tree: string): string[] {

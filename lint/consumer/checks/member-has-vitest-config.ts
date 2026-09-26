@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import { treeEntries, treeKind } from '../../../src/kernel/files/git-tree.js';
+import { treeEntries, treeKind } from '../../engine/project/git-tree.js';
 import type { Manifest } from '../../engine/project/member-manifest.js';
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import { isTestFileName } from '../../engine/project/role.js';

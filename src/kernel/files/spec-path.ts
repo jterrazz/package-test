@@ -1,4 +1,5 @@
-import { refusal } from '../refusals/refusal.js';
+import { refusal } from '../../../lint/engine/catalogue/refusal.js';
+import { requireRelativePath } from '../../../lint/engine/project/relative-path.js';
 
 /** A path relative to the spec file; `Extension` narrows its tail. */
 export type RelativePath<Extension extends string = string> =
@@ -27,26 +28,6 @@ export type DiskDirectory = {
 
 /** Either of the two — what a verb that takes a file or a directory accepts. */
 export type DiskTarget = DiskDirectory | DiskFile;
-
-export function isRelativePath(value: string): boolean {
-    return value.startsWith('./') || value.startsWith('../');
-}
-
-function asRelative(path: unknown): string {
-    const bare = typeof path === 'string' ? path.replace(/^\/+/u, '') : '';
-    return `./${bare === '' ? 'expected/output.txt' : bare}`;
-}
-
-export function requireRelativePath(call: string, path: unknown): asserts path is string {
-    if (typeof path !== 'string' || !isRelativePath(path)) {
-        throw new TypeError(
-            refusal('disk-named-by-relative-path-at-runtime', {
-                fix: `start it with ./ or ../, from the spec file: ${call}('${asRelative(path)}')`,
-                found: `${call}(${JSON.stringify(path)}), a path that is not relative to the spec file`,
-            }),
-        );
-    }
-}
 
 /** Name one file, by its path from the spec file. */
 export function file<const Path extends RelativePath>(

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { lessonParts } from './lesson.js';
+import { lessonParts } from './lesson-parts.js';
 import { refusal, REFUSAL_WHY } from './refusal.js';
 
 describe('refusal', () => {

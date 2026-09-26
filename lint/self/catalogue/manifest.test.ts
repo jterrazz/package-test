@@ -2,9 +2,6 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
-import { lessonParts } from '../../../src/kernel/refusals/lesson.js';
-import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
 import { FAMILIES } from '../../consumer/catalogue/families.js';
 import { spliceFork } from '../../consumer/catalogue/fork.js';
 import {
@@ -19,6 +16,9 @@ import {
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
 import plugin, { recommendedRules } from '../../consumer/rules/plugin.js';
 import { anchor, spliceCatalogue } from '../../engine/catalogue/chapter.js';
+import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
+import { CATALOGUE_CHAPTER } from '../../engine/catalogue/refusal.js';
+import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { SELF_PASS_IDS } from '../checks/checker.js';
 import selfPlugin, { selfRules } from '../rules/plugin.js';
 import { chapterWithSelfRules } from './chapter.js';

@@ -1,7 +1,7 @@
 import { join, resolve } from 'node:path';
 
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
 import { cell, table } from '../../engine/catalogue/chapter.js';
+import { treeEntries } from '../../engine/project/git-tree.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import type { SiblinglessKind } from './siblingless-kinds.js';
 

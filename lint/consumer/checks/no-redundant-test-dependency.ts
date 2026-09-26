@@ -1,7 +1,7 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
-import { treeEntries, treeKind } from '../../../src/kernel/files/git-tree.js';
+import { treeEntries, treeKind } from '../../engine/project/git-tree.js';
 import {
     MEMBER_DEPTH,
     readManifest,

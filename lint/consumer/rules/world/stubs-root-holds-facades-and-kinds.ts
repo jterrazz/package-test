@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { isStubKind, STUB_KINDS } from '../../../../src/world/stubs/kinds.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
     child,
@@ -15,6 +14,7 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { isStubKind, STUB_KINDS } from '../../../engine/project/stub-kinds.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KIND_FOLDERS = STUB_KINDS.map((kind) => `\`${kind}/\``).join(', ');

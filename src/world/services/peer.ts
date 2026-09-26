@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { findRoot } from '../../kernel/files/resolve.js';
+import { findRoot } from '../../../lint/engine/project/resolve.js';
 
 /** The lockfile each package manager leaves, and the install command its user types. */
 const INSTALLERS = [

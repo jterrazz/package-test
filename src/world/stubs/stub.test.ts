@@ -1,5 +1,13 @@
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { STUB_KINDS } from '../../../lint/engine/project/stub-kinds.js';
+import {
+    anthropic as publishedAnthropic,
+    http as publishedHttp,
+    openai as publishedOpenai,
+} from '../../index.js';
 import { anthropic } from './anthropic/anthropic.js';
 import { http } from './http/http.js';
 import { defineStub, defineStubs } from './stub.js';
@@ -17,6 +25,20 @@ function tagsOf(stubs: readonly Stub[]): string[] {
         const response = stub.response as { body: { tag: string } };
         return response.body.tag;
     });
+}
+
+async function builderFolders(): Promise<string[]> {
+    const named = readdirSync(import.meta.dirname, { withFileTypes: true })
+        .filter((dirent) => dirent.isDirectory())
+        .map((dirent) => dirent.name)
+        .filter((name) => existsSync(join(import.meta.dirname, name, `${name}.ts`)));
+    const builders = await Promise.all(
+        named.map(async (name) => {
+            const loaded: unknown = await import(`./${name}/${name}.ts`);
+            return typeof loaded === 'object' && loaded !== null && name in loaded ? [name] : [];
+        }),
+    );
+    return builders.flat();
 }
 
 describe('stub', () => {
@@ -105,5 +127,23 @@ describe('stub', () => {
         expect(tagsOf(base.stubs)).toStrictEqual(['events']);
         const nested = scenario.with(route('GET', '/x', 'x'));
         expect(tagsOf(nested.stubs)).toStrictEqual(['x', 'other']);
+    });
+
+    test('stub kinds — the builders a stub folder is named for — names every builder folder of the package, each a builder its entry exports', async () => {
+        // Given - the folders under src/world/stubs/ exporting the builder they are named for, and the builders the entry exports
+        const folders = await builderFolders();
+        const exported: Record<string, unknown> = {
+            anthropic: publishedAnthropic,
+            http: publishedHttp,
+            openai: publishedOpenai,
+        };
+
+        // Then - one kind per builder folder, and each kind is a builder the entry publishes
+        expect(STUB_KINDS).toStrictEqual(folders.toSorted());
+        expect(STUB_KINDS.map((kind) => typeof exported[kind])).toStrictEqual([
+            'object',
+            'object',
+            'object',
+        ]);
     });
 });

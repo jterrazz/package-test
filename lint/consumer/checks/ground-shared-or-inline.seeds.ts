@@ -2,14 +2,14 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
-import { dedent } from '../../../src/expectations/text/dedent.js';
-import { forgetTree } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_SEEDS } from '../../../src/kernel/files/ground.js';
 import {
     importsFromEntry,
     withEntryImport,
     withoutEntryImport,
 } from '../../engine/checker/entry-import.js';
+import { dedent } from '../../engine/project/dedent.js';
+import { forgetTree } from '../../engine/project/git-tree.js';
+import { GROUND_SEEDS } from '../../engine/project/ground.js';
 import {
     isInside,
     kebabName,

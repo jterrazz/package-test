@@ -29,23 +29,31 @@ describe('checkLintImportsFollowTheDirection', () => {
         ]);
     });
 
-    test('lint-imports-follow-the-direction — the entry composes consumer with the engine and never self, and src/ imports no lint/', () => {
-        // Given - an entry that reaches a rule, the engine and a self module, and a product module reaching the engine
+    test('lint-imports-follow-the-direction — the entry composes consumer with the engine and never self; the product reads the engine alone, and the shipped lint/ never reads the product', () => {
+        // Given - an entry reaching a rule, the engine and a self module; the product reaching the engine and a rule; the engine and a self meta-test reaching the product
         const entry = treeOf({
+            'lint/engine/project/ground.ts':
+                "import { facet } from '../../../src/facets/api/api.facet.js';\n",
             'lint/index.ts': [
                 "export { recommendedRules } from './consumer/rules/plugin.js';",
                 "export { materialAt } from './engine/project/production.js';",
                 "export { selfPlugin } from './self/rules/plugin.js';",
                 '',
             ].join('\n'),
-            'src/kernel/files/ground.ts':
-                "import { role } from '../../../lint/engine/project/role.js';\n",
+            'lint/self/corpus/compositions.ts':
+                "import { apiFacet } from '../../../src/facets/api/api.facet.js';\n",
+            'src/kernel/files/scratch.ts': [
+                "import { GROUND_DIRS } from '../../../lint/engine/project/ground.js';",
+                "import { noSleep } from '../../../lint/consumer/rules/world/no-sleep.js';",
+                '',
+            ].join('\n'),
         });
 
-        // Then - the rule and the engine are its to import; self, and the product reaching lint/, are named at the import
+        // Then - the entry's self import, the product reaching a rule and the engine reaching the product are named at the import
         expect(located(checkLintImportsFollowTheDirection(entry))).toStrictEqual([
+            'lint/engine/project/ground.ts:1:1 lint-imports-follow-the-direction: `lint/engine/project/ground.ts` imports `src/facets/api/api.facet.ts`, from `src/`, which `engine/` sits below',
             'lint/index.ts:3:1 lint-imports-follow-the-direction: `lint/index.ts` imports `lint/self/rules/plugin.ts`, from `self/rules/`, which `lint/index.ts` sits below',
-            'src/kernel/files/ground.ts:1:1 lint-imports-follow-the-direction: `src/kernel/files/ground.ts` imports `lint/engine/project/role.ts`, from `engine/`, which `src/` sits below',
+            'src/kernel/files/scratch.ts:2:1 lint-imports-follow-the-direction: `src/kernel/files/scratch.ts` imports `lint/consumer/rules/world/no-sleep.ts`, from `consumer/rules/`, which `src/` sits below',
         ]);
     });
 });

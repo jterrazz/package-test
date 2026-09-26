@@ -1,4 +1,4 @@
-import { ROUTES_KEY } from '../../../src/facets/api/routes/baseline.js';
+import { ROUTES_KEY } from './ratchet.js';
 
 /** Never an entry raised nor a key added, which would record debt that grew; the run's own key stays as held. */
 export function tightened(

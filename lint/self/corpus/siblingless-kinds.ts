@@ -52,7 +52,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/services/isolation.port.ts',
             'src/facets/api/server/server.port.ts',
             'src/world/services/service.port.ts',
-            'src/kernel/config/settings.ts',
+            'lint/engine/project/settings.ts',
             'src/world/stubs/exchange/exchange.ts',
             'lint/engine/project/config-shape.ts',
             'lint/engine/catalogue/row.ts',
@@ -64,7 +64,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/kernel/context/with.capability.ts',
-            'src/kernel/files/artifacts.ts',
+            'lint/engine/project/artifacts.ts',
             'src/elements/landmarks.ts',
             'src/elements/vocabulary-rows.ts',
             'src/world/services/containers/service-images.ts',
@@ -75,10 +75,11 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/catalogue/manifest.ts',
             'lint/self/catalogue/architecture.ts',
             'lint/self/catalogue/families.ts',
+            'lint/engine/project/stub-kinds.ts',
             'lint/self/corpus/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `one-owner-per-engine.test.ts` and `layers.test.ts` for the engine owners)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `stub.test.ts` for the stub kinds, `one-owner-per-engine.test.ts` and `layers.test.ts` for the engine owners)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
@@ -221,7 +222,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         claims: oneOf(
             'src/kernel/chain/action.ts',
             'src/kernel/chain/capability.ts',
-            'src/kernel/files/ground.ts',
+            'lint/engine/project/ground.ts',
             'src/kernel/chain/state.ts',
             'src/kernel/database-option.ts',
             'src/world/services/startup/registry.ts',

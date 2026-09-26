@@ -1,14 +1,14 @@
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
+import { repointModuleTests } from '../../engine/checker/repoint.js';
 import {
     forgetTree,
     moveKeepingHistory,
     treeEntries,
     treeKind,
-} from '../../../src/kernel/files/git-tree.js';
-import { GROUND_DIRS, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
-import { repointModuleTests } from '../../engine/checker/repoint.js';
+} from '../../engine/project/git-tree.js';
+import { GROUND_DIRS, SHARED_GROUND } from '../../engine/project/ground.js';
 import {
     aspectOf,
     lineEnd,

@@ -1,8 +1,8 @@
 import { join, relative } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
-import { parseYamlSource } from '../../../src/kernel/yaml/document.js';
+import { treeEntries } from './git-tree.js';
+import { SPEC_EXTENSION } from './spec-document.js';
+import { parseYamlSource } from './yaml-document.js';
 
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 

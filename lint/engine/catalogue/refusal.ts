@@ -1,4 +1,4 @@
-import { lessonBlock } from './lesson.js';
+import { lessonBlock } from './lesson-parts.js';
 
 export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
 

@@ -1,4 +1,4 @@
-import { refusal } from '../kernel/refusals/refusal.js';
+import { refusal } from '../../lint/engine/catalogue/refusal.js';
 import type { ElementMatch, ElementRef } from './descriptor.js';
 import { CONTEXT_LANDMARKS } from './landmarks.js';
 import { CONSTRUCTORS, formatBare, formatElement } from './spelling.js';

@@ -1,7 +1,7 @@
 import { join, relative, sep } from 'node:path';
 
-import { treeEntries, treeKind, treeNames } from '../../../src/kernel/files/git-tree.js';
-import { isGroundName } from '../../../src/kernel/files/ground.js';
+import { treeEntries, treeKind, treeNames } from '../../engine/project/git-tree.js';
+import { isGroundName } from '../../engine/project/ground.js';
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import type { Finding } from './checker.js';
 

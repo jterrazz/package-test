@@ -2,11 +2,11 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { renderSchema } from '../../src/facets/cli/documents/spec-document.js';
 import { FAMILIES } from '../consumer/catalogue/families.js';
 import { spliceFork } from '../consumer/catalogue/fork.js';
 import { consumerRows } from '../consumer/catalogue/manifest.js';
 import { spliceCatalogue } from '../engine/catalogue/chapter.js';
+import { renderSchema } from '../engine/project/spec-document.js';
 import { chapterWithSelfRules } from './catalogue/chapter.js';
 import { spliceMatrix, spliceMatrixLayers } from './corpus/matrix.js';
 import { spliceMetaTests } from './corpus/meta-tests.js';

@@ -6,15 +6,12 @@ export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
             chain: [],
-            // The config file's own types are the toolchain's.
-            config: ['@jterrazz/typescript/config'],
             context: [],
             // A scratch folder ends with the test that asked for it (vitest's `onTestFinished`).
             files: ['vitest'],
             refusals: [],
-            yaml: enginesOwnedIn('src/kernel/yaml/'),
         },
-        imports: ['kernel/'],
+        imports: ['kernel/', 'lint/engine/'],
     },
     world: {
         folders: {
@@ -24,7 +21,7 @@ export const FRAMEWORK_LAYERS = {
             services: [...enginesOwnedIn('src/world/services/'), 'vitest'],
             stubs: enginesOwnedIn('src/world/stubs/'),
         },
-        imports: ['kernel/'],
+        imports: ['kernel/', 'lint/engine/'],
         seams: {
             // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
             'world/stubs/exchange/queue.ts': ['expectations/tokens/'],
@@ -32,8 +29,8 @@ export const FRAMEWORK_LAYERS = {
             'world/stubs/http/http.ts': ['expectations/tokens/'],
         },
     },
-    elements: { imports: ['kernel/', 'elements/'] },
-    expectations: { imports: ['kernel/', 'expectations/'], packages: ['vitest'] },
+    elements: { imports: ['kernel/', 'elements/', 'lint/engine/'] },
+    expectations: { imports: ['kernel/', 'expectations/', 'lint/engine/'], packages: ['vitest'] },
     // A folder owns its files, and no facet lists another.
     facets: {
         folders: {
@@ -45,7 +42,7 @@ export const FRAMEWORK_LAYERS = {
             mobile: enginesOwnedIn('src/facets/mobile/'),
             website: enginesOwnedIn('src/facets/website/'),
         },
-        imports: ['kernel/', 'world/', 'elements/', 'expectations/'],
+        imports: ['kernel/', 'world/', 'elements/', 'expectations/', 'lint/engine/'],
         packages: ['vitest'],
         seams: {
             'facets/specification.ts': [
@@ -79,43 +76,16 @@ export const FRAMEWORK_LAYERS = {
             'facets/website/website.project',
             // Update mode's global setup, which every project carries.
             'expectations/in-place/in-place-setup',
+            'lint/engine/',
         ],
         packages: ['vitest'],
     },
     lint: {
-        imports: [
-            'lint/',
-            // One answer to where a tool writes what it generates.
-            'kernel/files/artifacts',
-            // The four ground names have one home: a rule probing its own copy could drift from what the runner resolves.
-            'kernel/files/ground',
-            // `no-redundant-root`'s rule must derive the root with the framework's own walk, not a copy.
-            'kernel/files/resolve',
-            // The path law the runner refuses by is the one the rules read by.
-            'kernel/files/spec-path',
-            // Every gate judges the tree the runtime reads: what git does not ignore.
-            'kernel/files/git-tree',
-            'kernel/yaml/document',
-            // The checker loads the file synchronously, since every pass is sync, and reads it with the runtime's reader.
-            'kernel/config/settings',
-            'kernel/config/test-section',
-            // A finding and a refusal teach in one form: the four parts, and how they read.
-            'kernel/refusals/lesson',
-            // The runtime's refusals open on the sentence their catalogue row does.
-            'kernel/refusals/refusal',
-            'expectations/tokens/match',
-            // `ground-shared-or-inline`'s fixer proves its guess against the runtime's own dedent.
-            'expectations/text/dedent',
-            'world/services/record-key',
-            // The folders a stub may sit in are the builders the package exports, listed once.
-            'world/stubs/kinds',
-            // The route-coverage key and the `.spec.yaml` grammar are read by the runner and the checker alike: one owner each.
-            'facets/api/routes/baseline',
-            'facets/cli/documents/spec-document',
-        ],
+        imports: ['lint/'],
         // oxlint's plugin types and the toolchain's config type (erased), its config names (inlined), and the module parser.
         packages: [
             '@oxlint/plugins',
+            '@jterrazz/typescript/config',
             '@jterrazz/typescript/oxlint',
             '@jterrazz/typescript/oxlint-config-names',
             ...enginesOwnedIn('lint/'),

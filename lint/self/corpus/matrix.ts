@@ -1,10 +1,10 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
 import { cell, table } from '../../engine/catalogue/chapter.js';
 import type { AstNode } from '../../engine/project/ast.js';
 import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
+import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';

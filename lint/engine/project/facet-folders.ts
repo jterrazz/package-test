@@ -1,10 +1,10 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
-import type { TreeEntry } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_FIXTURES } from '../../../src/kernel/files/ground.js';
 import { FACETS } from './facets.js';
+import { treeEntries } from './git-tree.js';
+import type { TreeEntry } from './git-tree.js';
+import { GROUND_FIXTURES } from './ground.js';
 
 export const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 

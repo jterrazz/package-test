@@ -1,5 +1,5 @@
-import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from '../../../kernel/files/ground.js';
-import { isRelativePath } from '../../../kernel/files/spec-path.js';
+import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from './ground.js';
+import { isRelativePath } from './relative-path.js';
 import {
     blockScalar,
     isMap,
@@ -8,8 +8,8 @@ import {
     parseYamlSource,
     renderYamlSource,
     yamlSyntaxErrors,
-} from '../../../kernel/yaml/document.js';
-import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../../kernel/yaml/document.js';
+} from './yaml-document.js';
+import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from './yaml-document.js';
 
 /** The grammar alone: no path resolution, no command, no filesystem. The runner, the lint checker and the JSON Schema read the same constants. */
 

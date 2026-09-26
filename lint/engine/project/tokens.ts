@@ -1,4 +1,28 @@
-import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
+export const TOKEN_KINDS = [
+    'any',
+    'base64',
+    'date',
+    'duration',
+    'email',
+    'float',
+    'hex',
+    'int',
+    'ip',
+    'iso8601',
+    'number',
+    'path',
+    'port',
+    'semver',
+    'sha',
+    'string',
+    'time',
+    'ulid',
+    'url',
+    'uuid',
+    'workdir',
+] as const;
+
+export type TokenKind = (typeof TOKEN_KINDS)[number];
 
 const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
 const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;

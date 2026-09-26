@@ -9,7 +9,7 @@ export type * from './facets/mobile/index.js';
 export type * from './facets/website/index.js';
 
 export type { ChainContext } from './kernel/context/with.capability.js';
-export type { TestSettings } from './kernel/config/settings.js';
+export type { TestSettings } from '../lint/engine/project/settings.js';
 
 export {
     directory,

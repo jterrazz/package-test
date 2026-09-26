@@ -1,5 +1,5 @@
-import type { SpecDocument } from '../../../src/facets/cli/documents/spec-document.js';
 import { finding } from '../../engine/project/document-model.js';
+import type { SpecDocument } from '../../engine/project/spec-document.js';
 import type { DocumentFinding } from './checker.js';
 
 export function checkNoSilentRefusal(document: SpecDocument): DocumentFinding[] {

@@ -1,7 +1,7 @@
+import { resolveRoot } from '../../../lint/engine/project/resolve.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { resolveRoot } from '../../kernel/files/resolve.js';
 import type { ServiceRecord } from '../../world/services/services.js';
 import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
 import type { StartedServices } from '../../world/services/startup/start-services.js';

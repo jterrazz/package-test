@@ -1,6 +1,6 @@
-import type { SpecFile } from '../../../src/facets/cli/documents/spec-document.js';
-import { Scalar } from '../../../src/kernel/yaml/document.js';
 import { finding, isBlock, runMaps, streamScalars } from '../../engine/project/document-model.js';
+import type { SpecFile } from '../../engine/project/spec-document.js';
+import { Scalar } from '../../engine/project/yaml-document.js';
 import type { DocumentFinding } from './checker.js';
 
 export function checkDocumentStreamsWrittenAsBlockScalars(

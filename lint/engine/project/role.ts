@@ -1,8 +1,8 @@
 import { basename, dirname, join, relative } from 'node:path';
 
-import { GROUND_DIRS } from '../../../src/kernel/files/ground.js';
 import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
 import { folderChanged, isFile } from './fs-cache.js';
+import { GROUND_DIRS } from './ground.js';
 
 /** The suffix decides the kind, and folders are read below the project root: a checkout under `fixtures/` or `__tests__/` is the machine's business. */
 

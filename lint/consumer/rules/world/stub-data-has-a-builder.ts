@@ -1,13 +1,13 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { STUB_KINDS } from '../../../../src/world/stubs/kinds.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { listDirectory } from '../../../engine/project/fs-cache.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { STUB_KINDS } from '../../../engine/project/stub-kinds.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const DATA_SUFFIXES = ['.request.ts', '.response.json'];

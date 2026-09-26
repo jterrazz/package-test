@@ -1,6 +1,6 @@
+import { toConstantCase } from '../../../../lint/engine/project/record-key.js';
 import { defineCapability } from '../../../kernel/chain/capability.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { toConstantCase } from '../../../world/services/record-key.js';
 import type { ServiceHandle } from '../../../world/services/service.port.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv } from './cli.port.js';

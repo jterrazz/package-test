@@ -1,4 +1,4 @@
-import { REFUSAL_WHY } from '../../../src/kernel/refusals/refusal.js';
+import { REFUSAL_WHY } from '../../engine/catalogue/refusal.js';
 import { ordered } from '../../engine/catalogue/row.js';
 import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
 import type { Family } from './families.js';

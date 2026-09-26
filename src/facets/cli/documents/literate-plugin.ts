@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { basename, isAbsolute, resolve } from 'node:path';
 
+import { readSpecFile } from '../../../../lint/engine/project/spec-document.js';
 import { DISK_KEY } from '../../../kernel/files/spec-path.js';
-import { readSpecFile } from './spec-document.js';
 
 /** Makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`. */
 

@@ -1,10 +1,10 @@
 import { relative } from 'node:path';
 
+import { resolveSpecPath, safeRealpath } from '../../../../lint/engine/project/resolve.js';
 import { CLI_RESULT_ROWS } from '../../../expectations/command/cli.result.js';
 import type { CliResult } from '../../../expectations/command/cli.result.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { resolveSpecPath, safeRealpath } from '../../../kernel/files/resolve.js';
 import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { requireDiskFile } from '../../../kernel/files/spec-path.js';
 import type { DiskFile } from '../../../kernel/files/spec-path.js';

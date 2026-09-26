@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../kernel/refusals/refusal.js';
+import { REFUSAL_WHY } from '../../lint/engine/catalogue/refusal.js';
 import { describeAmbiguity } from './ambiguity.js';
 import type { ElementMatch } from './descriptor.js';
 import { link, navigation, within } from './elements.js';

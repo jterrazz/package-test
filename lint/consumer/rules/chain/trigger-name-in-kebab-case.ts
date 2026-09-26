@@ -1,9 +1,9 @@
 import type { Context } from '@oxlint/plugins';
 
-import { toKebabCase } from '../../../../src/world/services/record-key.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { memberPropertyName, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
+import { toKebabCase } from '../../../engine/project/record-key.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 

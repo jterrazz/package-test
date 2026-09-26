@@ -1,7 +1,7 @@
 import { spawnSync } from 'node:child_process';
 import { basename, join, relative, sep } from 'node:path';
 
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
+import { treeEntries } from './git-tree.js';
 import { MEMBER_DEPTH, readManifest, workspacePatterns } from './member-manifest.js';
 import { SKIPPED } from './module-tests.js';
 

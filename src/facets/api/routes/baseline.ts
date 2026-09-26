@@ -1,13 +1,13 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { ROUTES_KEY } from '../../../../lint/engine/baseline/ratchet.js';
+
 /* `ROUTES_KEY` is the run's; the checker reads and writes the rest of that section. */
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
-
-export const ROUTES_KEY = 'routes/unreached';
 
 export function heldUnreached(root: string): number {
     const path = join(root, 'jterrazz.baseline.json');

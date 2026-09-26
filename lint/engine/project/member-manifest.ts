@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { treeKind } from '../../../src/kernel/files/git-tree.js';
+import { treeKind } from './git-tree.js';
 
 /** The toolchain's bound, to the segment. */
 export const MEMBER_DEPTH = 6;

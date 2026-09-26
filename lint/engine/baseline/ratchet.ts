@@ -1,9 +1,9 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { ROUTES_KEY } from '../../../src/facets/api/routes/baseline.js';
-
 export const BASELINE_FILE = 'jterrazz.baseline.json';
+
+export const ROUTES_KEY = 'routes/unreached';
 
 /** The `test` section of the family's `jterrazz.baseline.json`; every other section is kept byte for byte. Exact both ways: a rise, a new rule, a fall and an entry at zero all break it. Severity is not read: a warning is the debt a ratchet holds down. */
 export const BASELINE_SECTION = 'test';

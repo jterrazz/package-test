@@ -1,10 +1,10 @@
 import { existsSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { treeKind } from '../../../src/kernel/files/git-tree.js';
-import { SHARED_GROUND } from '../../../src/kernel/files/ground.js';
 import type { Teaching } from '../../engine/catalogue/lesson.js';
+import { treeKind } from '../../engine/project/git-tree.js';
+import { SHARED_GROUND } from '../../engine/project/ground.js';
+import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import {
     anchoredPaths,

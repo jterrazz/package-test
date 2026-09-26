@@ -2,7 +2,7 @@ import { rmSync } from 'node:fs';
 import { dirname, join, sep } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
-import { EVIDENCE_DIR } from '../../../kernel/files/artifacts.js';
+import { EVIDENCE_DIR } from '../../../../lint/engine/project/artifacts.js';
 import { createSharedBrowser, PlaywrightAdapter } from './playwright.adapter.js';
 
 /** A stub launcher: no chromium starts. */

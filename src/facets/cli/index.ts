@@ -13,6 +13,6 @@ export type {
     SpecRun,
     SpecServeEntry,
     SpecStream,
-} from './documents/spec-document.js';
+} from '../../../lint/engine/project/spec-document.js';
 export type { CliEnv, CliInput, CliOutput, CliPort, ExecOptions } from './process/cli.port.js';
 export { lintReport } from './process/lint-report.js';

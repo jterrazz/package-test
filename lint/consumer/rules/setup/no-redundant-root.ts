@@ -1,11 +1,11 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { findRoot } from '../../../../src/kernel/files/resolve.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { findProperty, specificationMember, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isFile } from '../../../engine/project/fs-cache.js';
+import { findRoot } from '../../../engine/project/resolve.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 

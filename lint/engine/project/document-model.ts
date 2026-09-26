@@ -1,15 +1,15 @@
 import { join } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import type { SpecDocument, SpecFile } from '../../../src/facets/cli/documents/spec-document.js';
-import { treeEntries, treeKind, treeNames } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_FIXTURES } from '../../../src/kernel/files/ground.js';
-import { resolveSpecPath } from '../../../src/kernel/files/resolve.js';
-import { isMap, isScalar, isSeq } from '../../../src/kernel/yaml/document.js';
-import type { Node, Pair, Scalar, YAMLMap } from '../../../src/kernel/yaml/document.js';
 import type { Teaching } from '../catalogue/lesson.js';
 import type { Severity } from '../checker/finding.js';
+import { treeEntries, treeKind, treeNames } from './git-tree.js';
+import { GROUND_FIXTURES } from './ground.js';
+import { resolveSpecPath } from './resolve.js';
+import { SPEC_EXTENSION } from './spec-document.js';
+import type { SpecDocument, SpecFile } from './spec-document.js';
 import { readText } from './tree.js';
+import { isMap, isScalar, isSeq } from './yaml-document.js';
+import type { Node, Pair, Scalar, YAMLMap } from './yaml-document.js';
 
 export type DocumentFinding<PassId extends string = string> = Teaching & {
     line: number;

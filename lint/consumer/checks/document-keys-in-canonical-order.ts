@@ -1,6 +1,3 @@
-import { DOCUMENT_KEYS, RUN_KEYS } from '../../../src/facets/cli/documents/spec-document.js';
-import type { SpecFile } from '../../../src/facets/cli/documents/spec-document.js';
-import type { Node, Pair, YAMLMap } from '../../../src/kernel/yaml/document.js';
 import {
     documentMap,
     finding,
@@ -8,6 +5,9 @@ import {
     pairsOf,
     runMaps,
 } from '../../engine/project/document-model.js';
+import { DOCUMENT_KEYS, RUN_KEYS } from '../../engine/project/spec-document.js';
+import type { SpecFile } from '../../engine/project/spec-document.js';
+import type { Node, Pair, YAMLMap } from '../../engine/project/yaml-document.js';
 import type { DocumentFinding } from './checker.js';
 
 export function checkDocumentKeysInCanonicalOrder(

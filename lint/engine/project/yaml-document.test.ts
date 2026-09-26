@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { blockScalar, parseYamlSource, renderYamlSource } from './document.js';
+import { blockScalar, parseYamlSource, renderYamlSource } from './yaml-document.js';
 
 function rewritten(step: number, text: string): string {
     const source = parseYamlSource(['runs:', `${' '.repeat(step)}- exit: 0`, ''].join('\n'));
@@ -28,8 +28,8 @@ const FORMATTED = [
     '              }',
     '',
 ].join('\n');
-describe('document', () => {
-    test('yaml document — a block scalar states its indentation — a stream opening on a space reads back byte for byte at four spaces', () => {
+describe('yaml-document', () => {
+    test('document — yaml document — a block scalar states its indentation — a stream opening on a space reads back byte for byte at four spaces', () => {
         // Given - a four-space document, the step oxfmt formats YAML at
         const text = ' TYPESCRIPT  src/index.ts\nsecond line\n';
         const rendered = rewritten(4, text);
@@ -41,7 +41,7 @@ describe('document', () => {
         expect(readBack(rendered)).toBe(text);
     });
 
-    test('yaml document — a block scalar states its indentation — the same stream reads back byte for byte at two spaces', () => {
+    test('document — yaml document — a block scalar states its indentation — the same stream reads back byte for byte at two spaces', () => {
         // Given - a two-space document, YAML's own default step
         const text = ' TYPESCRIPT  src/index.ts\nsecond line\n';
         const rendered = rewritten(2, text);
@@ -51,7 +51,7 @@ describe('document', () => {
         expect(readBack(rendered)).toBe(text);
     });
 
-    test('yaml document — a block scalar states its indentation — several leading spaces are kept, not counted', () => {
+    test('document — yaml document — a block scalar states its indentation — several leading spaces are kept, not counted', () => {
         // Given - a stream indented four spaces of its own, in a four-space document
         const text = '    deeply indented\nback\n';
         const rendered = rewritten(4, text);
@@ -61,7 +61,7 @@ describe('document', () => {
         expect(readBack(rendered)).toBe(text);
     });
 
-    test('yaml document — a block scalar states its indentation — a stream opening on a tab needs no indicator and survives without one', () => {
+    test('document — yaml document — a block scalar states its indentation — a stream opening on a tab needs no indicator and survives without one', () => {
         // Given - a tab-started stream, which YAML never reads as indentation
         const text = '\tTABBED\nback\n';
         const rendered = rewritten(4, text);
@@ -71,7 +71,7 @@ describe('document', () => {
         expect(readBack(rendered)).toBe(text);
     });
 
-    test('yaml document — a block scalar states its indentation — a stream opening on a newline needs no indicator either', () => {
+    test('document — yaml document — a block scalar states its indentation — a stream opening on a newline needs no indicator either', () => {
         // Given - a stream whose first line is empty
         const text = '\nafter the blank\n';
         const rendered = rewritten(4, text);
@@ -81,7 +81,7 @@ describe('document', () => {
         expect(readBack(rendered)).toBe(text);
     });
 
-    test('yaml document — a block scalar states its indentation — a step deeper than one digit is refused, naming what cannot be written', () => {
+    test('document — yaml document — a block scalar states its indentation — a step deeper than one digit is refused, naming what cannot be written', () => {
         // Given - a document indented past the single digit an indicator is
         // Then - the render refuses rather than writing an indentation it cannot state
         expect(() => rewritten(10, ' leading space\n')).toThrow(
@@ -89,7 +89,7 @@ describe('document', () => {
         );
     });
 
-    test('yaml document — a rewrite leaves alone what it did not change — a document nobody edited comes back byte for byte', () => {
+    test('document — yaml document — a rewrite leaves alone what it did not change — a document nobody edited comes back byte for byte', () => {
         // Given - unpadded flow sequences, a padded flow mapping, one broken over several lines, and a comment
         const source = parseYamlSource(FORMATTED);
 
@@ -97,7 +97,7 @@ describe('document', () => {
         expect(renderYamlSource(source)).toBe(FORMATTED);
     });
 
-    test('yaml document — a rewrite leaves alone what it did not change — an edited stream is rewritten and its neighbours are not', () => {
+    test('document — yaml document — a rewrite leaves alone what it did not change — an edited stream is rewritten and its neighbours are not', () => {
         // Given - one stream written into the run, next to the flow collections
         const source = parseYamlSource(FORMATTED);
         source.document.setIn(['runs', 0, 'stdout'], blockScalar('Scaffolded\n'));
@@ -118,7 +118,7 @@ describe('document', () => {
         );
     });
 
-    test('yaml document — a rewrite leaves alone what it did not change — a collection whose value changed is written by the writer, not restored', () => {
+    test('document — yaml document — a rewrite leaves alone what it did not change — a collection whose value changed is written by the writer, not restored', () => {
         // Given - a needle rewritten inside a flow collection
         const source = parseYamlSource(FORMATTED);
         source.document.setIn(['runs', 0, 'files', 'out/main.go', 'contains'], 'package rust');
@@ -129,7 +129,7 @@ describe('document', () => {
         expect(rendered).toContain("out/docs/README.md: { contains: ['# Docs', 'second needle'] }");
     });
 
-    test('yaml document — the step a document is written with — a document whose list holds only flow entries comes back at its own step', () => {
+    test('document — yaml document — the step a document is written with — a document whose list holds only flow entries comes back at its own step', () => {
         // Given - a four-space document whose one list is written in flow, and a key added to it
         const text = [
             'seed:',

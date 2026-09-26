@@ -1,4 +1,5 @@
-import { CaptureScope, Matcher, TOKEN_KINDS } from './match.js';
+import { TOKEN_KINDS } from '../../../lint/engine/project/tokens.js';
+import { CaptureScope, Matcher } from './match.js';
 import type { MatcherKind } from './match.js';
 
 const UUID_SOURCE = '[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}';

@@ -1,11 +1,11 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join, posix, resolve } from 'node:path';
 
-import { treeEntries } from '../../../src/kernel/files/git-tree.js';
-import { GROUND_DIRS } from '../../../src/kernel/files/ground.js';
 import type { Finding } from '../checker/finding.js';
 import { child, childList, isNode, nodeStart, stringValue, walk } from './ast.js';
 import type { AstNode } from './ast.js';
+import { treeEntries } from './git-tree.js';
+import { GROUND_DIRS } from './ground.js';
 import { parseProgram } from './module-parser.js';
 
 const GROUND = new Set<string>(GROUND_DIRS);

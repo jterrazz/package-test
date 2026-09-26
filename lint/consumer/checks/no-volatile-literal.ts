@@ -1,6 +1,6 @@
-import { assertedStreams } from '../../../src/facets/cli/documents/spec-document.js';
-import type { SpecDocument } from '../../../src/facets/cli/documents/spec-document.js';
 import { finding, fixedData } from '../../engine/project/document-model.js';
+import { assertedStreams } from '../../engine/project/spec-document.js';
+import type { SpecDocument } from '../../engine/project/spec-document.js';
 import type { DocumentFinding, Finding } from './checker.js';
 
 const VOLATILE = [

@@ -1,3 +1,4 @@
+import { resolveRoot } from '../../../lint/engine/project/resolve.js';
 import type { DockerSpecConfig } from '../../expectations/command/cli.result.js';
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
@@ -5,7 +6,6 @@ import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { resolveRoot } from '../../kernel/files/resolve.js';
 import { declaredDatabaseKeys } from '../../world/services/services.js';
 import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
 import type { Orchestrator } from '../../world/services/startup/orchestrator.js';

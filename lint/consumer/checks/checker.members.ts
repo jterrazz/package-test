@@ -1,6 +1,6 @@
 import { basename, join, relative } from 'node:path';
 
-import { treeKind } from '../../../src/kernel/files/git-tree.js';
+import { treeKind } from '../../engine/project/git-tree.js';
 import { readManifest } from '../../engine/project/member-manifest.js';
 import { discoverMembers } from '../../engine/project/members.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';

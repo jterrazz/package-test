@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
-import { treeEntries, treeKind } from '../../../src/kernel/files/git-tree.js';
-import { isGroundName } from '../../../src/kernel/files/ground.js';
+import { treeEntries, treeKind } from './git-tree.js';
+import { isGroundName } from './ground.js';
 import { isTestFileName } from './role.js';
 
 export const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);

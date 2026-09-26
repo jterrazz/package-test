@@ -1,10 +1,14 @@
 import { mergeConfig } from 'vitest/config';
 import type { TestProjectConfiguration, ViteUserConfig } from 'vitest/config';
 
+import {
+    BLOB_DIR,
+    COVERAGE_DIR,
+    REPORTER_OUTPUT_FILES,
+} from '../../lint/engine/project/artifacts.js';
+import { GROUND_GLOB } from '../../lint/engine/project/ground.js';
 import { literate } from '../facets/cli/cli.project.js';
 import type { LiterateOptions } from '../facets/cli/cli.project.js';
-import { BLOB_DIR, COVERAGE_DIR, REPORTER_OUTPUT_FILES } from '../kernel/files/artifacts.js';
-import { GROUND_GLOB } from '../kernel/files/ground.js';
 import { EXCLUDE, onProjectDefaults, projectDefaults, statedOnce } from './project-kit.js';
 
 /** A vite/vitest config, merged over the preset's defaults, plus `literate`. */

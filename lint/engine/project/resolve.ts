@@ -2,7 +2,7 @@ import { realpathSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
 
 import { treeKind } from './git-tree.js';
-import { requireRelativePath } from './spec-path.js';
+import { requireRelativePath } from './relative-path.js';
 
 const ROOT_MARKER = 'package.json';
 

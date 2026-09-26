@@ -1,10 +1,10 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { refusal } from '../../../../lint/engine/catalogue/refusal.js';
+import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity.js';
 import { formatElement } from '../../../elements/spelling.js';
-import { evidenceDirectory } from '../../../kernel/files/artifacts.js';
-import { refusal } from '../../../kernel/refusals/refusal.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';

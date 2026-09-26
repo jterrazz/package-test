@@ -1,6 +1,6 @@
-import { lessonLine } from '../../../src/kernel/refusals/lesson.js';
-import type { Lesson } from '../../../src/kernel/refusals/lesson.js';
-import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
+import { lessonLine } from './lesson-parts.js';
+import type { Lesson } from './lesson-parts.js';
+import { CATALOGUE_CHAPTER } from './refusal.js';
 import type { Row } from './row.js';
 
 /** `why` and `read` come from the row, so a message and the catalogue never say two things. */

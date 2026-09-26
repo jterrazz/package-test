@@ -1,12 +1,9 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
-import {
-    documentPaths,
-    parseSpecDocument,
-} from '../../../src/facets/cli/documents/spec-document.js';
-import { isRelativePath } from '../../../src/kernel/files/spec-path.js';
 import { moduleTestsOf } from '../project/module-tests.js';
+import { isRelativePath } from '../project/relative-path.js';
+import { documentPaths, parseSpecDocument } from '../project/spec-document.js';
 import { literalSpans } from '../project/spec-values.js';
 import { blankComments, isWithin, readText } from '../project/tree.js';
 

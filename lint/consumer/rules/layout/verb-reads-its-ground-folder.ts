@@ -1,12 +1,5 @@
 import type { Context } from '@oxlint/plugins';
 
-import {
-    GROUND_EXPECTED,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-    GROUND_SEEDS,
-    isGroundName,
-} from '../../../../src/kernel/files/ground.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
     child,
@@ -16,6 +9,13 @@ import {
     memberPropertyName,
 } from '../../../engine/project/ast.js';
 import type { AstNode, DiskCall, Visitor } from '../../../engine/project/ast.js';
+import {
+    GROUND_EXPECTED,
+    GROUND_FIXTURES,
+    GROUND_REQUESTS,
+    GROUND_SEEDS,
+    isGroundName,
+} from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';

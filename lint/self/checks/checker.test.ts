@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { forgetTree } from '../../../src/kernel/files/git-tree.js';
 import { runChecker } from '../../consumer/checks/checker.js';
+import { forgetTree } from '../../engine/project/git-tree.js';
 import { runSelfSpecsChecker, SELF_PASS_IDS } from './checker.js';
 
 function specsTree(files: Record<string, string>): string {

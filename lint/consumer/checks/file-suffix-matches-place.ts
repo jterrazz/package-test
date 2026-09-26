@@ -1,12 +1,12 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { SPEC_EXTENSION } from '../../../src/facets/cli/documents/spec-document.js';
-import { moveKeepingHistory, treeEntries, treeKind } from '../../../src/kernel/files/git-tree.js';
-import { isGroundName } from '../../../src/kernel/files/ground.js';
 import { isUnderSpecs } from '../../engine/project/ast.js';
 import { finding } from '../../engine/project/document-model.js';
 import { FACETS, reachesRunner } from '../../engine/project/facets.js';
+import { moveKeepingHistory, treeEntries, treeKind } from '../../engine/project/git-tree.js';
+import { isGroundName } from '../../engine/project/ground.js';
+import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { DocumentFinding, Finding } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';

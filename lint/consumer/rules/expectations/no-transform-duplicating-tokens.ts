@@ -1,6 +1,5 @@
 import type { Context } from '@oxlint/plugins';
 
-import { TOKEN_KINDS } from '../../../../src/expectations/tokens/match.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
     findProperty,
@@ -10,6 +9,7 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import type { LintRule } from '../../../engine/project/rule.js';
+import { TOKEN_KINDS } from '../../../engine/project/tokens.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
 const KNOWN_TOKEN_LITERAL = new RegExp(

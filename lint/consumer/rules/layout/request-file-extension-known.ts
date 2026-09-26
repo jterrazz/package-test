@@ -1,10 +1,10 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
-import { GROUND_REQUESTS } from '../../../../src/kernel/files/ground.js';
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
+import { GROUND_REQUESTS } from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';

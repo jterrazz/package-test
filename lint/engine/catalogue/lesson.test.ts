@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { missingParts } from '../../../src/kernel/refusals/lesson.js';
+import { missingParts } from './lesson-parts.js';
 import { lessonsAt, whyOf } from './lesson.js';
 import type { Row } from './row.js';
 

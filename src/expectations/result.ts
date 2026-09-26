@@ -1,9 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { safeRealpath } from '../../lint/engine/project/resolve.js';
 import type { ChainConfig } from '../kernel/chain/config.js';
 import { validateDatabaseOption } from '../kernel/database-option.js';
-import { safeRealpath } from '../kernel/files/resolve.js';
 import { DirectoryAccessor } from './disk/directory.js';
 import { TableAccessor } from './table/table.js';
 import type { TableSource } from './table/table.js';
