@@ -1,8 +1,8 @@
 import { resolve } from 'node:path';
 
-import type { Finding } from '../../checks/checker.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import { byPosition, finding, listed } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
-import { byPosition, finding, listed } from './source.js';
 
 export const SOURCE_ROOT = [
     'elements',

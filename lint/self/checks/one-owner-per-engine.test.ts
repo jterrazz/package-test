@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkOneOwnerPerEngine } from './one-owner-per-engine.js';
-import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('checkOneOwnerPerEngine', () => {
     test('one-owner-per-engine — each third-party engine is imported by the one slice that owns it', () => {

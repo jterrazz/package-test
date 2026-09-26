@@ -5,9 +5,8 @@ import { describe, expect, test } from 'vitest';
 import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
 import { lessonParts } from '../../../src/kernel/refusals/lesson.js';
 import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
-import { anchor, spliceCatalogue } from '../../catalogue/chapter.js';
-import { FAMILIES } from '../../catalogue/families.js';
-import { spliceFork } from '../../catalogue/fork.js';
+import { FAMILIES } from '../../consumer/catalogue/families.js';
+import { spliceFork } from '../../consumer/catalogue/fork.js';
 import {
     CHECKER_PASSES,
     consumerRows,
@@ -16,12 +15,13 @@ import {
     STATIQUE_RULES,
     TYPE_ROWS,
     UPSTREAM_RULES,
-} from '../../catalogue/manifest.js';
-import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../checks/checker.js';
-import plugin, { recommendedRules } from '../../rules/plugin.js';
+} from '../../consumer/catalogue/manifest.js';
+import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
+import plugin, { recommendedRules } from '../../consumer/rules/plugin.js';
+import { anchor, spliceCatalogue } from '../../engine/catalogue/chapter.js';
 import { SELF_PASS_IDS } from '../checks/checker.js';
 import selfPlugin, { selfRules } from '../rules/plugin.js';
-import { spliceSelfRules } from './chapter.js';
+import { chapterWithSelfRules } from './chapter.js';
 import {
     allRows,
     META_ROWS,
@@ -38,7 +38,7 @@ const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8')
 const allRules = { ...plugin.rules, ...selfPlugin.rules };
 
 function ruleFileOf(entry: { audience: string; family: string; name: string }): string {
-    const rules = entry.audience === 'self' ? 'lint/self/rules' : 'lint/rules';
+    const rules = entry.audience === 'self' ? 'lint/self/rules' : 'lint/consumer/rules';
     return `${rules}/${entry.family}/${entry.name}.ts`;
 }
 
@@ -282,7 +282,7 @@ describe('manifest', () => {
         const committed = read('docs/19-linting.md');
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
-        expect(spliceCatalogue(committed)).toBe(committed);
+        expect(spliceCatalogue(committed, consumerRows, FAMILIES)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
@@ -298,7 +298,7 @@ describe('manifest', () => {
         const committed = read(SELF_CHAPTER);
 
         // Then - re-splicing the self rows changes nothing (run `npm run docs`)
-        expect(spliceSelfRules(committed)).toBe(committed);
+        expect(chapterWithSelfRules(committed)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — a row is listed in the chapter of its audience, and only there', () => {
@@ -611,7 +611,9 @@ describe('manifest', () => {
                 'upstream',
                 (entry) =>
                     entry.upstream !== undefined &&
-                    read('lint/rulebook/vitest.test.ts').includes(`optionOf('${entry.upstream}')`),
+                    read('lint/consumer/rulebook/vitest.test.ts').includes(
+                        `optionOf('${entry.upstream}')`,
+                    ),
             ],
             [
                 'type',

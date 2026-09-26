@@ -1,9 +1,9 @@
 import { dirname, resolve } from 'node:path';
 
-import type { Finding } from '../../checks/checker.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import { byPosition, facetOf, finding, inGround, listed } from '../../engine/project/source.js';
+import type { Listed } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
-import { byPosition, facetOf, finding, inGround, listed } from './source.js';
-import type { Listed } from './source.js';
 
 /** A role rides on the file suffix, never on a folder name. */
 const ROLE_NAMES = new Set([

@@ -1,4 +1,4 @@
-import type { Finding } from '../../checks/checker.js';
+import type { Finding } from '../../engine/checker/finding.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
@@ -18,11 +18,11 @@ export const SELF_PASS_IDS = [
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];
 
-export function runSelfChecks(specsRoot: string): Finding<SelfPassId>[] {
+export function runSelfSpecsChecker(specsRoot: string): Finding<SelfPassId>[] {
     return checkSpecimenFiledByCapability(specsRoot);
 }
 
-export function runSelfSourceChecks(root: string): Finding<SelfPassId>[] {
+export function runSelfSourceChecker(root: string): Finding<SelfPassId>[] {
     return [
         ...checkSourceRootHoldsKnownEntries(root),
         ...checkNoCrossFacetImport(root),

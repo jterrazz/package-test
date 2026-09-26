@@ -1,7 +1,7 @@
-import type { Finding } from '../../checks/checker.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import { byPosition, finding, productionReferences } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
 import { ENGINE_OWNERS } from './engines.js';
-import { byPosition, finding, productionReferences } from './source.js';
 
 export function checkOneOwnerPerEngine(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)

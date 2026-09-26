@@ -2,12 +2,12 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 import { SHARED_GROUND } from '../../../src/kernel/files/ground.js';
-import type { Finding } from '../../checks/checker.js';
-import { suppressedLines } from '../../checks/suppression.js';
-import { listFiles } from '../../checks/tree.js';
-import { specimenOf } from '../../reading/specimen.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import { specimenOf } from '../../engine/project/specimen.js';
+import { suppressedLines } from '../../engine/project/suppression.js';
+import { listFiles } from '../../engine/project/tree.js';
 import { COLUMNS } from '../corpus/facet-matrix.js';
-import { capabilityFolders } from '../corpus/matrix.js';
+import { matrixCapabilityFolders } from '../corpus/matrix.js';
 import type { SelfPassId } from './checker.js';
 
 const COMPONENT = 'component';
@@ -31,11 +31,11 @@ const EXAMPLES = [
 function vocabularyOf(facet: string): Set<string> {
     const column = COLUMNS.find((name) => name === facet && name !== 'module');
     if (column !== undefined) {
-        return capabilityFolders(column);
+        return matrixCapabilityFolders(column);
     }
     const any = new Set<string>();
     for (const name of COLUMNS) {
-        for (const folder of capabilityFolders(name)) {
+        for (const folder of matrixCapabilityFolders(name)) {
             any.add(folder);
         }
     }
@@ -67,7 +67,7 @@ function fixOf(facet: string, shape: string, vocabulary: Set<string>, beside = '
 }
 
 function checkComponentTree(specsRoot: string): Finding<SelfPassId>[] {
-    const vocabulary = capabilityFolders(COMPONENT);
+    const vocabulary = matrixCapabilityFolders(COMPONENT);
     return listFiles(join(specsRoot, COMPONENT), (path) => RENDERED.test(path)).flatMap((file) => {
         const folders = foldersBelowFacet(specsRoot, file);
         const [folder = ''] = folders;

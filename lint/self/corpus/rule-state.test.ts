@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import plugin from '../../rules/plugin.js';
+import plugin from '../../consumer/rules/plugin.js';
 import selfPlugin from '../rules/plugin.js';
 import { corpusOf, e2eOptions, ROOT, ruleSources, session, unresetState } from './rule-state.js';
 

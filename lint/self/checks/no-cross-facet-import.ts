@@ -1,8 +1,14 @@
-import type { Finding } from '../../checks/checker.js';
-import type { LayerOptions } from '../../rules/architecture/import-within-declared-layers.js';
+import type { LayerOptions } from '../../consumer/rules/architecture/import-within-declared-layers.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import {
+    byPosition,
+    facetOf,
+    finding,
+    productionReferences,
+    targetOf,
+} from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
-import { byPosition, facetOf, finding, productionReferences, targetOf } from './source.js';
 
 function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;

@@ -1,11 +1,11 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt } from '../../../catalogue/lesson.js';
-import { importSourceVisitor } from '../../../reading/ast.js';
-import type { Visitor } from '../../../reading/ast.js';
-import { specsAnchorOf } from '../../../reading/linted-file.js';
-import type { LintRule } from '../../../rules/rule.js';
-import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
+import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
+import { importSourceVisitor } from '../../../engine/project/ast.js';
+import type { Visitor } from '../../../engine/project/ast.js';
+import { specsAnchorOf } from '../../../engine/project/linted-file.js';
+import type { LintRule } from '../../../engine/project/rule.js';
+import { SELF_CHAPTER, selfRows } from '../../catalogue/manifest.js';
 
 /** These segment names are the framework's layers in this repository alone; a spec importing its own app (`../../src/app.js`) names none of them. */
 const FRAMEWORK_LAYERS = new Set([
@@ -41,9 +41,9 @@ export const noFrameworkInternals: LintRule = {
         };
     },
     meta: {
-        docs: selfRowOf('no-framework-internals'),
+        docs: rowNamed(selfRows, 'no-framework-internals'),
         messages: lessonsAt(
-            selfRowOf('no-framework-internals'),
+            rowNamed(selfRows, 'no-framework-internals'),
             {
                 deepImport: {
                     found: 'a spec deep-imports "{{source}}", a framework internal',

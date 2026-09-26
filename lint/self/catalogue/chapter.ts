@@ -1,11 +1,11 @@
-import { rowTable } from '../../catalogue/chapter.js';
+import { rowTable } from '../../engine/catalogue/chapter.js';
 import { selfRows } from './manifest.js';
 
 export const SELF_START =
     '<!-- GENERATED:self-rules — do not edit by hand; run `npm run docs`. Source: lint/self/catalogue/manifest.ts -->';
 export const SELF_END = '<!-- /GENERATED:self-rules -->';
 
-export function spliceSelfRules(existing: string): string {
+export function chapterWithSelfRules(existing: string): string {
     const start = existing.indexOf(SELF_START);
     const end = existing.indexOf(SELF_END);
     if (start === -1 || end === -1) {

@@ -1,0 +1,59 @@
+import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
+
+const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
+const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
+const LEADING_WORD = /^(?<kind>[A-Za-z][A-Za-z0-9]*)/u;
+
+/** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
+const KNOWN = new Set<string>(TOKEN_KINDS);
+
+type TokenSite = { line: number; token: string };
+
+/** Template noise (`{{.Server.Version}}`, `{{ spaced }}`, `{{123}}`) is out of the grammar and ignored. */
+function misfitTokens(text: string): (TokenSite & { malformed: boolean })[] {
+    const misfits: (TokenSite & { malformed: boolean })[] = [];
+    const lines = text.split('\n');
+    for (const [index, lineText] of lines.entries()) {
+        for (const match of lineText.matchAll(BRACE_BLOCK)) {
+            const inner = match.groups?.inner ?? '';
+            if (VALID_TOKEN.test(inner)) {
+                if (!KNOWN.has(inner.split('#')[0] ?? '')) {
+                    misfits.push({ line: index + 1, malformed: false, token: match[0] });
+                }
+                continue;
+            }
+            // Flagged only when a known kind is followed by junk, never arbitrary noise.
+            const kind = LEADING_WORD.exec(inner)?.groups?.kind;
+            if (kind !== undefined && KNOWN.has(kind) && inner !== kind) {
+                misfits.push({ line: index + 1, malformed: true, token: match[0] });
+            }
+        }
+    }
+    return misfits;
+}
+
+export function findUnknownTokens(text: string): TokenSite[] {
+    return misfitTokens(text)
+        .filter(({ malformed }) => !malformed)
+        .map(({ line, token }) => ({ line, token }));
+}
+
+export function findMalformedRefs(text: string): TokenSite[] {
+    return misfitTokens(text)
+        .filter(({ malformed }) => malformed)
+        .map(({ line, token }) => ({ line, token }));
+}
+
+export function findKnownTokens(text: string): TokenSite[] {
+    const found: TokenSite[] = [];
+    const lines = text.split('\n');
+    for (const [index, lineText] of lines.entries()) {
+        for (const match of lineText.matchAll(BRACE_BLOCK)) {
+            const inner = match.groups?.inner ?? '';
+            if (VALID_TOKEN.test(inner) && KNOWN.has(inner.split('#')[0] ?? '')) {
+                found.push({ line: index + 1, token: match[0] });
+            }
+        }
+    }
+    return found;
+}

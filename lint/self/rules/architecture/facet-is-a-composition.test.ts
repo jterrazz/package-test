@@ -1,4 +1,4 @@
-import { asOxlintRule, ruleTester } from '../../../rules/rule-tester.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { facetIsAComposition } from './facet-is-a-composition.js';
 
 const COMPOSED = `

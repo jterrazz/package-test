@@ -1,8 +1,8 @@
-description: a reader importing a rule, and a pass importing a rule, are refused at the import
+description: the engine importing a rule, and a check importing a rule, are refused at the import
 fixture: ./fixtures/upward/
 runs:
     - command: self-checker .
       exit: 1
       stderr: |
-          lint/checks/tree.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)
-          lint/reading/role.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)
+          lint/consumer/checks/tree.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)
+          lint/engine/project/role.ts:1:1  jterrazz-check(lint-imports-follow-the-direction)

@@ -1,7 +1,7 @@
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { cell, table } from '../../catalogue/chapter.js';
+import { cell, table } from '../../engine/catalogue/chapter.js';
 
 /** A row says what the file's own top-level `describe` titles say, never a second description kept beside them. */
 

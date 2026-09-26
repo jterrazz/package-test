@@ -2,12 +2,12 @@ import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
-import { cell, table } from '../../catalogue/chapter.js';
-import type { AstNode } from '../../reading/ast.js';
-import { composedRows, COMPOSITIONS } from './compositions.js';
+import { cell, table } from '../../engine/catalogue/chapter.js';
+import type { AstNode } from '../../engine/project/ast.js';
+import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
+import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import { CAPABILITIES, COLUMNS } from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
-import { callShapeOf, callsOf, isCallOf } from './matrix-calls.js';
 import { META_LAYER_ROOTS } from './meta-tests.js';
 
 /** A cell counts files, not assertions: an occurrence count moves with every refactor of a loop and says nothing more. */
@@ -196,7 +196,7 @@ function declaredCapabilities(): Capability[] {
     const rows: Capability[] = [];
     for (const column of COLUMNS) {
         const composition = column === 'module' ? undefined : COMPOSITIONS[column];
-        for (const row of composition === undefined ? [] : composedRows(composition)) {
+        for (const row of composition === undefined ? [] : rowsOfCompositions(composition)) {
             const at = rows.find(
                 (capability) => capability.group === row.group && capability.name === row.name,
             );
@@ -217,7 +217,7 @@ function declaredCapabilities(): Capability[] {
     return [...facets, ...CAPABILITIES];
 }
 
-export function capabilities(): Capability[] {
+export function matrixCapabilities(): Capability[] {
     const tokens: Capability[] = TOKEN_KINDS.map((kind) => ({
         columns: ['api', 'cli', 'integration', 'website', 'module'],
         group: 'Token',
@@ -245,9 +245,9 @@ export function capabilityFolder(name: string): string {
         .join('-');
 }
 
-export function capabilityFolders(column: Column): Set<string> {
+export function matrixCapabilityFolders(column: Column): Set<string> {
     return new Set(
-        capabilities()
+        matrixCapabilities()
             .filter(({ columns }) => columns.includes(column))
             .map(({ name }) => capabilityFolder(name)),
     );
@@ -278,7 +278,7 @@ export function matrixRows(root: string): MatrixRow[] {
         const inCode = WRITTEN_IN_CODE.has(capability.group);
         return sources[column].filter((source) => carries(source, matcher, inCode)).length;
     };
-    return capabilities().map((capability) => ({
+    return matrixCapabilities().map((capability) => ({
         capability,
         cells: {
             api: count(capability, 'api'),
@@ -375,7 +375,7 @@ function filesDirectlyIn(dir: string, extensions: string[]): number {
 /** Innermost first, the order a reader reads them in. */
 export function layers(root: string): Layer[] {
     const allModuleTests = countUnder(root, ['src'], ['.test.ts', '.test.tsx']);
-    const ruleTests = countUnder(root, ['lint/rules'], ['.test.ts']);
+    const ruleTests = countUnder(root, ['lint/consumer/rules'], ['.test.ts']);
     const metaTests = META_LAYER_ROOTS.reduce(
         (total, tree) => total + filesDirectlyIn(resolve(root, tree), ['.test.ts']),
         0,
@@ -405,7 +405,7 @@ export function layers(root: string): Layer[] {
             count: ruleTests,
             judges: 'one rule: what it flags, what it leaves alone, and the message it prints',
             layer: 'Rule tests',
-            where: '`lint/rules/<family>/<rule>.test.ts` beside the rule',
+            where: '`lint/consumer/rules/<family>/<rule>.test.ts` beside the rule',
         },
         {
             count: facetSpecs,
@@ -438,7 +438,7 @@ export function renderLayers(root: string): string {
     return table(['Layer', 'Where', 'What it judges', 'Files'], rows).join('\n');
 }
 
-export function spliceLayers(existing: string, root: string): string {
+export function spliceMatrixLayers(existing: string, root: string): string {
     const start = existing.indexOf(LAYERS_START);
     const end = existing.indexOf(LAYERS_END);
     if (start === -1 || end === -1) {

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { importWithinDeclaredLayers } from '../../rules/architecture/import-within-declared-layers.js';
-import { asOxlintRule, ruleTester } from '../../rules/rule-tester.fixtures.js';
+import { importWithinDeclaredLayers } from '../../consumer/rules/architecture/import-within-declared-layers.js';
+import { asOxlintRule, ruleTester } from '../../engine/testing/rule-tester.fixtures.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 
 /* Lock 2: a reverse edge fails here even while no module uses it yet. */

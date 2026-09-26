@@ -6,11 +6,11 @@ import { describe, expect, test } from 'vitest';
 import { COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,
-    capabilityFolders,
     layers,
+    matrixCapabilityFolders,
     matrixRows,
-    spliceLayers,
     spliceMatrix,
+    spliceMatrixLayers,
 } from './matrix.js';
 import { metaTests } from './meta-tests.js';
 
@@ -120,7 +120,9 @@ describe('matrix', () => {
     test('capability matrix (meta-test `every-capability-exercised`) — the layered reading is byte-identical to a fresh generation', () => {
         // Given - the layers block chapter 03 carries
         // Then - regenerating reproduces it exactly, counts included
-        expect(spliceLayers(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
+        expect(spliceMatrixLayers(read('docs/03-testing.md'), ROOT)).toBe(
+            read('docs/03-testing.md'),
+        );
     });
 
     test('capability matrix (meta-test `every-capability-exercised`) — every layer of the reading carries files', () => {
@@ -164,7 +166,7 @@ describe('matrix', () => {
 
     test('the capability folders — the vocabulary a spec of a specimen is filed by — the vocabulary is the matrix, closed', () => {
         // Given - the folders the matrix names for the api column
-        const folders = capabilityFolders('api');
+        const folders = matrixCapabilityFolders('api');
 
         // Then - the capabilities are in it, a route's word and a grab-bag are not
         expect(
@@ -177,8 +179,8 @@ describe('matrix', () => {
 
     test("the capability folders — the vocabulary a spec of a specimen is filed by — a column's vocabulary holds only the capabilities its row declares there", () => {
         // Given - the folders of the cli and mobile columns
-        const cli = capabilityFolders('cli');
-        const mobile = capabilityFolders('mobile');
+        const cli = matrixCapabilityFolders('cli');
+        const mobile = matrixCapabilityFolders('mobile');
 
         // Then - `appium` and `open` are mobile's, `exec` and `fixture` cli's
         expect([

@@ -36,7 +36,7 @@ function keyOf(row: MatrixRow): string {
 }
 
 /** A row stated by two definitions counts once; stated with two probes it is refused, since a row counts by one probe. */
-export function composedRows(composition: Composition): MatrixRow[] {
+export function rowsOfCompositions(composition: Composition): MatrixRow[] {
     const rows = new Map<string, MatrixRow>();
     for (const row of [
         ...Object.values(composition.options),

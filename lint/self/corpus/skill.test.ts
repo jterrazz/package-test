@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { FORK } from '../../catalogue/fork.js';
+import { FORK } from '../../consumer/catalogue/fork.js';
 import { SKILL_MAX_LINES, skillFindings } from './skill.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');

@@ -5,7 +5,7 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     'better-sqlite3': ['src/world/services/sqlite/'],
     hono: ['src/facets/api/'],
     msw: ['src/world/stubs/network/'],
-    'oxc-parser': ['lint/reading/module-parser.ts'],
+    'oxc-parser': ['lint/engine/project/module-parser.ts'],
     pg: ['src/world/services/postgres/'],
     playwright: ['src/facets/website/'],
     react: ['src/facets/component/'],

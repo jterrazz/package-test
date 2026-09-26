@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import plugin from '../../rules/plugin.js';
+import plugin from '../../consumer/rules/plugin.js';
 import selfPlugin, { selfRules } from './plugin.js';
 
 describe('selfPlugin', () => {

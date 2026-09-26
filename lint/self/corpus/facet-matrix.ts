@@ -37,7 +37,7 @@ export type Capability = {
     probeByColumn?: Partial<Record<Column, string>>;
 };
 
-export function memberOf(capability: Pick<Capability, 'member' | 'name'>): string {
+export function facetMatrixMember(capability: Pick<Capability, 'member' | 'name'>): string {
     return capability.member ?? capability.name.replace(/^\./u, '').replace(/\(\)$/u, '');
 }
 

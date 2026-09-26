@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { documentData, isFixture, specDocuments } from './schema-documents.js';
+import { documentData, isFixture, specDocuments } from '../../engine/project/spec-documents.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object';

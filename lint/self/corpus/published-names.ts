@@ -1,9 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { isNode } from '../../reading/ast.js';
-import type { AstNode } from '../../reading/ast.js';
-import { parseProgram } from '../../reading/module-parser.js';
+import { isNode } from '../../engine/project/ast.js';
+import type { AstNode } from '../../engine/project/ast.js';
+import { parseProgram } from '../../engine/project/module-parser.js';
 
 /** A name is what a consumer's import spells, so the surface is recorded by name, whatever the build does behind it. */
 

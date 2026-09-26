@@ -1,4 +1,4 @@
-import type { LintPlugin } from '../../rules/rule.js';
+import type { LintPlugin } from '../../engine/project/rule.js';
 import { facetIsAComposition } from './architecture/facet-is-a-composition.js';
 import { noFrameworkInternals } from './imports/no-framework-internals.js';
 

@@ -14,9 +14,9 @@ import type {
 } from '../../../src/facets/mobile/index.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/index.js';
 import type { JobResult } from '../../../src/index.js';
-import { CAPABILITIES, COLUMNS, memberOf } from './facet-matrix.js';
+import { CAPABILITIES, COLUMNS, facetMatrixMember } from './facet-matrix.js';
 import type { CapabilityGroup, Column } from './facet-matrix.js';
-import { capabilities } from './matrix.js';
+import { matrixCapabilities } from './matrix.js';
 
 /** Each record is pinned to its interface's `keyof` with `satisfies`: a member added or removed fails the build, and the tests below hold the matrix rows equal to the records. */
 
@@ -43,9 +43,9 @@ function published(record: Record<string, Published>): string[] {
 }
 
 function declared(column: Column, group: CapabilityGroup): string[] {
-    return capabilities()
+    return matrixCapabilities()
         .filter((capability) => capability.group === group && capability.columns.includes(column))
-        .map((capability) => memberOf(capability))
+        .map((capability) => facetMatrixMember(capability))
         .toSorted();
 }
 

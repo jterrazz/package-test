@@ -5,10 +5,10 @@
         "src/vitest/index.ts",
         "lint/index.ts",
         "lint/self/rules/plugin.ts",
-        "lint/checks/checker.cli.ts",
+        "lint/consumer/checks/checker.cli.ts",
         "lint/self/checks/checker.cli.ts",
-        "lint/self/catalogue/chapters.cli.ts",
-        "lint/self/ratchet/coverage.cli.ts"
+        "lint/self/index.chapters.ts",
+        "lint/self/checks/coverage-floor.ts"
     ],
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to
     // Declare every lint plugin the composed rulebook names. They are

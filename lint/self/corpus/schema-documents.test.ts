@@ -5,13 +5,8 @@ import { describe, expect, test } from 'vitest';
 
 import { PRESENCE } from '../../../src/facets/cli/documents/spec-document.js';
 import type { PresenceShape } from '../../../src/facets/cli/documents/spec-document.js';
-import {
-    documentData,
-    isFixture,
-    parserRefusal,
-    schemaVerdicts,
-    specDocuments,
-} from './schema-documents.js';
+import { documentData, isFixture, specDocuments } from '../../engine/project/spec-documents.js';
+import { parserRefusal, schemaVerdicts } from './schema-documents.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 

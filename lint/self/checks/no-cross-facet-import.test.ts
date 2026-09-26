@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
-import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('checkNoCrossFacetImport', () => {
     test('no-cross-facet-import — a facet never imports another, and is entered from outside by its face', () => {

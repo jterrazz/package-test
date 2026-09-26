@@ -1,12 +1,12 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt } from '../../../catalogue/lesson.js';
-import { segments } from '../../../reading/ast.js';
-import type { Visitor } from '../../../reading/ast.js';
-import type { LintRule } from '../../../rules/rule.js';
-import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
-import { facetFileFindings } from '../../reading/facet-file.js';
-import { handleFileFindings } from '../../reading/facet-handle.js';
+import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
+import { segments } from '../../../engine/project/ast.js';
+import type { Visitor } from '../../../engine/project/ast.js';
+import type { LintRule } from '../../../engine/project/rule.js';
+import { SELF_CHAPTER, selfRows } from '../../catalogue/manifest.js';
+import { facetFileFindings } from './facet-is-a-composition.file.js';
+import { handleFileFindings } from './facet-is-a-composition.handle.js';
 
 type FacetFile = 'composition' | 'constructor' | undefined;
 
@@ -40,9 +40,9 @@ export const facetIsAComposition: LintRule = {
         };
     },
     meta: {
-        docs: selfRowOf('facet-is-a-composition'),
+        docs: rowNamed(selfRows, 'facet-is-a-composition'),
         messages: lessonsAt(
-            selfRowOf('facet-is-a-composition'),
+            rowNamed(selfRows, 'facet-is-a-composition'),
             {
                 adapter: {
                     found: 'the engine `{{port}}` is a {{what}} written in the facet, not an adapter an engine module builds',

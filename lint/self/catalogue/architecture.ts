@@ -1,4 +1,7 @@
-import type { Row } from '../../catalogue/row.js';
+import type { Family } from '../../consumer/catalogue/families.js';
+import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
+
+type Row = CatalogueRow<Family>;
 
 export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
     {
@@ -79,7 +82,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vite`, `@vitest/browser-playwright`, `vitest-browser-react` and `vitest/browser` by `facets/component/`, `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/network/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/yaml/document.ts` and `oxc-parser` by `lint/reading/module-parser.ts`. A node builtin is no engine ([ADR-009](decisions/009-node-builtins-are-not-engines.md)): `node:child_process` is imported by the one module of each slice that owns the program it spawns — the subject binary by `facets/cli/process/`, `xcrun simctl` by `facets/mobile/server/`, `docker` by `expectations/command/docker-cli.ts`, `git` by `kernel/files/git-tree.ts`, and every process of `world/` by `world/services/process/serve.ts` — which review holds, not this pass. An error at the import.',
+            'Each third-party engine is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vite`, `@vitest/browser-playwright`, `vitest-browser-react` and `vitest/browser` by `facets/component/`, `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/network/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `kernel/yaml/document.ts` and `oxc-parser` by `lint/engine/project/module-parser.ts`. A node builtin is no engine ([ADR-009](decisions/009-node-builtins-are-not-engines.md)): `node:child_process` is imported by the one module of each slice that owns the program it spawns — the subject binary by `facets/cli/process/`, `xcrun simctl` by `facets/mobile/server/`, `docker` by `expectations/command/docker-cli.ts`, `git` by `kernel/files/git-tree.ts`, and every process of `world/` by `world/services/process/serve.ts` — which review holds, not this pass. An error at the import.',
         facet: 'model',
         family: 'architecture',
         fix: 'Reach the engine through the port its owner implements, handed in by the facet — or import only what the owner exports.',
@@ -107,13 +110,13 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree. Tests are exempt. An error at the import.',
+            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree — `engine/` imports no declaration, a consumer folder the catalogue and the engine alone, nothing shipped imports `self/` — and `src/` imports nothing of `lint/`. Tests are exempt. An error at the import.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move what the importer needs into a folder it may import, or move the importer up the tree.',
         name: 'lint-imports-follow-the-direction',
         rationale:
-            '`import-within-declared-layers` sees `lint/` as one layer, so a reader reaching a rule, a pass reaching a rule, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
+            '`import-within-declared-layers` sees `lint/` as one layer, so the engine reaching a rule, a check reaching a rule, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
         reach: 'module',
         severity: 'error',
     },

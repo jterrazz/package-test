@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 
 import type { MatrixRow } from '../../../src/kernel/chain/capability.js';
 import type { Composition } from '../../../src/kernel/chain/define-facet.js';
-import { composedRows, COMPOSITIONS } from './compositions.js';
-import { memberOf } from './facet-matrix.js';
+import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
+import { facetMatrixMember } from './facet-matrix.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -15,7 +15,7 @@ function lineOf(row: {
     readonly name: string;
     readonly probe: string;
 }): string {
-    return `${row.group} · ${row.name} · ${row.probe} · ${memberOf(row)}`;
+    return `${row.group} · ${row.name} · ${row.probe} · ${facetMatrixMember(row)}`;
 }
 
 function actionStating(accessors: MatrixRow[]): Composition['actions'][number] {
@@ -54,7 +54,7 @@ describe('compositions', () => {
                 ...composition.capabilities,
                 ...composition.actions,
             ]
-                .filter(({ name, row }) => memberOf(row) !== name)
+                .filter(({ name, row }) => facetMatrixMember(row) !== name)
                 .map(({ name, row }) => `${column} · ${name} states ${row.name}`),
         );
 
@@ -77,7 +77,7 @@ describe('compositions', () => {
         };
 
         // Then - the matrix reads it once
-        expect(composedRows(composition).map((row) => lineOf(row))).toStrictEqual([
+        expect(rowsOfCompositions(composition).map((row) => lineOf(row))).toStrictEqual([
             "Terminal action · .trigger() · .trigger(' · trigger",
             'Result accessor · .table() · result.table( · table',
         ]);
@@ -109,7 +109,7 @@ describe('compositions', () => {
         };
 
         // Then - a row counts by one probe, so the second reading is named
-        expect(() => composedRows(composition)).toThrow(
+        expect(() => rowsOfCompositions(composition)).toThrow(
             'the row Result accessor · .table() is stated twice, read two ways: result.table(, .table(',
         );
     });

@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
-import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('source-root-holds-known-entries', () => {
     test('source-root-holds-known-entries — the source root holds the two entries and the six trees, and nothing else', () => {

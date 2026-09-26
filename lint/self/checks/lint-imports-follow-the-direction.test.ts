@@ -1,46 +1,51 @@
 import { describe, expect, test } from 'vitest';
 
+import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
-import { located, ROOT, treeOf } from './source.fixtures.js';
 
 describe('checkLintImportsFollowTheDirection', () => {
-    test('lint-imports-follow-the-direction — a lint folder imports only the folders below it, the catalogue under the rulebook', () => {
-        // Given - the package's own tree, and one where a reader reaches a rule, the catalogue and the rulebook reach what reads them, a pass reaches a rule and a rule a self module
+    test('lint-imports-follow-the-direction — the engine imports no declaration, and a consumer folder only the catalogue and the engine', () => {
+        // Given - the package's own tree, and one where the engine reaches a declaration, a rule a check, the catalogue a rule, a rule a self module
         const upward = treeOf({
-            'lint/catalogue/row.ts': "import { TEST_GLOBS } from '../rulebook/vitest.js';\n",
-            'lint/rulebook/vitest.ts':
-                "import { lessons } from '../catalogue/lesson.js';\nimport { recommendedRules } from '../rules/plugin.js';\n",
-            'lint/checks/tree.ts': "import { recommendedRules } from '../rules/plugin.js';\n",
-            'lint/reading/role.ts': "import type { LintRule } from '../rules/rule.js';\n",
-            'lint/rules/rule.ts': "import type { SelfPassId } from '../self/checks/checker.js';\n",
-            'lint/rules/rule.test.ts': "import { selfPlugin } from '../self/rules/plugin.js';\n",
+            'lint/engine/project/role.ts':
+                "import type { LintRule } from '../../consumer/rules/plugin.js';\n",
+            'lint/consumer/rules/chain/no-sleep.ts':
+                "import { consumerRows } from '../../catalogue/manifest.js';\nimport { runChecker } from '../../checks/checker.js';\n",
+            'lint/consumer/catalogue/manifest.ts':
+                "import { recommendedRules } from '../rules/plugin.js';\n",
+            'lint/consumer/checks/tree.ts':
+                "import type { SelfPassId } from '../../self/checks/checker.js';\n",
+            'lint/consumer/checks/tree.test.ts':
+                "import { selfPlugin } from '../../self/rules/plugin.js';\n",
         });
 
         // Then - the package holds none; each upward edge is named at the import, and the test passes
         expect(checkLintImportsFollowTheDirection(ROOT)).toStrictEqual([]);
         expect(located(checkLintImportsFollowTheDirection(upward))).toStrictEqual([
-            'lint/catalogue/row.ts:1:1 lint-imports-follow-the-direction: `lint/catalogue/row.ts` imports `lint/rulebook/vitest.ts`, from `rulebook/`, which `catalogue/` sits below',
-            'lint/checks/tree.ts:1:1 lint-imports-follow-the-direction: `lint/checks/tree.ts` imports `lint/rules/plugin.ts`, from `rules/`, which `checks/` sits below',
-            'lint/reading/role.ts:1:1 lint-imports-follow-the-direction: `lint/reading/role.ts` imports `lint/rules/rule.ts`, from `rules/`, which `reading/` sits below',
-            'lint/rulebook/vitest.ts:2:1 lint-imports-follow-the-direction: `lint/rulebook/vitest.ts` imports `lint/rules/plugin.ts`, from `rules/`, which `rulebook/` sits below',
-            'lint/rules/rule.ts:1:1 lint-imports-follow-the-direction: `lint/rules/rule.ts` imports `lint/self/checks/checker.ts`, from `self/`, which `rules/` sits below',
+            'lint/consumer/catalogue/manifest.ts:1:1 lint-imports-follow-the-direction: `lint/consumer/catalogue/manifest.ts` imports `lint/consumer/rules/plugin.ts`, from `consumer/rules/`, which `consumer/catalogue/` sits below',
+            'lint/consumer/checks/tree.ts:1:1 lint-imports-follow-the-direction: `lint/consumer/checks/tree.ts` imports `lint/self/checks/checker.ts`, from `self/checks/`, which `consumer/checks/` sits below',
+            'lint/consumer/rules/chain/no-sleep.ts:2:1 lint-imports-follow-the-direction: `lint/consumer/rules/chain/no-sleep.ts` imports `lint/consumer/checks/checker.ts`, from `consumer/checks/`, which `consumer/rules/` sits below',
+            'lint/engine/project/role.ts:1:1 lint-imports-follow-the-direction: `lint/engine/project/role.ts` imports `lint/consumer/rules/plugin.ts`, from `consumer/rules/`, which `engine/` sits below',
         ]);
     });
 
-    test('lint-imports-follow-the-direction — the entry `lint/index.ts` imports any shipped folder, and never self', () => {
-        // Given - an entry that reaches a pass, the ratchet and a self module
+    test('lint-imports-follow-the-direction — the entry composes consumer with the engine and never self, and src/ imports no lint/', () => {
+        // Given - an entry that reaches a rule, the engine and a self module, and a product module reaching the engine
         const entry = treeOf({
             'lint/index.ts': [
-                "export { runChecks } from './checks/checker.js';",
-                "export { judge } from './ratchet/baseline.js';",
+                "export { recommendedRules } from './consumer/rules/plugin.js';",
+                "export { materialAt } from './engine/project/production.js';",
                 "export { selfPlugin } from './self/rules/plugin.js';",
                 '',
             ].join('\n'),
+            'src/kernel/files/ground.ts':
+                "import { role } from '../../../lint/engine/project/role.js';\n",
         });
 
-        // Then - the pass and the ratchet are its to import; self is named at its import
+        // Then - the rule and the engine are its to import; self, and the product reaching lint/, are named at the import
         expect(located(checkLintImportsFollowTheDirection(entry))).toStrictEqual([
-            'lint/index.ts:3:1 lint-imports-follow-the-direction: `lint/index.ts` imports `lint/self/rules/plugin.ts`, from `self/`, which `index/` sits below',
+            'lint/index.ts:3:1 lint-imports-follow-the-direction: `lint/index.ts` imports `lint/self/rules/plugin.ts`, from `self/rules/`, which `index/` sits below',
+            'src/kernel/files/ground.ts:1:1 lint-imports-follow-the-direction: `src/kernel/files/ground.ts` imports `lint/engine/project/role.ts`, from `engine/`, which `src/` sits below',
         ]);
     });
 });

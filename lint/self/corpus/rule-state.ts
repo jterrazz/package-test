@@ -2,10 +2,10 @@ import type { Context } from '@oxlint/plugins';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { child, childList, identifierName, isNode, walk } from '../../reading/ast.js';
-import type { AstNode, Visitor } from '../../reading/ast.js';
-import { parsedModule } from '../../reading/module-parser.js';
-import type { LintRule } from '../../rules/rule.js';
+import { child, childList, identifierName, isNode, walk } from '../../engine/project/ast.js';
+import type { AstNode, Visitor } from '../../engine/project/ast.js';
+import { parsedModule } from '../../engine/project/module-parser.js';
+import type { LintRule } from '../../engine/project/rule.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -120,10 +120,10 @@ export function session(
 }
 
 export function ruleSources(): string[] {
-    return readdirSync(join(ROOT, 'lint/rules'), { recursive: true })
+    return readdirSync(join(ROOT, 'lint/consumer/rules'), { recursive: true })
         .map(String)
         .filter((entry) => entry.endsWith('.ts') && !entry.endsWith('.test.ts'))
-        .map((entry) => join(ROOT, 'lint/rules', entry))
+        .map((entry) => join(ROOT, 'lint/consumer/rules', entry))
         .toSorted();
 }
 

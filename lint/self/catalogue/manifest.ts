@@ -1,10 +1,14 @@
-import { consumerRows, ordered } from '../../catalogue/manifest.js';
-import type { Row } from '../../catalogue/row.js';
+import type { Family } from '../../consumer/catalogue/families.js';
+import { consumerRows } from '../../consumer/catalogue/manifest.js';
+import { ordered } from '../../engine/catalogue/row.js';
+import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
 import {
     ARCHITECTURE_META_ROWS,
     ARCHITECTURE_PASSES,
     ARCHITECTURE_STATIQUE_RULES,
 } from './architecture.js';
+
+type Row = CatalogueRow<Family>;
 
 /** No published entry imports this module: the published bundles read `consumerRows` alone. */
 
@@ -82,7 +86,7 @@ export const META_ROWS: Row[] = [
             "Every diagnostic's `read:` part is its own row's heading, generated from the row, and the heading exists in the generated chapter.",
         facet: 'model',
         family: 'catalogue',
-        fix: 'Let `lessons()` write the `read:` part; never type one.',
+        fix: 'Let `lessonsAt()` write the `read:` part; never type one.',
         name: 'message-reads-its-row',
         rationale:
             'The anchor is the only route most readers ever take into the catalogue, and forty hand-written tails drifted the first time a heading moved.',
@@ -95,7 +99,7 @@ export const META_ROWS: Row[] = [
             'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
         facet: 'model',
         family: 'catalogue',
-        fix: "Write the message as its `found` and its `fix` — `lessons()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.",
+        fix: "Write the message as its `found` and its `fix` — `lessonsAt()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.",
         name: 'message-has-four-parts',
         rationale:
             'A message is the only page of the catalogue most readers see: one that names the fault without its reason or its gesture sends the reader to the chapter for what the line could have said.',
@@ -199,7 +203,7 @@ export const META_ROWS: Row[] = [
             'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and lives in the manifest of its audience, and the tarball exposes no `self` rule, read as `npm pack` writes it and extracted: no byte of it — bundle, chunk, type, page, manifest — names a self row by its name or its code, nor the `jterrazz-self` plugin; every target the `exports` map publishes but a type and a JSON file is a `.js`, `.cjs` or `.mjs` module, so none is left unloaded; no module the `exports` map publishes, loaded under each condition node loads, carries at any depth a rule object whose `meta.docs` says `self` or a key or string naming a self row; no bin it publishes prints a self pass’s finding over that pass’s fixtures; no packed chunk is one only an unpacked bundle loads, no packed bundle imports a module the tarball lacks, and none cites a page the tarball leaves out; no row of the runtime, type or upstream channel is `self`, and no row of the meta channel is `consumer`, every refusal the runtime raises being a consumer row read at a heading of the catalogue.',
         facet: 'model',
         family: 'catalogue',
-        fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/rules/plugin.ts` or `lint/checks/checker.ts`.',
+        fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/consumer/rules/plugin.ts` or `lint/consumer/checks/checker.ts`.',
         name: 'rule-declares-its-audience',
         rationale:
             'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` filed their specs by a capability matrix they do not have, and the retired specs-public-entry rule refused a consumer’s own `src/model/` until its self half left it as `no-framework-internals`.',
@@ -242,13 +246,5 @@ export const selfRows: Row[] = ordered([
     ...META_ROWS,
     ...SELF_PROCESS_RULES,
 ]);
-
-export function selfRowOf(name: string): Row {
-    const row = selfRows.find((entry) => entry.name === name);
-    if (row === undefined) {
-        throw new Error(`no self row is named ${name}`);
-    }
-    return row;
-}
 
 export const allRows: Row[] = ordered([...consumerRows, ...selfRows]);

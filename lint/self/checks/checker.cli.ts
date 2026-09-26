@@ -1,22 +1,22 @@
 #!/usr/bin/env node
 import { relative, resolve } from 'node:path';
 
-import { lessonAt } from '../../catalogue/lesson.js';
-import { reportLine } from '../../checks/checker.js';
-import type { Finding } from '../../checks/checker.js';
-import { discoverSpecRoots } from '../../checks/members.js';
-import { SELF_CHAPTER, selfRowOf } from '../catalogue/manifest.js';
+import { lessonAt, rowNamed } from '../../engine/catalogue/lesson.js';
+import { reportLine } from '../../engine/checker/finding.js';
+import type { Finding } from '../../engine/checker/finding.js';
+import { discoverSpecRoots } from '../../engine/project/members.js';
+import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 import type { SelfPassId } from './checker.js';
-import { runSelfChecks, runSelfSourceChecks, SELF_PASS_IDS } from './checker.js';
+import { runSelfSourceChecker, runSelfSpecsChecker, SELF_PASS_IDS } from './checker.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /** `node dist/self-checker.js [dir]`, never in the tarball: no fixer, no ratchet, no JSON, since this repository is held at zero. */
 const root = resolve(process.argv[2] ?? '.');
 
-const findings: Finding<SelfPassId>[] = [...runSelfSourceChecks(root)];
+const findings: Finding<SelfPassId>[] = [...runSelfSourceChecker(root)];
 for (const specsRoot of discoverSpecRoots(root)) {
     const prefix = relative(root, specsRoot);
-    for (const violation of runSelfChecks(specsRoot)) {
+    for (const violation of runSelfSpecsChecker(specsRoot)) {
         findings.push({
             ...violation,
             file: prefix === '' ? violation.file : `${prefix}/${violation.file}`,
@@ -25,7 +25,7 @@ for (const specsRoot of discoverSpecRoots(root)) {
 }
 
 for (const finding of findings) {
-    const lesson = lessonAt(selfRowOf(finding.rule), finding, SELF_CHAPTER);
+    const lesson = lessonAt(rowNamed(selfRows, finding.rule), finding, SELF_CHAPTER);
     console.error(reportLine(finding, lesson));
 }
 

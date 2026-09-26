@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { CATALOGUE_CHAPTER, REFUSAL_WHY } from '../../../src/kernel/refusals/refusal.js';
-import { RUNTIME_RULES } from '../../catalogue/manifest.js';
+import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
 import { allRows, SELF_CHECKER_PASSES } from '../catalogue/manifest.js';
 import {
     danglingImports,
