@@ -1,46 +1,39 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { CHECKER } from '../../consumer/checks/checker.js';
 import type { Finding } from './finding.js';
-import { checkerLine, runTree } from './tree-run.js';
+import { walkGround } from './ground-walk.js';
+import type { GroundPasses } from './registry.js';
 
-const FIXTURES = resolve(
+const TREE = resolve(
     import.meta.dirname,
-    '../../../specs/lint/checker/fixtures/lint-violations',
+    '../../../specs/lint/checker/fixtures/lint-violations/no-unknown-token',
 );
 
-function groundFindings(root: string): Finding[] {
-    return runTree(root, CHECKER).filter(({ rule }) => rule === 'no-unknown-token');
+function visited(kind: string, rel: string): Finding {
+    return { file: rel, fix: '', found: kind, line: 1, rule: 'probe', severity: 'error' };
 }
 
+const RECORDING: GroundPasses = {
+    document: ({ rel }) => [visited('document', rel)],
+    expected: ({ atTop, rel }) => [visited(atTop ? 'expected at top' : 'expected', rel)],
+    read: () => [],
+    request: ({ rel }) => [visited('request', rel)],
+    seed: ({ rel }) => [visited('seed', rel)],
+};
+
 describe('walkGround', () => {
-    test('ground-walk — ground-files — the ground walk (`no-unknown-token`) — walks a specs tree and reports unknown tokens in fixture files', () => {
-        // Given - the violation fixture tree ({{userid}} in expected/out.txt)
-        const violations = groundFindings(resolve(FIXTURES, 'no-unknown-token'));
-
-        // Then - the finding names the relative file, line, token and severity
-        expect(violations).toStrictEqual([
-            expect.objectContaining({
-                file: 'specs/widget/expected/out.txt',
-                line: 1,
-                severity: 'error',
-                token: '{{userid}}',
-            }),
+    test('hands each ground file to the pass of the folder it sits in, and leaves a test file alone', () => {
+        // Given - a specs tree holding one test and one file under expected/
+        // Then - the one ground file reaches the expected pass, at the top of its folder, and the test reaches none
+        expect(walkGround(resolve(TREE, 'specs'), RECORDING)).toStrictEqual([
+            visited('expected at top', 'widget/expected/out.txt'),
         ]);
-
-        // Then - the rendering carries file, token and the known vocabulary
-        const rendered = violations.map((violation) => checkerLine(CHECKER, violation)).join('\n');
-        expect(rendered).toContain('specs/widget/expected/out.txt:1');
-        expect(rendered).toContain('{{userid}}');
-        expect(rendered).toContain('uuid');
     });
 
-    test('ground-walk — ground-files — the ground walk (`no-unknown-token`) — passes the compliant twin', () => {
-        // Given - the -ok tree (only known tokens)
-        const violations = groundFindings(resolve(FIXTURES, 'no-unknown-token-ok'));
-
-        // Then - clean
-        expect(violations).toStrictEqual([]);
+    test('walks nothing under a folder that does not exist', () => {
+        // Given - a root nothing was written at
+        // Then - no pass is handed anything
+        expect(walkGround(resolve(TREE, 'nowhere'), RECORDING)).toStrictEqual([]);
     });
 });

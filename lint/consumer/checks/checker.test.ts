@@ -1,11 +1,13 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { runMember, runMembers } from '../../engine/checker/member-run.js';
 import { runTree } from '../../engine/checker/tree-run.js';
 import { readManifest } from '../../engine/project/member-manifest.js';
+import { checkoutUnder } from '../../engine/testing/package-tree.fixtures.js';
 import { CHECKER } from './checker.js';
 import { checkFileSuffixMatchesPlaceInMember } from './file-suffix-matches-place.js';
 
@@ -37,6 +39,13 @@ function findings(root: string, rule: string): string[] {
         .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
+const WORKSPACE = resolve(import.meta.dirname, '../../../specs/shared/fixtures/member-workspace');
+const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
+
+function codes(dir: string, root = WORKSPACE): string[] {
+    return runMember(dir, root, CHECKER).map((violation) => violation.rule);
+}
+
 describe('checker', () => {
     test('the tree the checker judges — what git does not ignore — judges an untracked document, and never an ignored one', () => {
         // Given - three documents repeating their directory: tracked, new, and ignored
@@ -154,5 +163,41 @@ describe('checker', () => {
         expect(
             findings(root, 'no-volatile-literal').map((line) => line.split(':')[0]),
         ).toStrictEqual(['local/prints-where.spec.yaml']);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a member that owes nothing produces nothing', () => {
+        // Given - a member with a config, a test script and only optional peers
+        // Then - the pass is silent
+        expect(codes(memberAt('clean'))).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a member whose own root is the specs tree holds specs, not strays (`file-suffix-matches-place`)', () => {
+        // Given - `@fixture/specs-rooted`, a member declared as `specs` (spwn's shape), holding `cli/agent/agent-list.spec.ts`
+        // Then - the member pass reads the tree it IS: nothing is outside a specs tree here
+        expect(codes(resolve(WORKSPACE, 'specs'))).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — a folder of code named like ground is read below the member, never above it (`no-snapshot-folder`)', () => {
+        // Given - a package checked out under a folder named `specs/`, whose `src/goldens/` is matcher source
+        const member = checkoutUnder('specs', ['src/goldens']);
+        writeFileSync(join(member, 'src/goldens/matchers.ts'), 'export const golden = 1;\n');
+
+        // Then - the `specs` above the checkout is the machine's: the folder holds code, and stays
+        expect(codes(member, member)).toStrictEqual([]);
+    });
+
+    test('members — members — the member pass — what a workspace member owes — every member is judged in one run', () => {
+        // Given - the whole fixture workspace
+        const found = runMembers(WORKSPACE, CHECKER).map((violation) => violation.rule);
+
+        // Then - one `member-has-vitest-config`, one `no-simulated-dom-in-config`, three `no-redundant-test-dependency` and one `file-suffix-matches-place`, whatever the order they walk in
+        expect(found.toSorted()).toStrictEqual([
+            'file-suffix-matches-place',
+            'member-has-vitest-config',
+            'no-redundant-test-dependency',
+            'no-redundant-test-dependency',
+            'no-redundant-test-dependency',
+            'no-simulated-dom-in-config',
+        ]);
     });
 });
