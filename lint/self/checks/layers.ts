@@ -1,7 +1,7 @@
 import type { LayerOptions } from '../../rules/architecture/import-within-declared-layers.js';
 import { enginesOwnedIn } from './engines.js';
 
-/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's (`source-root-holds-known-entries`–`folder-named-for-a-concept`); engine ownership is read off `ENGINE_OWNERS`. */
+/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_PASS_IDS` in `checker.ts`; engine ownership is read off `ENGINE_OWNERS`. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {

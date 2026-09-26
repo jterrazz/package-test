@@ -78,7 +78,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/corpus/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `source-imports.test.ts` and `layers.test.ts` for the engine owners)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `one-owner-per-engine.test.ts` and `layers.test.ts` for the engine owners)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
@@ -212,6 +212,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/checks/pinned-value-from-the-input.ts',
             'lint/rules/layout/one-describe-per-file.merge.ts',
             'lint/reading/fs-cache.ts',
+            'lint/self/checks/source.ts',
         ),
         name: 'a lint-layer module',
         why: 'the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects',

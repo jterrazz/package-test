@@ -8,7 +8,7 @@ import type { SelfPassId } from './checker.js';
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
 export function treeOf(files: Record<string, string>): string {
-    const root = mkdtempSync(join(tmpdir(), 'source-tree-'));
+    const root = mkdtempSync(join(tmpdir(), 'self-source-'));
     for (const [path, content] of Object.entries(files)) {
         mkdirSync(dirname(join(root, path)), { recursive: true });
         writeFileSync(join(root, path), content);

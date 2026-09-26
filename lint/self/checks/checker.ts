@@ -1,10 +1,9 @@
 import type { Finding } from '../../checks/checker.js';
-import {
-    checkLintImportsFollowTheDirection,
-    checkNoCrossFacetImport,
-    checkOneOwnerPerEngine,
-} from './source-imports.js';
-import { checkFolderNamedForAConcept, checkSourceRootHoldsKnownEntries } from './source-tree.js';
+import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
+import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
+import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
+import { checkOneOwnerPerEngine } from './one-owner-per-engine.js';
+import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
 import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 
 /** `dist/checker.js` imports nothing from here, so no consumer run can reach a self pass. */
