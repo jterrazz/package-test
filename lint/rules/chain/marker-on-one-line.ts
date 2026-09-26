@@ -56,7 +56,7 @@ export const markerOnOneLine: LintRule = {
                         continue;
                     }
                     const indent = text.slice(lineStartAt(text, start), start);
-                    // A marker trailing code is `no-redundant-root`'s business, not this rule's.
+                    // A marker trailing code is out of this rule's reach.
                     if (indent.trim() !== '') {
                         continue;
                     }
