@@ -16,13 +16,12 @@ const MODULE_TEST = '/repo/src/report/report.test.ts';
 ruleTester.run('verb-reads-its-ground-folder', verbReadsItsGroundFolder as unknown as OxlintRule, {
     invalid: [
         { code: "api.seed(file('./_fixtures/rows.sql'));", errors: 1, filename: SPEC },
-        // The fixtures pool holds file state: a shared seed goes to the specs root's `_shared/_seeds/`.
         {
             code: "api.seed(file('../../_shared/_fixtures/_seeds/rows.sql'));",
             errors: [
                 {
                     message:
-                        /^found: `seed\(\)` reads _seeds\/, and `file\('\.\.\/\.\.\/_shared\/_fixtures\/_seeds\/rows\.sql'\)` names _fixtures\/ · .* · fix: move the file to \.\/_seeds\/ beside the test, or in specs\/_shared\/_seeds\/ if several leaves share it/u,
+                        /^found: `seed\(\)` reads _seeds\/, and `file\('\.\.\/\.\.\/_shared\/_fixtures\/_seeds\/rows\.sql'\)` names _fixtures\/ · .* · fix: move the file to \.\/_seeds\/ beside the test, or in the _seeds\/ of the lowest folder the leaves share \(specs\/_shared\/_seeds\/ across facets\)/u,
                 },
             ],
             filename: SPEC,

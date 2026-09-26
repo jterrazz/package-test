@@ -101,7 +101,7 @@ export const verbReadsItsGroundFolder: LintRule = {
                         where:
                             reads === undefined
                                 ? 'the folder its verb reads'
-                                : `./${reads}/ beside the test, or in specs/_shared/${reads}/ if several leaves share it`,
+                                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
                     },
                     messageId: 'crossed',
                     node: argument?.type === 'Identifier' ? argument : disk.node,

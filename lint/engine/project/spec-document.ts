@@ -489,7 +489,7 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
     }
     const found = groundOf(value);
     if (found !== role.folder) {
-        const where = `./${role.folder}/ beside the document, or in specs/_shared/${role.folder}/ if several leaves share it`;
+        const where = `./${role.folder}/ beside the document, or in the ${role.folder}/ of the lowest folder the leaves share (specs/_shared/${role.folder}/ across facets)`;
         at(
             `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
         );

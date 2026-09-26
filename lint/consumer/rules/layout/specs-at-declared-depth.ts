@@ -142,7 +142,7 @@ export const specsAtDeclaredDepth: LintRule = {
                     fix: 'move the spec out of `{{folder}}/`, into the subject folder it specifies; a reserved folder that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',
                 },
                 specInShared: {
-                    found: 'a spec under `specs/_shared/`, the ground several leaves share',
+                    found: 'a spec under `specs/_shared/`, what several facets share',
                     fix: 'move it into its facet: `specs/_shared/` holds only `_setup/`, `_fixtures/`, `_seeds/`, `_requests/` and `_expected/`',
                 },
                 specNotAtFacetRoot: {
@@ -151,7 +151,7 @@ export const specsAtDeclaredDepth: LintRule = {
                 },
                 strayFolder: {
                     found: 'a module in `specs/{{folder}}/`, a first-level folder that is no facet, not `_shared/`, and holds no test of its own',
-                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture under `specs/_shared/_fixtures/`; then remove `specs/{{folder}}/`',
+                    fix: 'move a runner to the root of the facet it builds (`specs/<facet>/<name>.specification.ts`), a test helper into the `_setup/` of the lowest folder its tests share, and a fixture in the ground of the lowest folder its tests share (`specs/_shared/_fixtures/` across facets); then remove `specs/{{folder}}/`',
                 },
                 testAtFacetRoot: {
                     found: 'a spec directly at its facet root',

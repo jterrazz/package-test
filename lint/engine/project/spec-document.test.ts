@@ -144,7 +144,7 @@ describe('spec-document', () => {
 
             // Then - the first ground folder is the one judged, as for every other path key
             expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
-                `case.spec.yaml:2: fixture: reads _fixtures/, and "${path}" ${names} — put the file in ./_fixtures/ beside the document, or in specs/_shared/_fixtures/ if several leaves share it (verb-reads-its-ground-folder)`,
+                `case.spec.yaml:2: fixture: reads _fixtures/, and "${path}" ${names} — put the file in ./_fixtures/ beside the document, or in the _fixtures/ of the lowest folder the leaves share (specs/_shared/_fixtures/ across facets) (verb-reads-its-ground-folder)`,
             );
         },
     );
