@@ -216,7 +216,7 @@ export const META_ROWS: Row[] = [
         fix: 'Specify the facet on the package itself before a rule presumes it.',
         name: 'every-constructor-has-specs',
         rationale:
-            'A facet the framework never ran against itself is a surface nobody has met, and P10 says the seam is proven before the rule wave.',
+            'A facet the framework never ran against itself is a surface nobody has met, and a seam is proven before the rule that presumes it.',
         reach: 'all',
     },
 ];

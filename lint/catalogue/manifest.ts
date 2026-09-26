@@ -920,7 +920,7 @@ export const CHECKER_PASSES: Row[] = [
         fix: "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
         name: 'seeds-state-absolute-time',
         rationale:
-            "A seed that reads the clock makes the row's date the date the suite happened to run: a case about \"published yesterday\" proves something different every day, and under SQLite `datetime('now')` writes a space-separated text where an ORM writes ISO `T`, so the two misorder across a calendar day. The R8 dry run counts 36, every one of them signews-api's.",
+            "A seed that reads the clock makes the row's date the date the suite happened to run: a case about \"published yesterday\" proves something different every day, and under SQLite `datetime('now')` writes a space-separated text where an ORM writes ISO `T`, so the two misorder across a calendar day. The estate dry run — the whole catalogue over every repository of the workbench — counts 36, every one of them signews-api's.",
         reach: 'ground',
         severity: 'error',
     },
