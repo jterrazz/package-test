@@ -50,7 +50,10 @@ import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
 import { checkPinnedValueFromTheInput } from './pinned-value-from-the-input.js';
 import { checkReservedFolderInClosedList } from './reserved-folder-in-closed-list.js';
 import { checkSeedsStateAbsoluteTime } from './seeds-state-absolute-time.js';
-import { checkSetupModuleAtLowestCommonFolder } from './setup-module-at-lowest-common-folder.js';
+import {
+    checkSetupModuleAtLowestCommonFolder,
+    fixSetupModuleAtLowestCommonFolder,
+} from './setup-module-at-lowest-common-folder.js';
 import { checkSpecCodeInSetupFolder } from './spec-code-in-setup-folder.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
@@ -193,6 +196,10 @@ export const CHECKER: CheckerRegistry = {
         (root) => fixNoDuplicateGround(root).map((move) => `moved ${move} (no-duplicate-ground)`),
         (root) =>
             fixGroundSharedOrInline(root).map((change) => `${change} (ground-shared-or-inline)`),
+        (root) =>
+            fixSetupModuleAtLowestCommonFolder(root).map(
+                (move) => `moved ${move} (setup-module-at-lowest-common-folder)`,
+            ),
     ],
     member: memberFindings,
     memberPassIds: MEMBER_PASS_IDS,
