@@ -5,7 +5,7 @@ import { checkFolderShape, checkSourceRoot } from './source-tree.js';
 
 /** The self checker passes `source-root-holds-known-entries` (`source-root-holds-known-entries`) and `folder-named-for-a-concept` (`folder-named-for-a-concept`). */
 describe('source-tree', () => {
-    test('checker-source-tree — the shape of the source tree (self checker passes) — `source-root-holds-known-entries` — the source root holds the two entries and the six trees, and nothing else', () => {
+    test('source-tree — the shape of the source tree (self checker passes) — `source-root-holds-known-entries` — the source root holds the two entries and the six trees, and nothing else', () => {
         // Given - the package's own tree, and one with a module and a folder left at its root
         const stray = treeOf({
             'src/index.ts': '',
@@ -22,7 +22,7 @@ describe('source-tree', () => {
         ]);
     });
 
-    test('checker-source-tree — the shape of the source tree (self checker passes) — `folder-named-for-a-concept` — a folder is named for a concept, holds two entries or more, and a facet root holds its face', () => {
+    test('source-tree — the shape of the source tree (self checker passes) — `folder-named-for-a-concept` — a folder is named for a concept, holds two entries or more, and a facet root holds its face', () => {
         // Given - the package's own tree, and one with role folders, a lone file and a stray file at a facet's root
         const misshapen = treeOf({
             'src/facets/api/api.facet.ts': '',

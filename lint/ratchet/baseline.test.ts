@@ -24,7 +24,7 @@ function projectWithOxlint(output: string): string {
     return root;
 }
 describe('baseline', () => {
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — a published code is recorded under its plugin and rule', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — a published code is recorded under its plugin and rule', () => {
         // Given - one code per namespace this package owns
         // Then - the key is the code spelled as a path
         expect(keyOf('jterrazz(test-beside-its-module)')).toBe('jterrazz/test-beside-its-module');
@@ -33,7 +33,7 @@ describe('baseline', () => {
         );
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — counts every finding under its key, whatever its severity', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — counts every finding under its key, whatever its severity', () => {
         // Given - two findings of one rule and one of another
         // Then - one line per key
         expect(
@@ -48,7 +48,7 @@ describe('baseline', () => {
         });
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — breaks on grown debt, new debt, and an entry the project paid', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — breaks on grown debt, new debt, and an entry the project paid', () => {
         // Given - a count above its entry, one with no entry, and an entry at zero
         const broken = judge(
             { 'jterrazz-check/no-unused-ground': 3, 'jterrazz/test-beside-its-module': 1 },
@@ -66,7 +66,7 @@ describe('baseline', () => {
         ]);
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — breaks on a count below its entry: the entry states where the project stands', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — breaks on a count below its entry: the entry states where the project stands', () => {
         // Given - the debt fell under one entry and stayed at the other
         // Then - the fall is named, with the gesture that records it
         expect(
@@ -79,7 +79,7 @@ describe('baseline', () => {
         ]);
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — holds when every count is at its entry', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — holds when every count is at its entry', () => {
         // Given - each count exactly where it was recorded, and the run's own key
         // Then - nothing breaks
         expect(
@@ -94,7 +94,7 @@ describe('baseline', () => {
         ).toStrictEqual([]);
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — the section sits in the family file at the project root, written sorted for a burn-down diff', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — the section sits in the family file at the project root, written sorted for a burn-down diff', () => {
         // Given - a project keeping its ratchet, and a member below it
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         const member = join(root, 'apps', 'web');
@@ -110,7 +110,7 @@ describe('baseline', () => {
         );
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — records its section and keeps every other section byte for byte', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — records its section and keeps every other section byte for byte', () => {
         // Given - a family file whose typescript section is spelled its own way, and a test section to replace
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         const typescript = '{"eslint/complexity":3,   "eslint/max-depth" : 1}';
@@ -134,7 +134,7 @@ describe('baseline', () => {
         );
     });
 
-    test("ratchet — the test ratchet — exact counts that a fix may lower and never raise — the routes the run holds are the run's: never judged here, never dropped by a recording", () => {
+    test("baseline — the test ratchet — exact counts that a fix may lower and never raise — the routes the run holds are the run's: never judged here, never dropped by a recording", () => {
         // Given - a test section holding a checker key and the run's route key
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         writeFileSync(
@@ -150,7 +150,7 @@ describe('baseline', () => {
         expect(judge({ 'jterrazz/new': 1 }, readBaseline(root))).toStrictEqual([]);
     });
 
-    test("ratchet — the test ratchet — exact counts that a fix may lower and never raise — a file holding another package's section alone keeps no test ratchet", () => {
+    test("baseline — the test ratchet — exact counts that a fix may lower and never raise — a file holding another package's section alone keeps no test ratchet", () => {
         // Given - a family file with a typescript section only
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         writeFileSync(join(root, BASELINE_FILE), '{ "typescript": { "eslint/complexity": 3 } }\n');
@@ -160,7 +160,7 @@ describe('baseline', () => {
         expect(readBaseline(root)).toStrictEqual({});
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — the retired file is never read', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — the retired file is never read', () => {
         // Given - a project holding only the file this package kept alone before the merge
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         writeFileSync(
@@ -173,7 +173,7 @@ describe('baseline', () => {
         expect(readBaseline(root)).toStrictEqual({});
     });
 
-    test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — an unreadable file records nothing rather than failing the run, and refuses a recording', () => {
+    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — an unreadable file records nothing rather than failing the run, and refuses a recording', () => {
         // Given - a family file that is not JSON
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
         writeFileSync(join(root, BASELINE_FILE), 'not json');
@@ -191,7 +191,7 @@ describe('baseline', () => {
         expect(readBaseline(root)).toStrictEqual({ 'jterrazz/x': 1 });
     });
 
-    test("ratchet — the plugin's diagnostics — judged here or nowhere — keeps the jterrazz diagnostics of the project oxlint report, and nothing else", () => {
+    test("baseline — the plugin's diagnostics — judged here or nowhere — keeps the jterrazz diagnostics of the project oxlint report, and nothing else", () => {
         // Given - a report with one diagnostic of this plugin, one of another, and one with no span
         const root = projectWithOxlint(
             JSON.stringify({
@@ -230,7 +230,7 @@ describe('baseline', () => {
         ]);
     });
 
-    test("ratchet — the plugin's diagnostics — judged here or nowhere — a project with no oxlint of its own has nothing to report", () => {
+    test("baseline — the plugin's diagnostics — judged here or nowhere — a project with no oxlint of its own has nothing to report", () => {
         // Given - a root with no install
         const root = mkdtempSync(join(tmpdir(), 'ratchet-bare-'));
 
@@ -238,7 +238,7 @@ describe('baseline', () => {
         expect(pluginDiagnostics(root)).toStrictEqual([]);
     });
 
-    test("ratchet — the plugin's diagnostics — judged here or nowhere — an oxlint that writes no JSON is a failure that says which binary", () => {
+    test("baseline — the plugin's diagnostics — judged here or nowhere — an oxlint that writes no JSON is a failure that says which binary", () => {
         // Given - a binary that prints prose
         const root = projectWithOxlint('Found 3 errors');
 
@@ -248,7 +248,7 @@ describe('baseline', () => {
         );
     });
 
-    test("ratchet — the plugin's diagnostics — judged here or nowhere — a report typescript check wrote is read, and no oxlint is run", () => {
+    test("baseline — the plugin's diagnostics — judged here or nowhere — a report typescript check wrote is read, and no oxlint is run", () => {
         // Given - a project whose oxlint prints prose, and a report beside it
         const root = projectWithOxlint('Found 3 errors');
         const report = join(root, 'handed.json');
@@ -280,7 +280,7 @@ describe('baseline', () => {
         ]);
     });
 
-    test("ratchet — the plugin's diagnostics — judged here or nowhere — a report that holds no JSON is a failure that names the file", () => {
+    test("baseline — the plugin's diagnostics — judged here or nowhere — a report that holds no JSON is a failure that names the file", () => {
         // Given - a handed report that is prose
         const root = mkdtempSync(join(tmpdir(), 'ratchet-report-'));
         const report = join(root, 'handed.json');

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('checker-cli', () => {
+describe('cli', () => {
     // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down

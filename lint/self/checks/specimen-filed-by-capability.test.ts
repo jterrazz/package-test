@@ -7,7 +7,7 @@ import { forgetTree } from '../../../src/kernel/files/git-tree.js';
 import { checkCapabilityFolder } from './specimen-filed-by-capability.js';
 
 function specsTree(files: Record<string, string>): string {
-    const scratch = mkdtempSync(join(tmpdir(), 'checker-capability-'));
+    const scratch = mkdtempSync(join(tmpdir(), 'specimen-filed-by-capability-'));
     const root = join(scratch, 'specs');
     for (const [path, text] of Object.entries(files)) {
         mkdirSync(dirname(join(root, path)), { recursive: true });

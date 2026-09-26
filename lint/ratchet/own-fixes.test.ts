@@ -52,7 +52,7 @@ function stubOxlint(root: string, status: number, script = ''): void {
 }
 
 describe('own-fixes', () => {
-    test("ratchet-own-fixes — the wrapper arms the plugin's rules alone, in the base and in every override", async () => {
+    test("own-fixes — the wrapper arms the plugin's rules alone, in the base and in every override", async () => {
         // Given - a base config arming the plugin beside another rulebook, in its rules and an override
         const root = projectWith({
             'oxlint.config.mjs': [
@@ -80,7 +80,7 @@ describe('own-fixes', () => {
         });
     });
 
-    test('ratchet-own-fixes — the wrapper carries `extends`, arming the plugin alone in every config extended', async () => {
+    test('own-fixes — the wrapper carries `extends`, arming the plugin alone in every config extended', async () => {
         // Given - the cap01 shape: a root arming the plugin only through an extended object, which extends a JSON file
         const root = projectWith({
             'base/base.json':
@@ -129,7 +129,7 @@ describe('own-fixes', () => {
         });
     });
 
-    test('ratchet-own-fixes — a JSON config and every JSON it extends are read as oxlint reads them, comments and trailing commas allowed', async () => {
+    test('own-fixes — a JSON config and every JSON it extends are read as oxlint reads them, comments and trailing commas allowed', async () => {
         // Given - a commented `.oxlintrc.json` extending a commented JSON, whose override arms a plugin of its folder
         const root = projectWith({
             '.oxlintrc.json':
@@ -170,7 +170,7 @@ describe('own-fixes', () => {
         });
     });
 
-    test('ratchet-own-fixes — a `.jsonc` config is read, never imported', async () => {
+    test('own-fixes — a `.jsonc` config is read, never imported', async () => {
         // Given - a root config written as `.oxlintrc.jsonc`, which Node refuses to import
         const root = projectWith({
             '.oxlintrc.jsonc':
@@ -204,7 +204,7 @@ describe('own-fixes', () => {
         },
     );
 
-    test('ratchet-own-fixes — every subtree under a nested oxlint config is fixed by a run of its own, under its own config', () => {
+    test('own-fixes — every subtree under a nested oxlint config is fixed by a run of its own, under its own config', () => {
         // Given - a nested config at sub/, another inside it, one under a skipped folder, one oxlint never nests
         const root = projectWith({
             'loose/oxlint.config.mjs': 'export default {};\n',
@@ -242,7 +242,7 @@ describe('own-fixes', () => {
         );
     });
 
-    test('ratchet-own-fixes — an oxlint that could not run is a failure naming the binary, and leaves no wrapper', () => {
+    test('own-fixes — an oxlint that could not run is a failure naming the binary, and leaves no wrapper', () => {
         // Given - an oxlint exiting past 1
         const root = projectWith({ '.oxlintrc.json': '{}\n' });
         stubOxlint(root, 2);
@@ -254,7 +254,7 @@ describe('own-fixes', () => {
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 
-    test('ratchet-own-fixes — a config oxlint could not load is a failure naming it, though oxlint exits 1', () => {
+    test('own-fixes — a config oxlint could not load is a failure naming it, though oxlint exits 1', () => {
         // Given - an oxlint that prints its load failure on stdout and exits 1, as it does
         const root = projectWith({ '.oxlintrc.json': '{}\n' });
         stubOxlint(root, 1, "echo 'Failed to parse oxlint configuration file.'");
@@ -266,7 +266,7 @@ describe('own-fixes', () => {
         expect(existsSync(join(root, OWN_FIXES_WRAPPER))).toBe(false);
     });
 
-    test('ratchet-own-fixes — a subtree under a `.oxlintrc.jsonc` is fixed under a wrapper that loads', () => {
+    test('own-fixes — a subtree under a `.oxlintrc.jsonc` is fixed under a wrapper that loads', () => {
         // Given - a commented nested `.jsonc`, and an oxlint that loads the wrapper it is handed as oxlint does
         const root = projectWith({
             'oxlint.config.ts': 'export default {};\n',
@@ -285,7 +285,7 @@ describe('own-fixes', () => {
         );
     });
 
-    test('ratchet-own-fixes — a project with no oxlint, or no root config, has nothing to fix', () => {
+    test('own-fixes — a project with no oxlint, or no root config, has nothing to fix', () => {
         // Given - one project with a config and no oxlint, one with an oxlint and no config
         const bare = projectWith({ 'oxlint.config.ts': 'export default {};\n' });
         const unconfigured = projectWith({ 'package.json': '{}\n' });

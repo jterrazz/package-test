@@ -64,7 +64,7 @@ function publishedEntries(exports: Record<string, unknown>): PublishedEntry[] {
 const PUBLISHED_CHANNELS = new Set(['runtime', 'type', 'upstream']);
 
 describe('audience', () => {
-    const scratch = mkdtempSync(join(tmpdir(), 'k12-tarball-'));
+    const scratch = mkdtempSync(join(tmpdir(), 'audience-tarball-'));
     const installed = extractTarball(ROOT, scratch);
     const packed = new Set(filesUnder(installed));
     const rows = selfRows();

@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('checker-ratchet', () => {
+describe('ratchet', () => {
     test('lint — checker CLI, the ratchet is exact — a count below its entry breaks the ratchet: the debt fell, and the entry says so', async () => {
         // Given - one dead fixture, held by an entry of three, and an entry whose rule is at zero
         const result = await cli

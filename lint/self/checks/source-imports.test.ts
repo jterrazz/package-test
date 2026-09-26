@@ -5,7 +5,7 @@ import { located, ROOT, treeOf } from './source-tree.fixtures.js';
 
 /** The self checker passes `no-cross-facet-import` (`no-cross-facet-import`) and `one-owner-per-engine` (`one-owner-per-engine`). */
 describe('source-imports', () => {
-    test('checker-source-imports — the imports of the source tree (self checker passes) — `no-cross-facet-import` — a facet never imports another, and is entered from outside by its face', () => {
+    test('source-imports — the imports of the source tree (self checker passes) — `no-cross-facet-import` — a facet never imports another, and is entered from outside by its face', () => {
         // Given - the package's own tree, and one where a facet reaches another, and an entry skips the face for a root file and for a concept folder
         const crossing = treeOf({
             'src/facets/api/api.handle.ts': "\nimport type { X } from '../cli/cli.handle.js';\n",
@@ -24,7 +24,7 @@ describe('source-imports', () => {
         ]);
     });
 
-    test('checker-source-imports — the imports of the source tree (self checker passes) — `one-owner-per-engine` — each third-party engine is imported by the one slice that owns it', () => {
+    test('source-imports — the imports of the source tree (self checker passes) — `one-owner-per-engine` — each third-party engine is imported by the one slice that owns it', () => {
         // Given - the package's own tree, and one where the kernel reaches for pg and the api facet for playwright
         const misplaced = treeOf({
             'src/facets/api/api.handle.ts':
