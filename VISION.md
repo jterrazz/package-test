@@ -2311,7 +2311,7 @@ The four questions of the overnight summary, and 129 and 130 raised above.
 
 ## Iteration 30 — the shared pool has a name (owner, 2026-09-24)
 
-The specs root holds only its facets and ONE more folder, `specs/_shared/`,
+The specs root holds only its facets and ONE more folder, `<specs>/shared/`,
 which holds the shared ground: `specs/shared/{fixtures,seeds,requests,expected}/`.
 A path leaves its leaf only to reach `specs/shared/<role>/` (C15); a pool
 entry one leaf uses moves beside it (C14, now C28's level half); identical
@@ -2337,7 +2337,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
   over such a spec (exit 1, C8 at the path the move left behind).
 - **The shared ground** (`577a150e`). `SHARED_GROUND` in
   `src/model/chain/ground.ts`; C9, C15, C27, C28 and C29 read and write
-  `specs/shared/<role>/`, and the walks prune `specs/_shared/` whole. A role
+  `specs/shared/<role>/`, and the walks prune `<specs>/shared/` whole. A role
   folder at the specs root is refused as a folder (C15), and `--fix` moves
   its entries under `shared/` and rewrites every source literal and document
   key of the specs tree that named one. This package's own tree moved with
@@ -2350,7 +2350,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
   rename. Red: the pool renamed in place; `$FIXTURES/` climbing to the root;
   the old rename named.
 - **C1 reserves `shared`** (`7933db45`). A spec or specification under
-  `specs/_shared/` is refused in every mode; a domain named `shared` under
+  `<specs>/shared/` is refused in every mode; a domain named `shared` under
   `facet-domain` and `facet`. Ground under `shared/` keeps its module tests.
   Red: each check off, and the facet check skipped under `off`.
 - **The history** (`23be665a`). Ten lines of earlier iterations spelled
@@ -2401,7 +2401,7 @@ their ground beside them (`./seeds/`…). The toolchain allows the name
 ### What the package-test branch did (iteration 31)
 
 - **131** (`cb72c1fb`). C1 drops its domain check: a spec under
-  `specs/_shared/` is still refused in every mode, and a folder named
+  `<specs>/shared/` is still refused in every mode, and a folder named
   `shared` below a facet is the author's. Red: the domain check restored
   (4 of 46 — three accepting rule-tester cases and the accepting document).
 - **132** (`f36b282b`). Every fixer that moves ground — C15's root ground,
@@ -2484,10 +2484,10 @@ import.meta.url)` — for existence; a bare literal and a command string are
   and hands the server the device by capabilities (`appium:deviceName`,
   `appium:platformVersion`, `appium:udid` when known) instead of resolving
   and booting it through `simctl`; the handle's `udid` becomes optional.
-  The double is a fixture, `specs/_shared/_fixtures/appium-double/` (the
+  The double is a fixture, `<specs>/shared/fixtures/appium-double/` (the
   specs reach it beside the public entry, F3): the W3C endpoints the
   adapter calls, the predicate subset parsed, `unknown command` for the
-  rest. The app is data, `specs/_shared/_fixtures/specimen-mobile/specimen.ts`.
+  rest. The app is data, `<specs>/shared/fixtures/specimen-mobile/specimen.ts`.
   Red: the declared server ignored, each capability dropped or unstripped,
   the double drawing everything invisible.
 - **Every mobile cell** (`2e7f36dd`). Four journeys — `launch/`,
@@ -2623,7 +2623,7 @@ The only conflicts were in the generated `docs/03-testing.md`; chore commit
   reuse a file that already holds the same bytes. What stays open:
     - **Owner confirmation.** In
       `specs/lint/one-subject-per-spec/fixes-a-file-of-two-routes.spec.yaml`,
-      the seed now stays in `specs/_shared/_seeds/`.
+      the seed now stays in `<specs>/shared/seeds/`.
     - A fixer that moves ground rewrites only whole relative literals, not a
       path built from pieces, so `--fix` can leave a C8 error. docs/18's "A
       fixer that moves ground rewrites every path that named it" is now false
@@ -2696,7 +2696,7 @@ over the toolchain installed from package-typescript `77f2d92` (`npm ci`).
 Every conflict was in a generated file (`docs/03-testing.md`,
 `jterrazz.baseline.json`) except one: `specs/api/intercepts.specification.ts`,
 whose inline app the capability filing moved to
-`specs/_shared/_fixtures/specimen-api-outbound/app.ts`. Keeping one side of
+`<specs>/shared/fixtures/specimen-api-outbound/app.ts`. Keeping one side of
 chapter 03 whole dropped the filing's prose, and `ed29775` restores it.
 Integrator commits: `382bae0` re-files the two specs and the fixture the
 other units added, and `9f3ce1f` regenerates chapter 03 and re-records the
@@ -3019,7 +3019,7 @@ The units:
       `server: { command }` that its own rule prose writes.
     - Two specimen guards are unpinned: the `;` boundary in `constHolding`
       and the `command` test in `runsAServerCommand`.
-    - `specs/_shared/_fixtures/orders/` is now a specimen. It is not named
+    - `<specs>/shared/fixtures/orders/` is now a specimen. It is not named
       `specimen-*`, and docs/03's pool sentence does not list it. Any
       import of the shared fixtures counts for an integration spec. This
       needs an **owner call** on the name.
