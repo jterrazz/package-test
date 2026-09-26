@@ -43,7 +43,7 @@ export function withOwnedBody(response: Response): Response {
     return reply;
 }
 
-export function owningBodies(engine: typeof fetch): typeof fetch {
+export function owningBodies(underlying: typeof fetch): typeof fetch {
     return async (input: RequestInfo | URL, init?: RequestInit): Promise<Response> =>
-        withOwnedBody(await engine(input, init));
+        withOwnedBody(await underlying(input, init));
 }

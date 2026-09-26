@@ -1,5 +1,5 @@
-/** The one statement of engine ownership: `one-owner-per-engine` holds every import to it, and the layer map grants each folder the engines listed here. */
-export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
+/** The one statement of library ownership: `one-owner-per-library` holds every import to it, and the layer map grants each folder the libraries listed here. */
+export const LIBRARY_OWNERS: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
     '@vitest/browser-playwright': ['src/facets/component/'],
     'better-sqlite3': ['src/world/services/sqlite/'],
@@ -20,8 +20,8 @@ export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     yaml: ['lint/engine/project/yaml-document.ts'],
 };
 
-export function enginesOwnedIn(tree: string): string[] {
-    return Object.entries(ENGINE_OWNERS)
+export function librariesOwnedIn(tree: string): string[] {
+    return Object.entries(LIBRARY_OWNERS)
         .filter(([, owners]) => owners.some((owner) => owner.startsWith(tree)))
-        .map(([engine]) => engine);
+        .map(([library]) => library);
 }

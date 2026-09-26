@@ -23,13 +23,13 @@ export type Action<
     /** A type alone, never set at runtime: `ChainOf` reads it. */
     readonly signature?: Signature;
     readonly verbs?: readonly MatrixRow[];
-    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
+    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and drivers is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     prepare?(
         args: Args,
         read: SliceReader,
     ): Promise<{ readonly workDir: null | string }> | { readonly workDir: null | string };
-    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and engines is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
-    perform(args: Args, read: SliceReader, engines: Needs, run: Run<Config>): Promise<Result>;
+    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any arguments, result and drivers is an `AnyAction`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
+    perform(args: Args, read: SliceReader, drivers: Needs, run: Run<Config>): Promise<Result>;
 };
 
 export type AnyAction = Action<string, readonly unknown[], unknown, ChainSignature, object>;

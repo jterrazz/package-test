@@ -6,17 +6,17 @@ import type { ChainState } from './state.js';
 
 export type Performed = {
     readonly config: ChainConfig;
-    readonly engines: object;
+    readonly drivers: object;
     readonly state: ChainState;
     readonly testDir: string;
 };
 
-/** An engine's recorded violation wins over the action's error and over its success; every armed effect is released in reverse. */
+/** A driver's recorded violation wins over the action's error and over its success; every armed effect is released in reverse. */
 export async function perform(
     setups: readonly AnyCapability[],
     action: AnyAction,
     args: readonly unknown[],
-    { config, engines, state, testDir }: Performed,
+    { config, drivers, state, testDir }: Performed,
 ): Promise<unknown> {
     const read = readerOf(state);
     const { workDir } = (await action.prepare?.(args, read)) ?? { workDir: null };
@@ -27,10 +27,10 @@ export async function perform(
     try {
         for (const setup of setups.toSorted((one, other) => one.phase - other.phase)) {
             // oxlint-disable-next-line eslint/no-await-in-loop -- the order IS the contract: a seed lands before the stubs that serve it, the clock last
-            const effect = await setup.arm?.(read(setup), engines, run);
+            const effect = await setup.arm?.(read(setup), drivers, run);
             armed.push(effect ?? {});
         }
-        const value = await action.perform(args, read, engines, run);
+        const value = await action.perform(args, read, drivers, run);
         const failed = violation();
         if (failed !== null) {
             throw failed;

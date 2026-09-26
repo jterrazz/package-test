@@ -49,7 +49,7 @@ function declared(column: Column, group: CapabilityGroup): string[] {
         .toSorted();
 }
 
-const INTERNAL = 'an @internal scope the engine uses to resolve `{{type#ref}}` captures';
+const INTERNAL = 'an @internal scope the matcher uses to resolve `{{type#ref}}` captures';
 
 const NO_DISK = 'inherited from BaseResult; this kind leaves no working directory to read';
 

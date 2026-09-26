@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { isRunnerRequest } from './worker.engine.js';
+import { isRunnerRequest } from './worker.driver.js';
 
-describe('worker.engine', () => {
+describe('worker.driver', () => {
     test("the page network — what passes without a stub — the runner's own traffic passes by its path, the subject's never by its extension", () => {
         // Given - what Vite and the runner fetch, and what a component fetches that merely looks like an asset
         const runner = [

@@ -142,14 +142,14 @@ describe('refusals', () => {
             cli.run(file('./fixtures/wrong-stdout.spec.yaml'), { frozen: true }),
         );
 
-        // Then - no engine frames, no generated-module frame: the `command:` line, which is what the message names too
+        // Then - no runner frames, no generated-module frame: the `command:` line, which is what the message names too
         expect(frames(error)).toStrictEqual([
             `at ${resolve(import.meta.dirname, 'fixtures/wrong-stdout.spec.yaml')}:3:1`,
         ]);
         expect(error.message).toContain('fixtures/wrong-stdout.spec.yaml:3');
     });
 
-    test('a grammar refusal points at the offending line, not at the engine', async () => {
+    test('a grammar refusal points at the offending line, not at the runner', async () => {
         // Given - a document carrying a key outside the closed set (line 2)
         const error = await errorOf(cli.run(file('./fixtures/unknown-key.spec.yaml')));
 

@@ -24,14 +24,14 @@ describe('facet-is-a-composition.values', () => {
         expect(rows.map((row) => isRow(expressionOf(row)))).toStrictEqual([true, false, false]);
     });
 
-    test("facet-values — facet values — an adapter is a plain value or an engine's constructor called on plain values", () => {
-        // Given - an engine's constructor and a definition
+    test("facet-values — facet values — an adapter is a plain value or a driver's constructor called on plain values", () => {
+        // Given - a driver's constructor and a definition
         const imports = new Map([
-            ['databaseSet', '../../world/services/seed/database-set.engine.js'],
+            ['databaseSet', '../../world/services/seed/database-set.driver.js'],
             ['seed', '../../world/services/seed/seed.capability.js'],
         ]);
 
-        // Then - only the engine's builds an adapter, and only on plain values
+        // Then - only the driver's builds an adapter, and only on plain values
         expect(isAdapter(expressionOf('databaseSet(config)'), imports)).toBe(true);
         expect(isAdapter(expressionOf('config.jobs ?? []'), imports)).toBe(true);
         expect(isAdapter(expressionOf('seed(config)'), imports)).toBe(false);

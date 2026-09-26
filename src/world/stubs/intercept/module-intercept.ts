@@ -12,7 +12,7 @@ export type InterceptOptions = {
     origin?: string;
 };
 
-/** The module-scope network double; awaited, so the engine listens before the subject runs. */
+/** The module-scope network double; awaited, so the network double listens before the subject runs. */
 export type Intercept = ((
     stubs: StubInput,
     options?: InterceptOptions,
@@ -29,7 +29,7 @@ function isOptions(value: unknown): value is InterceptOptions {
     );
 }
 
-/** Validated before anything starts, installed only once the engine listens: it sits on top of the engine's `fetch` and comes off first. */
+/** Validated before anything starts, installed only once the network double listens: it sits on top of the double's `fetch` and comes off first. */
 function resolveRelativeAgainst(origin: string): () => () => void {
     let base: URL;
     try {
@@ -40,16 +40,16 @@ function resolveRelativeAgainst(origin: string): () => () => void {
         );
     }
     return () => {
-        const engine = globalThis.fetch;
+        const underlying = globalThis.fetch;
         globalThis.fetch = async (
             input: RequestInfo | URL,
             init?: RequestInit,
         ): Promise<Response> =>
             typeof input === 'string' && input.startsWith('/')
-                ? await engine(new URL(input, base).toString(), init)
-                : await engine(input, init);
+                ? await underlying(new URL(input, base).toString(), init)
+                : await underlying(input, init);
         return () => {
-            globalThis.fetch = engine;
+            globalThis.fetch = underlying;
         };
     };
 }

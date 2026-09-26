@@ -32,7 +32,7 @@ describe('passthrough-cancel', () => {
         'passed through to a real server after a chain, its body settles a cancel',
         { timeout: 3000 },
         async () => {
-            // Given - a chain that started the engine, and a server holding its body open
+            // Given - a chain that started the network double, and a server holding its body open
             await integration
                 .intercept(http.get(`${PRICING}/quotes/ORD-1`), http.json({ total: 42 }))
                 .call(async () => await quoteOrder(PRICING, 'ORD-1'));

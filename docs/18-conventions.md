@@ -253,7 +253,7 @@ for the file that builds a runner. A repository suite is the one tree under
 `specs/` that keeps `.test.ts`: its first level is not a facet, it covers a tree
 rather than a product, and `specs-at-declared-depth`'s declared depth is what judges its shape.
 
-The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and a golden engine — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([06](06-integration.md)).
+The fork is the SUBJECT, never the amount of machinery. A rendered component needs a real browser, a Vite pipeline, a network double and golden matching — all of them the framework's — and it is still a unit, so it sits beside its code. A module that needs a real database needs nothing new at all, and it is still an assembled thing, so it sits under `specs/` ([06](06-integration.md)).
 
 The table is total: **a folder under `specs/` is a constructor's name, `shared/`, or a repository suite, and there is no tenth row**. A probe of an adapter against a real service — a database driver, a cache handle — answers the seventh question, so it is an integration spec like any other; what it cannot reach through the package's public entry it should not be reaching from a spec at all, and that probe is a module test beside its module.
 
@@ -263,7 +263,7 @@ Closed and ordered. An agent takes the FIRST rung that fits, and nothing below r
 
 1. **The real thing**, in-process — a pure module, a Hono app handed to `server`, a component mounted in a real Chromium.
 2. **A declared service** — `sqlite()`, `postgres()`, `redis()`, `process()` ([17](17-services.md)): real, isolated per worker, reset at the start of every chain.
-3. **A stub** — `.intercept()` on a chain (api, job, integration, component, website, mobile), `intercept()` in module scope ([16](16-stubs.md)). One queue, three transports ([16 § Three engines, one queue](16-stubs.md#three-engines-one-queue)), strict from the first stub (rule `network-strict-after-first-stub`); a streamed body is `http.stream` / `http.sse`.
+3. **A stub** — `.intercept()` on a chain (api, job, integration, component, website, mobile), `intercept()` in module scope ([16](16-stubs.md)). One queue, three transports ([16 § Three drivers, one queue](16-stubs.md#three-drivers-one-queue)), strict from the first stub (rule `network-strict-after-first-stub`); a streamed body is `http.stream` / `http.sse`.
 4. **A typed port double** — `mockOf<Port>()` for an injected interface, `vi.fn<Fn>()` for a function-shaped dependency. Asserting a call on one is a boundary observation; asserting ONLY on doubles the test built is not a test of anything. `T` is constrained to `object` and has no default, so a double asked for nothing answers for `object` — TypeScript falls back to the constraint where no inference site says otherwise, and the refusal lands where the double is USED rather than where it was made. State the port.
 
 **Off the ladder**, each with a destination: `vi.stubGlobal('fetch')` → `intercept()`; a raw `msw`/`nock`/`sinon` import → a stub; `vi.useFakeTimers` / `vi.setSystemTime` → `clock`; `toMatchSnapshot` → a golden under `expected/`; `vi.mock` of an application module → inject the port instead. A native module a consumer genuinely cannot inject is the one allow-listed exception, per specifier, with a reason.

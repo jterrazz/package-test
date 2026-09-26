@@ -18,7 +18,7 @@ export type FacetFinding = {
     readonly messageId:
         | 'adapter'
         | 'defined'
-        | 'engines'
+        | 'drivers'
         | 'inline'
         | 'listed'
         | 'member'
@@ -79,10 +79,10 @@ function isChainType(statement: AstNode): boolean {
 
 /** Only when written as an arrow whose every parameter is a bare name, typed or not. */
 function adaptersOf(facet: AstNode): AstNode | undefined {
-    const engines = child(findProperty(facet, 'engines'), 'value');
-    const body = unwrapped(child(engines, 'body'));
-    return engines?.type === 'ArrowFunctionExpression' &&
-        childList(engines, 'params').every((parameter) => parameter.type === 'Identifier') &&
+    const drivers = child(findProperty(facet, 'drivers'), 'value');
+    const body = unwrapped(child(drivers, 'body'));
+    return drivers?.type === 'ArrowFunctionExpression' &&
+        childList(drivers, 'params').every((parameter) => parameter.type === 'Identifier') &&
         body?.type === 'ObjectExpression'
         ? body
         : undefined;
@@ -170,7 +170,7 @@ function isNamed(property: AstNode, imports: ReadonlyMap<string, string>): boole
     }
     const value = child(property, 'value');
     return (
-        propertyKeyName(property) === 'engines' ||
+        propertyKeyName(property) === 'drivers' ||
         (isNamedKey(property) && isReference(value) && imports.has(rootOf(value) ?? ''))
     );
 }
@@ -187,7 +187,7 @@ function facetFindings(
     }));
     const adapters = adaptersOf(facet);
     if (adapters === undefined) {
-        return [...handed, { messageId: 'engines', node: facet }];
+        return [...handed, { messageId: 'drivers', node: facet }];
     }
     const unwired = childList(adapters, 'properties')
         .filter((adapter) => !isNamedKey(adapter) || !isAdapter(child(adapter, 'value'), imports))

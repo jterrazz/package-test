@@ -61,7 +61,7 @@ one `.call()` inside `test.each`.
   throw" test that passes because nothing threw. A chain says "and it did not
   refuse" with `await expect(result.error).toBeEmpty()`.
 - **D20 gains its destination.** `toMatchSnapshot` can be banned because every
-  test it served now has a facet, a folder and a golden engine.
+  test it served now has a facet, a folder and golden matching.
 - **One more folder name is spoken for, and no unowned one is added.**
   `specs/integration/` is a facet folder: singular, like `website/`, and
   holding a `*.specification.ts` at its root. The package renamed its own

@@ -76,7 +76,7 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 | `result.stdout.raw`                         | `string`       | `expect(result.stdout.raw).toMatch(/\u001B\[31m/u)` — the capture as it was                                      |
 | `result.containerIds`                       | `string[]`     | `expect(result.containerIds).toHaveLength(1)`                                                                    |
 | `await result.filesystem.files()`           | `string[]`     | `expect(await result.filesystem.files()).toContain('shoply.lock')`                                               |
-| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [20](20-documents.md#the-three-doors-one-engine) |
+| `await cli.run(file('./<case>.spec.yaml'))` | `CliResult`    | the document asserts itself; the LAST run's result comes back — [20](20-documents.md#the-three-doors-one-runner) |
 
 ## `result.response` — HTTP response (api)
 
@@ -324,7 +324,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Update mode
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The engine, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and it is `toMatch` on every result subject — a value written in place is rewritten in the test itself, a `file()` or a `directory()` on disk.
+`TEST_UPDATE=1` (or `vitest -u`) rewrites a mismatching golden from the actual output instead of failing, preserving the tokens already in the file, and `{ frozen: true }` opts one fixture out — a fixture whose mismatch IS the behaviour under test. The rewrite, the flag, the discipline it asks for and the frozen two-pass are all [15 — Tokens](15-tokens.md#update-mode-tokens-are-preserved)'s; this chapter only notes which matchers the flag reaches, and it is `toMatch` on every result subject — a value written in place is rewritten in the test itself, a `file()` or a `directory()` on disk.
 
 ## Common mistakes
 

@@ -2,7 +2,7 @@ import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { http } from '../http/http.js';
 import type { Stub } from '../stub.js';
-import { stubBackend } from './stub-backend.engine.js';
+import { stubBackend } from './stub-backend.driver.js';
 import { StubBackend } from './stub-backend.js';
 
 function get(path: string, n: number): Stub {

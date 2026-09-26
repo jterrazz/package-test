@@ -19,11 +19,11 @@ function findingsOf(source: string): string[] {
     );
 }
 
-function facetWiring(engines: string): string {
+function facetWiring(drivers: string): string {
     return `
 import { seed } from '../../../../world/services/seed/seed.capability.js';
 import { getCallerDir } from '../../../../kernel/files/caller.js';
-import { databaseSet } from '../../../../world/services/seed/database-set.engine.js';
+import { databaseSet } from '../../../../world/services/seed/database-set.driver.js';
 import { defineFacet } from '../../../define-facet.js';
 
 const composition = {
@@ -32,12 +32,12 @@ const composition = {
     options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } },
 } as const;
 
-export const jobFacet = defineFacet()({ ...composition, engines: ${engines}, locate: getCallerDir });
+export const jobFacet = defineFacet()({ ...composition, drivers: ${drivers}, locate: getCallerDir });
 `;
 }
 
 describe('facet-is-a-composition.file', () => {
-    test('facet-file — facetFileFindings — an adapter is a name, a read of the config, or an engine built on them', () => {
+    test('facet-file — facetFileFindings — an adapter is a name, a read of the config, or a driver built on them', () => {
         // Given - the three forms an adapter takes
         const source = facetWiring(
             '(config) => ({ databases: databaseSet(config), jobs: config.jobs ?? [], seed })',
@@ -62,12 +62,12 @@ describe('facet-is-a-composition.file', () => {
         ]);
     });
 
-    test('facet-file — facetFileFindings — engines not written as an arrow handing back an object are one finding', () => {
-        // Given - engines computed in a block
+    test('facet-file — facetFileFindings — drivers not written as an arrow handing back an object are one finding', () => {
+        // Given - drivers computed in a block
         const source = facetWiring('(config) => { return { seed }; }');
 
-        // Then - the engines, and nothing about what the block holds
-        expect(findingsOf(source)).toStrictEqual(['engines']);
+        // Then - the drivers, and nothing about what the block holds
+        expect(findingsOf(source)).toStrictEqual(['drivers']);
     });
 
     test('facet-file — importsOf — maps every local name a program imports to its source', () => {

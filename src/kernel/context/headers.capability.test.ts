@@ -22,7 +22,7 @@ function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [send],
         capabilities: [headers, sharing],
-        engines: () => ({}),
+        drivers: () => ({}),
         locate: () => '/specs',
         options: {},
     }).open({});

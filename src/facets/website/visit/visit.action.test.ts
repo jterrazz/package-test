@@ -39,7 +39,7 @@ function chainOver(sent: BrowserOpenOptions['headers'][]): Chain {
     return defineFacet<Chain, WebsiteConfig>()({
         actions: [visit],
         capabilities: [headers, sharing],
-        engines: () => ({ browser: async () => await Promise.resolve(browser) }),
+        drivers: () => ({ browser: async () => await Promise.resolve(browser) }),
         locate: () => '/specs/website',
         options: {},
     }).open({ baseUrl: 'http://127.0.0.1:9' });

@@ -3,5 +3,5 @@ export type ChainConfig = {
 };
 
 export type Started<Config extends ChainConfig, Key extends keyof Config> = Config & {
-    readonly [Engine in Key]-?: NonNullable<Config[Engine]>;
+    readonly [Driver in Key]-?: NonNullable<Config[Driver]>;
 };

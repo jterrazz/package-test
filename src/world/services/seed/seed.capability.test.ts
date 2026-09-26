@@ -45,7 +45,7 @@ function chainOver(log: string[], config: ServicesConfig): Chain {
     return defineFacet<Chain>()({
         actions: [settle],
         capabilities: [seed],
-        engines: () => ({ databases }),
+        drivers: () => ({ databases }),
         locate: () => '/specs/users',
         options: {},
     }).open(config);
@@ -59,9 +59,9 @@ describe('seed', () => {
 
         // When - the chain is armed
         await chain
-            // checker-disable-next-line named-path-exists -- the engine is a double that echoes the path it would read: no file is opened
+            // checker-disable-next-line named-path-exists -- the driver is a double that echoes the path it would read: no file is opened
             .seed(file('./seeds/users.sql'), { database: 'db' })
-            // checker-disable-next-line named-path-exists -- the engine is a double that echoes the path it would read: no file is opened
+            // checker-disable-next-line named-path-exists -- the driver is a double that echoes the path it would read: no file is opened
             .seed(file('./seeds/events.sql'), { database: 'analytics' })
             .settle();
 

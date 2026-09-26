@@ -6,7 +6,7 @@ A terminal session that is data is written as data: one `<case>.spec.yaml` per t
 - [Paths](#paths) — `fixture:` names the disk the way `file()` and `directory()` do
 - [A cli document](#a-cli-document) — the ground, the runs, what they left behind
 - [The schema and the key order](#the-schema-and-the-key-order)
-- [The three doors, one engine](#the-three-doors-one-engine) — the plugin, the bridge, the chain
+- [The three doors, one runner](#the-three-doors-one-runner) — the plugin, the bridge, the chain
 - [Failure and update](#failure-and-update) · [When to reach for code](#when-to-reach-for-code)
 
 ## One file, one test
@@ -121,7 +121,7 @@ A schema says which keys exist, not which ORDER they come in. The canonical orde
 
 The whole [token vocabulary](15-tokens.md) works in what a document ASSERTS — a run's streams and `files:` texts — and **never** in `description`, `command` or `stdin`, which are prose and inputs.
 
-## The three doors, one engine
+## The three doors, one runner
 
 | Door       | Use it when                                                                                    |
 | ---------- | ---------------------------------------------------------------------------------------------- |

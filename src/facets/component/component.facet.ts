@@ -4,16 +4,16 @@ import type { ChainConfig } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
-import { mswWorker } from '../../world/stubs/network/worker.engine.js';
+import { mswWorker } from '../../world/stubs/network/worker.driver.js';
 import type { ComponentOptions } from './component.project.js';
-import { pageClock } from './page/clock.engine.js';
+import { pageClock } from './page/clock.driver.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';
-import { vitestBrowserPage } from './page/page.engine.js';
+import { vitestBrowserPage } from './page/page.driver.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { render } from './render/render.action.js';
 import { wrap } from './render/wrap.capability.js';
 import { viewport } from './viewport/viewport.capability.js';
-import { pageViewport } from './viewport/viewport.engine.js';
+import { pageViewport } from './viewport/viewport.driver.js';
 
 const composition = {
     actions: [render],
@@ -34,7 +34,7 @@ export interface ComponentChain extends ChainOf<typeof composition, FacetParams,
 
 export const componentFacet = defineFacet<ComponentChain>()({
     ...composition,
-    engines: (_config: ChainConfig) => ({
+    drivers: (_config: ChainConfig) => ({
         clock: pageClock,
         network: mswWorker(afterThisTest),
         page: vitestBrowserPage,

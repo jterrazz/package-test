@@ -34,7 +34,7 @@ function chainOver(command: CliPort): Chain {
     return defineFacet<Chain>()({
         actions: [exec],
         capabilities: [env],
-        engines: () => ({ command }),
+        drivers: () => ({ command }),
         locate: () => import.meta.dirname,
         options: {},
     }).open({});

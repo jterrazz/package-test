@@ -1,37 +1,37 @@
-# ADR-009: A node builtin is not an engine, and each slice spawns only its own subject
+# ADR-009: A node builtin is not a library, and each slice spawns only its own subject
 
 **Status:** Proposed
 **Date:** 2026-09-25
 
 ## Context
 
-The source trees hold each third-party engine to exactly one slice, and a
-truly shared engine (git, yaml, oxc-parser, process spawning) lives behind a
+The source trees hold each third-party library to exactly one slice, and a
+truly shared library (git, yaml, oxc-parser, process spawning) lives behind a
 port in `kernel/` or in the ONE slice that needs it ([01 — Architecture § The
-source trees](../01-architecture.md#the-source-trees)). `one-owner-per-engine` (`lint/self/checks/one-owner-per-engine.ts`, over `ENGINE_OWNERS` in `lint/self/checks/engines.ts`) holds the
+source trees](../01-architecture.md#the-source-trees)). `one-owner-per-library` (`lint/self/checks/one-owner-per-library.ts`, over `LIBRARY_OWNERS` in `lint/self/checks/libraries.ts`) holds the
 first half for packages. It does not track `node:child_process`, which six
 slices import: `world/services/process/` (the processes a record serves),
 `facets/cli/process/` (the subject binary), `facets/mobile/server/` (`xcrun
 simctl`), `expectations/command/` (`docker` for a result's containers), `lint/engine/project/git-tree.ts` (what git does not ignore) and, until
 this record, `world/services/sqlite/` (`prisma db push`).
 
-These are not one engine used six times. Each spawns a different program for a
+These are not one library used six times. Each spawns a different program for a
 different owner, and none of them shares a lifecycle, an option shape or an
 error with another: a port over all six would be `spawn` renamed. What made
-sqlite's case different is that it spawned beside the process engine of its
+sqlite's case different is that it spawned beside the process library of its
 own area, `world/services/process/`, which is exactly the second copy that rule
 forbids.
 
 ## Decision
 
-- A node builtin is not an engine in I11's sense: `ENGINE_OWNERS` lists
-  third-party packages, and the one-slice-per-engine rule is read that way.
+- A node builtin is not a library in I11's sense: `LIBRARY_OWNERS` lists
+  third-party packages, and the one-slice-per-library rule is read that way.
 - A slice spawns only the program its own concept owns, from within that one
   concept folder: the cli facet its subject, the mobile server the simulator
   tools, `expectations/command/docker-cli.ts` `docker` (its lookup and its
   container reads, one module with one timeout), the git tree `git`.
 - `docker` stays in `expectations/`, not in `world/services/` beside
-  `testcontainers`, although the plan's engine list pairs them. The two read
+  `testcontainers`, although the plan's library list pairs them. The two read
   different containers: `world/services/containers/` starts the ones the
   TEST declares, through `testcontainers`; the `docker` CLI reads the ones the
   SUBJECT started, labelled by the run, to judge a result
@@ -43,7 +43,7 @@ forbids.
 - Within `world/`, every process goes through `world/services/process/serve.ts`:
   sqlite's schema push now calls its `runToCompletion`, so `world/` has one
   spawning site.
-- The rule therefore reads: each third-party engine is imported by exactly ONE
+- The rule therefore reads: each third-party library is imported by exactly ONE
   slice; process spawning lives in the one concept folder that owns the
   program spawned.
 

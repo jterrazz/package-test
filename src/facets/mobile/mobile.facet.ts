@@ -3,10 +3,10 @@ import type { ChainOf } from '../../kernel/chain/chain.js';
 import type { Started } from '../../kernel/chain/config.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { stubBackend } from '../../world/stubs/backend/stub-backend.engine.js';
+import { stubBackend } from '../../world/stubs/backend/stub-backend.driver.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import type { MobileConfig, MobileSpecificationOptions } from './mobile.handle.js';
-import { appiumApp } from './screen/app.engine.js';
+import { appiumApp } from './screen/app.driver.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { open } from './screen/open.action.js';
 
@@ -36,7 +36,7 @@ export const mobileFacet = defineFacet<
     Started<MobileConfig, 'bundleId' | 'device'>
 >()({
     ...composition,
-    engines: (config: Started<MobileConfig, 'bundleId' | 'device'>) => ({
+    drivers: (config: Started<MobileConfig, 'bundleId' | 'device'>) => ({
         app: appiumApp(config),
         network: stubBackend(config.backend, 'mobile'),
     }),

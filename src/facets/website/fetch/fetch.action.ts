@@ -29,7 +29,7 @@ export const rawFetch = defineAction<
         { group: 'Result accessor', name: '.location', probe: 'result.location' },
     ],
     name: 'fetch',
-    perform: async ([path], read, _engines, { config, testDir }) => {
+    perform: async ([path], read, _drivers, { config, testDir }) => {
         const { baseUrl } = config;
         if (baseUrl === undefined || baseUrl === '') {
             throw new Error('.fetch() requires a website under test (use specification.website())');

@@ -60,20 +60,20 @@ describe('interceptThrough', () => {
         expect(globalThis.fetch).toBe(original);
     });
 
-    test('intercept — the network double in module scope — resolves a relative request when the scope is what starts the engine', async () => {
+    test('intercept — the network double in module scope — resolves a relative request when the scope is what starts the driver', async () => {
         // Given - nothing listening yet, the state the FIRST intercept of a file finds
         await stopStubServer();
         await using _ = await intercept(http.get('/api/posts'), http.json({ posts: ['first'] }), {
             origin: 'http://console.test',
         });
 
-        // Then - the stub answers: the wrapper went on TOP of the fetch the engine installed while registering
+        // Then - the stub answers: the wrapper went on TOP of the fetch the driver installed while registering
         const response = await fetch('/api/posts');
         await expect(response.json()).resolves.toStrictEqual({ posts: ['first'] });
     });
 
-    test('intercept — the network double in module scope — leaves the engine in charge of the scopes that follow it', async () => {
-        // Given - an origin scope that was the engine's first registration, and ended
+    test('intercept — the network double in module scope — leaves the driver in charge of the scopes that follow it', async () => {
+        // Given - an origin scope that was the driver's first registration, and ended
         await stopStubServer();
         {
             await using _ = await intercept(http.get('/api/posts'), http.json({ posts: [] }), {
@@ -82,7 +82,7 @@ describe('interceptThrough', () => {
             await fetch('/api/posts');
         }
 
-        // Then - the next scope is still guarded: its disposal put the ENGINE's fetch back, not the one that preceded the engine
+        // Then - the next scope is still guarded: its disposal put the DRIVER's fetch back, not the one that preceded the driver
         await using _ = await intercept(
             http.get('https://weather.test/today'),
             http.json({ celsius: 21 }),

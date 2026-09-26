@@ -33,7 +33,7 @@ type NeedsOf<Member> =
           ? Needs
           : unknown;
 
-type EnginesOf<C extends Composition> = Intersect<
+type DriversOf<C extends Composition> = Intersect<
     NeedsOf<C['actions'][number] | C['capabilities'][number]>
 >;
 
@@ -49,7 +49,7 @@ type SameMembers<Self, C extends Composition> = [keyof Self] extends [MemberName
 
 type Wiring<C extends Composition, Config extends ChainConfig> = {
     /** Typed as written: a parameter left to context makes the facet context-sensitive, and the composition is then not inferred. */
-    readonly engines: (config: Config) => EnginesOf<C> & object;
+    readonly drivers: (config: Config) => DriversOf<C> & object;
     readonly locate: () => string;
 };
 
@@ -113,7 +113,7 @@ function chainOf(
         chain[action.name] = async (...args: unknown[]) =>
             await perform(setups, action, args, {
                 config: setup.config,
-                engines: setup.engines,
+                drivers: setup.drivers,
                 state,
                 testDir: here(),
             });
@@ -129,6 +129,6 @@ export function defineFacet<Self, Config extends ChainConfig = ChainConfig>(): F
         composition: facet,
         open: (config) =>
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the one cast: the chain is assembled from the definitions at run time, and its type computed from the same definitions at compile time
-            chainOf(facet, { config, engines: facet.engines(config) }, EMPTY_STATE) as Self,
+            chainOf(facet, { config, drivers: facet.drivers(config) }, EMPTY_STATE) as Self,
     });
 }

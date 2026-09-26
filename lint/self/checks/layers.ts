@@ -1,7 +1,7 @@
 import type { LayerOptions } from '../../consumer/rules/architecture/import-within-declared-layers.js';
-import { enginesOwnedIn } from './engines.js';
+import { librariesOwnedIn } from './libraries.js';
 
-/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_PASS_IDS` in `checker.ts`; engine ownership is read off `ENGINE_OWNERS`. */
+/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's, `SELF_PASS_IDS` in `checker.ts`; library ownership is read off `LIBRARY_OWNERS`. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
@@ -16,10 +16,10 @@ export const FRAMEWORK_LAYERS = {
     world: {
         folders: {
             clock: ['vitest'],
-            mocks: ['vitest', ...enginesOwnedIn('src/world/mocks/')],
+            mocks: ['vitest', ...librariesOwnedIn('src/world/mocks/')],
             // The container server's reader is a provided value (`vitest`).
-            services: [...enginesOwnedIn('src/world/services/'), 'vitest'],
-            stubs: enginesOwnedIn('src/world/stubs/'),
+            services: [...librariesOwnedIn('src/world/services/'), 'vitest'],
+            stubs: librariesOwnedIn('src/world/stubs/'),
         },
         imports: ['kernel/', 'lint/engine/'],
         seams: {
@@ -34,13 +34,13 @@ export const FRAMEWORK_LAYERS = {
     // A folder owns its files, and no facet lists another.
     facets: {
         folders: {
-            api: enginesOwnedIn('src/facets/api/'),
-            cli: enginesOwnedIn('src/facets/cli/'),
-            component: enginesOwnedIn('src/facets/component/'),
-            integration: enginesOwnedIn('src/facets/integration/'),
-            job: enginesOwnedIn('src/facets/job/'),
-            mobile: enginesOwnedIn('src/facets/mobile/'),
-            website: enginesOwnedIn('src/facets/website/'),
+            api: librariesOwnedIn('src/facets/api/'),
+            cli: librariesOwnedIn('src/facets/cli/'),
+            component: librariesOwnedIn('src/facets/component/'),
+            integration: librariesOwnedIn('src/facets/integration/'),
+            job: librariesOwnedIn('src/facets/job/'),
+            mobile: librariesOwnedIn('src/facets/mobile/'),
+            website: librariesOwnedIn('src/facets/website/'),
         },
         imports: ['kernel/', 'world/', 'elements/', 'expectations/', 'lint/engine/'],
         packages: ['vitest'],
@@ -88,7 +88,7 @@ export const FRAMEWORK_LAYERS = {
             '@jterrazz/typescript/config',
             '@jterrazz/typescript/oxlint',
             '@jterrazz/typescript/oxlint-config-names',
-            ...enginesOwnedIn('lint/'),
+            ...librariesOwnedIn('lint/'),
         ],
         seams: { 'lint/self/corpus/compositions.ts': ['facets/', 'kernel/chain/define-facet'] },
     },

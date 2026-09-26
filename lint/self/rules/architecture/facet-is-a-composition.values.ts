@@ -22,7 +22,7 @@ function isPlainValue(node: AstNode | undefined): boolean {
     );
 }
 
-function isEngineSource(source: string): boolean {
+function isDriverSource(source: string): boolean {
     return (
         (/(?:^|\/)world\//u.test(source) || /^\.\/[^/]+\/[^/]+\.js$/u.test(source)) &&
         !/\.(?:capability|action|facet|result)\.js$/u.test(source)
@@ -40,7 +40,7 @@ export function isAdapter(
     const built = identifierName(child(value, 'callee'));
     return (
         built !== undefined &&
-        isEngineSource(imports.get(built) ?? '') &&
+        isDriverSource(imports.get(built) ?? '') &&
         childList(value, 'arguments').every(isPlainValue)
     );
 }

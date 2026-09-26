@@ -30,7 +30,7 @@ export default defineStub({
 
 ### Selection
 
-One engine-agnostic queue serves every facet. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
+One driver-agnostic queue serves every facet. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
 
 **The first stub in list order that matches AND is not exhausted wins.** That single rule covers the two shapes you need:
 
@@ -222,7 +222,7 @@ The scope is an `AsyncDisposable`: the handlers come off at the end of the block
 
 **The refusal lands at DISPOSAL, not at the call.** An undeclared request is not rejected where the subject made it: the `fetch` proceeds and fails on its own, and the violation is raised when the scope closes. That is the right place, because a subject that catches its own network failures — a retry loop, an `onError` callback, a fallback value — would swallow a rejection thrown at the call site and the spec would pass on a call nobody declared. Disposal happens after the subject is done, so nothing can catch it.
 
-`await using _ = await intercept(…)` carries two awaits and both are load-bearing. The inner one waits for the engine to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(…)` does not compile.
+`await using _ = await intercept(…)` carries two awaits and both are load-bearing. The inner one waits for the network double to be listening; without it the subject could reach the real network before the first handler is in place. The shape refuses that spelling rather than leaving it to discipline: `intercept()` answers a promise, a promise is not an `AsyncDisposable`, and `await using _ = intercept(…)` does not compile.
 
 A file that declares the same world in several tests factors it into a function, and the two awaits survive the move — the helper is `async`, and it awaits what it hands back:
 
@@ -250,9 +250,9 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([07](07-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
-## Three engines, one queue
+## Three drivers, one queue
 
-| Facets                                                    | Engine                                            | Notes                                                                               |
+| Facets                                                    | Driver                                            | Notes                                                                               |
 | --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
 | `api`, `job`, `integration`, and a module's `intercept()` | **msw server**, in-process                        | The subject runs here, so its outgoing requests pass through this process           |
 | `component`                                               | **msw worker**, in the page                       | The component runs in Chromium, so the service worker answers its requests there    |
@@ -338,11 +338,11 @@ Exactness is the default because a substring filter silently cross-matches: two 
 
 The point: your stub states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
-`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. Both engines honour it: msw's node interceptor and its service worker share the response shape.
+`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. Both drivers honour it: msw's node interceptor and its service worker share the response shape.
 
 ### Streamed replies
 
-A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three engines honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile facets serve from.
+A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three drivers honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile facets serve from.
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';

@@ -1,7 +1,7 @@
 import { pause } from '../../../kernel/pause.js';
 import type { StreamBody } from './exchange.js';
 
-/** One serialisation for all three engines (msw server, msw worker, `node:http` stub). */
+/** One serialisation for all three drivers (msw server, msw worker, `node:http` stub). */
 
 export function toReadableStream(body: StreamBody): ReadableStream<Uint8Array> {
     const encoder = new TextEncoder();

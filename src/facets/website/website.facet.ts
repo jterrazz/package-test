@@ -6,9 +6,9 @@ import { headers } from '../../kernel/context/headers.capability.js';
 import { sharing } from '../../kernel/context/with.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
 import { clock } from '../../world/clock/clock.capability.js';
-import { stubBackend } from '../../world/stubs/backend/stub-backend.engine.js';
+import { stubBackend } from '../../world/stubs/backend/stub-backend.driver.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
-import { pageClock } from './browser/clock.engine.js';
+import { pageClock } from './browser/clock.driver.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { rawFetch } from './fetch/fetch.action.js';
 import { visit } from './visit/visit.action.js';
@@ -37,7 +37,7 @@ export interface WebsiteSpecification extends ChainOf<
 
 export const websiteFacet = defineFacet<WebsiteSpecification, Started<WebsiteConfig, 'browser'>>()({
     ...composition,
-    engines: (config: Started<WebsiteConfig, 'browser'>) => ({
+    drivers: (config: Started<WebsiteConfig, 'browser'>) => ({
         browser: config.browser,
         clock: pageClock,
         network: stubBackend(config.backend, 'website'),

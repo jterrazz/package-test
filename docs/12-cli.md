@@ -6,7 +6,7 @@ Use it when the subject under test is a process invocation. If the process serve
 
 ## What it specifies
 
-A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as documents rather than as code; [20 — Spec documents](20-documents.md#the-three-doors-one-engine) says when each door is right.
+A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as documents rather than as code; [20 — Spec documents](20-documents.md#the-three-doors-one-runner) says when each door is right.
 
 ## The constructor
 

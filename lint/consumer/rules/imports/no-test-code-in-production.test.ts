@@ -15,7 +15,7 @@ const ROOT = packageWith({
     'src/domain/helpers.ts': "import { user } from './user.fixtures.js';\nexport { user };\n",
     'src/features/stubs/http/events.ts': 'export default {};\n',
     'src/features/stubs/news.stubs.ts': 'export const news = {};\n',
-    'src/model/stubs/engine.ts': 'export const engine = {};\n',
+    'src/model/stubs/network.ts': 'export const network = {};\n',
     'tests/data.ts': "export * from '../specs/fixtures/users.js';\n",
     'tests/render.ts': "export { render } from '@testing-library/react';\n",
     'tests/format.ts': 'export const format = String;\n',
@@ -143,7 +143,7 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
         { code: 'import { other } from "@app/domain/other";', filename: PROD },
         { code: 'import { other } from "#domain/other.js";', filename: PROD },
         // A folder named `stubs/` with no facade is not a stubs folder.
-        { code: 'import { engine } from "../model/stubs/engine.js";', filename: PROD },
+        { code: 'import { network } from "../model/stubs/network.js";', filename: PROD },
         // The barrel is clean: the finding is on the helper that imports the fixtures.
         { code: 'export * from "./domain/helpers.js";', filename: BARREL },
         // A module that is not production and reaches nothing.

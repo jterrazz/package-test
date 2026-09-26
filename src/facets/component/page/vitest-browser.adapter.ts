@@ -25,7 +25,7 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/** Browser Mode's role engine gives `<search>` no role, while the ARIA tree and playwright call it `search`. */
+/** Browser Mode's role driver gives `<search>` no role, while the ARIA tree and playwright call it `search`. */
 const SEARCH_ELEMENT = 'css=search:not([role])';
 
 type SearchScope = LocatorSelectors & { getBySearchElement: () => Locator };

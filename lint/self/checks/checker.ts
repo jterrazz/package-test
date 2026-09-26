@@ -3,7 +3,7 @@ import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
-import { checkOneOwnerPerEngine } from './one-owner-per-engine.js';
+import { checkOneOwnerPerLibrary } from './one-owner-per-library.js';
 import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
 import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 
@@ -12,7 +12,7 @@ export const SELF_PASS_IDS = [
     'specimen-filed-by-capability',
     'source-root-holds-known-entries',
     'no-cross-facet-import',
-    'one-owner-per-engine',
+    'one-owner-per-library',
     'folder-named-for-a-concept',
     'lint-imports-follow-the-direction',
 ] as const;
@@ -26,7 +26,7 @@ export const SELF_CHECKER: AtZeroRegistry = {
     source: [
         checkSourceRootHoldsKnownEntries,
         checkNoCrossFacetImport,
-        checkOneOwnerPerEngine,
+        checkOneOwnerPerLibrary,
         checkFolderNamedForAConcept,
         checkLintImportsFollowTheDirection,
     ],

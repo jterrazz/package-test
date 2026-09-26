@@ -43,11 +43,11 @@ function packagesLoadedBy(entry: string): string[] {
 }
 
 describe('index', () => {
-    test('the node entry — loads no engine a spec pays for only when it declares one', () => {
+    test('the node entry — loads no library a spec pays for only when it declares one', () => {
         // Given - the entry loaded in a fresh module graph
         const loaded = packagesLoadedBy(builtEntry());
 
-        // Then - the network double's engine, the browser and the device driver stay behind their adapters' lazy imports
+        // Then - the network double's library, the browser and the device driver stay behind their adapters' lazy imports
         expect(
             loaded.filter((name) => ['msw', 'playwright', 'webdriverio'].includes(name)),
         ).toStrictEqual([]);

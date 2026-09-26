@@ -36,7 +36,7 @@ function chainOver(pinned: (null | string)[]): Chain {
     return defineFacet<Chain, WebsiteConfig>()({
         actions: [rawFetch],
         capabilities: [clock, headers],
-        engines: () => ({
+        drivers: () => ({
             clock: {
                 pin: (iso: null | string) => {
                     pinned.push(iso);
@@ -68,7 +68,7 @@ describe('rawFetch', () => {
     });
 
     test('.fetch() — one raw exchange with the site — refuses a pinned clock before any setup is armed', async () => {
-        // Given - a chain pinning a clock, over an engine logging every pin
+        // Given - a chain pinning a clock, over a driver logging every pin
         const pinned: (null | string)[] = [];
 
         // When - it asks for one raw exchange

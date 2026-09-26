@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 import { SurfacePanel } from './page-surface.js';
 import type { SurfacePort } from './page-surface.js';
 
-/** Run on the page's own engine rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain. */
+/** Run on the page's own runtime rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain. */
 
 describe('SurfacePanel', () => {
     test('the module-scope double answers the page, from its own worker', async () => {

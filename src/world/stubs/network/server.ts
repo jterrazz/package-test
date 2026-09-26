@@ -18,8 +18,8 @@ async function loadMsw(): Promise<{ msw: any; node: any }> {
 
 let serverInstance: any = null;
 
-/** The `fetch` the engine installed, which the owning wrapper sits on while it listens. */
-let engineFetch: null | typeof fetch = null;
+/** The `fetch` msw installed, which the owning wrapper sits on while it listens. */
+let installedFetch: null | typeof fetch = null;
 
 /** Once per process; reply bodies are handed over as owned streams, so a cancel settles. */
 export async function ensureStubServer(): Promise<void> {
@@ -29,8 +29,8 @@ export async function ensureStubServer(): Promise<void> {
     const { node } = await loadMsw();
     serverInstance = node.setupServer();
     serverInstance.listen({ onUnhandledRequest: 'bypass' });
-    engineFetch = globalThis.fetch;
-    globalThis.fetch = owningBodies(engineFetch);
+    installedFetch = globalThis.fetch;
+    globalThis.fetch = owningBodies(installedFetch);
 }
 
 /** The trailing catch-all records any request no stub accepted; the chain's pipeline rethrows it. */
@@ -54,9 +54,9 @@ export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistr
 
 export async function stopStubServer(): Promise<void> {
     if (serverInstance !== null) {
-        if (engineFetch !== null) {
-            globalThis.fetch = engineFetch;
-            engineFetch = null;
+        if (installedFetch !== null) {
+            globalThis.fetch = installedFetch;
+            installedFetch = null;
         }
         serverInstance.close();
         serverInstance = null;

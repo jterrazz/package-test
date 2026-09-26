@@ -4,7 +4,7 @@ import { defineAction } from '../../kernel/chain/action.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { clock } from './clock.capability.js';
 import type { ClockMethod } from './clock.capability.js';
-import { processClock } from './clock.engine.js';
+import { processClock } from './clock.driver.js';
 import type { ClockPort } from './clock.port.js';
 
 type Chain = { clock: ClockMethod<Chain>; now: () => Promise<string> };
@@ -16,11 +16,11 @@ const now = defineAction({
     row: { group: 'Terminal action', name: '.now()', probe: '.now(' },
 });
 
-function chain(engine: ClockPort = processClock): Chain {
+function chain(driver: ClockPort = processClock): Chain {
     return defineFacet<Chain>()({
         actions: [now],
         capabilities: [clock],
-        engines: () => ({ clock: engine }),
+        drivers: () => ({ clock: driver }),
         locate: () => '/specs',
         options: {},
     }).open({});
@@ -38,8 +38,8 @@ describe('clock', () => {
         });
     });
 
-    test('.clock() — the calendar a chain pins — judges the instant when the chain is armed, whatever the engine pins', async () => {
-        // Given - a chain stated with something that is not an instant, on an engine that pins nothing
+    test('.clock() — the calendar a chain pins — judges the instant when the chain is armed, whatever the driver pins', async () => {
+        // Given - a chain stated with something that is not an instant, on a driver that pins nothing
         const stated = chain({ pin: () => ({}) }).clock('soon');
 
         // Then - stating it passed; running it is refused in the calendar's own words

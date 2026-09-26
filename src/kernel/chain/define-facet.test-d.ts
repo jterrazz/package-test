@@ -7,7 +7,7 @@ declare const note: Capability<'note', readonly string[], [text: string]>;
 declare const read: Action<'read', [], readonly string[]>;
 
 const composition = { actions: [read], capabilities: [note], options: {} } as const;
-const wiring = { engines: () => ({}), locate: () => '/specs' };
+const wiring = { drivers: () => ({}), locate: () => '/specs' };
 
 type Noted = { note: (text: string) => Noted; read: () => Promise<readonly string[]> };
 
@@ -27,7 +27,7 @@ type Served = ChainConfig & { server?: undefined | { readonly url: string } };
 
 const served = defineFacet<Noted, Started<Served, 'server'>>()({
     ...composition,
-    engines: (config: Started<Served, 'server'>) => ({ server: config.server }),
+    drivers: (config: Started<Served, 'server'>) => ({ server: config.server }),
     locate: () => '/specs',
 });
 

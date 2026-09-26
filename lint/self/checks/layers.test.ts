@@ -43,7 +43,7 @@ describe('FRAMEWORK_LAYERS', () => {
                     filename: '/repo/src/kernel/chain/define-facet.ts',
                     options: own,
                 },
-                // Nor does it reach an engine a slice owns.
+                // Nor does it reach a library a slice owns.
                 {
                     code: 'import { Client } from "pg";',
                     errors: [{ messageId: 'foreignDependency' }],
@@ -83,7 +83,7 @@ describe('FRAMEWORK_LAYERS', () => {
                     filename: '/repo/src/facets/api/request/route.ts',
                     options: own,
                 },
-                // A facet folder owns its own engine, not a sibling's.
+                // A facet folder owns its own library, not a sibling's.
                 {
                     code: 'import { chromium } from "playwright";',
                     errors: [{ messageId: 'foreignDependency' }],

@@ -37,7 +37,7 @@ export type StubResponse = {
     transport?: 'network-error' | undefined;
 };
 
-/** Each engine serialises an object as JSON, so a stream declared as a plain value would arrive as `{}`: the tag tells them apart. */
+/** Each driver serialises an object as JSON, so a stream declared as a plain value would arrive as `{}`: the tag tells them apart. */
 export const STREAM_BODY = '@jterrazz/test:stream';
 
 /** A body that arrives in pieces, as `http.stream()` and `http.sse()` build it. */

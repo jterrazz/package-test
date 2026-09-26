@@ -21,7 +21,7 @@ function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [dress],
         capabilities: [wrap],
-        engines: () => ({}),
+        drivers: () => ({}),
         locate: () => '/specs',
         options: {},
     }).open({});

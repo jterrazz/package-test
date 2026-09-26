@@ -15,7 +15,7 @@ export interface ClockSignature extends ChainSignature {
     readonly chain: ClockChain<this['self']>;
 }
 
-/** The instant is judged here, before any engine sees it, and released when the action settles (`no-sampled-value-in-expectation`); a chain stating none hands the engine `null`. */
+/** The instant is judged here, before any driver sees it, and released when the action settles (`no-sampled-value-in-expectation`); a chain stating none hands the driver `null`. */
 export const clock = defineCapability<
     'clock',
     null | string,
@@ -24,11 +24,11 @@ export const clock = defineCapability<
     { clock: ClockPort },
     'clock'
 >({
-    arm: (instant, engines) => {
+    arm: (instant, drivers) => {
         if (instant !== null) {
             instantOf('at', instant);
         }
-        return engines.clock.pin(instant);
+        return drivers.clock.pin(instant);
     },
     context: 'clock',
     initial: null,

@@ -45,8 +45,8 @@ export const facetIsAComposition: LintRule = {
             rowNamed(selfRows, 'facet-is-a-composition'),
             {
                 adapter: {
-                    found: 'the engine `{{port}}` is a {{what}} written in the facet, not an adapter an engine module builds',
-                    fix: 'name the adapter, or call the constructor its engine module exports — under `src/world/`, or in a concept folder of the facet — on the config alone',
+                    found: 'the driver `{{port}}` is a {{what}} written in the facet, not an adapter a driver module builds',
+                    fix: 'name the adapter, or call the constructor its driver module exports — under `src/world/`, or in a concept folder of the facet — on the config alone',
                 },
                 buildsResult: {
                     found: 'the constructor builds a `{{built}}`, a result',
@@ -56,9 +56,9 @@ export const facetIsAComposition: LintRule = {
                     found: '`defineFacet` is handed a {{what}}, and it takes nothing but the chain type',
                     fix: 'write `defineFacet<Chain>()({ … })`: the facet object carries everything the facet composes',
                 },
-                engines: {
-                    found: "the facet's `engines` is not an arrow handing back the object of its adapters",
-                    fix: 'write `engines: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its engine module',
+                drivers: {
+                    found: "the facet's `drivers` is not an arrow handing back the object of its adapters",
+                    fix: 'write `drivers: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its driver module',
                 },
                 inline: {
                     found: "the facet's `{{key}}` is a {{what}} written in the facet, not a reference imported from its module",
@@ -82,7 +82,7 @@ export const facetIsAComposition: LintRule = {
                 },
                 stray: {
                     found: 'a {{stray}} in a facet file, which holds its composition alone',
-                    fix: 'move the logic to the capability, the action or the engine that owns it; a facet file lists definitions and wires engines',
+                    fix: 'move the logic to the capability, the action or the driver that owns it; a facet file lists definitions and wires drivers',
                 },
             },
             SELF_CHAPTER,

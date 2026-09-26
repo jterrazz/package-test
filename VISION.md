@@ -3954,7 +3954,7 @@ commits, all green:
   `projectDefaults()`; ANSI stripping in `text/ansi.ts`; `Intersect`
   once, `ContextKey` as `keyof ChainContext`; `findRoot` for the
   installer's root; msw's worker path in `world/stubs/network/`; and
-  `ENGINE_OWNERS` in `lint/self/checks/engines.ts`, from which the layer map
+  `ENGINE_OWNERS` in `lint/self/checks/libraries.ts`, from which the layer map
   builds each folder's engines, while I10 reads a facet's readers off
   the map's `facets/` edges.
 - **Right slice**: `resolveCommand` and `lintReport` in

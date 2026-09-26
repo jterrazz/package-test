@@ -10,7 +10,7 @@ import type { Stub } from '../stub.js';
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
 export type StubRegistration = {
-    /** Remove the chain's handlers from the shared engine. */
+    /** Remove the chain's handlers from the shared msw server. */
     cleanup: () => void;
     /** The strict-stub violation observed during the chain, if any. */
     violation: () => Error | null;

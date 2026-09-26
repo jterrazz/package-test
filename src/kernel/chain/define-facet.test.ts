@@ -33,7 +33,7 @@ type Told = { notes: readonly string[]; stamp: null | string; testDir: string };
 const read = defineAction({
     accessors: [],
     name: 'read',
-    perform: async (_args: [], slice, _engines, { testDir }) =>
+    perform: async (_args: [], slice, _drivers, { testDir }) =>
         await Promise.resolve<Told>({ notes: slice(note), stamp: slice(stamp), testDir }),
     row: { group: 'Terminal action', name: '.read()', probe: '.read(' },
 });
@@ -55,7 +55,7 @@ function toyFacet(): { located: () => number; toy: Toy } {
     let calls = 0;
     const facet = defineFacet<Toy>()({
         ...composition,
-        engines: () => ({}),
+        drivers: () => ({}),
         locate: () => {
             calls += 1;
             return `/specs/call-${calls}`;

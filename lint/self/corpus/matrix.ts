@@ -179,8 +179,8 @@ export type MatrixRow = {
     cells: Record<Column, null | number>;
 };
 
-const TOKENS_ARE_THE_ENGINES =
-    'the engine owns the family (proven in the module column); a facet uses the ones its goldens need';
+const TOKENS_ARE_THE_MATCHERS =
+    'the matcher owns the family (proven in the module column); a facet uses the ones its goldens need';
 
 const FACET_GROUPS: readonly CapabilityGroup[] = [
     'Constructor option',
@@ -225,12 +225,12 @@ export function matrixCapabilities(): Capability[] {
         name: `{{${kind}}}`,
         probe: `{{${kind}`,
         probeByColumn: { module: `match.${kind}` },
-        // A token family is declared by the engine, not a facet: a family no golden here needs is no hole in that facet, and the module column is the engine's proof.
+        // A token family is declared by the matcher, not a facet: a family no golden here needs is no hole in that facet, and the module column is the matcher's proof.
         exempt: {
-            api: TOKENS_ARE_THE_ENGINES,
-            cli: TOKENS_ARE_THE_ENGINES,
-            integration: TOKENS_ARE_THE_ENGINES,
-            website: TOKENS_ARE_THE_ENGINES,
+            api: TOKENS_ARE_THE_MATCHERS,
+            cli: TOKENS_ARE_THE_MATCHERS,
+            integration: TOKENS_ARE_THE_MATCHERS,
+            website: TOKENS_ARE_THE_MATCHERS,
         },
     }));
     return [...declaredCapabilities(), ...tokens];

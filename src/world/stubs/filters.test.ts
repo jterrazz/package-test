@@ -35,9 +35,9 @@ describe('matchesText', () => {
         expect(matchesText(filter, 'Summarize the article')).toBeFalsy();
     });
 
-    test('any other match.* matcher goes through the structural engine', () => {
+    test('any other match.* matcher goes through the structural comparison', () => {
         // Given - a typed matcher on the observed text
-        // Then - the same engine the assertions use decides
+        // Then - the same comparison the assertions make decides
         expect(matchesText(match.uuid(), '3f2504e0-4f89-41d3-9a0c-0305e82c3301')).toBeTruthy();
         expect(matchesText(match.uuid(), 'not-a-uuid')).toBeFalsy();
     });

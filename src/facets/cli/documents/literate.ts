@@ -25,7 +25,7 @@ import {
 } from '../../../expectations/tokens/structural.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
-import { fsFixtures } from '../fixture/fixtures.engine.js';
+import { fsFixtures } from '../fixture/fixtures.driver.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
 
@@ -131,7 +131,7 @@ function checkFile(
     return null;
 }
 
-/** The stack is replaced by the run's own line: the engine's frames end in the plugin's generated module. */
+/** The stack is replaced by the run's own line: the runner's frames end in the plugin's generated module. */
 function failure(
     document: SpecDocument,
     run: SpecRun,

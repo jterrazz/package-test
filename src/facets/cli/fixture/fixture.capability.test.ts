@@ -7,14 +7,14 @@ import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import { directory, file } from '../../../kernel/files/spec-path.js';
 import { fixture } from './fixture.capability.js';
 import type { FixtureMethod } from './fixture.capability.js';
-import { fsFixtures } from './fixtures.engine.js';
+import { fsFixtures } from './fixtures.driver.js';
 
 type Chain = { fixture: FixtureMethod<Chain>; list: () => Promise<string[]> };
 
 const list = defineAction({
     accessors: [],
     name: 'list',
-    perform: async (_args: [], _read, _engines, { workDir }) =>
+    perform: async (_args: [], _read, _drivers, { workDir }) =>
         await Promise.resolve(readdirSync(workDir ?? '').toSorted()),
     prepare: () => ({ workDir: scratchDirectory('fixture-') }),
     row: { group: 'Terminal action', name: '.list()', probe: '.list(' },
@@ -24,7 +24,7 @@ function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [list],
         capabilities: [fixture],
-        engines: () => ({ workdir: fsFixtures }),
+        drivers: () => ({ workdir: fsFixtures }),
         locate: () => import.meta.dirname,
         options: {},
     }).open({});

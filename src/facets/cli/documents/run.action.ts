@@ -31,7 +31,7 @@ export const run = defineAction<
 >({
     accessors: CLI_RESULT_ROWS,
     name: 'run',
-    perform: async ([document, options], read, _engines, { config, testDir, workDir }) => {
+    perform: async ([document, options], read, _drivers, { config, testDir, workDir }) => {
         // oxlint-disable-next-line typescript/no-non-null-assertion -- `prepare` always answers a directory: a document never runs in the source tree
         const cwd = workDir!;
         const filePath = resolveSpecPath('run', document.path, testDir);

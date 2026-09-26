@@ -18,7 +18,7 @@ skill both said a component test "needs vitest alone", on the ground that the
 framework is for a SURFACE and a component has none. The reading was wrong in
 one word: a component has no surface it is SERVED through, but it needs
 everything the framework owns — a real browser, a Vite pipeline, a network
-double, a golden engine, an element vocabulary. Rule I2's own message had been
+double, golden matching, an element vocabulary. Rule I2's own message had been
 saying so all along: "a test needing more than its module is a specification".
 
 What forced a decision now is that the estate has a UI to migrate (a console's

@@ -214,7 +214,7 @@ describe('http', () => {
             delay: 5,
         });
 
-        // Then - the body is a tagged stream the engines recognise, not an object
+        // Then - the body is a tagged stream the drivers recognise, not an object
         expect(isStreamBody(response.body)).toBe(true);
         expect(response.body).toStrictEqual({
             chunks: ['Hel', 'lo, ', 'world'],

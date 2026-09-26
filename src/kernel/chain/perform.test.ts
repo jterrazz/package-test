@@ -46,7 +46,7 @@ function acting(log: string[], outcome: unknown): AnyAction {
     });
 }
 
-const WHERE = { config: {}, engines: {}, state: EMPTY_STATE, testDir: '/specs' };
+const WHERE = { config: {}, drivers: {}, state: EMPTY_STATE, testDir: '/specs' };
 
 describe('perform', () => {
     test('perform — the one pipeline a terminal action runs through — arms every setup in phase order, runs the action, and releases in reverse', async () => {
@@ -76,8 +76,8 @@ describe('perform', () => {
         });
     });
 
-    test("perform — the one pipeline a terminal action runs through — an engine's violation is the failure reported, over the error the action met", async () => {
-        // Given - an engine that recorded an unmatched request, and an action that failed on the reply it got
+    test("perform — the one pipeline a terminal action runs through — a driver's violation is the failure reported, over the error the action met", async () => {
+        // Given - a driver that recorded an unmatched request, and an action that failed on the reply it got
         const log: string[] = [];
         const unmatched = new Error('no stub accepted GET https://api.test/rates');
         const setups = [logged(log, 'intercept', 40, { violation: () => unmatched })];
@@ -89,8 +89,8 @@ describe('perform', () => {
         expect(log).toStrictEqual(['arm intercept', 'act', 'release intercept']);
     });
 
-    test("perform — the one pipeline a terminal action runs through — an engine's violation fails an action that succeeded", async () => {
-        // Given - an engine that recorded an unmatched request the subject swallowed
+    test("perform — the one pipeline a terminal action runs through — a driver's violation fails an action that succeeded", async () => {
+        // Given - a driver that recorded an unmatched request the subject swallowed
         const log: string[] = [];
         const unmatched = new Error('no stub accepted GET https://api.test/rates');
         const setups = [logged(log, 'intercept', 40, { violation: () => unmatched })];

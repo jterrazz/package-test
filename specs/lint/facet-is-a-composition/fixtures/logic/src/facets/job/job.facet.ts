@@ -1,7 +1,7 @@
 import { trigger } from './trigger.action.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { processClock } from '../../world/clock/clock.engine.js';
+import { processClock } from '../../world/clock/clock.driver.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
 
@@ -21,6 +21,6 @@ function sorted(jobs: string[]): string[] {
 
 export const jobFacet = defineFacet<JobSpecification>()({
     ...composition,
-    engines: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: sorted(config.jobs ?? []) }),
+    drivers: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: sorted(config.jobs ?? []) }),
     locate: getCallerDir,
 });

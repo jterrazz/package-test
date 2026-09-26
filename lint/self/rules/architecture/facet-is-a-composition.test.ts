@@ -5,8 +5,8 @@ const COMPOSED = `
 import { trigger } from './trigger.action.js';
 import { clock } from '../../world/clock/clock.capability.js';
 import { getCallerDir } from '../../kernel/files/caller.js';
-import { databaseSet } from '../../world/services/seed/database-set.engine.js';
-import { processClock } from '../../world/clock/clock.engine.js';
+import { databaseSet } from '../../world/services/seed/database-set.driver.js';
+import { processClock } from '../../world/clock/clock.driver.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
 
@@ -21,7 +21,7 @@ export interface JobSpecification extends ChainOf<typeof composition, never, Job
 
 export const jobFacet = defineFacet<JobSpecification>()({
     ...composition,
-    engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),
+    drivers: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),
     locate: getCallerDir,
 });
 `;
@@ -57,13 +57,13 @@ ruleTester().run('facet-is-a-composition', asOxlintRule(facetIsAComposition), {
             errors: [{ messageId: 'stray' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // Engines built in a block of statements, rather than handed back as the adapters.
+        // Drivers built in a block of statements, rather than handed back as the adapters.
         {
             code: COMPOSED.replace(
-                'engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
-                'engines: (config) => {\n        const jobs = config.jobs ?? [];\n        return { clock: processClock, jobs };\n    },',
+                'drivers: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
+                'drivers: (config) => {\n        const jobs = config.jobs ?? [];\n        return { clock: processClock, jobs };\n    },',
             ),
-            errors: [{ messageId: 'engines' }],
+            errors: [{ messageId: 'drivers' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
         // A setup defined inside the composition, its reduce and all, rather than imported from its folder.
@@ -102,13 +102,13 @@ ruleTester().run('facet-is-a-composition', asOxlintRule(facetIsAComposition), {
             errors: [{ messageId: 'member' }, { messageId: 'option' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
-        // A default parameter of `engines` runs whatever it is written with, before any adapter.
+        // A default parameter of `drivers` runs whatever it is written with, before any adapter.
         {
             code: COMPOSED.replace(
-                'engines: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
-                'engines: ({ jobs = [3, 1].sort().map((x) => x * 2) } = {}) => ({ clock: processClock, jobs }),',
+                'drivers: (config) => ({ clock: processClock, databases: databaseSet(config), jobs: config.jobs ?? [] }),',
+                'drivers: ({ jobs = [3, 1].sort().map((x) => x * 2) } = {}) => ({ clock: processClock, jobs }),',
             ),
-            errors: [{ messageId: 'engines' }],
+            errors: [{ messageId: 'drivers' }],
             filename: '/repo/src/facets/job/job.facet.ts',
         },
         // What `defineFacet` is handed before the facet runs when the module loads.
@@ -141,7 +141,7 @@ ruleTester().run('facet-is-a-composition', asOxlintRule(facetIsAComposition), {
         },
         // The constructor running a definition's step, and building a result.
         {
-            code: `${OPENS}\nexport function seeded(state, config) {\n    return seed.reduce([], state, { config, engines: {} });\n}\nexport const empty = new BaseResult({ config: {}, testDir: '' });\n`,
+            code: `${OPENS}\nexport function seeded(state, config) {\n    return seed.reduce([], state, { config, drivers: {} });\n}\nexport const empty = new BaseResult({ config: {}, testDir: '' });\n`,
             errors: [{ messageId: 'runsStep' }, { messageId: 'buildsResult' }],
             filename: '/repo/src/facets/job/job.handle.ts',
         },

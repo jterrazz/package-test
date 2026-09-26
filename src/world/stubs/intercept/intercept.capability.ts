@@ -31,8 +31,8 @@ export const intercept = defineCapability<
     initial: [],
     name: 'intercept',
     phase: 40,
-    reduce: (stubs, [requestOrStubs, response], { engines }) => {
-        engines.network.accepts();
+    reduce: (stubs, [requestOrStubs, response], { drivers }) => {
+        drivers.network.accepts();
         return [...stubs, ...declared('.intercept', requestOrStubs, response)];
     },
     row: { group: 'Setup', name: '.intercept()', probe: '.intercept(' },
