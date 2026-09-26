@@ -4142,3 +4142,13 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `k11-messages-teach`                      | `message-has-four-parts`                      | catalogue    |
 | `k3-message-anchors`                      | `message-reads-its-row`                       | catalogue    |
 | `k12-rule-audience`                       | `rule-declares-its-audience`                  | catalogue    |
+
+## Reserved `_` folders and `_setup/` (2026-09-26): test
+
+This reverses §2: the folders under `specs/` that are no subject carry the `_` marker again — `_setup/`, `_seeds/`, `_requests/`, `_expected/`, `_fixtures/`, and `_shared/` directly under the specs root — a closed list, and a bare `seeds/` or `doubles/` holding no spec is refused with its `_` spelling. Three reasons outweighed the bare names:
+
+- The reserved set grew: `_setup/` holds the TypeScript that prepares specs — test adapters named `<port>.adapter.ts`, shared values, helpers, stubs — which had no home but a `*.fixtures.ts` beside the specs or a `doubles/` of the author's naming.
+- A subject's folder is derived from its route, command or job, so a subject can take any word: `GET /requests` wants `api/requests/list/`, and only a marker keeps the folders that are no subject from ever colliding with one.
+- A marker on folders that live among content is the ecosystem's convention — Jest's `__tests__`/`__mocks__`, Next.js's `_components` private folders — so a reader meets it already knowing it means "not a route".
+
+One placement law now holds code and data alike: a shared thing sits in the reserved folder of the lowest folder its readers share, `_shared/` only across facets. No `package.json` `imports` alias is added by default: a relative import states the placement the law judges.
