@@ -3985,7 +3985,9 @@ Open, **for the owner**:
   stale Vite dependency cache is re-optimised mid-run, and the cause is
   not the move. One read would settle it: run `make check` twice on
   `2b161302` after touching one `src/` file. It did not recur in the
-  second review pass's two full runs.
+  second review pass's two full runs. A new variant showed on 2026-09-26,
+  in the specs-layout run: `vitest-browser-react … SyntaxError: Undefined
+label 'a'` — recorded, not investigated.
 - `projects.test.ts` split into three test files, and the small `testOf`
   helper is now repeated in each of them.
 
