@@ -6,14 +6,14 @@
 
 **What landed overnight** (iterations 20–28, details below in their sections):
 
-- Production never imports test code: every target × form refused by F2 through one production reader, proven case by case; production = every non-test module outside `specs/` and ground; a reasoned `test.production.allow` in `jterrazz.config.ts` for a legitimate case (spwn's gate runs playwright).
+- Production never imports test code: every target × form refused by `no-test-code-in-production` through one production reader, proven case by case; production = every non-test module outside `specs/` and ground; a reasoned `test.production.allow` in `jterrazz.config.ts` for a legitimate case (spwn's gate runs playwright).
 - Route templates in tests: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`; route coverage and the subject rules read the template; an ambiguous literal path is reported, never guessed.
-- Size and complexity: `max-lines` 300 and `max-lines-per-function` 60 (off in test files), `complexity` 12 `modified`; a test body at most 60 lines of gestures (C34, a `toMatch` value not counted); every tsgolint rule decided by name; empty directories reported and removed by `make fix`.
+- Size and complexity: `max-lines` 300 and `max-lines-per-function` 60 (off in test files), `complexity` 12 `modified`; a test body at most 60 lines of gestures (`test-body-within-line-limit`, a `toMatch` value not counted); every tsgolint rule decided by name; empty directories reported and removed by `make fix`.
 - Performance: package-test's own lint 8.4 s → 2.5 s (a file's role computed once, cached reach walks, rules skipping what they do not judge); `typescript check` runs oxlint once and renders the human log from its JSON; a project without a config is handed the default one (no parent-folder walk).
 - Upgrades: oxlint 1.85, tsgolint 7.0.2002, oxfmt 0.70, knip 6.38, tsdown 0.23, better-sqlite3 13 (prebuilt binding), perfectionist, dependency-cruiser, prettier, @types/*; research in the session notes; not taken: oxfmt for Astro (unsupported), tsgo declarations (output differs), the React Compiler transform (experimental), Rust replacements for the Markdown/secret passes (immature).
-- Defects fixed along the way: the `toMatch(file())` false green on a string; table order; route tables; C4; seeds shared by nested routes; `make fix` order (checker first, formatter last); hooks copied by the split; the `prefer-spread` / `no-misused-spread` fix loop; wrong code frame after an in-place update.
+- Defects fixed along the way: the `toMatch(file())` false green on a string; table order; route tables; `stubs-root-holds-facades-and-kinds`; seeds shared by nested routes; `make fix` order (checker first, formatter last); hooks copied by the split; the `prefer-spread` / `no-misused-spread` fix loop; wrong code frame after an in-place update.
 
-**Waiting for you:** nothing — the four questions the night left (ADR-009 and ADR-010, fix mode's nested configs, C28 vs C34, the route template) were answered on 2026-09-24; see "Iteration 29 — the owner's answers" at the end.
+**Waiting for you:** nothing — the four questions the night left (ADR-009 and ADR-010, fix mode's nested configs, `ground-shared-or-inline` vs `test-body-within-line-limit`, the route template) were answered on 2026-09-24; see "Iteration 29 — the owner's answers" at the end.
 
 **Decided overnight by the orchestrator (reversible):** every call listed in iterations 21–28 below; the route template (your default was asked, none came).
 
@@ -76,7 +76,7 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared 
   removed. `toMatch`, `toBe`, `toContain` keep their Vitest meaning: a string
   is a value.
 - `$FIXTURES/` is removed. The shared pool is `<specs>/fixtures/`, reached by a
-  relative path. A path may leave its leaf only to reach the pool (C15
+  relative path. A path may leave its leaf only to reach the pool (`no-reach-into-sibling-ground`
   restated); anything else is an error.
 - The `.spec.yaml` documents follow the same law: `fixture: ./fixtures/shop/`.
 - `{{any}}`-style tokens and `TEST_UPDATE=1` keep working on every `…File`
@@ -93,7 +93,7 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared 
 | `_expected/`                   | `expected/`         | everything asserted, response `.http` included |
 | `_fixtures/` at the specs root | `<specs>/fixtures/` | the shared pool                                |
 
-- The four names are reserved under `specs/`: C1 refuses a facet, domain or
+- The four names are reserved under `specs/`: `specs-at-declared-depth` refuses a facet, domain or
   suite folder that takes one of them.
 - Every tool ignore that said `**/_fixtures/**` says
   `specs/**/{fixtures,expected,seeds,requests}/**`.
@@ -135,7 +135,7 @@ tree in, the command, the normalised report out (one line per diagnostic,
 only the presence:
 
 ```
-specs/lint/i2-sibling-test-naming/
+specs/lint/test-beside-its-module/
   rejects-orphan-test.spec.yaml
   accepts-sibling.spec.yaml
   fixtures/orphan/…
@@ -153,7 +153,7 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          src/orphan.test.ts:1:1  jterrazz(i2-sibling-test-naming)
+          src/orphan.test.ts:1:1  jterrazz(test-beside-its-module)
 ```
 
 ## 5. Knowledge has one owner each
@@ -173,24 +173,24 @@ runs:
 
 ## What the branches show, and what they defer
 
-| Area             | package-test                                                                                                                                                                                                                                                                                                                                                                                                                                                    | package-typescript                                                             | signews-api         |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------- |
-| §1 verbs + types | shown (iteration 1, variant A): `file()`/`directory()` branded, the simple verbs take them, `toMatch` vitest's plus the golden half, type and runtime refusals; own specs, lint fixtures and chapters migrated by the mover                                                                                                                                                                                                                                     | own documents and chains on the File/Directory verbs (the mover, then by hand) | migrated            |
-| §2 folders       | shown: renamed everywhere, C1 refuses a reserved domain, C13 flipped with the 16→17 mover as its `--fix`, C15 restated, the bare-ground bridge deleted                                                                                                                                                                                                                                                                                                          | ignore globs; own specs on the bare ground, its underscore bridge deleted      | renamed             |
-| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                                                                                                                                                                                                                                                                                                                                                            | the rule, tested                                                               | ratchet delta shown |
-| §4 spine         | shown: `src/lint` → `lint/`, I1 reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule                                                                                                                                                                                                                                                                                                                                  | the spine check (`bin/`, `lib/`, `presets/` reported); `rules/` → `lint/`      | follows             |
-| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                                                                                                                                                                                                                                                                                                                                                          | `docs` command, typedoc, Docs (sync) deleted                                   | —                   |
-| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                                                                                                                                                                                                                                                                                                                                                       | —                                                                              | —                   |
-| guards (iter. 1) | shown: role C24 (static), locality C15/C14 over the wrappers, existence C8 (checker pass; the oxlint C8 retired), F2 refusing ground imports, C25 refusing golden synonyms                                                                                                                                                                                                                                                                                      | ignores the four names at any depth                                            | —                   |
-| iteration 2      | shown: `.text` the comparable text and `.raw` the capture, `toContain` vitest's and refused on a stream by the types, D8w restated on `.raw` (`d8w-raw-bypass`), the mover's stream gesture; C8 over module tests (member pass); C24 through a `const`; C26 `file()` built in the test only; `schema/` under `jterrazz.typescript.roots`                                                                                                                        | `--oxlint-report` handed over; `jterrazz.typescript.roots` read                | —                   |
-| iteration 3      | shown: the mover gated on C13 (a tree with no 16 folder left byte for byte) and walking every member's module tests, C13 beside a module test; a directive naming `d8w-text-bypass` renamed, its line read as `.raw`; `toBeEmpty` a table's matcher alone (types, both runtimes, the mover); every rule reading a path below its package root; the green ratchet run one line                                                                                   | —                                                                              | —                   |
-| iteration 4      | shown: the mover gated per file (a 17 file beside a 16 one left byte for byte, a 16 pool reaching only the files naming `$FIXTURES/`); the directive rename on every `--fix`, read in a comment only; a file outside every package read below its repository root; the Makefile's six targets, `fix` the two fixers                                                                                                                                             | —                                                                              | —                   |
-| ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                                                                                                                                                 | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
-| iteration 9      | shown: 62 — a green run keeping no `test` section prints `jterrazz.baseline.json › test: nothing held`, a deferring run names the judging file relative to the project; 63 — a stream handed a value `toMatch` past the compiler is refused naming `.text`, in both builds                                                                                                                                                                                      | —                                                                              | —                   |
-| iteration 10     | shown: `kind: api` and `kind: jobs` documents — the grammar, the schema, the runner (`api.run`, `jobs.run`, the plugin by kind, the `api()`/`jobs()` door), steps and captures, every path key under C24/C15/C8/C9; B12 route coverage from a declared OpenAPI source; this package's pure-data api and jobs specs migrated; chapter 20 owns the format                                                                                                         | —                                                                              | —                   |
-| iteration 14     | shown: variant B — `toMatch` compares a whole result to a value in place or to `file()`/`directory()` (`toMatchRows` retired), `sql` seeds, `TEST_UPDATE=1` writing the value into the test source, C28 (a file exists only if shared; C14 folded in), D20 (every test compares its whole result; D12w folded in), route coverage measured at run time (B12 retired); iteration 10's api/jobs documents retired and this package's specs migrated to TypeScript | —                                                                              | —                   |
-| iteration 18     | shown: `sql` removed (export, types, runtime, docs), `seed()` a `.sql` `file()` alone; C28's seed branch (a seed one test reads lives beside it) and per-role caps both ways (requests 30, expected 150); the fixer writes inline `sql` to `./seeds/<name>.sql` and a value past its cap to a file; this package's specs migrated                                                                                                                               | —                                                                              | —                   |
-| iteration 19     | shown: 97 `specification.cli(bin, { commands })` read by the subject reader, first word by default; 98 `test: { collections }` read from `jterrazz.config.ts`; 100 the C29 split moves a helper several new files read into `<folder>/<folder>.fixtures.ts`                                                                                                                                                                                                     | —                                                                              | —                   |
+| Area             | package-test                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       | package-typescript                                                             | signews-api         |
+| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------ | ------------------- |
+| §1 verbs + types | shown (iteration 1, variant A): `file()`/`directory()` branded, the simple verbs take them, `toMatch` vitest's plus the golden half, type and runtime refusals; own specs, lint fixtures and chapters migrated by the mover                                                                                                                                                                                                                                                                                                                                        | own documents and chains on the File/Directory verbs (the mover, then by hand) | migrated            |
+| §2 folders       | shown: renamed everywhere, `specs-at-declared-depth` refuses a reserved domain, `ground-uses-reserved-name` flipped with the 16→17 mover as its `--fix`, `no-reach-into-sibling-ground` restated, the bare-ground bridge deleted                                                                                                                                                                                                                                                                                                                                   | ignore globs; own specs on the bare ground, its underscore bridge deleted      | renamed             |
+| §3 names         | shown: the three `types` sites renamed (`oxlint-api`, `exchange`, `component.shape`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | the rule, tested                                                               | ratchet delta shown |
+| §4 spine         | shown: `src/lint` → `lint/`, `import-within-declared-layers` reads the spine; 4 rules as `.spec.yaml`. Deferred: 81 rule specs, `lint/` one folder per rule                                                                                                                                                                                                                                                                                                                                                                                                        | the spine check (`bin/`, `lib/`, `presets/` reported); `rules/` → `lint/`      | follows             |
+| §5 knowledge     | shown: reference, typedoc, skill references and cards deleted; SKILL.md 106 lines, held by a meta-test                                                                                                                                                                                                                                                                                                                                                                                                                                                             | `docs` command, typedoc, Docs (sync) deleted                                   | —                   |
+| §6 exact names   | shown: the window removed from the three adapters, with its commands and its name reading                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | —                                                                              | —                   |
+| guards (iter. 1) | shown: role `verb-reads-its-ground-folder` (static), locality `no-reach-into-sibling-ground`/C14 over the wrappers, existence `named-path-exists` (checker pass; the oxlint `named-path-exists` retired), `no-test-code-in-production` refusing ground imports, `no-snapshot-folder` refusing golden synonyms                                                                                                                                                                                                                                                      | ignores the four names at any depth                                            | —                   |
+| iteration 2      | shown: `.text` the comparable text and `.raw` the capture, `toContain` vitest's and refused on a stream by the types, `no-raw-bypass` restated on `.raw` (`no-raw-bypass`), the mover's stream gesture; `named-path-exists` over module tests (member pass); `verb-reads-its-ground-folder` through a `const`; `paths-named-in-the-test` `file()` built in the test only; `schema/` under `jterrazz.typescript.roots`                                                                                                                                              | `--oxlint-report` handed over; `jterrazz.typescript.roots` read                | —                   |
+| iteration 3      | shown: the mover gated on `ground-uses-reserved-name` (a tree with no 16 folder left byte for byte) and walking every member's module tests, `ground-uses-reserved-name` beside a module test; a directive naming `d8w-text-bypass` renamed, its line read as `.raw`; `toBeEmpty` a table's matcher alone (types, both runtimes, the mover); every rule reading a path below its package root; the green ratchet run one line                                                                                                                                      | —                                                                              | —                   |
+| iteration 4      | shown: the mover gated per file (a 17 file beside a 16 one left byte for byte, a 16 pool reaching only the files naming `$FIXTURES/`); the directive rename on every `--fix`, read in a comment only; a file outside every package read below its repository root; the Makefile's six targets, `fix` the two fixers                                                                                                                                                                                                                                                | —                                                                              | —                   |
+| ratchet, report  | shown: `test.baseline.json` recorded by `jterrazz-test-check baseline` and judged by the checker; the checker's report line; `lintReport` published, refusing oxlint's graphical frames; iteration 2: `--oxlint-report <file>` read, the judging run prints every finding it counts and every plugin diagnostic                                                                                                                                                                                                                                                    | `typescript.baseline.json`, jterrazz keys refused                              | —                   |
+| iteration 9      | shown: 62 — a green run keeping no `test` section prints `jterrazz.baseline.json › test: nothing held`, a deferring run names the judging file relative to the project; 63 — a stream handed a value `toMatch` past the compiler is refused naming `.text`, in both builds                                                                                                                                                                                                                                                                                         | —                                                                              | —                   |
+| iteration 10     | shown: `kind: api` and `kind: jobs` documents — the grammar, the schema, the runner (`api.run`, `jobs.run`, the plugin by kind, the `api()`/`jobs()` door), steps and captures, every path key under `verb-reads-its-ground-folder`/C15/C8/C9; `route-written-as-template` route coverage from a declared OpenAPI source; this package's pure-data api and jobs specs migrated; chapter 20 owns the format                                                                                                                                                         | —                                                                              | —                   |
+| iteration 14     | shown: variant B — `toMatch` compares a whole result to a value in place or to `file()`/`directory()` (`toMatchRows` retired), `sql` seeds, `TEST_UPDATE=1` writing the value into the test source, `ground-shared-or-inline` (a file exists only if shared; the pool fixer folded in), `result-compared-whole` (every test compares its whole result; `d12w-response-body-probe` folded in), route coverage measured at run time (`route-written-as-template` retired); iteration 10's api/jobs documents retired and this package's specs migrated to TypeScript | —                                                                              | —                   |
+| iteration 18     | shown: `sql` removed (export, types, runtime, docs), `seed()` a `.sql` `file()` alone; `ground-shared-or-inline`'s seed branch (a seed one test reads lives beside it) and per-role caps both ways (requests 30, expected 150); the fixer writes inline `sql` to `./seeds/<name>.sql` and a value past its cap to a file; this package's specs migrated                                                                                                                                                                                                            | —                                                                              | —                   |
+| iteration 19     | shown: 97 `specification.cli(bin, { commands })` read by the subject reader, first word by default; 98 `test: { collections }` read from `jterrazz.config.ts`; 100 the `one-subject-per-spec` split moves a helper several new files read into `<folder>/<folder>.fixtures.ts`                                                                                                                                                                                                                                                                                     | —                                                                              | —                   |
 
 Each branch keeps one commit per unit, so the owner can read the vision
 commit by commit.
@@ -212,12 +212,12 @@ commit, prototype plumbing that never reaches the release.
 - **The lint rule specs still to convert in the refactor** — the checker's,
   `specs/lint/checker/<pass>.test.ts` over the twins in
   `specs/lint/checker/fixtures/lint-violations/`, each to become
-  `specs/lint/<pass-id>/<case>.spec.yaml`: a7, b5, c8-spec, c9, c12, c16,
-  c18, c20, c21w, c23, d4 ×2, d4b ×4, d5, d5w, d10w, d11w, j3w, j4, j5, j9,
-  member-pass, checker-cli, kitchen-sink; and the k4 reach meta-test. Every
-  static rule is converted (the spec-coverage pass converted the last 51,
-  c13's tree clause included), and a meta-test holds each to a golden naming
-  the line and column it fires on.
+  `specs/lint/<pass-name>/<case>.spec.yaml`: every checker pass that has a
+  file under `specs/lint/checker/`, with member-pass, checker-cli and
+  kitchen-sink, and the `every-reach-proven` meta-test.
+- **Every static rule is converted** (the spec-coverage pass converted the
+  last 51, `ground-uses-reserved-name`'s tree clause included), and a
+  meta-test holds each to a golden naming the line and column it fires on.
 
 ## Open questions for the iteration
 
@@ -2625,7 +2625,7 @@ The only conflicts were in the generated `docs/03-testing.md`; chore commit
   C28 never writes in place a file a module test names, and its writers
   reuse a file that already holds the same bytes. What stays open:
     - **Owner confirmation.** In
-      `specs/lint/c29-one-subject/fixes-a-file-of-two-routes.spec.yaml`,
+      `specs/lint/one-subject-per-spec/fixes-a-file-of-two-routes.spec.yaml`,
       the seed now stays in `specs/shared/seeds/`.
     - A fixer that moves ground rewrites only whole relative literals, not a
       path built from pieces, so `--fix` can leave a C8 error. docs/18's "A
@@ -2643,7 +2643,7 @@ The only conflicts were in the generated `docs/03-testing.md`; chore commit
   by page. C32 refuses every generic aspect. D20's carry depth is pinned
   on both sides of its boundary, and F2's allow list on a walk through a
   relay. What stays open: the mobile-journey split has no case of its own,
-  there is no YAML spec under `specs/lint/d20-whole-result/`, and the
+  there is no YAML spec under `specs/lint/result-compared-whole/`, and the
   generated C32 cases carry no name.
 - **Chain `with()` headers, and the routes ratchet's recorder**
   (`dc953985`, `b61fea5f`, `74cb963f`). What it closed: `with()` sends its
@@ -3990,3 +3990,157 @@ Open, **for the owner**:
   second review pass's two full runs.
 - `projects.test.ts` split into three test files, and the small `testOf`
   helper is now repeated in each of them.
+
+## Rule names (2026-09-26): test
+
+Every rule, checker pass, self lock and review principle answers to one name that states its requirement: the letter code and the `w` suffix are gone, a family is a word (the folder `lint/rules/<family>/`, the section of chapter 19), and the warn tier is the row's `severity`. A checker finding prints and keys under its pass's name (`jterrazz-check(no-unused-ground)`), and a code that covered several passes (`c8`, `d4`, `d4b`, `d5`) is one name per pass. `make fix` carries a consumer across: the mover renames `oxlint-disable` directives, lint-config overrides, `checker-disable` directives (a shared code to all of its passes) and the `jterrazz.baseline.json` › `test` keys (a shared code left for `jterrazz-test-check baseline`); its map, `lint/migration/names.ts`, goes with the mover in 17.1. The iterations above keep the codes they were written with; this table reads them.
+
+| Old id                                    | Name                                          | Family       |
+| ----------------------------------------- | --------------------------------------------- | ------------ |
+| `e6-component-project-helper`             | `browser-project-from-component`              | setup        |
+| `j9-checker-suppression-reason`           | `checker-suppression-states-a-reason`         | setup        |
+| `a4-cleanup-afterall`                     | `cleanup-passed-to-after-all`                 | setup        |
+| `g3-docker-aware-capture`                 | `containers-removed-with-the-run`             | setup        |
+| `a7-database-property`                    | `database-named-only-when-several`            | setup        |
+| `a7-database-runtime`                     | `database-named-only-when-several-at-runtime` | setup        |
+| `c8-spec-registered-name`                 | `document-env-and-serve-registered`           | setup        |
+| `e1-env-allowlist`                        | `environment-read-allow-listed`               | setup        |
+| `m1-constructor-has-a-tree`               | `every-constructor-has-specs`                 | setup        |
+| `e7w-include-prefix-exists`               | `include-points-at-a-folder`                  | setup        |
+| `e8-literate-specification-exists`        | `literate-specification-exists`               | setup        |
+| `e3-config-present`                       | `member-has-vitest-config`                    | setup        |
+| `g4-no-dom-in-module-test`                | `no-dom-in-module-test`                       | setup        |
+| `e9w-env-assignment-in-test`              | `no-raw-env-write`                            | setup        |
+| `a9w-redundant-root`                      | `no-redundant-root`                           | setup        |
+| `a3-no-destructure-alias`                 | `no-runner-alias`                             | setup        |
+| `a11-server-xor-url`                      | `no-server-with-url`                          | setup        |
+| `e5-no-simulated-dom`                     | `no-simulated-dom`                            | setup        |
+| `e5b-no-simulated-dom-config-member`      | `no-simulated-dom-in-config`                  | setup        |
+| `a2-known-constructors`                   | `no-unknown-constructor`                      | setup        |
+| `e4w-project-binding`                     | `project-named-for-its-facet`                 | setup        |
+| `a1-specification-file`                   | `runner-in-specification-file`                | setup        |
+| `a8-services-type-the-factory`            | `server-sees-declared-services`               | setup        |
+| `g2-per-worker-isolation`                 | `state-isolated-per-worker`                   | setup        |
+| `e2-preset-config`                        | `vitest-config-from-define-spec-config`       | setup        |
+| `b9w-product-command`                     | `cli-runs-the-product-binary`                 | chain        |
+| `b2-a-file-is-named-by-its-path`          | `disk-named-by-relative-path`                 | chain        |
+| `b2-relative-path-runtime`                | `disk-named-by-relative-path-at-runtime`      | chain        |
+| `b5-await-using-inference`                | `docker-exec-bound-with-await-using`          | chain        |
+| `b4-given-then`                           | `given-and-then-markers-present`              | chain        |
+| `j6w-given-in-the-test`                   | `given-in-the-test`                           | chain        |
+| `b11-marker-one-line`                     | `marker-on-one-line`                          | chain        |
+| `b3-no-label-on-a-chain`                  | `no-chain-label`                              | chain        |
+| `b6w-redundant-env-url`                   | `no-redundant-service-url`                    | chain        |
+| `b16w-file-context`                       | `no-repeated-chain-setting`                   | chain        |
+| `b1-one-terminal-action`                  | `one-terminal-action-per-chain`               | chain        |
+| `b12-route-template`                      | `route-written-as-template`                   | chain        |
+| `b12-route-params-runtime`                | `route-written-as-template-at-runtime`        | chain        |
+| `b7-sequence-by-seed`                     | `sequence-expressed-by-seeding`               | chain        |
+| `b6-url-injection`                        | `service-urls-injected`                       | chain        |
+| `b8-kebab-trigger`                        | `trigger-name-is-kebab-case`                  | chain        |
+| `b10-when-between-markers`                | `when-between-given-and-then`                 | chain        |
+| `j5-spec-description`                     | `document-description-is-a-title`             | layout       |
+| `j4-spec-description-unique`              | `document-description-unique`                 | layout       |
+| `c20-facet-folder`                        | `facet-folder-has-specification`              | layout       |
+| `c18-module-test-under-facet`             | `facet-test-uses-its-runner`                  | layout       |
+| `c12-spec-file-name`                      | `file-suffix-matches-place`                   | layout       |
+| `c1-asset-grouping`                       | `folder-follows-assets`                       | layout       |
+| `c5-a-path-names-its-subfolder`           | `golden-path-creates-folders`                 | layout       |
+| `c6-tomatch-extension`                    | `golden-path-has-extension`                   | layout       |
+| `c21w-ground-owned-by-one`                | `ground-beside-its-only-reader`               | layout       |
+| `c28-ground-shared-or-inline`             | `ground-shared-or-inline`                     | layout       |
+| `c13-bare-ground`                         | `ground-uses-reserved-name`                   | layout       |
+| `c8-disk-target-exists`                   | `named-path-exists`                           | layout       |
+| `c16-document-outside-ground`             | `no-document-in-ground`                       | layout       |
+| `c27w-duplicate-ground`                   | `no-duplicate-ground`                         | layout       |
+| `c15-local-fixture-reach`                 | `no-reach-into-sibling-ground`                | layout       |
+| `c25-no-ground-synonym`                   | `no-snapshot-folder`                          | layout       |
+| `c9-dead-fixtures`                        | `no-unused-ground`                            | layout       |
+| `j10-one-describe-level`                  | `one-describe-level`                          | layout       |
+| `c31-describe-names-file`                 | `one-describe-per-file`                       | layout       |
+| `c29-one-subject`                         | `one-subject-per-spec`                        | layout       |
+| `c26-disk-named-in-the-test`              | `paths-named-in-the-test`                     | layout       |
+| `c2-request-extension`                    | `request-file-extension-known`                | layout       |
+| `k7-siblingless-module-declared`          | `siblingless-module-declared`                 | layout       |
+| `c33-file-size`                           | `spec-file-within-line-limit`                 | layout       |
+| `c30-subject-folder`                      | `spec-in-subject-folder`                      | layout       |
+| `c32-aspect-name`                         | `spec-named-for-its-aspect`                   | layout       |
+| `c35-capability-folder`                   | `specimen-filed-by-capability`                | layout       |
+| `c1-domain-structure`                     | `specs-at-declared-depth`                     | layout       |
+| `i2-sibling-test-naming`                  | `test-beside-its-module`                      | layout       |
+| `c34-test-body-size`                      | `test-body-within-line-limit`                 | layout       |
+| `c24-ground-role`                         | `verb-reads-its-ground-folder`                | layout       |
+| `d4b-spec-shape`                          | `document-follows-its-grammar`                | expectations |
+| `d4b-spec-key-order`                      | `document-keys-in-canonical-order`            | expectations |
+| `d4b-spec-block-scalar`                   | `document-streams-written-as-block-scalars`   | expectations |
+| `d28-shared-expectation`                  | `expected-constant-is-shared`                 | expectations |
+| `c3-expected-http-shape`                  | `expected-headers-are-a-subset`               | expectations |
+| `d3-a-golden-is-read-where-its-path-says` | `golden-read-from-its-path`                   | expectations |
+| `d4b-http-first-line`                     | `http-first-line-follows-its-grammar`         | expectations |
+| `d2-await-io-matcher`                     | `io-matcher-awaited`                          | expectations |
+| `k10-lint-document-goldens-report`        | `lint-document-goldens-the-report`            | expectations |
+| `d13w-unfrozen-negative-fixture`          | `negative-golden-frozen`                      | expectations |
+| `d2w-await-sync-matcher`                  | `no-await-on-sync-matcher`                    | expectations |
+| `d17w-double-only-oracle`                 | `no-double-only-assertion`                    | expectations |
+| `j3w-spec-empty-assertion`                | `no-empty-expected-stream`                    | expectations |
+| `d18w-existence-only-oracle`              | `no-existence-only-assertion`                 | expectations |
+| `d29-no-foreign-expectation`              | `no-imported-expectation`                     | expectations |
+| `d4-malformed-ref`                        | `no-malformed-ref`                            | expectations |
+| `d19w-probe-cluster`                      | `no-probe-cluster`                            | expectations |
+| `d8w-raw-bypass`                          | `no-raw-bypass`                               | expectations |
+| `d16-sampled-oracle`                      | `no-sampled-value-in-expectation`             | expectations |
+| `d11w-spec-silent-refusal`                | `no-silent-refusal`                           | expectations |
+| `d9w-single-use-ref`                      | `no-single-use-ref`                           | expectations |
+| `d15w-status-only-probe`                  | `no-status-only-test`                         | expectations |
+| `d10w-tokens-in-requests`                 | `no-token-in-request`                         | expectations |
+| `d6w-transform-token-equivalent`          | `no-transform-duplicating-tokens`             | expectations |
+| `d4-unknown-token`                        | `no-unknown-token`                            | expectations |
+| `d20-golden-not-snapshot`                 | `no-vitest-snapshot`                          | expectations |
+| `d5-spec-volatile-literal`                | `no-volatile-literal`                         | expectations |
+| `d14-one-verb-per-meaning`                | `one-verb-per-meaning`                        | expectations |
+| `d11-golden-file`                         | `output-asserted-as-a-golden`                 | expectations |
+| `d5w-spec-pinned-value`                   | `pinned-value-from-the-input`                 | expectations |
+| `d1-read-only-accessors`                  | `result-accessor-is-read-only`                | expectations |
+| `d20-whole-result`                        | `result-compared-whole`                       | expectations |
+| `m2-mockof-requires-the-port`             | `mock-of-needs-a-port`                        | world        |
+| `d7-strict-intercepts`                    | `network-strict-after-first-stub`             | world        |
+| `i4-no-module-doubles`                    | `no-module-mock`                              | world        |
+| `d16w-ambient-value`                      | `no-sampled-value-in-test`                    | world        |
+| `j2-no-sleep`                             | `no-sleep`                                    | world        |
+| `m3-no-vi-time-or-global-stub`            | `no-vitest-time-or-global-stub`               | world        |
+| `c7-seeds-sql-only`                       | `seeds-are-sql`                               | world        |
+| `c23-seed-no-clock-read`                  | `seeds-state-absolute-time`                   | world        |
+| `k9-spec-server-port-zero`                | `server-binds-port-zero`                      | world        |
+| `c11-stub-data-pairing`                   | `stub-data-has-a-builder`                     | world        |
+| `c10-stubs-boundary`                      | `stubs-imported-through-facade`               | world        |
+| `c4-stub-shape`                           | `stubs-root-holds-facades-and-kinds`          | world        |
+| `w3-unambiguous-element`                  | `descriptor-matches-one-element`              | elements     |
+| `w1-scenario-pure`                        | `no-expect-in-scenario`                       | elements     |
+| `w4-no-landmarks-on-mobile`               | `no-landmark-on-mobile`                       | elements     |
+| `w5w-scenario-settles`                    | `scenario-ends-settled`                       | elements     |
+| `w2-testid-states-what-is-missing`        | `test-id-states-what-is-missing`              | elements     |
+| `w6-verb-subset-per-facet`                | `verb-belongs-to-its-facet`                   | elements     |
+| `f5-fixtures-only-from-tests`             | `fixtures-imported-by-tests-only`             | imports      |
+| `f7-no-framework-internals`               | `no-framework-internals`                      | imports      |
+| `f8-no-seam-dependency`                   | `no-redundant-test-dependency`                | imports      |
+| `f6-no-foreign-test-runtime`              | `no-second-test-runtime`                      | imports      |
+| `f2-no-test-imports-in-prod`              | `no-test-code-in-production`                  | imports      |
+| `f4-no-test-to-test-import`               | `no-test-to-test-import`                      | imports      |
+| `f1-no-subpath-import`                    | `no-unpublished-subpath`                      | imports      |
+| `i8-definition-is-its-folder`             | `definition-is-its-module`                    | architecture |
+| `i6-facet-is-composition`                 | `facet-is-a-composition`                      | architecture |
+| `i12-folder-shape`                        | `folder-named-for-a-concept`                  | architecture |
+| `i1-layer-boundaries`                     | `import-within-declared-layers`               | architecture |
+| `i7-kernel-loads-in-a-page`               | `kernel-loads-in-a-page`                      | architecture |
+| `i10-facet-isolation`                     | `no-cross-facet-import`                       | architecture |
+| `i11-engine-owner`                        | `one-owner-per-engine`                        | architecture |
+| `i9-source-root`                          | `source-root-holds-known-entries`             | architecture |
+| `k5-english-catalogue`                    | `catalogue-in-english`                        | catalogue    |
+| `k2-cited-ids-resolve`                    | `cited-rules-exist`                           | catalogue    |
+| `k1-retro-propagation`                    | `discovery-grows-a-guard`                     | catalogue    |
+| `k6-matrix-no-empty-cell`                 | `every-capability-exercised`                  | catalogue    |
+| `k4-reach-per-path`                       | `every-reach-proven`                          | catalogue    |
+| `k8-corpus-coordinates-resolve`           | `links-resolve`                               | catalogue    |
+| `k11-messages-teach`                      | `message-has-four-parts`                      | catalogue    |
+| `k3-message-anchors`                      | `message-reads-its-row`                       | catalogue    |
+| `k12-rule-audience`                       | `rule-declares-its-audience`                  | catalogue    |
