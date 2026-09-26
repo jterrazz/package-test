@@ -2,7 +2,7 @@
 export const FAMILIES = {
     setup: 'Constructors, configuration, projects and infrastructure',
     chain: 'The chain and its markers',
-    layout: 'Files, folders, sizes and names',
+    layout: 'Files, folders, sizes, names, and the suppressions a file carries',
     expectations: 'What is compared, and how',
     world: 'Stubs, doubles, time and seeds',
     elements: 'Screens, descriptors and scenarios',

@@ -949,7 +949,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         convention:
             'Every `checker-disable-next-line` / `checker-disable-line` directive carries ` -- <reason>`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. The word inside a string is prose, not a directive.',
         facet: 'model',
-        family: 'setup',
+        family: 'layout',
         fix: 'Write `checker-disable-next-line <name> -- <reason>`.',
         name: 'checker-suppression-states-a-reason',
         rationale:
@@ -1324,7 +1324,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         convention:
             'Docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.',
         facet: 'model',
-        family: 'chain',
+        family: 'setup',
         fix: 'Bind the result with `await using`, so the containers the run spawned are disposed with the scope.',
         name: 'docker-exec-bound-with-await-using',
         rationale:
