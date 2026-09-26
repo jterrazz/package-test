@@ -5,8 +5,7 @@ import { dirname, resolve } from 'node:path';
 
 import { refusal } from '../../../lint/engine/catalogue/refusal.js';
 import { dedent } from '../../../lint/engine/project/dedent.js';
-import { resolveSpecPath } from '../../../lint/engine/project/resolve.js';
-import { isDiskDirectory, isDiskFile } from '../../kernel/files/spec-path.js';
+import { isDiskDirectory, isDiskFile, resolveSpecPath } from '../../kernel/files/spec-path.js';
 import { ContainerAccessor } from '../command/container.js';
 import { diffDirectories, DirectoryAccessor, walkDirectory } from '../disk/directory.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';

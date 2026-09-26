@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { discoverRoot, findRoot, resolveRoot, resolveSpecPath } from './resolve.js';
+import { discoverRoot, findRoot, resolveRoot } from './resolve.js';
 
 const probe =
     (...present: string[]) =>
@@ -131,26 +131,5 @@ describe('resolve', () => {
 
         // Then - the override wins with no resolution against the caller
         expect(found).toBe(resolve(base, 'project'));
-    });
-
-    test('spec path resolution — a relative path resolves from the spec directory, climbing included', () => {
-        // Given - a spec two levels under specs/, naming its own ground and the pool
-        const specDir = '/repo/specs/cli/build';
-
-        // Then - both resolve from the spec, never from the working directory
-        expect(resolveSpecPath('seed', './seeds/users.sql', specDir)).toBe(
-            '/repo/specs/cli/build/seeds/users.sql',
-        );
-        expect(resolveSpecPath('fixture', '../../fixtures/shop/', specDir)).toBe(
-            '/repo/specs/fixtures/shop',
-        );
-    });
-
-    test('spec path resolution — a bare name is refused before anything is read', () => {
-        // Given - a bare name, resolved against no folder the call shows
-        // Then - refused with the verb
-        expect(() => resolveSpecPath('request', 'create.http', '/repo/specs')).toThrow(
-            /^found: request\("create\.http"\), a path that is not relative to the spec file/u,
-        );
     });
 });

@@ -2,7 +2,7 @@ import { cpSync, existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
 import { refusal } from '../../../../lint/engine/catalogue/refusal.js';
-import { resolveSpecPath } from '../../../../lint/engine/project/resolve.js';
+import { resolveSpecPath } from '../../../kernel/files/spec-path.js';
 import type { FixturePort } from './fixture.port.js';
 
 type FixtureCopyPlan = {

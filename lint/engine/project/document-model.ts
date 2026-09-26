@@ -1,10 +1,10 @@
-import { join } from 'node:path';
+import { join, resolve } from 'node:path';
 
 import type { Teaching } from '../catalogue/lesson.js';
 import type { Severity } from '../checker/finding.js';
 import { treeEntries, treeKind, treeNames } from './git-tree.js';
 import { GROUND_FIXTURES } from './ground.js';
-import { resolveSpecPath } from './resolve.js';
+import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import type { SpecDocument, SpecFile } from './spec-document.js';
 import { readText } from './tree.js';
@@ -130,13 +130,9 @@ export function fixedData(document: SpecDocument, dir: string): string {
         }
     };
     for (const fixture of document.fixtures) {
-        let source;
-        try {
-            source = resolveSpecPath('fixture', fixture.path, dir);
-        } catch {
-            continue;
+        if (isRelativePath(fixture.path)) {
+            visit(resolve(dir, fixture.path));
         }
-        visit(source);
     }
     visit(join(dir, GROUND_FIXTURES));
     return parts.join('\n');
