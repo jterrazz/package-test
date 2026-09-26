@@ -2305,8 +2305,9 @@ The four questions of the overnight summary, and 129 and 130 raised above.
   two `--oxlint-report` cases).
 - **130** (`ace65760`). A chain held whole in a declarator is a request
   when the test awaits that name after it; held and never awaited, the
-  read stays a read. The carry analysis moved to `lint/reading/carried.ts` (the
-  rule file was at the 300-line cap). Red: the previous rule (the
+  read stays a read. The carry analysis moved to a module of its own, today
+  `lint/rules/expectations/result-compared-whole.carried.ts` (the rule file
+  was at the 300-line cap). Red: the previous rule (the
   accepting rule-tester case and the accepting document, 2 of 15); the
   awaited-later check forced true (the never-awaited case, 1 of 15).
 - **Gates.** `make fix` then `make check` exit 0 after each commit
@@ -3845,8 +3846,9 @@ The owner approved this structure decision, and it is now in force.
 
 Edges point one way: `kernel ← world · elements · expectations ← facets ←
 vitest · entries`. `FRAMEWORK_LAYERS` states it. The self checker passes
-I9–I12, in `lint/self/checks/source-tree.ts` and
-`lint/self/checks/source-imports.ts`, hold what a layer map cannot:
+`source-root-holds-known-entries`, `no-cross-facet-import`,
+`one-owner-per-engine` and `folder-named-for-a-concept`, one file each
+under `lint/self/checks/`, hold what a layer map cannot:
 
 - the source root;
 - a facet never importing another, and being entered only by its root
