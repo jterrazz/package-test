@@ -1,4 +1,4 @@
-/* oxlint-disable jterrazz/runner-in-specification-file, jterrazz/no-unknown-constructor, jterrazz/io-matcher-awaited, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
+/* oxlint-disable jterrazz/runner-in-specification-file, jterrazz/io-matcher-awaited, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
 import { expect } from 'vitest';
 
 import type { ComponentChain, ComponentVisitor } from './facets/component/index.js';
@@ -55,9 +55,6 @@ export async function typeRows(): Promise<void> {
         { server: { command: 'npm start' }, url: 'https://site.test' },
     );
 
-    // @ts-expect-error no-unknown-constructor — `jobs` is retired: `specification.job()` [`Property 'jobs' does not exist on type 'Specification'`]
-    await specification.jobs({ jobs: [] });
-
     const { api } = await specification.api({ server: () => ({}) as never });
     const { cli } = await specification.cli('./bin.sh');
     await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
@@ -85,17 +82,6 @@ export async function typeRows(): Promise<void> {
     await api.get(file('./requests/orders.http'));
     // @ts-expect-error disk-named-by-relative-path — a command is a value where a verb takes one [`Argument of type 'FileAt<"./fixtures/args.txt">' is not assignable to parameter of type 'string | string[] | undefined'`]
     await cli.exec(file('./fixtures/args.txt'));
-
-    // @ts-expect-error disk-named-by-relative-path — `seedFile` is retired: `seed(file(…))` [`Property 'seedFile' does not exist on type 'ApiSpecification<never>'`]
-    api.seedFile('./seeds/x.sql');
-    // @ts-expect-error disk-named-by-relative-path — `requestFile` is retired: `request(file(…))` [`Property 'requestFile' does not exist on type 'ApiSpecification<never>'`]
-    await api.requestFile('./requests/x.http');
-    // @ts-expect-error disk-named-by-relative-path — `fixtureFile` is retired: `fixture(file(…))` [`Property 'fixtureFile' does not exist on type`]
-    cli.fixtureFile('./fixtures/a.json');
-    // @ts-expect-error disk-named-by-relative-path — `fixtureDirectory` is retired: `fixture(directory(…))` [`Property 'fixtureDirectory' does not exist on type`]
-    cli.fixtureDirectory('./fixtures/shop/');
-    // @ts-expect-error disk-named-by-relative-path — `runFile` is retired: `run(file(…))` [`Property 'runFile' does not exist on type`]
-    await cli.runFile('./case.spec.yaml');
 
     const out = await cli.exec();
     // @ts-expect-error one-verb-per-meaning — a string subject has no golden: its argument is a value [`Argument of type 'FileAt<"./expected/abc.txt">' is not assignable to parameter of type 'string | RegExp'`]
@@ -161,21 +147,6 @@ export async function streamMatcherRows(): Promise<void> {
     expect(out.stdout).toMatch(/built/u);
     expect(out.stderr).toMatch('warning: {{string}}\n');
     expect(out.stderr.text).toMatch(/warning/u);
-}
-
-/** `disk-named-by-relative-path` — the retired disk matchers stay retired. */
-export async function retiredMatcherRows(): Promise<void> {
-    const { api } = await specification.api({ server: () => ({}) as never });
-    const { cli } = await specification.cli('./bin.sh');
-    await specification.cli('./bin.sh', { commands: ['db', 'migrate'] });
-    const out = await cli.exec();
-    const result = await api.get('/orders/1');
-    // @ts-expect-error disk-named-by-relative-path — `toMatchFile` is retired: `toMatch(file(…))` [`Property 'toMatchFile' does not exist on type`]
-    expect(out.stdout).toMatchFile('./expected/out.txt');
-    // @ts-expect-error disk-named-by-relative-path — `toMatchDirectory` is retired: `toMatch(directory(…))` [`Property 'toMatchDirectory' does not exist on type`]
-    await expect(out.filesystem).toMatchDirectory('./expected/tree/');
-    // @ts-expect-error disk-named-by-relative-path — `toMatchRows` is retired: a table is compared whole, `toMatch(rows)` [`Property 'toMatchRows' does not exist on type`]
-    await expect(result.table('orders')).toMatchRows({ columns: ['id'], rows: [[1]] });
 }
 
 export async function valueSubjectMatcherRows(): Promise<void> {

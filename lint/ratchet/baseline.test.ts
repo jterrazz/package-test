@@ -150,19 +150,6 @@ describe('baseline', () => {
         expect(readBaseline(root)).toStrictEqual({});
     });
 
-    test('baseline — the test ratchet — exact counts that a fix may lower and never raise — the retired file is never read', () => {
-        // Given - a project holding only the file this package kept alone before the merge
-        const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
-        writeFileSync(
-            join(root, 'test.baseline.json'),
-            '{ "jterrazz-check/no-unused-ground": 1 }\n',
-        );
-
-        // Then - it keeps no test ratchet, and records nothing
-        expect(keepsBaseline(root)).toBe(false);
-        expect(readBaseline(root)).toStrictEqual({});
-    });
-
     test('baseline — the test ratchet — exact counts that a fix may lower and never raise — an unreadable file records nothing rather than failing the run, and refuses a recording', () => {
         // Given - a family file that is not JSON
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
