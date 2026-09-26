@@ -687,4 +687,30 @@ describe('mover', () => {
             { file: '.oxlintrc.json', removed: ['f3-specs-public-entry'], renamed: [] },
         ]);
     });
+
+    test('checker-migration — the 17.0 codes — an override spelling a 17.0 id names the rule, and one spelling a 16 id lands on the same name', () => {
+        // Given - a member overriding one rule by its 17.0 id and another by its 16 id
+        const member = tree16(
+            {
+                '.oxlintrc.json':
+                    '{\n    "rules": {\n        "jterrazz/j2-no-sleep": "off",\n        "jterrazz/c4-contract-shape": "warn"\n    }\n}\n',
+            },
+            '',
+        );
+
+        // When - the mover runs over the member
+        const moves = migrateLintConfig(member, member);
+
+        // Then - both override the rule by its name, and oxlint finds each
+        expect(readFileSync(join(member, '.oxlintrc.json'), 'utf8')).toBe(
+            '{\n    "rules": {\n        "jterrazz/no-sleep": "off",\n        "jterrazz/stubs-root-holds-facades-and-kinds": "warn"\n    }\n}\n',
+        );
+        expect(moves).toStrictEqual([
+            {
+                file: '.oxlintrc.json',
+                removed: [],
+                renamed: ['c4-contract-shape', 'j2-no-sleep'],
+            },
+        ]);
+    });
 });

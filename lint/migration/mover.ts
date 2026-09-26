@@ -11,6 +11,7 @@ import {
 } from '../../src/kernel/files/ground.js';
 import { repointModuleTests } from '../checks/crossfile.js';
 import { isTestFileName } from '../reading/role.js';
+import { PASS_NAMES, RULE_NAMES } from './names.js';
 import { migrateStubs } from './stubs.js';
 
 /** The 16 → 17 mover behind `--fix`. Its gate is per file: a file is 16-shaped while a 16 folder it stands on is still there, and every other file is left alone. Only literal arguments move, and a `toMatch` literal only when its golden exists. */
@@ -139,6 +140,7 @@ const RENAMED_RULES: Readonly<Record<string, string>> = {
     'c2-http-only-requests': 'request-file-extension-known',
     'c4-contract-shape': 'stubs-root-holds-facades-and-kinds',
     'd8w-text-bypass': 'no-raw-bypass',
+    ...RULE_NAMES,
 };
 
 const QUOTES = new Set(["'", '"', '`']);
@@ -317,8 +319,27 @@ function commentStart(line: string): number {
     return -1;
 }
 
+const CHECKER_DIRECTIVE =
+    /(?<directive>checker-disable(?:-next)?-line\s+)(?<ids>[\w*-]+(?:\s*,\s*[\w*-]+)*)/giu;
+
+function passNamesOf(id: string): readonly string[] {
+    const code = id.toLowerCase();
+    return (
+        PASS_NAMES[code] ?? PASS_NAMES[`${code}w`] ?? PASS_NAMES[code.replace(/w$/u, '')] ?? [id]
+    );
+}
+
+function renameCheckerDirectives(text: string): string {
+    return text.replaceAll(CHECKER_DIRECTIVE, (whole: string, directive: string, ids: string) => {
+        const names = [...new Set(ids.split(/\s*,\s*/u).flatMap(passNamesOf))];
+        const next = `${directive}${names.join(', ')}`;
+        return next === whole ? whole : next;
+    });
+}
+
 /** A 16 `.text` was the raw capture, so the line a `d8w-text-bypass` directive covers reads `.raw`. */
-function renameDirectives(text: string): string {
+function renameDirectives(source: string): string {
+    const text = renameCheckerDirectives(source);
     const lines = text.split('\n');
     for (const [index, line] of lines.entries()) {
         const start = commentStart(line);
@@ -636,7 +657,7 @@ function migrate(root: string, { files, folders, specsRoot }: Walked, rename: Re
         const next = isSixteen
             ? movedToSeventeen(text, file, specsRoot)
             : isDocument
-              ? text
+              ? renameCheckerDirectives(text)
               : renameDirectives(text);
         if (next !== text) {
             writeFileSync(file, next);

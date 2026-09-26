@@ -69,6 +69,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/world/services/containers/service-images.ts',
             'lint/catalogue/manifest.ts',
             'lint/catalogue/families.ts',
+            'lint/migration/names.ts',
             'lint/rulebook/import.ts',
             'lint/self/checks/engines.ts',
             'lint/self/catalogue/manifest.ts',

@@ -3,6 +3,8 @@ import { existsSync, readFileSync, statSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
 import { moveKeepingHistory } from '../../src/kernel/files/git-tree.js';
+import { migrateBaselineKeys } from '../migration/baseline-keys.js';
+import type { BaselineKeysMove } from '../migration/baseline-keys.js';
 import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from '../migration/mover.js';
 import type { LintConfigMove, Migration } from '../migration/mover.js';
 import {
@@ -274,6 +276,11 @@ function fixProject(root: string): void {
             reportLintConfigMove(move);
         }
     }
+    for (const dir of new Set([root, ...discoverMembers(root)])) {
+        for (const move of migrateBaselineKeys(dir)) {
+            reportBaselineKeysMove(relative(root, join(dir, move.file)), move);
+        }
+    }
     applyOwnFixes(root);
 }
 
@@ -432,6 +439,17 @@ function reportLintConfigMove({ file, removed, renamed }: LintConfigMove): void 
     for (const id of removed) {
         console.log(
             `conventions checker: ${file} — removed the override of jterrazz/${id}, a rule 17 retired`,
+        );
+    }
+}
+
+function reportBaselineKeysMove(file: string, { renamed, shared }: BaselineKeysMove): void {
+    for (const key of renamed) {
+        console.log(`conventions checker: ${file} — ${key} is keyed by its rule's name`);
+    }
+    for (const key of shared) {
+        console.log(
+            `conventions checker: ${file} — ${key} counted several passes under one code; run 'jterrazz-test-check baseline' to record each by its name`,
         );
     }
 }
