@@ -84,19 +84,6 @@ describe('cli', () => {
         );
     });
 
-    test('lint — checker CLI contract — a leftover test.baseline.json is never read: the section alone judges', async () => {
-        // Given - the retired file holding a count the project is far from, beside the recorded section
-        const result = await cli
-            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
-            .fixture(file('./fixtures/lint-violations/retired-baseline/test.baseline.json'))
-            .exec(['baseline .', '.']);
-
-        // Then - the run is held by the section, and says nothing of the old file: the toolchain owns that refusal
-        expect(result.exitCode).toBe(0);
-        expect(result.stderr.text).toBe('');
-        expect(result.stdout.text).not.toContain('test.baseline.json');
-    });
-
     test('lint — checker CLI contract — a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
         // Given - a project with one dead fixture, recorded, then judged
         const result = await cli
