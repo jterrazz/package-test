@@ -1,66 +1,39 @@
-/**
- * A scripted app — a native app described as data, and the running instance
- * the protocol double drives.
- *
- * A screen is a small tree of elements, each with the accessibility traits
- * XCUITest publishes (type, label, value, identifier, visibility). A tap
- * moves to the screen a button names; a field keeps what was typed into it
- * until the app is terminated; a label may quote a field (`{email}`); a list
- * may fill its rows from the JSON the app GETs at the `api` its deep link
- * carries. That is all the behaviour a spec needs to script, and nothing more.
- */
+import { StaleElementError } from './stale-element-error.js';
 
-/** The element types a scripted screen draws — XCUITest's, without the prefix. */
 export type ElementType = 'Button' | 'Other' | 'SecureTextField' | 'StaticText' | 'TextField';
 
-/** One element of a screen, as data. */
 export type ScreenElement = {
     children?: ScreenElement[];
-    /** The accessibility identifier — what `testId()` names. */
     identifier?: string;
-    /** The accessible label; `{field}` quotes what was typed into that field. */
     label?: string;
-    /** Mounted below the fold: absent from what is visible until scrolled to. */
     offscreen?: boolean;
-    /** Rows read at render time: one `StaticText` per item of the JSON array at `<api><path>`, labelled by `field`. */
     rows?: { failure: string; field: string; path: string };
-    /** The screen a tap on this element opens. */
     tap?: string;
     type: ElementType;
-    /** A field's placeholder, shown as its value while it is empty. */
     value?: string;
 };
 
-/** A native app, as data. */
 export type ScriptedApp = {
     bundleId: string;
-    /** The screen a plain launch opens on. */
     launch: string;
-    /** The app's display name — the application element's label. */
     name: string;
-    /** The URL scheme its deep links use (`specimen` for `specimen://feed`). */
     scheme: string;
     screens: Record<string, ScreenElement[]>;
 };
 
-/** One mounted element: the data, resolved, with the id the protocol hands out. */
 export type Mounted = {
     children: Mounted[];
     id: string;
     identifier?: string;
     label?: string;
     source: ScreenElement;
-    type: ElementType | 'Application' | 'Window';
+    type: 'Application' | 'Window' | ElementType;
     value?: string;
     visible: boolean;
 };
 
-/** The error an element id no longer mounted answers with — the protocol's `stale element reference`. */
-export class StaleElementError extends Error {}
-
 const SECRET = '•';
 
-/** A running instance of a scripted app: its screen, its fields, its mounted tree. */
 export class RunningApp {
     private readonly fields = new Map<string, string>();
     private mounted = new Map<string, Mounted>();
@@ -68,15 +41,22 @@ export class RunningApp {
     private params = new URLSearchParams();
     private root: Mounted | undefined;
 
-    constructor(private readonly app: ScriptedApp) {}
+    private readonly app: ScriptedApp;
 
-    /** Every mounted element, in document order, the application excluded. */
+    constructor(app: ScriptedApp) {
+        this.app = app;
+    }
+
     descendants(of?: Mounted): Mounted[] {
         const start = of ?? this.root;
         if (start === undefined) {
             return [];
         }
-        return start.children.flatMap((child) => [child, ...this.descendants(child)]);
+        const found: Mounted[] = [];
+        for (const child of start.children) {
+            found.push(child, ...this.descendants(child));
+        }
+        return found;
     }
 
     element(id: string): Mounted {
@@ -87,7 +67,6 @@ export class RunningApp {
         return found;
     }
 
-    /** Type into a field, appending to what it holds. */
     type(element: Mounted, text: string): void {
         this.setField(element, (this.fieldValue(element) ?? '') + text);
     }
@@ -96,7 +75,6 @@ export class RunningApp {
         this.setField(element, '');
     }
 
-    /** Relaunch on a deep link: `<scheme>://<screen>?<params>`. */
     async deepLink(url: string): Promise<void> {
         const parsed = new URL(url);
         if (parsed.protocol !== `${this.app.scheme}:`) {
@@ -111,11 +89,6 @@ export class RunningApp {
         await this.show(this.app.launch);
     }
 
-    scrollTo(element: Mounted): void {
-        element.visible = true;
-    }
-
-    /** What the app draws, as the page source XCUITest publishes. */
     source(): string {
         return this.root === undefined
             ? '<?xml version="1.0" encoding="UTF-8"?><AppiumAUT></AppiumAUT>'
@@ -166,7 +139,9 @@ export class RunningApp {
     }
 
     private async render(element: ScreenElement): Promise<Mounted> {
-        const children = await Promise.all((element.children ?? []).map((child) => this.render(child)));
+        const children = await Promise.all(
+            (element.children ?? []).map(async (child) => await this.render(child)),
+        );
         if (element.rows !== undefined) {
             children.push(...(await this.rows(element, element.rows)));
         }
@@ -181,8 +156,10 @@ export class RunningApp {
         });
     }
 
-    /** The rows a list reads from its api, or the one line saying it could not. */
-    private async rows(owner: ScreenElement, rows: NonNullable<ScreenElement['rows']>): Promise<Mounted[]> {
+    private async rows(
+        owner: ScreenElement,
+        rows: NonNullable<ScreenElement['rows']>,
+    ): Promise<Mounted[]> {
         const failure = (): Mounted[] => [
             this.mount({ label: rows.failure, type: 'StaticText' }, 'StaticText', [], {
                 label: rows.failure,
@@ -198,9 +175,12 @@ export class RunningApp {
             if (!response.ok) {
                 return failure();
             }
-            const items = (await response.json()) as Record<string, unknown>[];
-            return items.map((item) => {
-                const label = String(item[rows.field] ?? '');
+            const items: unknown = await response.json();
+            if (!Array.isArray(items)) {
+                return failure();
+            }
+            return items.map((item: unknown) => {
+                const label = fieldOf(item, rows.field);
                 return this.mount({ label, type: 'StaticText' }, 'StaticText', [], { label });
             });
         } catch {
@@ -227,7 +207,9 @@ export class RunningApp {
             throw new Error(`${this.app.name} has no screen '${screen}'`);
         }
         this.mounted = new Map();
-        const drawn = await Promise.all(elements.map((element) => this.render(element)));
+        const drawn = await Promise.all(
+            elements.map(async (element) => await this.render(element)),
+        );
         const window = this.mount({ type: 'Other' }, 'Window', drawn);
         this.root = this.mount({ type: 'Other' }, 'Application', [window], {
             label: this.app.name,
@@ -235,7 +217,12 @@ export class RunningApp {
     }
 }
 
-/** The value a field shows: its placeholder while empty, bullets for a secret, else what was typed. */
+function fieldOf(item: unknown, field: string): string {
+    const value: unknown =
+        typeof item === 'object' && item !== null ? Reflect.get(item, field) : undefined;
+    return typeof value === 'string' || typeof value === 'number' ? String(value) : '';
+}
+
 function displayed(element: ScreenElement, typed: string | undefined): string | undefined {
     if (typed === undefined || typed === '') {
         return element.value;
@@ -243,7 +230,6 @@ function displayed(element: ScreenElement, typed: string | undefined): string | 
     return element.type === 'SecureTextField' ? SECRET.repeat(typed.length) : typed;
 }
 
-/** An attribute value, escaped for XML. */
 function escapeXml(value: string): string {
     return value
         .replaceAll('&', '&amp;')
@@ -252,12 +238,10 @@ function escapeXml(value: string): string {
         .replaceAll('>', '&gt;');
 }
 
-/** XCUITest's `name`: the identifier, or the label when there is none. */
 export function nameOf(node: Mounted): string | undefined {
     return node.identifier ?? node.label;
 }
 
-/** One mounted element and its subtree, as page-source XML. */
 function xmlOf(node: Mounted, depth: number): string {
     const tag = `XCUIElementType${node.type}`;
     const attributes: [string, string | undefined][] = [

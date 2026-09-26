@@ -7,10 +7,10 @@
  * here.
  */
 
-/** What a predicate is evaluated against: an element's attributes, as strings. */
+import { InvalidSelectorError } from './invalid-selector-error.js';
+
 export type Attributes = Record<string, string | undefined>;
 
-/** A compiled predicate. */
 export type Predicate = (attributes: Attributes) => boolean;
 
 type Token =
@@ -19,13 +19,9 @@ type Token =
     | { kind: 'string'; text: string }
     | { kind: 'word'; text: string };
 
-/** The error a selector the grammar cannot read throws — the protocol's `invalid selector`. */
-export class InvalidSelectorError extends Error {}
-
 const WORD = /[A-Za-z_]/u;
 const DIGIT = /\d/u;
 
-/** Read a single-quoted string whose `\'` and `\\` are escapes. */
 function readString(source: string, start: number): { end: number; text: string } {
     let text = '';
     let index = start + 1;
@@ -42,7 +38,6 @@ function readString(source: string, start: number): { end: number; text: string 
     return { end: index + 1, text };
 }
 
-/** Read a run of characters that satisfy `pattern`. */
 function readRun(source: string, start: number, pattern: RegExp): number {
     let index = start;
     while (index < source.length && pattern.test(source[index] ?? '')) {
@@ -83,14 +78,17 @@ function tokenize(source: string): Token[] {
     return tokens;
 }
 
-/** A recursive-descent reading of the token list. */
 class Parser {
     private index = 0;
 
-    constructor(
-        private readonly tokens: Token[],
-        private readonly source: string,
-    ) {}
+    private readonly source: string;
+
+    private readonly tokens: Token[];
+
+    constructor(tokens: Token[], source: string) {
+        this.tokens = tokens;
+        this.source = source;
+    }
 
     parse(): Predicate {
         const predicate = this.or();
@@ -194,7 +192,6 @@ class Parser {
     }
 }
 
-/** Compile a predicate string, refusing what XCUITest would refuse. */
 export function compilePredicate(source: string): Predicate {
     return new Parser(tokenize(source), source).parse();
 }

@@ -5,10 +5,7 @@ import { directory } from '../../../src/index.js';
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
 /** It prints the sessions it saw when the run is over. */
-const DOUBLE_SETUP = resolve(
-    import.meta.dirname,
-    '../../_shared/_fixtures/appium-double/per-run.ts',
-);
+const DOUBLE_SETUP = resolve(import.meta.dirname, '../../_shared/_setup/appium/per-run.ts');
 
 const ON_THE_DOUBLE = { DOUBLE_SETUP, TEST_MOBILE_APPIUM_URL: null };
 

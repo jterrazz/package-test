@@ -1,4 +1,4 @@
-import type { ScriptedApp } from '../appium-double/app.js';
+import type { ScriptedApp } from '../../_setup/appium/app.js';
 
 /**
  * The simulator Specimen runs on: the one the runner asks the server for,

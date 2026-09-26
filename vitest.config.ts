@@ -47,10 +47,7 @@ const config = defineSpecConfig({
                 {
                     test: {
                         globalSetup: [
-                            resolve(
-                                import.meta.dirname,
-                                'specs/_shared/_fixtures/appium-double/per-run.ts',
-                            ),
+                            resolve(import.meta.dirname, 'specs/_shared/_setup/appium/per-run.ts'),
                         ],
                     },
                 },

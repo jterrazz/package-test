@@ -2,7 +2,7 @@
 
 Specimen is a native app small enough to hold in one head: a launch screen, a sign-in form, a notes list read from an API, and a drafts list with two `Delete` buttons and one button below the fold. It exists twice, kept screen for screen:
 
-- **As data**, `specimen.ts` — what the Appium protocol double (`../appium-double/`) draws in every run of `make check`.
+- **As data**, `specimen.ts` — what the Appium protocol double (`../../_setup/appium/`) draws in every run of `make check`.
 - **As a SwiftUI app**, `ios/` — what `make test-mobile` installs on a real iOS simulator.
 
 A spec green on one and red on the other has found a gap between the double and a device: the double is corrected to answer as the device did, never the other way round.
