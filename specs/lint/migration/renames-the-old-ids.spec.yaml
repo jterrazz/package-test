@@ -1,5 +1,5 @@
-description: --fix names every rule a 17.0 code still spells, in a directive and a baseline key
-fixture: ./fixtures/on-17-codes/
+description: --fix names every rule an old id still spells, in a directive and a baseline key
+fixture: ./fixtures/on-old-ids/
 runs:
     - command: checker . --fix
       exit: 0

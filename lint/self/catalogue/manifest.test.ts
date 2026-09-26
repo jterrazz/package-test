@@ -118,8 +118,8 @@ function checkerRowsOf(audience: string): string[] {
         .toSorted();
 }
 
-/** Files probing the CLI boundary, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
-const CLI_CONTRACT_SPECS = new Set(['cli', 'kitchen-sink', 'member-pass', 'ratchet']);
+/** Files probing the CLI boundary, the migration `--fix` performs, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
+const CLI_CONTRACT_SPECS = new Set(['cli', 'kitchen-sink', 'member-pass', 'migration', 'ratchet']);
 
 /** Whole words only: `qui` is inside "required", `est` inside "test". */
 function carries(text: string, token: string): boolean {
