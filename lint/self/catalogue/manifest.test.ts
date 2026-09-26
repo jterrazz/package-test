@@ -521,7 +521,7 @@ describe('manifest', () => {
         // Given - a false name in each shape a rule is cited by, beside a true one
         const ids = [
             'see rule `gone-rule`, rules `no-sleep` and `lost-rule`,',
-            '`jterrazz/retired-rule`, `jterrazz-check(lost-pass)`, @jterrazz/test',
+            '`jterrazz/unknown-rule`, `jterrazz-check(lost-pass)`, @jterrazz/test',
             '// checker-disable-next-line no-sleep, stale-pass -- a reason',
         ].flatMap(idsCitedIn);
         const unresolved = new Set(ids.filter((id) => !knownNames().has(id)));
@@ -531,13 +531,13 @@ describe('manifest', () => {
             'gone-rule',
             'lost-pass',
             'lost-rule',
-            'retired-rule',
             'stale-pass',
+            'unknown-rule',
         ]);
     });
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — `cited-rules-exist` — every rule the corpus cites resolves to a row', () => {
-        // Given - every citation the corpus writes, in the chapters, the skill, the messages the plugin ships and the code that implements them. A retired rule leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
+        // Given - every citation the corpus writes, in the chapters, the skill, the messages the plugin ships and the code that implements them. A rule no row declares leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
             for (const line of text.split('\n')) {
