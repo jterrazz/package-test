@@ -4,13 +4,13 @@ What proves a change here: this package specifies itself with itself. The suites
 
 **The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. `file-suffix-matches-place` holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
 
-| Ground          | Where                                          | Proves                                                                                  |
-| --------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------- |
-| Module tests    | `src/**/<file>.test.ts`                        | One module's behaviour, beside it (rule `test-beside-its-module`)                       |
-| Component tests | `specs/component/<capability>/<file>.test.tsx` | A rendered unit, beside it, in a real Chromium ([07](07-component.md))                  |
-| Product specs   | `specs/<facet>/<subject>/<aspect>.spec.ts`     | The framework's own facets, through the public surface                                  |
-| Spec documents  | `specs/cli/<domain>/<case>.spec.yaml`          | A cli session as data, collected as a test file by `literate()` ([20](20-documents.md)) |
-| Meta-tests      | `lint/*.test.ts`, `lint/self/*.test.ts`        | The framework applied to itself and to its own projections                              |
+| Ground          | Where                                                         | Proves                                                                                  |
+| --------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| Module tests    | `src/**/<file>.test.ts`                                       | One module's behaviour, beside it (rule `test-beside-its-module`)                       |
+| Component tests | `specs/component/<capability>/<file>.test.tsx`                | A rendered unit, beside it, in a real Chromium ([07](07-component.md))                  |
+| Product specs   | `specs/<facet>/<subject>/<aspect>.spec.ts`                    | The framework's own facets, through the public surface                                  |
+| Spec documents  | `specs/cli/<domain>/<case>.spec.yaml`                         | A cli session as data, collected as a test file by `literate()` ([20](20-documents.md)) |
+| Meta-tests      | `lint/self/corpus/*.test.ts`, `lint/self/catalogue/*.test.ts` | The framework applied to itself and to its own projections                              |
 
 ## The eight projects
 
@@ -87,13 +87,13 @@ The package proves itself in five layers, and they are meant to be read from the
 
 <!-- GENERATED:layers — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/matrix.ts -->
 
-| Layer                   | Where                                               | What it judges                                                           | Files |
-| ----------------------- | --------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                | one module, through its own exports, with nothing started                | 124   |
-| Rule tests              | `lint/rules/<facet>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
-| The package’s own specs | `specs/<facet>/`                                    | the framework's own facets, each met through its constructor             | 163   |
-| The lint suite          | `specs/lint/**`                                     | the built binary end to end, over fixture projects                       | 174   |
-| Meta-tests              | `lint/*.test.ts`, `lint/self/*.test.ts`             | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
+| Layer                   | Where                                                         | What it judges                                                           | Files |
+| ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 124   |
+| Rule tests              | `lint/rules/<family>/<rule>.test.ts` beside the rule          | one rule: what it flags, what it leaves alone, and the message it prints | 63    |
+| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 163   |
+| The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 174   |
+| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
 <!-- /GENERATED:layers -->
 
@@ -439,7 +439,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**24 files** are the channel — every `*.test.ts` directly under `lint/` or `lint/self/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**24 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |

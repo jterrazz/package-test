@@ -405,7 +405,7 @@ export function layers(root: string): Layer[] {
             count: ruleTests,
             judges: 'one rule: what it flags, what it leaves alone, and the message it prints',
             layer: 'Rule tests',
-            where: '`lint/rules/<facet>/<rule>.test.ts` beside the rule',
+            where: '`lint/rules/<family>/<rule>.test.ts` beside the rule',
         },
         {
             count: facetSpecs,
@@ -423,7 +423,7 @@ export function layers(root: string): Layer[] {
             count: metaTests,
             judges: 'the corpus itself: the catalogue, the matrix, the skill, the floor',
             layer: 'Meta-tests',
-            where: '`lint/*.test.ts`, `lint/self/*.test.ts`',
+            where: META_LAYER_ROOTS.map((root) => `\`${root}/*.test.ts\``).join(', '),
         },
     ];
 }
