@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder } from '../rule-tester.fixtures.js';
+import { checkoutUnder } from '../../reading/package-tree.fixtures.js';
 import { noModuleMock } from './no-module-mock.js';
 
 RuleTester.describe = describe;

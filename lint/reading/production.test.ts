@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../rules/rule-tester.fixtures.js';
+import { packageWith } from './package-tree.fixtures.js';
 import {
     isProductionModule,
     lintBegins,

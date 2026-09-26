@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkoutUnder, repositoryUnder } from '../rules/rule-tester.fixtures.js';
+import { checkoutUnder, repositoryUnder } from './package-tree.fixtures.js';
 import type { FileRole, LegacyDir } from './role.js';
 import { isTestFile, isTestRole, projectRootOf, projectSegments, roleOf } from './role.js';
 

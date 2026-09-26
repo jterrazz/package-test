@@ -6,7 +6,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, expect, it, test } from 'vitest';
 
 import type { AstNode } from '../../reading/ast.js';
-import { checkoutUnder } from '../rule-tester.fixtures.js';
+import { checkoutUnder } from '../../reading/package-tree.fixtures.js';
 import { seedsAreSql } from './seeds-are-sql.js';
 
 RuleTester.describe = describe;

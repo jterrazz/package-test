@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkoutUnder } from '../rules/rule-tester.fixtures.js';
+import { checkoutUnder } from '../reading/package-tree.fixtures.js';
 import { messageOf } from './checker.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
 

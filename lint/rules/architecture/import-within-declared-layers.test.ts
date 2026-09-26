@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder, repositoryUnder } from '../rule-tester.fixtures.js';
+import { checkoutUnder, repositoryUnder } from '../../reading/package-tree.fixtures.js';
 import { importWithinDeclaredLayers } from './import-within-declared-layers.js';
 
 RuleTester.describe = describe;

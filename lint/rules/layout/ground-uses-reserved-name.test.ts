@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder, packageWith } from '../rule-tester.fixtures.js';
+import { checkoutUnder, packageWith } from '../../reading/package-tree.fixtures.js';
 import { groundUsesReservedName } from './ground-uses-reserved-name.js';
 
 RuleTester.describe = describe;

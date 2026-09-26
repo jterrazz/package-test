@@ -3,7 +3,7 @@ import { join, resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { checkoutUnder } from '../rule-tester.fixtures.js';
+import { checkoutUnder } from '../../reading/package-tree.fixtures.js';
 import { requestFileExtensionKnown } from './request-file-extension-known.js';
 
 RuleTester.describe = describe;

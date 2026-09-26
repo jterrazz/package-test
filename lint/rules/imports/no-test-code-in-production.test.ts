@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 
-import { asOxlintRule, packageWith, ruleTester } from '../rule-tester.fixtures.js';
+import { packageWith } from '../../reading/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
 import { noTestCodeInProduction } from './no-test-code-in-production.js';
 
 // One package on disk: the aliases, the stubs folders and the modules a

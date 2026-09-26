@@ -1,6 +1,7 @@
 import { join } from 'node:path';
 
-import { asOxlintRule, packageWith, ruleTester } from '../rule-tester.fixtures.js';
+import { packageWith } from '../../reading/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
 import { oneDescribePerFile } from './one-describe-per-file.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

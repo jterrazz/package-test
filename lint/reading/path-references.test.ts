@@ -1,10 +1,10 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { packageWith } from '../rules/rule-tester.fixtures.js';
 import { isNode } from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
+import { packageWith } from './package-tree.fixtures.js';
 import {
     literalPathVisitor,
     mergeVisitors,
