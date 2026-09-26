@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { asWritten } from './as-written.js';
 import { main, navigation, region, within } from './landmarks.js';
-import { link } from './roles.js';
+import { content, link } from './roles.js';
 
 describe('asWritten', () => {
     test('asWritten — renders a descriptor as the source that would build it', () => {
@@ -44,5 +44,13 @@ describe('asWritten', () => {
 
         // Then - the chain reads from the outermost container inward
         expect(asWritten(element)).toBe('within(within(main(), region("Series")), link("Part 2"))');
+    });
+
+    test('asWritten — speaks content() for the text kind', () => {
+        // Given - a descriptor built by content(), whose kind is text
+        const element = content('Hello');
+
+        // Then - the author's function is named, never the kind
+        expect(asWritten(element)).toBe('content("Hello")');
     });
 });

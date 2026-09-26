@@ -1,4 +1,4 @@
-/** The ARIA landmark roles, the only containers a scope can name. */
+/** The ARIA landmark roles: the containers a refusal can offer by name as a scope. */
 export type LandmarkKind =
     | 'banner'
     | 'complementary'

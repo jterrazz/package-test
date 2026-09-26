@@ -1,5 +1,5 @@
 import { refusal } from '../../../lint/index.refusal.js';
-import { asWritten, asWrittenUnscoped, CONSTRUCTORS } from '../descriptors/as-written.js';
+import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../descriptors/as-written.js';
 import type { ElementRef } from '../descriptors/element.js';
 import { CONTEXT_LANDMARKS } from './landmark-of-tag.js';
 
@@ -23,11 +23,11 @@ export type ElementMatch = {
 function landmarkOf(match: ElementMatch): string | undefined {
     const kind = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
     if (kind !== 'region') {
-        return kind === undefined ? undefined : `${CONSTRUCTORS[kind]}()`;
+        return kind === undefined ? undefined : `${FUNCTION_NAME_OF_KIND[kind]}()`;
     }
     return match.contextName === undefined
         ? undefined
-        : `${CONSTRUCTORS.region}(${JSON.stringify(match.contextName)})`;
+        : `${FUNCTION_NAME_OF_KIND.region}(${JSON.stringify(match.contextName)})`;
 }
 
 function formatMatch(match: ElementMatch, index: number): string {

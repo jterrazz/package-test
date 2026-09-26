@@ -11,7 +11,7 @@ describe('roles', () => {
         expect(element).toStrictEqual({ kind: 'link', name: 'Articles' });
     });
 
-    test('element vocabulary — names the five roles a visitor reads rather than the container it sits in', () => {
+    test('element vocabulary — names dialog, table and row by their role', () => {
         // Given - the roles the estate's UI specs were reaching for by hand
         const named = [dialog('Settings'), table('Posts'), row('A first post')];
 
@@ -32,7 +32,7 @@ describe('roles', () => {
         ]);
     });
 
-    test('option / selected — names an option the way every other role descriptor is named', () => {
+    test('option — names an option the way every other role descriptor is named', () => {
         // Given - one of the channels a select offers
         const element = option('LinkedIn');
 

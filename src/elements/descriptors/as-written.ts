@@ -1,6 +1,6 @@
 import type { ElementRef } from './element.js';
 
-export const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
+export const FUNCTION_NAME_OF_KIND: Record<ElementRef['kind'], string> = {
     banner: 'banner',
     button: 'button',
     complementary: 'complementary',
@@ -37,5 +37,5 @@ export function asWrittenUnscoped(element: ElementRef): string {
     if (element.exact !== undefined) {
         args.push(`{ exact: ${String(element.exact)} }`);
     }
-    return `${CONSTRUCTORS[element.kind]}(${args.join(', ')})`;
+    return `${FUNCTION_NAME_OF_KIND[element.kind]}(${args.join(', ')})`;
 }
