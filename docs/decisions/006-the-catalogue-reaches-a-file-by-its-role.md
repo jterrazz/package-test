@@ -41,7 +41,7 @@ and the role is read from the SUFFIX: `.specification.ts(x)`, `.spec.yaml`,
 `.spec.ts`, `.test.tsx`, `.test.ts`, `vitest.config.*`, a ground ancestor, a
 `contracts/` ancestor. A statique rule reads those three fields and, where it
 must know where the file sits, the ONE package-bounded anchor every pass shares
-(`specsAnchor` in `src/lint/ast.ts`) — never a bare path segment. The rules
+(`specsAnchor` in `src/lint/reading/ast.ts`) — never a bare path segment. The rules
 that need it say so: C1, C4, C8, C13, F2, F3, I1, I4. Walking a TREE is the
 checker's — C1's depth, C12, C18, C20, C21w.
 

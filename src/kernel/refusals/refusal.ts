@@ -2,7 +2,7 @@ import { lessonBlock } from './lesson.js';
 
 export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
 
-/** `lint/manifest.ts` reads each sentence from here, so a refusal and its catalogue row say one thing. */
+/** `lint/catalogue/manifest.ts` reads each sentence from here, so a refusal and its catalogue row say one thing. */
 export const REFUSAL_WHY = {
     'a7-database-runtime':
         'With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',

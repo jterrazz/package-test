@@ -10,7 +10,7 @@ type MatrixGroup =
     | 'Terminal action'
     | 'Verb';
 
-/** `probe` is a call in `lint/matrix-calls.ts`'s grammar, or a literal. */
+/** `probe` is a call in `lint/self/corpus/matrix-calls.ts`'s grammar, or a literal. */
 export type MatrixRow = {
     readonly group: MatrixGroup;
     readonly member?: string;

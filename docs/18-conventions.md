@@ -2,7 +2,7 @@
 
 This chapter is the **constitution**: the principles, the non-mechanizable criteria, and the design rationales behind the conventions. It is hand-maintained and stable.
 
-The **mechanized per-rule catalogue** does not live here — it is **generated from the code** (`lint/manifest.ts`, where each rule carries its own normative text): the consumer rules into the [19 — Linting](19-linting.md) catalogue, the package's own into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules).
+The **mechanized per-rule catalogue** does not live here — it is **generated from the code** (`lint/catalogue/manifest.ts`, where each rule carries its own normative text): the consumer rules into the [19 — Linting](19-linting.md) catalogue, the package's own into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules).
 
 This is the **docs-as-code inversion**: the code is the source of truth for the mechanized rules (a rule and its normative text live together, so they cannot drift), and this constitution is the source of truth for the principles. There is **no duplication** — a machine-checkable rule is written once, in the code. The broader repo-layout doctrine this follows — a written corpus, thin injection layers, a compiler that projects; committed projections against CI-built presentations — is `jterrazz-studio`'s repo-structure chapter, its canonical home for every language.
 
@@ -230,9 +230,9 @@ Family I governs the source tree rather than the spec tree, and it splits in two
 
 ## The fork — which kind of test this is
 
-The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `lint/fork.ts`.
+The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `lint/catalogue/fork.ts`.
 
-<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/fork.ts -->
+<!-- GENERATED:fork — do not edit by hand; run `npm run docs`. Source: lint/catalogue/fork.ts -->
 
 | Question                                                               | Kind             | Lives at                                         | Constructor                   | Project       |
 | ---------------------------------------------------------------------- | ---------------- | ------------------------------------------------ | ----------------------------- | ------------- |
@@ -363,14 +363,14 @@ The four parts are the same everywhere a rule speaks — a static rule, a checke
 
 ## Maintaining the constitution
 
-- A new **mechanizable** rule is added to the **code** (`lint/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
+- A new **mechanizable** rule is added to the **code** (`lint/catalogue/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
 - A new **principle** or a non-mechanizable criterion is added here, in its family section or as a process rule.
 - Never duplicate a mechanized rule in this constitution: the code is its single source of truth.
 
 ## Pitfalls
 
 - **Treating these docs as the spec.** They explain and illustrate; this constitution and the generated catalogue ([19 — Linting](19-linting.md)) decide. When you find a discrepancy in the docs, fix the docs in the same change — [02 — Developing](02-developing.md) § What a change owes.
-- **Editing the generated catalogue by hand.** The [19 — Linting](19-linting.md) catalogue is GENERATED from `lint/manifest.ts` — a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
+- **Editing the generated catalogue by hand.** The [19 — Linting](19-linting.md) catalogue is GENERATED from `lint/catalogue/manifest.ts` — a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
 - **Adding a mechanized rule to the constitution.** A machine-checkable rule lives in the code (its `meta.docs` / the manifest), not in this chapter. The constitution holds principles and non-mechanizable criteria only.
 
 ## Related

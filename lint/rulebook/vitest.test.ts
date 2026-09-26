@@ -1,0 +1,71 @@
+import { describe, expect, test } from 'vitest';
+
+import { vitestOnTests } from './vitest.js';
+
+function optionOf(rule: string): { options: Record<string, string>; severity: unknown } {
+    const entry: unknown = { ...vitestOnTests.rules }[rule];
+    const pair: unknown[] = Array.isArray(entry) ? entry : [];
+    const [severity, options] = pair;
+    const named: Record<string, string> = {};
+    if (typeof options === 'object' && options !== null) {
+        for (const [key, value] of Object.entries(options)) {
+            named[key] = String(value);
+        }
+    }
+    return { options: named, severity };
+}
+
+describe('vitest', () => {
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — d20 — the seven snapshot matchers are refused, each naming the golden', () => {
+        // Given - the option the fragment sets on vitest's own rule
+        const { options: matchers, severity } = optionOf('vitest/no-restricted-matchers');
+
+        // Then - every matcher vitest offers for snapshots is named, with a destination
+        expect(severity).toBe('error');
+        expect(Object.keys(matchers).toSorted()).toStrictEqual([
+            'toMatchAriaSnapshot',
+            'toMatchFileSnapshot',
+            'toMatchInlineSnapshot',
+            'toMatchScreenshot',
+            'toMatchSnapshot',
+            'toThrowErrorMatchingInlineSnapshot',
+            'toThrowErrorMatchingSnapshot',
+        ]);
+        for (const [matcher, message] of Object.entries(matchers)) {
+            expect(message.length, `${matcher} states no fix`).toBeGreaterThan(0);
+        }
+    });
+
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — m3 — the four vi methods that take a seam, and not the one that restores itself', () => {
+        // Given - the option the fragment sets
+        const { options: methods, severity } = optionOf('vitest/no-restricted-vi-methods');
+
+        // Then - the clock and the global stub are named; `stubEnv` is sanctioned
+        expect(severity).toBe('error');
+        expect(Object.keys(methods).toSorted()).toStrictEqual([
+            'setSystemTime',
+            'stubGlobal',
+            'useFakeTimers',
+            'useRealTimers',
+        ]);
+        expect(methods).not.toHaveProperty('stubEnv');
+    });
+
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — c31 — the top-level describe keeps the case of the subject it names', () => {
+        // Given - the option the fragment sets on vitest's own rule
+        const { options, severity } = optionOf('vitest/prefer-lowercase-title');
+
+        // Then - a test title is still lower-cased, the file's describe is not
+        expect(severity).toBe('error');
+        expect(options).toStrictEqual({ ignoreTopLevelDescribe: 'true' });
+    });
+
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — j10 — one level of describe, and no more', () => {
+        // Given - the option the fragment sets on vitest's own rule
+        const { options, severity } = optionOf('vitest/max-nested-describe');
+
+        // Then - a second level of context is refused
+        expect(severity).toBe('error');
+        expect(options).toStrictEqual({ max: '1' });
+    });
+});

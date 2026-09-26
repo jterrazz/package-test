@@ -1,6 +1,6 @@
 {
     "typescript": {
-        "comments/comment-lines": 2584,
+        "comments/no-prose-comment-line": 2584,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 27,
         "eslint/max-classes-per-file": 1,
@@ -61,7 +61,6 @@
         "jterrazz/d16w-ambient-value": 7,
         "jterrazz/d18w-existence-only-oracle": 11,
         "jterrazz/e9w-env-assignment-in-test": 7,
-        "jterrazz/i1-layer-boundaries": 1,
         "jterrazz/j6w-given-in-the-test": 22,
         "jterrazz/w5w-scenario-settles": 4
     }

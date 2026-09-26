@@ -5,8 +5,8 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 ## Mental model
 
 - **Six constructors, and only six.** `specification.api()`, `.job()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A seventh subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
-- **The root reads the sentence of a test.** `src/` holds the two entries (`index.ts`, `index.browser.ts`), `vitest/`, and the trees `facets/`, `world/`, `elements/`, `expectations/`, `kernel/`; `lint/` sits at the repository root beside it. The edges point one way. The map, its edges and the passes that hold it: [01 § The source trees](docs/01-architecture.md#the-source-trees); the declaration: `lint/self-layers.ts`.
-- **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/manifest.ts` beside its implementation — in `lint/self-manifest.ts` for a rule only this package is held to, which no published entry imports — and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
+- **The root reads the sentence of a test.** `src/` holds the two entries (`index.ts`, `index.browser.ts`), `vitest/`, and the trees `facets/`, `world/`, `elements/`, `expectations/`, `kernel/`; `lint/` sits at the repository root beside it. The edges point one way. The map, its edges and the passes that hold it: [01 § The source trees](docs/01-architecture.md#the-source-trees); the declaration: `lint/self/checks/layers.ts`.
+- **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/catalogue/manifest.ts` beside its implementation — in `lint/self/catalogue/manifest.ts` for a rule only this package is held to, which no published entry imports — and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.
 - **The build precedes the lint.** `oxlint.config.ts` and the lint specs load `./dist/oxlint.js`, so `make build` comes first — always.
 
@@ -47,4 +47,4 @@ npm run docs                      # regenerate the generated tables and the sche
 - **A discovery grows a guard, in the same change** (rule K1) — see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **Never edit a generated table** — `npm run docs` writes them; see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **What lands with the change that makes it true** — the guard, the regenerated tables, the falsified chapter, the skill — is stated once, in [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
-- **A rule belongs in the code, a principle in the constitution.** `lint/manifest.ts` (or `lint/self-manifest.ts`) for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.
+- **A rule belongs in the code, a principle in the constitution.** `lint/catalogue/manifest.ts` (or `lint/self/catalogue/manifest.ts`) for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.
