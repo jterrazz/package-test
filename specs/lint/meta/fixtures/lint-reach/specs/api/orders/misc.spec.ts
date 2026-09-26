@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 describe('misc', () => {
-    test('asks nothing a name could say, where C32 — a rule of the spec reach — finds it', () => {
+    test('asks nothing a name could say, where spec-named-for-its-aspect — a rule of the spec reach — finds it', () => {
         // Given - a spec named for what fit nowhere else
         const where = 'misc';
 

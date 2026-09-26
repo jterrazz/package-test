@@ -14,7 +14,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 // Built at module load: the rule reads the fixtures on disk before the cases run.
-const featureDir = mkdtempSync(join(tmpdir(), 'd9w-'));
+const featureDir = mkdtempSync(join(tmpdir(), 'no-single-use-ref-'));
 const specsFeatureDir = join(featureDir, 'specs', 'app', 'widget');
 const expectedDir = join(specsFeatureDir, 'expected');
 mkdirSync(expectedDir, { recursive: true });

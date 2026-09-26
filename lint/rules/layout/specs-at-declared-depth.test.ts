@@ -200,7 +200,7 @@ ruleTester.run(
 );
 
 function groundTree(files: Record<string, string>): string {
-    const prefix = resolve(tmpdir(), 'c1-ground-');
+    const prefix = resolve(tmpdir(), 'specs-at-declared-depth-ground-');
     const root = resolve(mkdtempSync(prefix), 'specs');
     for (const [path, content] of Object.entries(files)) {
         const full = resolve(root, path);
