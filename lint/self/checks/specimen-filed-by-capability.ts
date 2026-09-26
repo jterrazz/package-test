@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
 
 import { SHARED_GROUND } from '../../../src/kernel/files/ground.js';
-import type { TokenViolation } from '../../checks/checker.js';
+import type { Finding } from '../../checks/checker.js';
 import { suppressedLines } from '../../checks/suppression.js';
 import { listFiles } from '../../checks/tree.js';
 import { specimenOf } from '../../reading/specimen.js';
@@ -66,7 +66,7 @@ function fixOf(facet: string, shape: string, vocabulary: Set<string>, beside = '
     return `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/03-testing.md § The capability matrix)`;
 }
 
-function checkComponentTree(specsRoot: string): TokenViolation<SelfPassId>[] {
+function checkComponentTree(specsRoot: string): Finding<SelfPassId>[] {
     const vocabulary = capabilityFolders(COMPONENT);
     return listFiles(join(specsRoot, COMPONENT), (path) => RENDERED.test(path)).flatMap((file) => {
         const folders = foldersBelowFacet(specsRoot, file);
@@ -99,11 +99,11 @@ function checkComponentTree(specsRoot: string): TokenViolation<SelfPassId>[] {
 }
 
 /** Reported at the file's first line of code, so a `checker-disable-next-line specimen-filed-by-capability -- <reason>` above it silences the finding. */
-export function checkCapabilityFolder(specsRoot: string): TokenViolation<SelfPassId>[] {
+export function checkSpecimenFiledByCapability(specsRoot: string): Finding<SelfPassId>[] {
     return [...checkSpecimenSpecs(specsRoot), ...checkComponentTree(specsRoot)];
 }
 
-function checkSpecimenSpecs(specsRoot: string): TokenViolation<SelfPassId>[] {
+function checkSpecimenSpecs(specsRoot: string): Finding<SelfPassId>[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
         const [facet = ''] = relative(specsRoot, file).split(sep);
         if (facet === SHARED_GROUND) {

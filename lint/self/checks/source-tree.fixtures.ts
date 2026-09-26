@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
-import type { TokenViolation } from '../../checks/checker.js';
+import type { Finding } from '../../checks/checker.js';
 import type { SelfPassId } from './checker.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
@@ -16,7 +16,7 @@ export function treeOf(files: Record<string, string>): string {
     return root;
 }
 
-export function located(findings: TokenViolation<SelfPassId>[]): string[] {
+export function located(findings: Finding<SelfPassId>[]): string[] {
     return findings.map(
         ({ column, file, found, line, rule }) => `${file}:${line}:${column ?? 1} ${rule}: ${found}`,
     );

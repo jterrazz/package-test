@@ -9,7 +9,7 @@ import {
 import type { SpecFile } from '../../src/facets/cli/documents/spec-document.js';
 import { isScalar, renderYamlSource, Scalar } from '../../src/kernel/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../../src/kernel/yaml/document.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { checkDescription } from './document-description-reads-as-a-title.js';
 import { checkRegisteredNames } from './document-env-and-serve-registered.js';
 import { checkKeyOrder } from './document-keys-in-canonical-order.js';
@@ -31,7 +31,7 @@ import { checkVolatileLiterals } from './no-volatile-literal.js';
 import { checkPinnedValues } from './pinned-value-from-the-input.js';
 
 /** A document the grammar refuses yields nothing here: `document-follows-its-grammar` already reported it. */
-export function checkSpecConventions(text: string, rel: string, path: string): TokenViolation[] {
+export function checkSpecConventions(text: string, rel: string, path: string): Finding[] {
     let file: SpecFile;
     try {
         file = readSpecFile(text, rel);

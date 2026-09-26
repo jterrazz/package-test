@@ -1,12 +1,12 @@
 import { readFileSync } from 'node:fs';
 import { relative } from 'node:path';
 
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 
 /** The same pair the statique `no-simulated-dom-in-config` refuses. */
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
 
-export function simulatedDom(config: string, rootDir: string): TokenViolation[] {
+export function simulatedDom(config: string, rootDir: string): Finding[] {
     const text = readFileSync(config, 'utf8');
     const found = SIMULATED_DOM.exec(text);
     if (found?.groups?.dom === undefined) {

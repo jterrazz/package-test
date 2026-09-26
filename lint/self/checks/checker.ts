@@ -1,7 +1,11 @@
-import type { TokenViolation } from '../../checks/checker.js';
-import { checkEngineOwner, checkFacetIsolation, checkLintDirection } from './source-imports.js';
-import { checkFolderShape, checkSourceRoot } from './source-tree.js';
-import { checkCapabilityFolder } from './specimen-filed-by-capability.js';
+import type { Finding } from '../../checks/checker.js';
+import {
+    checkLintImportsFollowTheDirection,
+    checkNoCrossFacetImport,
+    checkOneOwnerPerEngine,
+} from './source-imports.js';
+import { checkFolderNamedForAConcept, checkSourceRootHoldsKnownEntries } from './source-tree.js';
+import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 
 /** `dist/checker.js` imports nothing from here, so no consumer run can reach a self pass. */
 export const SELF_PASS_IDS = [
@@ -15,16 +19,16 @@ export const SELF_PASS_IDS = [
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];
 
-export function runSelfChecks(specsRoot: string): TokenViolation<SelfPassId>[] {
-    return checkCapabilityFolder(specsRoot);
+export function runSelfChecks(specsRoot: string): Finding<SelfPassId>[] {
+    return checkSpecimenFiledByCapability(specsRoot);
 }
 
-export function runSelfSourceChecks(root: string): TokenViolation<SelfPassId>[] {
+export function runSelfSourceChecks(root: string): Finding<SelfPassId>[] {
     return [
-        ...checkSourceRoot(root),
-        ...checkFacetIsolation(root),
-        ...checkEngineOwner(root),
-        ...checkFolderShape(root),
-        ...checkLintDirection(root),
+        ...checkSourceRootHoldsKnownEntries(root),
+        ...checkNoCrossFacetImport(root),
+        ...checkOneOwnerPerEngine(root),
+        ...checkFolderNamedForAConcept(root),
+        ...checkLintImportsFollowTheDirection(root),
     ];
 }

@@ -3,7 +3,7 @@ import { relative, resolve } from 'node:path';
 
 import { lessonAt } from '../../catalogue/lesson.js';
 import { reportLine } from '../../checks/checker.js';
-import type { TokenViolation } from '../../checks/checker.js';
+import type { Finding } from '../../checks/checker.js';
 import { discoverSpecRoots } from '../../checks/members.js';
 import { SELF_CHAPTER, selfRowOf } from '../catalogue/manifest.js';
 import type { SelfPassId } from './checker.js';
@@ -13,7 +13,7 @@ import { runSelfChecks, runSelfSourceChecks, SELF_PASS_IDS } from './checker.js'
 /** `node dist/self-checker.js [dir]`, never in the tarball: no fixer, no ratchet, no JSON, since this repository is held at zero. */
 const root = resolve(process.argv[2] ?? '.');
 
-const findings: TokenViolation<SelfPassId>[] = [...runSelfSourceChecks(root)];
+const findings: Finding<SelfPassId>[] = [...runSelfSourceChecks(root)];
 for (const specsRoot of discoverSpecRoots(root)) {
     const prefix = relative(root, specsRoot);
     for (const violation of runSelfChecks(specsRoot)) {

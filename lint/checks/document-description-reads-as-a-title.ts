@@ -1,16 +1,16 @@
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
 import { finding } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 const MAX_DESCRIPTION = 100;
 
 const SYMBOL_WORD = /^[A-Z0-9_]+$/u;
 
-export function checkDescription(document: SpecDocument): Finding[] {
-    const findings: Finding[] = [];
+export function checkDescription(document: SpecDocument): DocumentFinding[] {
+    const findings: DocumentFinding[] = [];
     const text = document.description;
     const line = document.descriptionLine;
-    const at = (found: string, fix: string): Finding =>
+    const at = (found: string, fix: string): DocumentFinding =>
         finding('document-description-reads-as-a-title', line, { fix, found });
     if (text.includes('\n')) {
         findings.push(

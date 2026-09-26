@@ -8,7 +8,7 @@ import {
     GROUND_REQUESTS,
     GROUND_SEEDS,
 } from '../../src/kernel/files/ground.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { checkSpecFile } from './document-follows-its-grammar.js';
 import { checkSpecConventions } from './documents.js';
 import { requestLineFindings, statusLineFindings } from './http-first-line-follows-its-grammar.js';
@@ -24,8 +24,8 @@ const FIXTURE_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_S
 /** `fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-export function checkConventionFiles(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkConventionFiles(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     const visit = (
         dir: string,
         inside: null | typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SEEDS,

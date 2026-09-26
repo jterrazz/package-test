@@ -1,4 +1,4 @@
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { decodeText } from './tree.js';
 
 /** Only spellings decidable on sight: the bare word `now` is a column name as often as a clock read. */
@@ -15,7 +15,7 @@ function withoutComments(text: string): string {
 }
 
 /** The chain's `.clock()` pins what the code reads, so a seed never asks the machine; under SQLite `datetime('now')` also writes a space where an ORM writes `T`, and the two mis-sort. */
-export function checkSeedClockReads(path: string, rel: string, name: string): TokenViolation[] {
+export function checkSeedClockReads(path: string, rel: string, name: string): Finding[] {
     // `seeds-are-sql` (oxlint) owns the extension rule; this pass reads the SQL alone.
     if (!name.endsWith('.sql')) {
         return [];
@@ -24,7 +24,7 @@ export function checkSeedClockReads(path: string, rel: string, name: string): To
     if (text === null) {
         return [];
     }
-    const violations: TokenViolation[] = [];
+    const violations: Finding[] = [];
     for (const [index, line] of withoutComments(text).split('\n').entries()) {
         const found = CLOCK_READ.exec(line);
         if (found === null) {

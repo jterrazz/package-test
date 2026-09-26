@@ -32,12 +32,12 @@ import {
     runAllChecks,
     TREE_PASS_IDS,
 } from './checker.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { fixSpecFiles } from './documents.js';
 import { movesUnderFacet } from './file-suffix-matches-place.js';
-import { fixGroundSharing } from './ground-shared-or-inline.js';
+import { fixGroundSharedOrInline } from './ground-shared-or-inline.js';
 import { checkMember, checkMembers, discoverMembers, discoverSpecRoots } from './members.js';
-import { fixCopiedGround } from './no-duplicate-ground.js';
+import { fixDuplicateGround } from './no-duplicate-ground.js';
 import { fixRootGround } from './no-reach-into-sibling-ground.js';
 import { applyOwnFixes } from './own-fixes.js';
 import { pluginDiagnostics } from './oxlint-run.js';
@@ -87,7 +87,7 @@ function judgingProject(): string | undefined {
     return keepsBaseline(process.cwd()) ? process.cwd() : undefined;
 }
 
-function codeOfFinding(violation: TokenViolation): string {
+function codeOfFinding(violation: Finding): string {
     return `${CHECKER_NAMESPACE}(${violation.rule})`;
 }
 
@@ -114,7 +114,7 @@ function pluginLines(plugin: PluginDiagnostic[]): string[] {
         : [];
 }
 
-function printFindings(violations: TokenViolation[], plugin: PluginDiagnostic[] = []): void {
+function printFindings(violations: Finding[], plugin: PluginDiagnostic[] = []): void {
     if (json) {
         console.log(
             JSON.stringify(
@@ -147,22 +147,12 @@ function say(line: string): void {
 }
 
 /** `passes` names only the passes that ran; with `deferredTo`, the project root's baseline judges the findings and this run exits 0. */
-function report(
-    violations: TokenViolation[],
-    what: string,
-    passes: string,
-    deferredTo?: string,
-): never {
+function report(violations: Finding[], what: string, passes: string, deferredTo?: string): never {
     printFindings(violations);
     verdict(violations, what, passes, deferredTo);
 }
 
-function verdict(
-    violations: TokenViolation[],
-    what: string,
-    passes: string,
-    deferredTo?: string,
-): never {
+function verdict(violations: Finding[], what: string, passes: string, deferredTo?: string): never {
     const errors = violations.filter((violation) => violation.severity === 'error');
     if (deferredTo !== undefined && violations.length > 0) {
         say(
@@ -183,8 +173,8 @@ function verdict(
 }
 
 type RatchetRun = {
-    counted: () => TokenViolation[];
-    own: TokenViolation[];
+    counted: () => Finding[];
+    own: Finding[];
     passes: string;
     plugin: PluginDiagnostic[];
     root: string;
@@ -296,8 +286,8 @@ function fixProject(root: string): void {
     applyOwnFixes(root);
 }
 
-function projectFindings(root: string): TokenViolation[] {
-    const found: TokenViolation[] = [];
+function projectFindings(root: string): Finding[] {
+    const found: Finding[] = [];
     for (const specsRoot of discoverSpecRoots(root)) {
         const prefix = relative(root, specsRoot);
         for (const violation of runAllChecks(specsRoot)) {
@@ -489,10 +479,10 @@ function applyFixes(root: string): void {
             `conventions checker: moved ${change} (one-subject-per-spec, spec-in-subject-folder)`,
         );
     }
-    for (const move of fixCopiedGround(root)) {
+    for (const move of fixDuplicateGround(root)) {
         console.log(`conventions checker: moved ${move} (no-duplicate-ground)`);
     }
-    for (const change of fixGroundSharing(root)) {
+    for (const change of fixGroundSharedOrInline(root)) {
         console.log(`conventions checker: ${change} (ground-shared-or-inline)`);
     }
 }

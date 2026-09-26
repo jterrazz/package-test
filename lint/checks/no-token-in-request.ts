@@ -1,7 +1,7 @@
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { findKnownTokens } from './tokens.js';
 
-export function tokenInRequestFindings(file: string, text: string): TokenViolation[] {
+export function tokenInRequestFindings(file: string, text: string): Finding[] {
     return findKnownTokens(text).map(({ line, token }) => ({
         file,
         line,

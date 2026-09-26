@@ -3,7 +3,7 @@ import { basename, join, relative, sep } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { moduleTestsOf } from '../reading/module-tests.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
 import { configPresent } from './member-has-vitest-config.js';
 import { MEMBER_DEPTH, readManifest, SKIPPED, workspacePatterns } from './member-manifest.js';
@@ -31,11 +31,11 @@ function configOf(dir: string): null | string {
     return null;
 }
 
-function anchoredToRoot(violations: TokenViolation[], label: string): TokenViolation[] {
+function anchoredToRoot(violations: Finding[], label: string): Finding[] {
     if (label === '.') {
         return violations;
     }
-    const anchored: TokenViolation[] = [];
+    const anchored: Finding[] = [];
     for (const violation of violations) {
         anchored.push({ ...violation, file: join(label, violation.file) });
     }
@@ -43,7 +43,7 @@ function anchoredToRoot(violations: TokenViolation[], label: string): TokenViola
 }
 
 /** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
-export function checkMember(memberDir: string, rootDir: string): TokenViolation[] {
+export function checkMember(memberDir: string, rootDir: string): Finding[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {
         return [];
@@ -184,6 +184,6 @@ export function discoverSpecRoots(rootDir: string): string[] {
     return found.filter((path) => !ignored.has(relative(rootDir, path)));
 }
 
-export function checkMembers(rootDir: string): TokenViolation[] {
+export function checkMembers(rootDir: string): Finding[] {
     return discoverMembers(rootDir).flatMap((member) => checkMember(member, rootDir));
 }

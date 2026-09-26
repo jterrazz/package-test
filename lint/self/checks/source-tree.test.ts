@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { located, ROOT, treeOf } from './source-tree.fixtures.js';
-import { checkFolderShape, checkSourceRoot } from './source-tree.js';
+import { checkFolderNamedForAConcept, checkSourceRootHoldsKnownEntries } from './source-tree.js';
 
 /** The self checker passes `source-root-holds-known-entries` (`source-root-holds-known-entries`) and `folder-named-for-a-concept` (`folder-named-for-a-concept`). */
 describe('source-tree', () => {
@@ -15,8 +15,8 @@ describe('source-tree', () => {
         });
 
         // Then - the package holds none, and each stray entry is named at itself
-        expect(checkSourceRoot(ROOT)).toStrictEqual([]);
-        expect(located(checkSourceRoot(stray))).toStrictEqual([
+        expect(checkSourceRootHoldsKnownEntries(ROOT)).toStrictEqual([]);
+        expect(located(checkSourceRootHoldsKnownEntries(stray))).toStrictEqual([
             'src/model:1:1 source-root-holds-known-entries: the folder `src/model` at the source root, which holds the two entries and the six trees alone',
             'src/settings.ts:1:1 source-root-holds-known-entries: the file `src/settings.ts` at the source root, which holds the two entries and the six trees alone',
         ]);
@@ -41,8 +41,8 @@ describe('source-tree', () => {
         });
 
         // Then - the package holds none; each misshapen folder or file is named at itself, the ground left alone
-        expect(checkFolderShape(ROOT)).toStrictEqual([]);
-        expect(located(checkFolderShape(misshapen))).toStrictEqual([
+        expect(checkFolderNamedForAConcept(ROOT)).toStrictEqual([]);
+        expect(located(checkFolderNamedForAConcept(misshapen))).toStrictEqual([
             'src/facets/api/route.ts:1:1 folder-named-for-a-concept: `route.ts` sits at the root of the facet `api`, and is no file of its face',
             'src/kernel/core:1:1 folder-named-for-a-concept: the folder `core/` is named for a role, not a concept',
             'src/world/clock:1:1 folder-named-for-a-concept: the folder `clock/` holds one entry',

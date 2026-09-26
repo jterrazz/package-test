@@ -9,11 +9,11 @@ import { isRelativePath } from '../../src/kernel/files/spec-path.js';
 import { isInside, literalSpans, nameAround } from '../reading/spec-values.js';
 import type { Span } from '../reading/spec-values.js';
 import { closingOf, literalEnd, withoutComments } from '../reading/subject.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { withEntryImport, withoutEntryImport } from './entry-import.js';
 import {
-    checkPoolFixtureSharing,
-    fixPoolFixtures,
+    checkPoolGroundSharedOrInline,
+    fixPoolGround,
     pathsModuleTestsName,
 } from './ground-shared-or-inline.pool.js';
 import { checkInlineSeeds, fixInlineSeeds } from './ground-shared-or-inline.seeds.js';
@@ -378,7 +378,7 @@ function capFix(oversized: Oversized, target: string): string {
         : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`;
 }
 
-function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
+function capFinding(rootDir: string, oversized: Oversized): Finding {
     const kind = oversized.role === GROUND_EXPECTED ? 'an expectation' : 'a request';
     const target = `./${oversized.role}/${oversized.name}${oversized.extension ?? ''}`;
     return {
@@ -392,7 +392,7 @@ function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
     };
 }
 
-export function checkGroundSharing(rootDir: string): TokenViolation[] {
+export function checkGroundSharedOrInline(rootDir: string): Finding[] {
     const single = singleUseFiles(rootDir).map(({ reference, target }) => ({
         column: reference.column,
         file: relative(rootDir, reference.file),
@@ -407,7 +407,7 @@ export function checkGroundSharing(rootDir: string): TokenViolation[] {
         ...single,
         ...oversizedValues(rootDir).map((oversized) => capFinding(rootDir, oversized)),
         ...checkInlineSeeds(rootDir),
-        ...checkPoolFixtureSharing(rootDir).filter((finding) => !inlined.has(finding.file)),
+        ...checkPoolGroundSharedOrInline(rootDir).filter((finding) => !inlined.has(finding.file)),
     ];
 }
 
@@ -513,7 +513,7 @@ function removeEmptied(folders: Set<string>): void {
     }
 }
 
-export function fixGroundSharing(rootDir: string): string[] {
+export function fixGroundSharedOrInline(rootDir: string): string[] {
     const done = [...fixInlineSeeds(rootDir), ...fixOversizedValues(rootDir)].map(
         (change) => `wrote ${change}`,
     );
@@ -554,6 +554,6 @@ export function fixGroundSharing(rootDir: string): string[] {
     }
     removeEmptied(emptied);
     forgetTree();
-    done.push(...fixPoolFixtures(rootDir).map((move) => `moved ${move}`));
+    done.push(...fixPoolGround(rootDir).map((move) => `moved ${move}`));
     return done;
 }

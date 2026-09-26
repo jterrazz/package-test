@@ -1,14 +1,14 @@
 import { assertedStreams } from '../../src/facets/cli/documents/spec-document.js';
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
 import { finding, fixedData } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 const ISO8601 = /\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})/u;
 
 const UUID = /[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/u;
 
-export function checkPinnedValues(document: SpecDocument, dir: string): Finding[] {
-    const findings: Finding[] = [];
+export function checkPinnedValues(document: SpecDocument, dir: string): DocumentFinding[] {
+    const findings: DocumentFinding[] = [];
     const streams = assertedStreams(document);
     if (streams.length === 0) {
         return findings;

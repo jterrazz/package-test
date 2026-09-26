@@ -1,10 +1,10 @@
 import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js';
 import { GROUND_DIRS } from '../../src/kernel/files/ground.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 
 const GROUND_NAMES = new Set<string>(GROUND_DIRS);
 
-export function documentInGroundFindings(file: string, name: string): TokenViolation[] {
+export function documentInGroundFindings(file: string, name: string): Finding[] {
     return file.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))
         ? [
               {

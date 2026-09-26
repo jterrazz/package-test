@@ -4,7 +4,7 @@ import { basename, dirname, join, relative, resolve } from 'node:path';
 import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js';
 import { moveKeepingHistory, treeEntries } from '../../src/kernel/files/git-tree.js';
 import { GROUND_DIRS, SHARED_GROUND } from '../../src/kernel/files/ground.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { repointDocument, repointed, repointModuleTests, repointSource } from './repoint.js';
 import {
     collectFixtureReferences,
@@ -42,8 +42,8 @@ function rootGroundOf(specsRoot: string): string[] {
     return GROUND_DIRS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
 }
 
-export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         const pools = poolsOf(specsRoot);
         for (const folder of rootGroundOf(specsRoot)) {

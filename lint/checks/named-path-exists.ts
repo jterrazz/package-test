@@ -5,7 +5,7 @@ import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js'
 import { treeKind } from '../../src/kernel/files/git-tree.js';
 import { SHARED_GROUND } from '../../src/kernel/files/ground.js';
 import type { Teaching } from '../catalogue/lesson.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { suppressedLines } from './suppression.js';
 import {
     anchoredPaths,
@@ -44,8 +44,8 @@ function crossedTarget(
     };
 }
 
-export function diskTargetFindings(file: string, rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function diskTargetFindings(file: string, rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
         : suppressedLines(readText(file), 'named-path-exists');
@@ -89,7 +89,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
     return violations;
 }
 
-export function checkDiskTargetsExist(rootDir: string): TokenViolation[] {
+export function checkNamedPathExists(rootDir: string): Finding[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         listReferrers(specsRoot, join(specsRoot, SHARED_GROUND)).flatMap((file) =>
             diskTargetFindings(file, rootDir),

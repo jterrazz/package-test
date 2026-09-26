@@ -11,7 +11,7 @@ import type { Node, Pair, Scalar, YAMLMap } from '../../src/kernel/yaml/document
 import type { Teaching } from '../catalogue/lesson.js';
 import type { CheckerPassId, Severity } from './checker.js';
 
-export type Finding = Teaching & {
+export type DocumentFinding = Teaching & {
     line: number;
     rule: CheckerPassId;
     severity: Severity;
@@ -22,7 +22,7 @@ export function finding(
     line: number,
     { fix, found }: Teaching,
     severity: Severity = 'error',
-): Finding {
+): DocumentFinding {
     return { fix, found, line, rule, severity };
 }
 

@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { posix, resolve } from 'node:path';
 
-import type { TokenViolation } from '../../checks/checker.js';
+import type { Finding } from '../../checks/checker.js';
 import { child, childList, isNode, nodeStart, stringValue, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { parseProgram } from '../../reading/module-parser.js';
@@ -101,7 +101,7 @@ function productionReferences(root: string): { from: string; reference: Referenc
         );
 }
 
-export function checkFacetIsolation(root: string): TokenViolation<SelfPassId>[] {
+export function checkNoCrossFacetImport(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)
         .filter(({ reference }) => reference.specifier.startsWith('.'))
         .flatMap(({ from, reference }) => {
@@ -153,7 +153,7 @@ export function checkFacetIsolation(root: string): TokenViolation<SelfPassId>[] 
         .toSorted(byPosition);
 }
 
-export function checkEngineOwner(root: string): TokenViolation<SelfPassId>[] {
+export function checkOneOwnerPerEngine(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)
         .flatMap(({ from, reference }) => {
             const { specifier } = reference;
@@ -199,7 +199,7 @@ function lintFolderOf(path: string): string | undefined {
     return next === undefined ? 'index' : folder;
 }
 
-export function checkLintDirection(root: string): TokenViolation<SelfPassId>[] {
+export function checkLintImportsFollowTheDirection(root: string): Finding<SelfPassId>[] {
     return productionReferences(root)
         .filter(({ reference }) => reference.specifier.startsWith('.'))
         .flatMap(({ from, reference }) => {

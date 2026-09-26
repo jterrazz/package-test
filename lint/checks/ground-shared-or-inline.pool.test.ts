@@ -4,7 +4,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { fixPoolFixtures } from './ground-shared-or-inline.pool.js';
+import { fixPoolGround } from './ground-shared-or-inline.pool.js';
 
 function singleReaderPool(git: boolean): string {
     const root = mkdtempSync(join(tmpdir(), 'pool-'));
@@ -28,7 +28,7 @@ describe('ground-shared-or-inline.pool', () => {
         const root = singleReaderPool(true);
 
         // When - the fixer moves it beside its leaf
-        fixPoolFixtures(join(root, 'specs'));
+        fixPoolGround(join(root, 'specs'));
 
         // Then - the index holds the new path and not the old one
         const indexed = execFileSync('git', ['ls-files'], { cwd: root, encoding: 'utf8' });
@@ -43,7 +43,7 @@ describe('ground-shared-or-inline.pool', () => {
         const root = singleReaderPool(false);
 
         // When - the fixer moves it beside its leaf
-        fixPoolFixtures(join(root, 'specs'));
+        fixPoolGround(join(root, 'specs'));
 
         // Then - the disk holds it at its new place only
         expect(existsSync(join(root, 'specs', 'api', 'fixtures', 'app', 'index.txt'))).toBe(true);

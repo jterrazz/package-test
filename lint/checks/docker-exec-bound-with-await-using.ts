@@ -1,15 +1,15 @@
 import { relative } from 'node:path';
 
 import { isNodeTestFileName } from '../reading/role.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { modelSpecFile, namedImports, resolveRelativeImport } from './spec-model.js';
 import type { SpecModel } from './spec-model.js';
 import { suppressedLines } from './suppression.js';
 import { lineAt, listFiles, readSource, readText } from './tree.js';
 
 /** The runners are inferred from the `docker:` option of the imported spec files, where the oxlint rule needs them spelled by hand. */
-export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     const specFiles = listFiles(rootDir, (path) => path.endsWith('.specification.ts'));
     const dockerSpecs = new Map<string, SpecModel>();
     for (const file of specFiles) {

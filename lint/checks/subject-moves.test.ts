@@ -2,8 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkOneSubject } from './one-subject-per-spec.js';
-import { checkSubjectFolder } from './spec-in-subject-folder.js';
+import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
+import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSubjects } from './subject-moves.js';
 import { CHARTS, RUNNER, specsTree, TWO_ROUTES } from './subject.fixtures.js';
 
@@ -125,7 +125,7 @@ describe('fixSubjects', () => {
         });
 
         // Then - `spec-in-subject-folder` names the folder, and the fix moves it there
-        expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
+        expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
             'move it to api/orders/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
         ]);
         fixSubjects(root);
@@ -251,7 +251,7 @@ describe('fixSubjects', () => {
         });
 
         // Then - the finding says why no split is offered, and the fix only files the journey
-        expect(checkOneSubject(root)[0]?.fix).toBe(
+        expect(checkOneSubjectPerSpec(root)[0]?.fix).toBe(
             'the test "creates then lists" reaches POST /orders and GET /orders — state what it stands on with a seed, and keep one subject per test',
         );
         fixSubjects(root);
@@ -281,7 +281,7 @@ describe('fixSubjects', () => {
             journey: created.includes("test('creates then lists'"),
             listed: existsSync(join(root, 'api/orders/list/orders.spec.ts')),
         }).toStrictEqual({ journey: true, listed: true });
-        expect(checkOneSubject(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkOneSubjectPerSpec(root).map(({ file }) => file)).toStrictEqual([
             'api/orders/create/orders.spec.ts',
         ]);
     });
@@ -299,7 +299,7 @@ describe('fixSubjects', () => {
         });
 
         // Then - nothing
-        expect(checkSubjectFolder(root)).toStrictEqual([]);
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
         expect(fixSubjects(root)).toStrictEqual([]);
     });
 
@@ -318,8 +318,8 @@ describe('fixSubjects', () => {
 
         // Then - neither `one-subject-per-spec` nor `spec-in-subject-folder` reads it, and the fixer leaves it where it is
         expect([
-            ...checkOneSubject(root),
-            ...checkSubjectFolder(root),
+            ...checkOneSubjectPerSpec(root),
+            ...checkSpecInSubjectFolder(root),
             ...fixSubjects(root),
         ]).toStrictEqual([]);
     });

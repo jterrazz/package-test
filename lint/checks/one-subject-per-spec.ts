@@ -1,4 +1,4 @@
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { secondSubjectAt, shown, silenced, splitPlan, subjectSpecs } from './spec-subjects.js';
 import type { SpecRead, TestOf } from './spec-subjects.js';
 
@@ -20,7 +20,7 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
     return journey === undefined ? split : `${split}; ${seed}`;
 }
 
-export function checkOneSubject(specsRoot: string): TokenViolation[] {
+export function checkOneSubjectPerSpec(specsRoot: string): Finding[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         if (spec.subjects.size < 2 || silenced(spec)) {
             return [];

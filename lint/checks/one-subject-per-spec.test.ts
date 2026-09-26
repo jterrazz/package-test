@@ -2,11 +2,11 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkOneSubject } from './one-subject-per-spec.js';
-import { checkSubjectFolder } from './spec-in-subject-folder.js';
+import { checkOneSubjectPerSpec } from './one-subject-per-spec.js';
+import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { RUNNER, specsTree, TWO_ROUTES } from './subject.fixtures.js';
 
-describe('checkOneSubject', () => {
+describe('checkOneSubjectPerSpec', () => {
     test('one-subject-per-spec — a spec of two routes is reported at the chain reaching the second, naming the split', () => {
         // Given - one file reaching GET /orders and POST /orders
         const root = specsTree({
@@ -15,7 +15,7 @@ describe('checkOneSubject', () => {
         });
 
         // Then - one `one-subject-per-spec` finding, where the second route is sent, and no `spec-in-subject-folder` before the split
-        const [finding] = checkOneSubject(root);
+        const [finding] = checkOneSubjectPerSpec(root);
         expect({ column: finding?.column, line: finding?.line }).toStrictEqual({
             column: 30,
             line: 25,
@@ -24,7 +24,7 @@ describe('checkOneSubject', () => {
         expect(finding?.fix).toBe(
             'split it, one file per subject — api/orders/list/orders.spec.ts, api/orders/create/orders.spec.ts — `make fix` splits it',
         );
-        expect(checkSubjectFolder(root)).toStrictEqual([]);
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([]);
     });
 
     test("one-subject-per-spec — a spec holding two runners reads each chain with its own runner's list", () => {
@@ -44,7 +44,7 @@ describe('checkOneSubject', () => {
         });
 
         // Then - the chain on `dbCli` names both declared words, so the file holds two subjects
-        expect(checkOneSubject(root).map(({ found }) => found)).toStrictEqual([
+        expect(checkOneSubjectPerSpec(root).map(({ found }) => found)).toStrictEqual([
             'a spec reaching 2 subjects — exec db migrate, exec db',
         ]);
     });
@@ -60,7 +60,7 @@ describe('checkOneSubject', () => {
                 '',
             ].join('\n'),
         });
-        const undeclared = checkOneSubject(root).map(({ found }) => found);
+        const undeclared = checkOneSubjectPerSpec(root).map(({ found }) => found);
         writeFileSync(
             join(dirname(root), 'jterrazz.config.ts'),
             "export default { test: { methodless: ['/mcp'] } };\n",
@@ -69,6 +69,8 @@ describe('checkOneSubject', () => {
 
         // Then - two subjects before the declaration, one filed where it sits after it
         expect(undeclared).toStrictEqual(['a spec reaching 2 subjects — POST /mcp, PUT /mcp']);
-        expect([...checkOneSubject(root), ...checkSubjectFolder(root)]).toStrictEqual([]);
+        expect([...checkOneSubjectPerSpec(root), ...checkSpecInSubjectFolder(root)]).toStrictEqual(
+            [],
+        );
     });
 });

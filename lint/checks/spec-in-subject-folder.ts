@@ -1,12 +1,12 @@
 import { dirname } from 'node:path';
 
 import { ambiguousSegment } from '../reading/subject.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { positionOf, shown, silenced, subjectSpecs, targetOf } from './spec-subjects.js';
 import type { SpecRead } from './spec-subjects.js';
 
 /** No folder is derived from a word that may be a value: the author writes the template that says which it is. */
-function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViolation | undefined {
+function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Finding | undefined {
     const at = spec.subjects.get(name);
     const segment = at === undefined ? undefined : ambiguousSegment(at.subject, spec.reading);
     if (at === undefined || segment === undefined || at.subject.facet !== 'api') {
@@ -27,7 +27,7 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViol
     };
 }
 
-export function checkSubjectFolder(specsRoot: string): TokenViolation[] {
+export function checkSpecInSubjectFolder(specsRoot: string): Finding[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         const [only] = [...spec.subjects.keys()];
         if (spec.subjects.size !== 1 || only === undefined || silenced(spec)) {

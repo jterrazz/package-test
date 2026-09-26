@@ -3,11 +3,11 @@ import {
     readSpecFile,
     SpecSyntaxError,
 } from '../../src/facets/cli/documents/spec-document.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { unknownTokenFindings } from './no-unknown-token.js';
 
 /** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
-export function checkSpecFile(text: string, rel: string): TokenViolation[] {
+export function checkSpecFile(text: string, rel: string): Finding[] {
     let document;
     try {
         document = readSpecFile(text, rel).document;

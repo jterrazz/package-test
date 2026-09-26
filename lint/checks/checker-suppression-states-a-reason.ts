@@ -1,6 +1,6 @@
 import { relative } from 'node:path';
 
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { listFiles, readText } from './tree.js';
 
 const DIRECTIVE = /(?<lead>.*?)checker-disable(?:-next-line|-line)\s+(?<rest>.*)$/iu;
@@ -22,8 +22,8 @@ function idOf(rest: string | undefined): string {
 const REASON = /--\s*\S/u;
 
 /** The toolchain's `suppressions-reason` gate reads `oxlint-disable*` only, so this channel carries its own. */
-export function checkSuppressionReason(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkCheckerSuppressionStatesAReason(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     for (const file of listFiles(rootDir, isReadableText)) {
         const text = readText(file);
         if (!text.includes('checker-disable')) {

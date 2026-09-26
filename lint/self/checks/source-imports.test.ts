@@ -1,6 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { checkEngineOwner, checkFacetIsolation, checkLintDirection } from './source-imports.js';
+import {
+    checkLintImportsFollowTheDirection,
+    checkNoCrossFacetImport,
+    checkOneOwnerPerEngine,
+} from './source-imports.js';
 import { located, ROOT, treeOf } from './source-tree.fixtures.js';
 
 /** The self checker passes `no-cross-facet-import` (`no-cross-facet-import`) and `one-owner-per-engine` (`one-owner-per-engine`). */
@@ -16,8 +20,8 @@ describe('source-imports', () => {
         });
 
         // Then - the package holds none; the facet's import and each reach past the face are named at the import
-        expect(checkFacetIsolation(ROOT)).toStrictEqual([]);
-        expect(located(checkFacetIsolation(crossing))).toStrictEqual([
+        expect(checkNoCrossFacetImport(ROOT)).toStrictEqual([]);
+        expect(located(checkNoCrossFacetImport(crossing))).toStrictEqual([
             'src/facets/api/api.handle.ts:2:1 no-cross-facet-import: the facet `api` imports `src/facets/cli/cli.handle.ts`, a module of the facet `cli`',
             'src/index.ts:1:1 no-cross-facet-import: `src/facets/cli/cli.handle.ts` is reached from outside the facet `cli` by a module its face does not serve',
             'src/index.ts:2:1 no-cross-facet-import: `src/facets/cli/process/cli.port.ts` is reached inside the facet `cli`, below its root files',
@@ -34,8 +38,8 @@ describe('source-imports', () => {
         });
 
         // Then - the package holds none; each import outside its owner is named at the import, with the owner
-        expect(checkEngineOwner(ROOT)).toStrictEqual([]);
-        expect(located(checkEngineOwner(misplaced))).toStrictEqual([
+        expect(checkOneOwnerPerEngine(ROOT)).toStrictEqual([]);
+        expect(located(checkOneOwnerPerEngine(misplaced))).toStrictEqual([
             'src/facets/api/api.handle.ts:2:12 one-owner-per-engine: `playwright` is imported outside `src/facets/website/`, the one slice that owns it',
             'src/kernel/chain/state.ts:1:1 one-owner-per-engine: `pg` is imported outside `src/world/services/postgres/`, the one slice that owns it',
         ]);
@@ -52,8 +56,8 @@ describe('source-imports', () => {
         });
 
         // Then - the package holds none; each upward edge is named at the import, the entry and the test pass
-        expect(checkLintDirection(ROOT)).toStrictEqual([]);
-        expect(located(checkLintDirection(upward))).toStrictEqual([
+        expect(checkLintImportsFollowTheDirection(ROOT)).toStrictEqual([]);
+        expect(located(checkLintImportsFollowTheDirection(upward))).toStrictEqual([
             'lint/checks/tree.ts:1:1 lint-imports-follow-the-direction: `lint/checks/tree.ts` imports `lint/migration/mover.ts`, from `migration/`, which `checks/` sits below',
             'lint/reading/role.ts:1:1 lint-imports-follow-the-direction: `lint/reading/role.ts` imports `lint/rules/rule.ts`, from `rules/`, which `reading/` sits below',
             'lint/rules/rule.ts:1:1 lint-imports-follow-the-direction: `lint/rules/rule.ts` imports `lint/self/checks/checker.ts`, from `self/`, which `rules/` sits below',

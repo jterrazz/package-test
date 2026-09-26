@@ -1,7 +1,7 @@
 import { relative } from 'node:path';
 
 import { isNodeTestFileName } from '../reading/role.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import {
     balancedParens,
     CONSTRUCTORS,
@@ -38,8 +38,8 @@ function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     return match === null ? match : (match.groups?.name ?? null);
 }
 
-export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     const enforced = new Map<string, SpecModel>();
     for (const file of listFiles(rootDir, (path) => path.endsWith('.specification.ts'))) {
         const model = modelSpecFile(file);

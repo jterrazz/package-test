@@ -1,12 +1,12 @@
 import { dirname, relative } from 'node:path';
 
 import { readSpecFile } from '../../src/facets/cli/documents/spec-document.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { listSpecFiles, readText } from './document-model.js';
 
-export function checkSpecDescriptionsUnique(rootDir: string): TokenViolation[] {
+export function checkDocumentDescriptionUnique(rootDir: string): Finding[] {
     const byDirectory = new Map<string, Map<string, string>>();
-    const violations: TokenViolation[] = [];
+    const violations: Finding[] = [];
     for (const path of listSpecFiles(rootDir)) {
         let document;
         try {

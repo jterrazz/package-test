@@ -7,7 +7,7 @@ import {
 } from '../../src/facets/cli/documents/spec-document.js';
 import { treeEntries } from '../../src/kernel/files/git-tree.js';
 import { specsAnchor } from '../reading/ast.js';
-import type { Severity, TokenViolation } from './checker.js';
+import type { Finding, Severity } from './checker.js';
 import {
     collectFixtureReferences,
     DISK_CALL,
@@ -146,8 +146,8 @@ function entryReferenced(path: string, references: References): boolean {
     return false;
 }
 
-export function checkDeadFixtures(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkNoUnusedGround(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     for (const dir of listDirs(rootDir)) {
         if (basename(dir) === 'specs') {
             continue;
@@ -220,8 +220,8 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
     return violations;
 }
 
-function checkPoolFixtures(rootDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+function checkPoolFixtures(rootDir: string): Finding[] {
+    const violations: Finding[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
         // A reference made from inside the pool is left out: a dead entry cannot vouch for another.

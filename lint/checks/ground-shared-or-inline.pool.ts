@@ -3,7 +3,7 @@ import { basename, dirname, isAbsolute, join, relative, resolve, sep } from 'nod
 
 import { moveKeepingHistory, treeKind } from '../../src/kernel/files/git-tree.js';
 import { moduleTestsOf } from '../reading/module-tests.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { relativeLiterals } from './repoint.js';
 import {
     anchoredPaths,
@@ -113,7 +113,7 @@ function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     return misplaced;
 }
 
-export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
+export function checkPoolGroundSharedOrInline(rootDir: string): Finding[] {
     return misplacedPoolFixtures(rootDir).map(({ entry, leaf, pool, referrers }) => {
         const relEntry = relative(rootDir, join(pool, entry));
         const relLeaf = relative(rootDir, leaf);
@@ -138,7 +138,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
 }
 
 /** A pool the move empties goes with it, and the shared folder when it was the last. */
-export function fixPoolFixtures(rootDir: string): string[] {
+export function fixPoolGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { entry, leaf, pool, referrers } of misplacedPoolFixtures(rootDir)) {
         const role = basename(pool);

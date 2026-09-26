@@ -2,7 +2,7 @@ import { join, relative, sep } from 'node:path';
 
 import { treeEntries, treeKind, treeNames } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { SKIPPED } from './member-manifest.js';
 
 /** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
@@ -23,8 +23,8 @@ function holdsGround(path: string, memberDir: string): boolean {
 }
 
 /** The walk stops at a nested package and never enters ground: a fixture project may carry the word on purpose. */
-export function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
-    const found: TokenViolation[] = [];
+export function groundSynonyms(memberDir: string, label: string): Finding[] {
+    const found: Finding[] = [];
     const walk = (dir: string): void => {
         let entries;
         try {

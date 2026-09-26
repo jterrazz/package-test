@@ -2,7 +2,7 @@ import { join, relative } from 'node:path';
 
 import { GROUND_DIRS } from '../../src/kernel/files/ground.js';
 import { isNodeTestFileName } from '../reading/role.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { entriesOf, SKIPPED, textOf, walkFiles } from './facet-folders.js';
 
 function* walkDirectories(dir: string): Generator<string> {
@@ -24,8 +24,8 @@ const GROUND = new Set<string>(GROUND_DIRS);
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
 /** Not where the folder is the subject's standard name (`spec-in-subject-folder`): there the leaf is the subject, and its aspect files share it by design. */
-export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkGroundBesideItsOnlyReader(specsRoot: string): Finding[] {
+    const violations: Finding[] = [];
     const derived = (directory: string): boolean =>
         SUBJECT_FOLDER_FACETS.has(relative(specsRoot, directory).split(/[/\\]/u)[0] ?? '');
     for (const directory of [specsRoot, ...walkDirectories(specsRoot)].filter(

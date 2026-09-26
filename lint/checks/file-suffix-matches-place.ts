@@ -6,9 +6,9 @@ import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isGroundName } from '../../src/kernel/files/ground.js';
 import { isUnderSpecs } from '../reading/ast.js';
 import { FACETS, reachesRunner } from '../reading/facets.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { finding } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
@@ -54,8 +54,8 @@ export type PlacementMove = {
 };
 
 /** Only the author knows whether the file meets the product through HTTP or through a binary, so the mover leaves it. */
-export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
-    const violations: TokenViolation[] = [];
+export function checkSpecOutsideSpecs(memberDir: string): Finding[] {
+    const violations: Finding[] = [];
     for (const path of walk(memberDir, true)) {
         if (!path.endsWith('.spec.ts')) {
             continue;
@@ -77,7 +77,7 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
 }
 
 /** A file reaching no runner is `facet-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
-export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
+export function checkFileSuffixMatchesPlace(specsRoot: string): Finding[] {
     return movesUnderFacet(specsRoot).map(({ from }) => {
         const rel = relative(specsRoot, from);
         const first = rel.split(/[/\\]/u)[0] ?? '';
@@ -136,10 +136,10 @@ const KEBAB = /^[a-z0-9]+(?:-[a-z0-9]+)*$/u;
 
 const REDUNDANT_WORDS = new Set(['cli', 'spec', 'test']);
 
-export function checkFileName(rel: string): Finding[] {
+export function checkFileName(rel: string): DocumentFinding[] {
     const name = basename(rel);
     const caseName = name.slice(0, -SPEC_EXTENSION.length);
-    const findings: Finding[] = [];
+    const findings: DocumentFinding[] = [];
     if (!KEBAB.test(caseName)) {
         findings.push(
             finding('file-suffix-matches-place', 1, {

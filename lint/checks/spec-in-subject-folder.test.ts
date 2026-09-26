@@ -2,16 +2,16 @@ import { writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { checkSubjectFolder } from './spec-in-subject-folder.js';
+import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { CHARTS, migrating, RUNNER, specsTree } from './subject.fixtures.js';
 
-describe('checkSubjectFolder', () => {
+describe('checkSpecInSubjectFolder', () => {
     test('spec-in-subject-folder — a route written as its template is filed under the route, and a filled one that reads two ways teaches the template', () => {
         // Given - the chart route twice: once as a template, once as the path it fills
         const root = specsTree(CHARTS);
 
         // Then - the template's file goes to indicators/chart/; the filled one is reported at its chain
-        expect(checkSubjectFolder(root)).toStrictEqual([
+        expect(checkSpecInSubjectFolder(root)).toStrictEqual([
             {
                 column: 31,
                 file: 'api/charts/filled.spec.ts',
@@ -44,7 +44,7 @@ describe('checkSubjectFolder', () => {
         });
 
         // Then - the first word files the one, the declared words the other
-        expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
+        expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
             'move it to cli/db/runs.spec.ts — `make fix` moves it, and the ground it stands on',
             'move it to cli/db/migrate/runs.spec.ts — `make fix` moves it, and the ground it stands on',
         ]);
@@ -60,7 +60,7 @@ describe('checkSubjectFolder', () => {
                 '',
             ].join('\n'),
         });
-        const plain = checkSubjectFolder(root);
+        const plain = checkSpecInSubjectFolder(root);
         writeFileSync(
             join(dirname(root), 'jterrazz.config.ts'),
             "export default { test: { collections: ['data'] } };\n",
@@ -69,7 +69,7 @@ describe('checkSubjectFolder', () => {
 
         // Then - no finding before the declaration, and the list folder after it
         expect(plain).toStrictEqual([]);
-        expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
+        expect(checkSpecInSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
             'move it to api/data/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
         ]);
     });

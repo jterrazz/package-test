@@ -3,7 +3,7 @@ import { dirname, join } from 'node:path';
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
 import { treeNames } from '../../src/kernel/files/git-tree.js';
 import { finding, readText } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 /** Read by depth, not by parsing. */
 function objectKeys(source: string, from: number): { end: number; keys: string[] } {
@@ -95,7 +95,7 @@ function registeredNames(dir: string): null | { env: Set<string>; serve: Set<str
     }
 }
 
-export function checkRegisteredNames(document: SpecDocument, dir: string): Finding[] {
+export function checkRegisteredNames(document: SpecDocument, dir: string): DocumentFinding[] {
     if (document.env.length === 0 && document.serve.length === 0) {
         return [];
     }
@@ -103,7 +103,7 @@ export function checkRegisteredNames(document: SpecDocument, dir: string): Findi
     if (registered === null) {
         return [];
     }
-    const findings: Finding[] = [];
+    const findings: DocumentFinding[] = [];
     for (const token of document.env) {
         if (token.kind === 'set' && !registered.env.has(token.name)) {
             findings.push(

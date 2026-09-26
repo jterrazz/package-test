@@ -2,7 +2,7 @@ import { join } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { isTestFileName } from '../reading/role.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { SKIPPED } from './member-manifest.js';
 import type { Manifest } from './member-manifest.js';
 
@@ -49,7 +49,7 @@ export function configPresent(
     memberDir: string,
     label: string,
     subject: string,
-): TokenViolation[] {
+): Finding[] {
     // A delegating `test` script runs the members' tests, not this package's.
     const testScript = manifest.scripts?.test;
     const ownsTests =

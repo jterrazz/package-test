@@ -7,7 +7,7 @@ import { forgetTree } from '../../src/kernel/files/git-tree.js';
 import { GROUND_SEEDS } from '../../src/kernel/files/ground.js';
 import { isInside, kebabName, literalSpans, titleAround } from '../reading/spec-values.js';
 import { skipString, withoutComments } from '../reading/subject.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { importsFromEntry, withEntryImport, withoutEntryImport } from './entry-import.js';
 import { suppressedLines } from './suppression.js';
 import { findSpecsRoots, listFiles } from './tree.js';
@@ -119,7 +119,7 @@ function inlineSeeds(rootDir: string): InlineSeed[] {
     );
 }
 
-export function checkInlineSeeds(rootDir: string): TokenViolation[] {
+export function checkInlineSeeds(rootDir: string): Finding[] {
     return inlineSeeds(rootDir).map((seed) => ({
         column: seed.column,
         file: relative(rootDir, seed.file),

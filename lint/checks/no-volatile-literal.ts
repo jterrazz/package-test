@@ -1,8 +1,8 @@
 import { assertedStreams } from '../../src/facets/cli/documents/spec-document.js';
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { finding, fixedData } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 const VOLATILE = [
     {
@@ -43,8 +43,8 @@ export function volatileLiteralIn(
 }
 
 /** Unless the document fixed it, the carve-out `pinned-value-from-the-input` rests on: a value the document states rather than one the run minted. */
-export function checkVolatileLiterals(document: SpecDocument, dir: string): Finding[] {
-    const findings: Finding[] = [];
+export function checkVolatileLiterals(document: SpecDocument, dir: string): DocumentFinding[] {
+    const findings: DocumentFinding[] = [];
     let fixed: null | string = null;
     for (const stream of assertedStreams(document)) {
         for (const [index, text] of stream.text.split('\n').entries()) {
@@ -67,7 +67,7 @@ export function checkVolatileLiterals(document: SpecDocument, dir: string): Find
     return findings;
 }
 
-export function volatileLiteralsInGround(file: string, text: string): TokenViolation[] {
+export function volatileLiteralsInGround(file: string, text: string): Finding[] {
     return text.split('\n').flatMap((line, index) => {
         const volatileLiteral = volatileLiteralIn(line);
         return volatileLiteral === undefined

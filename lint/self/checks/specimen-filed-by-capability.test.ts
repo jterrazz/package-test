@@ -4,7 +4,7 @@ import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { forgetTree } from '../../../src/kernel/files/git-tree.js';
-import { checkCapabilityFolder } from './specimen-filed-by-capability.js';
+import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 
 function specsTree(files: Record<string, string>): string {
     const scratch = mkdtempSync(join(tmpdir(), 'specimen-filed-by-capability-'));
@@ -23,7 +23,7 @@ function spec(depth: number): string {
     return `import { api } from '${'../'.repeat(depth)}api.specification.js';\n`;
 }
 
-describe('checkCapabilityFolder', () => {
+describe('checkSpecimenFiledByCapability', () => {
     test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — a spec of a specimen filed by its route, or under no capability, is refused', () => {
         // Given - three specs of a specimen: by route, under a grab-bag, one folder too deep
         const root = specsTree({
@@ -35,7 +35,7 @@ describe('checkCapabilityFolder', () => {
 
         // Then - each, at its first line
         expect(
-            checkCapabilityFolder(root).map(({ file, found }) => `${file} ${found}`),
+            checkSpecimenFiledByCapability(root).map(({ file, found }) => `${file} ${found}`),
         ).toStrictEqual([
             'api/assertions/whole.spec.ts a spec of the specimen `shared/fixtures/specimen-api`, filed under `api/assertions/`',
             'api/seed/nominal/nominal.spec.ts a spec of the specimen `shared/fixtures/specimen-api`, filed under `api/seed/nominal/`',
@@ -52,7 +52,9 @@ describe('checkCapabilityFolder', () => {
         });
 
         // Then - refused, naming the cli column's own capabilities
-        expect(checkCapabilityFolder(root).map(({ file, fix }) => `${file} ${fix}`)).toStrictEqual([
+        expect(
+            checkSpecimenFiledByCapability(root).map(({ file, fix }) => `${file} ${fix}`),
+        ).toStrictEqual([
             'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/03-testing.md § The capability matrix)',
         ]);
     });
@@ -70,8 +72,8 @@ describe('checkCapabilityFolder', () => {
 
         // Then - no finding in either
         expect([
-            ...checkCapabilityFolder(specimen),
-            ...checkCapabilityFolder(product),
+            ...checkSpecimenFiledByCapability(specimen),
+            ...checkSpecimenFiledByCapability(product),
         ]).toStrictEqual([]);
     });
 
@@ -85,7 +87,7 @@ describe('checkCapabilityFolder', () => {
 
         // Then - the silenced file passes, and the other is reported at its first line of code
         expect(
-            checkCapabilityFolder(root).map(({ file, line }) => `${file}:${line}`),
+            checkSpecimenFiledByCapability(root).map(({ file, line }) => `${file}:${line}`),
         ).toStrictEqual(['api/users/get/reading.spec.ts:2']);
     });
 
@@ -101,7 +103,7 @@ describe('checkCapabilityFolder', () => {
         });
 
         // Then - only the folder no column names is refused
-        expect(checkCapabilityFolder(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkSpecimenFiledByCapability(root).map(({ file }) => file)).toStrictEqual([
             'surface/misc/grab-bag.spec.ts',
         ]);
     });
@@ -117,7 +119,7 @@ describe('checkCapabilityFolder', () => {
         });
 
         // Then - the one calling the shared fixtures' module is refused; the inline module is out of reach
-        expect(checkCapabilityFolder(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkSpecimenFiledByCapability(root).map(({ file }) => file)).toStrictEqual([
             'integration/timekeeping/imported.spec.ts',
         ]);
     });
@@ -136,7 +138,9 @@ describe('checkCapabilityFolder', () => {
 
         // Then - each, at its first line of code, named with the column's own capabilities
         expect(
-            checkCapabilityFolder(root).map(({ file, found, line }) => `${file}:${line} ${found}`),
+            checkSpecimenFiledByCapability(root).map(
+                ({ file, found, line }) => `${file}:${line} ${found}`,
+            ),
         ).toStrictEqual([
             'component/exec/runner.tsx:1 a file of the component tree, filed under `component/exec/`',
             'component/hooks/use-modal.ts:1 a file of the component tree, filed under `component/hooks/`',
@@ -145,7 +149,7 @@ describe('checkCapabilityFolder', () => {
             'component/post-table.tsx:1 a file of the component tree, filed under `component/`',
             'component/providers.tsx:2 a file of the component tree, filed under `component/`',
         ]);
-        expect(checkCapabilityFolder(root)[0]?.fix).toBe(
+        expect(checkSpecimenFiledByCapability(root)[0]?.fix).toBe(
             'file it under the capability it specifies, one folder below its facet — `component/<capability>/<unit>.test.tsx` beside the `<unit>.tsx` it renders, the capability a name the matrix gives the `component` column, kebab-cased (`intercept`, `clock`, `to-match`, …; docs/03-testing.md § The capability matrix)',
         );
     });
@@ -163,6 +167,6 @@ describe('checkCapabilityFolder', () => {
         });
 
         // Then - no finding
-        expect(checkCapabilityFolder(root)).toStrictEqual([]);
+        expect(checkSpecimenFiledByCapability(root)).toStrictEqual([]);
     });
 });

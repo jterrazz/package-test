@@ -5,7 +5,7 @@ import { basename, dirname, join, relative } from 'node:path';
 import { SPEC_EXTENSION } from '../../src/facets/cli/documents/spec-document.js';
 import { moveKeepingHistory, treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { GROUND_DIRS, SHARED_GROUND } from '../../src/kernel/files/ground.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { repointDocument, repointed, repointModuleTests, repointSource } from './repoint.js';
 import {
     findSpecsRoots,
@@ -108,7 +108,7 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
 }
 
 /** A warning, since two leaves may mean to diverge; `--fix` acts only when the copies share one name, the only name a fix could keep. */
-export function checkCopiedGround(rootDir: string): TokenViolation[] {
+export function checkNoDuplicateGround(rootDir: string): Finding[] {
     return copiedGround(rootDir).flatMap((group) => {
         const advice = copyAdvice(rootDir, group);
         return group.copies.map((copy) => ({
@@ -126,7 +126,7 @@ export function checkCopiedGround(rootDir: string): TokenViolation[] {
 }
 
 /** An entry the target already holds byte for byte deletes every copy; one holding something else, or copies of several names, are the author's call and nothing moves. */
-export function fixCopiedGround(rootDir: string): string[] {
+export function fixDuplicateGround(rootDir: string): string[] {
     const moved: string[] = [];
     for (const { copies, fingerprint, target } of copiedGround(rootDir)) {
         if (target === null) {

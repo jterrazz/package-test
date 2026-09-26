@@ -3,7 +3,7 @@ import { dirname, join, resolve } from 'node:path';
 
 import { treeEntries } from '../../../src/kernel/files/git-tree.js';
 import { GROUND_DIRS } from '../../../src/kernel/files/ground.js';
-import type { TokenViolation } from '../../checks/checker.js';
+import type { Finding } from '../../checks/checker.js';
 import type { SelfPassId } from './checker.js';
 
 /** Read off the tree git does not ignore; a root with no `src/` holds nothing to judge. */
@@ -71,13 +71,13 @@ const AT_ITS_TOP = { column: 1, line: 1 };
 export function finding(
     rule: SelfPassId,
     file: string,
-    teaching: Pick<TokenViolation, 'fix' | 'found'>,
+    teaching: Pick<Finding, 'fix' | 'found'>,
     at: { column: number; line: number } = AT_ITS_TOP,
-): TokenViolation<SelfPassId> {
+): Finding<SelfPassId> {
     return { ...teaching, ...at, file, rule, severity: 'error' };
 }
 
-export function byPosition(one: TokenViolation<string>, other: TokenViolation<string>): number {
+export function byPosition(one: Finding<string>, other: Finding<string>): number {
     return (
         one.file.localeCompare(other.file) ||
         one.line - other.line ||
@@ -85,7 +85,7 @@ export function byPosition(one: TokenViolation<string>, other: TokenViolation<st
     );
 }
 
-export function checkSourceRoot(root: string): TokenViolation<SelfPassId>[] {
+export function checkSourceRootHoldsKnownEntries(root: string): Finding<SelfPassId>[] {
     return listed(resolve(root, 'src'), 'src')
         .filter(({ path }) => path.split('/').length === 2)
         .filter(({ path }) => !SOURCE_ROOT.includes(path.slice('src/'.length)))
@@ -99,7 +99,7 @@ export function checkSourceRoot(root: string): TokenViolation<SelfPassId>[] {
 }
 
 /** Ground is exempt: it is what a test stands on. */
-export function checkFolderShape(root: string): TokenViolation<SelfPassId>[] {
+export function checkFolderNamedForAConcept(root: string): Finding<SelfPassId>[] {
     const paths = listed(resolve(root, 'src'), 'src');
     const folders = paths.filter(({ directory, path }) => directory && !inGround(path));
     const childrenOf = (folder: string): Listed[] =>
@@ -129,7 +129,7 @@ export function checkFolderShape(root: string): TokenViolation<SelfPassId>[] {
     return [...found, ...strayFaceFiles(paths, folders)].toSorted(byPosition);
 }
 
-function strayFaceFiles(paths: Listed[], folders: Listed[]): TokenViolation<SelfPassId>[] {
+function strayFaceFiles(paths: Listed[], folders: Listed[]): Finding<SelfPassId>[] {
     const facets = folders.filter(
         ({ path }) => path.split('/').length === 3 && facetOf(`${path}/x`) !== undefined,
     );

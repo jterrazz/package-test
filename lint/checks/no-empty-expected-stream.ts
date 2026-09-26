@@ -1,10 +1,10 @@
 import { assertedStreams } from '../../src/facets/cli/documents/spec-document.js';
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
 import { finding } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
-export function checkEmptyAssertions(document: SpecDocument): Finding[] {
-    const findings: Finding[] = [];
+export function checkEmptyAssertions(document: SpecDocument): DocumentFinding[] {
+    const findings: DocumentFinding[] = [];
     for (const stream of assertedStreams(document)) {
         if (
             stream.text.replaceAll('{{any}}', '').trim() === '' &&

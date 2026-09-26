@@ -2,7 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
-import type { TokenViolation } from './checker.js';
+import type { Finding } from './checker.js';
 import { MEMBER_DEPTH, readManifest, SKIPPED, workspacePatterns } from './member-manifest.js';
 import type { Manifest } from './member-manifest.js';
 
@@ -161,7 +161,7 @@ export function seamDependencies(member: {
     manifest: Manifest;
     memberDir: string;
     subject: string;
-}): TokenViolation[] {
+}): Finding[] {
     const { label, manifest, memberDir, subject } = member;
     const jestRuns =
         declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));

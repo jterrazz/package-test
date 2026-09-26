@@ -2,13 +2,13 @@ import { DOCUMENT_KEYS, RUN_KEYS } from '../../src/facets/cli/documents/spec-doc
 import type { SpecFile } from '../../src/facets/cli/documents/spec-document.js';
 import type { Node, Pair, YAMLMap } from '../../src/kernel/yaml/document.js';
 import { documentMap, finding, keyName, pairsOf, runMaps } from './document-model.js';
-import type { Finding } from './document-model.js';
+import type { DocumentFinding } from './document-model.js';
 
 export function checkKeyOrder(
     file: SpecFile,
     lineAt: (node: Pair<Node, Node>) => number,
-): Finding[] {
-    const findings: Finding[] = [];
+): DocumentFinding[] {
+    const findings: DocumentFinding[] = [];
     const inspect = (map: YAMLMap, order: readonly string[], where: string): void => {
         let highest = -1;
         let highestKey = '';
