@@ -695,10 +695,10 @@ export const STATIQUE_RULES: Row[] = [
         convention: 'A test file never imports another test file.',
         facet: 'model',
         family: 'imports',
-        fix: 'Move what the two share into a `*.fixtures.ts` neighbour.',
+        fix: 'Under `specs/`, move what the two read into the `_setup/` of the lowest folder they share; for a module test under `src/`, into a sibling `<file>.fixtures.ts` for typed input data.',
         name: 'no-test-to-test-import',
         rationale:
-            'Sharing between tests goes through `*.fixtures.ts`, not through test-to-test imports that couple the files.',
+            'Sharing between tests goes through a module that prepares them — a `_setup/` module under `specs/`, a sibling `<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.',
         reach: 'tests',
         severity: 'error',
     },
@@ -777,7 +777,7 @@ export const STATIQUE_RULES: Row[] = [
             "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list (a config comment states why each entry is there), a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
         facet: 'model',
         family: 'world',
-        fix: 'Double the port with `mockOf<Port>()`, keep a payload in a `*.fixtures.ts` neighbour, and allow-list a native module with its reason (chapter 05 § Doubles).',
+        fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module with its reason (chapter 05 § Doubles).",
         name: 'no-module-mock',
         rationale:
             'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',

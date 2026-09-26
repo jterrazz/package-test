@@ -1,4 +1,4 @@
-description: accepts importing the fixtures neighbour instead
+description: accepts importing a `_setup/` module instead
 fixture: ./_fixtures/compliant/
 runs:
     - command: .

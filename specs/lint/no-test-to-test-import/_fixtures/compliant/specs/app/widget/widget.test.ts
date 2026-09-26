@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
-import { sharedUser } from './widget.fixtures.js';
+import { sharedUser } from '../_setup/shared-user.js';
 
 describe('widget', () => {
-test('reuses typed fixture data', () => {
-    // Given - data from the fixtures neighbour
-    // Then - allowed by `no-test-to-test-import` and `fixtures-imported-by-tests-only`
+test('reuses a shared value', () => {
+    // Given - a value from the `_setup/` of the folder it shares
+    // Then - allowed by `no-test-to-test-import`
     expect(sharedUser).toBeDefined();
 });
 });

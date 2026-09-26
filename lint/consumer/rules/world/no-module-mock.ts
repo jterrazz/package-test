@@ -152,11 +152,11 @@ export const noModuleMock: LintRule = {
             {
                 assetImport: {
                     found: 'a module test imports the data asset "{{source}}"',
-                    fix: 'write the data as code in a `*.fixtures.ts` neighbour, or move the test under `specs/` as a `.spec.ts`',
+                    fix: 'write the data as code in a sibling `<file>.fixtures.ts`, or move the test under `specs/` as a `.spec.ts`',
                 },
                 bannedDir: {
                     found: 'a `{{dir}}/` directory',
-                    fix: 'write the doubles as code — `mockOf<Port>()` inline, payloads in a `*.fixtures.ts` neighbour — and delete the directory',
+                    fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a sibling `<file>.fixtures.ts`, a spec's in `_fixtures/` — and delete the directory",
                 },
                 viMock: {
                     found: '`vi.mock` doubles a module for every importer',

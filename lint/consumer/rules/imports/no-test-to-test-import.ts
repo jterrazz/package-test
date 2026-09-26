@@ -28,7 +28,7 @@ export const noTestToTestImport: LintRule = {
             {
                 testToTest: {
                     found: 'a test file imports the test file "{{source}}"',
-                    fix: 'share the data through a `*.fixtures.ts` neighbour, or the runner through a `*.specification.ts`',
+                    fix: 'under `specs/`, move what both read into the `_setup/` of the lowest folder they share; under `src/`, into a sibling `<file>.fixtures.ts` for typed input data',
                 },
             },
             CATALOGUE_CHAPTER,
