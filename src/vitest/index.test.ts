@@ -6,7 +6,7 @@ const ROOT = resolve(import.meta.dirname, '../..');
 
 type ProjectHelper = () => { test?: { globalSetup?: string | string[] } };
 
-describe('index', () => {
+describe('vitest', () => {
     test('@jterrazz/test/vitest — a built project names setups the bundle ships — every global setup a built project helper names is a file of dist/', async () => {
         // Given - the built runner-config entry, whose helpers resolve their setups beside the bundle (`npm run build` first)
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a computed specifier resolves to `any`: the helpers are what this reads of it

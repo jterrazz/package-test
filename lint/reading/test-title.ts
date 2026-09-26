@@ -2,11 +2,9 @@ import { basename, dirname, join } from 'node:path';
 
 import { childList, isNode } from './ast.js';
 import type { AstNode } from './ast.js';
-import { readFileCached } from './fs-cache.js';
+import { isFile, readFileCached } from './fs-cache.js';
 import { parseProgram } from './module-parser.js';
 import type { FileRole } from './role.js';
-
-/** The first that answers: the default export's name; the one value export; the value export spelling the base in camelCase or PascalCase, or the base less a role suffix (`request.action` → `request`); else the base. A type is no value export: a test calls what runs. */
 
 /** `pagination.spec.ts` → `pagination`. */
 export function aspectOf(filename: string): string {
@@ -68,6 +66,7 @@ function defaultNameOf(statements: AstNode[]): string | undefined {
     return nameOf(declaration) ?? (isNode(declaration) ? nameOf(declaration.id) : undefined);
 }
 
+/** The first that answers: the default export's name; the one value export; the value export spelling the base in camelCase or PascalCase, or the base less a role suffix (`request.action` → `request`); else the base — an `index` module's being its folder's name, the package entry's aside. A type is no value export: a test calls what runs. */
 export function subjectOfSource(base: string, source: string, filename: string): string {
     const program = parseProgram(filename, source);
     const statements = isNode(program) ? childList(program, 'body') : [];
@@ -87,7 +86,10 @@ export function subjectOfSource(base: string, source: string, filename: string):
 }
 
 function subjectOf(filename: string): string {
-    const base = testBaseOf(filename);
+    const stem = testBaseOf(filename);
+    const folder = dirname(filename);
+    const entry = isFile(join(dirname(folder), 'package.json'));
+    const base = stem === 'index' && !entry ? basename(folder) : stem;
     for (const sibling of siblingsOf(filename)) {
         const source = readFileCached(sibling);
         if (source !== null) {

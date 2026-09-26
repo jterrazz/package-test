@@ -62,4 +62,18 @@ describe('testTitle', () => {
         });
         expect(testTitle(join(root, 'src/alone.test.ts'), 'module').named).toBe('alone');
     });
+
+    test('names an index module by the folder it stands for, the package entry aside', () => {
+        // Given - a folder's index module exporting two values, neither spelling the folder
+        const root = packageWith({
+            'src/concurrency/index.ts':
+                'export class Semaphore {}\nexport function yieldToEventLoop() {}\n',
+        });
+
+        // Then - the folder names the subject, not the word index
+        expect(testTitle(join(root, 'src/concurrency/index.test.ts'), 'module').named).toBe(
+            'concurrency',
+        );
+        expect(testTitle(join(root, 'src/index.test.ts'), 'module').named).toBe('index');
+    });
 });
