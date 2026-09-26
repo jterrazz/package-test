@@ -1,4 +1,4 @@
-import type { ElementRef } from './descriptor.js';
+import type { ElementRef } from './element.js';
 
 export const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
     banner: 'banner',
@@ -24,12 +24,12 @@ export const CONSTRUCTORS: Record<ElementRef['kind'], string> = {
 };
 
 /** Spoken in the vocabulary the author wrote, never playwright's: an option appears only when the author stated one. */
-export function formatElement(element: ElementRef): string {
-    const bare = formatBare(element);
-    return element.scope ? `within(${formatElement(element.scope)}, ${bare})` : bare;
+export function asWritten(element: ElementRef): string {
+    const bare = asWrittenUnscoped(element);
+    return element.scope ? `within(${asWritten(element.scope)}, ${bare})` : bare;
 }
 
-export function formatBare(element: ElementRef): string {
+export function asWrittenUnscoped(element: ElementRef): string {
     const args: string[] = [];
     if (element.name !== undefined) {
         args.push(JSON.stringify(element.name));

@@ -73,35 +73,38 @@ export { clock, type PinnedClock } from './world/clock/clock.js';
 export { mockOf, type MockOfOptions, type MockPort } from './world/mocks/mock-of.js';
 
 export {
-    banner,
     button,
-    complementary,
     content,
-    contentinfo,
     dialog,
-    disabled,
-    type ElementOptions,
-    enabled,
     field,
-    focused,
-    form,
     heading,
     link,
     listitem,
-    main,
-    navigation,
     option,
-    region,
     row,
-    search,
-    selected,
     status,
     table,
     testId,
-    valued,
+} from './elements/descriptors/roles.js';
+export {
+    banner,
+    complementary,
+    contentinfo,
+    form,
+    main,
+    navigation,
+    region,
+    search,
     within,
-} from './elements/elements.js';
-export type { ElementKind, ElementMatch, ElementRef, LandmarkKind } from './elements/descriptor.js';
+} from './elements/descriptors/landmarks.js';
+export { disabled, enabled, focused, selected, valued } from './elements/descriptors/modifiers.js';
+export type {
+    ElementKind,
+    ElementOptions,
+    ElementRef,
+    LandmarkKind,
+} from './elements/descriptors/element.js';
+export type { ElementMatch } from './elements/ambiguity/ambiguity.js';
 
 export {
     type CaptureScope,

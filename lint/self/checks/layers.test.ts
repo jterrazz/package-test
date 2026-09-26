@@ -65,15 +65,15 @@ describe('FRAMEWORK_LAYERS', () => {
                     options: own,
                 },
                 {
-                    code: 'import { button } from "../../elements/elements.js";',
+                    code: 'import { button } from "../../elements/descriptors/roles.js";',
                     errors: [{ messageId: 'crossLayer' }],
                     filename: '/repo/src/world/clock/clock.ts',
                     options: own,
                 },
                 {
-                    code: 'import { websiteFacet } from "../facets/website/index.js";',
+                    code: 'import { websiteFacet } from "../../facets/website/index.js";',
                     errors: [{ messageId: 'crossLayer' }],
-                    filename: '/repo/src/elements/elements.ts',
+                    filename: '/repo/src/elements/descriptors/roles.ts',
                     options: own,
                 },
                 // A facet reaches the project kit only from its project, never from test code.

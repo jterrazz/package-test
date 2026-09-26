@@ -3,8 +3,8 @@ import { resolve } from 'node:path';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
-import { AmbiguousElementError } from '../../../elements/ambiguity.js';
-import { formatElement } from '../../../elements/spelling.js';
+import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
+import { asWritten } from '../../../elements/descriptors/as-written.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
@@ -73,7 +73,7 @@ function compilePredicate(
             throw new Error(
                 refusal('no-landmark-on-mobile', {
                     fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
-                    found: `${formatElement(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
+                    found: `${asWritten(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
                 }),
             );
         }
@@ -324,7 +324,7 @@ export class AppiumAdapter implements DevicePort {
             // The excerpt is best-effort evidence — never mask the timeout.
         }
         return new Error(
-            `${verb}(${formatElement(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
+            `${verb}(${asWritten(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
         );
     }
 

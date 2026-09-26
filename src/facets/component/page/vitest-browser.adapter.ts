@@ -2,10 +2,11 @@ import { expect, TestRunner } from 'vitest';
 import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
-import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity.js';
-import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
-import { LANDMARK_SELECTOR } from '../../../elements/landmarks.js';
-import { formatElement } from '../../../elements/spelling.js';
+import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
+import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
+import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
+import { asWritten } from '../../../elements/descriptors/as-written.js';
+import type { ElementRef } from '../../../elements/descriptors/element.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
@@ -225,7 +226,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                 // Polled: `expect.element` refuses a locator matching nothing, the commonest way to be gone.
                 await polling(
                     () => isGone(locator, element),
-                    `${formatElement(element)} is still on the screen`,
+                    `${asWritten(element)} is still on the screen`,
                 ).toBeTruthy();
             });
         },
@@ -256,7 +257,7 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
                     // No matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
                     await polling(
                         () => locator.query()?.matches(':checked') === true,
-                        `${formatElement(element)} is not the selected one`,
+                        `${asWritten(element)} is not the selected one`,
                     ).toBe(element.selected);
                     return;
                 }

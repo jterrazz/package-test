@@ -1,5 +1,5 @@
 import { refusal } from '../../../../lint/index.refusal.js';
-import { formatElement } from '../../../elements/spelling.js';
+import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { MobileElementMatch, MobileElementRef } from './device.port.js';
 
 function formatMatch(match: MobileElementMatch, index: number): string {
@@ -15,7 +15,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
 
     if (!element.scope) {
         fixes.push(
-            `scope it       within(testId('…'), ${formatElement(element)}) — a screen has no landmarks; any descriptor works as the scope`,
+            `scope it       within(testId('…'), ${asWritten(element)}) — a screen has no landmarks; any descriptor works as the scope`,
         );
     }
 
@@ -23,7 +23,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
         const remaining = matches.filter((match) => match.label === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
-                `exact name     ${formatElement({ exact: true, kind: element.kind, name: element.name })}` +
+                `exact name     ${asWritten({ exact: true, kind: element.kind, name: element.name })}` +
                     `   [leaves ${remaining} of ${matches.length}]`,
             );
         }
@@ -58,7 +58,7 @@ export function describeMobileAmbiguity(options: {
     return refusal('descriptor-matches-one-element', {
         fix: ['designate one of them:', ...fixes].join('\n'),
         found: [
-            `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on the screen —`,
+            `Ambiguous element: ${asWritten(element)} matched ${matches.length} elements on the screen —`,
             ...matches.map((match, index) => formatMatch(match, index)),
         ].join('\n'),
     });

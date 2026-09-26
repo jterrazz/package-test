@@ -1,4 +1,4 @@
-import type { ElementRef } from '../../../elements/descriptor.js';
+import type { PageVerbs } from '../../../elements/verbs.js';
 
 /** A `<link>` element captured from the rendered document's head. */
 export type BrowserLinkElement = {
@@ -21,21 +21,10 @@ export type BrowserConsoleMessage = {
     type: string;
 };
 
-/** The verbs a visit scenario is handed; every action auto-waits, `see()` is the one synchronization primitive. */
-export type Visitor = {
-    check: (element: ElementRef) => Promise<void>;
-    click: (element: ElementRef) => Promise<void>;
-    fill: (element: ElementRef, value: string) => Promise<void>;
-    /** Wait until the element is gone, hidden or never in the document. */
-    gone: (element: ElementRef) => Promise<void>;
+/** The verbs a visit scenario is handed: a page's, plus navigation. */
+export type Visitor = PageVerbs & {
     /** Navigate to a path of the site under test. */
     goto: (path: string) => Promise<void>;
-    hover: (element: ElementRef) => Promise<void>;
-    /** Press a key (e.g. `Enter`). */
-    press: (key: string) => Promise<void>;
-    /** Wait until the element is visible — the only synchronization primitive. */
-    see: (element: ElementRef) => Promise<void>;
-    select: (element: ElementRef, option: string) => Promise<void>;
 };
 
 /** The behavior of a visit — the When of the spec; assertions stay in the Then. */

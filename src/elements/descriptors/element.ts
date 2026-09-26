@@ -43,18 +43,8 @@ export type ElementRef = {
     scope?: ElementRef;
 };
 
-/** One candidate of an ambiguous descriptor, as the refusal lists it. */
-export type ElementMatch = {
-    /** The accessible name, when it differs from the text (an `aria-label`). */
-    accessibleName?: string | undefined;
-    /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
-    context?: string | undefined;
-    /** That landmark's accessible name. */
-    contextName?: string | undefined;
-    /** The attribute that disambiguates most — `href` for links, `name` for fields. */
-    detail?: string | undefined;
-    /** Tag name, lower-cased. */
-    tag: string;
-    /** Text content, whitespace-collapsed and truncated. */
-    text: string;
+/** Options accepted by every named descriptor. */
+export type ElementOptions = {
+    /** Match the accessible name whole; `true` by default, `{ exact: false }` for a name with a variable part. */
+    exact?: boolean;
 };

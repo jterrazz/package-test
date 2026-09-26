@@ -1,4 +1,5 @@
-import type { ElementRef } from '../../../elements/descriptor.js';
+import type { ElementRef } from '../../../elements/descriptors/element.js';
+import type { PageVerbs } from '../../../elements/verbs.js';
 
 export type MobileDevice = {
     /** Simulator name, matched exactly (`iPhone 17`). */
@@ -27,12 +28,8 @@ export type MobileElementMatch = {
     value?: string;
 };
 
-/** The verbs a mobile scenario is handed; each polls until a visible match exists. */
-export type MobileVisitor = {
-    /** Fill a text field with a value. */
-    fill: (element: MobileElementRef, value: string) => Promise<void>;
-    /** Wait until the element is visible — the only synchronization primitive. */
-    see: (element: MobileElementRef) => Promise<void>;
+/** The verbs a mobile scenario is handed: a page's `see` and `fill`, and a `tap`; each polls until a visible match exists. */
+export type MobileVisitor = Pick<PageVerbs, 'fill' | 'see'> & {
     tap: (element: MobileElementRef) => Promise<void>;
 };
 

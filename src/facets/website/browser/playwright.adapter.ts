@@ -4,10 +4,11 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
-import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity.js';
-import type { ElementMatch, ElementRef } from '../../../elements/descriptor.js';
-import { LANDMARK_SELECTOR } from '../../../elements/landmarks.js';
-import { formatElement } from '../../../elements/spelling.js';
+import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
+import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
+import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
+import { asWritten } from '../../../elements/descriptors/as-written.js';
+import type { ElementRef } from '../../../elements/descriptors/element.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -196,7 +197,7 @@ async function waitForValue(locator: Locator, element: ElementRef, wanted: boole
         }
         if (Date.now() >= deadline) {
             throw new Error(
-                `${formatElement(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
+                `${asWritten(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
             );
         }
         // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS

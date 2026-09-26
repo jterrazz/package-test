@@ -1,4 +1,4 @@
-import { DRAWN_DESCRIPTORS, DRAWN_VERBS, WITHIN } from '../../../elements/vocabulary-rows.js';
+import { DRAWN_DESCRIPTORS, DRAWN_VERBS, WITHIN } from '../../../elements/matrix.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import type { MobileScenario } from '../device/device.port.js';

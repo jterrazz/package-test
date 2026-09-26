@@ -1,9 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../../lint/index.refusal.js';
+import { REFUSAL_WHY } from '../../../lint/index.refusal.js';
+import { navigation, within } from '../descriptors/landmarks.js';
+import { link } from '../descriptors/roles.js';
 import { describeAmbiguity } from './ambiguity.js';
-import type { ElementMatch } from './descriptor.js';
-import { link, navigation, within } from './elements.js';
+import type { ElementMatch } from './ambiguity.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     tag: 'a',

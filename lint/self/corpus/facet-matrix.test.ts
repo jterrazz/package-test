@@ -1,7 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-// oxlint-disable-next-line import/no-namespace -- the point of this import IS the export list: the test holds the vocabulary equal to what the module publishes, which a named import cannot read.
-import * as elements from '../../../src/elements/elements.js';
+/* oxlint-disable import/no-namespace -- the point of these imports IS the export list: the test holds the vocabulary equal to what the descriptor modules publish, which a named import cannot read. */
+import * as landmarks from '../../../src/elements/descriptors/landmarks.js';
+import * as modifiers from '../../../src/elements/descriptors/modifiers.js';
+import * as roles from '../../../src/elements/descriptors/roles.js';
+/* oxlint-enable import/no-namespace */
 import type { CliResult } from '../../../src/expectations/command/cli.result.js';
 import type { HttpResult } from '../../../src/facets/api/index.js';
 import type { RouteOptionsAny } from '../../../src/facets/api/request/route.js';
@@ -229,9 +232,11 @@ describe('facet-matrix', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `elements/` exports', () => {
-        // Given - the element module, which is the vocabulary's one home
-        const exported = Object.keys(elements).toSorted();
+    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `elements/descriptors/` exports', () => {
+        // Given - the descriptor modules, which are the vocabulary's one home
+        const exported = [roles, landmarks, modifiers]
+            .flatMap((module) => Object.keys(module))
+            .toSorted();
 
         // Then - the browsers declare them all, the device the four XCUITest kinds and the scope
         expect(declared('website', 'Descriptor')).toStrictEqual(exported);

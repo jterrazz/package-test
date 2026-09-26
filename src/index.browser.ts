@@ -43,33 +43,31 @@ export { defineStub, defineStubs } from './world/stubs/stub.js';
 export { clock } from './world/clock/clock.js';
 export { mockOf } from './world/mocks/mock-of.js';
 export {
-    banner,
     button,
-    complementary,
     content,
-    contentinfo,
     dialog,
-    disabled,
-    enabled,
     field,
-    focused,
-    form,
     heading,
     link,
     listitem,
-    main,
-    navigation,
     option,
-    region,
     row,
-    search,
-    selected,
     status,
     table,
     testId,
-    valued,
+} from './elements/descriptors/roles.js';
+export {
+    banner,
+    complementary,
+    contentinfo,
+    form,
+    main,
+    navigation,
+    region,
+    search,
     within,
-} from './elements/elements.js';
+} from './elements/descriptors/landmarks.js';
+export { disabled, enabled, focused, selected, valued } from './elements/descriptors/modifiers.js';
 export { match, Matcher } from './expectations/tokens/match.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil } from './expectations/conditions/wait-until.js';

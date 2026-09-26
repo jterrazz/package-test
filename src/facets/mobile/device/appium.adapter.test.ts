@@ -1,7 +1,8 @@
 /* oxlint-disable vitest/no-restricted-vi-methods -- this file tests the ADAPTER's own deadline: `clock` pins the calendar, and what has to move here is the timer queue the adapter waits on, which only vitest's fake timers hold */
 import { describe, expect, test, vi } from 'vitest';
 
-import { button, testId, within } from '../../../elements/elements.js';
+import { within } from '../../../elements/descriptors/landmarks.js';
+import { button, testId } from '../../../elements/descriptors/roles.js';
 import { AppiumAdapter } from './appium.adapter.js';
 
 /** A stub driver that resolves no element: every verb runs to its deadline, the value under test. */

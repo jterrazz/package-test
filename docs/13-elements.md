@@ -113,7 +113,7 @@ A scenario is the When: pure interaction, no `expect()` inside it (rule `no-expe
 | `see(element)`            | **The synchronization primitive** — retries until visible           |
 | `gone(element)`           | The absence primitive — retries until hidden or out of the document |
 
-`goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` is absent on mobile until the adapter can answer for absence honestly, which an XCUITest tree does not do yet.
+The website's and the component's visitors carry the same eight page verbs by construction — one declaration, `PageVerbs` (`src/elements/verbs.ts`), each surface adding only its own words — and the device's visitor takes its `see` and `fill` from it. `goto()` does not exist on a component, because a component has no address. `rerender`/`unmount` exist nowhere else, because only a component has a parent inside the test. `gone()` is absent on mobile until the adapter can answer for absence honestly, which an XCUITest tree does not do yet.
 
 ## The per-facet matrix
 

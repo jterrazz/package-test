@@ -1,4 +1,4 @@
-import type { LandmarkKind } from './descriptor.js';
+import type { LandmarkKind } from '../descriptors/element.js';
 
 const LANDMARK_ELEMENTS: Record<LandmarkKind, string> = {
     banner: 'header',

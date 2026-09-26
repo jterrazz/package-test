@@ -1,7 +1,23 @@
-import { refusal } from '../../lint/index.refusal.js';
-import type { ElementMatch, ElementRef } from './descriptor.js';
-import { CONTEXT_LANDMARKS } from './landmarks.js';
-import { CONSTRUCTORS, formatBare, formatElement } from './spelling.js';
+import { refusal } from '../../../lint/index.refusal.js';
+import { asWritten, asWrittenUnscoped, CONSTRUCTORS } from '../descriptors/as-written.js';
+import type { ElementRef } from '../descriptors/element.js';
+import { CONTEXT_LANDMARKS } from './landmark-of-tag.js';
+
+/** One candidate of an ambiguous descriptor, as the refusal lists it. */
+export type ElementMatch = {
+    /** The accessible name, when it differs from the text (an `aria-label`). */
+    accessibleName?: string | undefined;
+    /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
+    context?: string | undefined;
+    /** That landmark's accessible name. */
+    contextName?: string | undefined;
+    /** The attribute that disambiguates most — `href` for links, `name` for fields. */
+    detail?: string | undefined;
+    /** Tag name, lower-cased. */
+    tag: string;
+    /** Text content, whitespace-collapsed and truncated. */
+    text: string;
+};
 
 /** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
 function landmarkOf(match: ElementMatch): string | undefined {
@@ -49,8 +65,8 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
             rest.length > 0 ? `   [also here: ${rest.map(([name]) => name).join(', ')}]` : '';
         fixes.push(
             first === undefined
-                ? `scope it       within(<a container holding only this one>, ${formatBare(element)})`
-                : `scope it       within(${first[0]}, ${formatBare(element)})   [leaves ${first[1]} of ${matches.length}]${alsoHere}`,
+                ? `scope it       within(<a container holding only this one>, ${asWrittenUnscoped(element)})`
+                : `scope it       within(${first[0]}, ${asWrittenUnscoped(element)})   [leaves ${first[1]} of ${matches.length}]${alsoHere}`,
         );
     }
 
@@ -59,7 +75,7 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
-                `exact name     ${formatBare({ ...element, exact: true })}` +
+                `exact name     ${asWrittenUnscoped({ ...element, exact: true })}` +
                     `   [leaves ${remaining} of ${matches.length}]`,
             );
         }
@@ -87,7 +103,7 @@ export function describeAmbiguity(options: {
     return refusal('descriptor-matches-one-element', {
         fix: ['designate one of them:', ...fixes].join('\n'),
         found: [
-            `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on ${url} —`,
+            `Ambiguous element: ${asWritten(element)} matched ${matches.length} elements on ${url} —`,
             ...matches.map((match, index) => formatMatch(match, index)),
         ].join('\n'),
     });
