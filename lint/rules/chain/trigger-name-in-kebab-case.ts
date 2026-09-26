@@ -15,7 +15,7 @@ function kebabOf(name: string): string {
 }
 
 /** Only string literals are checked: a dynamic name is out of static reach. */
-export const triggerNameIsKebabCase: LintRule = {
+export const triggerNameInKebabCase: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -36,8 +36,8 @@ export const triggerNameIsKebabCase: LintRule = {
         };
     },
     meta: {
-        docs: rowOf('trigger-name-is-kebab-case'),
-        messages: lessons('trigger-name-is-kebab-case', {
+        docs: rowOf('trigger-name-in-kebab-case'),
+        messages: lessons('trigger-name-in-kebab-case', {
             notKebab: {
                 found: 'the job name "{{name}}" is not kebab-case',
                 fix: 'rename the job "{{kebab}}", in the app and in its tests alike',

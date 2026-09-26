@@ -3,19 +3,19 @@ import { describe, expect, test } from 'vitest';
 import { directory, file } from '../../../src/index.js';
 import { cli } from '../checker.specification.js';
 
-describe('document-description-is-a-title', () => {
+describe('document-description-reads-as-a-title', () => {
     // The checker's diagnostics are this package's product, so the whole stream is goldened.
     test('rejects a description that is a capitalised sentence', async () => {
         // Given - a description: starting on a capital and ending on a period
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/document-description-is-a-title/'))
+            .fixture(directory('./fixtures/lint-violations/document-description-reads-as-a-title/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(document-description-is-a-title): found: a \`description:\` ending with a period · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: drop the period — a title is a fragment, not a sentence · read: docs/19-linting.md#document-description-is-a-title
-            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(document-description-is-a-title): found: a \`description:\` starting with a capital · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: start it lowercase: "builds the widget." · read: docs/19-linting.md#document-description-is-a-title
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(document-description-reads-as-a-title): found: a \`description:\` ending with a period · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: drop the period — a title is a fragment, not a sentence · read: docs/19-linting.md#document-description-reads-as-a-title
+            specs/widget/builds.spec.yaml:1:1: error jterrazz-check(document-description-reads-as-a-title): found: a \`description:\` starting with a capital · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: start it lowercase: "builds the widget." · read: docs/19-linting.md#document-description-reads-as-a-title
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);

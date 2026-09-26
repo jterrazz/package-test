@@ -4,4 +4,4 @@ runs:
     - command: .
       exit: 1
       stdout: |
-          specs/app/widget/widget.test.ts:8:38  jterrazz(trigger-name-is-kebab-case)
+          specs/app/widget/widget.test.ts:8:38  jterrazz(trigger-name-in-kebab-case)

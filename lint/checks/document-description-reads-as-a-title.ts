@@ -11,7 +11,7 @@ export function checkDescription(document: SpecDocument): Finding[] {
     const text = document.description;
     const line = document.descriptionLine;
     const at = (found: string, fix: string): Finding =>
-        finding('document-description-is-a-title', line, { fix, found });
+        finding('document-description-reads-as-a-title', line, { fix, found });
     if (text.includes('\n')) {
         findings.push(
             at('a `description:` of several lines', 'write the vitest title on one line'),

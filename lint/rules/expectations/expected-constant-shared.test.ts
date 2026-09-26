@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { expectedConstantIsShared } from './expected-constant-is-shared.js';
+import { expectedConstantShared } from './expected-constant-shared.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-ruleTester().run('expected-constant-is-shared', asOxlintRule(expectedConstantIsShared), {
+ruleTester().run('expected-constant-shared', asOxlintRule(expectedConstantShared), {
     invalid: [
         // One test reads it once: the value goes in place, the constant goes.
         {

@@ -17,7 +17,7 @@
         "jterrazz/no-repeated-chain-setting": "warn",
         "jterrazz/given-and-then-markers-present": "error",
         "jterrazz/no-redundant-service-url": "warn",
-        "jterrazz/trigger-name-is-kebab-case": "error",
+        "jterrazz/trigger-name-in-kebab-case": "error",
         "jterrazz/cli-runs-the-product-binary": "warn",
         "jterrazz/specs-at-declared-depth": [
             "error",
@@ -39,7 +39,7 @@
         "jterrazz/spec-file-within-line-limit": "error",
         "jterrazz/test-body-within-line-limit": "error",
         "jterrazz/result-compared-whole": "error",
-        "jterrazz/expected-constant-is-shared": "error",
+        "jterrazz/expected-constant-shared": "error",
         "jterrazz/no-imported-expectation": "error",
         "jterrazz/negative-golden-frozen": "warn",
         "jterrazz/no-status-only-test": "warn",

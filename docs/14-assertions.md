@@ -1,6 +1,6 @@
 # 14 — Assertions: the reference
 
-Every assertion goes through `expect()` (rule `result-accessor-is-read-only`). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
+Every assertion goes through `expect()` (rule `result-accessor-read-only`). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
 
 This chapter is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and the file it reads.
 
@@ -285,7 +285,7 @@ A call that threw leaves `result.value` empty and vice versa; asserting on both 
 
 ## Two helpers that are not matchers
 
-`expect()` is the only way an assertion is made (rule `result-accessor-is-read-only`), but two gestures around an assertion had been hand-written in every repository that needed them.
+`expect()` is the only way an assertion is made (rule `result-accessor-read-only`), but two gestures around an assertion had been hand-written in every repository that needed them.
 
 **`required(value, why)`** — the value, or a failure that says what was missing and why it mattered. A test reaching into a captured structure meets `T | undefined` and has to answer for it; `!` erases the question and a three-line `if (…) throw` is the same three lines everywhere.
 
@@ -328,7 +328,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Common mistakes
 
-- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-is-read-only`). Write `expect(result.stdout.text).toContain('x')`.
+- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-read-only`). Write `expect(result.stdout.text).toContain('x')`.
 - **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule `io-matcher-awaited`).
 - **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract `io-matcher-awaited` states and the types carry.
 - **`file('./expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./expected/help/')`.

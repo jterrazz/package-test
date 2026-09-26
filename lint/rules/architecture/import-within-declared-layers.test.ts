@@ -159,7 +159,7 @@ ruleTester.run('import-within-declared-layers (a declared map)', rule, {
         // An exact-module edge reached with its extension.
         {
             code: 'import { toKebabCase } from "../../src/model/chain/binding.js";',
-            filename: `${SPINE}/lint/rules/trigger-name-is-kebab-case.ts`,
+            filename: `${SPINE}/lint/rules/trigger-name-in-kebab-case.ts`,
             options: framework,
         },
         // A `lint/` with no `src/` beside it is no spine, and no layer.

@@ -5,12 +5,12 @@ import { givenInTheTest } from './chain/given-in-the-test.js';
 import { markerOnOneLine } from './chain/marker-on-one-line.js';
 import { noRedundantServiceUrl } from './chain/no-redundant-service-url.js';
 import { noRepeatedChainSetting } from './chain/no-repeated-chain-setting.js';
-import { triggerNameIsKebabCase } from './chain/trigger-name-is-kebab-case.js';
+import { triggerNameInKebabCase } from './chain/trigger-name-in-kebab-case.js';
 import { whenBetweenGivenAndThen } from './chain/when-between-given-and-then.js';
 import { noExpectInScenario } from './elements/no-expect-in-scenario.js';
 import { scenarioEndsSettled } from './elements/scenario-ends-settled.js';
 import { testIdStatesWhatIsMissing } from './elements/test-id-states-what-is-missing.js';
-import { expectedConstantIsShared } from './expectations/expected-constant-is-shared.js';
+import { expectedConstantShared } from './expectations/expected-constant-shared.js';
 import { ioMatcherAwaited } from './expectations/io-matcher-awaited.js';
 import { negativeGoldenFrozen } from './expectations/negative-golden-frozen.js';
 import { noAwaitOnSyncMatcher } from './expectations/no-await-on-sync-matcher.js';
@@ -76,7 +76,7 @@ const plugin: LintPlugin = {
         'no-repeated-chain-setting': noRepeatedChainSetting,
         'given-and-then-markers-present': givenAndThenMarkersPresent,
         'no-redundant-service-url': noRedundantServiceUrl,
-        'trigger-name-is-kebab-case': triggerNameIsKebabCase,
+        'trigger-name-in-kebab-case': triggerNameInKebabCase,
         'cli-runs-the-product-binary': cliRunsTheProductBinary,
         'specs-at-declared-depth': specsAtDeclaredDepth,
         'stubs-imported-through-facade': stubsImportedThroughFacade,
@@ -98,7 +98,7 @@ const plugin: LintPlugin = {
         'no-existence-only-assertion': noExistenceOnlyAssertion,
         'no-probe-cluster': noProbeCluster,
         'result-compared-whole': resultComparedWhole,
-        'expected-constant-is-shared': expectedConstantIsShared,
+        'expected-constant-shared': expectedConstantShared,
         'no-imported-expectation': noImportedExpectation,
         'io-matcher-awaited': ioMatcherAwaited,
         'no-await-on-sync-matcher': noAwaitOnSyncMatcher,

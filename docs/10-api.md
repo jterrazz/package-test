@@ -170,7 +170,7 @@ Location: /users/{{uuid#user}}
 
 ## The result
 
-The result of an API action exposes read-only accessors (rule `result-accessor-is-read-only`); all assertions go through `expect()`:
+The result of an API action exposes read-only accessors (rule `result-accessor-read-only`); all assertions go through `expect()`:
 
 | Member                      | Type             | Description                                                                                                             |
 | --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |

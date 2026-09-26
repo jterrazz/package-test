@@ -10,7 +10,7 @@ import type { SpecFile } from '../../src/facets/cli/documents/spec-document.js';
 import { isScalar, renderYamlSource, Scalar } from '../../src/kernel/yaml/document.js';
 import type { Node, Pair, YAMLMap } from '../../src/kernel/yaml/document.js';
 import type { TokenViolation } from './checker.js';
-import { checkDescription } from './document-description-is-a-title.js';
+import { checkDescription } from './document-description-reads-as-a-title.js';
 import { checkRegisteredNames } from './document-env-and-serve-registered.js';
 import { checkKeyOrder } from './document-keys-in-canonical-order.js';
 import {

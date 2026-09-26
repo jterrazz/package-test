@@ -156,7 +156,7 @@ export const STATIQUE_RULES: CatalogEntry[] = [
         facet: 'job',
         family: 'chain',
         fix: 'Write the job name in kebab-case, the same spelling the application registers it under.',
-        name: 'trigger-name-is-kebab-case',
+        name: 'trigger-name-in-kebab-case',
         rationale:
             'The job name is a contract between the app and its tests — a stable identifier forbids divergent translations.',
         reach: 'tests',
@@ -461,7 +461,7 @@ export const STATIQUE_RULES: CatalogEntry[] = [
         facet: 'model',
         family: 'expectations',
         fix: 'Write the value in place, in the matcher the one test hands it to, and delete the constant — `make fix` inlines one read.',
-        name: 'expected-constant-is-shared',
+        name: 'expected-constant-shared',
         rationale:
             'A test is read where it is written: an expectation parked at the top of the file makes its one reader scroll to know what it asserts, and buys no sharing for the price.',
         reach: 'spec',
@@ -1104,7 +1104,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         facet: 'cli',
         family: 'layout',
         fix: 'Write it as a title, not as a sentence.',
-        name: 'document-description-is-a-title',
+        name: 'document-description-reads-as-a-title',
         rationale:
             "The description IS the vitest title — a title's rules apply to it, not a paragraph's.",
         reach: 'document',
@@ -1433,7 +1433,7 @@ export const TYPE_ROWS: CatalogEntry[] = [
         facet: 'model',
         family: 'expectations',
         fix: 'Assert on what the run produced; change the Given if the answer is wrong.',
-        name: 'result-accessor-is-read-only',
+        name: 'result-accessor-read-only',
         rationale:
             'The answer a run produced is evidence, and a test that can rewrite its own evidence proves nothing.',
         reach: 'tests',

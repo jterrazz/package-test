@@ -126,7 +126,7 @@ export async function typeRows(): Promise<void> {
     // @ts-expect-error one-terminal-action-per-chain — one terminal action closes the chain [`Property 'get' does not exist on type 'HttpResult'`]
     await result.get('/orders/2');
 
-    // @ts-expect-error result-accessor-is-read-only — a result accessor is read-only [`Cannot assign to 'status' because it is a read-only property`]
+    // @ts-expect-error result-accessor-read-only — a result accessor is read-only [`Cannot assign to 'status' because it is a read-only property`]
     result.status = 200;
 
     const anonymous = mockOf();

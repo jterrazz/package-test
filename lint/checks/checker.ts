@@ -48,7 +48,7 @@ export const TREE_PASS_IDS = [
     'no-empty-expected-stream',
     'document-description-unique',
     'checker-suppression-states-a-reason',
-    'document-description-is-a-title',
+    'document-description-reads-as-a-title',
 ] as const;
 
 export const MEMBER_PASS_IDS = [

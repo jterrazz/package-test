@@ -98,7 +98,7 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
 }
 
 /** A constant a helper reads counts as shared: no scan can tell how many tests call the helper. */
-export const expectedConstantIsShared: LintRule = {
+export const expectedConstantShared: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'spec',
@@ -152,9 +152,9 @@ export const expectedConstantIsShared: LintRule = {
         };
     },
     meta: {
-        docs: rowOf('expected-constant-is-shared'),
+        docs: rowOf('expected-constant-shared'),
         fixable: 'code',
-        messages: lessons('expected-constant-is-shared', {
+        messages: lessons('expected-constant-shared', {
             singleReader: {
                 found: 'the expectation `{{name}}`, declared for the file and read by one test',
                 fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',

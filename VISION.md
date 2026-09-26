@@ -4037,9 +4037,9 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `b12-route-params-runtime`                | `route-written-as-template-at-runtime`        | chain        |
 | `b7-sequence-by-seed`                     | `sequence-expressed-by-seeding`               | chain        |
 | `b6-url-injection`                        | `service-urls-injected`                       | chain        |
-| `b8-kebab-trigger`                        | `trigger-name-is-kebab-case`                  | chain        |
+| `b8-kebab-trigger`                        | `trigger-name-in-kebab-case`                  | chain        |
 | `b10-when-between-markers`                | `when-between-given-and-then`                 | chain        |
-| `j5-spec-description`                     | `document-description-is-a-title`             | layout       |
+| `j5-spec-description`                     | `document-description-reads-as-a-title`             | layout       |
 | `j4-spec-description-unique`              | `document-description-unique`                 | layout       |
 | `c20-facet-folder`                        | `facet-folder-has-specification`              | layout       |
 | `c18-module-test-under-facet`             | `facet-test-uses-its-runner`                  | layout       |
@@ -4073,7 +4073,7 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `d4b-spec-shape`                          | `document-follows-its-grammar`                | expectations |
 | `d4b-spec-key-order`                      | `document-keys-in-canonical-order`            | expectations |
 | `d4b-spec-block-scalar`                   | `document-streams-written-as-block-scalars`   | expectations |
-| `d28-shared-expectation`                  | `expected-constant-is-shared`                 | expectations |
+| `d28-shared-expectation`                  | `expected-constant-shared`                 | expectations |
 | `c3-expected-http-shape`                  | `expected-headers-are-a-subset`               | expectations |
 | `d3-a-golden-is-read-where-its-path-says` | `golden-read-from-its-path`                   | expectations |
 | `d4b-http-first-line`                     | `http-first-line-follows-its-grammar`         | expectations |
@@ -4100,7 +4100,7 @@ Every rule, checker pass, self lock and review principle answers to one name tha
 | `d14-one-verb-per-meaning`                | `one-verb-per-meaning`                        | expectations |
 | `d11-golden-file`                         | `output-asserted-as-a-golden`                 | expectations |
 | `d5w-spec-pinned-value`                   | `pinned-value-from-the-input`                 | expectations |
-| `d1-read-only-accessors`                  | `result-accessor-is-read-only`                | expectations |
+| `d1-read-only-accessors`                  | `result-accessor-read-only`                | expectations |
 | `d20-whole-result`                        | `result-compared-whole`                       | expectations |
 | `m2-mockof-requires-the-port`             | `mock-of-needs-a-port`                        | world        |
 | `d7-strict-intercepts`                    | `network-strict-after-first-stub`             | world        |
