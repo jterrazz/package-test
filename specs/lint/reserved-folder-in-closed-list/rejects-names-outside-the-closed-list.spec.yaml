@@ -7,6 +7,7 @@ runs:
           specs/_shared/notes.md:1:1  jterrazz-check(reserved-folder-in-closed-list)
           specs/cli/doubles/:1:1  jterrazz-check(reserved-folder-in-closed-list)
           specs/cli/orders/_helpers/:1:1  jterrazz-check(reserved-folder-in-closed-list)
+          specs/cli/orders/_setup/_helpers/:1:1  jterrazz-check(reserved-folder-in-closed-list)
           specs/cli/orders/_setup/_seeds/:1:1  jterrazz-check(reserved-folder-in-closed-list)
           specs/cli/orders/_setup/rows.json:1:1  jterrazz-check(reserved-folder-in-closed-list)
           specs/cli/orders/_shared/:1:1  jterrazz-check(reserved-folder-in-closed-list)

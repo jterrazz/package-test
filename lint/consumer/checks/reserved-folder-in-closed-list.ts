@@ -110,6 +110,14 @@ function refusedInSetup(
             `move it beside that \`${SETUP_FOLDER}/\`, to \`${owner}/${name}/\`, and the paths that name what it holds`,
         );
     }
+    if (isDirectory && name.startsWith('_')) {
+        return finding(
+            rootDir,
+            path,
+            `\`${name}/\` inside a \`${SETUP_FOLDER}/\`, a \`_\` name outside the closed list`,
+            `drop the \`_\` and name it for what it holds — the reserved folders, ${CLOSED_LIST}, sit beside a \`${SETUP_FOLDER}/\`, never inside it`,
+        );
+    }
     if (isDirectory || isModuleName(name) || DECLARATION.test(name)) {
         return undefined;
     }
