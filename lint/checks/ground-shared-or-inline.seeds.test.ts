@@ -30,7 +30,7 @@ describe('ground-shared-or-inline.seeds', () => {
         ['A user with an admin role', 'user-admin-role'],
         ['the', undefined],
     ])(
-        'checker-sql-seeds — the seed branch of `ground-shared-or-inline` — a seed with no comment is named by its test — the title %j names the seed %j',
+        'ground-shared-or-inline.seeds — the seed branch of `ground-shared-or-inline` — a seed with no comment is named by its test — the title %j names the seed %j',
         (title, name) => {
             // Given - a test's title
             // Then - its first four meaningful words, kebab-cased, or nothing when it has none
