@@ -7,6 +7,7 @@ import { listFiles, suppressedLines } from '../../checks/crossfile.js';
 import { specimenOf } from '../../reading/specimen.js';
 import { COLUMNS } from '../corpus/facet-matrix.js';
 import { capabilityFolders } from '../corpus/matrix.js';
+import type { SelfPassId } from './checker.js';
 
 const COMPONENT = 'component';
 
@@ -64,7 +65,7 @@ function fixOf(facet: string, shape: string, vocabulary: Set<string>, beside = '
     return `file it under the capability it specifies, one folder below its facet — \`${facet}/<capability>/${shape}\`${beside}, the capability a name the matrix gives the \`${facet}\` column, kebab-cased (\`${EXAMPLES.filter((name) => vocabulary.has(name)).join('`, `')}\`, …; docs/03-testing.md § The capability matrix)`;
 }
 
-function checkComponentTree(specsRoot: string): TokenViolation[] {
+function checkComponentTree(specsRoot: string): TokenViolation<SelfPassId>[] {
     const vocabulary = capabilityFolders(COMPONENT);
     return listFiles(join(specsRoot, COMPONENT), (path) => RENDERED.test(path)).flatMap((file) => {
         const folders = foldersBelowFacet(specsRoot, file);
@@ -97,11 +98,11 @@ function checkComponentTree(specsRoot: string): TokenViolation[] {
 }
 
 /** Reported at the file's first line of code, so a `checker-disable-next-line specimen-filed-by-capability -- <reason>` above it silences the finding. */
-export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
+export function checkCapabilityFolder(specsRoot: string): TokenViolation<SelfPassId>[] {
     return [...checkSpecimenSpecs(specsRoot), ...checkComponentTree(specsRoot)];
 }
 
-function checkSpecimenSpecs(specsRoot: string): TokenViolation[] {
+function checkSpecimenSpecs(specsRoot: string): TokenViolation<SelfPassId>[] {
     return listFiles(specsRoot, (path) => path.endsWith('.spec.ts')).flatMap((file) => {
         const [facet = ''] = relative(specsRoot, file).split(sep);
         if (facet === SHARED_GROUND) {

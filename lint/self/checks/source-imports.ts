@@ -6,6 +6,7 @@ import { child, childList, isNode, nodeStart, stringValue, walk } from '../../re
 import type { AstNode } from '../../reading/ast.js';
 import { parseProgram } from '../../reading/module-parser.js';
 import type { LayerOptions } from '../../rules/architecture/import-within-declared-layers.js';
+import type { SelfPassId } from './checker.js';
 import { ENGINE_OWNERS } from './engines.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import { byPosition, facetOf, finding, inGround, listed } from './source-tree.js';
@@ -100,7 +101,7 @@ function productionReferences(root: string): { from: string; reference: Referenc
         );
 }
 
-export function checkFacetIsolation(root: string): TokenViolation[] {
+export function checkFacetIsolation(root: string): TokenViolation<SelfPassId>[] {
     return productionReferences(root)
         .filter(({ reference }) => reference.specifier.startsWith('.'))
         .flatMap(({ from, reference }) => {
@@ -152,7 +153,7 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
         .toSorted(byPosition);
 }
 
-export function checkEngineOwner(root: string): TokenViolation[] {
+export function checkEngineOwner(root: string): TokenViolation<SelfPassId>[] {
     return productionReferences(root)
         .flatMap(({ from, reference }) => {
             const { specifier } = reference;

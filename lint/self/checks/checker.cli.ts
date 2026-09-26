@@ -6,13 +6,14 @@ import { reportLine } from '../../checks/checker.js';
 import type { TokenViolation } from '../../checks/checker.js';
 import { discoverSpecRoots } from '../../checks/members.js';
 import { SELF_CHAPTER, selfRowOf } from '../catalogue/manifest.js';
+import type { SelfPassId } from './checker.js';
 import { runSelfChecks, runSelfSourceChecks, SELF_PASS_IDS } from './checker.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /** `node dist/self-checker.js [dir]`, never in the tarball: no fixer, no ratchet, no JSON, since this repository is held at zero. */
 const root = resolve(process.argv[2] ?? '.');
 
-const findings: TokenViolation[] = [...runSelfSourceChecks(root)];
+const findings: TokenViolation<SelfPassId>[] = [...runSelfSourceChecks(root)];
 for (const specsRoot of discoverSpecRoots(root)) {
     const prefix = relative(root, specsRoot);
     for (const violation of runSelfChecks(specsRoot)) {

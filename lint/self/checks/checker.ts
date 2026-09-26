@@ -14,11 +14,11 @@ export const SELF_PASS_IDS = [
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];
 
-export function runSelfChecks(specsRoot: string): TokenViolation[] {
+export function runSelfChecks(specsRoot: string): TokenViolation<SelfPassId>[] {
     return checkCapabilityFolder(specsRoot);
 }
 
-export function runSelfSourceChecks(root: string): TokenViolation[] {
+export function runSelfSourceChecks(root: string): TokenViolation<SelfPassId>[] {
     return [
         ...checkSourceRoot(root),
         ...checkFacetIsolation(root),

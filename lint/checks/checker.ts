@@ -18,7 +18,6 @@ import {
 } from '../../src/kernel/files/ground.js';
 import { lessonOf } from '../catalogue/lesson.js';
 import type { Teaching } from '../catalogue/lesson.js';
-import type { SelfPassId } from '../self/checks/checker.js';
 import {
     checkCopiedGround,
     checkDatabaseProperty,
@@ -114,25 +113,22 @@ export const CHECKER_PASS_IDS: string[] = [
     ...new Set<string>([...TREE_PASS_IDS, ...MEMBER_PASS_IDS]),
 ];
 
-export type CheckerPassId =
-    | (typeof MEMBER_PASS_IDS)[number]
-    | (typeof TREE_PASS_IDS)[number]
-    | SelfPassId;
+export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
 
 export type Severity = 'error' | 'warn';
 
-export type TokenViolation = Teaching & {
+export type TokenViolation<PassId extends string = CheckerPassId> = Teaching & {
     /** A finding about a whole file or folder points at its first column. */
     column?: number;
     file: string;
     line: number;
     /** Published as `jterrazz-check(<code>)`, counted by the ratchet under `jterrazz-check/<code>`. */
-    rule: CheckerPassId;
+    rule: PassId;
     severity: Severity;
     token?: string;
 };
 
-export function messageOf(violation: TokenViolation): string {
+export function messageOf(violation: TokenViolation<string>): string {
     return lessonOf(violation.rule, violation);
 }
 
@@ -435,16 +431,16 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
 }
 
 /** The compiler convention every editor's problem matcher parses, and oxlint's findings normalise to. */
-export function reportLine(violation: TokenViolation, message: string): string {
+export function reportLine(violation: TokenViolation<string>, message: string): string {
     const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
     return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${rule}): ${message}`;
 }
 
-export function formatViolation(violation: TokenViolation): string {
+export function formatViolation(violation: TokenViolation<string>): string {
     return reportLine(violation, messageOf(violation));
 }
 
-export function formatViolations(violations: TokenViolation[]): string {
+export function formatViolations(violations: TokenViolation<string>[]): string {
     return violations.map(formatViolation).join('\n');
 }
