@@ -1,12 +1,9 @@
-import type { AfterHook, BeforeHook, Context, RuleDocs, RuleMeta } from '@oxlint/plugins';
+import type { Context, RuleDocs, RuleMeta } from '@oxlint/plugins';
 
 import type { RuleDoc } from '../catalogue/row.js';
-import type { AstNode } from '../reading/ast.js';
+import type { Visitor } from '../reading/ast.js';
 
-export type Visitor = Record<string, (node: AstNode) => void> & {
-    after?: AfterHook;
-    before?: BeforeHook;
-};
+export type { Visitor } from '../reading/ast.js';
 
 /** `before` opens each file and returns `false` to skip it; the context answers only inside the hooks and handlers. */
 export type LintRule = {

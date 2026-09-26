@@ -1,8 +1,7 @@
 import { dirname, resolve } from 'node:path';
 
-import type { Visitor } from '../rules/rule.js';
 import { child, childList, identifierName, memberPropertyName, stringValue, walk } from './ast.js';
-import type { AstNode } from './ast.js';
+import type { AstNode, Visitor } from './ast.js';
 import { projectRootOf } from './role.js';
 
 export type PathReference = { node: AstNode; path: string };
