@@ -13,6 +13,7 @@ import {
 import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
+import { SPEC_EXTENSION } from './spec-document.js';
 import { isWithin, readText } from './tree.js';
 
 export const COMPONENT_TREE = 'component';
@@ -91,7 +92,7 @@ export function importedModulesOf(file: string): string[] {
 }
 
 export function declaresTests(name: string): boolean {
-    return /\.(?:test\.tsx?|spec\.tsx?|spec\.yaml)$/u.test(name);
+    return isTestOrSpecName(name) || name.endsWith(SPEC_EXTENSION);
 }
 
 export function holdsASpec(folder: string): boolean {
