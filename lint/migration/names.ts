@@ -52,7 +52,6 @@ export const RULE_NAMES: Readonly<Record<string, string>> = {
     'e7w-include-prefix-exists': 'include-points-at-a-folder',
     'e8-literate-specification-exists': 'literate-specification-exists',
     'e9w-env-assignment-in-test': 'no-raw-env-write',
-    'expected-constant-is-shared': 'expected-constant-shared',
     'f1-no-subpath-import': 'no-unpublished-subpath',
     'f2-no-test-imports-in-prod': 'no-test-code-in-production',
     'f4-no-test-to-test-import': 'no-test-to-test-import',
@@ -64,7 +63,6 @@ export const RULE_NAMES: Readonly<Record<string, string>> = {
     'i4-no-module-doubles': 'no-module-mock',
     'j2-no-sleep': 'no-sleep',
     'j6w-given-in-the-test': 'given-in-the-test',
-    'trigger-name-is-kebab-case': 'trigger-name-in-kebab-case',
     'w1-scenario-pure': 'no-expect-in-scenario',
     'w2-testid-states-what-is-missing': 'test-id-states-what-is-missing',
     'w5w-scenario-settles': 'scenario-ends-settled',
@@ -106,6 +104,5 @@ export const PASS_NAMES: Readonly<Record<string, readonly string[]>> = {
     j3w: ['no-empty-expected-stream'],
     j4: ['document-description-unique'],
     j5: ['document-description-reads-as-a-title'],
-    'document-description-is-a-title': ['document-description-reads-as-a-title'],
     j9: ['checker-suppression-states-a-reason'],
 };
