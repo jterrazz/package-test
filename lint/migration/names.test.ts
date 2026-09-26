@@ -28,7 +28,7 @@ const PUBLISHED_CHECKER_CODES = [
 ];
 
 describe('names', () => {
-    test('RULE_NAMES — every old id lands on a rule the plugin registers, and every rule has an old id', () => {
+    test('the rule map — every old id lands on a rule the plugin registers, and every rule has an old id', () => {
         // Given - the map's targets and the plugin's rules
         const targets = new Set(Object.values(RULE_NAMES));
 
@@ -36,7 +36,7 @@ describe('names', () => {
         expect([...targets].toSorted()).toStrictEqual(Object.keys(plugin.rules).toSorted());
     });
 
-    test('PASS_NAMES — every code lands on passes the checker runs, and every pass has a code', () => {
+    test('the pass map — every code lands on passes the checker runs, and every pass has a code', () => {
         // Given - the passes the codes name
         const targets = new Set(Object.values(PASS_NAMES).flat());
 
@@ -44,7 +44,7 @@ describe('names', () => {
         expect([...targets].toSorted()).toStrictEqual([...CHECKER_PASS_IDS].toSorted());
     });
 
-    test('PASS_NAMES — every checker code 16.1.1 published has its passes', () => {
+    test('the pass map — every checker code 16.1.1 published has its passes', () => {
         // Given - the codes a 16.1.1 directive or baseline key can carry
         // Then - none falls through the map
         expect(
