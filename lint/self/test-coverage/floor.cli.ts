@@ -11,7 +11,7 @@ import {
     report,
     SUMMARY_FILE,
     writeBaseline,
-} from './coverage.js';
+} from './floor.js';
 
 /** `node dist/coverage.js` refuses a drop, `--write` records; `--scope <name>` keeps one project's floor apart. Neither runs the suite: they read the last `--coverage` report, or a second run could disagree with the first. */
 const argv = process.argv.slice(2);

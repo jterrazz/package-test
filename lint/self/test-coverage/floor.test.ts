@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { BASELINE_FILE, drops, raised, readBaseline, report } from './coverage.js';
+import { BASELINE_FILE, drops, raised, readBaseline, report } from './floor.js';
 
 function rootWith(contents: string): string {
     const root = mkdtempSync(join(tmpdir(), 'coverage-baseline-'));
@@ -13,7 +13,7 @@ function rootWith(contents: string): string {
 
 const floor = { branches: 70, functions: 80, lines: 76, statements: 76 };
 
-describe('coverage', () => {
+describe('floor', () => {
     test('the coverage ratchet — says nothing when every metric holds its floor', () => {
         // Given - a run that matches the floor exactly
         const now = { ...floor };
