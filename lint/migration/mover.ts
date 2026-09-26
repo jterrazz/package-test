@@ -130,15 +130,6 @@ function migrateSource(text: string, file: string, root: string): string {
         .replaceAll(STREAM_EMPTY, "expect($<space>$<subject>.text$<close>$<not>.toBe('')");
 }
 
-const RENAMED_RULES: Readonly<Record<string, string>> = {
-    'c10-contracts-boundary': 'stubs-imported-through-facade',
-    'c11-contract-data-pairing': 'stub-data-has-a-builder',
-    'c2-http-only-requests': 'request-file-extension-known',
-    'c4-contract-shape': 'stubs-root-holds-facades-and-kinds',
-    'd8w-text-bypass': 'no-raw-bypass',
-    ...RULE_NAMES,
-};
-
 const QUOTES = new Set(["'", '"', '`']);
 
 /** oxlint refuses to start on an override of a rule its plugin no longer defines. */
@@ -248,7 +239,7 @@ function migrateLintConfigText(
     const removed: string[] = [];
     const renamed: string[] = [];
     let next = text;
-    for (const [from, to] of Object.entries(RENAMED_RULES)) {
+    for (const [from, to] of Object.entries(RULE_NAMES)) {
         const replaced = next.replaceAll(
             new RegExp(`(['"])jterrazz/${from}\\1`, 'gu'),
             `$1jterrazz/${to}$1`,
@@ -346,7 +337,7 @@ function renameDirectives(source: string): string {
         }
         const scope = directive.groups?.scope;
         let renamed = comment;
-        for (const [from, to] of Object.entries(RENAMED_RULES)) {
+        for (const [from, to] of Object.entries(RULE_NAMES)) {
             renamed = renamed.replaceAll(
                 new RegExp(`\\bjterrazz/${from}\\b`, 'gu'),
                 `jterrazz/${to}`,

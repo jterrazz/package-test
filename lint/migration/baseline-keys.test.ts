@@ -85,4 +85,23 @@ describe('migrateBaselineKeys', () => {
             '{\n    "test": {\n        "jterrazz/no-sleep": 1\n    }\n}\n',
         );
     });
+
+    test('baseline-keys — a consumer still keyed on 16.1.1 ids takes the names too', () => {
+        // Given - a test section keyed by a rule id and a checker code 16.1.1 published
+        const root = project({
+            'jterrazz.baseline.json':
+                '{\n    "test": {\n        "jterrazz-check/c14": 1,\n        "jterrazz/d8w-text-bypass": 3\n    }\n}\n',
+        });
+
+        // When - the keys move
+        migrateBaselineKeys(root);
+
+        // Then - both carry the names their findings print now
+        const written: unknown = JSON.parse(
+            readFileSync(join(root, 'jterrazz.baseline.json'), 'utf8'),
+        );
+        expect(written).toStrictEqual({
+            test: { 'jterrazz-check/ground-shared-or-inline': 1, 'jterrazz/no-raw-bypass': 3 },
+        });
+    });
 });
