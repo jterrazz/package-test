@@ -2,13 +2,13 @@ import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
 import { treeKind } from './git-tree.js';
-import { GROUND_FIXTURES, SHARED_GROUND } from './ground.js';
+import { GROUND_FIXTURES } from './ground.js';
 import { closingOf, literalEnd, withoutComments } from './subject.js';
 
 /** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
 
-const INTO_SHARED_FIXTURES = new RegExp(
-    String.raw`(?:^|[/'"\x60\s])${SHARED_GROUND}/${GROUND_FIXTURES}/(?<name>[\w.-]+)(?<inside>/[\w.-])?`,
+const INTO_FIXTURES = new RegExp(
+    String.raw`(?:^|[/'"\x60\s])${GROUND_FIXTURES}/(?<name>[\w.-]+)(?<inside>/[\w.-])?`,
     'u',
 );
 
@@ -83,7 +83,7 @@ function rootOfAServer(blank: string, at: number): boolean {
 function specimenNamedIn(text: string): string | undefined {
     const blank = withoutComments(text);
     for (const { at, literal } of literalsOf(blank)) {
-        const groups = INTO_SHARED_FIXTURES.exec(literal)?.groups;
+        const groups = INTO_FIXTURES.exec(literal)?.groups;
         if (
             groups?.name !== undefined &&
             (groups.inside !== undefined || rootOfAServer(blank, at))
@@ -121,7 +121,7 @@ function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
 
 function importedSpecimen(text: string): string | undefined {
     for (const { groups } of withoutComments(text).matchAll(IMPORT_FROM)) {
-        const name = INTO_SHARED_FIXTURES.exec(groups?.from ?? '')?.groups?.name;
+        const name = INTO_FIXTURES.exec(groups?.from ?? '')?.groups?.name;
         if (name !== undefined) {
             return name;
         }

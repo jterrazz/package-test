@@ -1,0 +1,5 @@
+description: a pool fixture a runner and the member's vitest config both name passes
+fixture: ./_fixtures/config-read/
+runs:
+    - command: checker .
+      exit: 0

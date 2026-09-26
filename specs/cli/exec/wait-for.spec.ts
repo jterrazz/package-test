@@ -9,7 +9,7 @@ describe('wait-for', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — resolves when the waitFor pattern is matched in stdout', async () => {
         // Given - a watch-mode process that prints then keeps running
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('dev', { timeout: 10_000, waitFor: 'Hello from CLI app' });
 
         // Then - resolved at the pattern with the output captured so far
@@ -21,7 +21,7 @@ describe('wait-for', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — waitFor without timeout defaults to 10s', async () => {
         // Given - only waitFor is set
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('dev', { waitFor: 'Hello from CLI app' });
 
         // Then - the pattern resolved well before the default timeout
@@ -31,7 +31,7 @@ describe('wait-for', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — kills a long-running process at the timeout', async () => {
         // Given - dev runs forever but the pattern never appears
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('dev', { timeout: 2000, waitFor: 'NONEXISTENT_PATTERN' });
 
         // Then - exit code 124 (timeout)

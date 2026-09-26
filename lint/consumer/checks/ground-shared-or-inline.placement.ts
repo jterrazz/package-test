@@ -6,13 +6,11 @@ import { moveKeepingHistory, treeKind } from '../../engine/project/git-tree.js';
 import { isGroundName, SHARED_GROUND } from '../../engine/project/ground.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
-import {
-    isTestOrSpecName,
-    ownerOfSetup,
-    setupFolderOf,
-} from '../../engine/project/specs-modules.js';
+import { literalSpans } from '../../engine/project/spec-values.js';
+import { ownerOfSetup, setupFolderOf } from '../../engine/project/specs-modules.js';
 import {
     anchoredPaths,
+    blankComments,
     collectFixtureReferences,
     DISK_CALL,
     findSpecsRoots,
@@ -49,6 +47,36 @@ function ownerOf(specsRoot: string, ground: string): string | undefined {
     return owner === join(specsRoot, SHARED_GROUND) ? specsRoot : owner;
 }
 
+const WHOLE_LITERAL = /^(?:\.\/)?specs\/[^\s]*$/gu;
+
+const WORD_IN_LITERAL = /(?<=^|\s)(?:\.\/)?specs\/[\w./@-]+/gu;
+
+function memberAnchoredLiterals(member: string, file: string, pattern: RegExp): string[] {
+    const scanned = blankComments(readText(file));
+    return literalSpans(scanned).flatMap(({ end, start }) => {
+        const value = scanned.slice(start + 1, end - 1);
+        const quoted = `'"\``.includes(scanned[start] ?? '') && !value.includes('${');
+        return quoted ? [...value.matchAll(pattern)].map(([path]) => resolve(member, path)) : [];
+    });
+}
+
+function pathsNamedIn(member: string, file: string): string[] {
+    const found = collectFixtureReferences(file, DISK_CALL, true).map(({ path }) =>
+        resolve(dirname(file), path),
+    );
+    if (file.endsWith(SPEC_EXTENSION)) {
+        return found;
+    }
+    const literals = relativeLiterals(readText(file)).map(({ value }) =>
+        resolve(dirname(file), value),
+    );
+    return found.concat(
+        literals,
+        anchoredPaths(file).map(({ target }) => target),
+        memberAnchoredLiterals(member, file, WORD_IN_LITERAL),
+    );
+}
+
 function usageUnder(specsRoot: string): Map<string, Usage> {
     const usage = new Map<string, Usage>();
     const referrers = listFiles(
@@ -56,15 +84,16 @@ function usageUnder(specsRoot: string): Map<string, Usage> {
         (path) => /\.[cm]?[jt]sx?$/u.test(path) || path.endsWith(SPEC_EXTENSION),
     );
     for (const file of referrers) {
-        for (const { path } of collectFixtureReferences(file, DISK_CALL, true)) {
-            const found = entryOf(specsRoot, resolve(dirname(file), path));
+        const setup = setupFolderOf(specsRoot, file);
+        const place = setup === undefined ? dirname(file) : ownerOfSetup(specsRoot, setup);
+        for (const path of new Set(pathsNamedIn(dirname(specsRoot), file))) {
+            const found = entryOf(specsRoot, path);
             if (found === undefined) {
                 continue;
             }
             const key = join(found.ground, found.entry);
             const held = usage.get(key) ?? { ...found, leaves: new Set(), referrers: new Set() };
-            const setup = setupFolderOf(specsRoot, file);
-            held.leaves.add(setup === undefined ? dirname(file) : ownerOfSetup(specsRoot, setup));
+            held.leaves.add(place);
             held.referrers.add(file);
             usage.set(key, held);
         }
@@ -82,33 +111,38 @@ export function pathsModuleTestsName(member: string): string[] {
         for (const { target } of anchoredPaths(file)) {
             named.push(target);
         }
+        named.push(...memberAnchoredLiterals(member, file, WHOLE_LITERAL));
     }
     return named;
 }
 
-function pathsSetupNames(specsRoot: string): string[] {
-    return listFiles(
-        specsRoot,
-        (path) => /\.[cm]?[jt]sx?$/u.test(path) && !isTestOrSpecName(basename(path)),
-    ).flatMap((file) => {
-        const literals = relativeLiterals(readText(file)).map(({ value }) =>
-            resolve(dirname(file), value),
-        );
-        const anchored = anchoredPaths(file).map(({ target }) => target);
-        return literals.concat(anchored);
-    });
+const MAKEFILE_PATH = /(?<![\w./-])(?:\.\/)?specs\/[\w./@-]+/gu;
+
+const VITEST_CONFIGS = ['vitest.config.ts', 'vitest.config.mts', 'vitest.config.js'];
+
+function pathsMemberConfigsName(member: string): string[] {
+    const makefile = join(member, 'Makefile');
+    const fromMakefile =
+        treeKind(makefile) === 'file'
+            ? [...readText(makefile).matchAll(MAKEFILE_PATH)].map(([path]) => resolve(member, path))
+            : [];
+    const fromVitest = VITEST_CONFIGS.map((name) => join(member, name))
+        .filter((file) => treeKind(file) === 'file')
+        .flatMap((file) => memberAnchoredLiterals(member, file, WORD_IN_LITERAL));
+    return fromMakefile.concat(fromVitest);
 }
 
 function misplacedGround(rootDir: string): Misplaced[] {
     const misplaced: Misplaced[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         const readOutside = new Set(
-            [...pathsModuleTestsName(dirname(specsRoot)), ...pathsSetupNames(specsRoot)].flatMap(
-                (path) => {
-                    const found = entryOf(specsRoot, path);
-                    return found === undefined ? [] : [join(found.ground, found.entry)];
-                },
-            ),
+            [
+                ...pathsModuleTestsName(dirname(specsRoot)),
+                ...pathsMemberConfigsName(dirname(specsRoot)),
+            ].flatMap((path) => {
+                const found = entryOf(specsRoot, path);
+                return found === undefined ? [] : [join(found.ground, found.entry)];
+            }),
         );
         for (const [key, { entry, ground, leaves, referrers }] of usageUnder(specsRoot)) {
             const lowest = lowestCommonFolder([...leaves]);

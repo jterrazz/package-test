@@ -5,7 +5,7 @@ import { afterAll } from 'vitest';
 export const { cleanup, website } = await specification.website({
     backend: { env: 'API_URL' },
     external: 'allow',
-    root: '../_shared/_fixtures/specimen-website',
+    root: './_fixtures/specimen-website',
     server: { command: 'node server.mjs', ready: /listening on port (?<port>\d+)/u },
 });
 

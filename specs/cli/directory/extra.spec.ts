@@ -7,7 +7,7 @@ describe('extra', () => {
     test('detects an extra file', async () => {
         // Given - scaffold-extra writes an unexpected file
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('scaffold-extra');
 
         // Then - diff surfaces the added file (frozen: shared golden asserted negatively)

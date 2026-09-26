@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
-import { stamp } from '../../_shared/_fixtures/orders/stamp.js';
+import { stamp } from '../_fixtures/orders/stamp.js';
 import { integration } from '../pure.specification.js';
 
 describe('clock', () => {

@@ -18,7 +18,7 @@ import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
 export const { cleanup, website } = await specification.website({
-    server: { command: 'node specs/_shared/_fixtures/specimen-website/server.mjs', ready: '/' },
+    server: { command: 'node specs/website/_fixtures/specimen-website/server.mjs', ready: '/' },
 });
 
 afterAll(cleanup);

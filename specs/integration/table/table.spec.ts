@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { file } from '../../../src/index.js';
-import { tally } from '../../_shared/_fixtures/orders/tally.js';
+import { tally } from '../_fixtures/orders/tally.js';
 import { integration } from '../pure.specification.js';
 
 /** Golden names in a template literal: the shape `no-unused-ground` must read as a reference rather than silence. */

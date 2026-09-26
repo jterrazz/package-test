@@ -37,9 +37,9 @@ describe('checkSpecimenFiledByCapability', () => {
         expect(
             checkSpecimenFiledByCapability(root).map(({ file, found }) => `${file} ${found}`),
         ).toStrictEqual([
-            'api/assertions/whole.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/assertions/`',
-            'api/seed/nominal/nominal.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/seed/nominal/`',
-            'api/users/list/listing.spec.ts a spec of the specimen `_shared/_fixtures/specimen-api`, filed under `api/users/list/`',
+            'api/assertions/whole.spec.ts a spec of the specimen `specimen-api`, filed under `api/assertions/`',
+            'api/seed/nominal/nominal.spec.ts a spec of the specimen `specimen-api`, filed under `api/seed/nominal/`',
+            'api/users/list/listing.spec.ts a spec of the specimen `specimen-api`, filed under `api/users/list/`',
         ]);
     });
 
@@ -47,7 +47,7 @@ describe('checkSpecimenFiledByCapability', () => {
         // Given - a cli spec of a specimen filed under `appium/`, a capability of the mobile column
         const root = specsTree({
             'cli/cli.specification.ts':
-                "const BIN = resolve(import.meta.dirname, '../_shared/_fixtures/specimen-cli/cli.sh');\n",
+                "const BIN = resolve(import.meta.dirname, './_fixtures/specimen-cli/cli.sh');\n",
             'cli/appium/session.spec.ts': "import { cli } from '../cli.specification.js';\n",
         });
 
@@ -108,17 +108,17 @@ describe('checkSpecimenFiledByCapability', () => {
         ]);
     });
 
-    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is the shared fixtures’, and its author’s when inline', () => {
+    test('`specimen-filed-by-capability` — a spec of a specimen is filed by its capability — an integration spec is filed by capability when its module is its facet’s fixtures’, and its author’s when inline', () => {
         // Given - two specs on a module-only runner under a folder the matrix never names
         const runner = "import { integration } from '../pure.specification.js';\n";
         const root = specsTree({
             'integration/pure.specification.ts':
                 'export const { integration } = await specification.integration();\n',
-            'integration/timekeeping/imported.spec.ts': `import { stamp } from '../../_shared/_fixtures/orders/stamp.js';\n${runner}`,
+            'integration/timekeeping/imported.spec.ts': `import { stamp } from '../_fixtures/orders/stamp.js';\n${runner}`,
             'integration/timekeeping/inline.spec.ts': `${runner}const stamp = () => ({ at: new Date() });\n`,
         });
 
-        // Then - the one calling the shared fixtures' module is refused; the inline module is out of reach
+        // Then - the one calling the fixtures' module is refused; the inline module is out of reach
         expect(checkSpecimenFiledByCapability(root).map(({ file }) => file)).toStrictEqual([
             'integration/timekeeping/imported.spec.ts',
         ]);

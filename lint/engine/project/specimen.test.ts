@@ -52,7 +52,7 @@ describe('specimenOf', () => {
             'website/deployed.specification.ts':
                 "import { url } from './website.specification.js';",
             'website/website.specification.ts':
-                "const command = 'node specs/_shared/_fixtures/specimen-website/server.mjs';",
+                "const command = 'node specs/website/_fixtures/specimen-website/server.mjs';",
         });
         const spec = "import { website } from '../deployed.specification.js';\n";
 
@@ -106,11 +106,11 @@ describe('specimenOf', () => {
     test.each([
         [
             'written inline',
-            "specification.website({ root: '../_shared/_fixtures/specimen-website', server: { command: 'node server.mjs' } });",
+            "specification.website({ root: './_fixtures/specimen-website', server: { command: 'node server.mjs' } });",
         ],
         [
             'hoisted into a const',
-            "const SITE = resolve(import.meta.dirname, '../_shared/_fixtures/specimen-website');\nspecification.website({ root: SITE, server: { command: 'node server.mjs' } });",
+            "const SITE = resolve(import.meta.dirname, './_fixtures/specimen-website');\nspecification.website({ root: SITE, server: { command: 'node server.mjs' } });",
         ],
     ])('specimen — the root a server command runs from is the app, %s', (_, door) => {
         // Given - a runner whose server command runs from a specimen's folder
@@ -124,9 +124,9 @@ describe('specimenOf', () => {
     });
 
     test('specimen — a spec building its runner inline drives the specimen it names', () => {
-        // Given - a spec that starts its own runner over a binary of the shared fixtures
+        // Given - a spec that starts its own runner over a binary of its facet's fixtures
         const spec =
-            "const BIN = resolve(import.meta.dirname, '../../_shared/_fixtures/specimen-cli/cli.sh');\nexport const { cli } = await specification.cli(BIN);\n";
+            "const BIN = resolve(import.meta.dirname, '../_fixtures/specimen-cli/cli.sh');\nexport const { cli } = await specification.cli(BIN);\n";
         const root = specsTree({ 'cli/exec/refusals.spec.ts': spec });
 
         // Then - the specimen the binary sits in
@@ -135,10 +135,10 @@ describe('specimenOf', () => {
         );
     });
 
-    test('specimen — an integration spec reaches the module of the shared fixtures its chains call', () => {
-        // Given - a spec importing a module of the shared fixtures, under integration and under api
+    test('specimen — an integration spec reaches the module of the fixtures its chains call', () => {
+        // Given - a spec importing a module of its facet's fixtures, under integration and under api
         const spec =
-            "import { listOrders } from '../../_shared/_fixtures/orders/orders.js';\nimport { integration } from '../pure.specification.js';\n";
+            "import { listOrders } from '../_fixtures/orders/orders.js';\nimport { integration } from '../pure.specification.js';\n";
         const root = specsTree({
             'integration/pure.specification.ts': '',
             'api/api.specification.ts': '',

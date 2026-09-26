@@ -39,17 +39,13 @@ describe('assertions', () => {
         // Given - a fixture created via update mode
         const fixtureName = `stdout-transient-${Date.now()}.txt`;
         try {
-            const a = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const a = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             inUpdateMode(() => {
                 expect(a.stdout).toMatch(file(`./_expected/${fixtureName}`));
             });
 
             // Then - a second identical run matches _expected/<name> (flat)
-            const b = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const b = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             expect(b.stdout).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(resolve(EXPECTED_DIR, fixtureName));
@@ -64,9 +60,7 @@ describe('assertions', () => {
             writeFileSync(resolve(EXPECTED_DIR, fixtureName), 'different\n');
 
             // Then - the matcher reports an output diff (frozen: assert the diff even under TEST_UPDATE)
-            const result = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             expect(() => {
                 expect(result.stdout).toMatch(file(`./_expected/${fixtureName}`), { frozen: true });
             }).toThrow(/Output mismatch/u);
@@ -82,9 +76,7 @@ describe('assertions', () => {
         try {
             mkdirSync(EXPECTED_DIR, { recursive: true });
             writeFileSync(fixturePath, 'deliberately wrong\n');
-            const result = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
 
             // Then - even in update mode, a frozen mismatch still throws its diff and never writes
             inUpdateMode(() => {
@@ -102,9 +94,7 @@ describe('assertions', () => {
 
     test('toMatch requires the extension in the name', async () => {
         // Given - a fixture name without extension
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('json');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
 
         // Then - the matcher enforces rule `golden-path-has-extension` frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
         expect(() => {
@@ -116,9 +106,7 @@ describe('assertions', () => {
 
     test('value exposes the parsed JSON', async () => {
         // Given - a run printing JSON
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('json');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
 
         // Then - the parsed value is readable
         expect(result.json).toMatch({
@@ -133,9 +121,7 @@ describe('assertions', () => {
         const fixtureName = `json-transient-${Date.now()}.json`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
-            const a = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const a = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             inUpdateMode(() => {
                 expect(a.json).toMatch(file(`./_expected/${fixtureName}`));
             });
@@ -146,9 +132,7 @@ describe('assertions', () => {
             expect(written.endsWith('\n')).toBeTruthy();
 
             // Then - a second identical run matches
-            const b = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const b = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             expect(b.json).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(fixturePath);
@@ -171,9 +155,7 @@ describe('assertions', () => {
             );
 
             // Then - dynamic segments match by type
-            const result = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             expect(result.json).toMatch(file(`./_expected/${fixtureName}`));
         } finally {
             removeGolden(fixturePath);
@@ -196,9 +178,7 @@ describe('assertions', () => {
             );
 
             // When - update mode rewrites the fixture from actual output
-            const result = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-                .exec('json');
+            const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');
             inUpdateMode(() => {
                 expect(result.json).toMatch(file(`./_expected/${fixtureName}`));
             });

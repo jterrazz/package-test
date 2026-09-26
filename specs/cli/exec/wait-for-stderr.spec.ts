@@ -9,7 +9,7 @@ describe('wait-for-stderr', () => {
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
         // Given - a process whose readiness banner goes to stderr
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('dev-stderr', { timeout: 10_000, waitFor: 'Listening on stderr' });
 
         // Then - resolved at the stderr pattern with the output captured so far

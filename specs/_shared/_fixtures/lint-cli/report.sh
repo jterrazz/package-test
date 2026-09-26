@@ -10,7 +10,7 @@ set -e
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if [ "$1" = "checker" ]; then
   shift
-  exec bash "$SCRIPT_DIR/../checker-cli/check.sh" "$@"
+  exec bash "$SCRIPT_DIR/../../../lint/_fixtures/checker-cli/check.sh" "$@"
 fi
 if [ "$1" = "self-checker" ]; then
   shift

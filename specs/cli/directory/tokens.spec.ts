@@ -7,7 +7,7 @@ describe('tokens', () => {
     test('tokens match inside tree-snapshot file contents', async () => {
         // Given - a scaffold whose out/report.txt embeds a fresh uuid
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('scaffold-dynamic');
 
         // Then - the committed tree fixture matches via the {{uuid}} token

@@ -12,15 +12,9 @@ const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '')
 
 const unreachedApp = { request: () => Response.json({}, { status: 200 }) };
 
-const BROKEN_POSTGRES_INIT = resolve(
-    import.meta.dirname,
-    '../../_shared/_fixtures/broken-postgres-init',
-);
-const BROKEN_MULTI_INIT = resolve(import.meta.dirname, '../../_shared/_fixtures/broken-multi-init');
-const BROKEN_SECOND_POSTGRES = resolve(
-    import.meta.dirname,
-    '../../_shared/_fixtures/broken-second-postgres',
-);
+const BROKEN_POSTGRES_INIT = resolve(import.meta.dirname, './_fixtures/broken-postgres-init');
+const BROKEN_MULTI_INIT = resolve(import.meta.dirname, './_fixtures/broken-multi-init');
+const BROKEN_SECOND_POSTGRES = resolve(import.meta.dirname, './_fixtures/broken-second-postgres');
 
 /* The startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (`output-asserted-as-a-golden` scalpel). */
 

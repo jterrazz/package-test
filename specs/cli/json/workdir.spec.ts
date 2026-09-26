@@ -22,7 +22,7 @@ describe('workdir', () => {
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);
         try {
             const result = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+                .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec('json-cwd');
             const rawCwd = (result.json.value as { cwd: string }).cwd;
             vi.stubEnv('TEST_UPDATE', '1');
@@ -40,7 +40,7 @@ describe('workdir', () => {
 
             // Then - a second run (different cwd) matches the updated fixture
             const second = await cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+                .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec('json-cwd');
             expect(second.json).toMatch(file(`./_expected/${fixtureName}`));
         } finally {

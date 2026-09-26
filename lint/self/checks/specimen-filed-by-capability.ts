@@ -127,7 +127,7 @@ function checkSpecimenSpecs(specsRoot: string): Finding<SelfPassId>[] {
             {
                 file: relative(specsRoot, file).split(sep).join('/'),
                 fix: fixOf(facet, '<aspect>.spec.ts', vocabulary),
-                found: `a spec of the specimen \`${SHARED_GROUND}/_fixtures/${specimen}\`, filed under \`${shown}/\``,
+                found: `a spec of the specimen \`${specimen}\`, filed under \`${shown}/\``,
                 line,
                 rule: 'specimen-filed-by-capability' as const,
                 severity: 'error' as const,

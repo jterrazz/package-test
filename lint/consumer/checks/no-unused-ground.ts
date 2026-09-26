@@ -8,6 +8,7 @@ import {
     parseSpecDocument,
     SPEC_EXTENSION,
 } from '../../engine/project/spec-document.js';
+import { isModuleName } from '../../engine/project/specs-modules.js';
 import {
     collectFixtureReferences,
     DISK_CALL,
@@ -189,6 +190,9 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
         }
 
         const references: References = { paths: new Set(), patterns: [] };
+        for (const reader of listFiles(dir, (path) => isModuleName(basename(path)))) {
+            referencesOf(reader, references);
+        }
         let downgrade = false;
         for (const testFile of testFiles) {
             referencesOf(testFile, references);

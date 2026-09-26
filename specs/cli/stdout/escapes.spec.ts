@@ -6,9 +6,7 @@ import { cli } from '../cli.specification.js';
 describe('escapes', () => {
     test('comparisons see clean text while .raw keeps the escapes', async () => {
         // Given - output wrapped in ANSI escapes, no transform configured
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('ansi');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('ansi');
 
         // Then - matchers compare the stripped form
         expect(result.stdout.text).toContain('red plain bold');

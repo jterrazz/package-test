@@ -8,9 +8,7 @@ import { cli } from '../cli.specification.js';
 describe('sequences', () => {
     test('runs a command successfully', async () => {
         // Given - the cli-app fixture project
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('build');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('build');
 
         // Then - clean exit
         expect(result.exitCode).toBe(0);
@@ -19,7 +17,7 @@ describe('sequences', () => {
     test('multi-exec — runs commands sequentially in same directory', async () => {
         // Given - build then start (start needs dist/ from build)
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec(['build', 'start']);
 
         // Then - the last command's whole output is surfaced
@@ -32,7 +30,7 @@ describe('sequences', () => {
     test('multi-exec — preserves files between commands', async () => {
         // Given - build creates dist/, then we check it still exists
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec(['build', 'check']);
 
         // Then - the sequence shares one working directory
@@ -45,7 +43,7 @@ describe('sequences', () => {
         // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
         await expect(
             cli
-                .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+                .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec(['build', 'start'], { waitFor: 'x' }),
         ).rejects.toThrow('not supported with a command sequence');
     });

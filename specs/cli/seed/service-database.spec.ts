@@ -8,7 +8,7 @@ describe('service-database', () => {
     test('runs a SQL seed against the declared service database', async () => {
         // Given - a SQL seed applied to the single sqlite service
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .seed(file('./_seeds/users.sql'))
             .exec('help');
 
@@ -23,7 +23,7 @@ describe('service-database', () => {
     test('combines a SQL seed and a file fixture in one chain', async () => {
         // Given - a SQL seed (database state) plus a file fixture (file state)
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .fixture(file('./_fixtures/note.txt'))
             .seed(file('./_seeds/users.sql'))
             .exec('help');

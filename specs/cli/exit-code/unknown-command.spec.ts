@@ -9,7 +9,7 @@ describe('unknown-command', () => {
     test('captures unknown command failure', async () => {
         // Given - a command the fixture does not know
         const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
+            .fixture(directory('../_fixtures/specimen-cli/'))
             .exec('nonexistent');
 
         // Then - non-zero exit with a useful stderr

@@ -18,9 +18,7 @@ function removeGolden(path: string): void {
 describe('matching', () => {
     test('matches an identical fixture tree', async () => {
         // Given - scaffold writes the exact tree committed under _expected/cli-scaffold/
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('scaffold');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('scaffold');
 
         // Then - the snapshot matches (a slash in the name creates a subfolder)
         expect(result.exitCode).toBe(0);
@@ -29,9 +27,7 @@ describe('matching', () => {
 
     test('detects a missing fixture', async () => {
         // Given - a fixture name that was never created
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('scaffold');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('scaffold');
 
         // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing snapshot must still throw rather than be created
         await expect(
@@ -46,9 +42,7 @@ describe('matching', () => {
         // Given - fresh scaffold and a non-existent fixture name
         const fixtureName = `transient-fixture-${Date.now()}`;
 
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('scaffold');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('scaffold');
 
         // When - update mode writes the fixture
         vi.stubEnv('TEST_UPDATE', '1');
@@ -59,9 +53,7 @@ describe('matching', () => {
         }
 
         // Then - running again without update mode now matches
-        const result2 = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('scaffold');
+        const result2 = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('scaffold');
         await expect(result2.directory('out')).toMatch(directory(`./_expected/${fixtureName}/`));
 
         removeGolden(resolve(EXPECTED_DIR, fixtureName));
@@ -69,9 +61,7 @@ describe('matching', () => {
 
     test('files() helper — lists files recursively, sorted', async () => {
         // Given - a scaffold run
-        const result = await cli
-            .fixture(directory('../../_shared/_fixtures/specimen-cli/'))
-            .exec('scaffold');
+        const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('scaffold');
 
         // Then - the tree listing is complete and sorted
         const files = await result.directory('out').files();
