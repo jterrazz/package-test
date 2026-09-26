@@ -1,8 +1,6 @@
 import { LineCounter, parseDocument, Scalar, visit } from 'yaml';
 import type { CollectionTag, Document, ScalarTag } from 'yaml';
 
-/** The one module owning the `yaml` engine (`one-owner-per-library`): consumers import its node types from here. */
-
 export { isMap, isPair, isScalar, isSeq, Scalar } from 'yaml';
 export type { Document, Node, Pair, YAMLMap, YAMLSeq } from 'yaml';
 

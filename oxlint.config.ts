@@ -21,7 +21,6 @@ const config: OxlintConfig = defineConfig(
                 rules: { 'jterrazz/runner-in-specification-file': 'off' },
             },
             {
-                // The sanctioned runner coupling (`import-within-declared-layers`): the modules whose engine is a test package.
                 files: [
                     'src/vitest/**',
                     'src/facets/*/*.project.ts',
