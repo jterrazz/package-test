@@ -206,7 +206,7 @@ export const META_ROWS: Row[] = [
         fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/consumer/rules/plugin.ts` or `lint/consumer/checks/checker.ts`.',
         name: 'rule-declares-its-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` filed their specs by a capability matrix they do not have, and the retired specs-public-entry rule refused a consumer’s own `src/model/` until its self half left it as `no-framework-internals`.',
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` would file their specs by a capability matrix they do not have, and `no-framework-internals` would refuse a consumer’s own `src/model/`.',
         reach: 'all',
     },
     ...ARCHITECTURE_META_ROWS,

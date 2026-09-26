@@ -434,7 +434,7 @@ export const STATIQUE_RULES: Row[] = [
         fix: "Write `expect(<result>.<subject>).toMatch('')` and run `TEST_UPDATE=1` — the whole result is written in place; keep the precise assertion beside it if one property IS the subject.",
         name: 'result-compared-whole',
         rationale:
-            'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it. It is the retired warning on body-probe clusters, grown into the rule it stood in for.',
+            'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it.',
         reach: 'tests',
         severity: 'error',
     },
@@ -1071,7 +1071,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and the mover leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
+            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
         facet: 'model',
         family: 'layout',
         fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `jterrazz-test-check <root> --fix` does it with `git mv`, and names every `include`/`exclude` entry of the member the rename broke.',
