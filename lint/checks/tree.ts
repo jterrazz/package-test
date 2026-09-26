@@ -349,3 +349,14 @@ export function isWithin(directory: string, path: string): boolean {
     const rest = relative(directory, path);
     return rest !== '' && !rest.startsWith('..') && !isAbsolute(rest);
 }
+
+export function decodeText(path: string): null | string {
+    let text;
+    try {
+        text = readFileSync(path, 'utf8');
+    } catch {
+        return null;
+    }
+    // A NUL or a U+FFFD replacement char: a binary snapshot carries no token grammar.
+    return text.includes('\u0000') || text.includes('\uFFFD') ? null : text;
+}

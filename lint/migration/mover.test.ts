@@ -1,3 +1,4 @@
+import { execFileSync } from 'node:child_process';
 import {
     existsSync,
     mkdirSync,
@@ -10,6 +11,7 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { moveKeepingHistory } from '../../src/kernel/files/git-tree.js';
 import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './mover.js';
 
 function tree16(files: Record<string, string>, at = 'specs'): string {
@@ -19,6 +21,17 @@ function tree16(files: Record<string, string>, at = 'specs'): string {
         mkdirSync(dirname(join(root, path)), { recursive: true });
         writeFileSync(join(root, path), content);
     }
+    return root;
+}
+
+function repositoryIgnoring(files: string[], ignore: string): string {
+    const root = mkdtempSync(join(tmpdir(), 'migrate-git-'));
+    for (const path of files) {
+        mkdirSync(dirname(join(root, path)), { recursive: true });
+        writeFileSync(join(root, path), `${path}\n`);
+    }
+    writeFileSync(join(root, '.gitignore'), ignore);
+    execFileSync('git', ['init', '--quiet'], { cwd: root });
     return root;
 }
 
@@ -712,5 +725,29 @@ describe('mover', () => {
                 renamed: ['c4-contract-shape', 'j2-no-sleep'],
             },
         ]);
+    });
+
+    test('a golden `.gitignore` names is not one the mover points at', () => {
+        // Given - a 16 leaf whose `_expected/` holds a new golden and an ignored one
+        const root = repositoryIgnoring(
+            [
+                'specs/cli/help/_expected/usage.txt',
+                'specs/cli/help/_expected/local.txt',
+                'specs/cli/help/help.test.ts',
+            ],
+            'local.txt\n',
+        );
+        writeFileSync(
+            join(root, 'specs', 'cli', 'help', 'help.test.ts'),
+            "expect(a).toMatch('usage.txt');\nexpect(b).toMatch('local.txt');\n",
+        );
+
+        // When - the mover runs
+        migrateTo17(join(root, 'specs'), moveKeepingHistory);
+
+        // Then - the new golden is named by its path, the ignored name stays a value
+        expect(readFileSync(join(root, 'specs', 'cli', 'help', 'help.test.ts'), 'utf8')).toContain(
+            "expect(a).toMatch(file('./expected/usage.txt'));\nexpect(b).toMatch('local.txt');",
+        );
     });
 });

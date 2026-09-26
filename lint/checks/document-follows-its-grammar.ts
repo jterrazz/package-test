@@ -1,0 +1,33 @@
+import {
+    assertedStreams,
+    readSpecFile,
+    SpecSyntaxError,
+} from '../../src/facets/cli/documents/spec-document.js';
+import type { TokenViolation } from './checker.js';
+import { unknownTokenFindings } from './no-unknown-token.js';
+
+/** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
+export function checkSpecFile(text: string, rel: string): TokenViolation[] {
+    let document;
+    try {
+        document = readSpecFile(text, rel).document;
+    } catch (error) {
+        if (!(error instanceof SpecSyntaxError)) {
+            throw error;
+        }
+        return [
+            {
+                file: rel,
+                line: error.line,
+                fix: 'rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires',
+                found: error.reason,
+                rule: 'document-follows-its-grammar',
+                severity: 'error',
+            },
+        ];
+    }
+
+    return assertedStreams(document).flatMap((stream) =>
+        unknownTokenFindings(stream.text, rel, stream.line),
+    );
+}

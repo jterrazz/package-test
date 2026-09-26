@@ -1,133 +1,16 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, readFileSync } from 'node:fs';
-import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { basename, join, relative, sep } from 'node:path';
 
-import { treeEntries, treeKind, treeNames } from '../../src/kernel/files/git-tree.js';
-import { isGroundName } from '../../src/kernel/files/ground.js';
+import { treeEntries, treeKind } from '../../src/kernel/files/git-tree.js';
 import { moduleTestsOf } from '../reading/module-tests.js';
-import { isTestFileName } from '../reading/role.js';
 import type { TokenViolation } from './checker.js';
 import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
+import { configPresent } from './member-has-vitest-config.js';
+import { MEMBER_DEPTH, readManifest, SKIPPED, workspacePatterns } from './member-manifest.js';
 import { diskTargetFindings } from './named-path-exists.js';
-
-/** The toolchain's bound, to the segment. */
-const MEMBER_DEPTH = 6;
-
-const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
-
-/** The same pair the statique `no-simulated-dom-in-config` refuses. */
-const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
-
-/** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */
-const CARRIED = new Set(['msw', 'vitest-mock-extended']);
-
-/** Only as a dev dependency: a member parsing YAML at runtime declares `yaml` rightly, and the framework never ships it to a product. */
-const CARRIED_IN_DEV = new Set(['yaml']);
-
-/** `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies. */
-const FRAMEWORK = '@jterrazz/test';
-const RETIRED = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
-const RETIRED_SCOPES = ['@testing-library/'];
-
-/** React Native renders under jest until the react-native-web answer lands, and `@testing-library/react-native` is the only vocabulary there; the allowance lapses the day jest stops running the member's tests. */
-const JEST_ONLY_SEAM = '@testing-library/react-native';
-
-function declaresJest(manifest: Manifest): boolean {
-    const declares = (name: string): boolean =>
-        name in (manifest.dependencies ?? {}) || name in (manifest.devDependencies ?? {});
-    return (
-        declares('jest') ||
-        declares('jest-expo') ||
-        manifest.jest !== undefined ||
-        /(?:^|[\s/])jest(?:\s|$)/u.test(manifest.scripts?.test ?? '')
-    );
-}
-
-const JEST_CONFIG = /^jest\.config\.[cm]?[jt]s$/u;
-
-const JEST_REACH =
-    /\b(?:roots|testMatch|testPathDirs|testPathIgnorePatterns)\s*:\s*\[(?<paths>[^\]]*)\]/gu;
-
-const JEST_PATH = /['"`](?<path>[^'"`\n]*)['"`]/gu;
-
-const PNPM_WORKSPACE = ['pnpm-workspace.yaml', 'pnpm-workspace.yml'];
-
-function declaresWorkspace(dir: string): boolean {
-    if (PNPM_WORKSPACE.some((name) => treeKind(join(dir, name)) === 'file')) {
-        return true;
-    }
-    const manifest = readManifest(dir);
-    return manifest !== null && workspacePatterns(manifest).length > 0;
-}
-
-/** Walked up from the member, so a run started inside it reads the jest the root run reads; it stops at the first workspace declaration and never leaves the checkout (a `.git` directory or worktree file). */
-function workspaceRootOf(memberDir: string): string {
-    let current = memberDir;
-    for (;;) {
-        if (declaresWorkspace(current) || existsSync(join(current, '.git'))) {
-            return current;
-        }
-        const parent = dirname(current);
-        if (parent === current) {
-            return memberDir;
-        }
-        current = parent;
-    }
-}
-
-const jestConfigs = new Map<string, string[]>();
-
-function findJestConfigs(rootDir: string): string[] {
-    const cached = jestConfigs.get(rootDir);
-    if (cached !== undefined) {
-        return cached;
-    }
-    const found: string[] = [];
-    const walk = (dir: string, depth: number): void => {
-        if (depth > MEMBER_DEPTH) {
-            return;
-        }
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            return;
-        }
-        for (const entry of entries) {
-            const path = join(dir, entry.name);
-            if (entry.isDirectory()) {
-                if (!entry.name.startsWith('.') && !SKIPPED.has(entry.name)) {
-                    walk(path, depth + 1);
-                }
-            } else if (JEST_CONFIG.test(entry.name)) {
-                found.push(path);
-            }
-        }
-    };
-    walk(rootDir, 0);
-    jestConfigs.set(rootDir, found);
-    return found;
-}
-
-/** `<rootDir>` is jest's token for its config's directory: a path resolves against it, and the member is reached when the result lands inside it. */
-function jestReachesMember(memberDir: string, rootDir: string): boolean {
-    return findJestConfigs(rootDir).some((config) => {
-        const from = dirname(config);
-        let text;
-        try {
-            text = readFileSync(config, 'utf8');
-        } catch {
-            return false;
-        }
-        return [...text.matchAll(JEST_REACH)].some((list) =>
-            [...(list.groups?.paths ?? '').matchAll(JEST_PATH)].some((entry) => {
-                const stated = (entry.groups?.path ?? '').replace('<rootDir>', from);
-                const absolute = resolve(from, stated);
-                return absolute === memberDir || absolute.startsWith(`${memberDir}/`);
-            }),
-        );
-    });
-}
+import { seamDependencies } from './no-redundant-test-dependency.js';
+import { simulatedDom } from './no-simulated-dom-in-config.js';
+import { groundSynonyms } from './no-snapshot-folder.js';
 
 const CONFIG_NAMES = [
     'vitest.config.ts',
@@ -137,28 +20,6 @@ const CONFIG_NAMES = [
     'vitest.config.mjs',
     'vitest.config.cjs',
 ];
-
-type Manifest = {
-    dependencies?: Record<string, string>;
-    devDependencies?: Record<string, string>;
-    jest?: unknown;
-    name?: string;
-    scripts?: Record<string, string>;
-    workspaces?: string[] | { packages?: string[] };
-};
-
-export function readManifest(dir: string): Manifest | null {
-    const path = join(dir, 'package.json');
-    if (treeKind(path) !== 'file') {
-        return null;
-    }
-    try {
-        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- JSON.parse answers `any`; the shape named here is the one every read below goes through, and a wrong one reads as absent
-        return JSON.parse(readFileSync(path, 'utf8')) as Manifest;
-    } catch {
-        return null;
-    }
-}
 
 function configOf(dir: string): null | string {
     for (const name of CONFIG_NAMES) {
@@ -170,151 +31,6 @@ function configOf(dir: string): null | string {
     return null;
 }
 
-/** A directory carrying its own `package.json` is another package's tree, and its tests are its own to configure. */
-function holdsTests(dir: string): boolean {
-    const stack = [dir];
-    let first = true;
-    while (stack.length > 0) {
-        const current = stack.pop();
-        if (current === undefined) {
-            break;
-        }
-        if (!first && treeKind(join(current, 'package.json')) === 'file') {
-            continue;
-        }
-        first = false;
-        let entries;
-        try {
-            entries = treeEntries(current);
-        } catch {
-            continue;
-        }
-        for (const entry of entries) {
-            if (entry.isDirectory()) {
-                if (!SKIPPED.has(entry.name) && !entry.name.startsWith('.')) {
-                    stack.push(join(current, entry.name));
-                }
-                continue;
-            }
-            if (isTestFileName(entry.name)) {
-                return true;
-            }
-        }
-    }
-    return false;
-}
-
-/** `npm run test --workspaces`, `pnpm -r test` and `turbo run test` hand the work to the members: no evidence this package runs vitest. */
-const DELEGATING_TEST =
-    /--workspaces|(?:^|\s)-r(?:\s|$)|--recursive|turbo\s+run|nx\s+run-many|lerna\s+run/u;
-
-type Seam = { kind: 'carried' | 'retired'; name: string };
-
-function declaredSeams(manifest: Manifest, jestRuns: boolean): Seam[] {
-    if (manifest.name === FRAMEWORK) {
-        return [];
-    }
-    const isRetired = (name: string): boolean => {
-        if (name === JEST_ONLY_SEAM && jestRuns) {
-            return false;
-        }
-        return RETIRED.has(name) || RETIRED_SCOPES.some((scope) => name.startsWith(scope));
-    };
-    const declared = new Set([
-        ...Object.keys(manifest.dependencies ?? {}).filter(
-            (name) => CARRIED.has(name) || isRetired(name),
-        ),
-        ...Object.keys(manifest.devDependencies ?? {}).filter(
-            (name) => CARRIED.has(name) || CARRIED_IN_DEV.has(name) || isRetired(name),
-        ),
-    ]);
-    return [...declared].toSorted().map((name) => ({
-        kind: isRetired(name) ? ('retired' as const) : ('carried' as const),
-        name,
-    }));
-}
-
-/** A finding points at the declaration, not at `{`. */
-function lineOfKey(dir: string, key: string): number {
-    try {
-        const lines = readFileSync(join(dir, 'package.json'), 'utf8').split('\n');
-        const found = lines.findIndex((line) => line.includes(`"${key}"`));
-        return found === -1 ? 1 : found + 1;
-    } catch {
-        return 1;
-    }
-}
-
-function configPresent(
-    manifest: Manifest,
-    memberDir: string,
-    label: string,
-    subject: string,
-): TokenViolation[] {
-    // A delegating `test` script runs the members' tests, not this package's.
-    const testScript = manifest.scripts?.test;
-    const ownsTests =
-        (typeof testScript === 'string' && !DELEGATING_TEST.test(testScript)) ||
-        holdsTests(memberDir);
-    if (!ownsTests) {
-        return [];
-    }
-    return [
-        {
-            file: join(label, 'package.json'),
-            line: 1,
-            fix: `write ${join(label, 'vitest.config.ts')}: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\``,
-            found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` are running its tests`,
-            rule: 'member-has-vitest-config',
-            severity: 'error',
-        },
-    ];
-}
-
-function simulatedDom(config: string, rootDir: string): TokenViolation[] {
-    const text = readFileSync(config, 'utf8');
-    const found = SIMULATED_DOM.exec(text);
-    if (found?.groups?.dom === undefined) {
-        return [];
-    }
-    const relConfig = relative(rootDir, config);
-    return [
-        {
-            file: relConfig,
-            line: text.slice(0, found.index).split('\n').length,
-            fix: `delete \`environment: '${found.groups.dom}'\`, and write each rendered test as a \`.test.tsx\` beside its component, collected by \`component()\``,
-            found: `\`environment: '${found.groups.dom}'\` gives every file of this project a drawing of a browser`,
-            rule: 'no-simulated-dom-in-config',
-            severity: 'error',
-        },
-    ];
-}
-
-function seamDependencies(member: {
-    label: string;
-    manifest: Manifest;
-    memberDir: string;
-    subject: string;
-}): TokenViolation[] {
-    const { label, manifest, memberDir, subject } = member;
-    const jestRuns =
-        declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));
-    return declaredSeams(manifest, jestRuns).map((seam) => ({
-        file: join(label, 'package.json'),
-        line: lineOfKey(memberDir, seam.name),
-        fix:
-            seam.kind === 'carried'
-                ? `remove \`${seam.name}\` from ${join(label, 'package.json')}`
-                : `remove \`${seam.name}\` from ${join(label, 'package.json')}, and write its tests on \`component()\`, \`website()\`, \`clock\` or \`intercept()\``,
-        found:
-            seam.kind === 'carried'
-                ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\``
-                : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced`,
-        rule: 'no-redundant-test-dependency' as const,
-        severity: 'error' as const,
-    }));
-}
-
 function anchoredToRoot(violations: TokenViolation[], label: string): TokenViolation[] {
     if (label === '.') {
         return violations;
@@ -324,56 +40,6 @@ function anchoredToRoot(violations: TokenViolation[], label: string): TokenViola
         anchored.push({ ...violation, file: join(label, violation.file) });
     }
     return anchored;
-}
-
-/** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
-const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);
-
-const CODE_MODULE = /\.[cm]?[jt]sx?$/u;
-
-/** Under the member's `specs/` tree always; elsewhere only when it holds no code: a `goldens/` folder of matcher source is named for what its code does. */
-function holdsGround(path: string, memberDir: string): boolean {
-    if (relative(memberDir, path).split(sep).includes('specs')) {
-        return true;
-    }
-    try {
-        return !treeNames(path).some((name) => CODE_MODULE.test(name));
-    } catch {
-        return false;
-    }
-}
-
-/** The walk stops at a nested package and never enters ground: a fixture project may carry the word on purpose. */
-function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
-    const found: TokenViolation[] = [];
-    const walk = (dir: string): void => {
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            return;
-        }
-        for (const entry of entries) {
-            const path = join(dir, entry.name);
-            if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundName(entry.name)) {
-                continue;
-            }
-            if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {
-                found.push({
-                    file: join(label, relative(memberDir, path), '/'),
-                    line: 1,
-                    fix: `rename \`${entry.name}/\` to \`expected/\`, beside the test that reads it`,
-                    found: `\`${entry.name}/\`, a synonym of \`expected/\``,
-                    rule: 'no-snapshot-folder',
-                    severity: 'error',
-                });
-            } else if (dir === memberDir || treeKind(join(path, 'package.json')) !== 'file') {
-                walk(path);
-            }
-        }
-    };
-    walk(memberDir);
-    return found;
 }
 
 /** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
@@ -397,14 +63,6 @@ export function checkMember(memberDir: string, rootDir: string): TokenViolation[
         // The tree pass reads the tests under `specs/`.
         ...moduleTestsOf(memberDir).flatMap((test) => diskTargetFindings(test, rootDir)),
     ];
-}
-
-function workspacePatterns(manifest: Manifest): string[] {
-    const { workspaces } = manifest;
-    if (Array.isArray(workspaces)) {
-        return workspaces;
-    }
-    return workspaces?.packages ?? [];
 }
 
 /** The translation `@jterrazz/typescript`'s `lib/workspace-members.js` makes: the two member lists must be one list, or the ratchet can neither record nor clear a finding. */

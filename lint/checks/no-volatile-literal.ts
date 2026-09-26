@@ -1,5 +1,6 @@
 import { assertedStreams } from '../../src/facets/cli/documents/spec-document.js';
 import type { SpecDocument } from '../../src/facets/cli/documents/spec-document.js';
+import type { TokenViolation } from './checker.js';
 import { finding, fixedData } from './document-model.js';
 import type { Finding } from './document-model.js';
 
@@ -64,4 +65,22 @@ export function checkVolatileLiterals(document: SpecDocument, dir: string): Find
         }
     }
     return findings;
+}
+
+export function volatileLiteralsInGround(file: string, text: string): TokenViolation[] {
+    return text.split('\n').flatMap((line, index) => {
+        const volatileLiteral = volatileLiteralIn(line);
+        return volatileLiteral === undefined
+            ? []
+            : [
+                  {
+                      file,
+                      line: index + 1,
+                      fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
+                      found: `"${volatileLiteral.found}", a value the next run will not reproduce`,
+                      rule: 'no-volatile-literal',
+                      severity: 'error',
+                  },
+              ];
+    });
 }
