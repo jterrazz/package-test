@@ -167,7 +167,7 @@ export const META_ROWS: Row[] = [
         fix: 'Point the link at the heading as it is now written, or restore the heading it named.',
         name: 'links-resolve',
         rationale:
-            'A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s; the 16.0 renumbering left the map pointing at a heading the same commit had replaced.',
+            'A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s.',
         reach: 'all',
     },
     {
