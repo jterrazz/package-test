@@ -42,8 +42,15 @@ function adapterNameOf(port: string): string {
     return `${kebabOf(port.replace(/Port$/u, '') || port)}${ADAPTER_SUFFIX}`;
 }
 
-function portsImported(specsRoot: string, file: string, program: AstNode): Set<string> {
-    const ports = new Set<string>();
+type PortsImported = { names: Map<string, string>; namespaces: Set<string> };
+
+function importedName(specifier: AstNode): string | undefined {
+    const imported = child(specifier, 'imported');
+    return identifierName(imported) ?? stringValue(imported);
+}
+
+function portsImported(specsRoot: string, file: string, program: AstNode): PortsImported {
+    const ports: PortsImported = { names: new Map(), namespaces: new Set() };
     for (const statement of childList(program, 'body')) {
         const source = stringValue(child(statement, 'source'));
         if (statement.type !== 'ImportDeclaration' || source === undefined) {
@@ -55,23 +62,39 @@ function portsImported(specsRoot: string, file: string, program: AstNode): Set<s
         }
         for (const specifier of childList(statement, 'specifiers')) {
             const local = identifierName(child(specifier, 'local'));
-            if (local !== undefined) {
-                ports.add(local);
+            if (local === undefined) {
+                continue;
+            }
+            if (specifier.type === 'ImportNamespaceSpecifier') {
+                ports.namespaces.add(local);
+            } else {
+                ports.names.set(local, importedName(specifier) ?? local);
             }
         }
     }
     return ports;
 }
 
-function implementersOf(program: AstNode, ports: ReadonlySet<string>): Implementer[] {
+function portOf(expression: AstNode | undefined, ports: PortsImported): string | undefined {
+    if (expression?.type === 'MemberExpression') {
+        const namespace = identifierName(child(expression, 'object'));
+        return namespace !== undefined && ports.namespaces.has(namespace)
+            ? identifierName(child(expression, 'property'))
+            : undefined;
+    }
+    const local = identifierName(expression);
+    return local === undefined ? undefined : ports.names.get(local);
+}
+
+function implementersOf(program: AstNode, ports: PortsImported): Implementer[] {
     const found: Implementer[] = [];
     walk(program, (node) => {
         if (node.type !== 'ClassDeclaration' && node.type !== 'ClassExpression') {
             return;
         }
         for (const clause of childList(node, 'implements')) {
-            const port = identifierName(child(clause, 'expression'));
-            if (port !== undefined && ports.has(port)) {
+            const port = portOf(child(clause, 'expression'), ports);
+            if (port !== undefined) {
                 found.push({
                     at: nodeStart(node),
                     name: identifierName(child(node, 'id')) ?? 'the class',

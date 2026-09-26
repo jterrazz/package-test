@@ -1,4 +1,4 @@
-description: a test adapter named <port>.adapter.ts passes, whatever its class is called
+description: a test adapter named <port>.adapter.ts passes, however its class or its import is named
 fixture: ./_fixtures/named/
 runs:
     - command: checker .
