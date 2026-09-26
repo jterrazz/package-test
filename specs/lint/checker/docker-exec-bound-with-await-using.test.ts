@@ -14,7 +14,7 @@ describe('docker-exec-bound-with-await-using', () => {
         // Then - the checker fails with the full diagnostic naming the runner
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/widget.test.ts:8:1: error jterrazz-check(docker-exec-bound-with-await-using): found: a result of the docker-aware runner "dockerCli" bound without \`await using\` · why: \`docker-exec-bound-with-await-using\`'s one channel: docker-aware runners are inferred from the \`docker:\` option of the imported specification file, and every \`.exec()\` result bound without \`await using\` is reported. · fix: bind it with \`await using result = await dockerCli…\`, so the containers it started are removed at the end of the scope · read: docs/19-linting.md#docker-exec-bound-with-await-using
+            specs/widget/widget.test.ts:8:1: error jterrazz-check(docker-exec-bound-with-await-using): found: a result of the docker-aware runner "dockerCli" bound without \`await using\` · why: Docker-aware runners are inferred from the \`docker:\` option of the imported specification file, and every \`.exec()\` result bound without \`await using\` is reported. · fix: bind it with \`await using result = await dockerCli…\`, so the containers it started are removed at the end of the scope · read: docs/19-linting.md#docker-exec-bound-with-await-using
 
             conventions checker: 1 error(s) found under {{workdir}}
         `);
