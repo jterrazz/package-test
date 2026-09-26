@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d20WholeResult } from './result-compared-whole.js';
+import { resultComparedWhole } from './result-compared-whole.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ const ruleTester = new RuleTester();
 
 const SPEC = '/repo/specs/api/users/users.spec.ts';
 
-ruleTester.run('d20-whole-result', d20WholeResult as unknown as OxlintRule, {
+ruleTester.run('result-compared-whole', resultComparedWhole as unknown as OxlintRule, {
     invalid: [
         // A body probe alone — the rest of the response regresses unseen.
         {
@@ -72,7 +72,7 @@ ruleTester.run('d20-whole-result', d20WholeResult as unknown as OxlintRule, {
             code: "test('t', async () => { const result = await api.get('/users'); expect(result.response).toMatch(file('./expected/listed.http')); await expect(result.table('users')).toBeEmpty(); });",
             filename: SPEC,
         },
-        // A status alone is D15w's, never this rule's.
+        // A status alone is `no-status-only-test`'s, never this rule's.
         {
             code: "test('t', async () => { const result = await api.get('/users'); expect(result.status).toBe(200); });",
             filename: SPEC,

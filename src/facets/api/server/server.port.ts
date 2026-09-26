@@ -10,7 +10,7 @@ export type ServerRequestOptions = {
     template?: string | undefined;
 };
 
-/** The app a request is sent to — answered in this process (A8); `HonoAdapter` is its one adapter. */
+/** The app a request is sent to — answered in this process (`server-sees-declared-services`); `HonoAdapter` is its one adapter. */
 export type ServerPort = {
     /** Send an HTTP request and return the parsed response. */
     request: (

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -153,7 +152,7 @@ function inPlaceOf(node: AstNode): boolean {
     );
 }
 
-export const d13wUnfrozenNegativeFixture: LintRule = {
+export const negativeGoldenFrozen: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -172,8 +171,8 @@ export const d13wUnfrozenNegativeFixture: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d13w-unfrozen-negative-fixture'],
-        messages: lessons('d13w-unfrozen-negative-fixture', {
+        docs: rowOf('negative-golden-frozen'),
+        messages: lessons('negative-golden-frozen', {
             unfrozenNegativeFixture: {
                 found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
                 fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',

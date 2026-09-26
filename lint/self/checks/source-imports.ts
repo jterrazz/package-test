@@ -113,7 +113,7 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
             if (own !== undefined) {
                 return [
                     finding(
-                        'i10-facet-isolation',
+                        'no-cross-facet-import',
                         from,
                         {
                             fix: 'move what the two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and import it from there',
@@ -134,7 +134,7 @@ export function checkFacetIsolation(root: string): TokenViolation[] {
             }
             return [
                 finding(
-                    'i10-facet-isolation',
+                    'no-cross-facet-import',
                     from,
                     rootFile
                         ? {
@@ -164,7 +164,7 @@ export function checkEngineOwner(root: string): TokenViolation[] {
                 ? []
                 : [
                       finding(
-                          'i11-engine-owner',
+                          'one-owner-per-engine',
                           from,
                           {
                               fix: `reach the engine through the port \`${owners.join('` or `')}\` implements, handed in by the facet — or import only what the owner exports`,

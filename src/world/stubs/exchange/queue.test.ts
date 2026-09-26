@@ -139,7 +139,7 @@ describe('queue', () => {
         expect(queue.routes[1]?.url).toBe(URL_A);
     });
 
-    test('stub queue — strict failure message (CONVENTIONS D7) — names the offending request and lists stubs with their state', () => {
+    test('stub queue — strict failure message (rule `network-strict-after-first-stub`) — names the offending request and lists stubs with their state', () => {
         // Given - a queue with one exhausted and one untouched stub
         const queue = new StubQueue([
             stub(http.get(URL_A), 'a', { times: 1 }),
@@ -158,7 +158,7 @@ describe('queue', () => {
         expect(error.message).toContain(`- POST ${URL_B}`);
     });
 
-    test('stub queue — strict failure message (CONVENTIONS D7) — falls back to "no stubs declared" on an empty queue', () => {
+    test('stub queue — strict failure message (rule `network-strict-after-first-stub`) — falls back to "no stubs declared" on an empty queue', () => {
         // Given - an empty queue
         const queue = new StubQueue([]);
 

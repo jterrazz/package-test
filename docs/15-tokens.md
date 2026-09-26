@@ -1,6 +1,6 @@
 # 15 — Tokens: dynamic values in fixtures
 
-Real systems generate UUIDs, timestamps, ports, and paths. The framework handles them with **one unified token grammar** (rule D4): the same `{{token}}` vocabulary works in every fixture file, and the same vocabulary is available in code as `match.*`. The vocabulary is fixed — 21 tokens, defined, tested, and documented in the package — and an unknown token in a fixture is an error, not a silent literal.
+Real systems generate UUIDs, timestamps, ports, and paths. The framework handles them with **one unified token grammar** (rule `no-unknown-token`): the same `{{token}}` vocabulary works in every fixture file, and the same vocabulary is available in code as `match.*`. The vocabulary is fixed — 21 tokens, defined, tested, and documented in the package — and an unknown token in a fixture is an error, not a silent literal.
 
 ## Where tokens work
 
@@ -26,7 +26,7 @@ Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
 ```
 
-Stream comparisons strip ANSI escape sequences **before** token matching (rule D6), so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
+Stream comparisons strip ANSI escape sequences **before** token matching (rule `no-transform-duplicating-tokens`), so fixtures never contain color codes — `.text` is the stripped text, `.raw` the capture as it was.
 
 ## The vocabulary — all 21 tokens
 
@@ -92,7 +92,7 @@ Every token matches one value of its family at its position. The normative defin
 
 ## `#ref` captures
 
-Any token becomes a capture by suffixing `#name`: `{{uuid#order}}`. The **first occurrence captures** the actual value; every subsequent occurrence of the same ref **must be equal** (rule D4). Refs are scoped to the current spec — one namespace shared by all fixture files and code-side `match.ref()` within that spec, resetting between specs.
+Any token becomes a capture by suffixing `#name`: `{{uuid#order}}`. The **first occurrence captures** the actual value; every subsequent occurrence of the same ref **must be equal** (rule `no-unknown-token`). Refs are scoped to the current spec — one namespace shared by all fixture files and code-side `match.ref()` within that spec, resetting between specs.
 
 ```http
 ### expected/order-created.http — {{uuid#order}} appears 3 times → all must be equal
@@ -138,7 +138,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatch([
 
 ## Update mode: tokens are preserved
 
-`TEST_UPDATE=1` (or `vitest -u`) rewrites fixtures from actual output — but it writes **tokens, not values** (rule D5):
+`TEST_UPDATE=1` (or `vitest -u`) rewrites fixtures from actual output — but it writes **tokens, not values** (rule `no-volatile-literal`):
 
 - Segments already covered by a placeholder are **preserved**: a fixture line `Done in {{duration}}` stays `Done in {{duration}}` after an update, no matter what duration the run printed.
 - Values the framework knows to be dynamic are substituted automatically: the spec's cwd becomes `{{workdir}}` in the written fixture without you doing anything.
@@ -168,7 +168,7 @@ The same preservation and `{{workdir}}` substitution apply identically across ev
 
 A `toMatch(<value>)` is rewritten where it stands, in the test file, the gesture vitest's `toMatchInlineSnapshot` makes: the call is found from the stack of the assertion, and its argument — up to its comma or its closing parenthesis, whatever template, string or nested call it holds — is replaced by the actual result, merged with the tokens the old value had where the result still matches them. A text is written as a template literal indented one level deeper than its call, a json as its JSON, a table one row per line. An empty value — `toMatch('')` — is the one an author leaves to be recorded: outside update mode it fails naming the run that fills it. A value that matches is never touched, and neither is a `{ frozen: true }` one or a `.not` — a negation asserts a mismatch, and records nothing. Every rewrite of one file during a run is laid on the source the run loaded, so a second rewrite lands where its stack says even when a first one moved the lines below it. Under the preset the test file is written when the run ENDS, after its report: vitest frames a failure by reading the file on disk at the line the run loaded, so a file rewritten mid-run would frame a later failure at another test's code. The preset's global setup hands each project a pending folder under `.artifacts/vitest/in-place/` and writes what waits there once the report is printed — in watch mode, when the watcher exits; a run outside the preset writes each file at once. A component's value is rewritten the same way through a server command, the page's stack mapped back to the test's source by the browser server. What update mode writes is code the formatter has not seen: `make fix` gives it the repository's quotes.
 
-This is why `transform` on `specification.cli` is only an escape hatch (rule D6): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is warned by D6w ([d6w-transform-token-equivalent](19-linting.md#d6w-transform-token-equivalent)).
+This is why `transform` on `specification.cli` is only an escape hatch (rule `no-transform-duplicating-tokens`): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is warned by `no-transform-duplicating-tokens` ([no-transform-duplicating-tokens](19-linting.md#no-transform-duplicating-tokens)).
 
 ### Frozen fixtures — opting a negative fixture out of the rewrite
 
@@ -183,7 +183,7 @@ expect(() =>
 ).toThrow(/Response mismatch/);
 ```
 
-A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every golden subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `d13w-unfrozen-negative-fixture` flags a golden `toMatch(file(…))`/`toMatch(directory(…))` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
+A frozen fixture is **never written** in update mode — a frozen mismatch still throws its diff, and a frozen _missing_ fixture still throws "does not exist" (never created). Its failure says so rather than pointing at update mode: write the file by hand, or drop `{ frozen }` for one `TEST_UPDATE=1` run and put it back. It is available on every golden subject (`result.response`, `result.stdout`/`result.stderr`, `result.json`, `result.directory`, `result.filesystem`). The static rule `negative-golden-frozen` flags a golden `toMatch(file(…))`/`toMatch(directory(…))` wrapped in `expect(() => …).toThrow()` / `.rejects` that omits it.
 
 ### The discipline — update mode writes, it does not judge
 
@@ -203,7 +203,7 @@ The round-trip is not a step the suite performs for you, and deliberately so: up
 
 The grammar is deliberately small; three edges are worth knowing:
 
-- **No escaping for literal `{{…}}` text.** There is no escape sequence. A `{{uuid}}` written in a fixture is _always_ interpreted as the token — you cannot assert a literal, un-substituted `{{uuid}}` string in expected output. (An unknown name like `{{widget}}` is caught by the conventions checker (rule D4) as an error — the vocabulary is frozen, so an unknown token is never a usable literal escape.) For genuinely custom shapes, use `match.regex()` in code.
+- **No escaping for literal `{{…}}` text.** There is no escape sequence. A `{{uuid}}` written in a fixture is _always_ interpreted as the token — you cannot assert a literal, un-substituted `{{uuid}}` string in expected output. (An unknown name like `{{widget}}` is caught by the conventions checker (rule `no-unknown-token`) as an error — the vocabulary is frozen, so an unknown token is never a usable literal escape.) For genuinely custom shapes, use `match.regex()` in code.
 - **Update-merge pairs one previous line with one actual line.** Placeholder preservation is by **pattern**: the aligned line is tried first, then what is left over is re-paired by matching each remaining placeholder line against each unresolved actual line, in file order. A mid-file insertion is therefore safe — the shifted `{{duration}}` line is recognised where it landed. What stays out of reach: a previous line is spent **once**, so when the output grows a SECOND line the same placeholder could cover, the first keeps the token and the new one is written as a raw value, for you to tokenize.
 - **`{{float}}` cannot require a decimal on a JSON number.** In JSON there is no distinction between `42` and `42.0`, so as a whole JSON value `{{float}}` accepts any finite number (an integer passes). The decimal requirement only holds in **text** contexts (`4.2` matches, `42` does not). This is a JSON limitation, not a token choice.
 
@@ -240,14 +240,14 @@ accept native JSON numbers.
 
 ## Pitfalls
 
-- **Inventing a token.** The vocabulary is fixed; `{{timestamp}}` in a fixture is an error (rule D4). Use `{{iso8601}}` — or `match.regex()` in code for genuinely custom shapes.
+- **Inventing a token.** The vocabulary is fixed; `{{timestamp}}` in a fixture is an error (rule `no-unknown-token`). Use `{{iso8601}}` — or `match.regex()` in code for genuinely custom shapes.
 - **Expecting `{{workdir}}` to be a pattern.** It matches the _exact_ cwd of the current spec — a path from another spec's cwd fails.
 - **Assuming refs span the suite.** Ref scope is the current spec; `{{uuid#order}}` in two different tests are unrelated captures.
 - **Using `{{any}}` where a precise token exists.** `{{any}}` matches garbage too; every widening of a fixture weakens the spec.
 - **Reading "always-true" as unframed.** `{{any}}` is only unconditional as the _whole_ value. Embedded (`A {{any}} Z`), the frame around it must still match — and a non-string/number actual cannot satisfy an embedded token at all.
 - **Hand-writing values that update mode would tokenize.** Run `TEST_UPDATE=1` first, then tighten: placeholders you wrote once are preserved forever after.
-- **Escaping into `transform` for tokenizable noise.** Only application noise _not_ covered by the grammar justifies a transform (rule D6); one a token already names is D6w's warning.
-- **Leaving a deliberately-wrong fixture unfrozen.** A negative test whose golden matcher asserts a mismatch (wrapped in `expect(() => …).toThrow()` / `.rejects`) must pass `{ frozen: true }` — otherwise `TEST_UPDATE=1` overwrites the wrong fixture with the real output and the assertion silently stops testing anything (rule `d13w-unfrozen-negative-fixture`).
+- **Escaping into `transform` for tokenizable noise.** Only application noise _not_ covered by the grammar justifies a transform (rule `no-transform-duplicating-tokens`); one a token already names is `no-transform-duplicating-tokens`'s warning.
+- **Leaving a deliberately-wrong fixture unfrozen.** A negative test whose golden matcher asserts a mismatch (wrapped in `expect(() => …).toThrow()` / `.rejects`) must pass `{ frozen: true }` — otherwise `TEST_UPDATE=1` overwrites the wrong fixture with the real output and the assertion silently stops testing anything (rule `negative-golden-frozen`).
 
 ## Related
 

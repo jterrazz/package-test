@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -114,8 +113,8 @@ function scopeOf(context: Context): Scope | undefined {
     return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
 }
 
-/** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it. `vi.stubGlobal` is an upstream option (M3, ADR-005). */
-export const i4NoModuleDoubles: LintRule = {
+/** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it. `vi.stubGlobal` is an upstream option (`no-vitest-time-or-global-stub`, ADR-005). */
+export const noModuleMock: LintRule = {
     createOnce(context: Context): Visitor {
         let scope: Scope | undefined;
         return {
@@ -145,8 +144,8 @@ export const i4NoModuleDoubles: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['i4-no-module-doubles'],
-        messages: lessons('i4-no-module-doubles', {
+        docs: rowOf('no-module-mock'),
+        messages: lessons('no-module-mock', {
             assetImport: {
                 found: 'a module test imports the data asset "{{source}}"',
                 fix: 'write the data as code in a `*.fixtures.ts` neighbour, or move the test under `specs/` as a `.spec.ts`',

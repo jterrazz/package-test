@@ -39,7 +39,7 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
     backend?: MobileBackendOptions;
     /** The simulator to run on; under a `mobile({ device })` project it restates the project's, never another. */
     device?: MobileDevice;
-    /** Project-root override (A9): where the appium binary is resolved from. */
+    /** Project-root override (`no-redundant-root`): where the appium binary is resolved from. */
     root?: string;
     /** Services started and stopped with the runner, such as a `process()` for the bundler. */
     services?: Services;
@@ -47,7 +47,7 @@ export type MobileSpecificationOptions<Services extends ServiceRecord = ServiceR
     timeouts?: DeviceTimeouts;
 };
 
-/** What `specification.mobile()` returns: `const { mobile, cleanup, udid } = …` (A3). */
+/** What `specification.mobile()` returns: `const { mobile, cleanup, udid } = …` (`no-runner-alias`). */
 export type MobileHandle = {
     /** Base URL of the stub backend, with the `backend` option; inject it into your bundler env. */
     backendUrl?: string | undefined;

@@ -1,8 +1,0 @@
-description: rejects a deep internal src import from specs/
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/app/widget/widget.test.ts:3:23  jterrazz-self(f7-no-framework-internals)
-          specs/app/widget/widget.test.ts:6:1  jterrazz(d18w-existence-only-oracle)

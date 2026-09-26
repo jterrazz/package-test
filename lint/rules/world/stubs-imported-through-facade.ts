@@ -1,15 +1,14 @@
 import type { Context } from '@oxlint/plugins';
 
 import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 const INTERNAL_UNIT = new RegExp(`(?:^|/)stubs/(?:${STUB_KINDS.join('|')})/`, 'u');
 
-export const c10StubsBoundary: LintRule = {
+export const stubsImportedThroughFacade: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             ...importSourceVisitor(({ node, source }) => {
@@ -25,8 +24,8 @@ export const c10StubsBoundary: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c10-stubs-boundary'],
-        messages: lessons('c10-stubs-boundary', {
+        docs: rowOf('stubs-imported-through-facade'),
+        messages: lessons('stubs-imported-through-facade', {
             internal: {
                 found: 'the import "{{source}}" reaches into a stub kind folder',
                 fix: 'export a named scenario from the `stubs/*.stubs.ts` facade, and import that',

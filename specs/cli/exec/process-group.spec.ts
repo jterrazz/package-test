@@ -3,10 +3,10 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (D11 scalpel). */
+/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('process-group', () => {
-    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — terminates the whole process group, not just the direct child', async () => {
+    test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — terminates the whole process group, not just the direct child', async () => {
         // Given - a command that spawns a looping background grandchild (like a tsdown --watch under a dev command) and records its pid
         const result = await cli
             .fixture(directory('../../shared/fixtures/specimen-cli/'))

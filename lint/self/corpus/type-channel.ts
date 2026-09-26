@@ -12,8 +12,8 @@ export type TypeRow = {
     reason: string;
 };
 
-/** `// @ts-expect-error <ID> — <reason> [`<words>`]`. */
-const ROW = /\/\/ @ts-expect-error (?<id>[A-Z]\d+) — (?<reason>.+?) \[`(?<expected>.+)`\]\s*$/u;
+/** `// @ts-expect-error <row name> — <reason> [`<words>`]`. */
+const ROW = /\/\/ @ts-expect-error (?<id>[a-z][a-z-]+) — (?<reason>.+?) \[`(?<expected>.+)`\]\s*$/u;
 
 const MARKER = /\/\/ @ts-expect-error\b/u;
 

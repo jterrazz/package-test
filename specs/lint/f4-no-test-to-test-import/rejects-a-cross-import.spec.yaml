@@ -1,8 +1,0 @@
-description: rejects a test file importing another test file
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/app/widget/widget.test.ts:3:28  jterrazz(f4-no-test-to-test-import)
-          specs/app/widget/widget.test.ts:6:1  jterrazz(d18w-existence-only-oracle)

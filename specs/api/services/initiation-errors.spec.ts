@@ -1,11 +1,11 @@
-/* oxlint-disable jterrazz/a1-specification-file -- negative constructor specs:
+/* oxlint-disable jterrazz/runner-in-specification-file -- negative constructor specs:
    every specification.api() call here MUST fail to start, so no runner can
-   live in a *.specification.ts file (A1's sanctioned home is for runners that
+   live in a *.specification.ts file (`runner-in-specification-file`'s sanctioned home is for runners that
    boot). The failure paths themselves are the behaviour under test. */
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
 
-// Through the package entry: it wires the integration registry the constructors consume (F7).
+// Through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
 import { postgres, redis, specification } from '../../../src/index.js';
 
 const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '');
@@ -22,7 +22,7 @@ const BROKEN_SECOND_POSTGRES = resolve(
     '../../shared/fixtures/broken-second-postgres',
 );
 
-/* The startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (D11 scalpel). */
+/* The startup report interleaves live postgres logs and absolute paths, so each test probes the status markers and the thrown error (`output-asserted-as-a-golden` scalpel). */
 
 async function startAndCapture(
     root: string,

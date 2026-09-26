@@ -17,7 +17,7 @@ function tree(files: Record<string, string>): string {
 }
 
 describe('silentLintFailures', () => {
-    test('k10 — a lint-rule document goldens its report (meta-test) — no lint-rule document of this package asserts a failing exit with no report', () => {
+    test('`lint-document-goldens-the-report` — a lint-rule document goldens its report (meta-test) — no lint-rule document of this package asserts a failing exit with no report', () => {
         // Given - every lint-rule document of this package's own suite
         const silent = silentLintFailures(ROOT);
 
@@ -25,22 +25,22 @@ describe('silentLintFailures', () => {
         expect(silent).toStrictEqual([]);
     });
 
-    test('k10 — a lint-rule document goldens its report (meta-test) — names a document that pins a failing exit with neither stdout nor stderr golden', () => {
+    test('`lint-document-goldens-the-report` — a lint-rule document goldens its report (meta-test) — names a document that pins a failing exit with neither stdout nor stderr golden', () => {
         // Given - one document that goldens nothing, one that goldens stderr, one that stays silent on a passing run, and one under a fixture tree a violation is fed through
         const root = tree({
-            'specs/lint/c1-domain-structure/fixtures/violation/rejects.spec.yaml':
+            'specs/lint/specs-at-declared-depth/fixtures/violation/rejects.spec.yaml':
                 'description: x\nruns:\n    - command: checker .\n      exit: 1\n',
-            'specs/lint/c1-domain-structure/rejects-depth.spec.yaml':
+            'specs/lint/specs-at-declared-depth/rejects-depth.spec.yaml':
                 'description: x\nruns:\n    - command: checker .\n      exit: 1\n',
-            'specs/lint/j2-no-sleep/accepts-a-double-that-settles.spec.yaml':
+            'specs/lint/no-sleep/accepts-a-double-that-settles.spec.yaml':
                 'description: x\nruns:\n    - command: .\n      exit: 0\n',
-            'specs/lint/j2-no-sleep/rejects-a-sleep.spec.yaml':
-                'description: x\nruns:\n    - command: .\n      exit: 1\n      stderr: |\n          jterrazz-check(j2)\n',
+            'specs/lint/no-sleep/rejects-a-sleep.spec.yaml':
+                'description: x\nruns:\n    - command: .\n      exit: 1\n      stderr: |\n          jterrazz-check(no-sleep)\n',
         });
 
         // Then - only the document with neither channel golden is named
         expect(silentLintFailures(root)).toStrictEqual([
-            'specs/lint/c1-domain-structure/rejects-depth.spec.yaml',
+            'specs/lint/specs-at-declared-depth/rejects-depth.spec.yaml',
         ]);
     });
 });

@@ -91,7 +91,7 @@ describe('sending', () => {
     test('refuses a directory as a body, naming the one-file form', async () => {
         // Given - a body named by directory()
         // Then - the chain rejects before a request is sent: a body is one file
-        // checker-disable-next-line c8 -- negative spec: the refusal fires before the disk is read
+        // checker-disable-next-line named-path-exists -- negative spec: the refusal fires before the disk is read
         await expect(api.post('/users', directory('./requests/'))).rejects.toThrow(
             '.post("/users", directory("./requests/")): a body is one file — name it with file().',
         );
@@ -100,7 +100,7 @@ describe('sending', () => {
     test('throws on nonexistent request file', async () => {
         // Given - reference to a nonexistent .http file
         // Then - the chain rejects with ENOENT
-        // checker-disable-next-line c8 -- negative spec: the missing file IS the behaviour under test
+        // checker-disable-next-line named-path-exists -- negative spec: the missing file IS the behaviour under test
         await expect(api.request(file('./requests/nonexistent.http'))).rejects.toThrow('ENOENT');
     });
 });

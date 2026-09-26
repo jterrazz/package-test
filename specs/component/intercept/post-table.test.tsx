@@ -59,7 +59,7 @@ describe('PostTable', () => {
             await visitor.see(content('Could not load posts'));
         });
 
-        // Then - D7 is TOTAL here: no stub means no network, not an open door
+        // Then - `network-strict-after-first-stub` is TOTAL here: no stub means no network, not an open door
         await expect(render).rejects.toThrow(/\/api\/posts/u);
     });
 

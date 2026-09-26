@@ -16,7 +16,7 @@ export type StubRegistration = {
     violation: () => Error | null;
 };
 
-/** Zero stubs under node: nothing is guarded, the process has traffic of its own (D7, known scope). */
+/** Zero stubs under node: nothing is guarded, the process has traffic of its own (`network-strict-after-first-stub`, known scope). */
 export const NO_STUBS: StubRegistration = {
     cleanup: () => {},
     violation: () => null,
@@ -79,7 +79,7 @@ export function buildStubHandlers(
                     const observed = await observe(request);
                     const stub = queue.take(observed);
                     if (!stub) {
-                        // Nothing matches, or everything that matches is spent (D7).
+                        // Nothing matches, or everything that matches is spent (`network-strict-after-first-stub`).
                         return recordViolation(request.method, request.url);
                     }
                     const response =

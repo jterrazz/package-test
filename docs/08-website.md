@@ -33,21 +33,21 @@ export const { cleanup, website } = await specification.website({
 
 ### Options
 
-| Option      | Description                                                                                                                                                                                                                          |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `server`    | How the site is started locally: a `process()`, the `ProcessOptions` object itself, or `(services) => …` returning either. Exactly one of `server` / `url`                                                                           |
-| `url`       | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                                                                                      |
-| `services`  | A named record started BEFORE the site and stopped with it — a database it reads, a `process()` backend it calls. See [Services beside the site](#services-beside-the-site)                                                          |
-| `backend`   | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)                                                                        |
-| `external`  | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external)                                                          |
-| `root`      | **Project-root override** (rule A9): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                                                                         |
-| `transform` | **Escape hatch only** (rule D6): a normaliser applied to every compared reading — the head projection and the json-ld among them — before the comparison, for framework noise no token can name. It never mutates what the page said |
+| Option      | Description                                                                                                                                                                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `server`    | How the site is started locally: a `process()`, the `ProcessOptions` object itself, or `(services) => …` returning either. Exactly one of `server` / `url`                                                                                                          |
+| `url`       | Target an already-running site (deployed, preview, dev server). Exactly one of `server` / `url`                                                                                                                                                                     |
+| `services`  | A named record started BEFORE the site and stopped with it — a database it reads, a `process()` backend it calls. See [Services beside the site](#services-beside-the-site)                                                                                         |
+| `backend`   | `{ env, port? }` — start a declared stub backend and inject its URL into the server child. Requires `server` mode — see [Declared backend](#declared-backend)                                                                                                       |
+| `external`  | `'allow' \| 'block'` — cross-origin policy for `.visit()`. Default `'block'` with `server`, `'allow'` with `url` — see [Cross-origin policy](#cross-origin-policy-external)                                                                                         |
+| `root`      | **Project-root override** (rule `no-redundant-root`): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                                                                                       |
+| `transform` | **Escape hatch only** (rule `no-transform-duplicating-tokens`): a normaliser applied to every compared reading — the head projection and the json-ld among them — before the comparison, for framework noise no token can name. It never mutates what the page said |
 
 `server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
 The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)), its own children with it.
 
-The handle destructures to `{ website, cleanup, url }` (rule A3) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
+The handle destructures to `{ website, cleanup, url }` (rule `no-runner-alias`) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
 
 ### Services beside the site
 
@@ -130,11 +130,11 @@ test('subscribes through the form and captures the final state', async () => {
 });
 ```
 
-**No `expect()` inside a scenario (rule W1).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
+**No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
 
 The visitor's verbs and the words it names elements with are [13 — Elements](13-elements.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the descriptors and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
 
-Designating exactly one element is rule W3, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-elements.md#designating-exactly-one-element).
+Designating exactly one element is rule `descriptor-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-elements.md#designating-exactly-one-element).
 
 Navigating within a scenario changes what the capture describes:
 
@@ -239,7 +239,7 @@ test('exposes canonical, alternates, and named metas directly', async () => {
 });
 ```
 
-**A meta the FRAMEWORK owns is dropped by the runner, not absorbed by the golden.** A view-transitions router writes its own metas into every head; a golden that swallows them says the site declares something it never did, and every page's golden grows the same two lines. `transform` is the door — the same option `specification.cli()` has, for the same reason (rule D6):
+**A meta the FRAMEWORK owns is dropped by the runner, not absorbed by the golden.** A view-transitions router writes its own metas into every head; a golden that swallows them says the site declares something it never did, and every page's golden grows the same two lines. `transform` is the door — the same option `specification.cli()` has, for the same reason (rule `no-transform-duplicating-tokens`):
 
 ```typescript
 export const { cleanup, website } = await specification.website({
@@ -358,7 +358,7 @@ Provisioning the environment is not this package's job. In CI, the shared valida
 
 ```
 specs/website/
-├── website.specification.ts    # runner at the facet ROOT (rule C1)
+├── website.specification.ts    # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── expected/                # ALL expected fixtures, FLAT (*.head.json, *.jsonld.json, *.console.txt, …)
@@ -372,8 +372,8 @@ No `seeds/` or `requests/` — a website chain has no `.seed()` setup and no req
 ## Pitfalls
 
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
-- **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
-- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and W2 refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, W3's fix — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
+- **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
+- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, `descriptor-matches-one-element`'s fix — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
 - **Snapshotting the tree to prove focus.** The tree carries none — [13 § Modifiers](13-elements.md#modifiers) says what does, and what a golden may pin instead.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.

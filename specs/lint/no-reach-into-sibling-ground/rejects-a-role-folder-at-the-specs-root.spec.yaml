@@ -1,0 +1,12 @@
+description: a role folder at the specs root is refused as a folder and at every path into it
+fixture: ./fixtures/root-ground/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/listed-over-the-catalog.spec.ts:10:20  jterrazz-check(no-reach-into-sibling-ground)
+          specs/api/users/users.spec.ts:9:40  jterrazz-check(no-reach-into-sibling-ground)
+          specs/fixtures:1:1  jterrazz-check(no-reach-into-sibling-ground)
+          specs/seeds:1:1  jterrazz-check(no-reach-into-sibling-ground)
+          specs/tool/gadget/renders.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)
+          specs/tool/widget/renders.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)

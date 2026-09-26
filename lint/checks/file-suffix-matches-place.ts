@@ -68,14 +68,14 @@ export function checkSpecOutsideSpecs(memberDir: string): TokenViolation[] {
             line: 1,
             fix: `move it under \`specs/<facet>/\`, or rename it \`${rel.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
             found: 'a `.spec.ts` outside every `specs/` tree',
-            rule: 'c12-spec-file-name',
+            rule: 'file-suffix-matches-place',
             severity: 'error',
         });
     }
     return violations;
 }
 
-/** A file reaching no runner is C18's, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
+/** A file reaching no runner is `facet-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
 export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
     return movesUnderFacet(specsRoot).map(({ from }) => {
         const rel = relative(specsRoot, from);
@@ -86,7 +86,7 @@ export function checkTestUnderFacet(specsRoot: string): TokenViolation[] {
             line: 1,
             fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`make fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,
-            rule: 'c12-spec-file-name',
+            rule: 'file-suffix-matches-place',
             severity: 'error' as const,
         };
     });
@@ -111,11 +111,11 @@ export function movesUnderFacet(specsRoot: string): PlacementMove[] {
         }
         const parts = relative(specsRoot, path).split(/[/\\]/u);
         const facet = parts[0];
-        // A file loose at the specs root is C1's, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
+        // A file loose at the specs root is `specs-at-declared-depth`'s, and a non-facet first level is a repository suite, unless the tree itself is one facet's.
         if (!rooted && (parts.length < 2 || facet === undefined || !FACETS.has(facet))) {
             continue;
         }
-        // A `<module>.test.ts` beside its `<module>.ts` is I2's pairing, legal anywhere.
+        // A `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
         if (parts.some((part) => isGroundName(part))) {
             continue;
         }

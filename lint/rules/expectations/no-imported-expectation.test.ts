@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d29NoForeignExpectation } from './no-imported-expectation.js';
+import { noImportedExpectation } from './no-imported-expectation.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-ruleTester().run('d29-no-foreign-expectation', asOxlintRule(d29NoForeignExpectation), {
+ruleTester().run('no-imported-expectation', asOxlintRule(noImportedExpectation), {
     invalid: [
         // An expectation written in another module.
         {

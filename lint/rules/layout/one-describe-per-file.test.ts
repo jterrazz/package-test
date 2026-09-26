@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
 import { asOxlintRule, packageWith, ruleTester } from '../rule-tester.fixtures.js';
-import { c31DescribeNamesFile } from './one-describe-per-file.js';
+import { oneDescribePerFile } from './one-describe-per-file.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
@@ -13,7 +13,7 @@ const ROOT = packageWith({
 const MODULE_TEST = join(ROOT, 'src/route-judge.test.ts');
 const COMPONENT_TEST = join(ROOT, 'src/locale-note.test.tsx');
 
-ruleTester().run('c31-describe-names-file', asOxlintRule(c31DescribeNamesFile), {
+ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
     invalid: [
         // No describe: the tests are wrapped in one titled with the aspect.
         {

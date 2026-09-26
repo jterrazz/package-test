@@ -89,7 +89,7 @@ export function checkSourceRoot(root: string): TokenViolation[] {
         .filter(({ path }) => path.split('/').length === 2)
         .filter(({ path }) => !SOURCE_ROOT.includes(path.slice('src/'.length)))
         .map(({ directory, path }) =>
-            finding('i9-source-root', path, {
+            finding('source-root-holds-known-entries', path, {
                 fix: 'move it into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`)',
                 found: `the ${directory ? 'folder' : 'file'} \`${path}\` at the source root, which holds the two entries and the six trees alone`,
             }),
@@ -109,7 +109,7 @@ export function checkFolderShape(root: string): TokenViolation[] {
         return [
             ...(ROLE_NAMES.has(name)
                 ? [
-                      finding('i12-folder-shape', path, {
+                      finding('folder-named-for-a-concept', path, {
                           fix: 'name the folder for what its files are about, and let each file carry its role on its suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …)',
                           found: `the folder \`${name}/\` is named for a role, not a concept`,
                       }),
@@ -117,7 +117,7 @@ export function checkFolderShape(root: string): TokenViolation[] {
                 : []),
             ...(children.length < 2
                 ? [
-                      finding('i12-folder-shape', path, {
+                      finding('folder-named-for-a-concept', path, {
                           fix: 'fold what it holds into its parent, or give the concept the second file it groups',
                           found: `the folder \`${name}/\` holds ${children.length === 0 ? 'nothing' : 'one entry'}`,
                       }),
@@ -155,7 +155,7 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): TokenViolation[] {
                           ),
                   )
                   .map((file) =>
-                      finding('i12-folder-shape', file, {
+                      finding('folder-named-for-a-concept', file, {
                           fix: 'move it into the concept folder it belongs to; the root of a facet with concept folders holds its face alone — `index.ts`, `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts`',
                           found: `\`${file.split('/').at(-1) ?? ''}\` sits at the root of the facet \`${facet}\`, and is no file of its face`,
                       }),

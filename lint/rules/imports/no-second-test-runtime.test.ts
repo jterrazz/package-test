@@ -1,12 +1,12 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { f6NoForeignTestRuntime } from './no-second-test-runtime.js';
+import { noSecondTestRuntime } from './no-second-test-runtime.js';
 
 const tester = ruleTester();
 
 const MODULE_TEST = '/repo/src/ui/post-client.test.ts';
 const COMPONENT_TEST = '/repo/src/ui/post-table.test.tsx';
 
-tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
+tester.run('no-second-test-runtime', asOxlintRule(noSecondTestRuntime), {
     invalid: [
         {
             code: 'import { render } from "@testing-library/react";',
@@ -86,7 +86,7 @@ tester.run('f6-no-foreign-test-runtime', asOxlintRule(f6NoForeignTestRuntime), {
         },
     ],
     valid: [
-        // The framework's own entry is the one a spec imports (F1).
+        // The framework's own entry is the one a spec imports (`no-unpublished-subpath`).
         { code: 'import { component } from "@jterrazz/test";', filename: COMPONENT_TEST },
         // The runner itself is not a foreign runtime.
         { code: 'import { expect, test } from "vitest";', filename: MODULE_TEST },

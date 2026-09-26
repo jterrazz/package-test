@@ -1,0 +1,7 @@
+description: warns on await of a synchronous matcher
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:9:11  jterrazz(no-await-on-sync-matcher)

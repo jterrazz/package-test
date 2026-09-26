@@ -15,7 +15,7 @@ function member(paths: string[]): string {
 }
 
 describe('moduleTestsOf', () => {
-    test('the module tests of a member — what C8 and the ground fixers read beside specs/ — reads the module tests of a member, outside specs/, ground and nested packages', () => {
+    test('the module tests of a member — what `named-path-exists` and the ground fixers read beside specs/ — reads the module tests of a member, outside specs/, ground and nested packages', () => {
         // Given - module tests beside their modules, and tests the walk leaves to others
         const root = member([
             'lint/checks/checker.test.ts',

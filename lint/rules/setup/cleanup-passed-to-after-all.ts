@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { propertyKeyName, specificationMember, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -46,7 +45,7 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
     return found;
 }
 
-export const a4CleanupAfterall: LintRule = {
+export const cleanupPassedToAfterAll: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'specification',
@@ -68,8 +67,8 @@ export const a4CleanupAfterall: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['a4-cleanup-afterall'],
-        messages: lessons('a4-cleanup-afterall', {
+        docs: rowOf('cleanup-passed-to-after-all'),
+        messages: lessons('cleanup-passed-to-after-all', {
             unregistered: {
                 found: '`cleanup` is destructured and never handed to `afterAll`',
                 fix: 'add `afterAll(cleanup);` at the end of the specification file',

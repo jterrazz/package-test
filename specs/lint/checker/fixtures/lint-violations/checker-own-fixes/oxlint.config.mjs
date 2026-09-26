@@ -4,7 +4,7 @@ export default {
     jsPlugins: [`${process.env.JTERRAZZ_TEST_REPO}/dist/oxlint.js`],
     plugins: ['unicorn'],
     rules: {
-        'jterrazz/b16w-file-context': 'warn',
+        'jterrazz/no-repeated-chain-setting': 'warn',
         'unicorn/no-useless-undefined': 'error',
     },
 };

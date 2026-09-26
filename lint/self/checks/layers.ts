@@ -1,7 +1,7 @@
 import type { LayerOptions } from '../../rules/architecture/import-within-declared-layers.js';
 import { enginesOwnedIn } from './engines.js';
 
-/** This package's layer map (I1), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's (I9–I12); engine ownership is read off `ENGINE_OWNERS`. */
+/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← facets ← vitest · the entries`. What a map cannot express is the self checker's (`source-root-holds-known-entries`–`folder-named-for-a-concept`); engine ownership is read off `ENGINE_OWNERS`. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
@@ -89,7 +89,7 @@ export const FRAMEWORK_LAYERS = {
             'kernel/files/artifacts',
             // The four ground names have one home: a rule probing its own copy could drift from what the runner resolves.
             'kernel/files/ground',
-            // A9's rule must derive the root with the framework's own walk, not a copy.
+            // `no-redundant-root`'s rule must derive the root with the framework's own walk, not a copy.
             'kernel/files/resolve',
             // The path law the runner refuses by is the one the rules read by.
             'kernel/files/spec-path',
@@ -104,7 +104,7 @@ export const FRAMEWORK_LAYERS = {
             // The runtime's refusals open on the sentence their catalogue row does.
             'kernel/refusals/refusal',
             'expectations/tokens/match',
-            // C28's fixer proves its guess against the runtime's own dedent.
+            // `ground-shared-or-inline`'s fixer proves its guess against the runtime's own dedent.
             'expectations/text/dedent',
             'world/services/record-key',
             // The folders a stub may sit in are the builders the package exports, listed once.

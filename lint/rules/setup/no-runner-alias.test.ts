@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { a3NoDestructureAlias } from './no-runner-alias.js';
+import { noRunnerAlias } from './no-runner-alias.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('a3-no-destructure-alias', a3NoDestructureAlias as unknown as OxlintRule, {
+ruleTester.run('no-runner-alias', noRunnerAlias as unknown as OxlintRule, {
     invalid: [
         // Renamed facet.
         {

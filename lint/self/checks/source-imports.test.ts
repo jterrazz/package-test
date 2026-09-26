@@ -3,9 +3,9 @@ import { describe, expect, test } from 'vitest';
 import { checkEngineOwner, checkFacetIsolation } from './source-imports.js';
 import { located, ROOT, treeOf } from './source-tree.fixtures.js';
 
-/** The self checker passes I10 (`i10-facet-isolation`) and I11 (`i11-engine-owner`). */
+/** The self checker passes `no-cross-facet-import` (`no-cross-facet-import`) and `one-owner-per-engine` (`one-owner-per-engine`). */
 describe('source-imports', () => {
-    test('checker-source-imports — the imports of the source tree (self checker passes I10, I11) — i10 — a facet never imports another, and is entered from outside by its face', () => {
+    test('checker-source-imports — the imports of the source tree (self checker passes) — `no-cross-facet-import` — a facet never imports another, and is entered from outside by its face', () => {
         // Given - the package's own tree, and one where a facet reaches another, and an entry skips the face for a root file and for a concept folder
         const crossing = treeOf({
             'src/facets/api/api.handle.ts': "\nimport type { X } from '../cli/cli.handle.js';\n",
@@ -18,13 +18,13 @@ describe('source-imports', () => {
         // Then - the package holds none; the facet's import and each reach past the face are named at the import
         expect(checkFacetIsolation(ROOT)).toStrictEqual([]);
         expect(located(checkFacetIsolation(crossing))).toStrictEqual([
-            'src/facets/api/api.handle.ts:2:1 i10-facet-isolation: the facet `api` imports `src/facets/cli/cli.handle.ts`, a module of the facet `cli`',
-            'src/index.ts:1:1 i10-facet-isolation: `src/facets/cli/cli.handle.ts` is reached from outside the facet `cli` by a module its face does not serve',
-            'src/index.ts:2:1 i10-facet-isolation: `src/facets/cli/process/cli.port.ts` is reached inside the facet `cli`, below its root files',
+            'src/facets/api/api.handle.ts:2:1 no-cross-facet-import: the facet `api` imports `src/facets/cli/cli.handle.ts`, a module of the facet `cli`',
+            'src/index.ts:1:1 no-cross-facet-import: `src/facets/cli/cli.handle.ts` is reached from outside the facet `cli` by a module its face does not serve',
+            'src/index.ts:2:1 no-cross-facet-import: `src/facets/cli/process/cli.port.ts` is reached inside the facet `cli`, below its root files',
         ]);
     });
 
-    test('checker-source-imports — the imports of the source tree (self checker passes I10, I11) — i11 — each third-party engine is imported by the one slice that owns it', () => {
+    test('checker-source-imports — the imports of the source tree (self checker passes) — `one-owner-per-engine` — each third-party engine is imported by the one slice that owns it', () => {
         // Given - the package's own tree, and one where the kernel reaches for pg and the api facet for playwright
         const misplaced = treeOf({
             'src/facets/api/api.handle.ts':
@@ -36,8 +36,8 @@ describe('source-imports', () => {
         // Then - the package holds none; each import outside its owner is named at the import, with the owner
         expect(checkEngineOwner(ROOT)).toStrictEqual([]);
         expect(located(checkEngineOwner(misplaced))).toStrictEqual([
-            'src/facets/api/api.handle.ts:2:12 i11-engine-owner: `playwright` is imported outside `src/facets/website/`, the one slice that owns it',
-            'src/kernel/chain/state.ts:1:1 i11-engine-owner: `pg` is imported outside `src/world/services/postgres/`, the one slice that owns it',
+            'src/facets/api/api.handle.ts:2:12 one-owner-per-engine: `playwright` is imported outside `src/facets/website/`, the one slice that owns it',
+            'src/kernel/chain/state.ts:1:1 one-owner-per-engine: `pg` is imported outside `src/world/services/postgres/`, the one slice that owns it',
         ]);
     });
 });

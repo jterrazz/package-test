@@ -66,7 +66,7 @@ async function toMatchGolden(
 ): Promise<MatcherResult> {
     if (!isDiskFile(expected)) {
         throw new TypeError(
-            refusal('d14-one-verb-per-meaning', {
+            refusal('one-verb-per-meaning', {
                 fix: 'compare the tree under node, or a captured text of the page to its file(…)',
                 found: 'toMatch(directory(…)) in a page, which has no working directory',
             }),
@@ -74,7 +74,7 @@ async function toMatchGolden(
     }
     if (!(received instanceof TextAccessor)) {
         throw new TypeError(
-            refusal('d14-one-verb-per-meaning', {
+            refusal('one-verb-per-meaning', {
                 fix: `compare a captured text — result.tree, result.html, text(…) — to file(${JSON.stringify(expected.path)})`,
                 found: `toMatch(file(${JSON.stringify(expected.path)})) in a page, on a subject that is no captured text`,
             }),
@@ -91,7 +91,7 @@ async function toMatchWhole(
 ): Promise<MatcherResult> {
     if (!(received instanceof TextAccessor) || typeof expected !== 'string') {
         throw new TypeError(
-            refusal('d14-one-verb-per-meaning', {
+            refusal('one-verb-per-meaning', {
                 fix: 'compare a captured text — result.tree, result.html, text(…) — to a text written in place',
                 found: 'toMatch(<value>) in a page, on a subject or a value that is no text',
             }),
@@ -117,7 +117,7 @@ async function toBeEmpty(received: unknown): Promise<MatcherResult> {
         received instanceof TextAccessor
             ? emptyStreamRefusal(received)
             : new TypeError(
-                  refusal('d14-one-verb-per-meaning', {
+                  refusal('one-verb-per-meaning', {
                       fix: "compare the stream's text: expect(<result>.<stream>.text).toBe('')",
                       found: 'toBeEmpty() in a page, which holds no table',
                   }),

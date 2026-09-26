@@ -90,7 +90,7 @@ export function checkFacetFolder(specsRoot: string): TokenViolation[] {
             line: 1,
             fix: `create \`specs/${facet}/${facet}.specification.ts\` calling \`specification.${facet}()\`, or rename the folder`,
             found: `\`specs/${facet}/\`, a facet folder with no specification constructing \`specification.${facet}()\``,
-            rule: 'c20-facet-folder',
+            rule: 'facet-folder-has-specification',
             severity: 'error',
         });
     }
@@ -101,7 +101,7 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     for (const { facet, path } of facetFoldersOf(specsRoot)) {
         if (specificationsIn(path).length === 0) {
-            // C20 owns the folder with no runner at all.
+            // `facet-folder-has-specification` owns the folder with no runner at all.
             continue;
         }
         for (const file of walkFiles(path)) {
@@ -122,7 +122,7 @@ export function checkModuleTestUnderFacet(specsRoot: string): TokenViolation[] {
                 line: 1,
                 fix: `import \`{ ${facet} }\` from \`${facet}.specification.js\` and drive the product through it, or move the module test beside its module`,
                 found: `a test under the \`${facet}\` facet that reaches no runner`,
-                rule: 'c18-module-test-under-facet',
+                rule: 'facet-test-uses-its-runner',
                 severity: 'error',
             });
         }
@@ -148,7 +148,7 @@ const GROUND = new Set<string>(GROUND_DIRS);
 /** Such a test reads every golden of its leaf though its source names none. */
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
-/** Not where the folder is the subject's standard name (C30): there the leaf is the subject, and its aspect files share it by design. */
+/** Not where the folder is the subject's standard name (`spec-in-subject-folder`): there the leaf is the subject, and its aspect files share it by design. */
 export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
     const violations: TokenViolation[] = [];
     const derived = (directory: string): boolean =>
@@ -157,7 +157,7 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
         (candidate) => !derived(candidate),
     )) {
         const entries = entriesOf(directory);
-        // A `.test.tsx` is out of reach, as for C1: a tree of rendered units has no domain folders for the ground to move into.
+        // A `.test.tsx` is out of reach, as for `specs-at-declared-depth`: a tree of rendered units has no domain folders for the ground to move into.
         const tests = entries
             .filter((entry) => entry.isFile() && isNodeTestFileName(entry.name))
             .map((entry) => join(directory, entry.name));
@@ -192,7 +192,7 @@ export function checkGroundOwnedByOne(specsRoot: string): TokenViolation[] {
                 line: 1,
                 fix: `give \`${relative(directory, reader)}\` a domain folder of its own, and move \`${ground}/\` into it`,
                 found: `\`${ground}/\`, read by \`${relative(directory, reader)}\` alone of the tests beside it`,
-                rule: 'c21w-ground-owned-by-one',
+                rule: 'ground-beside-its-only-reader',
                 severity: 'warn',
             });
         }

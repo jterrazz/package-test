@@ -13,7 +13,7 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
     throw new Error(`expected ${path} to be refused, but the visit succeeded`);
 }
 
-// RUNTIME W3 — a descriptor a verb ACTS on must designate exactly one element; the refusal enumerates the candidates and the rewrites.
+// RUNTIME descriptor-matches-one-element — a descriptor a verb ACTS on must designate exactly one element; the refusal enumerates the candidates and the rewrites.
 describe('ambiguity', () => {
     test('refuses an element that matches more than one node', async () => {
         // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles"), which the whole-name default does not reach
@@ -36,7 +36,7 @@ describe('ambiguity', () => {
         expect(message).toContain('in <nav>');
         expect(message).toContain('in <footer>');
         expect(message).toContain('within(navigation(), link("Articles"))');
-        expect(message).toContain('read: docs/19-linting.md#w3-unambiguous-element');
+        expect(message).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
     });
 
     test('names a candidate inside a `<search>` element by its landmark', async () => {

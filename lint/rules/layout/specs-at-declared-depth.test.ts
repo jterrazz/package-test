@@ -4,7 +4,7 @@ import { resolve } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { c1DomainStructure } from './specs-at-declared-depth.js';
+import { specsAtDeclaredDepth } from './specs-at-declared-depth.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -15,7 +15,7 @@ const ruleTester = new RuleTester();
 
 const SUITES = groundTree({ 'posts/add/add.test.ts': '', 'tree/row-names.test.ts': '' });
 
-ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule, {
+ruleTester.run('specs-at-declared-depth', specsAtDeclaredDepth as unknown as OxlintRule, {
     invalid: [
         // A test directly at the facet root — no domain folder.
         {
@@ -72,7 +72,7 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
             filename: '/repo/specs/integration/shared/shared.spec.ts',
             options: [{ depth: 'facet' }],
         },
-        // Module tests under src/ follow the neighbour rule (I2), not C1.
+        // Module tests under src/ follow the neighbour rule (`test-beside-its-module`), not `specs-at-declared-depth`.
         { code: 'const x = 1;', filename: '/repo/src/specification/matching/match.test.ts' },
         // The default is explicit-equivalent: stating it changes nothing.
         {
@@ -83,113 +83,121 @@ ruleTester.run('c1-domain-structure', c1DomainStructure as unknown as OxlintRule
     ],
 });
 
-ruleTester.run('c1-domain-structure (depth: facet)', c1DomainStructure as unknown as OxlintRule, {
-    invalid: [
-        // A test loose at the specs root belongs to no facet.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'testOutsideFacet' }],
-            filename: '/repo/specs/row-names.test.ts',
-            options: [{ depth: 'facet' }],
-        },
-        // A test nested below the one domain folder the mode allows.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'testTooDeepForFacet' }],
-            filename: '/repo/specs/tree/rows/names/names.test.ts',
-            options: [{ depth: 'facet' }],
-        },
-        // A specification inside a domain rather than at the facet root.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'specNotAtFacetRoot' }],
-            filename: `${SUITES}/tree/rows/tree.specification.ts`,
-            options: [{ depth: 'facet' }],
-        },
-    ],
-    valid: [
-        // At the facet root — the asset-less sibling shape.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/tree/row-names.test.ts',
-            options: [{ depth: 'facet' }],
-        },
-        // One domain down — the shape a test with its own assets earns.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/source/import-paths/import-paths.test.ts',
-            options: [{ depth: 'facet' }],
-        },
-        // Specifications sit at the facet root, exactly as in facet-domain.
-        {
-            code: 'const x = 1;',
-            filename: `${SUITES}/tree/tree.specification.ts`,
-            options: [{ depth: 'facet' }],
-        },
-        // Still out of scope under src/.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/src/specification/matching/match.test.ts',
-            options: [{ depth: 'facet' }],
-        },
-    ],
-});
+ruleTester.run(
+    'specs-at-declared-depth (depth: facet)',
+    specsAtDeclaredDepth as unknown as OxlintRule,
+    {
+        invalid: [
+            // A test loose at the specs root belongs to no facet.
+            {
+                code: 'const x = 1;',
+                errors: [{ messageId: 'testOutsideFacet' }],
+                filename: '/repo/specs/row-names.test.ts',
+                options: [{ depth: 'facet' }],
+            },
+            // A test nested below the one domain folder the mode allows.
+            {
+                code: 'const x = 1;',
+                errors: [{ messageId: 'testTooDeepForFacet' }],
+                filename: '/repo/specs/tree/rows/names/names.test.ts',
+                options: [{ depth: 'facet' }],
+            },
+            // A specification inside a domain rather than at the facet root.
+            {
+                code: 'const x = 1;',
+                errors: [{ messageId: 'specNotAtFacetRoot' }],
+                filename: `${SUITES}/tree/rows/tree.specification.ts`,
+                options: [{ depth: 'facet' }],
+            },
+        ],
+        valid: [
+            // At the facet root — the asset-less sibling shape.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/tree/row-names.test.ts',
+                options: [{ depth: 'facet' }],
+            },
+            // One domain down — the shape a test with its own assets earns.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/source/import-paths/import-paths.test.ts',
+                options: [{ depth: 'facet' }],
+            },
+            // Specifications sit at the facet root, exactly as in facet-domain.
+            {
+                code: 'const x = 1;',
+                filename: `${SUITES}/tree/tree.specification.ts`,
+                options: [{ depth: 'facet' }],
+            },
+            // Still out of scope under src/.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/src/specification/matching/match.test.ts',
+                options: [{ depth: 'facet' }],
+            },
+        ],
+    },
+);
 
-ruleTester.run('c1-domain-structure (depth: mirror)', c1DomainStructure as unknown as OxlintRule, {
-    invalid: [
-        // A test loose at the specs root mirrors nothing.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'testAtSpecsRoot' }],
-            filename: '/repo/specs/logs.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-        // A test not named after the directory holding it.
-        {
-            code: 'const x = 1;',
-            errors: [{ messageId: 'testNotMirroringDirectory' }],
-            filename: '/repo/specs/posts/add/creation.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-    ],
-    valid: [
-        // One directory deep — a top-level leaf.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/logs/logs.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-        // Two deep — a leaf under a namespace.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/infrastructure/pods/pods.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-        // Three deep — the mirror has no maximum, unlike facet-domain.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/a/b/c/c.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-        // A mirror has no facet level, so specification files are unconstrained.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/cli.specification.ts',
-            options: [{ depth: 'mirror' }],
-        },
-        {
-            code: 'const x = 1;',
-            filename: `${SUITES}/posts/add/add.specification.ts`,
-            options: [{ depth: 'mirror' }],
-        },
-        // Still out of scope under src/.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/src/specification/matching/match.test.ts',
-            options: [{ depth: 'mirror' }],
-        },
-    ],
-});
+ruleTester.run(
+    'specs-at-declared-depth (depth: mirror)',
+    specsAtDeclaredDepth as unknown as OxlintRule,
+    {
+        invalid: [
+            // A test loose at the specs root mirrors nothing.
+            {
+                code: 'const x = 1;',
+                errors: [{ messageId: 'testAtSpecsRoot' }],
+                filename: '/repo/specs/logs.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+            // A test not named after the directory holding it.
+            {
+                code: 'const x = 1;',
+                errors: [{ messageId: 'testNotMirroringDirectory' }],
+                filename: '/repo/specs/posts/add/creation.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+        ],
+        valid: [
+            // One directory deep — a top-level leaf.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/logs/logs.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+            // Two deep — a leaf under a namespace.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/infrastructure/pods/pods.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+            // Three deep — the mirror has no maximum, unlike facet-domain.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/a/b/c/c.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+            // A mirror has no facet level, so specification files are unconstrained.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/cli.specification.ts',
+                options: [{ depth: 'mirror' }],
+            },
+            {
+                code: 'const x = 1;',
+                filename: `${SUITES}/posts/add/add.specification.ts`,
+                options: [{ depth: 'mirror' }],
+            },
+            // Still out of scope under src/.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/src/specification/matching/match.test.ts',
+                options: [{ depth: 'mirror' }],
+            },
+        ],
+    },
+);
 
 function groundTree(files: Record<string, string>): string {
     const prefix = resolve(tmpdir(), 'c1-ground-');
@@ -213,7 +221,7 @@ const CODE_GROUND = groundTree({
     'support/support.specification.ts': '',
 });
 
-ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as OxlintRule, {
+ruleTester.run('specs-at-declared-depth (ground)', specsAtDeclaredDepth as unknown as OxlintRule, {
     invalid: [
         // A test in ground with no module beside it is a spec that wandered in.
         {
@@ -255,7 +263,7 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
         })),
     ],
     valid: [
-        // I2's pairing inside its ground: the depth rules never reach it.
+        // `test-beside-its-module`'s pairing inside its ground: the depth rules never reach it.
         { code: 'const x = 1;', filename: `${CODE_GROUND}/cli/fixtures/binary/binary.test.ts` },
         {
             code: 'const x = 1;',
@@ -265,24 +273,28 @@ ruleTester.run('c1-domain-structure (ground)', c1DomainStructure as unknown as O
     ],
 });
 
-ruleTester.run('c1-domain-structure (depth: off)', c1DomainStructure as unknown as OxlintRule, {
-    invalid: [],
-    valid: [
-        // The tree's shape is declared guarded elsewhere: everything is accepted.
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/job/job.test.ts',
-            options: [{ depth: 'off' }],
-        },
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/cli/check/linter/linter.test.ts',
-            options: [{ depth: 'off' }],
-        },
-        {
-            code: 'const x = 1;',
-            filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
-            options: [{ depth: 'off' }],
-        },
-    ],
-});
+ruleTester.run(
+    'specs-at-declared-depth (depth: off)',
+    specsAtDeclaredDepth as unknown as OxlintRule,
+    {
+        invalid: [],
+        valid: [
+            // The tree's shape is declared guarded elsewhere: everything is accepted.
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/job/job.test.ts',
+                options: [{ depth: 'off' }],
+            },
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/cli/check/linter/linter.test.ts',
+                options: [{ depth: 'off' }],
+            },
+            {
+                code: 'const x = 1;',
+                filename: '/repo/specs/api/intercepts/intercepts.specification.ts',
+                options: [{ depth: 'off' }],
+            },
+        ],
+    },
+);

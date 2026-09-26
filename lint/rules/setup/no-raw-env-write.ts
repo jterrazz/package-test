@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, memberPath } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -20,7 +19,7 @@ function isEnvTarget(node: AstNode | undefined): boolean {
 }
 
 /** A warning: a test whose subject is the process environment writes to it, and says so in a line. */
-export const e9wEnvAssignmentInTest: LintRule = {
+export const noRawEnvWrite: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -38,8 +37,8 @@ export const e9wEnvAssignmentInTest: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['e9w-env-assignment-in-test'],
-        messages: lessons('e9w-env-assignment-in-test', {
+        docs: rowOf('no-raw-env-write'),
+        messages: lessons('no-raw-env-write', {
             rawAssignment: {
                 found: 'the test writes the process environment directly',
                 fix: "write `vi.stubEnv('<NAME>', '<value>')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`",

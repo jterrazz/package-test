@@ -15,7 +15,7 @@ import type { Node, Pair, YAMLMap, YAMLSeq, YamlSource } from '../../../kernel/y
 
 export const SPEC_EXTENSION = '.spec.yaml';
 
-/** The canonical order, enforced and rewritten by `d4b-spec-key-order`. */
+/** The canonical order, enforced and rewritten by `document-keys-in-canonical-order`. */
 export const DOCUMENT_KEYS = ['description', 'fixture', 'env', 'serve', 'runs'] as const;
 
 export const RUN_KEYS = [
@@ -476,7 +476,7 @@ type PathRole = {
     key: string;
 };
 
-/** Judged by the law of `file()` and `directory()`: relative, in the folder its key reads (C24). */
+/** Judged by the law of `file()` and `directory()`: relative, in the folder its key reads (`verb-reads-its-ground-folder`). */
 function readPath(context: Context, line: number, value: string, role: PathRole): SpecPath {
     const at = (message: string): never => {
         throw new SpecSyntaxError(context.fileName, line, message);
@@ -493,7 +493,7 @@ function readPath(context: Context, line: number, value: string, role: PathRole)
     if (found !== role.folder) {
         const where = `./${role.folder}/ beside the document, or in specs/shared/${role.folder}/ if several leaves share it`;
         at(
-            `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (C24)`,
+            `${role.key}: reads ${role.folder}/, and "${value}" names ${found === undefined ? `no ${role.folder}/ folder` : `${found}/`} — put the file in ${where} (verb-reads-its-ground-folder)`,
         );
     }
     if (
@@ -688,7 +688,7 @@ function presenceOf(shape: PresenceShape): SchemaNode {
     };
 }
 
-/** Built from the constants above; committed as `schema/spec.schema.json` by `npm run docs`. Key order is `d4b-spec-key-order`'s, which JSON Schema cannot state. */
+/** Built from the constants above; committed as `schema/spec.schema.json` by `npm run docs`. Key order is `document-keys-in-canonical-order`'s, which JSON Schema cannot state. */
 type SchemaNode = Record<string, unknown>;
 
 export type SpecSchema = {

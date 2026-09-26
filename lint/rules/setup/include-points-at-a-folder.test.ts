@@ -1,14 +1,14 @@
 import { resolve } from 'node:path';
 
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { e7wIncludePrefixExists } from './include-points-at-a-folder.js';
+import { includePointsAtAFolder } from './include-points-at-a-folder.js';
 
 // Placed at this package's own root: `specs/api` exists here and `specs/lint2`
 // does not, so the probe answers against a real tree.
 const ROOT = resolve(import.meta.dirname, '../../..');
 const CONFIG = resolve(ROOT, 'vitest.config.ts');
 
-ruleTester().run('e7w-include-prefix-exists', asOxlintRule(e7wIncludePrefixExists), {
+ruleTester().run('include-points-at-a-folder', asOxlintRule(includePointsAtAFolder), {
     invalid: [
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'lint', include: ['specs/lint2/**/*.test.ts'] }] } });`,

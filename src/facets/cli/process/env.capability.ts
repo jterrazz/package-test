@@ -43,7 +43,7 @@ export function expandWorkdir(variables: CliEnv, workdir: string): CliEnv {
     return expanded;
 }
 
-/** B6: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind. */
+/** `service-urls-injected`: `<KEY>_URL` each, `DATABASE_URL` / `REDIS_URL` when exactly one of that kind. */
 function serviceEnv(services: Readonly<Record<string, ServiceHandle>> | undefined): CliEnv {
     const injected: CliEnv = {};
     const sql: ServiceHandle[] = [];

@@ -1,0 +1,7 @@
+description: rejects an external dependency imported from core/
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/core/matching/store.ts:1:24  jterrazz(import-within-declared-layers)

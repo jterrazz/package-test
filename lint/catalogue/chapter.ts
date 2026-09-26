@@ -1,4 +1,5 @@
-import { consumerCatalog, FAMILIES } from './manifest.js';
+import { FAMILIES } from './families.js';
+import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
 
 /** Rendered from `manifest.ts` and deterministic: `plugin.test.ts` asserts the committed chapters are reproduced byte for byte. */
@@ -39,29 +40,6 @@ export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }
 
-function families(rows: CatalogEntry[]): string[] {
-    return [...new Set(rows.map((entry) => entry.family))].sort((a, b) => a.localeCompare(b));
-}
-
-/** `model` first, then one section per facet: a reader adopting one constructor stops after two sections. */
-const FACET_ORDER = ['model', 'api', 'cli', 'component', 'integration', 'job', 'mobile', 'website'];
-
-function facets(): string[] {
-    const present = new Set<string>(published.map((entry) => entry.facet));
-    return FACET_ORDER.filter((facet) => present.has(facet));
-}
-
-const FACET_TITLES: Record<string, string> = {
-    api: 'the HTTP app, met through its entry',
-    cli: 'the command binary and its literate documents',
-    component: 'a rendered unit, in a page',
-    integration: 'a module against the real thing',
-    job: 'what a name triggers in-process',
-    mobile: 'a native screen on a simulator',
-    model: 'every facet, whichever constructor you reach for',
-    website: 'the served site, driven in a browser',
-};
-
 function counts(): Record<CatalogEntry['channel'], number> {
     const tally: Record<CatalogEntry['channel'], number> = {
         checker: 0,
@@ -78,15 +56,16 @@ function counts(): Record<CatalogEntry['channel'], number> {
     return tally;
 }
 
-const COLUMNS = ['Code', 'Implementation', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
+const COLUMNS = ['Rule', 'Facet', 'Channel', 'Severity', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
 export function rowTable(rows: CatalogEntry[]): string[] {
     return table(
         COLUMNS,
         rows.map((entry) => [
-            entry.id,
             `${anchor(entry.name)}\`${entry.name}\``,
+            entry.facet,
             entry.channel,
+            entry.severity ?? '—',
             entry.reach,
             cell(entry.convention),
             cell(entry.fix),
@@ -96,18 +75,13 @@ export function rowTable(rows: CatalogEntry[]): string[] {
 }
 
 function catalogueSections(): string[] {
-    return facets().flatMap((facet) => {
-        const owned = published.filter((entry) => entry.facet === facet);
-        const tables = families(owned).map((family) => {
-            const rows = owned
-                .filter((entry) => entry.family === family)
-                .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
-            return [`### ${family} — ${FAMILIES[family] ?? family}`, '', ...rowTable(rows)].join(
-                '\n',
-            );
-        });
-        tables.unshift(`## ${facet} — ${FACET_TITLES[facet] ?? facet}`);
-        return tables;
+    return Object.entries(FAMILIES).flatMap(([family, title]) => {
+        const rows = published
+            .filter((entry) => entry.family === family)
+            .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
+        return rows.length === 0
+            ? []
+            : [[`## ${family} — ${title}`, '', ...rowTable(rows)].join('\n')];
     });
 }
 

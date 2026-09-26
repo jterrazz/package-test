@@ -1,7 +1,6 @@
 import type { Context, FixFn } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { childList, nodeEnd, nodeStart, stringValue } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -69,7 +68,7 @@ function titleFinding(
 }
 
 /** A group holding anything but tests, or running per row, is left to its author: the merge would change the scope of its hooks and table. */
-export const c31DescribeNamesFile: LintRule = {
+export const oneDescribePerFile: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -103,9 +102,9 @@ export const c31DescribeNamesFile: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c31-describe-names-file'],
+        docs: rowOf('one-describe-per-file'),
         fixable: 'code',
-        messages: lessons('c31-describe-names-file', {
+        messages: lessons('one-describe-per-file', {
             noDescribe: {
                 found: 'the tests of this file stand in no `describe`',
                 fix: "wrap them in `describe('{{named}}', () => { … })` — `make fix` does it",

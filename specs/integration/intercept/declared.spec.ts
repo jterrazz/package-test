@@ -33,7 +33,7 @@ describe('declared', () => {
             .intercept(http.get(`${PRICING}/quotes/ORD-1`), http.json({ total: 42 }))
             .call(async () => await quoteOrder(PRICING, 'ORD-9'));
 
-        // Then - the undeclared call fails the CHAIN, not the module: a refusal the module chose is `result.error`, a call nobody declared is the spec's own mistake (D7)
+        // Then - the undeclared call fails the CHAIN, not the module: a refusal the module chose is `result.error`, a call nobody declared is the spec's own mistake (`network-strict-after-first-stub`)
         await expect(chain).rejects.toThrow('ORD-9');
     });
 });

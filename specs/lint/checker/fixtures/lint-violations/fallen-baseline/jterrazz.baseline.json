@@ -1,8 +1,8 @@
 {
     "typescript": { "eslint/complexity": 3 },
     "test": {
-        "jterrazz-check/c15": 2,
-        "jterrazz-check/c9": 3,
+        "jterrazz-check/no-reach-into-sibling-ground": 2,
+        "jterrazz-check/no-unused-ground": 3,
         "routes/unreached": 2
     }
 }

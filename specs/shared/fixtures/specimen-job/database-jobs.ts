@@ -42,7 +42,7 @@ async function insertOneEvent(analyticsUrl: string, type: string): Promise<void>
 }
 
 // A job that reaches OUT to an HTTP API and stores what it learns — the vehicle
-// For the intercept (D7) specs: its outgoing request is what `.intercept()` mocks.
+// For the intercept (`network-strict-after-first-stub`) specs: its outgoing request is what `.intercept()` mocks.
 async function enrichFromApi(analyticsUrl: string): Promise<void> {
     const response = await fetch('https://enrich.example.test/label');
     const data = (await response.json()) as { label: string };

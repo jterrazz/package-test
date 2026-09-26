@@ -1,7 +1,0 @@
-description: a unit filed at the component tree's root, outside every capability folder, is refused
-fixture: ./fixtures/unfiled-component/
-runs:
-    - command: self-checker .
-      exit: 1
-      stderr: |
-          specs/component/order-card.tsx:2:1  jterrazz-check(c35)

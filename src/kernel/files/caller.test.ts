@@ -59,7 +59,7 @@ describe('caller', () => {
         // Given - a direct call from this sibling test file (under src/kernel/files/)
         const dir = getCallerDir();
 
-        // Then - sibling .test.ts frames are callers, not framework internals (CONVENTIONS I2)
+        // Then - sibling .test.ts frames are callers, not framework internals (rule `test-beside-its-module`)
         expect(dir).toBe(import.meta.dirname);
     });
 
@@ -92,7 +92,7 @@ describe('caller', () => {
         ).toBeFalsy();
     });
 
-    test('framework frames are recognised by identity — a sibling module test stays a caller wherever it lives (I2)', () => {
+    test('framework frames are recognised by identity — a sibling module test stays a caller wherever it lives (`test-beside-its-module`)', () => {
         // Given - a `<file>.test.ts` inside the framework's own directory
         writeFileSync(join(framework, 'match.test.js'), '');
 

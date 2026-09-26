@@ -11,7 +11,7 @@ describe('member-pass', () => {
         // Given - a member with a test script, no config, and no spec tree
         const result = await cli.exec(`--member ${member('tested-no-config')} ${WORKSPACE}`);
 
-        // Then - E3 fired: the pass is about a member, never about a tree
+        // Then - `member-has-vitest-config` fired: the pass is about a member, never about a tree
         expect(result.exitCode).toBe(1);
         expect(result.stderr.text).toContain('no vitest.config.ts');
     });
@@ -33,9 +33,9 @@ describe('member-pass', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('packages/clean');
         expect(result.stdout.text).toContain(
-            'c12-spec-file-name, c8-disk-target-exists, c25-no-ground-synonym, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency',
+            'file-suffix-matches-place, named-path-exists, no-snapshot-folder, member-has-vitest-config, no-simulated-dom-in-config, no-redundant-test-dependency',
         );
-        expect(result.stdout.text).not.toContain('c9-dead-fixtures');
+        expect(result.stdout.text).not.toContain('no-unused-ground');
     });
 
     test("checker CLI — the member pass — a root whose only tests are its members' owes no config", async () => {
@@ -68,19 +68,19 @@ describe('member-pass', () => {
         expect(result.exitCode).toBe(1);
         expect(result.json).toMatch([
             {
-                code: 'jterrazz-check(f8)',
+                code: 'jterrazz-check(no-redundant-test-dependency)',
                 file: 'packages/seam-dependency/package.json',
                 line: 4,
                 message:
-                    'found: packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `@testing-library/react` from packages/seam-dependency/package.json, and write its tests on `component()`, `website()`, `clock` or `intercept()` · read: docs/19-linting.md#f8-no-seam-dependency',
+                    'found: packages/seam-dependency: `@testing-library/react` is a seam `@jterrazz/test` replaced · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `@testing-library/react` from packages/seam-dependency/package.json, and write its tests on `component()`, `website()`, `clock` or `intercept()` · read: docs/19-linting.md#no-redundant-test-dependency',
                 severity: 'error',
             },
             {
-                code: 'jterrazz-check(f8)',
+                code: 'jterrazz-check(no-redundant-test-dependency)',
                 file: 'packages/seam-dependency/package.json',
                 line: 5,
                 message:
-                    'found: packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `msw` from packages/seam-dependency/package.json · read: docs/19-linting.md#f8-no-seam-dependency',
+                    'found: packages/seam-dependency: `msw` is a transitive of `@jterrazz/test` · why: A member declares no dependency `@jterrazz/test` already carries (`msw`, `vitest-mock-extended`; `yaml` in devDependencies only — as a production dependency it is the product’s own library) and no retired seam (`happy-dom`, `jsdom`, `@testing-library/*`, `@playwright/test`, `mockdate`) — except `@testing-library/react-native` where jest runs the tests of the member — the only vocabulary that runtime has until the React Native answer lands. · fix: remove `msw` from packages/seam-dependency/package.json · read: docs/19-linting.md#no-redundant-test-dependency',
                 severity: 'error',
             },
         ]);

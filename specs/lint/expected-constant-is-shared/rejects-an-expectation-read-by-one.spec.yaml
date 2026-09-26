@@ -1,0 +1,7 @@
+description: a file-level expectation one test reads is refused at its declaration
+fixture: ./fixtures/one-reader/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/events/list/pagination.spec.ts:5:7  jterrazz(expected-constant-is-shared)

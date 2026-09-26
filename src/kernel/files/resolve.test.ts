@@ -27,7 +27,7 @@ describe('resolve', () => {
         rmSync(base, { force: true, recursive: true });
     });
 
-    test('findRoot — the one walk both the runner and A9 use — the NEAREST ancestor that declares itself a project wins', () => {
+    test('findRoot — the one walk both the runner and `no-redundant-root` use — the NEAREST ancestor that declares itself a project wins', () => {
         // Given - a manifest at the monorepo root and one in the package
         const exists = probe('/mono/package.json', '/mono/apps/cli/package.json');
 
@@ -35,19 +35,19 @@ describe('resolve', () => {
         expect(findRoot('/mono/apps/cli/specs/logs', exists)).toBe('/mono/apps/cli');
     });
 
-    test('findRoot — the one walk both the runner and A9 use — returns undefined when no ancestor carries a marker', () => {
+    test('findRoot — the one walk both the runner and `no-redundant-root` use — returns undefined when no ancestor carries a marker', () => {
         // Given - a probe that finds nothing
         // Then - there is no root to derive, and the caller decides the fallback
         expect(findRoot('/nowhere/at/all', probe())).toBeUndefined();
     });
 
-    test('findRoot — the one walk both the runner and A9 use — a directory carrying a marker is its own root', () => {
+    test('findRoot — the one walk both the runner and `no-redundant-root` use — a directory carrying a marker is its own root', () => {
         // Given - the starting directory itself declares the package
         // Then - the walk does not climb past it
         expect(findRoot('/pkg', probe('/pkg/package.json'))).toBe('/pkg');
     });
 
-    test('root discovery (CONVENTIONS A9) — walks up to the nearest directory carrying a root marker', () => {
+    test('root discovery (rule `no-redundant-root`) — walks up to the nearest directory carrying a root marker', () => {
         // Given - a specification file nested under the project
         const found = discoverRoot(resolve(base, 'project/tests/feature'));
 
@@ -55,7 +55,7 @@ describe('resolve', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('root discovery (CONVENTIONS A9) — a directory carrying a package.json is a root', () => {
+    test('root discovery (rule `no-redundant-root`) — a directory carrying a package.json is a root', () => {
         // Given - a plain project
         const found = discoverRoot(resolve(base, 'plain/tests/deep'));
 
@@ -63,7 +63,7 @@ describe('resolve', () => {
         expect(found).toBe(resolve(base, 'plain'));
     });
 
-    test('root discovery (CONVENTIONS A9) — resolveRoot treats an explicit root as an override', () => {
+    test('root discovery (rule `no-redundant-root`) — resolveRoot treats an explicit root as an override', () => {
         // Given - an explicit relative root
         const found = resolveRoot('../..', resolve(base, 'project/tests/feature'));
 
@@ -71,7 +71,7 @@ describe('resolve', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('root discovery (CONVENTIONS A9) — resolveRoot without a root auto-discovers from the caller directory', () => {
+    test('root discovery (rule `no-redundant-root`) — resolveRoot without a root auto-discovers from the caller directory', () => {
         // Given - no explicit root
         const found = resolveRoot(undefined, resolve(base, 'project/tests/feature'));
 
@@ -79,7 +79,7 @@ describe('resolve', () => {
         expect(found).toBe(resolve(base, 'project'));
     });
 
-    test('root discovery (CONVENTIONS A9) — falls back to the starting directory when no marker exists anywhere up', () => {
+    test('root discovery (rule `no-redundant-root`) — falls back to the starting directory when no marker exists anywhere up', () => {
         // Given - a bare temp tree with no package.json above it
         const bare = mkdtempSync(resolve(tmpdir(), 'no-marker-'));
         try {
@@ -90,7 +90,7 @@ describe('resolve', () => {
         }
     });
 
-    test('root discovery (CONVENTIONS A9) — a workspace package wins over the repository above it (monorepo)', () => {
+    test('root discovery (rule `no-redundant-root`) — a workspace package wins over the repository above it (monorepo)', () => {
         // Given - a manifest at the monorepo root and one in a nested package (the shape where walking past the first marker measures every path the runner resolves from the wrong unit)
         mkdirSync(resolve(base, 'mono'), { recursive: true });
         writeFileSync(resolve(base, 'mono/package.json'), '{"name":"mono"}\n');
@@ -103,13 +103,13 @@ describe('resolve', () => {
         );
     });
 
-    test('root discovery (CONVENTIONS A9) — the marker in a directory resolves to that directory', () => {
+    test('root discovery (rule `no-redundant-root`) — the marker in a directory resolves to that directory', () => {
         // Given - the ordinary single-package repo
         // Then - the nearest ancestor carrying the manifest is the root
         expect(discoverRoot(resolve(base, 'project/tests/feature'))).toBe(resolve(base, 'project'));
     });
 
-    test('root discovery (CONVENTIONS A9) — in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
+    test('root discovery (rule `no-redundant-root`) — in a git checkout, a `.gitignore`d manifest marks no root and a new one does', () => {
         // Given - a repository whose `pkg/package.json` is ignored, and a `fresh/` package nobody added
         const repository = resolve(base, 'repository');
         mkdirSync(resolve(repository, 'pkg/src'), { recursive: true });
@@ -125,7 +125,7 @@ describe('resolve', () => {
         expect(discoverRoot(resolve(repository, 'fresh/src'))).toBe(resolve(repository, 'fresh'));
     });
 
-    test('root discovery (CONVENTIONS A9) — an absolute root override is used verbatim', () => {
+    test('root discovery (rule `no-redundant-root`) — an absolute root override is used verbatim', () => {
         // Given - an absolute root and an unrelated caller directory
         const found = resolveRoot(resolve(base, 'project'), resolve(base, 'plain/tests/deep'));
 

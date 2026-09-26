@@ -1,7 +1,0 @@
-description: a clock every chain of a file pins alike is a warning at the first chain
-fixture: ./fixtures/repeated/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:8:30  jterrazz(b16w-file-context)

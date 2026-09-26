@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { c24GroundRole } from './verb-reads-its-ground-folder.js';
+import { verbReadsItsGroundFolder } from './verb-reads-its-ground-folder.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -13,7 +13,7 @@ const ruleTester = new RuleTester();
 const SPEC = '/repo/specs/api/orders/orders.spec.ts';
 const MODULE_TEST = '/repo/src/report/report.test.ts';
 
-ruleTester.run('c24-ground-role', c24GroundRole as unknown as OxlintRule, {
+ruleTester.run('verb-reads-its-ground-folder', verbReadsItsGroundFolder as unknown as OxlintRule, {
     invalid: [
         { code: "api.seed(file('./fixtures/rows.sql'));", errors: 1, filename: SPEC },
         // The fixtures pool holds file state: a shared seed goes to the specs root's `shared/seeds/`.

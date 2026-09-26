@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { b11MarkerOneLine } from './marker-on-one-line.js';
+import { markerOnOneLine } from './marker-on-one-line.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
+ruleTester().run('marker-on-one-line', asOxlintRule(markerOnOneLine), {
     invalid: [
         // The sentence wrapped onto a second comment line.
         {
@@ -70,7 +70,7 @@ ruleTester().run('b11-marker-one-line', asOxlintRule(b11MarkerOneLine), {
         {
             code: `test('ships', () => {
     // Given - a paid order
-    // oxlint-disable-next-line jterrazz/j2-no-sleep -- the clock primitive under test
+    // oxlint-disable-next-line jterrazz/no-sleep -- the clock primitive under test
     const order = paid();
     // Then - it leaves
     expect(order).toBe(true);

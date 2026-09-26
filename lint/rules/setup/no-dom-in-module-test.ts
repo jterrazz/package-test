@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, identifierName, isNode, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -74,7 +73,7 @@ function isValueReference(node: AstNode): boolean {
 }
 
 /** Reach is the `module` role outside `specs/`: under `specs/` an api or cli spec is a `.test.ts` too. */
-export const g4NoDomInModuleTest: LintRule = {
+export const noDomInModuleTest: LintRule = {
     createOnce(context: Context): Visitor {
         let declared = new Set<string>();
         return {
@@ -100,8 +99,8 @@ export const g4NoDomInModuleTest: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['g4-no-dom-in-module-test'],
-        messages: lessons('g4-no-dom-in-module-test', {
+        docs: rowOf('no-dom-in-module-test'),
+        messages: lessons('no-dom-in-module-test', {
             domGlobal: {
                 found: '`{{name}}` in a module test, where no DOM exists',
                 fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',

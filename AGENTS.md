@@ -44,7 +44,7 @@ npm run docs                      # regenerate the generated tables and the sche
 
 ## Standing rules
 
-- **A discovery grows a guard, in the same change** (rule K1) — see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
+- **A discovery grows a guard, in the same change** (rule `discovery-grows-a-guard`) — see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **Never edit a generated table** — `npm run docs` writes them; see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **What lands with the change that makes it true** — the guard, the regenerated tables, the falsified chapter, the skill — is stated once, in [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **A rule belongs in the code, a principle in the constitution.** `lint/catalogue/manifest.ts` (or `lint/self/catalogue/manifest.ts`) for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.

@@ -30,7 +30,7 @@ describe('tokens', () => {
         expect(result.stdout).toMatch(file('./expected/version.txt'));
     });
 
-    test('update mode substitutes the workdir and preserves tokens (CONVENTIONS D5)', async () => {
+    test('update mode substitutes the workdir and preserves tokens (rule `no-volatile-literal`)', async () => {
         // Given - update mode on a fresh fixture name
         const fixtureName = `version-transient-${Date.now()}.txt`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);

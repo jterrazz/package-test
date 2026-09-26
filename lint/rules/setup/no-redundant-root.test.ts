@@ -5,7 +5,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { a9wRedundantRoot } from './no-redundant-root.js';
+import { noRedundantRoot } from './no-redundant-root.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -17,7 +17,7 @@ const ruleTester = new RuleTester();
 // The fs-anchored cases run against the shared E2E fixture trees (the
 // violation fixture has a package.json at its root, so the walk-up derives it).
 const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
-const SPEC_FILE = `${SPECS_LINT}/a9w-redundant-root/fixtures/violation/specs/cli/rooted.specification.ts`;
+const SPEC_FILE = `${SPECS_LINT}/no-redundant-root/fixtures/violation/specs/cli/rooted.specification.ts`;
 
 const IGNORED_MARKER = checkoutUnder('work', ['pkg/specs']);
 writeFileSync(join(IGNORED_MARKER, 'pkg/package.json'), '{}\n');
@@ -26,7 +26,7 @@ mkdirSync(join(IGNORED_MARKER, 'pkg/specs'), { recursive: true });
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_MARKER });
 const IGNORED_SPEC = join(IGNORED_MARKER, 'pkg/specs/rooted.specification.ts');
 
-ruleTester.run('a9w-redundant-root', a9wRedundantRoot as unknown as OxlintRule, {
+ruleTester.run('no-redundant-root', noRedundantRoot as unknown as OxlintRule, {
     invalid: [
         // The checkout is what the runtime derives past an ignored marker.
         {

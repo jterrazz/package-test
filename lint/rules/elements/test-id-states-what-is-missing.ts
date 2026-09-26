@@ -1,7 +1,6 @@
 import type { Comment, Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { memberPropertyName, SCENARIO_ACTIONS, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -11,7 +10,7 @@ import type { LintRule, Visitor } from '../rule.js';
 const REASON = /\/\/\s*testId:\s*\S/u;
 
 /** Accepted on the call's line or the one above: consumers arm `eslint/no-inline-comments`. */
-export const w2TestIdStatesWhatIsMissing: LintRule = {
+export const testIdStatesWhatIsMissing: LintRule = {
     createOnce(context: Context): Visitor {
         let lines: string[] = [];
         let comments: Comment[] = [];
@@ -76,8 +75,8 @@ export const w2TestIdStatesWhatIsMissing: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['w2-testid-states-what-is-missing'],
-        messages: lessons('w2-testid-states-what-is-missing', {
+        docs: rowOf('test-id-states-what-is-missing'),
+        messages: lessons('test-id-states-what-is-missing', {
             unexplainedTestId: {
                 found: '`testId()` with no line saying what the element lacks',
                 fix: 'name the element with `button()`/`link()`/`field()`/`heading()`/`content()`, or write `// testId: <no accessible name|no role|…>` on this line or the one above',

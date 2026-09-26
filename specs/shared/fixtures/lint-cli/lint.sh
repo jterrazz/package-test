@@ -20,7 +20,7 @@ if [ ! -x "$OXLINT" ]; then
   echo "lint.sh: no oxlint binary under $REPO_ROOT/node_modules — run npm install" >&2
   exit 2
 fi
-# The reach fixture (K4) declares a `depth` of its own, so the config is
+# The reach fixture (every-reach-proven) declares a `depth` of its own, so the config is
 # Chosen by the caller; every other run takes the standard one.
 CONFIG="$SCRIPT_DIR/${LINT_CONFIG:-oxlint.e2e.json}"
 TARGET="${1:-.}"

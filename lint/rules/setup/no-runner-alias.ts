@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { propertyKeyName, specificationMember } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
@@ -15,7 +14,7 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
 }
 
 /** Renaming at the import site stays legal: the canonical name is enforced where the record is destructured. */
-export const a3NoDestructureAlias: LintRule = {
+export const noRunnerAlias: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             VariableDeclarator(node: AstNode) {
@@ -48,8 +47,8 @@ export const a3NoDestructureAlias: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['a3-no-destructure-alias'],
-        messages: lessons('a3-no-destructure-alias', {
+        docs: rowOf('no-runner-alias'),
+        messages: lessons('no-runner-alias', {
             aliased: {
                 found: '`{ {{key}}: {{alias}} }` renames the handle',
                 fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',

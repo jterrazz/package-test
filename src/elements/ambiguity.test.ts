@@ -160,7 +160,7 @@ describe('ambiguity', () => {
         });
 
         // Then - an agent reading the failure reads the rule, and where it is whole
-        expect(message).toContain(`why: ${REFUSAL_WHY['w3-unambiguous-element']}`);
-        expect(message).toContain('read: docs/19-linting.md#w3-unambiguous-element');
+        expect(message).toContain(`why: ${REFUSAL_WHY['descriptor-matches-one-element']}`);
+        expect(message).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
     });
 });

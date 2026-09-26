@@ -4,7 +4,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { c11StubDataPairing } from './stub-data-has-a-builder.js';
+import { stubDataHasABuilder } from './stub-data-has-a-builder.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -22,7 +22,7 @@ writeFileSync(
     'export {};\n',
 );
 
-ruleTester.run('c11-stub-data-pairing', c11StubDataPairing as unknown as OxlintRule, {
+ruleTester.run('stub-data-has-a-builder', stubDataHasABuilder as unknown as OxlintRule, {
     invalid: [
         // A matched input is data too: summary.request.ts has no summary.ts, in anthropic/.
         {
@@ -34,19 +34,19 @@ ruleTester.run('c11-stub-data-pairing', c11StubDataPairing as unknown as OxlintR
         {
             code: 'test("x", () => {});',
             errors: [{ messageId: 'orphan' }],
-            filename: `${SPECS_LINT}/c11-stub-data-pairing/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/stub-data-has-a-builder/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // Both payloads pair with events.ts (stem = name up to the first dot).
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c11-stub-data-pairing/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/stub-data-has-a-builder/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // A feature with no stubs/ sibling.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c2-request-extension/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/request-file-extension-known/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

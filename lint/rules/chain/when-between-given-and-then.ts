@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -15,7 +14,7 @@ import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
 import type { LintRule, Visitor } from '../rule.js';
 
-export const b10WhenBetweenMarkers: LintRule = {
+export const whenBetweenGivenAndThen: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -45,8 +44,8 @@ export const b10WhenBetweenMarkers: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b10-when-between-markers'],
-        messages: lessons('b10-when-between-markers', {
+        docs: rowOf('when-between-given-and-then'),
+        messages: lessons('when-between-given-and-then', {
             afterThen: {
                 found: '`// When -` written after `// Then -`',
                 fix: 'move it above the action it narrates, between Given and Then — or delete it when the chain is the action',

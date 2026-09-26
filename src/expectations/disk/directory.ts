@@ -46,7 +46,7 @@ export async function walkDirectory(
     return out;
 }
 
-/** Fixture contents honour the `{{token}}` grammar (D4); captures recorded in sorted-path order. */
+/** Fixture contents honour the `{{token}}` grammar (`no-unknown-token`); captures recorded in sorted-path order. */
 export async function diffDirectories(
     expectedRoot: string,
     actualRoot: string,

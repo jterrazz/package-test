@@ -132,7 +132,7 @@ function compiledSources(): string[] {
     return [...sources].filter((source) => !source.includes('/node_modules/'));
 }
 describe('declaredSubpaths', () => {
-    test('package-exports — F1 reads the published contract — lists every subpath of the exports map, never the root', () => {
+    test('package-exports — `no-unpublished-subpath` reads the published contract — lists every subpath of the exports map, never the root', () => {
         // Given - an install whose manifest publishes two subpaths
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, {
@@ -149,7 +149,7 @@ describe('declaredSubpaths', () => {
         ]);
     });
 
-    test('package-exports — F1 reads the published contract — reads an install in a gitignored node_modules — a dependency is read from the disk', () => {
+    test('package-exports — `no-unpublished-subpath` reads the published contract — reads an install in a gitignored node_modules — a dependency is read from the disk', () => {
         // Given - a consumer checkout that ignores node_modules, with the package installed as a copy under it
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, { name: 'some-consumer' });
@@ -170,7 +170,7 @@ describe('declaredSubpaths', () => {
         ]);
     });
 
-    test('package-exports — F1 reads the published contract — the walk stops at the first manifest — a host project vouches for nothing', () => {
+    test('package-exports — `no-unpublished-subpath` reads the published contract — the walk stops at the first manifest — a host project vouches for nothing', () => {
         // Given - a consumer manifest sitting above, with subpaths of its own
         const root = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
         manifestAt(root, { exports: { './anything': {} }, name: 'some-consumer' });
@@ -181,7 +181,7 @@ describe('declaredSubpaths', () => {
         expect(declaredSubpaths(nested)).toStrictEqual([]);
     });
 
-    test('package-exports — F1 reads the published contract — no manifest at all yields no exemption — F1 applies plainly', () => {
+    test('package-exports — `no-unpublished-subpath` reads the published contract — no manifest at all yields no exemption — `no-unpublished-subpath` applies plainly', () => {
         // Given - a directory with nothing above it to read
         const orphan = mkdtempSync(resolve(tmpdir(), 'pkg-exports-'));
 
@@ -189,7 +189,7 @@ describe('declaredSubpaths', () => {
         expect(declaredSubpaths(orphan)).toStrictEqual([]);
     });
 
-    test("package-exports — F1 reads the published contract — this package's own manifest is what the rule actually reads", () => {
+    test("package-exports — `no-unpublished-subpath` reads the published contract — this package's own manifest is what the rule actually reads", () => {
         // Given - the framework linting itself, resolved from this module
         const subpaths = declaredSubpaths();
 

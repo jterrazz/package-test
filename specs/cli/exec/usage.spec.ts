@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (D11 scalpel). */
+/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('usage', () => {
     test('surfaces the whole usage banner on stdout', async () => {
@@ -23,7 +23,7 @@ describe('usage', () => {
         `);
     });
 
-    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — returns non-zero when the process exits without matching', async () => {
+    test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — returns non-zero when the process exits without matching', async () => {
         // Given - help exits immediately without matching pattern
         const result = await cli
             .fixture(directory('../../shared/fixtures/specimen-cli/'))

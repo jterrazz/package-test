@@ -79,14 +79,14 @@ function migrating(door: string): string {
 }
 
 describe('subject', () => {
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a spec of two routes is reported at the chain reaching the second, naming the split', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a spec of two routes is reported at the chain reaching the second, naming the split', () => {
         // Given - one file reaching GET /orders and POST /orders
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
             'api/orders/orders.spec.ts': TWO_ROUTES,
         });
 
-        // Then - one C29 finding, where the second route is sent, and no C30 before the split
+        // Then - one `one-subject-per-spec` finding, where the second route is sent, and no `spec-in-subject-folder` before the split
         const [finding] = checkOneSubject(root);
         expect({ column: finding?.column, line: finding?.line }).toStrictEqual({
             column: 30,
@@ -99,7 +99,7 @@ describe('subject', () => {
         expect(checkSubjectFolder(root)).toStrictEqual([]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the split keeps each test with the imports, constants and helpers it reads, in one describe', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the split keeps each test with the imports, constants and helpers it reads, in one describe', () => {
         // Given - the same file, and the golden its GET test reads through a helper
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -142,7 +142,7 @@ describe('subject', () => {
         }).toStrictEqual({ golden: true, helper: true, path: true, unread: false });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a route written as its template is filed under the route, and a filled one that reads two ways teaches the template', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a route written as its template is filed under the route, and a filled one that reads two ways teaches the template', () => {
         // Given - the chart route twice: once as a template, once as the path it fills
         const root = specsTree(CHARTS);
 
@@ -154,7 +154,7 @@ describe('subject', () => {
                 fix: "write the route's template: `.get('/indicators/:<name>/chart', { params: { <name>: 'btc' } })` — or, if `btc` is the route's own segment, state that the path is the route: `.get('/indicators/btc/chart', { params: {} })`",
                 found: '`GET /indicators/btc/chart` names `btc` right after the collection `indicators`: a value or a segment of the route, and the folder depends on which',
                 line: 2,
-                rule: 'c30-subject-folder',
+                rule: 'spec-in-subject-folder',
                 severity: 'error',
             },
             {
@@ -162,13 +162,13 @@ describe('subject', () => {
                 fix: 'move it to api/indicators/chart/templated.spec.ts — `make fix` moves it, and the ground it stands on',
                 found: 'a spec of GET /indicators/:id/chart, filed under api/charts/',
                 line: 1,
-                rule: 'c30-subject-folder',
+                rule: 'spec-in-subject-folder',
                 severity: 'error',
             },
         ]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the fix moves a templated route to its folder and never a path that reads two ways', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the fix moves a templated route to its folder and never a path that reads two ways', () => {
         // Given - the same two files
         const root = specsTree(CHARTS);
 
@@ -180,7 +180,7 @@ describe('subject', () => {
         expect(existsSync(join(root, 'api/charts/filled.spec.ts'))).toBe(true);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the split copies a hook only into the files whose tests read what it sets', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the split copies a hook only into the files whose tests read what it sets', () => {
         // Given - two routes, a ticker source only the list test sets, and the hook that clears it
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -230,7 +230,7 @@ describe('subject', () => {
         }).toStrictEqual({ createdHook: false, createdSource: false, listedHook: true });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a spec of one route outside its folder is moved there, its paths rebased', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a spec of one route outside its folder is moved there, its paths rebased', () => {
         // Given - GET /orders filed under a folder of its own choosing
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -241,7 +241,7 @@ describe('subject', () => {
             ].join('\n'),
         });
 
-        // Then - C30 names the folder, and the fix moves it there
+        // Then - `spec-in-subject-folder` names the folder, and the fix moves it there
         expect(checkSubjectFolder(root).map(({ fix }) => fix)).toStrictEqual([
             'move it to api/orders/list/listing.spec.ts — `make fix` moves it, and the ground it stands on',
         ]);
@@ -251,7 +251,7 @@ describe('subject', () => {
         );
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a move removes the folders it empties, up to the first that still holds something', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a move removes the folders it empties, up to the first that still holds something', () => {
         // Given - a spec filed two folders deep, alone in both, and one in a folder below its own subject
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -280,7 +280,7 @@ describe('subject', () => {
         ).toStrictEqual([false, false, false, true]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the split drops an import only a string of the file names', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the split drops an import only a string of the file names', () => {
         // Given - a file whose second route's test only names `cli` inside a string
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -302,7 +302,7 @@ describe('subject', () => {
         );
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the split drops an import another clause only aliases, and a helper with its doc comment', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the split drops an import another clause only aliases, and a helper with its doc comment', () => {
         // Given - one handle imported twice under two names, and a documented helper one test calls
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -331,7 +331,7 @@ describe('subject', () => {
         }).toStrictEqual({ createdHelper: false, listedApi: false });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a move leaves a path naming nothing, and a call spelled in a string, as written', () => {
         // Given - a negative spec's missing file, and a refusal message quoting a call on a file that exists
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -355,7 +355,7 @@ describe('subject', () => {
         }).toStrictEqual({ missing: true, quoted: true });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a test reaching two subjects is reported with its title, and filed with the subject it opens on', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a test reaching two subjects is reported with its title, and filed with the subject it opens on', () => {
         // Given - one test that creates, then lists
         const source = [
             "import { api } from '../api.specification.js';",
@@ -377,7 +377,7 @@ describe('subject', () => {
         );
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a journey goes with the subject it opens on, and the rest of the file is still cut', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a journey goes with the subject it opens on, and the rest of the file is still cut', () => {
         // Given - one test on GET, one journey opening on POST and reading GET back
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -392,7 +392,7 @@ describe('subject', () => {
         // When - the fix runs
         fixSubjects(root);
 
-        // Then - two files, the journey with its opening subject, which C29 keeps naming
+        // Then - two files, the journey with its opening subject, which `one-subject-per-spec` keeps naming
         const created = readFileSync(join(root, 'api/orders/create/orders.spec.ts'), 'utf8');
         expect({
             journey: created.includes("test('creates then lists'"),
@@ -403,10 +403,10 @@ describe('subject', () => {
         ]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a finding its author silenced is neither reported nor fixed', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a finding its author silenced is neither reported nor fixed', () => {
         // Given - a misfiled spec whose first line says why
         const source = [
-            "import { api } from '../api.specification.js'; // checker-disable-line c30 -- the folder is the case",
+            "import { api } from '../api.specification.js'; // checker-disable-line spec-in-subject-folder -- the folder is the case",
             "test('a', async () => { await api.get('/orders'); });",
             '',
         ].join('\n');
@@ -420,7 +420,7 @@ describe('subject', () => {
         expect(fixSubjects(root)).toStrictEqual([]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a cli command is its first word, unless its runner declares the words of its commands', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a cli command is its first word, unless its runner declares the words of its commands', () => {
         // Given - one spec running `db migrate`, from a runner that declares no list, and one from a runner that does
         const root = specsTree({
             'cli/cli.specification.ts':
@@ -438,7 +438,7 @@ describe('subject', () => {
         ]);
     });
 
-    test("checker-subject — c29 and c30 — one subject per file, filed under its standard name — a spec holding two runners reads each chain with its own runner's list", () => {
+    test("checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a spec holding two runners reads each chain with its own runner's list", () => {
         // Given - a spec importing a runner with no list first, and running `db migrate` through the one declaring it
         const root = specsTree({
             'cli/cli.specification.ts':
@@ -460,7 +460,7 @@ describe('subject', () => {
         ]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a collection no plural names is listed once the repository declares it', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a collection no plural names is listed once the repository declares it', () => {
         // Given - GET /data filed as a singleton would be, in a unit whose config names `data` a collection
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -484,7 +484,7 @@ describe('subject', () => {
         ]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a method-less route is one subject whatever verbs its tests send, filed by its segments', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a method-less route is one subject whatever verbs its tests send, filed by its segments', () => {
         // Given - a POST and a PUT to /mcp in one file under mcp/, in a unit that declares /mcp method-less
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -507,7 +507,7 @@ describe('subject', () => {
         expect([...checkOneSubject(root), ...checkSubjectFolder(root)]).toStrictEqual([]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a spec of a specimen is no subject: its routes are neither split nor filed', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a spec of a specimen is no subject: its routes are neither split nor filed', () => {
         // Given - a runner driving a specimen, and a spec under seed/ reaching two of its routes
         const root = specsTree({
             'api/api.specification.ts':
@@ -520,7 +520,7 @@ describe('subject', () => {
             ].join('\n'),
         });
 
-        // Then - neither C29 nor C30 reads it, and the fixer leaves it where it is
+        // Then - neither `one-subject-per-spec` nor `spec-in-subject-folder` reads it, and the fixer leaves it where it is
         expect([
             ...checkOneSubject(root),
             ...checkSubjectFolder(root),
@@ -528,7 +528,7 @@ describe('subject', () => {
         ]).toStrictEqual([]);
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — the types a moved helper reads move with it, and a type only the tests read stays', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the types a moved helper reads move with it, and a type only the tests read stays', () => {
         // Given - three routes: two share a helper typed by an alias and an interface and a type they read themselves, one reads only the interface
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -602,7 +602,7 @@ describe('subject', () => {
         });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a helper the split leaves to several files moves once into the leaf fixtures module', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a helper the split leaves to several files moves once into the leaf fixtures module', () => {
         // Given - two routes sharing a helper and the constant it reads, and a helper that builds a file()
         const root = specsTree({
             'api/api.specification.ts': RUNNER,
@@ -664,7 +664,7 @@ describe('subject', () => {
         }).toStrictEqual({ copy: true, imported: true, moved: false });
     });
 
-    test("checker-subject — c29 and c30 — one subject per file, filed under its standard name — the split leaves an author's fixtures module as written, and each file keeps its own copy", () => {
+    test("checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — the split leaves an author's fixtures module as written, and each file keeps its own copy", () => {
         // Given - two routes sharing a helper, beside a fixtures module the author wrote
         const authored = "export const SEEDED = 'the author wrote this';\n";
         const root = specsTree({
@@ -703,7 +703,7 @@ describe('subject', () => {
         }).toStrictEqual({ copies: [true, true], module: authored });
     });
 
-    test('checker-subject — c29 and c30 — one subject per file, filed under its standard name — a file of two pages keeps the first in place and writes the second beside it, named for it', () => {
+    test('checker-subject — `one-subject-per-spec` and `spec-in-subject-folder` — one subject per file, filed under its standard name — a file of two pages keeps the first in place and writes the second beside it, named for it', () => {
         // Given - one website file visiting the pricing page and an article page
         const root = specsTree({
             'website/pages/home.spec.ts': [

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     chainRootName,
     child,
@@ -85,7 +84,7 @@ function settles(node: AstNode, visitor: string): boolean {
 }
 
 /** Only the visitor's calls count: the callback's own parameter is the receiver. A component's scenario is out of reach: its action often produces a call rather than a screen. */
-export const w5wScenarioSettles: LintRule = {
+export const scenarioEndsSettled: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -121,8 +120,8 @@ export const w5wScenarioSettles: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['w5w-scenario-settles'],
-        messages: lessons('w5w-scenario-settles', {
+        docs: rowOf('scenario-ends-settled'),
+        messages: lessons('scenario-ends-settled', {
             unsettled: {
                 found: 'a scenario that acts and ends without reading the screen',
                 fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',

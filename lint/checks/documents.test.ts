@@ -79,7 +79,7 @@ describe('documents', () => {
 
     test('checker-spec — fixSpecDocument — key order and block scalars — a document the grammar refuses is never rewritten', () => {
         // Given - a file that is not a spec document at all
-        // Then - the fixer declines; d4b-spec-shape is what reports it
+        // Then - the fixer declines; document-follows-its-grammar is what reports it
         expect(fixSpecDocument('- just\n- a list\n', 'case.spec.yaml')).toBeNull();
     });
 });

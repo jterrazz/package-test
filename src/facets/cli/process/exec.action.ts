@@ -14,7 +14,7 @@ export type ExecSignature = ChainSignature & {
     };
 };
 
-/** A sequence stops at the first non-zero exit. The one execution method (B2). */
+/** A sequence stops at the first non-zero exit. The one execution method (`disk-named-by-relative-path`). */
 export const exec = defineAction<
     'exec',
     [args?: string | string[], options?: ExecOptions],

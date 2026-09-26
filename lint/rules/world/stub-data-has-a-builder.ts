@@ -2,8 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
 import { STUB_KINDS } from '../../../src/world/stubs/kinds.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { listDirectory } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -18,7 +17,7 @@ function ownerOf(entry: string): string {
 }
 
 /** Reported on the feature's test file, since oxlint never visits a `.json`. */
-export const c11StubDataPairing: LintRule = {
+export const stubDataHasABuilder: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -51,8 +50,8 @@ export const c11StubDataPairing: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c11-stub-data-pairing'],
-        messages: lessons('c11-stub-data-pairing', {
+        docs: rowOf('stub-data-has-a-builder'),
+        messages: lessons('stub-data-has-a-builder', {
             orphan: {
                 found: '`stubs/{{kind}}/{{entry}}` has no stub beside it',
                 fix: 'write `stubs/{{kind}}/{{owner}}` — data pairs with the unit named by its stem, up to the first dot — or delete the orphan',

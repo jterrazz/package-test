@@ -3,7 +3,7 @@ import type { Context } from '@oxlint/plugins';
 import { lessonsAt } from '../../../catalogue/lesson.js';
 import { segments } from '../../../reading/ast.js';
 import type { LintRule, Visitor } from '../../../rules/rule.js';
-import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../catalogue/manifest.js';
+import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
 import { facetFileFindings } from './facet-file.js';
 import { handleFileFindings } from './facet-handle.js';
 
@@ -21,7 +21,7 @@ function facetFileOf(filename: string): FacetFile {
 }
 
 /** A `self` rule: these folders are this package's architecture. */
-export const i6FacetIsComposition: LintRule = {
+export const facetIsAComposition: LintRule = {
     createOnce(context: Context): Visitor {
         let file: FacetFile;
         return {
@@ -39,9 +39,9 @@ export const i6FacetIsComposition: LintRule = {
         };
     },
     meta: {
-        docs: SELF_RULE_DOCS['i6-facet-is-composition'],
+        docs: selfRowOf('facet-is-a-composition'),
         messages: lessonsAt(
-            selfRowOf('i6-facet-is-composition'),
+            selfRowOf('facet-is-a-composition'),
             {
                 adapter: {
                     found: 'the engine `{{port}}` is a {{what}} written in the facet, not an adapter an engine module builds',

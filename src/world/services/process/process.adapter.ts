@@ -92,7 +92,7 @@ export class ProcessHandle implements ServiceHandle {
             typeof this.options.env === 'function' ? this.options.env(services) : this.options.env;
         this.served = new ServedProcess(this.options, root, 'process', {
             ...stated,
-            // One id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (D16).
+            // One id per run, minted by the facet: a spec reads it instead of sampling `Date.now()` (`no-sampled-value-in-expectation`).
             TEST_RUN_ID: runId,
         });
         this.connectionString = await this.served.start();

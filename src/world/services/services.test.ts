@@ -9,7 +9,7 @@ describe('declaredDatabaseKeys', () => {
         // Given - a record mixing a cache between two databases
         const services = { analyticsDb: postgres(), cache: redis(), db: postgres() };
 
-        // Then - the cache is left out, and the first database stays first (A7's default)
+        // Then - the cache is left out, and the first database stays first (`database-named-only-when-several`'s default)
         expect(declaredDatabaseKeys(services)).toStrictEqual(['analyticsDb', 'db']);
     });
 });

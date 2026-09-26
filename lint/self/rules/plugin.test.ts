@@ -17,8 +17,8 @@ describe('selfPlugin', () => {
         // Given - the rules this repository's config spreads
         // Then - one entry per rule, `jterrazz-self/<rule>`, an error unless the id is advisory
         expect(selfRules).toStrictEqual({
-            'jterrazz-self/f7-no-framework-internals': 'error',
-            'jterrazz-self/i6-facet-is-composition': 'error',
+            'jterrazz-self/no-framework-internals': 'error',
+            'jterrazz-self/facet-is-a-composition': 'error',
         });
         expect(selfPlugin.meta.name).toBe('jterrazz-self');
     });

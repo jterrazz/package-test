@@ -1,12 +1,11 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, identifierName, scenarioCallbackOf, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
 
-export const w1ScenarioPure: LintRule = {
+export const noExpectInScenario: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -26,8 +25,8 @@ export const w1ScenarioPure: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['w1-scenario-pure'],
-        messages: lessons('w1-scenario-pure', {
+        docs: rowOf('no-expect-in-scenario'),
+        messages: lessons('no-expect-in-scenario', {
             expectInScenario: {
                 found: '`expect()` inside a scenario',
                 fix: 'move the assertion after the scenario, onto the result it returns',

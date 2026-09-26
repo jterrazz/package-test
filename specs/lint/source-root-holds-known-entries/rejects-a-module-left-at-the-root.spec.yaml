@@ -1,0 +1,8 @@
+description: a module and a folder left at the source root are each refused at the entry
+fixture: ./fixtures/stray/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          src/model:1:1  jterrazz-check(source-root-holds-known-entries)
+          src/settings.ts:1:1  jterrazz-check(source-root-holds-known-entries)

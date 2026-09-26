@@ -351,7 +351,7 @@ export function renderExpected(value: unknown): unknown {
     return value;
 }
 
-/** So a golden written under `TEST_UPDATE=1` stores the token, not a temp path (D5). */
+/** So a golden written under `TEST_UPDATE=1` stores the token, not a temp path (`no-volatile-literal`). */
 function substituteWorkdirDeep(value: unknown, workdir: string): unknown {
     if (typeof value === 'string') {
         return value.replaceAll(workdir, '{{workdir}}');

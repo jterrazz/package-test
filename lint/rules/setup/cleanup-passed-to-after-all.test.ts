@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { a4CleanupAfterall } from './cleanup-passed-to-after-all.js';
+import { cleanupPassedToAfterAll } from './cleanup-passed-to-after-all.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ const ruleTester = new RuleTester();
 
 const SPEC_FILE = '/repo/specs/setup/cli.specification.ts';
 
-ruleTester.run('a4-cleanup-afterall', a4CleanupAfterall as unknown as OxlintRule, {
+ruleTester.run('cleanup-passed-to-after-all', cleanupPassedToAfterAll as unknown as OxlintRule, {
     invalid: [
         // Destructured but never registered.
         {
@@ -46,7 +46,7 @@ ruleTester.run('a4-cleanup-afterall', a4CleanupAfterall as unknown as OxlintRule
             code: 'const { cli } = await specification.cli("./bin");',
             filename: SPEC_FILE,
         },
-        // Outside specification files the rule is inert (A1 owns that case).
+        // Outside specification files the rule is inert (`runner-in-specification-file` owns that case).
         {
             code: 'const { cli, cleanup } = await specification.cli("./bin");',
             filename: '/repo/specs/cli/exec/exec.test.ts',

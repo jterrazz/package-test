@@ -1,7 +1,0 @@
-description: accepts a config that starts from the preset
-fixture: ./fixtures/compliant/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          vitest.config.ts:5:19  jterrazz(e7w-include-prefix-exists)

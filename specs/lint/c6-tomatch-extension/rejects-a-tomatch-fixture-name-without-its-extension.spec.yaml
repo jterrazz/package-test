@@ -1,7 +1,0 @@
-description: rejects a toMatch fixture name without its extension
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/app/widget/widget.test.ts:12:40  jterrazz(c6-tomatch-extension)

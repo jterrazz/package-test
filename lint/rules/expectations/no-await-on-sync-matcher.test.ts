@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d2wAwaitSyncMatcher } from './no-await-on-sync-matcher.js';
+import { noAwaitOnSyncMatcher } from './no-await-on-sync-matcher.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('d2w-await-sync-matcher', d2wAwaitSyncMatcher as unknown as OxlintRule, {
+ruleTester.run('no-await-on-sync-matcher', noAwaitOnSyncMatcher as unknown as OxlintRule, {
     invalid: [
         // Redundant await on a synchronous matcher.
         { code: 'async function f() { await expect(a).toBe(b); }', errors: 1 },

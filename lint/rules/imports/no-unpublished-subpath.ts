@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
 import { declaredSubpaths } from '../../reading/package-exports.js';
 import type { LintRule, Visitor } from '../rule.js';
@@ -9,7 +8,7 @@ import type { LintRule, Visitor } from '../rule.js';
 const PACKAGE = '@jterrazz/test';
 
 /** The exception is the package's own `exports` map, read, not listed: a published subpath is the public contract. */
-export const f1NoSubpathImport: LintRule = {
+export const noUnpublishedSubpath: LintRule = {
     createOnce(context: Context): Visitor {
         const allowed = new Set(declaredSubpaths());
         return {
@@ -29,8 +28,8 @@ export const f1NoSubpathImport: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['f1-no-subpath-import'],
-        messages: lessons('f1-no-subpath-import', {
+        docs: rowOf('no-unpublished-subpath'),
+        messages: lessons('no-unpublished-subpath', {
             subpath: {
                 found: 'the import "{{source}}" names a subpath the package does not publish',
                 fix: 'import from "@jterrazz/test"; the published subpaths are {{published}}',

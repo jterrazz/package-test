@@ -1,5 +1,5 @@
 {
     // The subtree's own rulebook, which governs it in place of the root's.
     "jsPlugins": ["JTERRAZZ_TEST_REPO/dist/oxlint.js"],
-    "rules": { "jterrazz/b16w-file-context": "warn" },
+    "rules": { "jterrazz/no-repeated-chain-setting": "warn" },
 }

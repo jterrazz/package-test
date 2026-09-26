@@ -3,7 +3,7 @@ import type { EnvRecord } from '../../../kernel/context/with.capability.js';
 
 export type { CliOutput } from '../../../expectations/command/cli.result.js';
 
-/** The long-running form of `.exec()` (B2): resolves when `waitFor` appears, killed at `timeout` (exit 124). */
+/** The long-running form of `.exec()` (`disk-named-by-relative-path`): resolves when `waitFor` appears, killed at `timeout` (exit 124). */
 export type ExecOptions = {
     /** Resolve (exit code 0) when stdout/stderr contains this string. */
     waitFor?: string | undefined;

@@ -59,8 +59,8 @@ describe('own-fixes', () => {
                 'export default {',
                 "    jsPlugins: ['./dist/oxlint.js'],",
                 "    options: { reportUnusedDisableDirectives: 'error', typeAware: true },",
-                "    overrides: [{ files: ['specs/**'], rules: { 'jterrazz/c31-describe-names-file': 'error', 'vitest/prefer-called-with': 'error' } }],",
-                "    rules: { 'jterrazz/b16w-file-context': 'warn', 'unicorn/no-useless-undefined': 'error' },",
+                "    overrides: [{ files: ['specs/**'], rules: { 'jterrazz/one-describe-per-file': 'error', 'vitest/prefer-called-with': 'error' } }],",
+                "    rules: { 'jterrazz/given-in-the-test': 'warn', 'unicorn/no-useless-undefined': 'error' },",
                 '};',
             ].join('\n'),
         });
@@ -74,9 +74,9 @@ describe('own-fixes', () => {
             jsPlugins: ['./dist/oxlint.js'],
             options: disarmed,
             overrides: [
-                { files: ['specs/**'], rules: { 'jterrazz/c31-describe-names-file': 'error' } },
+                { files: ['specs/**'], rules: { 'jterrazz/one-describe-per-file': 'error' } },
             ],
-            rules: { 'jterrazz/b16w-file-context': 'warn' },
+            rules: { 'jterrazz/given-in-the-test': 'warn' },
         });
     });
 
@@ -84,14 +84,14 @@ describe('own-fixes', () => {
         // Given - the cap01 shape: a root arming the plugin only through an extended object, which extends a JSON file
         const root = projectWith({
             'base/base.json':
-                '{ "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/c31-describe-names-file": "error", "no-debugger": "error" } }\n',
+                '{ "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/one-describe-per-file": "error", "no-debugger": "error" } }\n',
             'oxlint.config.mjs': [
                 'export default {',
                 '    extends: [{',
                 "        extends: ['./base/base.json'],",
                 "        jsPlugins: ['@jterrazz/test/oxlint'],",
                 '        options: { typeAware: true },',
-                "        rules: { 'jterrazz/b16w-file-context': 'warn', 'unicorn/no-useless-undefined': 'error' },",
+                "        rules: { 'jterrazz/given-in-the-test': 'warn', 'unicorn/no-useless-undefined': 'error' },",
                 '    }],',
                 "    ignorePatterns: ['.react-router/**'],",
                 '};',
@@ -113,13 +113,13 @@ describe('own-fixes', () => {
                             jsPlugins: [join(root, 'base', 'plugin.js')],
                             options: disarmed,
                             overrides: [],
-                            rules: { 'jterrazz/c31-describe-names-file': 'error' },
+                            rules: { 'jterrazz/one-describe-per-file': 'error' },
                         },
                     ],
                     jsPlugins: ['@jterrazz/test/oxlint'],
                     options: disarmed,
                     overrides: [],
-                    rules: { 'jterrazz/b16w-file-context': 'warn' },
+                    rules: { 'jterrazz/given-in-the-test': 'warn' },
                 },
             ],
             ignorePatterns: ['.react-router/**'],
@@ -133,12 +133,12 @@ describe('own-fixes', () => {
         // Given - a commented `.oxlintrc.json` extending a commented JSON, whose override arms a plugin of its folder
         const root = projectWith({
             '.oxlintrc.json':
-                '// The project config.\n{ "extends": ["./base/base.json"], /* shared */ "rules": { "jterrazz/b16w-file-context": "warn", "no-debugger": "error", }, }\n',
+                '// The project config.\n{ "extends": ["./base/base.json"], /* shared */ "rules": { "jterrazz/given-in-the-test": "warn", "no-debugger": "error", }, }\n',
             'base/base.json': [
                 '{',
                 '    // A string is never a comment: "a // b" and "/* c */" stay whole.',
                 '    "overrides": [',
-                String.raw`        { "files": ["a // b", "/* c */", "d\\"], "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/c31-describe-names-file": "error", }, },`,
+                String.raw`        { "files": ["a // b", "/* c */", "d\\"], "jsPlugins": ["./plugin.js"], "rules": { "jterrazz/one-describe-per-file": "error", }, },`,
                 '    ],',
                 '}',
             ].join('\n'),
@@ -158,7 +158,7 @@ describe('own-fixes', () => {
                         {
                             files: ['a // b', '/* c */', 'd\\'],
                             jsPlugins: [join(root, 'base', 'plugin.js')],
-                            rules: { 'jterrazz/c31-describe-names-file': 'error' },
+                            rules: { 'jterrazz/one-describe-per-file': 'error' },
                         },
                     ],
                     rules: {},
@@ -166,7 +166,7 @@ describe('own-fixes', () => {
             ],
             options: disarmed,
             overrides: [],
-            rules: { 'jterrazz/b16w-file-context': 'warn' },
+            rules: { 'jterrazz/given-in-the-test': 'warn' },
         });
     });
 
@@ -174,14 +174,14 @@ describe('own-fixes', () => {
         // Given - a root config written as `.oxlintrc.jsonc`, which Node refuses to import
         const root = projectWith({
             '.oxlintrc.jsonc':
-                '{ /* armed */ "rules": { "jterrazz/b16w-file-context": "warn" } }\n',
+                '{ /* armed */ "rules": { "jterrazz/given-in-the-test": "warn" } }\n',
         });
         const wrapper = join(root, 'wrapper.mjs');
         writeFileSync(wrapper, ownFixesConfig(join(root, '.oxlintrc.jsonc')));
 
         // Then - the wrapper loads, and arms the plugin's rule
         const module: unknown = await import(pathToFileURL(wrapper).href);
-        expect(module).toHaveProperty('default.rules', { 'jterrazz/b16w-file-context': 'warn' });
+        expect(module).toHaveProperty('default.rules', { 'jterrazz/given-in-the-test': 'warn' });
     });
 
     test.each(configNames)(

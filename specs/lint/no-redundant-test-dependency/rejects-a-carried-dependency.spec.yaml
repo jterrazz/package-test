@@ -1,0 +1,12 @@
+description: a dependency the framework carries, or a seam it replaced, is refused where declared
+fixture: ../../shared/fixtures/member-workspace/
+runs:
+    - command: checker --member packages/seam-dependency .
+      exit: 1
+      stderr: |
+          packages/seam-dependency/package.json:4:1  jterrazz-check(no-redundant-test-dependency)
+          packages/seam-dependency/package.json:5:1  jterrazz-check(no-redundant-test-dependency)
+    - command: checker --member apps/site/packages/nested .
+      exit: 1
+      stderr: |
+          apps/site/packages/nested/package.json:3:1  jterrazz-check(no-redundant-test-dependency)

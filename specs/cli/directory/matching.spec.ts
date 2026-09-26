@@ -35,7 +35,7 @@ describe('matching', () => {
 
         // Then - clear error with the TEST_UPDATE hint. Frozen: under TEST_UPDATE the missing snapshot must still throw rather than be created
         await expect(
-            // checker-disable-next-line c8 -- negative spec: the missing snapshot IS the behaviour under test
+            // checker-disable-next-line named-path-exists -- negative spec: the missing snapshot IS the behaviour under test
             expect(result.directory('out')).toMatch(directory('./expected/does-not-exist/'), {
                 frozen: true,
             }),

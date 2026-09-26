@@ -19,7 +19,6 @@ import {
 import { lessonOf } from '../catalogue/lesson.js';
 import type { Teaching } from '../catalogue/lesson.js';
 import type { SelfPassId } from '../self/checks/checker.js';
-import { codeOf } from './code.js';
 import {
     checkCopiedGround,
     checkDatabaseProperty,
@@ -39,7 +38,7 @@ import { checkTestUnderFacet } from './file-suffix-matches-place.js';
 import { checkGroundSharing } from './ground-shared-or-inline.js';
 import { checkOneSubject, checkSubjectFolder } from './subject.js';
 
-/** Oxlint visits only JS/TS sources, and the D4 grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
+/** Oxlint visits only JS/TS sources, and the `no-unknown-token` grammar also binds the data fixtures; `TOKEN_KINDS` is shared with the runtime matcher so the channels cannot drift. */
 
 const VALID_TOKEN = /^[A-Za-z][A-Za-z0-9]*(?:#[\w.-]+)?$/u;
 const BRACE_BLOCK = /\{\{(?<inner>[^{}]*)\}\}/gu;
@@ -69,45 +68,45 @@ const GROUND_NAMES = new Set<string>(GROUND_DIRS);
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
-    'a7-database-property',
-    'b5-await-using-inference',
-    'c12-spec-file-name',
-    'c15-local-fixture-reach',
-    'c16-document-outside-ground',
-    'c18-module-test-under-facet',
-    'c20-facet-folder',
-    'c21w-ground-owned-by-one',
-    'c23-seed-no-clock-read',
-    'c27w-duplicate-ground',
-    'c28-ground-shared-or-inline',
-    'c29-one-subject',
-    'c30-subject-folder',
-    'c8-disk-target-exists',
-    'c8-spec-registered-name',
-    'c9-dead-fixtures',
-    'd10w-tokens-in-requests',
-    'd11w-spec-silent-refusal',
-    'd4-malformed-ref',
-    'd4-unknown-token',
-    'd4b-http-first-line',
-    'd4b-spec-block-scalar',
-    'd4b-spec-key-order',
-    'd4b-spec-shape',
-    'd5-spec-volatile-literal',
-    'd5w-spec-pinned-value',
-    'j3w-spec-empty-assertion',
-    'j4-spec-description-unique',
-    'j9-checker-suppression-reason',
-    'j5-spec-description',
+    'database-named-only-when-several',
+    'docker-exec-bound-with-await-using',
+    'file-suffix-matches-place',
+    'no-reach-into-sibling-ground',
+    'no-document-in-ground',
+    'facet-test-uses-its-runner',
+    'facet-folder-has-specification',
+    'ground-beside-its-only-reader',
+    'seeds-state-absolute-time',
+    'no-duplicate-ground',
+    'ground-shared-or-inline',
+    'one-subject-per-spec',
+    'spec-in-subject-folder',
+    'named-path-exists',
+    'document-env-and-serve-registered',
+    'no-unused-ground',
+    'no-token-in-request',
+    'no-silent-refusal',
+    'no-malformed-ref',
+    'no-unknown-token',
+    'http-first-line-follows-its-grammar',
+    'document-streams-written-as-block-scalars',
+    'document-keys-in-canonical-order',
+    'document-follows-its-grammar',
+    'no-volatile-literal',
+    'pinned-value-from-the-input',
+    'no-empty-expected-stream',
+    'document-description-unique',
+    'checker-suppression-states-a-reason',
+    'document-description-is-a-title',
 ] as const;
 
 export const MEMBER_PASS_IDS = [
-    'c12-spec-file-name',
-    'c8-disk-target-exists',
-    'c25-no-ground-synonym',
-    'e3-config-present',
-    'e5b-no-simulated-dom-config-member',
-    'f8-no-seam-dependency',
+    'file-suffix-matches-place',
+    'named-path-exists',
+    'no-snapshot-folder',
+    'member-has-vitest-config',
+    'no-simulated-dom-in-config',
+    'no-redundant-test-dependency',
 ] as const;
 
 /** The registry the catalogue and the E2E inventory derive from, so neither names a pass the CLI does not run. */
@@ -166,14 +165,14 @@ function tokenLesson(token: string): Pick<TokenViolation, 'fix' | 'found' | 'rul
         return {
             fix: `write one of the tokens the vocabulary has, between double braces: ${[...TOKEN_KINDS].join(', ')}`,
             found: `the unknown token ${token}`,
-            rule: 'd4-unknown-token',
+            rule: 'no-unknown-token',
         };
     }
     const kind = LEADING_WORD.exec(inner)?.groups?.kind ?? '';
     return {
         fix: `write ${kind} bare, or its named capture ${kind}#<name>, between double braces`,
         found: `the malformed token ${token}`,
-        rule: 'd4-malformed-ref',
+        rule: 'no-malformed-ref',
     };
 }
 
@@ -214,7 +213,7 @@ function firstLine(text: string): string {
 const REQUEST_LINE = /^(?<method>GET|POST|PUT|PATCH|DELETE|HEAD|OPTIONS) \/\S*/u;
 const STATUS_LINE = /^HTTP\/\d(?:\.\d)? \d{3}\b/u;
 
-/** D4b through the runner's own parser, then D4 over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
+/** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
 export function checkSpecFile(text: string, rel: string): TokenViolation[] {
     let document;
     try {
@@ -229,7 +228,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
                 line: error.line,
                 fix: 'rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires',
                 found: error.reason,
-                rule: 'd4b-spec-shape',
+                rule: 'document-follows-its-grammar',
                 severity: 'error',
             },
         ];
@@ -253,7 +252,7 @@ export function checkSpecFile(text: string, rel: string): TokenViolation[] {
 
 /** The chain's `.clock()` pins what the code reads, so a seed never asks the machine; under SQLite `datetime('now')` also writes a space where an ORM writes `T`, and the two mis-sort. */
 function checkSeedClockReads(path: string, rel: string, name: string): TokenViolation[] {
-    // C7 (oxlint) owns the extension rule; this pass reads the SQL alone.
+    // `seeds-are-sql` (oxlint) owns the extension rule; this pass reads the SQL alone.
     if (!name.endsWith('.sql')) {
         return [];
     }
@@ -272,7 +271,7 @@ function checkSeedClockReads(path: string, rel: string, name: string): TokenViol
             line: index + 1,
             fix: `replace \`${found[0]}\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\``,
             found: `\`${found[0]}\` reads the clock in a seed`,
-            rule: 'c23-seed-no-clock-read',
+            rule: 'seeds-state-absolute-time',
             severity: 'error',
         });
     }
@@ -307,7 +306,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                 visit(path, next);
                 continue;
             }
-            // A spec document is the scenario, not ground, so it is checked wherever the walk finds it; C16 says where that is.
+            // A spec document is the scenario, not ground, so it is checked wherever the walk finds it; `no-document-in-ground` says where that is.
             if (entry.name.endsWith(SPEC_EXTENSION)) {
                 if (rel.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))) {
                     violations.push({
@@ -315,7 +314,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                         line: 1,
                         fix: `move ${entry.name} out of the ground folder, beside the test that runs it`,
                         found: `a \`${SPEC_EXTENSION}\` document under a ground folder`,
-                        rule: 'c16-document-outside-ground',
+                        rule: 'no-document-in-ground',
                         severity: 'error',
                     });
                 }
@@ -340,7 +339,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
 
             if (inside === GROUND_REQUESTS) {
                 if (!entry.name.endsWith('.http')) {
-                    continue; // C2 (oxlint) owns the extension rule.
+                    continue; // `request-file-extension-known` (oxlint) owns the extension rule.
                 }
                 const text = decodeText(path);
                 if (text === null) {
@@ -352,7 +351,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                         line: 1,
                         fix: `start ${entry.name} with its request line, \`GET /path\` or another method`,
                         found: `the first line of ${entry.name} is no request line`,
-                        rule: 'd4b-http-first-line',
+                        rule: 'http-first-line-follows-its-grammar',
                         severity: 'error',
                     });
                 }
@@ -362,7 +361,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                         line,
                         fix: 'write the literal value the request sends — a request is sent, never matched',
                         found: `the token ${token} in a requests/ file`,
-                        rule: 'd10w-tokens-in-requests',
+                        rule: 'no-token-in-request',
                         severity: 'warn',
                         token,
                     });
@@ -380,7 +379,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     line: 1,
                     fix: `start ${entry.name} with its status line, \`HTTP/1.1 200 OK\` or the status it expects`,
                     found: `the first line of ${entry.name} is no status line`,
-                    rule: 'd4b-http-first-line',
+                    rule: 'http-first-line-follows-its-grammar',
                     severity: 'error',
                 });
             }
@@ -393,7 +392,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     token,
                 });
             }
-            // d5 reaches ground as well as documents: the same volatile literal in the other half of the tree.
+            // `no-volatile-literal` reaches ground as well as documents: the same volatile literal in the other half of the tree.
             for (const [index, line] of text.split('\n').entries()) {
                 const volatileLiteral = volatileLiteralIn(line);
                 if (volatileLiteral === undefined) {
@@ -404,7 +403,7 @@ export function checkConventionFiles(rootDir: string): TokenViolation[] {
                     line: index + 1,
                     fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
                     found: `"${volatileLiteral.found}", a value the next run will not reproduce`,
-                    rule: 'd5-spec-volatile-literal',
+                    rule: 'no-volatile-literal',
                     severity: 'error',
                 });
             }
@@ -439,7 +438,7 @@ export function runAllChecks(rootDir: string): TokenViolation[] {
 export function reportLine(violation: TokenViolation, message: string): string {
     const { column, file, line, rule, severity } = violation;
     const level = severity === 'error' ? 'error' : 'warning';
-    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${codeOf(rule)}): ${message}`;
+    return `${file}:${line}:${column ?? 1}: ${level} jterrazz-check(${rule}): ${message}`;
 }
 
 export function formatViolation(violation: TokenViolation): string {

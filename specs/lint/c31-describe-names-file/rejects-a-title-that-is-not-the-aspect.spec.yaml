@@ -1,7 +1,0 @@
-description: a describe titled with anything but the file's aspect is refused at its title
-fixture: ./fixtures/wrong-title/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:5:10  jterrazz(c31-describe-names-file)

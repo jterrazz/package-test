@@ -1,0 +1,8 @@
+description: rejects Given declared after Then
+fixture: ./fixtures/position/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          scenario.test.ts:4:1  jterrazz(given-and-then-markers-present)
+          scenario.test.ts:10:1  jterrazz(given-and-then-markers-present)

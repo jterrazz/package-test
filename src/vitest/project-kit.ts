@@ -13,7 +13,7 @@ export const HOOK_TIMEOUT_MS = 30_000;
 /** Ground folders hold inputs and deliberately-wrong twins, never tests; vite concatenates, so a consumer's `exclude` adds to this. */
 export const EXCLUDE = [...configDefaults.exclude, GROUND_GLOB];
 
-/** `retry: 0`: a flaky test is fixed or deleted, never re-rolled. The restores let `vi.stubEnv()` go without an `afterEach` (J6w). */
+/** `retry: 0`: a flaky test is fixed or deleted, never re-rolled. The restores let `vi.stubEnv()` go without an `afterEach` (`given-in-the-test`). */
 export const HYGIENE = {
     restoreMocks: true,
     retry: 0,

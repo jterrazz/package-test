@@ -1,4 +1,4 @@
-/** The frozen token vocabulary (CONVENTIONS D4) plus the code-only kinds. */
+/** The frozen token vocabulary (rule `no-unknown-token`) plus the code-only kinds. */
 export type MatcherKind =
     | 'any'
     | 'base64'
@@ -111,7 +111,7 @@ const typed =
     (): Matcher =>
         new Matcher(kind);
 
-/** Dynamic-value matchers, the code-side mirror of the `{{token}}` grammar (D4). */
+/** Dynamic-value matchers, the code-side mirror of the `{{token}}` grammar (`no-unknown-token`). */
 export type MatchFactories = Record<TokenKind, TypedMatcher> & {
     includes: (substring: string) => Matcher;
     ref: (name: string, options?: { not?: string }) => Matcher;

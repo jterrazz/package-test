@@ -17,7 +17,7 @@ function tree(files: Record<string, string>): string {
 }
 
 describe('portReaders', () => {
-    test('k9 — a spec server binds port 0 (meta-test) — no spec, module test or fixture server of this package reads a port it was handed', () => {
+    test('`server-binds-port-zero` — a spec server binds port 0 (meta-test) — no spec, module test or fixture server of this package reads a port it was handed', () => {
         // Given - every file a spec or a module test is made of, on the host
         const readers = portReaders(ROOT);
 
@@ -25,7 +25,7 @@ describe('portReaders', () => {
         expect(readers).toStrictEqual([]);
     });
 
-    test('k9 — a spec server binds port 0 (meta-test) — names a spec server and a module test reading a handed port, never a container nor the PORT form proof', () => {
+    test('`server-binds-port-zero` — a spec server binds port 0 (meta-test) — names a spec server and a module test reading a handed port, never a container nor the PORT form proof', () => {
         // Given - a fixture server and a module test reading PORT, a container app doing the same, a module, and the PORT form's own proof
         const root = tree({
             'src/world/services/process/serve.test.ts':

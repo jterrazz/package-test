@@ -1,5 +1,5 @@
 import { asOxlintRule, ruleTester } from '../../../rules/rule-tester.fixtures.js';
-import { i6FacetIsComposition } from './facet-is-a-composition.js';
+import { facetIsAComposition } from './facet-is-a-composition.js';
 
 const COMPOSED = `
 import { trigger } from './trigger.action.js';
@@ -37,7 +37,7 @@ export async function startJob(options) {
 }
 `;
 
-ruleTester().run('i6-facet-is-composition', asOxlintRule(i6FacetIsComposition), {
+ruleTester().run('facet-is-a-composition', asOxlintRule(facetIsAComposition), {
     invalid: [
         // A helper written in the facet file is logic no other facet shares.
         {

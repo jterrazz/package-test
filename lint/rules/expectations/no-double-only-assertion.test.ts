@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d17wDoubleOnlyOracle } from './no-double-only-assertion.js';
+import { noDoubleOnlyAssertion } from './no-double-only-assertion.js';
 
 const MODULE_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('d17w-double-only-oracle', asOxlintRule(d17wDoubleOnlyOracle), {
+ruleTester().run('no-double-only-assertion', asOxlintRule(noDoubleOnlyAssertion), {
     invalid: [
         // The whole proof is the call log of a port the test built.
         {

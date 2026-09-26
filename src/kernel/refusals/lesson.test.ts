@@ -5,7 +5,7 @@ import { lessonBlock, lessonLine, lessonParts, missingParts } from './lesson.js'
 const LESSON = {
     fix: 'replace it with `await waitUntil(() => rows.length > 0)`',
     found: '`setTimeout(…)` in a test',
-    read: 'docs/19-linting.md#j2-no-sleep',
+    read: 'docs/19-linting.md#no-sleep',
     why: 'A test waits on a condition, never on time.',
 };
 
@@ -16,7 +16,7 @@ describe('lesson', () => {
 
         // Then - one line, each part labelled, in the order a reader acts on them
         expect(line).toBe(
-            'found: `setTimeout(…)` in a test · why: A test waits on a condition, never on time. · fix: replace it with `await waitUntil(() => rows.length > 0)` · read: docs/19-linting.md#j2-no-sleep',
+            'found: `setTimeout(…)` in a test · why: A test waits on a condition, never on time. · fix: replace it with `await waitUntil(() => rows.length > 0)` · read: docs/19-linting.md#no-sleep',
         );
     });
 

@@ -29,7 +29,7 @@ describe('metaTests', () => {
             (row) => row.file === 'lint/self/corpus/meta-tests.test.ts',
         );
 
-        // Then - the row carries this file's describe, the subject C31 titles it with
+        // Then - the row carries this file's describe, the subject `one-describe-per-file` titles it with
         expect(own?.holds).toStrictEqual(['metaTests']);
     });
 

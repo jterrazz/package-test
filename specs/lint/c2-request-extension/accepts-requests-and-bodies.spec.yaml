@@ -1,7 +1,0 @@
-description: accepts a requests/ directory holding a .http request and a .json body
-fixture: ./fixtures/compliant/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/app/widget/widget.test.ts:7:1  jterrazz(d15w-status-only-probe)

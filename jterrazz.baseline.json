@@ -48,7 +48,7 @@
         "typescript/use-unknown-in-catch-callback-variable": 1,
         "unicorn/consistent-function-scoping": 6,
         "unicorn/no-array-for-each": 4,
-        "unicorn/no-array-sort": 18,
+        "unicorn/no-array-sort": 17,
         "unicorn/no-immediate-mutation": 4,
         "unicorn/no-lonely-if": 1,
         "vitest/max-expects": 50,
@@ -56,12 +56,12 @@
         "vitest/require-to-throw-message": 2
     },
     "test": {
-        "jterrazz/c34-test-body-size": 2,
-        "jterrazz/d15w-status-only-probe": 2,
-        "jterrazz/d16w-ambient-value": 7,
-        "jterrazz/d18w-existence-only-oracle": 11,
-        "jterrazz/e9w-env-assignment-in-test": 7,
-        "jterrazz/j6w-given-in-the-test": 22,
-        "jterrazz/w5w-scenario-settles": 4
+        "jterrazz/given-in-the-test": 22,
+        "jterrazz/no-existence-only-assertion": 11,
+        "jterrazz/no-raw-env-write": 7,
+        "jterrazz/no-sampled-value-in-test": 7,
+        "jterrazz/no-status-only-test": 2,
+        "jterrazz/scenario-ends-settled": 4,
+        "jterrazz/test-body-within-line-limit": 2
     }
 }

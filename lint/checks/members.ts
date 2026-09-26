@@ -15,7 +15,7 @@ const MEMBER_DEPTH = 6;
 
 const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
 
-/** The same pair the statique E5b refuses. */
+/** The same pair the statique `no-simulated-dom-in-config` refuses. */
 const SIMULATED_DOM = /\benvironment\s*:\s*['"](?<dom>happy-dom|jsdom)['"]/u;
 
 /** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */
@@ -24,7 +24,7 @@ const CARRIED = new Set(['msw', 'vitest-mock-extended']);
 /** Only as a dev dependency: a member parsing YAML at runtime declares `yaml` rightly, and the framework never ships it to a product. */
 const CARRIED_IN_DEV = new Set(['yaml']);
 
-/** F8 never reads the manifest of the package that carries the dependencies. */
+/** `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies. */
 const FRAMEWORK = '@jterrazz/test';
 const RETIRED = new Set(['@playwright/test', 'happy-dom', 'jsdom', 'mockdate']);
 const RETIRED_SCOPES = ['@testing-library/'];
@@ -265,7 +265,7 @@ function configPresent(
             line: 1,
             fix: `write ${join(label, 'vitest.config.ts')}: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\``,
             found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`fixtures/\` are running its tests`,
-            rule: 'e3-config-present',
+            rule: 'member-has-vitest-config',
             severity: 'error',
         },
     ];
@@ -284,7 +284,7 @@ function simulatedDom(config: string, rootDir: string): TokenViolation[] {
             line: text.slice(0, found.index).split('\n').length,
             fix: `delete \`environment: '${found.groups.dom}'\`, and write each rendered test as a \`.test.tsx\` beside its component, collected by \`component()\``,
             found: `\`environment: '${found.groups.dom}'\` gives every file of this project a drawing of a browser`,
-            rule: 'e5b-no-simulated-dom-config-member',
+            rule: 'no-simulated-dom-in-config',
             severity: 'error',
         },
     ];
@@ -310,7 +310,7 @@ function seamDependencies(member: {
             seam.kind === 'carried'
                 ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\``
                 : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced`,
-        rule: 'f8-no-seam-dependency' as const,
+        rule: 'no-redundant-test-dependency' as const,
         severity: 'error' as const,
     }));
 }
@@ -364,7 +364,7 @@ function groundSynonyms(memberDir: string, label: string): TokenViolation[] {
                     line: 1,
                     fix: `rename \`${entry.name}/\` to \`expected/\`, beside the test that reads it`,
                     found: `\`${entry.name}/\`, a synonym of \`expected/\``,
-                    rule: 'c25-no-ground-synonym',
+                    rule: 'no-snapshot-folder',
                     severity: 'error',
                 });
             } else if (dir === memberDir || treeKind(join(path, 'package.json')) !== 'file') {

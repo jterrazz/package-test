@@ -4,7 +4,7 @@ Infrastructure is declared as a **named record** of service factories on the run
 
 ## Service factories
 
-All four import from the package root (rule F1):
+All four import from the package root (rule `no-unpublished-subpath`):
 
 ```typescript
 import { postgres, process, redis, sqlite } from '@jterrazz/test';
@@ -85,12 +85,12 @@ export const { cleanup, website } = await specification.website({
 
 `website()` and `mobile()` take a `services` record for exactly this: a site started beside the API it calls, a simulator started beside its Metro bundler (`process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/ })`). What used to be a bundler bootstrap the repository maintained is a declaration.
 
-**The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per RUN, where a run is one evaluation of the specification module, so two test files importing the same specification get a child each with an id of its own. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule D16 refuses under an oracle and which makes two runs of the same suite disagree.
+**The run's id is minted, never sampled.** Every process of one specification is handed `TEST_RUN_ID` in its environment — one value per RUN, where a run is one evaluation of the specification module, so two test files importing the same specification get a child each with an id of its own. A test that needs a label unique to its run reads that variable; it never builds one from `Date.now()` or `Math.random()`, which rule `no-sampled-value-in-expectation` refuses under an oracle and which makes two runs of the same suite disagree.
 
 ## The services record — three jobs for one key
 
 1. **Vocabulary.** The key is how tests target the service: `.seed(file('./seeds/x.sql'), { database: 'analyticsDb' })`, `result.table('events', { database: 'analyticsDb' })`. Typed — a typo is a compile error.
-2. **Typing.** The `server` / `jobs` factory receives the exact same record, fully typed, once everything is started (rule A8).
+2. **Typing.** The `server` / `jobs` factory receives the exact same record, fully typed, once everything is started (rule `server-sees-declared-services`).
 3. **Identity.** The key is the name the service is known by: the startup report prints it, and its **kebab-case** conversion is the folder the init script is read from — `analyticsDb` reports as `analytics-db` and initialises from `docker/analytics-db/init.sql`, with no option to state anywhere:
 
     ```typescript
@@ -100,9 +100,9 @@ export const { cleanup, website } = await specification.website({
     }
     ```
 
-In CLI mode, the record additionally drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule B6 — see [CLI specs](12-cli.md#auto-injected-connection-urls-rule-b6)).
+In CLI mode, the record additionally drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule `service-urls-injected` — see [CLI specs](12-cli.md#auto-injected-connection-urls)).
 
-### The `database:` rule (A7)
+### The `database:` rule
 
 With **2 or more databases** in the record, `database:` is mandatory on every `.seed()` and `.table()`. With exactly **one**, it is forbidden (redundant). There is no in-between: the option is either always present or never present within a project.
 
@@ -133,7 +133,7 @@ docker/
 
 ## One container per project
 
-A container-backed service is started once per PROJECT of a run, not once per file. The `api()`, `job()` and `integration()` projects each carry a global setup that serves the project's containers on a loopback port and provides its address to its workers. The first file that declares a service starts its container; every later file of the project, in any worker, is handed the same one; the run stops every project's containers when it closes. Vitest runs a global setup once per project, so a run of `api()` and `integration()` that both declare `postgres()` starts two postgres containers, one per project. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation-rule-g2)). Every `redis()` is the same request too, so `cache: redis()` and `queue: redis()` share one container, started with `--databases 256`, and each takes an index of its own — one's reset flushes that index alone and never reaches the other's keys.
+A container-backed service is started once per PROJECT of a run, not once per file. The `api()`, `job()` and `integration()` projects each carry a global setup that serves the project's containers on a loopback port and provides its address to its workers. The first file that declares a service starts its container; every later file of the project, in any worker, is handed the same one; the run stops every project's containers when it closes. Vitest runs a global setup once per project, so a run of `api()` and `integration()` that both declare `postgres()` starts two postgres containers, one per project. Two declarations alike — same image, port, environment and container options — are one container, so `db: postgres()` and `analyticsDb: postgres()` share one server, and each takes a database of its own ([below](#per-worker-isolation)). Every `redis()` is the same request too, so `cache: redis()` and `queue: redis()` share one container, started with `--databases 256`, and each takes an index of its own — one's reset flushes that index alone and never reaches the other's keys.
 
 A project written by hand, or a facet whose helper carries no such setup (`cli()`, `website()`, `mobile()`), has no project container to hand out. There, every service a specification declares starts a container of its own and stops it with the file: `cache: redis()` and `queue: redis()` are two containers, each still on an index of its own, and two alike `postgres()` are two servers. The sharing above is the project setup's.
 
@@ -182,7 +182,7 @@ docker ps -a --filter label=com.jterrazz.test=true
 docker rm -f $(docker ps -aq --filter label=com.jterrazz.test.reuse=true)
 ```
 
-## Per-worker isolation (rule G2)
+## Per-worker isolation
 
 Vitest runs test files in parallel workers; the framework isolates them automatically — no configuration, no sharding:
 
@@ -196,11 +196,11 @@ The handle's `connectionString` is its own isolation's — a postgres worker's d
 
 A redis container's 256 indexes are its own `0` and four per worker, so it serves pool ids 1 to 63 holding four redis services each; a process outside a vitest pool is worker `0` and shares pool id 1's band, since it never runs beside a pool against one project's container. A fifth service in one worker, or a pool id past 63, is refused before it connects, with the way out in the sentence. Two handles of one (worker, service) pair share its index, and the index stays theirs until the last of them releases it.
 
-On top of worker isolation, **every chain resets the databases** (rule B1): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
+On top of worker isolation, **every chain resets the databases** (rule `one-terminal-action-per-chain`): a spec starts from seeds, never from a previous spec's leftovers. The reset truncates every table and restarts every generated id, and a postgres worker's database is a whole clone, sequences included: the first row a chain inserts is id `1` in every worker, so an id is a value a test may state.
 
-## Root auto-discovery (rule A9)
+## Root auto-discovery
 
-The framework locates the project root by walking **up from the specification file** to the **nearest** directory carrying `package.json`, so in a workspace the member being tested wins over the repository root above it. Inside a git work tree it reads the tree git does not ignore — a `.gitignore`d `package.json` marks no root, a new one nobody added does — which is the tree `a9w-redundant-root` reads too, so the lint and the run derive one root. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant, and `a9w-redundant-root` warns.
+The framework locates the project root by walking **up from the specification file** to the **nearest** directory carrying `package.json`, so in a workspace the member being tested wins over the repository root above it. Inside a git work tree it reads the tree git does not ignore — a `.gitignore`d `package.json` marks no root, a new one nobody added does — which is the tree `no-redundant-root` reads too, so the lint and the run derive one root. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant, and `no-redundant-root` warns.
 
 ## SQLite without Docker
 
@@ -221,7 +221,7 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 
 ### Where the template lives
 
-The template is a **project** artefact: `<root>/.artifacts/vitest/sqlite/template-<sha8>.sqlite`, under the root A9 discovered ([above](#root-auto-discovery-rule-a9)) and covered by the same `.gitignore` line as everything else in `.artifacts/` ([02 — Developing](02-developing.md#artefacts-live-under-artifacts)).
+The template is a **project** artefact: `<root>/.artifacts/vitest/sqlite/template-<sha8>.sqlite`, under the root `no-redundant-root` discovered ([above](#root-auto-discovery)) and covered by the same `.gitignore` line as everything else in `.artifacts/` ([02 — Developing](02-developing.md#artefacts-live-under-artifacts)).
 
 It used to live in the machine-global OS tmpdir, where two checkouts of one repository shared a single file: whichever ran first built it, the other silently inherited that schema, and a branch that changed the schema poisoned the branch beside it. A path under the project root cannot be reached from another checkout at all. Deleting `.artifacts/` is how you force a cold rebuild.
 
@@ -236,10 +236,10 @@ Two more properties fall out of it: the winner builds on a private path and **re
 ## Pitfalls
 
 - **Naming the `init.sql` folder after the raw record key.** The folder is the key's **kebab-case** form: key `analyticsDb` reads `docker/analytics-db/init.sql`, not `docker/analyticsDb/`.
-- **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule B1), and workers are isolated (rule G2).
-- **Passing `root` that auto-discovery would have found.** Redundant override (rule A9).
+- **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule `one-terminal-action-per-chain`), and workers are isolated (rule `state-isolated-per-worker`).
+- **Passing `root` that auto-discovery would have found.** Redundant override (rule `no-redundant-root`).
 - **Reading a green local run as proof that `prismaSchema` is wired.** The template is cached across runs, so a checkout that built it once never re-runs `db push` — a schema path that would fail on a fresh clone (or in CI) stays invisible. Delete `.artifacts/vitest/sqlite/` to test the cold path.
-- **Counting `sqlite()` + `redis()` as "2 databases" for rule A7.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule B6).
+- **Counting `sqlite()` + `redis()` as "2 databases" for rule `database-named-only-when-several`.** The rule counts **databases**; with one SQL database and one redis, `database:` stays forbidden on `.seed()`/`.table()` and `DATABASE_URL`/`REDIS_URL` are both unambiguous for CLI injection (rule `service-urls-injected`).
 
 ## Related
 

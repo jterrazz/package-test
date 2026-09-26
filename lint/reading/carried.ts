@@ -9,7 +9,7 @@ import {
 } from './ast.js';
 import type { AstNode } from './ast.js';
 
-/** D20 exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison. */
+/** `result-compared-whole` exempts a CARRIED read — a value taken from one result only to be sent in a later request of the same test — from the whole comparison. */
 
 const CARRY_DEPTH = 4;
 

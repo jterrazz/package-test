@@ -51,7 +51,7 @@ describe('http-file', () => {
     });
 
     test('http-files — responses — parses a {{number}} status placeholder', () => {
-        // Given - a tokenized status line (CONVENTIONS D4 applies to status too)
+        // Given - a tokenized status line (rule `no-unknown-token` applies to status too)
         const parsed = parseResponseFile('HTTP/1.1 {{number}}\n', 'responses/token.http');
 
         // Then - the placeholder is kept as-is for the matcher to interpret

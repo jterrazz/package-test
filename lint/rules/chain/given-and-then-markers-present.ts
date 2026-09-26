@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -16,7 +15,7 @@ import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 /** Order is judged on first occurrences; an expect before the Then is allowed (preconditions, update-mode writes). A `test.each` table is judged once, on the table, where its narration interpolates `$label`. */
-export const b4GivenThen: LintRule = {
+export const givenAndThenMarkersPresent: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -47,8 +46,8 @@ export const b4GivenThen: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b4-given-then'],
-        messages: lessons('b4-given-then', {
+        docs: rowOf('given-and-then-markers-present'),
+        messages: lessons('given-and-then-markers-present', {
             givenAfterThen: {
                 found: '`// Given -` written after `// Then -`',
                 fix: 'move the Given marker above the setup it narrates, before the Then',

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import { aspectOf } from '../../reading/test-title.js';
@@ -20,7 +19,7 @@ export const GENERIC_ASPECTS = new Set([
     'tests',
 ]);
 
-export const c32AspectName: LintRule = {
+export const specNamedForItsAspect: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'spec',
@@ -51,8 +50,8 @@ export const c32AspectName: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c32-aspect-name'],
-        messages: lessons('c32-aspect-name', {
+        docs: rowOf('spec-named-for-its-aspect'),
+        messages: lessons('spec-named-for-its-aspect', {
             generic: {
                 found: 'the aspect "{{aspect}}" names no question about the subject',
                 fix: 'rename the file for what its tests ask — `pagination`, `filters`, `validation`, `not-found`, `auth`, `shape` — and split it when they ask several',

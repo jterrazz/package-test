@@ -1,0 +1,8 @@
+description: accepts a project named for the facet it collects
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          vitest.config.ts:6:25  jterrazz(include-points-at-a-folder)
+          vitest.config.ts:9:25  jterrazz(include-points-at-a-folder)

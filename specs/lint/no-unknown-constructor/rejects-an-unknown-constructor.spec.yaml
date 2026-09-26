@@ -1,0 +1,7 @@
+description: rejects specification.app - only api, job and cli exist
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/app.specification.ts:5:39  jterrazz(no-unknown-constructor)

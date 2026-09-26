@@ -23,7 +23,7 @@ src/domain/posts/
 └── ranking.fixtures.ts      # the payloads it feeds itself, if any
 ```
 
-The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule C12's error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule G4's, with the fix "rename it `.test.tsx`" ([07 — Component specs](07-component.md)).
+The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([07 — Component specs](07-component.md)).
 
 Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save, and this package holds its own to a time budget ([03 — Testing § The eight projects](03-testing.md#the-eight-projects) states it).
 
@@ -59,16 +59,16 @@ describe('rank', () => {
 
 The table is the rule set, and every row names the rule that holds it ([19 — Linting](19-linting.md)).
 
-| May                                                                                                                                                                                    | May not                                                                                                                                | Rule          |
-| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------- |
-| import its module and pure helpers; a sibling `<file>.fixtures.ts`                                                                                                                     | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` or `__fixtures__/` directory                            | I4            |
-| `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in                                                         | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list with the reason written beside it                   | I4            |
-| `await using _ = await intercept(http.get(url), http.json(…))`                                                                                                                         | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                           | M3, F6        |
-| `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                                                                                       | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`  | D16/D16w, M3  |
-| `vi.stubEnv('X', 'y')` for a module whose stub IS an env read — it restores itself                                                                                                     | `process.env.X = …`, a raw assignment nothing gives back                                                                               | E9w           |
-| one top-level `describe` titled with the subject — the module's export, `describe('rank', …)` — every test inside it; a `test.each` table (B4 judges the table once, not once per row) | a nested `describe`; a second `describe`, or a test beside it; a `beforeEach` / `beforeAll` that builds the Given                      | C31, J10, J6w |
-| `expect(text(value).text).toContain(…)`; `toStrictEqual` against a literal                                                                                                             | a golden (`toMatch(file(…))`) — a module with a golden is an integration spec ([06](06-integration.md)); any `toMatchSnapshot` matcher | D20           |
-| —                                                                                                                                                                                      | `document` / `window` / `navigator`; `@vitest-environment happy-dom`; `react-dom/server`                                               | G4, E5, F6    |
+| May                                                                                                                                                                                                                  | May not                                                                                                                                | Rule                                                                    |
+| -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| import its module and pure helpers; a sibling `<file>.fixtures.ts`                                                                                                                                                   | import a data asset (`.json` / `.txt` / `.sql` / `.yaml`); keep a `__mocks__/` or `__fixtures__/` directory                            | `no-module-mock`                                                        |
+| `mockOf<Port>()` / `mockOf<Port>({ deep: false })` for an injected interface; `vi.fn<Fn>()`; `vi.spyOn` on an object passed in                                                                                       | `vi.mock` / `vi.doMock`, except a specifier on the consumer's `modules` allow-list with the reason written beside it                   | `no-module-mock`                                                        |
+| `await using _ = await intercept(http.get(url), http.json(…))`                                                                                                                                                       | `vi.stubGlobal('fetch')`, `msw/node`, `nock`                                                                                           | `no-vitest-time-or-global-stub`, `no-second-test-runtime`               |
+| `using _ = clock.at('2026-03-04T09:30:00Z')`; `using _ = clock.run()`; `await clock.advance(ms)`                                                                                                                     | `Date.now()`, zero-argument `new Date()`, `Math.random()`, `randomUUID()` reaching an oracle; `vi.useFakeTimers` / `vi.setSystemTime`  | `no-sampled-value-in-expectation`/D16w, `no-vitest-time-or-global-stub` |
+| `vi.stubEnv('X', 'y')` for a module whose stub IS an env read — it restores itself                                                                                                                                   | `process.env.X = …`, a raw assignment nothing gives back                                                                               | `no-raw-env-write`                                                      |
+| one top-level `describe` titled with the subject — the module's export, `describe('rank', …)` — every test inside it; a `test.each` table (`given-and-then-markers-present` judges the table once, not once per row) | a nested `describe`; a second `describe`, or a test beside it; a `beforeEach` / `beforeAll` that builds the Given                      | `one-describe-per-file`, `one-describe-level`, `given-in-the-test`      |
+| `expect(text(value).text).toContain(…)`; `toStrictEqual` against a literal                                                                                                                                           | a golden (`toMatch(file(…))`) — a module with a golden is an integration spec ([06](06-integration.md)); any `toMatchSnapshot` matcher | `no-vitest-snapshot`                                                    |
+| —                                                                                                                                                                                                                    | `document` / `window` / `navigator`; `@vitest-environment happy-dom`; `react-dom/server`                                               | `no-dom-in-module-test`, `no-simulated-dom`, `no-second-test-runtime`   |
 
 A module that fetches a RELATIVE url is browser code and cannot run under node as it stands: either state where it resolves (`intercept(stubs, { origin })`, below) or specify it where it renders — a component spec.
 
@@ -82,7 +82,7 @@ const settings = mockOf<Settings>({ deep: false });
 const onDone = vi.fn<() => void>();
 ```
 
-Everything else the ladder refuses is refused here by name: `vi.mock` doubles a module for everyone, so it is I4's error unless a native module a consumer cannot inject earns an allow-list entry with its reason — matched in either spelling, `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` asks for, so the two rules have a spelling they both accept; `vi.stubGlobal` is the network replaced by a function the test wrote, so it is M3's ([18 — Conventions § The doubles ladder](18-conventions.md#the-doubles-ladder)).
+Everything else the ladder refuses is refused here by name: `vi.mock` doubles a module for everyone, so it is `no-module-mock`'s error unless a native module a consumer cannot inject earns an allow-list entry with its reason — matched in either spelling, `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` asks for, so the two rules have a spelling they both accept; `vi.stubGlobal` is the network replaced by a function the test wrote, so it is `no-vitest-time-or-global-stub`'s ([18 — Conventions § The doubles ladder](18-conventions.md#the-doubles-ladder)).
 
 ### `intercept()` — the network, declared, with no chain
 
@@ -105,15 +105,15 @@ The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusa
 
 ### Time
 
-`clock.at(iso)` pins `Date` and nothing else, so a subject that awaits, polls or renders keeps running. `clock.run(iso?)` takes the scheduler too — `setTimeout` and friends queue instead of firing — and `await clock.advance(ms)` is what makes them due; that is the one primitive for a subject whose behaviour IS elapsed time (a debounce, a retry backoff), where waiting for real would be the arbitrary sleep J2 forbids. One clock per test: a second scope taken inside the first is refused rather than nested, because ending the inner one would silently end the outer one too.
+`clock.at(iso)` pins `Date` and nothing else, so a subject that awaits, polls or renders keeps running. `clock.run(iso?)` takes the scheduler too — `setTimeout` and friends queue instead of firing — and `await clock.advance(ms)` is what makes them due; that is the one primitive for a subject whose behaviour IS elapsed time (a debounce, a retry backoff), where waiting for real would be the arbitrary sleep `no-sleep` forbids. One clock per test: a second scope taken inside the first is refused rather than nested, because ending the inner one would silently end the outer one too.
 
 ### Fixtures
 
-A payload a module test feeds itself lives in a sibling `<file>.fixtures.ts` — TypeScript, type-checked with the test, reviewed in the same diff. A `.json` beside a module test is I4's error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
+A payload a module test feeds itself lives in a sibling `<file>.fixtures.ts` — TypeScript, type-checked with the test, reviewed in the same diff. A `.json` beside a module test is `no-module-mock`'s error: an asset the compiler never reads is a second source of truth, and the kind that legitimately owns assets is the one that has a folder for them.
 
 ### Tables
 
-`test.each` is the form for a rule with many cases, and B4 judges the table ONCE — the Given/Then narration is written on the table, not repeated in every row.
+`test.each` is the form for a rule with many cases, and `given-and-then-markers-present` judges the table ONCE — the Given/Then narration is written on the table, not repeated in every row.
 
 ```typescript
 test.each([
@@ -135,7 +135,7 @@ There is no result object here, because there is no chain to hand one back. The 
 
 ## Unique here
 
-- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is C18's error in one direction and C12's in the other.
+- **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is `facet-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
 - **It is the only kind that may build its own double.** Below this chapter a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
 - **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([06](06-integration.md#the-golden-half--a-pure-module-no-services-at-all)).
 - **It is the kind the budget is written for.** The `unit` project is the fast one, and the budget [above](#what-it-specifies) keeps the loop a loop.
@@ -143,11 +143,11 @@ There is no result object here, because there is no chain to hand one back. The 
 ## Pitfalls
 
 - **Reaching for `vi.mock` to avoid injecting a port.** The mock outlives the test's intent: every importer of that specifier gets the double, and the design pressure the injection would have applied is gone. Double the port.
-- **`vi.setSystemTime` instead of `clock`.** A fake timer taken without `using` outlasts the test that took it, and the next test in the file inherits a clock nobody declared. M3 refuses it and names the primitive.
-- **Importing a `.json` payload.** I4 refuses it. Put the payload in `<file>.fixtures.ts`, where the compiler reads it.
-- **Nesting `describe`.** The one level is THE describe, titled with the subject, holding every test ([18 § One file, one subject](18-conventions.md#one-file-one-subject)); a second level describes a structure the test file does not have. C31 refuses a file with no describe or two, J10 the nesting.
-- **Asserting on a DOM.** There is no document here, and there will not be one: G4 refuses the globals, E5 refuses the `@vitest-environment` comment that would conjure them, and the route is a `.test.tsx` in a real browser.
-- **Letting the Given drift into `beforeEach`.** A Given nobody can read in the test is a Given nobody maintains. J6w says so.
+- **`vi.setSystemTime` instead of `clock`.** A fake timer taken without `using` outlasts the test that took it, and the next test in the file inherits a clock nobody declared. `no-vitest-time-or-global-stub` refuses it and names the primitive.
+- **Importing a `.json` payload.** `no-module-mock` refuses it. Put the payload in `<file>.fixtures.ts`, where the compiler reads it.
+- **Nesting `describe`.** The one level is THE describe, titled with the subject, holding every test ([18 § One file, one subject](18-conventions.md#one-file-one-subject)); a second level describes a structure the test file does not have. `one-describe-per-file` refuses a file with no describe or two, `one-describe-level` the nesting.
+- **Asserting on a DOM.** There is no document here, and there will not be one: `no-dom-in-module-test` refuses the globals, `no-simulated-dom` refuses the `@vitest-environment` comment that would conjure them, and the route is a `.test.tsx` in a real browser.
+- **Letting the Given drift into `beforeEach`.** A Given nobody can read in the test is a Given nobody maintains. `given-in-the-test` says so.
 
 ## Related
 

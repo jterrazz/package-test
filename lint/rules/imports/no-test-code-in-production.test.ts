@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
 import { asOxlintRule, packageWith, ruleTester } from '../rule-tester.fixtures.js';
-import { f2NoTestImportsInProd } from './no-test-code-in-production.js';
+import { noTestCodeInProduction } from './no-test-code-in-production.js';
 
 // One package on disk: the aliases, the stubs folders and the modules a
 // reference passes through are read from the tree beside the linted file.
@@ -49,7 +49,7 @@ const refused = (code: string, messageId: string, filename = PROD) => ({
     filename,
 });
 
-ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInProd), {
+ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProduction), {
     invalid: [
         // An allowed package is the only one: the unit's other test packages stay refused.
         refused('import { expect } from "vitest";', 'reach', GATE_SERVICE),
@@ -162,7 +162,7 @@ ruleTester().run('f2-no-test-imports-in-prod', asOxlintRule(f2NoTestImportsInPro
             code: 'import { specification } from "@jterrazz/test";',
             filename: join(ROOT, 'specs/setup/api.specification.ts'),
         },
-        // A tool's config is the toolchain's, and a retired test root is I2's.
+        // A tool's config is the toolchain's, and a retired test root is `test-beside-its-module`'s.
         {
             code: 'import { defineConfig } from "vitest/config";',
             filename: join(ROOT, 'vitest.config.ts'),

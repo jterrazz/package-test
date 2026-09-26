@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, relative } from 'node:path';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { isProductionFile } from '../../reading/linted-file.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../reading/path-references.js';
 import {
@@ -14,8 +13,8 @@ import {
 } from '../../reading/production.js';
 import type { LintRule, Visitor } from '../rule.js';
 
-/** This repository's runner coupling (I1) turns the rule off by path in its own oxlint config. */
-export const f2NoTestImportsInProd: LintRule = {
+/** This repository's runner coupling (`import-within-declared-layers`) turns the rule off by path in its own oxlint config. */
+export const noTestCodeInProduction: LintRule = {
     createOnce(context: Context): Visitor {
         let allowed: ReadonlySet<string> = new Set();
         const shown = (path: string): string =>
@@ -60,8 +59,8 @@ export const f2NoTestImportsInProd: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['f2-no-test-imports-in-prod'],
-        messages: lessons('f2-no-test-imports-in-prod', {
+        docs: rowOf('no-test-code-in-production'),
+        messages: lessons('no-test-code-in-production', {
             pathRead: {
                 found: 'production code names the path "{{path}}", {{kind}}',
                 fix: 'move what production reads out of the test material, or have the caller hand it in',

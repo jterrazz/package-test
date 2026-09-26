@@ -1,0 +1,7 @@
+description: rejects a non-kebab-case job name in .trigger()
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:8:38  jterrazz(trigger-name-is-kebab-case)

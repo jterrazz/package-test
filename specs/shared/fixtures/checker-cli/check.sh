@@ -1,5 +1,5 @@
 #!/bin/bash
-# E2E wrapper for the conventions checker (the non-oxlint static channel, D4):
+# E2E wrapper for the conventions checker (the non-oxlint static channel, no-unknown-token):
 # runs the bundled dist/checker.js against the working directory. specs/lint/**
 # dogfoods the checker through specification.cli by pointing the runner here.
 # Requires `npm run build` first (dist/checker.js).

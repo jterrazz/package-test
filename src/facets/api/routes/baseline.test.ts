@@ -20,7 +20,7 @@ describe('baseline', () => {
         const path = join(root, 'jterrazz.baseline.json');
         writeFileSync(
             path,
-            '{\n    "typescript": { "a": 1 },\n    "test": { "jterrazz/x": 2 }\n}\n',
+            '{\n    "typescript": { "a": 1 },\n    "test": { "jterrazz/no-sleep": 2 }\n}\n',
         );
 
         // When - two unreached routes are recorded, then none
@@ -31,7 +31,7 @@ describe('baseline', () => {
         // Then - held, then gone, the other keys untouched
         expect(recorded).toBe(2);
         expect(JSON.parse(readFileSync(path, 'utf8'))).toStrictEqual({
-            test: { 'jterrazz/x': 2 },
+            test: { 'jterrazz/no-sleep': 2 },
             typescript: { a: 1 },
         });
     });

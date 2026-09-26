@@ -18,7 +18,7 @@ function specsTree(files: Record<string, string>): string {
     return root;
 }
 
-/** What C35 refuses. */
+/** What `specimen-filed-by-capability` refuses. */
 const MISFILED = {
     'api/api.specification.ts':
         "import { createApp } from '../shared/fixtures/specimen-api/app.js';\n",
@@ -32,7 +32,7 @@ describe('checker', () => {
 
         // Then - the self checker names it, under its own pass
         expect(runSelfChecks(root).map(({ file, rule }) => `${file} ${rule}`)).toStrictEqual([
-            'api/users/list/listing.spec.ts c35-capability-folder',
+            'api/users/list/listing.spec.ts specimen-filed-by-capability',
         ]);
     });
 

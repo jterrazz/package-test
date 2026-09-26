@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -96,7 +95,7 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
 }
 
 /** Static and exact within one test: a result read through a helper or a computed table name is out of reach, and the rule stays silent rather than guess. A carried read (`carried.ts`) owes no comparison. */
-export const d20WholeResult: LintRule = {
+export const resultComparedWhole: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role) && identityOf(context).inSpecs,
@@ -135,8 +134,8 @@ export const d20WholeResult: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d20-whole-result'],
-        messages: lessons('d20-whole-result', {
+        docs: rowOf('result-compared-whole'),
+        messages: lessons('result-compared-whole', {
             partialOracle: {
                 found: 'the test reads {{subject}} and never compares it whole',
                 fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',

@@ -232,8 +232,8 @@ function secondSubjectAt(spec: SpecRead): { column: number; line: number } {
 
 function silenced(spec: SpecRead): boolean {
     return spec.subjects.size > 1
-        ? suppressedLines(spec.text, 'c29').has(secondSubjectAt(spec).line)
-        : suppressedLines(spec.text, 'c30').has(1);
+        ? suppressedLines(spec.text, 'one-subject-per-spec').has(secondSubjectAt(spec).line)
+        : suppressedLines(spec.text, 'spec-in-subject-folder').has(1);
 }
 
 function shown(specsRoot: string, path: string): string {
@@ -252,7 +252,7 @@ export function checkOneSubject(specsRoot: string): TokenViolation[] {
                 file: shown(specsRoot, spec.file),
                 fix: splitAdvice(specsRoot, spec),
                 found: `a spec reaching ${names.length} subjects — ${names.join(', ')}`,
-                rule: 'c29-one-subject' as const,
+                rule: 'one-subject-per-spec' as const,
                 severity: 'error' as const,
             },
         ];
@@ -276,7 +276,7 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): TokenViol
         file: shown(specsRoot, spec.file),
         fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` — or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
         found: `\`${method} ${bare}\` names \`${segment}\` right after the collection \`${collection}\`: a value or a segment of the route, and the folder depends on which`,
-        rule: 'c30-subject-folder' as const,
+        rule: 'spec-in-subject-folder' as const,
         severity: 'error' as const,
     };
 }
@@ -301,7 +301,7 @@ export function checkSubjectFolder(specsRoot: string): TokenViolation[] {
                 fix: `move it to ${shown(specsRoot, target)} — \`make fix\` moves it, and the ground it stands on`,
                 found: `a spec of ${only}, filed under ${shown(specsRoot, dirname(spec.file))}/`,
                 line: 1,
-                rule: 'c30-subject-folder' as const,
+                rule: 'spec-in-subject-folder' as const,
                 severity: 'error' as const,
             },
         ];
@@ -530,7 +530,7 @@ function describesOf(text: string): (Span & { holdsTests: boolean; open: number 
     });
 }
 
-/** C31: a split would otherwise break the one-describe law on every file it writes. */
+/** `one-describe-per-file`: a split would otherwise break the one-describe law on every file it writes. */
 function oneDescribe(text: string, aspect: string): string {
     let current = text;
     for (const empty of describesOf(current)
@@ -600,7 +600,7 @@ function liftGround(specsRoot: string, leaf: string): string[] {
                 continue;
             }
             const destination = join(specsRoot, SHARED_GROUND, role, entry.name);
-            // The pool holds that name: C15 keeps reporting the reach.
+            // The pool holds that name: `no-reach-into-sibling-ground` keeps reporting the reach.
             if (existsSync(destination)) {
                 continue;
             }
@@ -638,7 +638,7 @@ function reads(code: string, name: string): boolean {
     ).test(codeOnly(code));
 }
 
-/** A declaration building a `file()` or `directory()` (C26), or reading one, stays copied where it is read; a type only tests read stays in each file. */
+/** A declaration building a `file()` or `directory()` (`paths-named-in-the-test`), or reading one, stays copied where it is read; a type only tests read stays in each file. */
 function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaration[] {
     const declarations = declarationsOf(spec.text);
     const code = new Map(declarations.map((d) => [d.name, spec.text.slice(d.start, d.end)]));

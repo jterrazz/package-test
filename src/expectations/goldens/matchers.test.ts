@@ -106,21 +106,21 @@ describe('matchers', () => {
         await registerMatchers();
     });
 
-    test('toMatch — native string behavior preserved (D3) — a plain string still matches a regexp', () => {
+    test('toMatch — native string behavior preserved (`golden-read-from-its-path`) — a plain string still matches a regexp', () => {
         // Given - a plain string subject (not an accessor)
         // Then - native regexp semantics survive the override
         expect('abc').toMatch(/b/u);
         expect('abc').not.toMatch(/z/u);
     });
 
-    test('toMatch — native string behavior preserved (D3) — a plain string still matches a substring', () => {
+    test('toMatch — native string behavior preserved (`golden-read-from-its-path`) — a plain string still matches a substring', () => {
         // Given - a plain string subject
         // Then - native substring semantics survive the override
         expect('hello world').toMatch('world');
         expect('hello world').not.toMatch('nope');
     });
 
-    test('response update mode — buildUpdatedResponse (CONVENTIONS D5) — writes only headers present in the actual response (intersection)', () => {
+    test('response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — writes only headers present in the actual response (intersection)', () => {
         // Given - a previous fixture with a matching placeholder, a stale value, and a header the response no longer sends
         const previous = parseResponseFile(
             'HTTP/1.1 200 OK\ncontent-type: {{string}}\nx-stale: old\nx-gone: bye\n\n{ "ok": true }\n',
@@ -139,7 +139,7 @@ describe('matchers', () => {
         expect(updated.headers).toStrictEqual({ 'content-type': '{{string}}', 'x-stale': 'new' });
     });
 
-    test('response update mode — buildUpdatedResponse (CONVENTIONS D5) — a fresh fixture records only the content-type header', () => {
+    test('response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — a fresh fixture records only the content-type header', () => {
         // Given - no previous fixture
         const updated = buildUpdatedResponse(null, {
             body: { id: UUID },
@@ -153,7 +153,7 @@ describe('matchers', () => {
         expect(updated.body).toStrictEqual({ id: UUID });
     });
 
-    test('response update mode — buildUpdatedResponse (CONVENTIONS D5) — preserves a still-matching status placeholder and body placeholders', () => {
+    test('response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — preserves a still-matching status placeholder and body placeholders', () => {
         // Given - a previous fixture with tokens everywhere
         const previous = parseResponseFile(
             'HTTP/1.1 {{number}}\n\n{ "id": "{{uuid}}", "name": "STALE" }\n',
@@ -172,7 +172,7 @@ describe('matchers', () => {
         expect(updated.body).toStrictEqual({ id: '{{uuid}}', name: 'Alice' });
     });
 
-    test('response update mode — buildUpdatedResponse (CONVENTIONS D5) — meta: a freshly updated fixture passes the next comparison run', () => {
+    test('response update mode — buildUpdatedResponse (rule `no-volatile-literal`) — meta: a freshly updated fixture passes the next comparison run', () => {
         // Given - an update-mode write from a previous fixture (placeholders, stale header value, dropped header), serialized and re-parsed exactly as the matcher does across two runs
         const previous = parseResponseFile(
             'HTTP/1.1 {{number}}\ncontent-type: {{string}}\nx-stale: old\nx-gone: bye\n\n{ "id": "{{uuid}}", "name": "STALE" }\n',
@@ -193,7 +193,7 @@ describe('matchers', () => {
         expect(failure).toBeNull();
     });
 
-    test('response body update mode — workdir substitution (CONVENTIONS D5, text/json/http-body parity) — a fresh body substitutes the known cwd for its {{workdir}} token', () => {
+    test('response body update mode — workdir substitution (rule `no-volatile-literal`, text/json/http-body parity) — a fresh body substitutes the known cwd for its {{workdir}} token', () => {
         // Given - no previous fixture and a body embedding the run cwd
         const updated = buildUpdatedResponse(
             null,
@@ -208,7 +208,7 @@ describe('matchers', () => {
         });
     });
 
-    test('response body update mode — workdir substitution (CONVENTIONS D5, text/json/http-body parity) — a previous {{workdir}} placeholder in the body is preserved', () => {
+    test('response body update mode — workdir substitution (rule `no-volatile-literal`, text/json/http-body parity) — a previous {{workdir}} placeholder in the body is preserved', () => {
         // Given - a previous fixture that already tokenised the cwd
         const previous = parseResponseFile(
             'HTTP/1.1 200 OK\n\n{ "cwd": "{{workdir}}", "name": "STALE" }\n',
@@ -226,7 +226,7 @@ describe('matchers', () => {
         expect(updated.body).toStrictEqual({ cwd: '{{workdir}}', name: 'Alice' });
     });
 
-    test('response body update mode — workdir substitution (CONVENTIONS D5, text/json/http-body parity) — meta: a workdir-substituted body passes the next comparison run', () => {
+    test('response body update mode — workdir substitution (rule `no-volatile-literal`, text/json/http-body parity) — meta: a workdir-substituted body passes the next comparison run', () => {
         // Given - an update-mode write serialized and re-parsed as the matcher does
         const actual = { body: { cwd: WORKDIR, name: 'Alice' }, headers: {}, status: 200 };
         const written = serializeResponseFile(buildUpdatedResponse(null, actual, WORKDIR));
@@ -245,7 +245,7 @@ describe('matchers', () => {
         expect(failure).toBeNull();
     });
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — a golden named in expected/ is not read from the 16 _expected/ beside it", () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a golden named in expected/ is not read from the 16 _expected/ beside it", () => {
         // Given - a spec directory holding only the 16 folder, and a golden it would match
         const specDir = mkdtempSync(join(tmpdir(), 'bridge-'));
         try {
@@ -255,7 +255,7 @@ describe('matchers', () => {
 
             // Then - the path is read where it says, and the refusal names it
             expect(() => {
-                // checker-disable-next-line c8 -- negative spec: the golden missing from expected/ IS the behaviour under test
+                // checker-disable-next-line named-path-exists -- negative spec: the golden missing from expected/ IS the behaviour under test
                 expect(subject).toMatch(file('./expected/out.txt'), { frozen: true });
             }).toThrow(`does not exist at ${join(specDir, 'expected/out.txt')}`);
         } finally {
@@ -263,8 +263,8 @@ describe('matchers', () => {
         }
     });
 
-    // RUNTIME D14 — `toMatch` routes the disk to the golden, and a value to the whole-result comparison or a refusal.
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — a stream is compared whole to a text in place: a RegExp is refused naming its .text", () => {
+    // RUNTIME one-verb-per-meaning — `toMatch` routes the disk to the golden, and a value to the whole-result comparison or a refusal.
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a stream is compared whole to a text in place: a RegExp is refused naming its .text", () => {
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m\n', 'stdout', '/tmp');
 
@@ -295,7 +295,7 @@ describe('matchers', () => {
             subject: () => new ContainerAccessor(null, null, '/tmp'),
         },
     ])(
-        "toMatch is vitest's for a value, and the golden for the disk (D14) — $name takes no value: a value handed to it is refused, naming $golden",
+        "toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — $name takes no value: a value handed to it is refused, naming $golden",
         ({ golden, subject }) => {
             // Given - a result accessor handed a string and a RegExp, past the compiler
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses a value on these subjects
@@ -334,7 +334,7 @@ describe('matchers', () => {
             value: '1',
         },
     ])(
-        "toMatch is vitest's for a value, and the golden for the disk (D14) — $name is refused a value of the wrong shape, naming the one it takes",
+        "toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — $name is refused a value of the wrong shape, naming the one it takes",
         ({ refusal, subject, value }) => {
             // Given - a result accessor handed a value it cannot be compared to, past the compiler
             // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- past the compiler, which refuses the shape
@@ -347,7 +347,7 @@ describe('matchers', () => {
         },
     );
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — toContain on a stream is vitest's: its .text answers, and no override reads the accessor", () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — toContain on a stream is vitest's: its .text answers, and no override reads the accessor", () => {
         // Given - a stream subject, ANSI included
         const subject = new TextAccessor('\u001B[31mbuilt in 3s\u001B[0m', 'stdout', '/tmp');
 
@@ -359,7 +359,7 @@ describe('matchers', () => {
         }).toThrow(/to include 'built in 3s'/u);
     });
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — an empty stream is an empty text: toBeEmpty refuses a stream, naming the form to write", async () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — an empty stream is an empty text: toBeEmpty refuses a stream, naming the form to write", async () => {
         // Given - an empty stream, and a table's matcher handed to it past the compiler
         const stream = new TextAccessor('', 'stderr', '/tmp');
         const subject = stream as unknown as TableAccessor;
@@ -371,40 +371,40 @@ describe('matchers', () => {
         expect(stream.text).toBe('');
     });
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — a file golden refuses a tree subject, naming directory()", () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a file golden refuses a tree subject, naming directory()", () => {
         // Given - a directory subject handed a file golden, past the compiler
         const subject = new DirectoryAccessor('/tmp', '/tmp') as unknown as TextAccessor;
 
         // Then - the refusal names the wrapper a tree takes
         expect(() => {
-            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
+            // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/tree.txt'), { frozen: true });
         }).toThrow(/a directory or the working directory is `await toMatch\(directory\(…\)\)`/u);
     });
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — a file golden refuses a value subject", () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a file golden refuses a value subject", () => {
         // Given - a plain string, which has no golden, past the compiler
         const subject = 'abc' as unknown as TextAccessor;
 
         // Then - the file is refused, naming the subjects a file golden compares against
         expect(() => {
-            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
+            // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
             expect(subject).toMatch(file('./expected/abc.txt'));
         }).toThrow(/fix: compare a stream, a json or a response to its file/u);
     });
 
-    test("toMatch is vitest's for a value, and the golden for the disk (D14) — a directory golden refuses a stream subject, as a rejection", async () => {
+    test("toMatch is vitest's for a value, and the golden for the disk (`one-verb-per-meaning`) — a directory golden refuses a stream subject, as a rejection", async () => {
         // Given - a stream subject handed a directory golden, past the compiler
         const subject = new TextAccessor('out', 'stdout', '/tmp') as unknown as DirectoryAccessor;
 
         // Then - the refusal is awaited like the golden it stands for
         await expect(
-            // checker-disable-next-line c8 -- the refusal under test fires before any disk is read
+            // checker-disable-next-line named-path-exists -- the refusal under test fires before any disk is read
             expect(subject).toMatch(directory('./expected/out/'), { frozen: true }),
         ).rejects.toThrow(/on a subject that is no tree/u);
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — json: a frozen missing fixture throws instead of being written', () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — json: a frozen missing fixture throws instead of being written', () => {
         // Given - a json subject and a fixture name that does not exist on disk
         const scratch = updateModeScratch();
         const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
@@ -412,13 +412,13 @@ describe('matchers', () => {
 
         // Then - update mode is bypassed: it throws the does-not-exist error, no write
         expect(() => {
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/frozen.json'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — json: a frozen wrong fixture keeps its content and throws its diff', () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — json: a frozen wrong fixture keeps its content and throws its diff', () => {
         // Given - a deliberately-wrong committed json fixture
         const scratch = updateModeScratch();
         const fixturePath = resolve(scratch, 'expected', 'wrong.json');
@@ -428,25 +428,25 @@ describe('matchers', () => {
 
         // Then - frozen mismatch still throws and never overwrites
         expect(() => {
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/wrong.json'), { frozen: true });
         }).toThrow();
         expect(readFileSync(fixturePath, 'utf8')).toBe('{\n    "id": 999\n}\n');
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — json: without frozen, update mode writes the fixture (control)', () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — json: without frozen, update mode writes the fixture (control)', () => {
         // Given - the same missing fixture, but NOT frozen
         const scratch = updateModeScratch();
         const accessor = new JsonAccessor('{ "id": 1 }', 'stdout', scratch);
         const fixturePath = resolve(scratch, 'expected', 'written.json');
 
         // Then - update mode writes it and passes
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./expected/written.json'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — response: a frozen missing fixture throws instead of being written', () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — response: a frozen missing fixture throws instead of being written', () => {
         // Given - a response subject and a missing fixture
         const scratch = updateModeScratch();
         const accessor = new ResponseAccessor(
@@ -457,13 +457,13 @@ describe('matchers', () => {
 
         // Then - frozen bypasses the write, throwing the does-not-exist error
         expect(() => {
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./expected/frozen.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixturePath)).toBeFalsy();
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — response: without frozen, update mode writes the fixture (control)', () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — response: without frozen, update mode writes the fixture (control)', () => {
         // Given - the same missing fixture, not frozen
         const scratch = updateModeScratch();
         const accessor = new ResponseAccessor(
@@ -473,12 +473,12 @@ describe('matchers', () => {
         const fixturePath = resolve(scratch, 'expected', 'written.http');
 
         // Then - update mode writes and passes
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./expected/written.http'));
         expect(existsSync(fixturePath)).toBeTruthy();
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — tree: a frozen missing fixture throws instead of being written', async () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — tree: a frozen missing fixture throws instead of being written', async () => {
         // Given - an actual output tree and a directory fixture that does not exist
         const scratch = updateModeScratch();
         const actualRoot = resolve(scratch, 'actual');
@@ -489,13 +489,13 @@ describe('matchers', () => {
 
         // Then - frozen bypasses the write (async matcher rejects), nothing created
         await expect(
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(directory('./expected/frozen-tree/'), { frozen: true }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
         expect(existsSync(fixtureDir)).toBeFalsy();
     });
 
-    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, D13) — tree: without frozen, update mode writes the fixture tree (control)', async () => {
+    test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — tree: without frozen, update mode writes the fixture tree (control)', async () => {
         // Given - the same actual tree and a missing fixture, not frozen
         const scratch = updateModeScratch();
         const actualRoot = resolve(scratch, 'actual');
@@ -505,7 +505,7 @@ describe('matchers', () => {
         const fixtureFile = resolve(scratch, 'expected', 'written-tree', 'file.txt');
 
         // Then - update mode copies the tree and passes
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         await expect(accessor).toMatch(directory('./expected/written-tree/'));
         expect(existsSync(fixtureFile)).toBeTruthy();
     });
@@ -538,7 +538,7 @@ describe('matchers', () => {
             'HTTP/1.1 200',
         ],
     ])(
-        'update mode records a golden whatever the file holds: nothing, or no file at all (D5) — %s: an empty golden is filled from what came back',
+        'update mode records a golden whatever the file holds: nothing, or no file at all (`no-volatile-literal`) — %s: an empty golden is filled from what came back',
         async (_kind, name, subject, written) => {
             // Given - update mode, and a golden that exists and holds nothing — a file created to be recorded
             await registerMatchers();
@@ -552,7 +552,7 @@ describe('matchers', () => {
             writeFileSync(fixturePath, '');
 
             // Then - update mode writes it as if it were missing, and passes
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(subject(scratch)).toMatch(file(`./expected/${name}` as const));
             expect(readFileSync(fixturePath, 'utf8')).toContain(written);
         },
@@ -612,7 +612,7 @@ describe('matchers', () => {
 
         // Then - both read the golden's 42 as text, and match
         expect(plainCount('/tmp')).toMatch('HTTP/1.1 200 OK\n\n42');
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'), { frozen: true });
     });
 
@@ -626,7 +626,7 @@ describe('matchers', () => {
         );
 
         // When - the reply is compared to each
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(plainCount(golden.dir)).toMatch(file('./expected/count.http'));
         void wholeOf(plainCount('/tmp'))('HTTP/1.1 200 OK\n\n41', undefined, scratch.stack);
 
@@ -648,7 +648,7 @@ describe('matchers', () => {
         );
 
         // When - the golden is re-recorded
-        // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+        // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(reply).toMatch(file('./expected/count.http'));
 
         // Then - the text still matched its token, so the token stays
@@ -662,7 +662,7 @@ describe('matchers', () => {
 
         // Then - update mode is where it comes from
         expect(() => {
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(subject).toMatch(file('./expected/nowhere.txt'));
         }).toThrow('Run with TEST_UPDATE=1');
     });
@@ -674,12 +674,12 @@ describe('matchers', () => {
 
         // Then - the hint names the two things that do work, and not the one that silently writes nothing: `{ frozen }` IS the no-write switch
         expect(() => {
-            // checker-disable-next-line c8 -- the golden resolves against the hand-built accessor's scratch directory, not this file's
+            // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(subject).toMatch(file('./expected/nowhere.txt'), { frozen: true });
         }).toThrow('Write the file by hand');
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a stream against its text: indentation of the test dropped, tokens read, the golden diff on a mismatch', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a stream against its text: indentation of the test dropped, tokens read, the golden diff on a mismatch', () => {
         // Given - a stream, and its text written in place, indented with the test
         const subject = new TextAccessor('built 3 files in 12ms\ndone\n', 'stdout', '/tmp');
 
@@ -695,7 +695,7 @@ describe('matchers', () => {
         }).toThrow(/Output mismatch \(the value in place\)[\s\S]*\+ done/u);
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a response against its .http text: status, the headers it lists, the whole body', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a response against its .http text: status, the headers it lists, the whole body', () => {
         // Given - a response
         const subject = new ResponseAccessor(
             {
@@ -725,7 +725,7 @@ describe('matchers', () => {
         }).toThrow('Response status mismatch (the value in place)');
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a json against its value: tokens in its strings, every key compared', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a json against its value: tokens in its strings, every key compared', () => {
         // Given - a json
         const subject = new JsonAccessor(`{ "id": "${UUID}", "tags": ["a"] }`, 'stdout', '/tmp');
 
@@ -736,7 +736,7 @@ describe('matchers', () => {
         }).toThrow(/Response mismatch \(the value in place\)[\s\S]*\+ {3}"tags"/u);
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table against its rows: every column, an instant read as its ISO text', async () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table against its rows: every column, an instant read as its ISO text', async () => {
         // Given - a table holding one row, its instant a Date as a driver hands it
         const subject = new TableAccessor(
             'users',
@@ -750,7 +750,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table of rows keyed by random ids matches whatever order they come back in, run after run', async () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table of rows keyed by random ids matches whatever order they come back in, run after run', async () => {
         // Given - fifty tables of three rows keyed by uuids drawn anew for each, each handed back in its first column's order
         const draw = uuidDraw();
         const runs = Array.from({ length: 50 }, () => {
@@ -774,7 +774,7 @@ describe('matchers', () => {
         );
     });
 
-    test("toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table compared { ordered: true } holds its first column's order as part of the claim", async () => {
+    test("toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table compared { ordered: true } holds its first column's order as part of the claim", async () => {
         // Given - two rows, handed back as the table orders them
         const subject = new TableAccessor(
             'users',
@@ -800,7 +800,7 @@ describe('matchers', () => {
         ).rejects.toThrow(/- 2 {2}\| {2}Bob[\s\S]*\+ 1 {2}\| {2}Ada/u);
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table diff pairs each stated row with the row it resembles most, and shows the rows that match as matching', async () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table diff pairs each stated row with the row it resembles most, and shows the rows that match as matching', async () => {
         // Given - two rows, one stated with a wrong name, stated in the other order
         const subject = new TableAccessor(
             'users',
@@ -824,7 +824,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table the database does not hold is refused naming it', async () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table the database does not hold is refused naming it', async () => {
         // Given - a table with no columns
         const subject = new TableAccessor('ghost', {
             ...usersTable([]),
@@ -837,7 +837,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — an empty text is filled with the stream, as a block indented with the call', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — an empty text is filled with the stream, as a block indented with the call', () => {
         // Given - a scratch test holding an empty value, under update mode
         vi.stubEnv('TEST_UPDATE', '1');
         const scratch = scratchTest('expect(result.stdout).toMatch(``);');
@@ -855,7 +855,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a line whose token still matches keeps it; the lines that moved are rewritten', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a line whose token still matches keeps it; the lines that moved are rewritten', () => {
         // Given - a value in place with a token line and a stale line, under update mode
         vi.stubEnv('TEST_UPDATE', '1');
         const scratch = scratchTest(
@@ -873,7 +873,7 @@ describe('matchers', () => {
         expect(scratch.read()).toContain('        built in {{duration}}\n        new\n    `');
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a response not yet recorded fails naming update mode, and update mode writes its .http text', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a response not yet recorded fails naming update mode, and update mode writes its .http text', () => {
         // Given - a response, and an empty value in place
         const subject = new ResponseAccessor(
             { body: { id: UUID }, headers: { 'content-type': 'application/json' }, status: 201 },
@@ -892,7 +892,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a json keeps the tokens that still match and takes every other value', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a json keeps the tokens that still match and takes every other value', () => {
         // Given - a json whose id matches its token and whose name moved, under update mode
         vi.stubEnv('TEST_UPDATE', '1');
         const scratch = scratchTest(
@@ -912,7 +912,7 @@ describe('matchers', () => {
         );
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a table not yet recorded is written row by row, a cell keeping the token that still matches', async () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a table not yet recorded is written row by row, a cell keeping the token that still matches', async () => {
         // Given - a table, an empty value, then rows whose instant was a token
         vi.stubEnv('TEST_UPDATE', '1');
         const table = new TableAccessor(
@@ -935,7 +935,7 @@ describe('matchers', () => {
         expect(tokened.read()).toContain('toMatch([\n        [1, "Ada", "{{iso8601}}"],\n    ]);');
     });
 
-    test('toMatch compares the whole result to the value written in place, and update mode writes it there (D5) — a value that matches, a frozen one and a negation are never written', () => {
+    test('toMatch compares the whole result to the value written in place, and update mode writes it there (`no-volatile-literal`) — a value that matches, a frozen one and a negation are never written', () => {
         // Given - three calls in place, under update mode
         vi.stubEnv('TEST_UPDATE', '1');
         const subject = new TextAccessor('built\n', 'stdout', '/tmp');

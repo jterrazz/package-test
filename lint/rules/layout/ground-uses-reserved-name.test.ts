@@ -3,7 +3,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder, packageWith } from '../rule-tester.fixtures.js';
-import { c13BareGround } from './ground-uses-reserved-name.js';
+import { groundUsesReservedName } from './ground-uses-reserved-name.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -18,20 +18,20 @@ const SPECS_LINT = resolve(import.meta.dirname, '../../../specs/lint');
 
 const MODULE_16 = checkoutUnder('work', ['src/report/_expected']);
 
-const ON_16_STUBS = `${SPECS_LINT}/c13-bare-ground/fixtures/on-16-stubs`;
+const ON_16_STUBS = `${SPECS_LINT}/ground-uses-reserved-name/fixtures/on-16-stubs`;
 
 const PRODUCT_CONTRACTS = packageWith({
     'src/billing/billing.test.ts': 'test("x", () => {});\n',
     'src/billing/contracts/invoice.ts': 'export type Invoice = { total: number };\n',
 });
 
-ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
+ruleTester.run('ground-uses-reserved-name', groundUsesReservedName as unknown as OxlintRule, {
     invalid: [
         // The violation fixture keeps the 16.x `_expected/` beside its spec.
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/ground-uses-reserved-name/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
         // The 16 pool is named with the place 17 keeps it: the shared ground.
         {
@@ -46,7 +46,7 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
                         /^found: "_fixtures\/" is a 16\.x ground name · .* · fix: rename it "shared\/fixtures\/"/u,
                 },
             ],
-            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/every-16-folder/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/ground-uses-reserved-name/fixtures/every-16-folder/specs/app/widget/widget.test.ts`,
         },
         // A module test stands on ground as surely as a spec: its 16 folder is named too.
         {
@@ -81,13 +81,13 @@ ruleTester.run('c13-bare-ground', c13BareGround as unknown as OxlintRule, {
         // The compliant twin carries `expected/`.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/ground-uses-reserved-name/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // Anchored on TEST files only: a module beside the same legacy directory
         // is not a spec, so it is not a probe site.
         {
             code: 'export const helper = () => {};',
-            filename: `${SPECS_LINT}/c13-bare-ground/fixtures/violation/specs/app/widget/helper.ts`,
+            filename: `${SPECS_LINT}/ground-uses-reserved-name/fixtures/violation/specs/app/widget/helper.ts`,
         },
         // A module test with no 16 folder beside it is on 17.
         {

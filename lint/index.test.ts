@@ -33,9 +33,9 @@ describe('index', () => {
         expect(composed.rules).toBe(recommendedRules);
     });
 
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — is self-sufficient (no `extends` needed): plugin + every rule + the A4 override', () => {
+    test('the ./oxlint entry — testing fragment — standalone oxlint config — is self-sufficient (no `extends` needed): plugin + every rule + the `cleanup-passed-to-after-all` override', () => {
         // Given - a consumer NOT using @jterrazz/typescript adopts just the conventions via `export default testing` — the fragment must be a COMPLETE oxlint config
-        // Then - it registers the tool-facing plugin, enables every shipped rule, and ships the one override the A4 idiom needs — without pulling in any base preset
+        // Then - it registers the tool-facing plugin, enables every shipped rule, and ships the one override the `cleanup-passed-to-after-all` idiom needs — without pulling in any base preset
         expect(testing.jsPlugins).toContain('@jterrazz/test/oxlint');
         expect(testing.rules).toBe(recommendedRules);
         expect(Object.keys(recommendedRules)).toStrictEqual(
@@ -58,13 +58,16 @@ describe('index', () => {
         }
     });
 
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — the only `warn` levels are the advisory `w` channel', () => {
-        // Given - each rule the fragment enables (its `rules` IS this map, above)
-        for (const [id, level] of Object.entries(recommendedRules)) {
-            // Then - `warn` belongs to the redundancy heuristics (`<family><n>w-…`) and nothing else; every hard convention is an error. The estate's rulebook has no warn tier — this package's `w` channel is its one documented exception (see the manifest's statique channel note)
-            const advisory = /^jterrazz\/\w+w-/u.test(id);
-            expect(level, `${id} is ${level}`).toBe(advisory ? 'warn' : 'error');
-        }
+    test("the ./oxlint entry — testing fragment — standalone oxlint config — each rule is enabled at its row's severity, and the warn tier is the redundancy heuristics alone", () => {
+        // Given - each rule the fragment enables (its `rules` IS this map, above), and the row each rule carries
+        const levels = Object.entries(plugin.rules).map(([name, rule]) => [
+            recommendedRules[`jterrazz/${name}`],
+            rule.meta.docs.severity,
+        ]);
+
+        // Then - the level oxlint runs is the row's, and the estate's one warn tier is not empty: a rule whose level is read off anything else would run every heuristic as an error
+        expect(levels.filter(([level, severity]) => level !== severity)).toStrictEqual([]);
+        expect(levels.filter(([level]) => level === 'warn').length).toBeGreaterThan(0);
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — its overrides add a layer instead of replacing one', () => {
@@ -81,7 +84,7 @@ describe('index', () => {
         // oxlint-disable-next-line typescript/no-unsafe-assignment -- `require` answers `any`: the ESM build's published types are the shape the CJS build must carry
         const cjs: MaterialReaders = createRequire(import.meta.url)('@jterrazz/test/oxlint');
 
-        // Then - each build reads a module id and a specifier as the F2 guard does
+        // Then - each build reads a module id and a specifier as the `no-test-code-in-production` guard does
         const answers = [
             'a test file',
             'the specs tree',

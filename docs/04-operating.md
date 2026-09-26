@@ -24,7 +24,7 @@ The shipped chapters keep their links to the two pages left home, so from inside
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 
-One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less (a path that is NOT a specs tree is read as a project root and takes that third run, anchored there) — and `--format json` publishes the findings under the `jterrazz-check(<id>)` codes ([19 — Linting](19-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
+One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less (a path that is NOT a specs tree is read as a project root and takes that third run, anchored there) — and `--format json` publishes the findings under the `jterrazz-check(<name>)` codes ([19 — Linting](19-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 
 ## What a consumer must bring
 
@@ -103,17 +103,17 @@ each name 16 published its 17 name wherever a file imports it from the
 entry: `defineContract` and `defineContracts` to `defineStub` and
 `defineStubs`, `Contract`, `Contracts` and the `Contract…` types to
 `Stub`, `Stubs` and `Stub…`. A `contracts/` folder still beside a test, in
-the same scope, is a C13 error that names the mover, so a tree that
+the same scope, is a `ground-uses-reserved-name` error that names the mover, so a tree that
 reintroduces the 16 name after the move is caught.
 
-Its gate is per file: it moves only a file C13 still finds 16.x-shaped — one
+Its gate is per file: it moves only a file `ground-uses-reserved-name` still finds 16.x-shaped — one
 with a 16 ground folder beside it, or one naming a 16 pool by `$FIXTURES/` —
 so a second run, a run over a tree already on 17, or a 17 file beside a 16 one
 in the same tree changes nothing. Two gestures run outside that gate, on
 every file of every run: the stubs move above, which finds nothing on a
 second run since 17 publishes none of the 16 names and leaves no `contracts/`
 folder; and the directive rename below, since a renamed directive no longer
-matches. It is 17.0's alone: C13 and its mover retire in 17.1, once the estate's wave
+matches. It is 17.0's alone: `ground-uses-reserved-name` and its mover retire in 17.1, once the estate's wave
 has run. What it leaves to the reader:
 
 - **A `toMatch` literal with no golden behind it stays a value.** The mover
@@ -135,7 +135,7 @@ has run. What it leaves to the reader:
   into that interface as `TestSettings` — it holds nothing yet, so it accepts
   `{}` and refuses any key.
 - **A helper that named ground moves where it stands.** The mover writes the
-  `file()` where the string was, inside the helper, and C26 refuses it there:
+  `file()` where the string was, inside the helper, and `paths-named-in-the-test` refuses it there:
   a path resolves against the spec that starts the chain, so the helper takes
   the `file()` as a parameter and each test builds its own.
 - **A 16.x file with no 16 folder beside it is not moved.** Nothing in it
@@ -150,10 +150,10 @@ has run. What it leaves to the reader:
   and the compiler names each read.
 - **A suppression follows the rule it names.**
   `d8w-text-bypass`, `c2-http-only-requests`, `c4-contract-shape`, `c10-contracts-boundary` and `c11-contract-data-pairing` no longer exist under those names:
-  the mover rewrites a directive naming one to `d8w-raw-bypass`,
-  `c2-request-extension`, `c4-stub-shape`, `c10-stubs-boundary` or
-  `c11-stub-data-pairing` on every file, a tree an earlier mover already moved included, and the line a
-  `-next-line` or `-line` directive naming D8w covers reads `.raw` — the
+  the mover rewrites a directive naming one to `no-raw-bypass`,
+  `request-file-extension-known`, `stubs-root-holds-facades-and-kinds`, `stubs-imported-through-facade` or
+  `stub-data-has-a-builder` on every file, a tree an earlier mover already moved included, and the line a
+  `-next-line` or `-line` directive naming `no-raw-bypass` covers reads `.raw` — the
   capture 16's `.text` was. A directive naming a rule 17 retired names nothing,
   and the toolchain's Suppressions pass reports it: delete it.
 - **An override follows the rule it names too.** oxlint refuses to start on a
@@ -162,14 +162,14 @@ has run. What it leaves to the reader:
   `.oxlintrc.json`): an override of a renamed rule names its 17 id, and an
   override of a static rule 17 retired is removed with the comment lines
   directly above it —
-  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist, and neither does `f3-specs-public-entry`: its subpath half is F1's, and the rest holds this package alone.
+  `b2-known-fixture-marker`, `c13-underscored-ground`, `c8-referenced-fixture-exists` and `d12w-response-body-probe` no longer exist, and neither does `f3-specs-public-entry`: its subpath half is `no-unpublished-subpath`'s, and the rest holds this package alone.
   What a removed override tuned is not carried over: the rule that replaced
   it, if any, is judged at its own defaults.
 - **A computed name is out of its reach.** A template or a variable naming a
   seed, a fixture or a golden is left as written, and the first run names each
   one the verb refuses.
 - **A domain named with a reserved word** (`requests/`, `fixtures/`, …) is
-  renamed by hand: C1 refuses it, and only its author knows the subject.
+  renamed by hand: `specs-at-declared-depth` refuses it, and only its author knows the subject.
 - **Element names are exact.** A partial name that 16.x widened now designates
   nothing; write the accessible name whole, as the ARIA tree prints it.
 
@@ -185,7 +185,7 @@ a reader:
   renames a facet spec. The mover names the ones it BROKE — a glob whose prefix
   covers a file it moved, a literal naming one, and never a comment — so a
   notice is always about a file that just moved; update them in the same commit,
-  and E7w holds the class afterwards.
+  and `include-points-at-a-folder` holds the class afterwards.
 - **`typescript baseline` in an npm-hoisted member** cannot resolve oxlint
   today, so the step the adopt flow prescribes "where red" has to be run from a
   directory where `node_modules/.bin/oxlint` does resolve. Also in `TODO.md`.

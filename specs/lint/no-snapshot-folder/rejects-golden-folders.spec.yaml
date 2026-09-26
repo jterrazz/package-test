@@ -1,0 +1,10 @@
+description: a folder named for goldens in any other word is refused, in specs/ and beside a module alike
+fixture: ./fixtures/synonyms/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/golden/:1:1  jterrazz-check(no-snapshot-folder)
+          specs/api/orders/snapshots/:1:1  jterrazz-check(no-snapshot-folder)
+          src/__snapshots__/:1:1  jterrazz-check(no-snapshot-folder)
+          src/report/goldens/:1:1  jterrazz-check(no-snapshot-folder)

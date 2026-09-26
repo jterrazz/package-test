@@ -1,0 +1,7 @@
+description: a spec of a specimen filed by the route it reaches is refused at its first line
+fixture: ./fixtures/misfiled/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/list/listing.spec.ts:1:1  jterrazz-check(specimen-filed-by-capability)

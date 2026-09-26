@@ -18,7 +18,7 @@ export type OrchestratorOptions = {
     subject?: AppInfo | undefined;
     /** The kebab-case key names the init-script folder: `analyticsDb` → `docker/analytics-db/`. */
     services: Record<string, ServiceHandle>;
-    /** Required: resolved from the calling specification file (A9), never from `process.cwd()`. */
+    /** Required: resolved from the calling specification file (`no-redundant-root`), never from `process.cwd()`. */
     root: string;
 };
 

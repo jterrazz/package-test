@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d15wStatusOnlyProbe } from './no-status-only-test.js';
+import { noStatusOnlyTest } from './no-status-only-test.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ const ruleTester = new RuleTester();
 
 const SPEC = '/repo/specs/api/events/create-event.test.ts';
 
-ruleTester.run('d15w-status-only-probe', d15wStatusOnlyProbe as unknown as OxlintRule, {
+ruleTester.run('no-status-only-test', noStatusOnlyTest as unknown as OxlintRule, {
     invalid: [
         // A lone status probe as the test's sole assertion.
         {

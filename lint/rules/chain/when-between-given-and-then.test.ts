@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { b10WhenBetweenMarkers } from './when-between-given-and-then.js';
+import { whenBetweenGivenAndThen } from './when-between-given-and-then.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('b10-when-between-markers', asOxlintRule(b10WhenBetweenMarkers), {
+ruleTester().run('when-between-given-and-then', asOxlintRule(whenBetweenGivenAndThen), {
     invalid: [
         // The action narrated before the setup it acts on.
         {

@@ -1,5 +1,5 @@
 export { specification, type SpecificationConfig } from './facets/specification.js';
-// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: F1 publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
+// oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: `no-unpublished-subpath` publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
 export type * from './facets/api/index.js';
 export type * from './facets/cli/index.js';
 export * from './facets/component/index.js';

@@ -3,10 +3,10 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/* Capability probes: a `waitFor` block is cut at an arbitrary instant (D11(b)). */
+/* Capability probes: a `waitFor` block is cut at an arbitrary instant (`output-asserted-as-a-golden`(b)). */
 
 describe('wait-for-stderr', () => {
-    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
+    test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — resolves when the waitFor pattern is matched in stderr', async () => {
         // Given - a process whose readiness banner goes to stderr
         const result = await cli
             .fixture(directory('../../shared/fixtures/specimen-cli/'))

@@ -25,7 +25,7 @@ export type PluginDiagnostic = {
     severity: 'error' | 'warn';
 };
 
-/** `jterrazz(i2-sibling-test-naming)` → `jterrazz/i2-sibling-test-naming`. */
+/** `jterrazz(test-beside-its-module)` → `jterrazz/test-beside-its-module`. */
 export function keyOf(code: string): string {
     const match = /^(?<plugin>[\w-]+)\((?<rule>[^)]+)\)$/u.exec(code);
     return match?.groups === undefined ? code : `${match.groups.plugin}/${match.groups.rule}`;

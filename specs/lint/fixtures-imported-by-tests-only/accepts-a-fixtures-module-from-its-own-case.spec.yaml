@@ -1,0 +1,7 @@
+description: accepts a fixtures module imported from its test
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/app/widget/widget.test.ts:6:1  jterrazz(no-existence-only-assertion)

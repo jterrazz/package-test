@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d8wRawBypass } from './no-raw-bypass.js';
+import { noRawBypass } from './no-raw-bypass.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('d8w-raw-bypass', d8wRawBypass as unknown as OxlintRule, {
+ruleTester.run('no-raw-bypass', noRawBypass as unknown as OxlintRule, {
     invalid: [
         // Negated, on the other stream: the capture is still what the check reads.
         {

@@ -2,8 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { findRoot } from '../../../src/kernel/files/resolve.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { findProperty, specificationMember, stringValue } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { isFile } from '../../reading/fs-cache.js';
@@ -14,7 +13,7 @@ function derivedRoot(startDir: string): string | undefined {
     return findRoot(startDir, isFile);
 }
 
-export const a9wRedundantRoot: LintRule = {
+export const noRedundantRoot: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -40,8 +39,8 @@ export const a9wRedundantRoot: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['a9w-redundant-root'],
-        messages: lessons('a9w-redundant-root', {
+        docs: rowOf('no-redundant-root'),
+        messages: lessons('no-redundant-root', {
             redundant: {
                 found: '`root: "{{root}}"` names the directory the walk already finds',
                 fix: 'delete the `root` option',

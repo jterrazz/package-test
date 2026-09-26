@@ -15,7 +15,7 @@ describe('worker.engine', () => {
             'http://localhost:63315/static/app.js',
         ];
 
-        // Then - the runner's passes, and the subject's still answers to its stubs (D7)
+        // Then - the runner's passes, and the subject's still answers to its stubs (`network-strict-after-first-stub`)
         expect(runner.map(isRunnerRequest)).toStrictEqual([true, true, true]);
         expect(subject.map(isRunnerRequest)).toStrictEqual([false, false]);
     });

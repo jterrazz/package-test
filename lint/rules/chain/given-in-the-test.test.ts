@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { j6wGivenInTheTest } from './given-in-the-test.js';
+import { givenInTheTest } from './given-in-the-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('j6w-given-in-the-test', asOxlintRule(j6wGivenInTheTest), {
+ruleTester().run('given-in-the-test', asOxlintRule(givenInTheTest), {
     invalid: [
         // The Given, above the tests that stand on it.
         {
@@ -29,7 +29,7 @@ ruleTester().run('j6w-given-in-the-test', asOxlintRule(j6wGivenInTheTest), {
             code: `afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });`,
             filename: TEST_FILE,
         },
-        // A4's own idiom, in a test file that owns a runner's cleanup.
+        // `cleanup-passed-to-after-all`'s own idiom, in a test file that owns a runner's cleanup.
         { code: `afterAll(cleanup);`, filename: TEST_FILE },
         // The same idiom with a `vi` member: a restore handed over by name.
         { code: `afterEach(vi.restoreAllMocks);`, filename: TEST_FILE },

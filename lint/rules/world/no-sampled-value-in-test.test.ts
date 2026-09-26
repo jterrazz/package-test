@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d16wAmbientValue } from './no-sampled-value-in-test.js';
+import { noSampledValueInTest } from './no-sampled-value-in-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('d16w-ambient-value', asOxlintRule(d16wAmbientValue), {
+ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest), {
     invalid: [
         // Sampled into the Given, read back through the subject.
         {
@@ -25,7 +25,7 @@ ruleTester().run('d16w-ambient-value', asOxlintRule(d16wAmbientValue), {
         },
     ],
     valid: [
-        // Silent where D16 already refuses: one fault, one diagnostic.
+        // Silent where `no-sampled-value-in-expectation` already refuses: one fault, one diagnostic.
         {
             code: `test('stamps', () => {
                 expect(stamp().at).toBe(Date.now());

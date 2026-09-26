@@ -1,8 +1,0 @@
-description: a seed two leaves hold byte for byte under two names is a warning on each copy
-fixture: ./fixtures/renamed/
-runs:
-    - command: checker .
-      exit: 0
-      stderr: |
-          specs/api/orders/seeds/two-users.sql:1:1  jterrazz-check(c27w)
-          specs/api/users/seeds/pair.sql:1:1  jterrazz-check(c27w)

@@ -24,7 +24,7 @@ export type ElementKind =
     | 'testId'
     | 'text';
 
-/** A user-facing element descriptor; it must designate exactly one element (W3). */
+/** A user-facing element descriptor; it must designate exactly one element (`descriptor-matches-one-element`). */
 export type ElementRef = {
     /** Match the accessible name whole; absent means the default, exact. */
     exact?: boolean;

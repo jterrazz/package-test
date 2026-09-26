@@ -44,7 +44,7 @@ export default defineStubs(
 );
 ```
 
-If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction-rule-d7)). A chain that declares **no** stub is not guarded at all: strictness begins with the first `.intercept()`.
+If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). A chain that declares **no** stub is not guarded at all: strictness begins with the first `.intercept()`.
 
 ### `times` and `required` — saying what you mean
 
@@ -134,13 +134,13 @@ specs/<facet>/<feature>/
         └── draft-reply.ts
 ```
 
-The rules, enforced by [C4, C10 and C11](19-linting.md):
+The rules, enforced by [`stubs-root-holds-facades-and-kinds`, `stubs-imported-through-facade` and `stub-data-has-a-builder`](19-linting.md):
 
 - The **root** holds only `*.stubs.ts` facades and one folder per stub **kind** — a builder the package exports: `http`, `openai`, `anthropic`, a closed list that grows only with the exports. The folder carries the kind — filenames drop it and go back to being business names.
-- A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; C4 judges the default by where its builder comes from, since the linter reads no types.
+- A facade **exports its builders and sets by name** — the world (`export const newsroom = defineStubs(…)`) and its **scenario factories** (`withArticleGone(id)`), so every variant of the world is named next to the world; a facade that exports nothing is an error. A default export is not required — a test imports the name it calls, and a default no test reads is dead code the unused-export pass reports. When a facade has one, it is a composition: a `defineStubs(...)`, a scenario of a sibling facade — `export default pipeline({ ingestion: 'ai-facts' })`, `pipeline` imported from `./pipeline.stubs.js` — or a call to a builder it declares to return `Stubs`; `stubs-root-holds-facades-and-kinds` judges the default by where its builder comes from, since the linter reads no types.
 - A unit stub is `<kind>/<kebab-name>.ts` and default-exports `defineStub(...)` or a factory returning one. It calls its own folder's builder alone — an `openai/` unit that replies with `http.error(…)` is an error, however it is written. A provider's streamed reply is that provider's stub (`openai.stream`, `anthropic.stream`); any other server-sent stream is an `http` stub.
 - Data with real mass goes to a sibling `.response.json` (served) or `.request.ts` (matched). The stem before the FIRST dot pairs the data with its stub: `events.fr.response.json` belongs to `events.ts`. An orphan payload is an error.
-- **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (C10). A scenario belongs in the facade, not in the test.
+- **Tests import only `*.stubs.ts`.** Kind folders are internal — reaching into one from a test is an error (`stubs-imported-through-facade`). A scenario belongs in the facade, not in the test.
 - Shared data has ONE owner: a second stub imports `./events.response.json` directly. No copies, no `shared/` folder.
 
 A unit stub may import `@jterrazz/test`, its neighbours inside `stubs/`, **and the app's own source** — importing the app's real prompt builder is preferred over pinning its output, so a domain change surfaces as a type error or a readable diff instead of a silent "unmatched request".
@@ -218,7 +218,7 @@ test('reads the rate off the provider', async () => {
 });
 ```
 
-The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no stub accepted is thrown THERE — the same strictness a chain gets (rule D7), which is what makes it a guard and not a convenience.
+The scope is an `AsyncDisposable`: the handlers come off at the end of the block however the block ends, and an outgoing request no stub accepted is thrown THERE — the same strictness a chain gets (rule `network-strict-after-first-stub`), which is what makes it a guard and not a convenience.
 
 **The refusal lands at DISPOSAL, not at the call.** An undeclared request is not rejected where the subject made it: the `fetch` proceeds and fails on its own, and the violation is raised when the scope closes. That is the right place, because a subject that catches its own network failures — a retry loop, an `onError` callback, a fallback value — would swallow a rejection thrown at the call site and the spec would pass on a call nobody declared. Disposal happens after the subject is done, so nothing can catch it.
 
@@ -236,7 +236,7 @@ async function rateProvider() {
 
 Both keywords are the rulebook's, not taste: a function returning a promise is `async` (`typescript/promise-function-async`) and a returned promise is awaited (`typescript/return-await`), so the other spellings do not lint.
 
-It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules F6 and F8 refuse a test and a consumer respectively.
+It is real in both runtimes — msw's server under node, msw's worker in a page — so a module test and a component test declare the outside world the same way. What it replaces is `vi.stubGlobal('fetch')` and a direct `msw/node` import, which rules `no-second-test-runtime` and `no-redundant-test-dependency` refuse a test and a consumer respectively.
 
 **A subject that fetches a PATH states where the path lives.** `fetch('/api/posts')` is browser code: under node the URL has no base, so the request fails before any stub can answer it. `intercept(stubs, { origin: 'http://console.test' })` gives the block that base — the relative call resolves against it, the stubs match as they would any other request (a path-form stub ignores the origin, an absolute one compares it), and `fetch` is put back when the scope ends. It is the seam's own wrapping, so no test has to own one.
 
@@ -405,7 +405,7 @@ export default defineStub({
 
 The `request` handed to it is the same `MatchableRequest` the match ran on: `{ body, headers, url }`, with `body` already parsed when the payload is JSON. Prefer a fixed response whenever the reply is known ahead of time — a dynamic one is for echo endpoints, request-derived ids, and per-call variation.
 
-## Strict by construction (rule D7)
+## Strict by construction
 
 The moment a chain declares one stub, the network is guarded: every outgoing request during the action must match a declared, non-exhausted stub. Anything else fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
 
@@ -414,7 +414,7 @@ found: an unmatched outgoing request, POST https://api.openai.com/v1/chat/comple
   - POST https://api.openai.com/v1/chat/completions (exhausted after 1)
 why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.
 fix: declare a stub for POST https://api.openai.com/v1/chat/completions — or raise the `times` of the one it exhausted
-read: docs/19-linting.md#d7-strict-intercepts
+read: docs/19-linting.md#network-strict-after-first-stub
 ```
 
 At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route.
@@ -423,7 +423,7 @@ At chain end the same channel verifies `required` stubs: one that was declared a
 
 A chain's scope is ONE terminal action, and a stub's `required` is checked at the end of it — not at the end of the test, and not at the end of the file. A spec that declares a stub and then performs two actions has declared it for the first one: the second starts a fresh registration, and a `required` stub unmet by the action it belongs to fails that action's chain.
 
-This is the same boundary rule B1 already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
+This is the same boundary rule `one-terminal-action-per-chain` already states from the other side — one chain, one action — read from the stub's end. A test that wants a stub to hold across two actions writes two chains, each declaring what it expects to see.
 
 Two scoping notes:
 
@@ -432,12 +432,12 @@ Two scoping notes:
 
 ## Pitfalls
 
-- **Reaching into a kind folder from a test.** `import events from './stubs/http/events.js'` is an error (C10). Add a named scenario export to the facade instead — that is what facades are for.
+- **Reaching into a kind folder from a test.** `import events from './stubs/http/events.js'` is an error (`stubs-imported-through-facade`). Add a named scenario export to the facade instead — that is what facades are for.
 - **Pinning a prompt by copying it.** A 550-line prompt pasted into a stub is a fossil. Import the app's real builder, or match a stable prefix with `match.includes` — the stub pins the _interaction_, not the wording.
 - **Expecting a substring to match.** Provider string filters are exact. A prompt that "should obviously match" but does not is almost always a whitespace or a template difference — use `match.includes` if that is genuinely what you mean.
 - **Writing a call count as a loop.** `for (…) chain.intercept(garbage)` is `times: 8`. The loop hides the number the spec is actually asserting.
 - **Relying on declaration specificity instead of order.** Selection is first-match. `.with()` prepends precisely so an override wins without deleting the generic route — outside `.with()`, order is yours to get right.
-- **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one stub is declared, D7 turns a stray call into a failure.
+- **Letting a pipeline hit the network.** An unintercepted call is a test escaping the sandbox, not extra realism. Once one stub is declared, `network-strict-after-first-stub` turns a stray call into a failure.
 - **Duplicating a payload.** The 45-line article exists ONCE, as a `.response.json`; the second stub imports it.
 
 ## Related

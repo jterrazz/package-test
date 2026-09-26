@@ -15,7 +15,7 @@ export type LiterateOptions = {
     specification: string;
 };
 
-/** Structural, so the runner coupling stays one dependency (I1); assignable to vite's `Plugin`. */
+/** Structural, so the runner coupling stays one dependency (`import-within-declared-layers`); assignable to vite's `Plugin`. */
 export type LiteratePlugin = {
     config: () => { test: { include: string[] } };
     /** Vite hands the resolved root here — what a relative `specification` is resolved against. */

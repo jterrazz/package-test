@@ -75,10 +75,10 @@ describe('files', () => {
         ]);
     });
 
-    // RUNTIME A7 — with two databases `database:` is required on every seed, and with one it is refused: the record fixes the call.
+    // RUNTIME database-named-only-when-several-at-runtime — with two databases `database:` is required on every seed, and with one it is refused: the record fixes the call.
     test('requires the database option when several databases are declared', () => {
         // Given - a spec with two postgres handles (db + analytics)
-        // Then - .seed() without a database option violates A7, synchronously checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
+        // Then - .seed() without a database option violates `database-named-only-when-several-at-runtime`, synchronously checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
         expect(() => api.seed(file('../../shared/seeds/one-user.sql'))).toThrow(
             'found: seed() names no database, and 2 databases are declared ("analyticsDb", "db")',
         );
@@ -88,7 +88,7 @@ describe('files', () => {
         // Given - reference to nonexistent seed
         // Then - the chain rejects with ENOENT
         await expect(
-            // checker-disable-next-line c8 -- negative spec: the missing file IS the behaviour under test
+            // checker-disable-next-line named-path-exists -- negative spec: the missing file IS the behaviour under test
             api.seed(file('./seeds/nonexistent.sql'), { database: 'db' }).get('/users'),
         ).rejects.toThrow('ENOENT');
     });
@@ -109,7 +109,7 @@ describe('files', () => {
         'seed() without any declared SQL database fails with a clear error',
         async () => {
             // Given - an api runner whose services record declares no database
-            // oxlint-disable-next-line jterrazz/a1-specification-file, jterrazz/a3-no-destructure-alias -- negative-path runner: it exists only to fail .seed(), and aliasing avoids shadowing the module-level `api`
+            // oxlint-disable-next-line jterrazz/runner-in-specification-file, jterrazz/no-runner-alias -- negative-path runner: it exists only to fail .seed(), and aliasing avoids shadowing the module-level `api`
             const { api: bareApi, cleanup: stop } = await specification.api({
                 server: () => new Hono(),
             });

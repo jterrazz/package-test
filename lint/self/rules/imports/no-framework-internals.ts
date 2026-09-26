@@ -4,7 +4,7 @@ import { lessonsAt } from '../../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../../reading/ast.js';
 import { specsAnchorOf } from '../../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../../../rules/rule.js';
-import { SELF_CHAPTER, SELF_RULE_DOCS, selfRowOf } from '../../catalogue/manifest.js';
+import { SELF_CHAPTER, selfRowOf } from '../../catalogue/manifest.js';
 
 /** These segment names are the framework's layers in this repository alone; a spec importing its own app (`../../src/app.js`) names none of them. */
 const FRAMEWORK_LAYERS = new Set([
@@ -17,7 +17,7 @@ const FRAMEWORK_LAYERS = new Set([
 ]);
 
 /** A `self` rule: the folder names mean the framework's layers only here. */
-export const f7NoFrameworkInternals: LintRule = {
+export const noFrameworkInternals: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => specsAnchorOf(context) !== undefined,
@@ -40,9 +40,9 @@ export const f7NoFrameworkInternals: LintRule = {
         };
     },
     meta: {
-        docs: SELF_RULE_DOCS['f7-no-framework-internals'],
+        docs: selfRowOf('no-framework-internals'),
         messages: lessonsAt(
-            selfRowOf('f7-no-framework-internals'),
+            selfRowOf('no-framework-internals'),
             {
                 deepImport: {
                     found: 'a spec deep-imports "{{source}}", a framework internal',

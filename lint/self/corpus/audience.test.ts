@@ -7,7 +7,6 @@ import { describe, expect, test } from 'vitest';
 
 import { CATALOGUE_CHAPTER, REFUSAL_WHY } from '../../../src/kernel/refusals/refusal.js';
 import { RUNTIME_RULES } from '../../catalogue/manifest.js';
-import { codeOf } from '../../checks/code.js';
 import { catalog, SELF_CHECKER_PASSES } from '../catalogue/manifest.js';
 import {
     danglingImports,
@@ -21,7 +20,7 @@ import {
     strandedBundles,
 } from './audience.js';
 
-/** K12 (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first. */
+/** `rule-declares-its-audience` (meta-test) — a rule only this package is held to never reaches a consumer: the tarball is packed and extracted as an install holds it, so `npm run build` comes first. */
 const ROOT = resolve(import.meta.dirname, '../../..');
 
 type Manifest = {
@@ -79,23 +78,22 @@ describe('audience', () => {
             ),
         );
 
-        // Then - no self rule's name, code, nor the plugin that registers one, is in any of it
+        // Then - no self rule's name, nor the plugin that registers one, is in any of it
         expect(packed.has('package.json')).toBe(true);
         expect(mentions).toStrictEqual([]);
     });
 
-    test('a text is found naming a self rule by its name, its code, or its plugin', () => {
-        // Given - one text per way of naming a row, and one that only looks like a code
+    test('a text is found naming a self rule by its name, or its plugin', () => {
+        // Given - one text per way of naming a row, and one that only starts like a name
         const [row] = rows;
-        const named = row === undefined ? [] : [`${row.name} runs`, `rule ${row.id}.`];
+        const named = row === undefined ? [] : [`${row.name} runs`];
 
-        // Then - each is found, and a longer code sharing a prefix is not the row's
-        expect(named.map((text) => selfMentions(text, rows).length > 0)).toStrictEqual([
-            true,
-            true,
-        ]);
+        // Then - each is found, and a longer name sharing a prefix is not the row's
+        expect(named.map((text) => selfMentions(text, rows).length > 0)).toStrictEqual([true]);
         expect(selfMentions('"jterrazz-self/x": "error"', rows)).toContain('jterrazz-self');
-        expect(selfMentions('K12 holds', [{ id: 'K1', name: 'k1-x' }])).toStrictEqual([]);
+        expect(
+            selfMentions('links-resolve-twice holds', [{ name: 'links-resolve' }]),
+        ).toStrictEqual([]);
     });
 
     test('no packed chunk is one only an unpacked bundle loads, nor imports one the tarball lacks', () => {
@@ -127,18 +125,18 @@ describe('audience', () => {
         const fragment = {
             testing: {
                 jsPlugins: ['jterrazz-self/plugin'],
-                overrides: [{ rules: { 'jterrazz/f7-no-framework-internals': 'off' } }],
+                overrides: [{ rules: { 'jterrazz/no-framework-internals': 'off' } }],
             },
             nested: [{ meta: { docs: { audience: 'self' } } }],
-            plugin: { rules: { 'c35-capability-folder': {} } },
+            plugin: { rules: { 'specimen-filed-by-capability': {} } },
         };
 
         // Then - each is answered at the path it was found
         expect(selfExposures(fragment, self, 'x')).toStrictEqual([
             'x.testing.jsPlugins.0 = jterrazz-self/plugin',
-            'x.testing.overrides.0.rules.jterrazz/f7-no-framework-internals',
+            'x.testing.overrides.0.rules.jterrazz/no-framework-internals',
             'x.nested.0 (meta.docs.audience: self)',
-            'x.plugin.rules.c35-capability-folder',
+            'x.plugin.rules.specimen-filed-by-capability',
         ]);
     });
 
@@ -171,7 +169,7 @@ describe('audience', () => {
     test('no bin the tarball publishes runs a self pass, over the trees that trip each one', () => {
         // Given - every bin of the extracted package, run over every fixture a self pass's documents stand on
         const bins = Object.entries(manifestOf(installed).bin ?? {});
-        const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${codeOf(name)})`);
+        const codes = SELF_CHECKER_PASSES.map(({ name }) => `jterrazz-check(${name})`);
         const trees = SELF_CHECKER_PASSES.flatMap(({ name }) => {
             const fixtures = resolve(ROOT, 'specs/lint', name, 'fixtures');
             return readdirSync(fixtures).map((tree) => resolve(fixtures, tree));

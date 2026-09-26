@@ -16,7 +16,7 @@ function removeGolden(path: string): void {
 }
 
 describe('workdir', () => {
-    test('update mode substitutes the workdir inside JSON (CONVENTIONS D5, text/json parity)', async () => {
+    test('update mode substitutes the workdir inside JSON (rule `no-volatile-literal`, text/json parity)', async () => {
         // Given - a JSON payload whose values embed the run cwd, update mode on A fresh fixture name
         const fixtureName = `json-cwd-transient-${Date.now()}.json`;
         const fixturePath = resolve(EXPECTED_DIR, fixtureName);

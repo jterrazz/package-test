@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { a1SpecificationFile } from './runner-in-specification-file.js';
+import { runnerInSpecificationFile } from './runner-in-specification-file.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('a1-specification-file', a1SpecificationFile as unknown as OxlintRule, {
+ruleTester.run('runner-in-specification-file', runnerInSpecificationFile as unknown as OxlintRule, {
     invalid: [
         // Constructor call inside a plain spec file.
         {
@@ -18,7 +18,7 @@ ruleTester.run('a1-specification-file', a1SpecificationFile as unknown as Oxlint
             errors: 1,
             filename: '/repo/specs/cli/exec/exec.test.ts',
         },
-        // Any member counts — a1 is about the file, a2 about the member.
+        // Any member counts — `runner-in-specification-file` is about the file, `no-unknown-constructor` about the member.
         {
             code: 'await specification.app({});',
             errors: 1,

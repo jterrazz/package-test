@@ -1,0 +1,7 @@
+description: warns on a wrapped negative toMatch without frozen
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/cli/negative/negative.test.ts:10:18  jterrazz(negative-golden-frozen)

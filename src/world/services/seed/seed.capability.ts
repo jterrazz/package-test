@@ -26,7 +26,7 @@ export interface SeedSignature extends ChainSignature {
     readonly chain: SeedChain<this['self'], this['params']['databaseKey']>;
 }
 
-/** The path and the `database` option are judged when stated (A7); the file is read when the chain is armed. */
+/** The path and the `database` option are judged when stated (`database-named-only-when-several`); the file is read when the chain is armed. */
 export const seed = defineCapability<
     'seed',
     readonly QueuedSeed[],

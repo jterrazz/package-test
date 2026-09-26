@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, childList, identifierName, memberPath, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -47,7 +46,7 @@ function restoreOnly(hook: AstNode): boolean {
 }
 
 /** A teardown that only gives back is no Given, and stands. */
-export const j6wGivenInTheTest: LintRule = {
+export const givenInTheTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -67,8 +66,8 @@ export const j6wGivenInTheTest: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['j6w-given-in-the-test'],
-        messages: lessons('j6w-given-in-the-test', {
+        docs: rowOf('given-in-the-test'),
+        messages: lessons('given-in-the-test', {
             givenInAHook: {
                 found: '`{{hook}}` moves the Given out of the tests',
                 fix: 'write the Given in each test — a shared value is a function each test calls, and `clock.at()` restores itself',

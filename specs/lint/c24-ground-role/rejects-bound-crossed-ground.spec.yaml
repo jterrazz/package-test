@@ -1,8 +1,0 @@
-description: a file bound to a const is followed to the verb it reaches, and refused where it is handed over
-fixture: ./fixtures/bound/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/orders/orders.spec.ts:9:35  jterrazz(c24-ground-role)
-          specs/api/orders/orders.spec.ts:12:37  jterrazz(c24-ground-role)

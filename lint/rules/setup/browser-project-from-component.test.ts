@@ -1,11 +1,11 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { e6ComponentProjectHelper } from './browser-project-from-component.js';
+import { browserProjectFromComponent } from './browser-project-from-component.js';
 
 const tester = ruleTester();
 
 const CONFIG = '/repo/vitest.config.ts';
 
-tester.run('e6-component-project-helper', asOxlintRule(e6ComponentProjectHelper), {
+tester.run('browser-project-from-component', asOxlintRule(browserProjectFromComponent), {
     invalid: [
         {
             code: 'export default { test: { browser: { enabled: true, instances: [] } } };',

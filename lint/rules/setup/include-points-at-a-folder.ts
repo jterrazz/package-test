@@ -1,16 +1,15 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { collectsAFile, projectLiterals, staticPrefix } from '../../reading/config-shape.js';
 import { isDirectory } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../rule.js';
 
-/** The glob is checked too: a suffix renamed under a folder that still exists (C12's `--fix`) collects nothing as surely. */
-export const e7wIncludePrefixExists: LintRule = {
+/** The glob is checked too: a suffix renamed under a folder that still exists (`file-suffix-matches-place`'s `--fix`) collects nothing as surely. */
+export const includePointsAtAFolder: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'config',
@@ -44,8 +43,8 @@ export const e7wIncludePrefixExists: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['e7w-include-prefix-exists'],
-        messages: lessons('e7w-include-prefix-exists', {
+        docs: rowOf('include-points-at-a-folder'),
+        messages: lessons('include-points-at-a-folder', {
             collectsNothing: {
                 found: '`{{glob}}` matches no file, though its folder exists',
                 fix: 'point the glob at the suffix the files carry now (`.spec.ts` after a rename), or delete it',

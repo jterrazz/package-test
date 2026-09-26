@@ -29,7 +29,6 @@ import {
     TREE_PASS_IDS,
 } from './checker.js';
 import type { TokenViolation } from './checker.js';
-import { codeOf } from './code.js';
 import { fixCopiedGround, fixRootGround } from './crossfile.js';
 import { fixSpecFiles } from './documents.js';
 import { movesUnderFacet } from './file-suffix-matches-place.js';
@@ -81,8 +80,7 @@ function judgingProject(): string | undefined {
 }
 
 function codeOfFinding(violation: TokenViolation): string {
-    // The published code is the convention code, the id's first segment, whatever a pass calls itself: two spellings of one rule would be two lines of debt.
-    return `${CHECKER_NAMESPACE}(${codeOf(violation.rule)})`;
+    return `${CHECKER_NAMESPACE}(${violation.rule})`;
 }
 
 function formatDiagnostic({
@@ -380,8 +378,8 @@ function collectedEntries(text: string): string[] {
 
 function noticeFor(where: string, entry: string): string {
     return entry.includes('*')
-        ? `${where}: ${entry} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (C12)`
-        : `${where}: ${entry} names a file this run renamed — it is \`${entry.slice(0, -'.test.ts'.length)}.spec.ts\` now, and the entry collects nothing until it follows (C12)`;
+        ? `${where}: ${entry} still names \`.test.ts\` — the files it collected are \`.spec.ts\` now, and the project collects nothing until the glob follows (file-suffix-matches-place)`
+        : `${where}: ${entry} names a file this run renamed — it is \`${entry.slice(0, -'.test.ts'.length)}.spec.ts\` now, and the entry collects nothing until it follows (file-suffix-matches-place)`;
 }
 
 function staleEntriesIn(path: string, owner: string, renamed: Rename[]): string[] {
@@ -406,11 +404,11 @@ function staleIncludes(root: string, renamed: Rename[]): string[] {
 
 function reportMigration(migration: Migration): void {
     for (const move of migration.renamed) {
-        console.log(`conventions checker: renamed ${move} (C13)`);
+        console.log(`conventions checker: renamed ${move} (ground-uses-reserved-name)`);
     }
     if (migration.rewritten.length > 0) {
         console.log(
-            `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (C13)`,
+            `conventions checker: named ${migration.rewritten.length} file(s)' ground by path (ground-uses-reserved-name)`,
         );
     }
     if (migration.directives.length > 0) {
@@ -420,7 +418,7 @@ function reportMigration(migration: Migration): void {
     }
     if (migration.stubs.length > 0) {
         console.log(
-            `conventions checker: named the stubs of ${migration.stubs.length} file(s) as 17 does — defineStub, stubs/, *.stubs.ts (C13)`,
+            `conventions checker: named the stubs of ${migration.stubs.length} file(s) as 17 does — defineStub, stubs/, *.stubs.ts (ground-uses-reserved-name)`,
         );
     }
 }
@@ -441,12 +439,12 @@ function reportLintConfigMove({ file, removed, renamed }: LintConfigMove): void 
 function applyFixes(root: string): void {
     reportMigration(migrateTo17(root, moveKeepingHistory));
     for (const move of fixRootGround(root)) {
-        console.log(`conventions checker: moved ${move} (C15)`);
+        console.log(`conventions checker: moved ${move} (no-reach-into-sibling-ground)`);
     }
     const renamed = fixSpecSuffixes(root);
     for (const { from, to } of renamed) {
         console.log(
-            `conventions checker: renamed ${relative(root, from)} → ${relative(root, to)} (C12)`,
+            `conventions checker: renamed ${relative(root, from)} → ${relative(root, to)} (file-suffix-matches-place)`,
         );
     }
     for (const stale of staleIncludes(root, renamed)) {
@@ -457,13 +455,15 @@ function applyFixes(root: string): void {
         console.log(`conventions checker: rewrote ${written.length} spec document(s)`);
     }
     for (const change of fixSubjects(root)) {
-        console.log(`conventions checker: moved ${change} (C29/C30)`);
+        console.log(
+            `conventions checker: moved ${change} (one-subject-per-spec, spec-in-subject-folder)`,
+        );
     }
     for (const move of fixCopiedGround(root)) {
-        console.log(`conventions checker: moved ${move} (C27)`);
+        console.log(`conventions checker: moved ${move} (no-duplicate-ground)`);
     }
     for (const change of fixGroundSharing(root)) {
-        console.log(`conventions checker: ${change} (C28)`);
+        console.log(`conventions checker: ${change} (ground-shared-or-inline)`);
     }
 }
 

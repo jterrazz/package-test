@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { w2TestIdStatesWhatIsMissing } from './test-id-states-what-is-missing.js';
+import { testIdStatesWhatIsMissing } from './test-id-states-what-is-missing.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -13,8 +13,8 @@ const ruleTester = new RuleTester();
 const SPEC = '/repo/specs/website/home/subscribe.spec.ts';
 
 ruleTester.run(
-    'w2-testid-states-what-is-missing',
-    w2TestIdStatesWhatIsMissing as unknown as OxlintRule,
+    'test-id-states-what-is-missing',
+    testIdStatesWhatIsMissing as unknown as OxlintRule,
     {
         invalid: [
             // The escape hatch with nothing stated about it.

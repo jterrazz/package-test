@@ -1,4 +1,4 @@
-/** A facet's own rows are stated by its composition's definitions (`self/compositions.ts`), never here; zero framework imports, so the lint layer stays runtime-free (I1). */
+/** A facet's own rows are stated by its composition's definitions (`self/compositions.ts`), never here; zero framework imports, so the lint layer stays runtime-free (`import-within-declared-layers`). */
 
 export const COLUMNS = [
     'api',
@@ -42,7 +42,7 @@ export function memberOf(capability: Pick<Capability, 'member' | 'name'>): strin
 }
 
 const IN_PLACE =
-    "every golden of this facet's tree is read by one test, so it is written in place (C28); the file form is proven where goldens are shared";
+    "every golden of this facet's tree is read by one test, so it is written in place (`ground-shared-or-inline`); the file form is proven where goldens are shared";
 
 export const CAPABILITIES: Capability[] = [
     {

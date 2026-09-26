@@ -29,7 +29,7 @@ The `sqlite()` specs of the `unit` project need no rebuild after `npm ci`: this 
 
 The key reads the lockfile, not the installed toolchain. `@jterrazz/typescript` installed from a sibling checkout (`file:../package-typescript`) is locked by version alone, so a preset change reinstalled at the same version leaves the key unchanged, and `make build` restores a bundle built under the old `compilerOptions`. After such a reinstall, run `npx turbo run build --force` or `rm -rf .artifacts/turbo`. A restore only adds files, so `npm run build:cached` removes `dist/` first: nothing left there by another branch survives into the bundle or a local `npm pack`.
 
-That config is also where this repository DECLARES its own architecture: `i1-layer-boundaries` ships inert, and `FRAMEWORK_LAYERS` in `lint/self/checks/layers.ts`, which that config wires, is the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
+That config is also where this repository DECLARES its own architecture: `import-within-declared-layers` ships inert, and `FRAMEWORK_LAYERS` in `lint/self/checks/layers.ts`, which that config wires, is the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
 
 ### Which file a change opens
 
@@ -40,7 +40,7 @@ That config is also where this repository DECLARES its own architecture: `i1-lay
 | A matcher, or update-mode behaviour               | `src/expectations/goldens/` and `src/expectations/in-place/` — `src/vitest/` only for the hook that wires them                                                                                                                                      |
 | An external dependency's adapter                  | the ONE slice that owns the engine — a world area (`src/world/services/<db>/`, `src/world/stubs/network/` …) or a facet's concept folder (`src/facets/website/browser/` …), and no other                                                            |
 | A `{{token}}` or the structural comparison        | `src/expectations/tokens/`                                                                                                                                                                                                                          |
-| A descriptor, a landmark, or how one is spelled   | `src/elements/` — `elements.ts` (the constructors), `descriptor.ts` (the types), `vocabulary-rows.ts` (a visitor verb's rows), `spelling.ts`, `landmarks.ts`, `ambiguity.ts` (the W3 refusal)                                                       |
+| A descriptor, a landmark, or how one is spelled   | `src/elements/` — `elements.ts` (the constructors), `descriptor.ts` (the types), `vocabulary-rows.ts` (a visitor verb's rows), `spelling.ts`, `landmarks.ts`, `ambiguity.ts` (the `descriptor-matches-one-element` refusal)                         |
 | A runner-config default, or a project helper      | `src/vitest/preset.ts` and `src/vitest/project-kit.ts` — or the facet's own `<facet>.project.ts` for its project                                                                                                                                    |
 | The `<case>.spec.yaml` grammar                    | `src/facets/cli/documents/spec-document.ts` — read by BOTH the runner and the checker                                                                                                                                                               |
 | How a cli document runs                           | `src/facets/cli/documents/literate.ts`                                                                                                                                                                                                              |
@@ -72,7 +72,7 @@ Those two are the required peers; every other peer is optional, loaded the first
 
 Trying an unreleased branch of the framework: install a `npm pack` tarball, never a `file:` link — a link makes the consumer resolve `vitest`'s types twice, and the matcher augmentation then lands on one copy and not the other, so `toMatch(file(…))` types on one subject and not on another.
 
-Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). F1 reads that map, so a specifier it does not publish is refused:
+Everything a spec needs imports from the single package root; the tool subpaths beside it are the ones the `exports` map publishes, and they are listed once — [01 § What the tree publishes](01-architecture.md#what-the-tree-publishes). `no-unpublished-subpath` reads that map, so a specifier it does not publish is refused:
 
 ```typescript
 // the runners, the services, and what a chain stands on
@@ -98,7 +98,7 @@ specification.website(…)     → { website, cleanup, url }   // no docker — 
 specification.mobile(…)      → { mobile, cleanup, udid }   // no docker — a simulator, not a container
 ```
 
-The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule A3) — and every specification file registers `afterAll(cleanup)` (rule A4).
+The destructured names are canonical — no aliasing (`{ api: myApi }` is an error, rule `no-runner-alias`) — and every specification file registers `afterAll(cleanup)` (rule `cleanup-passed-to-after-all`).
 
 ### First API spec
 
@@ -195,7 +195,7 @@ Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}
 ```
 
-Each CLI spec runs in a fresh, empty temp directory. ANSI escape sequences are stripped before comparison by default (rule D6) — you never snapshot color codes.
+Each CLI spec runs in a fresh, empty temp directory. ANSI escape sequences are stripped before comparison by default (rule `no-transform-duplicating-tokens`) — you never snapshot color codes.
 
 ### vitest config: the preset
 
@@ -229,7 +229,7 @@ What every helper accepts, on top of the project it already is:
 
 `unit({ isolate: false })` runs every file of a worker in one module graph instead of a fresh one per file, so a worker imports each module once. It is for a PURE project: a test that leaves state in a module — a registry, a globally registered matcher, a cache — reaches the next file of its worker, and fails there. Absent, vitest isolates each file. This package's own `unit` project is not pure — its matcher and update-mode modules keep state across a file — so it stays isolated.
 
-`unit()` and `component()` are a pair by construction: `unit()` collects `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`, `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; the facet helpers collect `specs/<facet>/**/*.spec.ts` — the word for the assembled product (C12) — and `cli()` its documents too, `specs/cli/**/*.spec.yaml` ([20](20-documents.md#the-three-doors-one-engine)). All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [07 — Component specs](07-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
+`unit()` and `component()` are a pair by construction: `unit()` collects `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`, `component()` collects exactly those, so the suffix beside a file decides which project runs it and which rules judge it. `unit()` takes `roots?` where the modules are not at the repository root, or `include?` for the globs outright; the facet helpers collect `specs/<facet>/**/*.spec.ts` — the word for the assembled product (`file-suffix-matches-place`) — and `cli()` its documents too, `specs/cli/**/*.spec.yaml` ([20](20-documents.md#the-three-doors-one-engine)). All three carry `sequence.groupOrder` — node 0, `website` 1, `component` 2 — so the two browser projects never open two Chromiums at once on a 2-vCPU runner. What `component()` sets — the provider pinned to the runner's exact version, the msw worker served from this package's own install, the JSX transform the current Vite uses, the dependencies a cold cache must pre-bundle, the artefact directories, the group order that keeps two Chromiums apart — is [07 — Component specs](07-component.md)'s. `component()` is async, and a project may be a promise: `projects: [component({ … })]` needs no `await`.
 
 #### What the preset sets
 
@@ -244,8 +244,8 @@ What every helper accepts, on top of the project it already is:
 | `test.outputFile`                | `.artifacts/vitest/{json,junit,html,blob}`                     | Vitest 5 turned the json and junit reporters into FILE writers; all four are artefacts. The blob is one file per run under `blob/`, named for its shard when the run is one, so `--merge-reports .artifacts/vitest/blob` reads a split run back whole                                                  |
 | `test.retry`                     | `0`                                                            | A flaky test is fixed or deleted — a retry turns a real defect into a slow one and hides it                                                                                                                                                                                                            |
 | `test.restoreMocks`              | `true`                                                         | A `vi.spyOn` a test forgets to restore fails a LATER file, one that did nothing wrong                                                                                                                                                                                                                  |
-| `test.unstubGlobals`             | `true`                                                         | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule J6w)                                                                                                                                                                                                     |
-| `test.unstubEnvs`                | `true`                                                         | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule E9w)                                                                                                                                                                                                         |
+| `test.unstubGlobals`             | `true`                                                         | Same for `vi.stubGlobal` — and it is what lets a test be written without an `afterEach` (rule `given-in-the-test`)                                                                                                                                                                                     |
+| `test.unstubEnvs`                | `true`                                                         | Same for `vi.stubEnv`, which is the sanctioned way to state a module's env contract (rule `no-raw-env-write`)                                                                                                                                                                                          |
 | `test.globalSetup`               | the update-mode setup, the temp-root setup                     | Update mode writes a value in place after the run is reported, so a failure's code frame reads the lines the run loaded ([15](15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test)); the temp root is [below](#scratch-lives-in-the-runs-temp-root)                                         |
 | `plugins`                        | `literate()`, when `literate:` is given                        | Turns every matching `<case>.spec.yaml` into a test file (see [20 — Spec documents](20-documents.md))                                                                                                                                                                                                  |
 
@@ -341,24 +341,24 @@ You set exactly one variable, prefixed `TEST_`: `TEST_UPDATE=1` turns on update 
 specs/
 ├── api/
 │   ├── api.specification.ts
-│   └── users/create/              # POST /users — the subject's standard folder (rules C29, C30)
-│       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules C31, C32)
+│   └── users/create/              # POST /users — the subject's standard folder (rules `one-subject-per-spec`, `spec-in-subject-folder`)
+│       ├── shape.spec.ts          # <aspect>.spec.ts, one describe('shape') (rules `one-describe-per-file`, `spec-named-for-its-aspect`)
 │       ├── seeds/                 # *.sql
 │       ├── requests/              # what it sends: *.http complete requests, and body files (*.json, …)
 │       ├── stubs/             # <name>.stubs.ts facade + <kind>/<name>.ts units + their data
 │       └── expected/              # every golden it reads — incl. response *.http, each named by file(…)
 └── cli/
-    ├── cli.specification.ts       # runner at the facet root (rule C1)
+    ├── cli.specification.ts       # runner at the facet root (rule `specs-at-declared-depth`)
     └── help/                      # the `help` command
-        └── usage.spec.ts          # under specs/, the suffix is .spec.ts (rule C12)
+        └── usage.spec.ts          # under specs/, the suffix is .spec.ts (rule `file-suffix-matches-place`)
 ```
 
 ## Pitfalls
 
-- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `job`, `cli`, `integration`, `website`, `mobile` are enforced (rule A3).
-- **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule A4 requires it in every specification file.
-- **Importing from a subpath the `exports` map does not publish** (`@jterrazz/test/services`). Everything a spec needs comes from `@jterrazz/test` (rule F1).
-- **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule B4); `// When` only when the action is not obvious — the chain _is_ the when.
+- **Renaming the destructured runner** (`const { api: usersApi } = …`). The canonical names `api`, `job`, `cli`, `integration`, `website`, `mobile` are enforced (rule `no-runner-alias`).
+- **Forgetting `afterAll(cleanup)`.** Infrastructure leaks across suites; rule `cleanup-passed-to-after-all` requires it in every specification file.
+- **Importing from a subpath the `exports` map does not publish** (`@jterrazz/test/services`). Everything a spec needs comes from `@jterrazz/test` (rule `no-unpublished-subpath`).
+- **Writing `// Given` without `// Then`** (or vice versa). Every test carries both comments (rule `given-and-then-markers-present`); `// When` only when the action is not obvious — the chain _is_ the when.
 
 ## Related
 

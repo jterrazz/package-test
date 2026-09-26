@@ -2,7 +2,7 @@
 
 Three facets drive something a person can see — a served page ([08](08-website.md)), a mounted unit ([07](07-component.md)), a screen on a simulator ([09](09-mobile.md)). They name what they act on with **one vocabulary**, owned here and restated nowhere: the same descriptors, the same modifiers, the same ambiguity refusal, the same matching rule. A facet chapter says what its surface adds; it does not redefine a word.
 
-The vocabulary is user-facing by construction (rule W2): there is no CSS surface, no XPath and no raw predicate. A test names what a person would name.
+The vocabulary is user-facing by construction (rule `test-id-states-what-is-missing`): there is no CSS surface, no XPath and no raw predicate. A test names what a person would name.
 
 | The shape            | Held below                                                                                  |
 | -------------------- | ------------------------------------------------------------------------------------------- |
@@ -96,7 +96,7 @@ await visitor.see(channel);
 
 ## Verbs
 
-A scenario is the When: pure interaction, no `expect()` inside it (rule W1). Every verb auto-waits; there are no sleeps anywhere in the framework.
+A scenario is the When: pure interaction, no `expect()` inside it (rule `no-expect-in-scenario`). Every verb auto-waits; there are no sleeps anywhere in the framework.
 
 | Verb                      | Does                                                                |
 | ------------------------- | ------------------------------------------------------------------- |
@@ -127,11 +127,11 @@ The ARIA landmarks are web-only: passing one to a mobile verb refuses at runtime
 
 Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard to land and `gone(disabled(button('Save')))` waits for a control to become usable again.
 
-`see()` ACTS ON NOTHING, and on the mobile facet that changes what W3 asks of it: any visible match satisfies it, because an XCUITest tree legitimately exposes the same label twice (a container and its child both carry it), and a synchronization primitive refusing on that would punish honest screens. On the web and in a component, `see()` holds the same cardinality as every other verb.
+`see()` ACTS ON NOTHING, and on the mobile facet that changes what `descriptor-matches-one-element` asks of it: any visible match satisfies it, because an XCUITest tree legitimately exposes the same label twice (a container and its child both carry it), and a synchronization primitive refusing on that would punish honest screens. On the web and in a component, `see()` holds the same cardinality as every other verb.
 
 ## Designating exactly one element
 
-**A descriptor must match exactly one element (rule W3).** When several match, the framework refuses the action instead of taking the first one:
+**A descriptor must match exactly one element (rule `descriptor-matches-one-element`).** When several match, the framework refuses the action instead of taking the first one:
 
 ```
 found: Ambiguous element: link("Articles") matched 2 elements on http://site.test/ambiguous —
@@ -141,7 +141,7 @@ why: A verb acts on exactly ONE element: a descriptor that matches several is re
 fix: designate one of them:
   • scope it       within(navigation(), link("Articles"))   [leaves 1 of 2]   [also here: contentinfo()]
   • other element  a heading(), button() or field() may name one thing where this does not
-read: docs/19-linting.md#w3-unambiguous-element
+read: docs/19-linting.md#descriptor-matches-one-element
 ```
 
 The refusal is a lesson in the four parts every message carries ([19](19-linting.md#what-a-finding-says)), one part per line.
@@ -160,7 +160,7 @@ fix: designate one of them:
   • scope it       within(testId('…'), button("Bookmark")) — a screen has no landmarks; any descriptor works as the scope
   • test id        testId("event-1-bookmark")   [also here: event-2-bookmark]
   • other element  a button() or field() may name one thing where this does not
-read: docs/19-linting.md#w3-unambiguous-element
+read: docs/19-linting.md#descriptor-matches-one-element
 ```
 
 Taking "the first match" is the failure this rule exists to prevent: the spec stays green while the visitor acts on a different element, and nothing ever reports it. Ambiguity is an authoring mistake, not something DOM order should arbitrate.
@@ -199,7 +199,7 @@ A name only part of an accessible name designates nothing, on every surface and 
 
 ## `testId()` — the one escape hatch
 
-`testId(id)` reads `data-testid` on the web and the accessibility identifier on a device. It is the ONLY descriptor that names something a user cannot perceive, and rule W2 is an error on it: a `testId()` carries a `// testId: <what is missing>` comment on its own line or the one directly above.
+`testId(id)` reads `data-testid` on the web and the accessibility identifier on a device. It is the ONLY descriptor that names something a user cannot perceive, and rule `test-id-states-what-is-missing` is an error on it: a `testId()` carries a `// testId: <what is missing>` comment on its own line or the one directly above.
 
 ```typescript
 // testId: the row has no accessible name — the cells carry the data
@@ -213,8 +213,8 @@ The comment is an INVARIANT, not a rationale: it states the property of the mark
 - **Asserting focus with a golden.** The tree carries no focus — [§ Modifiers](#modifiers).
 - **Expecting a name to match a prefix.** It does not: write the name whole, read off the ARIA tree, or scope it with `within(…)`.
 - **Answering an ambiguity with `{ exact: false }`.** The option widens the match; ambiguity wants narrowing. Scope it.
-- **Reaching for `testId()` first.** It is the last rung, and W2 asks for the line saying why. A heading, a button or a field usually names the thing already.
-- **Putting an `expect()` inside a scenario.** W1 refuses it: a scenario is interaction, the Then is on the result.
+- **Reaching for `testId()` first.** It is the last rung, and `test-id-states-what-is-missing` asks for the line saying why. A heading, a button or a field usually names the thing already.
+- **Putting an `expect()` inside a scenario.** `no-expect-in-scenario` refuses it: a scenario is interaction, the Then is on the result.
 - **Passing a landmark to a mobile verb.** It refuses at runtime, naming the boundary. Scope with `within(testId(…), …)` instead.
 - **Nesting three constructors in a verb call.** `unicorn/max-nested-calls` refuses it, and a named `const` reads better.
 

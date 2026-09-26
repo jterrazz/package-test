@@ -81,7 +81,7 @@ describe('comparison', () => {
         );
     });
 
-    // RUNTIME D3 — every `toMatch` subject resolves against `expected/`; the refusal names the path it looked at, and only `.request()` reads `requests/`.
+    // RUNTIME golden-read-from-its-path — every `toMatch` subject resolves against `expected/`; the refusal names the path it looked at, and only `.request()` reads `requests/`.
     test('toMatch on a missing stream fixture names the path it resolved, and TEST_UPDATE', async () => {
         // Given - a fixture name that was never created
         const result = await cli
@@ -90,7 +90,7 @@ describe('comparison', () => {
 
         // Then - the failure names the path it resolved and explains how to create the fixture frozen - under TEST_UPDATE the missing fixture must still throw rather than be created
         const message = catchMessage(() => {
-            // checker-disable-next-line c8 -- negative spec: the missing fixture IS the behaviour under test
+            // checker-disable-next-line named-path-exists -- negative spec: the missing fixture IS the behaviour under test
             expect(result.stdout).toMatch(file('./expected/never-created.txt'), { frozen: true });
         });
         expect(message).toContain(
@@ -99,7 +99,7 @@ describe('comparison', () => {
         expect(message).toMatch(/TEST_UPDATE=1/u);
     });
 
-    // RUNTIME C5 — a slash in a fixture name is a SUBFOLDER of `expected/`, not a separator the resolver flattens.
+    // RUNTIME golden-path-creates-folders — a slash in a fixture name is a SUBFOLDER of `expected/`, not a separator the resolver flattens.
     test('a slash in the fixture name creates a subfolder under expected/', async () => {
         // Given - a fixture written via update mode with a slash in its name
         const fixtureName = `sub/help-${Date.now()}.txt`;
@@ -147,7 +147,7 @@ describe('comparison', () => {
         expect(() => result.json.value).toThrow(/stdout is not valid JSON/u);
     });
 
-    // RUNTIME B2 — a string is a value: a verb that reads the disk takes file() or directory(), and a bare string is refused where it is written.
+    // RUNTIME disk-named-by-relative-path-at-runtime — a string is a value: a verb that reads the disk takes file() or directory(), and a bare string is refused where it is written.
     test('a fixture named by a bare string is refused where it is written', () => {
         // Given - the 16 spelling, a name resolved against a folder the line does not show
         // Then - refused at the call, naming the wrapper to write
@@ -158,7 +158,7 @@ describe('comparison', () => {
 
     test('a directory named by file() is refused with the form to write', async () => {
         // Given - the shared cli-app project named as if it were one file
-        // checker-disable-next-line c8 -- negative spec: a directory named by file() IS the behaviour under test
+        // checker-disable-next-line named-path-exists -- negative spec: a directory named by file() IS the behaviour under test
         const run = cli.fixture(file('../../shared/fixtures/specimen-cli')).exec('help');
 
         // Then - the path states the kind, so the wrong one is refused rather than guessed

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { isFile } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -22,7 +21,7 @@ function owesANeighbour({ inSpecs, legacyDir, role }: FileIdentity): boolean {
     return role === 'component' || (role === 'module' && !inSpecs);
 }
 
-export const i2SiblingTestNaming: LintRule = {
+export const testBesideItsModule: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -61,8 +60,8 @@ export const i2SiblingTestNaming: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['i2-sibling-test-naming'],
-        messages: lessons('i2-sibling-test-naming', {
+        docs: rowOf('test-beside-its-module'),
+        messages: lessons('test-beside-its-module', {
             orphanComponent: {
                 found: 'a component test with no neighbour "{{expected}}"',
                 fix: 'move it next to what it renders — a hook or a DOM function is the `.ts` of the same basename, its Host in the test',

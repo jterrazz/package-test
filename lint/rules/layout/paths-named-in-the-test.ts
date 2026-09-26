@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, childList, identifierName, stringValue } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -25,7 +24,7 @@ function isTest(file: LintedFile): boolean {
     return isTestRole(identityOf(file).role) || file.physicalFilename.endsWith('.test-d.ts');
 }
 
-export const c26DiskNamedInTheTest: LintRule = {
+export const pathsNamedInTheTest: LintRule = {
     createOnce(context: Context): Visitor {
         let bound = new Set<string>();
         return {
@@ -55,8 +54,8 @@ export const c26DiskNamedInTheTest: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c26-disk-named-in-the-test'],
-        messages: lessons('c26-disk-named-in-the-test', {
+        docs: rowOf('paths-named-in-the-test'),
+        messages: lessons('paths-named-in-the-test', {
             builtOutsideTest: {
                 found: '`{{name}}()` called outside a test',
                 fix: 'take the `{{name}}()` as a parameter, and build it in the test that stands on it',

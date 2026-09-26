@@ -1,0 +1,8 @@
+description: rejects a 16.x ground directory beside a spec
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:1:1  jterrazz(ground-uses-reserved-name)
+          specs/app/widget/widget.test.ts:12:40  jterrazz(verb-reads-its-ground-folder)

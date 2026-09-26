@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { memberPropertyName } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
@@ -31,7 +30,7 @@ function rootsAtSyncExpect(node: AstNode | undefined): boolean {
     return false;
 }
 
-export const d2wAwaitSyncMatcher: LintRule = {
+export const noAwaitOnSyncMatcher: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -54,8 +53,8 @@ export const d2wAwaitSyncMatcher: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d2w-await-sync-matcher'],
-        messages: lessons('d2w-await-sync-matcher', {
+        docs: rowOf('no-await-on-sync-matcher'),
+        messages: lessons('no-await-on-sync-matcher', {
             redundantAwait: {
                 found: '`await` on the synchronous `expect(…).{{matcher}}(…)`',
                 fix: 'delete the `await`; only an IO matcher is awaited — a table compared whole, `toMatch(directory(…))`, `toBeEmpty`, `toBeRunning`',

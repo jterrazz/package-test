@@ -1,0 +1,8 @@
+description: refuses a testId() that states nothing about the element
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/website/home/subscribe.spec.ts:10:15  jterrazz(scenario-ends-settled)
+          specs/website/home/subscribe.spec.ts:10:29  jterrazz(test-id-states-what-is-missing)

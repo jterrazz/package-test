@@ -17,7 +17,7 @@ export type IntegrationSpecificationOptions<Services extends ServiceRecord = Ser
     services?: Services;
 };
 
-/** What `specification.integration()` returns: `const { integration, cleanup } = …` (A3). */
+/** What `specification.integration()` returns: `const { integration, cleanup } = …` (`no-runner-alias`). */
 export type IntegrationHandle<
     Services extends ServiceRecord = ServiceRecord,
     DatabaseKey extends string = string,

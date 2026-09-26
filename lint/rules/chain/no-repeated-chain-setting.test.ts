@@ -1,10 +1,10 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { b16wFileContext } from './no-repeated-chain-setting.js';
+import { noRepeatedChainSetting } from './no-repeated-chain-setting.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 const IMPORT = "import { api } from '../../api.specification.js';";
 
-ruleTester().run('b16w-file-context', asOxlintRule(b16wFileContext), {
+ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSetting), {
     invalid: [
         // Every chain pins the same instant: the view is declared once, the setting leaves each chain.
         {

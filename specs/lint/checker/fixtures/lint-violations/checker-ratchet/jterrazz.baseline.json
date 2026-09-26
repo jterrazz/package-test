@@ -1,6 +1,6 @@
 {
     "typescript": { "eslint/complexity": 3 },
     "test": {
-        "jterrazz-check/c14": 1
+        "jterrazz-check/ground-shared-or-inline": 1
     }
 }

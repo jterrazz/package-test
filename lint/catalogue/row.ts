@@ -1,3 +1,5 @@
+import type { Family } from './families.js';
+
 export type RuleDoc = {
     /** `consumer` ships and is in the public catalogue; `self` is this package's own discipline, run only here. A rule that is both is two rules. */
     audience: 'consumer' | 'self';
@@ -8,8 +10,7 @@ export type RuleDoc = {
     fix: string;
     /** Required: `model` is a statement (this reaches every facet), never a default. */
     facet: 'api' | 'cli' | 'component' | 'integration' | 'job' | 'mobile' | 'model' | 'website';
-    family: string;
-    id: string;
+    family: Family;
     rationale: string;
     /** An `upstream` row names the rule whose option carries it; the completeness meta-test reads it. */
     upstream?: string;
@@ -27,4 +28,6 @@ export type RuleDoc = {
         | 'specs'
         | 'stub'
         | 'tests';
+    /** A `statique` or `checker` row's level: `warn` is the redundancy heuristic, every hard convention is `error`. */
+    severity?: 'error' | 'warn';
 };

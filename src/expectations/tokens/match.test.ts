@@ -61,7 +61,7 @@ describe('match', () => {
         ).toBeFalsy();
     });
 
-    test('match — full token vocabulary (CONVENTIONS D4) — identifier, time, and version tokens match their canonical forms', () => {
+    test('match — full token vocabulary (rule `no-unknown-token`) — identifier, time, and version tokens match their canonical forms', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -83,7 +83,7 @@ describe('match', () => {
         expect(structuralEquals(match.base64(), 'aGVsbG8=', scope)).toBeTruthy();
     });
 
-    test('match — full token vocabulary (CONVENTIONS D4) — numeric and network tokens match their canonical forms', () => {
+    test('match — full token vocabulary (rule `no-unknown-token`) — numeric and network tokens match their canonical forms', () => {
         // Given - a fresh capture scope
         const scope = new CaptureScope();
 
@@ -111,7 +111,7 @@ describe('match', () => {
         expect(structuralEquals(match.path(), 'no-slash', scope)).toBeFalsy();
     });
 
-    test('match — full token vocabulary (CONVENTIONS D4) — workdir matches the exact spec cwd known by the framework', () => {
+    test('match — full token vocabulary (rule `no-unknown-token`) — workdir matches the exact spec cwd known by the framework', () => {
         // Given - a scope carrying the spec cwd
         const scope = new CaptureScope('/tmp/spec-abc');
 
@@ -126,7 +126,7 @@ describe('match', () => {
         expect(structuralEquals(match.workdir(), '/tmp/spec-abc', blind)).toBeFalsy();
     });
 
-    test('match — full token vocabulary (CONVENTIONS D4) — every token is capturable via {{type#ref}}', () => {
+    test('match — full token vocabulary (rule `no-unknown-token`) — every token is capturable via {{type#ref}}', () => {
         // Given - a semver captured under #v
         const scope = new CaptureScope();
         expect(structuralEquals('v{{semver#v}}', 'v1.2.3', scope)).toBeTruthy();

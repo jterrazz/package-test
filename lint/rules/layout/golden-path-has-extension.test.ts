@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { c6ToMatchExtension } from './golden-path-has-extension.js';
+import { goldenPathHasExtension } from './golden-path-has-extension.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ const ruleTester = new RuleTester();
 
 const VIOLATION = '/repo/specs/app/widget/widget.test.ts';
 
-ruleTester.run('c6-tomatch-extension', c6ToMatchExtension as unknown as OxlintRule, {
+ruleTester.run('golden-path-has-extension', goldenPathHasExtension as unknown as OxlintRule, {
     invalid: [
         // No extension.
         {

@@ -47,7 +47,7 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/** No `.first()`: playwright's strict mode is the mechanism behind W3. */
+/** No `.first()`: playwright's strict mode is the mechanism behind `descriptor-matches-one-element`. */
 function locate(root: MatchScope, element: ElementRef): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // `exact` is the framework's default, not playwright's.
@@ -176,7 +176,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
     try {
         return await locator.inputValue({ timeout: VALUE_POLL_MS });
     } catch (error) {
-        // A strict-mode violation is `act()`'s W3 refusal; anything else means the field is not there yet.
+        // A strict-mode violation is `act()`'s `descriptor-matches-one-element` refusal; anything else means the field is not there yet.
         if (isStrictViolation(error)) {
             throw error;
         }
@@ -385,7 +385,7 @@ export class PlaywrightAdapter implements BrowserPort {
                 } catch (error) {
                     const evidence = await this.captureEvidence(page);
                     const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                    // A W3 refusal is already complete: re-wrapping would print it twice.
+                    // A `descriptor-matches-one-element` refusal is already complete: re-wrapping would print it twice.
                     if (error instanceof AmbiguousElementError) {
                         error.message += suffix;
                         throw error;

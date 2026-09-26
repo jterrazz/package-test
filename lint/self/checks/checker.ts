@@ -5,11 +5,11 @@ import { checkCapabilityFolder } from './specimen-filed-by-capability.js';
 
 /** `dist/checker.js` imports nothing from here, so no consumer run can reach a self pass. */
 export const SELF_PASS_IDS = [
-    'c35-capability-folder',
-    'i9-source-root',
-    'i10-facet-isolation',
-    'i11-engine-owner',
-    'i12-folder-shape',
+    'specimen-filed-by-capability',
+    'source-root-holds-known-entries',
+    'no-cross-facet-import',
+    'one-owner-per-engine',
+    'folder-named-for-a-concept',
 ] as const;
 
 export type SelfPassId = (typeof SELF_PASS_IDS)[number];

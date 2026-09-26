@@ -1,7 +1,0 @@
-description: a string subject compared to a value past its cap is refused where written
-fixture: ./fixtures/past-cap-string/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/widget/widget.test.ts:6:29  jterrazz-check(c28)

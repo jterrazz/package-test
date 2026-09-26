@@ -9,7 +9,7 @@ import { CliResult } from './cli.result.js';
 
 const UUID = '5b3f6e6e-8f5f-4f7e-9c1d-2a6b7c8d9e0f';
 
-// Given - a fake command output (mocks are code, CONVENTIONS I4)
+// Given - a fake command output (mocks are code, rule `no-module-mock`)
 const commandOutput: CliOutput = {
     exitCode: 0,
     stderr: '',
@@ -73,7 +73,7 @@ describe('CliResult', () => {
         const first = makeResult();
         const second = makeResult();
 
-        // Then - scopes are per-result (refs reset per chain, CONVENTIONS D4)
+        // Then - scopes are per-result (refs reset per chain, rule `no-unknown-token`)
         expect(first.captures).not.toBe(second.captures);
     });
 });

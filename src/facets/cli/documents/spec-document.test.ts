@@ -130,7 +130,7 @@ describe('spec-document', () => {
         ['./tree/', 'names no fixtures/ folder'],
         ['./seeds/fixtures/tree/', 'names seeds/'],
     ])(
-        'spec document — reading — a fixture whose first ground folder is not fixtures/ is refused on its line (C24): %s',
+        'spec document — reading — a fixture whose first ground folder is not fixtures/ is refused on its line (`verb-reads-its-ground-folder`): %s',
         (path, names) => {
             // Given - a path whose first ground folder is another role's, or none
             const source = [
@@ -144,7 +144,7 @@ describe('spec-document', () => {
 
             // Then - the first ground folder is the one judged, as for every other path key
             expect(() => parseSpecDocument(source, 'case.spec.yaml')).toThrow(
-                `case.spec.yaml:2: fixture: reads fixtures/, and "${path}" ${names} — put the file in ./fixtures/ beside the document, or in specs/shared/fixtures/ if several leaves share it (C24)`,
+                `case.spec.yaml:2: fixture: reads fixtures/, and "${path}" ${names} — put the file in ./fixtures/ beside the document, or in specs/shared/fixtures/ if several leaves share it (verb-reads-its-ground-folder)`,
             );
         },
     );

@@ -1,7 +1,0 @@
-description: a module test with no neighbour module is refused
-fixture: ./fixtures/orphan/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          src/util.test.ts:1:1  jterrazz(i2-sibling-test-naming)

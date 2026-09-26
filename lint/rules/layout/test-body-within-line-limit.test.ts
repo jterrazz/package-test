@@ -1,5 +1,5 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { c34TestBodySize, MAX_TEST_LINES } from './test-body-within-line-limit.js';
+import { MAX_TEST_LINES, testBodyWithinLineLimit } from './test-body-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
@@ -17,7 +17,7 @@ function claimedTestOf(gestures: number, claim: number): string {
     ].join('\n');
 }
 
-ruleTester().run('c34-test-body-size', asOxlintRule(c34TestBodySize), {
+ruleTester().run('test-body-within-line-limit', asOxlintRule(testBodyWithinLineLimit), {
     invalid: [
         {
             code: testOf(MAX_TEST_LINES + 1),

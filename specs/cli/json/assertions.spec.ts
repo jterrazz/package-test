@@ -106,10 +106,10 @@ describe('assertions', () => {
             .fixture(directory('../../shared/fixtures/specimen-cli/'))
             .exec('json');
 
-        // Then - the matcher enforces CONVENTIONS C6 frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
+        // Then - the matcher enforces rule `golden-path-has-extension` frozen - a negative assertion; keep it update-safe alongside the rest of the sweep
         expect(() => {
-            // checker-disable-next-line c8 -- negative spec: the golden with no extension exists nowhere, and that IS the behaviour under test
-            // oxlint-disable-next-line jterrazz/c6-tomatch-extension -- negative spec: the missing extension IS the behaviour under test
+            // checker-disable-next-line named-path-exists -- negative spec: the golden with no extension exists nowhere, and that IS the behaviour under test
+            // oxlint-disable-next-line jterrazz/golden-path-has-extension -- negative spec: the missing extension IS the behaviour under test
             expect(result.stdout).toMatch(file('./expected/no-extension'), { frozen: true });
         }).toThrow(/extension is part of the path/u);
     });

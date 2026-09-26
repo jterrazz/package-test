@@ -1,7 +1,0 @@
-description: warns on a raw process.env assignment in a test
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          scenario.test.ts:8:5  jterrazz(e9w-env-assignment-in-test)

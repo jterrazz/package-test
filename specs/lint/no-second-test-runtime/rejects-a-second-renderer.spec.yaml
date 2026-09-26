@@ -1,0 +1,10 @@
+description: rejects a second renderer imported by a test
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/widget.test.ts:1:22  jterrazz(no-second-test-runtime)
+          src/widget.test.ts:2:29  jterrazz(no-second-test-runtime)
+          src/widget.test.ts:3:38  jterrazz(no-second-test-runtime)
+          src/widget.test.ts:5:26  jterrazz(no-second-test-runtime)

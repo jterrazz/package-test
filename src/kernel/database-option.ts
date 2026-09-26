@@ -1,6 +1,6 @@
 import { refusal } from './refusals/refusal.js';
 
-/** Enforces CONVENTIONS A7. */
+/** Enforces rule `database-named-only-when-several`. */
 export function validateDatabaseOption(
     method: string,
     config: { readonly databaseKeys?: readonly string[] | undefined },
@@ -12,7 +12,7 @@ export function validateDatabaseOption(
     }
     if (keys.length >= 2 && !database) {
         throw new Error(
-            refusal('a7-database-runtime', {
+            refusal('database-named-only-when-several-at-runtime', {
                 fix: `pass the database it reads: { database: '${keys[0]}' }, or another declared key`,
                 found: `${method}() names no database, and ${keys.length} databases are declared (${keys.map((k) => `"${k}"`).join(', ')})`,
             }),
@@ -20,7 +20,7 @@ export function validateDatabaseOption(
     }
     if (keys.length === 1 && database) {
         throw new Error(
-            refusal('a7-database-runtime', {
+            refusal('database-named-only-when-several-at-runtime', {
                 fix: `delete { database: '${database}' }`,
                 found: `${method}() names a database, and "${keys[0]}" is the only one declared`,
             }),

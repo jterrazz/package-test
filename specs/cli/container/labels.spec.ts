@@ -32,7 +32,7 @@ function dockerAvailable(): boolean {
 
 const HAS_DOCKER = dockerAvailable();
 
-/* A live container's log stream is cut at an arbitrary instant: targeted probes, D11 scalpel. */
+/* A live container's log stream is cut at an arbitrary instant: targeted probes, `output-asserted-as-a-golden` scalpel. */
 
 describe('labels', () => {
     test.skipIf(!HAS_DOCKER)(
@@ -84,7 +84,7 @@ describe('labels', () => {
     );
 
     test.skipIf(!HAS_DOCKER)(
-        // RUNTIME G3 — the capture is docker-aware: every container a run spawned carries its run label, and the scope's exit removes them.
+        // RUNTIME containers-removed-with-the-run — the capture is docker-aware: every container a run spawned carries its run label, and the scope's exit removes them.
         'dispose removes containers even when the run was never asserted on',
         async () => {
             // Given - the runner's test-run id, read from the injected child env

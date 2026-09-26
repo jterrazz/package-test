@@ -11,7 +11,7 @@ describe('run', () => {
 
         // Then - it is refused, naming the extension a document has
         await expect(
-            // checker-disable-next-line c8 -- the refusal under test fires before the document is read: the path names nothing on purpose
+            // checker-disable-next-line named-path-exists -- the refusal under test fires before the document is read: the path names nothing on purpose
             async () => await run.prepare?.([file('./help.yaml') as never], unread),
         ).rejects.toThrow(/a file not ending in \.spec\.yaml/u);
     });

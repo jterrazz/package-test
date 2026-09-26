@@ -1,8 +1,0 @@
-description: accepts a project named for the facet it collects
-fixture: ./fixtures/compliant/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          vitest.config.ts:6:25  jterrazz(e7w-include-prefix-exists)
-          vitest.config.ts:9:25  jterrazz(e7w-include-prefix-exists)

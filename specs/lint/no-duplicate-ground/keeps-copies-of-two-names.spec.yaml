@@ -1,0 +1,12 @@
+description: --fix moves nothing when the copies' names disagree, since no name is the one to keep
+fixture: ./fixtures/renamed/
+runs:
+    - command: checker . --fix
+      exit: 0
+      stderr: |
+          specs/api/orders/seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
+          specs/api/users/seeds/pair.sql:1:1  jterrazz-check(no-duplicate-ground)
+      files:
+          specs/api/orders/seeds/two-users.sql: exists
+          specs/api/users/seeds/pair.sql: exists
+          specs/shared/seeds: absent

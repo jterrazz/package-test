@@ -6,13 +6,13 @@ import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
 import { lessonParts } from '../../../src/kernel/refusals/lesson.js';
 import { CATALOGUE_CHAPTER } from '../../../src/kernel/refusals/refusal.js';
 import { anchor, spliceCatalog } from '../../catalogue/chapter.js';
+import { FAMILIES } from '../../catalogue/families.js';
 import {
     CHECKER_PASSES,
     consumerCatalog,
-    FAMILIES,
     PROCESS_RULES,
-    RULE_DOCS,
     RUNTIME_RULES,
+    STATIQUE_RULES,
     TYPE_ROWS,
     UPSTREAM_RULES,
 } from '../../catalogue/manifest.js';
@@ -27,7 +27,7 @@ import {
     SELF_CHAPTER,
     SELF_CHECKER_PASSES,
     SELF_PROCESS_RULES,
-    SELF_RULE_DOCS,
+    SELF_STATIQUE_RULES,
     selfCatalog,
 } from './manifest.js';
 
@@ -36,15 +36,9 @@ const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8')
 
 const allRules = { ...plugin.rules, ...selfPlugin.rules };
 
-function ruleFileOf(name: string): string {
-    const files = readdirSync(resolve(ROOT, 'lint/rules'), { recursive: true }).map(String);
-    const file = files.find(
-        (path) =>
-            path.endsWith('.ts') &&
-            !path.endsWith('.test.ts') &&
-            read(`lint/rules/${path}`).includes(`['${name}']`),
-    );
-    return `lint/rules/${file ?? name}`;
+function ruleFileOf(entry: { audience: string; family: string; name: string }): string {
+    const rules = entry.audience === 'self' ? 'lint/self/rules' : 'lint/rules';
+    return `${rules}/${entry.family}/${entry.name}.ts`;
 }
 
 const pluginRules = new Set(Object.keys(allRules));
@@ -53,14 +47,15 @@ function namespaceOf(id: string): string {
     return id in selfPlugin.rules ? 'jterrazz-self' : 'jterrazz';
 }
 
+const STATIQUE_ROWS = [...STATIQUE_RULES, ...SELF_STATIQUE_RULES];
+
 function statiqueRowsOf(audience: string): string[] {
-    return Object.entries({ ...RULE_DOCS, ...SELF_RULE_DOCS })
-        .filter(([, doc]) => doc.audience === audience)
-        .map(([id]) => id)
+    return STATIQUE_ROWS.filter((row) => row.audience === audience)
+        .map((row) => row.name)
         .toSorted();
 }
 
-/** A spec marks the runtime row it proves with `// RUNTIME <ID> — <the sentence>` above its test. */
+/** A spec marks the runtime row it proves with `// RUNTIME <row name> — <the sentence>` above its test. */
 function runtimeMarkers(): Set<string> {
     const found = new Set<string>();
     for (const root of ['specs', 'src']) {
@@ -72,7 +67,7 @@ function runtimeMarkers(): Set<string> {
             ) {
                 continue;
             }
-            for (const match of read(path).matchAll(/\/\/ RUNTIME (?<id>[A-Z]\d+)/gu)) {
+            for (const match of read(path).matchAll(/\/\/ RUNTIME (?<id>[a-z][a-z-]+) —/gu)) {
                 found.add(match.groups?.id ?? '');
             }
         }
@@ -100,8 +95,7 @@ function metaProofs(): Set<string> {
         }
     }
     for (const row of META_ROWS) {
-        const id = row.id.toLowerCase();
-        if (sources.some((text) => text.includes(`${id} —`) || text.includes(row.name))) {
+        if (sources.some((text) => text.includes(row.name))) {
             found.add(row.name);
         }
     }
@@ -123,7 +117,7 @@ function checkerRowsOf(audience: string): string[] {
         .toSorted();
 }
 
-/** Files probing the CLI boundary, plus the D11 kitchen-sink, sit outside the rule↔fixture inventory. */
+/** Files probing the CLI boundary, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
 const CLI_CONTRACT_SPECS = new Set([
     'checker-cli',
     'checker-ratchet',
@@ -173,47 +167,42 @@ const knownNames = (): Set<string> =>
         ...CHECKER_PASS_IDS,
         ...SELF_PASSES,
         ...catalog.map((entry) => entry.name),
-        // Fixture trees and goldens are named after the rule plus their case, so the listing is the vocabulary.
-        ...readdirSync(resolve(ROOT, 'specs/lint/checker/fixtures/lint-violations')),
-        ...readdirSync(resolve(ROOT, 'specs/lint/checker/expected')).map((file) =>
-            file.replace(/\.[a-z]+$/u, ''),
-        ),
     ]);
 
-const rowIds = new Set(catalog.map((entry) => entry.id));
+const NAME = String.raw`[a-z][a-z0-9]*(?:-[a-z0-9]+)*`;
 
-const letters = Object.keys(FAMILIES).join('');
+const TICK = '`';
 
-/** `rule X` / `rules X, Y`, a parenthesised tail (`(C18)`), `CONVENTIONS X/Y`, and a possessive (`D7's`). */
+const CITED = `${TICK}${NAME}${TICK}`;
+
+/** The letters the retired codes were written with: a code cited again resolves to no row. */
+const CODE = String.raw`[ABCDEFGIJKMW]\d+b?w?`;
+
 const citationPatterns = (): RegExp[] => [
+    new RegExp(String.raw`\brules?\s+(${CITED}(?:\s*(?:,|and|or|/)\s*${CITED})*)`, 'gu'),
+    new RegExp(String.raw`(?<![@\w./-])jterrazz(?:-self)?/(${NAME})(?![\w/-])`, 'gu'),
+    new RegExp(String.raw`\bjterrazz(?:-self)?-check[(/](${NAME})`, 'gu'),
     new RegExp(
-        String.raw`\brules?\s+((?:[${letters}]\d+w?)(?:\s*(?:,|and|/)\s*[${letters}]\d+w?)*)`,
+        String.raw`checker-disable(?:-next)?-line\s+((?:${NAME}|\*)(?:,\s*(?:${NAME}|\*))*)(?=\s+--|\s*$|${TICK})`,
+        'giu',
+    ),
+    new RegExp(
+        String.raw`\b(?:rules?|CONVENTIONS)\s+(${CODE}(?:\s*(?:,|and|/)\s*${CODE})*)\b`,
         'gu',
     ),
-    new RegExp(String.raw`\bCONVENTIONS\s+((?:[${letters}]\d+w?)(?:/[${letters}]\d+w?)*)`, 'gu'),
-    new RegExp(String.raw`\(([${letters}]\d+w?)(?:\s+—[^)]*)?\)`, 'gu'),
-    new RegExp(String.raw`\b([${letters}]\d+w?)'s\b`, 'gu'),
+    new RegExp(String.raw`\((${CODE})(?:\s+—[^)]*)?\)`, 'gu'),
+    new RegExp(String.raw`\b(${CODE})'s\b`, 'gu'),
 ];
 
-const idsCitedIn = (text: string): string[] =>
+const idsCitedIn = (line: string): string[] =>
     citationPatterns().flatMap((pattern) =>
-        [...text.matchAll(pattern)].flatMap((match) =>
+        [...line.matchAll(pattern)].flatMap((match) =>
             (match[1] ?? '')
-                .split(/[\s,/]+|and/u)
-                .filter(Boolean)
-                .map((id) => id.replace(/w$/u, '')),
+                .replaceAll('`', '')
+                .split(/[\s,/]+/u)
+                .filter((id) => !['', '*', 'and', 'or'].includes(id)),
         ),
     );
-
-const namesCitedIn = (line: string): string[] =>
-    [
-        ...line.matchAll(
-            new RegExp(
-                String.raw`(?:^|[^\w\-#])([${letters.toLowerCase()}]\d+w?(?:-[a-z0-9]+)+)(?![\w-])`,
-                'gu',
-            ),
-        ),
-    ].map((match) => match[1] ?? '');
 
 const rulesOf = (path: string): string[] => {
     const parsed: unknown = JSON.parse(read(path));
@@ -241,7 +230,7 @@ const e2eSpecIds = new Set([
         .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
 ]);
 
-/** Meta-test K8 — every relative link and heading anchor of the corpus resolves, generated pages included. */
+/** Meta-test `links-resolve` — every relative link and heading anchor of the corpus resolves, generated pages included. */
 function slugOf(heading: string): string {
     return heading
         .trim()
@@ -353,11 +342,11 @@ describe('manifest', () => {
 
     test('conventions catalogue — completeness (meta-test) — every shipped plugin rule carries a statique meta.docs entry', () => {
         // Given - each rule of either plugin, and the manifest read by rule id
-        const docsById: Record<string, unknown> = { ...RULE_DOCS, ...SELF_RULE_DOCS };
+        const docsById = new Map(STATIQUE_ROWS.map((row) => [row.name, row]));
         for (const [id, rule] of Object.entries(allRules)) {
             // Then - it attaches its manifest doc as meta.docs (channel statique)
             expect(rule.meta?.docs, `rule ${id} is missing meta.docs`).toBeDefined();
-            expect(rule.meta?.docs).toBe(docsById[id]);
+            expect(rule.meta?.docs).toBe(docsById.get(id));
             expect(rule.meta?.docs?.channel).toBe('statique');
         }
     });
@@ -385,7 +374,7 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — k5 — no catalogue sentence has gone back to French', () => {
+    test('conventions catalogue — completeness (meta-test) — `catalogue-in-english` — no catalogue sentence has gone back to French', () => {
         // Given - the tokens the manifest actually carried while it was French. A deny-list of the KNOWN corpus, not a language heuristic: the point is to catch a row being written back in the old language, and a heuristic would argue with every borrowed word the domain has
         const FRENCH = [
             'aucun',
@@ -426,7 +415,7 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — k3 — every diagnostic reads at its own row, on a heading that exists', () => {
+    test('conventions catalogue — completeness (meta-test) — `message-reads-its-row` — every diagnostic reads at its own row, on a heading that exists', () => {
         // Given - the rules of both plugins, whose messages carry a generated `read:` part, and the chapter each audience's rows live in
         for (const [name, rule] of Object.entries(allRules)) {
             const chapter = rule.meta.docs.audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
@@ -462,16 +451,28 @@ describe('manifest', () => {
             'specification',
         ]);
 
-        // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and W2 was one — any file with a `.visit/.render/.open` scenario was judged
+        // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one — any file with a `.visit/.render/.open` scenario was judged
         for (const entry of catalog) {
             if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
-            const source = read(ruleFileOf(entry.name));
+            const source = read(ruleFileOf(entry));
             expect(
                 source.includes('identityOf(') || source.includes('isTestRole('),
                 `${entry.name} states reach \`${entry.reach}\` and reads no role`,
             ).toBe(true);
+        }
+    });
+
+    test('conventions catalogue — completeness (meta-test) — a row that reports states its severity, and no other row does', () => {
+        // Given - the two channels whose findings carry a level: a plugin rule and a checker pass
+        const REPORTING = new Set(['checker', 'statique']);
+
+        // Then - each of their rows states `error` or `warn`, since the plugin enables a rule at its row's level, and a row of any other channel states none
+        for (const entry of catalog) {
+            expect(entry.severity !== undefined, `${entry.name} severity`).toBe(
+                REPORTING.has(entry.channel),
+            );
         }
     });
 
@@ -493,7 +494,7 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — k12 — every catalogue row declares ONE audience', () => {
+    test('conventions catalogue — completeness (meta-test) — `rule-declares-its-audience` — every catalogue row declares ONE audience', () => {
         // Given - the two audiences a rule can have
         const AUDIENCES = new Set(['consumer', 'self']);
 
@@ -503,7 +504,7 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — k12 — a row lives in the manifest of its audience', () => {
+    test('conventions catalogue — completeness (meta-test) — `rule-declares-its-audience` — a row lives in the manifest of its audience', () => {
         // Given - the two manifests: the one the published code reads, and the one no published entry imports
         // Then - the published manifest holds consumer rows alone, the self manifest self rows alone, and together they are the whole catalogue
         expect(audiences(consumerCatalog)).toStrictEqual(['consumer']);
@@ -521,27 +522,43 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — the channels answer for themselves (meta-test) — k2 — a citation that resolves to nothing is caught, in every shape it takes', () => {
-        // Given - one false id in each of the four citation shapes, beside a true one, and a false name beside a true one
-        const ids = idsCitedIn("see rule C99, (C98 — gone), CONVENTIONS C97/C12, and C96's reach");
-        const names = namesCitedIn('`c99-nothing-here` and `c12-spec-file-name`');
+    test('conventions catalogue — the channels answer for themselves (meta-test) — `cited-rules-exist` — a citation that resolves to nothing is caught, in every shape it takes', () => {
+        // Given - a false name in each shape a rule is cited by, beside a true one, and the retired letter codes in the shapes they took
+        const ids = [
+            'see rule `gone-rule`, rules `no-sleep` and `lost-rule`,',
+            '`jterrazz/retired-rule`, `jterrazz-check(lost-pass)`, @jterrazz/test',
+            '// checker-disable-next-line no-sleep, stale-pass -- a reason',
+            "and rule C99, (C98 — gone), CONVENTIONS C97/C12, C96's reach",
+        ].flatMap(idsCitedIn);
+        const unresolved = new Set(ids.filter((id) => !knownNames().has(id)));
 
-        // Then - exactly the false ones resolve to nothing
-        expect(ids.filter((id) => !rowIds.has(id)).toSorted()).toStrictEqual([
+        // Then - exactly the false ones resolve to nothing, every letter code among them
+        expect([...unresolved].toSorted()).toStrictEqual([
+            'C12',
             'C96',
             'C97',
             'C98',
             'C99',
+            'gone-rule',
+            'lost-pass',
+            'lost-rule',
+            'retired-rule',
+            'stale-pass',
         ]);
-        expect(names.filter((name) => !knownNames().has(name))).toStrictEqual(['c99-nothing-here']);
     });
 
-    test('conventions catalogue — the channels answer for themselves (meta-test) — k2 — every id the corpus cites resolves to a row', () => {
-        // Given - every citation shape the corpus uses, in the chapters, the skill, the messages the plugin ships and the comments of the code that implements them. The families are the vocabulary: a citation is a family letter and a number, and nothing else is one
+    test('conventions catalogue — the channels answer for themselves (meta-test) — `cited-rules-exist` — every rule the corpus cites resolves to a row', () => {
+        // Given - every citation the corpus writes, in the chapters, the skill, the messages the plugin ships and the code that implements them. A retired rule leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
         const cited = new Map<string, string>();
         const collect = (text: string, where: string): void => {
-            for (const id of idsCitedIn(text)) {
-                cited.set(id, where);
+            for (const line of text.split('\n')) {
+                // A migration sentence names what it retired: those names are gone by design.
+                if (line.includes('no longer exist')) {
+                    continue;
+                }
+                for (const id of idsCitedIn(line)) {
+                    cited.set(id, where);
+                }
             }
         };
         for (const file of [...citingFiles(), ...citingSources()]) {
@@ -554,49 +571,22 @@ describe('manifest', () => {
         }
 
         // Then - each resolves to a row a reader can open
+        const names = knownNames();
         expect(cited.size).toBeGreaterThan(0);
         for (const [id, where] of cited) {
-            expect(rowIds.has(id), `${where} cites rule ${id}, which resolves to no row`).toBe(
-                true,
-            );
+            expect(names.has(id), `${where} cites rule ${id}, which resolves to no row`).toBe(true);
         }
     });
 
-    test('conventions catalogue — the channels answer for themselves (meta-test) — k2 — every rule NAME the corpus cites resolves to a rule or a pass', () => {
-        // Given - every implementation name the corpus spells, in the chapters, the skill and the code. A retired rule leaves its name behind in an example a consumer copies, and oxlint refuses a config naming a rule it does not know — the whole file, not the line
-        const names = knownNames();
-        const cited = new Map<string, string>();
-        for (const file of [...citingFiles(), ...citingSources()]) {
-            for (const line of read(file).split('\n')) {
-                // A migration sentence names what it retired: those names are gone by design.
-                if (line.includes('no longer exist')) {
-                    continue;
-                }
-                for (const name of namesCitedIn(line)) {
-                    cited.set(name, file);
-                }
-            }
-        }
-
-        // Then - each names something that exists
-        expect(cited.size).toBeGreaterThan(0);
-        for (const [name, where] of cited) {
-            expect(
-                names.has(name),
-                `${where} names \`${name}\`, which is no rule of this plugin`,
-            ).toBe(true);
-        }
-    });
-
-    test('conventions catalogue — the channels answer for themselves (meta-test) — k4 — the reach fixture proves a rule of every reach the catalogue states', () => {
+    test('conventions catalogue — the channels answer for themselves (meta-test) — `every-reach-proven` — the reach fixture proves a rule of every reach the catalogue states', () => {
         // Given - the reaches the plugin's rows state, and the rules the reach meta-test reads off its one run
         const reachOf = new Map(
             Object.entries(plugin.rules).map(([id, rule]) => [id, rule.meta?.docs?.reach]),
         );
         const named = [
-            ...read('specs/lint/meta/k4-reach-per-path.test.ts')
+            ...read('specs/lint/meta/every-reach-proven.test.ts')
                 .replaceAll(/\.not\.toContain\(\s*'[^']*',?\s*\)/gu, '')
-                .matchAll(/'(?<id>[a-z]\d+w?-[a-z0-9-]+)'/gu),
+                .matchAll(/'(?<id>[a-z][a-z0-9-]+)'/gu),
         ]
             .map((match) => match.groups?.id ?? '')
             .filter((id) => reachOf.has(id));
@@ -607,7 +597,7 @@ describe('manifest', () => {
         );
     });
 
-    test('conventions catalogue — the channels answer for themselves (meta-test) — m1 — every constructor has a specs tree in this package', () => {
+    test('conventions catalogue — the channels answer for themselves (meta-test) — `every-constructor-has-specs` — every constructor has a specs tree in this package', () => {
         // Given - the six constructors, and the trees this package specifies itself on
         const constructors = ['api', 'cli', 'integration', 'job', 'mobile', 'website'];
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
@@ -629,10 +619,7 @@ describe('manifest', () => {
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — every channel answers for its rows the way the channel can', () => {
         // Given - the seven channels, each with the proof its rows owe
-        const proofs: [
-            string,
-            (entry: { id: string; name: string; upstream?: string }) => boolean,
-        ][] = [
+        const proofs: [string, (entry: { name: string; upstream?: string }) => boolean][] = [
             ['statique', (entry) => pluginRules.has(entry.name)],
             ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name) || SELF_PASSES.has(entry.name)],
             [
@@ -641,8 +628,14 @@ describe('manifest', () => {
                     entry.upstream !== undefined &&
                     read('lint/rulebook/vitest.test.ts').includes(`optionOf('${entry.upstream}')`),
             ],
-            ['type', (entry) => read('src/type-channel.test-d.ts').includes(entry.id)],
-            ['runtime', (entry) => runtimeMarkers().has(entry.id)],
+            [
+                'type',
+                (entry) =>
+                    [`// ${entry.name} —`, `@ts-expect-error ${entry.name} —`].some((marker) =>
+                        read('src/type-channel.test-d.ts').includes(marker),
+                    ),
+            ],
+            ['runtime', (entry) => runtimeMarkers().has(entry.name)],
             ['meta', (entry) => metaProofs().has(entry.name)],
             ['process', (entry) => entry.name.length > 0],
         ];
@@ -725,7 +718,7 @@ describe('manifest', () => {
     test('conventions catalogue — E2E inventory (meta-test) — the reach config enables exactly the rules the standard one does', () => {
         // Given - the two standalone configs the lint E2E specs run with
 
-        // Then - the reach fixture is judged by the SAME catalogue; only C1's declared depth differs, which is what the fixture is there to state
+        // Then - the reach fixture is judged by the SAME catalogue; only `specs-at-declared-depth`'s declared depth differs, which is what the fixture is there to state
         expect(
             rulesOf('specs/shared/fixtures/lint-cli/oxlint.reach.json').toSorted(),
         ).toStrictEqual(rulesOf('specs/shared/fixtures/lint-cli/oxlint.e2e.json').toSorted());
@@ -756,7 +749,7 @@ describe('manifest', () => {
         expect([...documented].sort()).toStrictEqual([...TOKEN_KINDS].sort());
     });
 
-    test('conventions catalogue — the corpus’ own coordinates (meta-test K8) — k8 — every relative link lands on a file, and every anchor on a heading', () => {
+    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every relative link lands on a file, and every anchor on a heading', () => {
         // Given - the pages, and the anchors each of them offers
         const texts = new Map(
             pages().map((path) => [path, readFileSync(resolve(ROOT, path), 'utf8')]),
@@ -782,7 +775,7 @@ describe('manifest', () => {
         expect(coordinates.length).toBeGreaterThan(300);
     });
 
-    test('conventions catalogue — the corpus’ own coordinates (meta-test K8) — k8 — every `docs/NN` the source cites names a chapter that exists', () => {
+    test('conventions catalogue — the corpus’ own coordinates (meta-test) — `links-resolve` — every `docs/NN` the source cites names a chapter that exists', () => {
         // Given - the chapter numbers the corpus actually has, and every one the source names — a test TITLE and a comment cite chapters too, and a renumbering moves the files while leaving those behind
         const chapters = new Set(
             readdirSync(resolve(ROOT, 'docs'))

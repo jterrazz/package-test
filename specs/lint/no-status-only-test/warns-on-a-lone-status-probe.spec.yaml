@@ -1,0 +1,7 @@
+description: warns on a test whose only assertion is a status probe
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/api/events/events.test.ts:4:1  jterrazz(no-status-only-test)

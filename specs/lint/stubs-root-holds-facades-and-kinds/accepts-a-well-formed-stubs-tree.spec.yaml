@@ -1,0 +1,7 @@
+description: accepts a well-formed stubs/ tree
+fixture: ./fixtures/compliant/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          specs/app/widget/widget.test.ts:7:1  jterrazz(no-status-only-test)

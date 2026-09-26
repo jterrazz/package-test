@@ -1,0 +1,8 @@
+description: a seed two leaves hold byte for byte is a warning on each copy
+fixture: ./fixtures/copied/
+runs:
+    - command: checker .
+      exit: 0
+      stderr: |
+          specs/api/orders/seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
+          specs/api/users/seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)

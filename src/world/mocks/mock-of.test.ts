@@ -11,7 +11,7 @@ type Gateway = {
 
 type Assert<Row extends true> = Row;
 
-// @ts-expect-error -- M2: a primitive is not a port, `T extends object`
+// @ts-expect-error -- `mock-of-needs-a-port`: a primitive is not a port, `T extends object`
 export type PrimitiveIsRefused = ReturnType<typeof mockOf<string>>;
 
 export type DeepIsTheDefault = Assert<

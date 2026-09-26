@@ -134,11 +134,11 @@ function migrateSource(text: string, file: string, root: string): string {
 }
 
 const RENAMED_RULES: Readonly<Record<string, string>> = {
-    'c10-contracts-boundary': 'c10-stubs-boundary',
-    'c11-contract-data-pairing': 'c11-stub-data-pairing',
-    'c2-http-only-requests': 'c2-request-extension',
-    'c4-contract-shape': 'c4-stub-shape',
-    'd8w-text-bypass': 'd8w-raw-bypass',
+    'c10-contracts-boundary': 'stubs-imported-through-facade',
+    'c11-contract-data-pairing': 'stub-data-has-a-builder',
+    'c2-http-only-requests': 'request-file-extension-known',
+    'c4-contract-shape': 'stubs-root-holds-facades-and-kinds',
+    'd8w-text-bypass': 'no-raw-bypass',
 };
 
 const QUOTES = new Set(["'", '"', '`']);

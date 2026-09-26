@@ -52,7 +52,7 @@ export function routeRequest(
     if (values === undefined) {
         if (names.length > 0) {
             throw new TypeError(
-                refusal('b12-route-params-runtime', {
+                refusal('route-written-as-template-at-runtime', {
                     fix: `write ${callWith(method, template, names)}`,
                     found: `.${method.toLowerCase()}(${JSON.stringify(template)}) names ${names.map((name) => `:${name}`).join(', ')} and is handed no params`,
                 }),
@@ -68,7 +68,7 @@ export function routeRequest(
             ...extra.map((name) => `\`${name}\` is no parameter of it`),
         ].join(', ');
         throw new TypeError(
-            refusal('b12-route-params-runtime', {
+            refusal('route-written-as-template-at-runtime', {
                 fix: `write ${callWith(method, template, names)}`,
                 found: `.${method.toLowerCase()}(${JSON.stringify(template)}, { params }): ${told}`,
             }),

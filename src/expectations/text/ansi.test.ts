@@ -7,7 +7,7 @@ describe('stripAnsiCodes', () => {
         // Given - a report line a linter coloured: red, bold, then a reset
         const coloured = '\u001B[31m\u001B[1merror\u001B[0m unused-var.ts:1:7';
 
-        // Then - what a golden compares is the text alone (D6)
+        // Then - what a golden compares is the text alone (`no-transform-duplicating-tokens`)
         expect(stripAnsiCodes(coloured)).toBe('error unused-var.ts:1:7');
     });
 });

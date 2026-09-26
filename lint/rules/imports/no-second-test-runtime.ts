@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { importSourceVisitor } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
 import type { FileRole } from '../../reading/role.js';
@@ -69,7 +68,7 @@ const GROUPS: Group[] = [
 const REACHED = new Set<FileRole>(['component', 'module', 'spec', 'specification']);
 
 /** `react-dom/server` alone has a role of its own: in a `.test.tsx` rendering to a string is legitimate. */
-export const f6NoForeignTestRuntime: LintRule = {
+export const noSecondTestRuntime: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             ...importSourceVisitor(({ node, source }) => {
@@ -91,8 +90,8 @@ export const f6NoForeignTestRuntime: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['f6-no-foreign-test-runtime'],
-        messages: lessons('f6-no-foreign-test-runtime', {
+        docs: rowOf('no-second-test-runtime'),
+        messages: lessons('no-second-test-runtime', {
             foreignRuntime: {
                 found: '`{{source}}` is a second test runtime in a test file',
                 fix: '{{fix}}',

@@ -50,7 +50,7 @@ type FailureContext = {
     filePath: string;
 };
 
-/** ANSI stripped (D6) and `transform` applied, nothing else: a block scalar states its own final newline. */
+/** ANSI stripped (`no-transform-duplicating-tokens`) and `transform` applied, nothing else: a block scalar states its own final newline. */
 function comparable(raw: string, transform?: (text: string) => string): string {
     const stripped = stripAnsiCodes(raw);
     return transform ? transform(stripped) : stripped;
@@ -197,7 +197,7 @@ function assertRun(
     }
 }
 
-/** Placeholders of the previous golden preserved by pattern (D5); an emptied stream loses its key. */
+/** Placeholders of the previous golden preserved by pattern (`no-volatile-literal`); an emptied stream loses its key. */
 function updates(outcomes: RunOutcome[], scope: CaptureScope) {
     return outcomes.map(({ actual, run, stderr, stdout }) => ({
         exitCode: actual.exitCode,

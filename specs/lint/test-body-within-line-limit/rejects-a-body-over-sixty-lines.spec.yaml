@@ -1,0 +1,7 @@
+description: a test whose body spans more than sixty lines of gestures is refused at its function
+fixture: ./fixtures/long/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/events/list/pagination.spec.ts:6:43  jterrazz(test-body-within-line-limit)

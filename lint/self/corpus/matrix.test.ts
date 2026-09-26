@@ -18,9 +18,9 @@ const ROOT = resolve(import.meta.dirname, '../../..');
 
 const read = (relative: string): string => readFileSync(resolve(ROOT, relative), 'utf8');
 
-/** Meta-test K6 (`k6-matrix-no-empty-cell`) — a capability a facet declares with no test file exercising it fails, unless its row names the reason. */
+/** Meta-test `every-capability-exercised` (`every-capability-exercised`) — a capability a facet declares with no test file exercising it fails, unless its row names the reason. */
 describe('matrix', () => {
-    test('capability matrix (meta-test K6) — every declared capability is exercised, or says why it is not', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — every declared capability is exercised, or says why it is not', () => {
         // Given - the matrix derived from the declaration and the package's own trees
         const rows = matrixRows(ROOT);
 
@@ -36,7 +36,7 @@ describe('matrix', () => {
         );
     });
 
-    test('capability matrix (meta-test K6) — a call counts where it is written in code, never where a string or a comment names it', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — a call counts where it is written in code, never where a string or a comment names it', () => {
         // Given - a cli tree whose one file names `.exec(` in a string and a comment, and another that calls it
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -58,7 +58,7 @@ describe('matrix', () => {
         }
     });
 
-    test('capability matrix (meta-test K6) — a call counts from the syntax tree, however a formatter splits it', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — a call counts from the syntax tree, however a formatter splits it', () => {
         // Given - a cli file whose golden call the formatter broke after each paren
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -79,7 +79,7 @@ describe('matrix', () => {
         }
     });
 
-    test('capability matrix (meta-test K6) — a glob in a string opens no comment, and the option after it still counts', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — a glob in a string opens no comment, and the option after it still counts', () => {
         // Given - a config whose first project collects `x/*` + `/*.yaml`, and whose component project states its clock after it
         const root = mkdtempSync(join(tmpdir(), 'matrix-'));
         try {
@@ -96,7 +96,7 @@ describe('matrix', () => {
         }
     });
 
-    test('capability matrix (meta-test K6) — an exemption excuses an empty cell, and goes the day the cell fills', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — an exemption excuses an empty cell, and goes the day the cell fills', () => {
         // Given - every reason a capability row states, and the cell it states it for. A token row's reason is the engine's and holds whatever a facet's goldens carry, so it is no debt to pay off
         const stale = matrixRows(ROOT)
             .filter((row) => row.capability.group !== 'Token')
@@ -111,19 +111,19 @@ describe('matrix', () => {
         expect(stale, 'an exemption on a cell a spec now fills').toStrictEqual([]);
     });
 
-    test('capability matrix (meta-test K6) — the committed projection is byte-identical to a fresh generation', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — the committed projection is byte-identical to a fresh generation', () => {
         // Given - the matrix `npm run docs` splices into chapter 03
         // Then - regenerating reproduces it exactly (edit the source, not the projection)
         expect(spliceMatrix(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
     });
 
-    test('capability matrix (meta-test K6) — the layered reading is byte-identical to a fresh generation', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — the layered reading is byte-identical to a fresh generation', () => {
         // Given - the layers block chapter 03 carries
         // Then - regenerating reproduces it exactly, counts included
         expect(spliceLayers(read('docs/03-testing.md'), ROOT)).toBe(read('docs/03-testing.md'));
     });
 
-    test('capability matrix (meta-test K6) — every layer of the reading carries files', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — every layer of the reading carries files', () => {
         // Given - the four layers the chapter publishes
         // Then - none of them is a claim with nothing behind it
         const found = layers(ROOT);
@@ -133,7 +133,7 @@ describe('matrix', () => {
         }
     });
 
-    test('capability matrix (meta-test K6) — the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
+    test('capability matrix (meta-test `every-capability-exercised`) — the meta-test layer counts the files the meta-test channel lists under `lint/`', () => {
         // Given - the layer, and the channel's own rows outside the end-to-end suite
         const layer = layers(ROOT).find((one) => one.layer === 'Meta-tests');
         const listed = metaTests(ROOT).filter((row) => !row.file.startsWith('specs/'));

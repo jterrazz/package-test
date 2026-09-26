@@ -108,7 +108,7 @@ function inlineSeedsIn(file: string): InlineSeed[] {
             statements,
         });
     }
-    const suppressed = suppressedLines(source, 'c28');
+    const suppressed = suppressedLines(source, 'ground-shared-or-inline');
     return seeds.filter((seed) => !suppressed.has(seed.line));
 }
 
@@ -125,7 +125,7 @@ export function checkInlineSeeds(rootDir: string): TokenViolation[] {
         fix: `write the statements to ./${GROUND_SEEDS}/${seed.name}.sql and seed it with file('./${GROUND_SEEDS}/${seed.name}.sql') — \`make fix\` writes the file`,
         found: 'SQL written in the test, tagged `sql`',
         line: seed.line,
-        rule: 'c28-ground-shared-or-inline' as const,
+        rule: 'ground-shared-or-inline' as const,
         severity: 'error' as const,
     }));
 }

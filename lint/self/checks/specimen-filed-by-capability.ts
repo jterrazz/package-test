@@ -73,7 +73,7 @@ function checkComponentTree(specsRoot: string): TokenViolation[] {
         const line = firstCodeLine(text);
         if (
             (folders.length === 1 && vocabulary.has(folder)) ||
-            suppressedLines(text, 'c35').has(line)
+            suppressedLines(text, 'specimen-filed-by-capability').has(line)
         ) {
             return [];
         }
@@ -89,14 +89,14 @@ function checkComponentTree(specsRoot: string): TokenViolation[] {
                 ),
                 found: `a file of the component tree, filed under \`${shown}/\``,
                 line,
-                rule: 'c35-capability-folder' as const,
+                rule: 'specimen-filed-by-capability' as const,
                 severity: 'error' as const,
             },
         ];
     });
 }
 
-/** Reported at the file's first line of code, so a `checker-disable-next-line c35 -- <reason>` above it silences the finding. */
+/** Reported at the file's first line of code, so a `checker-disable-next-line specimen-filed-by-capability -- <reason>` above it silences the finding. */
 export function checkCapabilityFolder(specsRoot: string): TokenViolation[] {
     return [...checkSpecimenSpecs(specsRoot), ...checkComponentTree(specsRoot)];
 }
@@ -116,7 +116,7 @@ function checkSpecimenSpecs(specsRoot: string): TokenViolation[] {
         if (
             specimen === undefined ||
             (folders.length === 1 && vocabulary.has(folder)) ||
-            suppressedLines(text, 'c35').has(line)
+            suppressedLines(text, 'specimen-filed-by-capability').has(line)
         ) {
             return [];
         }
@@ -127,7 +127,7 @@ function checkSpecimenSpecs(specsRoot: string): TokenViolation[] {
                 fix: fixOf(facet, '<aspect>.spec.ts', vocabulary),
                 found: `a spec of the specimen \`${SHARED_GROUND}/fixtures/${specimen}\`, filed under \`${shown}/\``,
                 line,
-                rule: 'c35-capability-folder' as const,
+                rule: 'specimen-filed-by-capability' as const,
                 severity: 'error' as const,
             },
         ];

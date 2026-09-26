@@ -2,8 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
 import { isStubKind, STUB_KINDS } from '../../../src/world/stubs/kinds.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -183,7 +182,7 @@ function compositionBuilder(node: AstNode): string | undefined {
     return undefined;
 }
 
-/** A sibling facade's named exports are scenarios, compositions by C4. */
+/** A sibling facade's named exports are scenarios, compositions by `stubs-root-holds-facades-and-kinds`. */
 function compositionNames(node: AstNode, names: Set<string>): void {
     const found =
         node.type === 'ImportDeclaration' ? facadeImports(node) : [compositionBuilder(node)];
@@ -332,7 +331,7 @@ function checkOf(context: Context): Check | undefined {
 }
 
 /** The folder carries the kind, so a unit calling another kind's builder is an error. */
-export const c4StubShape: LintRule = {
+export const stubsRootHoldsFacadesAndKinds: LintRule = {
     createOnce(context: Context): Visitor {
         let check: Check | undefined;
         return {
@@ -346,8 +345,8 @@ export const c4StubShape: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c4-stub-shape'],
-        messages: lessons('c4-stub-shape', {
+        docs: rowOf('stubs-root-holds-facades-and-kinds'),
+        messages: lessons('stubs-root-holds-facades-and-kinds', {
             badKindDir: {
                 found: '`stubs/{{entry}}/` is no stub kind',
                 fix: 'move its units into the folder of the builder they call — one of {{kinds}}',

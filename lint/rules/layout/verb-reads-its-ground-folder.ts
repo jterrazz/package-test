@@ -7,8 +7,7 @@ import {
     GROUND_SEEDS,
     isGroundName,
 } from '../../../src/kernel/files/ground.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -21,7 +20,7 @@ import { identityOf } from '../../reading/linted-file.js';
 import { isTestRole } from '../../reading/role.js';
 import type { LintRule, Visitor } from '../rule.js';
 
-/** A document that is a spec stands beside its test (C16); one that is an input to a negative spec is file material, under `fixtures/`. */
+/** A document that is a spec stands beside its test (`no-document-in-ground`); one that is an input to a negative spec is file material, under `fixtures/`. */
 const ROLES: Record<string, { argument: number; grounds: readonly (string | undefined)[] }> = {
     fixture: { argument: 0, grounds: [GROUND_FIXTURES] },
     post: { argument: 1, grounds: [GROUND_REQUESTS] },
@@ -65,7 +64,7 @@ function groundOf(path: string): string | undefined {
 }
 
 /** Judged by the first ground folder the literal path passes through; a computed path is out of reach. */
-export const c24GroundRole: LintRule = {
+export const verbReadsItsGroundFolder: LintRule = {
     createOnce(context: Context): Visitor {
         let bindings = new Map<string, AstNode[]>();
         return {
@@ -117,8 +116,8 @@ export const c24GroundRole: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c24-ground-role'],
-        messages: lessons('c24-ground-role', {
+        docs: rowOf('verb-reads-its-ground-folder'),
+        messages: lessons('verb-reads-its-ground-folder', {
             crossed: {
                 found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
                 fix: 'move the file to {{where}}, and name it from there',

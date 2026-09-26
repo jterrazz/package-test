@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     identifierName,
@@ -36,7 +35,7 @@ function implementationOf(node: AstNode): AstNode | undefined {
 }
 
 /** A timer inside a double's implementation stages the world (a clone that settles late) and is not the test waiting. */
-export const j2NoSleep: LintRule = {
+export const noSleep: LintRule = {
     createOnce(context: Context): Visitor {
         // The walk is top-down, so a double's span is recorded before anything inside it: the plugin API gives no parent pointer.
         let doubles: { end: number; start: number }[] = [];
@@ -94,8 +93,8 @@ export const j2NoSleep: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['j2-no-sleep'],
-        messages: lessons('j2-no-sleep', {
+        docs: rowOf('no-sleep'),
+        messages: lessons('no-sleep', {
             sleep: {
                 found: 'an arbitrary sleep in a test',
                 fix: 'wait on what the sleep stands for: `await waitUntil(() => <condition>)`, or `see()`/`gone()` inside a scenario',

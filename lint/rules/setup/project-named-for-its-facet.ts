@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import {
     collectedSegments,
@@ -13,7 +12,7 @@ import { identityOf } from '../../reading/linted-file.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 /** Read from the glob and the config's place in its package, never the absolute path: a checkout under a folder called `specs` collects nothing of the kind. */
-export const e4wProjectBinding: LintRule = {
+export const projectNamedForItsFacet: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'config',
@@ -51,8 +50,8 @@ export const e4wProjectBinding: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['e4w-project-binding'],
-        messages: lessons('e4w-project-binding', {
+        docs: rowOf('project-named-for-its-facet'),
+        messages: lessons('project-named-for-its-facet', {
             nameTheFacet: {
                 found: 'the project `{{name}}` collects `specs/{{facet}}/**`',
                 fix: 'name it `{{facet}}`, so `--project {{facet}}` means the same in every repository',

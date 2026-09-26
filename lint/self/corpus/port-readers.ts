@@ -3,7 +3,7 @@ import { join, relative, resolve } from 'node:path';
 
 import { treeEntries } from '../../../src/kernel/files/git-tree.js';
 
-/** Meta-test K9: a picked-then-bound port is a window another server can take, so a server binds 0 and announces; nothing on the host reads `PORT`. A folder holding a `Dockerfile` is a container's, whose ports are its own. */
+/** Meta-test `server-binds-port-zero`: a picked-then-bound port is a window another server can take, so a server binds 0 and announces; nothing on the host reads `PORT`. A folder holding a `Dockerfile` is a container's, whose ports are its own. */
 
 /** The proof of the PORT form itself: its children report the port they were handed and never bind it. */
 const PORT_FORM_PROOF = 'src/world/services/process/serve.test.ts';

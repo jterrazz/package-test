@@ -13,7 +13,6 @@ import {
     formatViolations,
     runAllChecks,
 } from './checker.js';
-import { codeOf } from './code.js';
 import { fixPoolFixtures } from './crossfile.js';
 import { checkSpecOutsideSpecs } from './file-suffix-matches-place.js';
 import { readManifest } from './members.js';
@@ -44,12 +43,12 @@ function repository(files: string[], add: string[], ignore = ''): string {
 }
 function findings(root: string, rule: string): string[] {
     return runAllChecks(join(root, 'specs'))
-        .filter((violation) => violation.rule === rule || codeOf(violation.rule) === rule)
+        .filter((violation) => violation.rule === rule)
         .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
 function singleReaderPool(git: boolean): string {
-    const root = mkdtempSync(join(tmpdir(), 'checker-c14-'));
+    const root = mkdtempSync(join(tmpdir(), 'checker-pool-'));
     mkdirSync(join(root, 'specs', 'shared', 'fixtures', 'app'), { recursive: true });
     mkdirSync(join(root, 'specs', 'api'), { recursive: true });
     writeFileSync(join(root, 'specs', 'shared', 'fixtures', 'app', 'index.txt'), 'app\n');
@@ -64,7 +63,7 @@ function singleReaderPool(git: boolean): string {
     return root;
 }
 describe('checker', () => {
-    test('conventions checker — findUnknownTokens (D4) — flags an identifier-shaped token outside the vocabulary', () => {
+    test('conventions checker — findUnknownTokens (`no-unknown-token`) — flags an identifier-shaped token outside the vocabulary', () => {
         // Given - a fixture line with one unknown and one known token
         const violations = findUnknownTokens('user {{userid}} created at {{iso8601}}');
 
@@ -72,7 +71,7 @@ describe('checker', () => {
         expect(violations).toStrictEqual([{ line: 1, token: '{{userid}}' }]);
     });
 
-    test('conventions checker — findUnknownTokens (D4) — accepts every known token, with and without capture refs', () => {
+    test('conventions checker — findUnknownTokens (`no-unknown-token`) — accepts every known token, with and without capture refs', () => {
         // Given - a sample of the frozen vocabulary
         const text = '{{uuid}} {{uuid#id}} {{iso8601}} {{workdir}} {{any}} {{int#count}}';
 
@@ -80,7 +79,7 @@ describe('checker', () => {
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
-    test('conventions checker — findUnknownTokens (D4) — flags a malformed ref on a known kind (empty ref, spaced)', () => {
+    test('conventions checker — findUnknownTokens (`no-malformed-ref`) — flags a malformed ref on a known kind (empty ref, spaced)', () => {
         // Given - two malformed captures of otherwise-known kinds
         // Then - both are reported (they are not well-formed tokens)
         expect(findUnknownTokens('{{iso8601#}}')).toStrictEqual([
@@ -91,7 +90,7 @@ describe('checker', () => {
         ]);
     });
 
-    test('conventions checker — findUnknownTokens (D4) — reports the 1-based line of each finding', () => {
+    test('conventions checker — findUnknownTokens (`no-unknown-token`) — reports the 1-based line of each finding', () => {
         // Given - an unknown token on the third line
         const violations = findUnknownTokens('ok\nok {{sha}}\nbad {{sha256}}');
 
@@ -99,7 +98,7 @@ describe('checker', () => {
         expect(violations).toStrictEqual([{ line: 3, token: '{{sha256}}' }]);
     });
 
-    test('conventions checker — findUnknownTokens (D4) — ignores structural template noise like Go templates', () => {
+    test('conventions checker — findUnknownTokens (`no-unknown-token`) — ignores structural template noise like Go templates', () => {
         // Given - braces that are not identifier-shaped tokens
         const text = 'docker {{.Server.Version}} and {{ spaced }} and {{123}}';
 
@@ -107,7 +106,7 @@ describe('checker', () => {
         expect(findUnknownTokens(text)).toStrictEqual([]);
     });
 
-    test('conventions checker — findKnownTokens (D10) — reports known tokens (the requests/ leak signal)', () => {
+    test('conventions checker — findKnownTokens (`no-token-in-request`) — reports known tokens (the requests/ leak signal)', () => {
         // Given - a request body carrying a token
         // Then - the known token is surfaced (an unknown one is not this signal)
         expect(findKnownTokens('{"id": "{{uuid}}", "x": "{{userid}}"}')).toStrictEqual([
@@ -115,9 +114,9 @@ describe('checker', () => {
         ]);
     });
 
-    test('conventions checker — checkConventionFiles (D4) — walks a specs tree and reports unknown tokens in fixture files', () => {
+    test('conventions checker — checkConventionFiles (`no-unknown-token`) — walks a specs tree and reports unknown tokens in fixture files', () => {
         // Given - the violation fixture tree ({{userid}} in expected/out.txt)
-        const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token'));
+        const violations = checkConventionFiles(resolve(FIXTURES, 'no-unknown-token'));
 
         // Then - the finding names the relative file, line, token and severity
         expect(violations).toStrictEqual([
@@ -136,9 +135,9 @@ describe('checker', () => {
         expect(rendered).toContain('uuid');
     });
 
-    test('conventions checker — checkConventionFiles (D4) — passes the compliant twin', () => {
+    test('conventions checker — checkConventionFiles (`no-unknown-token`) — passes the compliant twin', () => {
         // Given - the -ok tree (only known tokens)
-        const violations = checkConventionFiles(resolve(FIXTURES, 'd4-unknown-token-ok'));
+        const violations = checkConventionFiles(resolve(FIXTURES, 'no-unknown-token-ok'));
 
         // Then - clean
         expect(violations).toStrictEqual([]);
@@ -153,13 +152,12 @@ describe('checker', () => {
         );
 
         // Then - the tracked and the new one are reported, the ignored one is not
-        expect(findings(root, 'c12').map((line) => line.split(':')[0])).toStrictEqual([
-            'cp/cp.spec.yaml',
-            'rm/rm.spec.yaml',
-        ]);
+        expect(
+            findings(root, 'file-suffix-matches-place').map((line) => line.split(':')[0]),
+        ).toStrictEqual(['cp/cp.spec.yaml', 'rm/rm.spec.yaml']);
     });
 
-    test('the tree the checker judges — what git does not ignore — reads a `file()` whose target is new as existing, and an ignored one as not (C8)', () => {
+    test('the tree the checker judges — what git does not ignore — reads a `file()` whose target is new as existing, and an ignored one as not (`named-path-exists`)', () => {
         // Given - a spec naming three goldens on disk: tracked, new, and ignored
         const root = repository(
             [
@@ -181,12 +179,12 @@ describe('checker', () => {
         );
 
         // Then - only the ignored golden names nothing a checkout holds
-        expect(findings(root, 'c8-disk-target-exists')).toStrictEqual([
+        expect(findings(root, 'named-path-exists')).toStrictEqual([
             "api/boot.spec.ts:3: file('./expected/local.txt') names nothing — api/expected/local.txt is ignored by git",
         ]);
     });
 
-    test('the moves the fixers make — keeps the history of a fixture C14 moves in a git checkout', () => {
+    test('the moves the fixers make — keeps the history of a pool fixture `ground-shared-or-inline` moves in a git checkout', () => {
         // Given - a tracked single-reader pool fixture
         const root = singleReaderPool(true);
 
@@ -201,7 +199,7 @@ describe('checker', () => {
         ]);
     });
 
-    test('the moves the fixers make — moves a C14 fixture by plain rename where git places the tree in no work tree', () => {
+    test('the moves the fixers make — moves a pool fixture by plain rename where git places the tree in no work tree', () => {
         // Given - the same tree, and no repository
         const root = singleReaderPool(false);
 
@@ -213,7 +211,7 @@ describe('checker', () => {
         expect(existsSync(join(root, 'specs', 'shared'))).toBe(false);
     });
 
-    test('the single paths the checker probes — through the same tree — an ignored pool directory is no fixture to move (C14)', () => {
+    test('the single paths the checker probes — through the same tree — an ignored pool directory is no fixture to move (`ground-shared-or-inline`)', () => {
         // Given - a pool directory `.gitignore` names, reached from one leaf
         const root = repository(
             ['specs/shared/fixtures/app/index.txt', 'specs/shared/fixtures/kept.txt'],
@@ -226,9 +224,9 @@ describe('checker', () => {
             "await api.fixture(directory('../shared/fixtures/app/')).get('/');\n",
         );
 
-        // Then - C8 names the path, and C14 has nothing to move
-        expect(findings(root, 'c14')).toStrictEqual([]);
-        expect(findings(root, 'c8-disk-target-exists')).toHaveLength(1);
+        // Then - `named-path-exists` names the path, and `ground-shared-or-inline` has nothing to move
+        expect(findings(root, 'ground-shared-or-inline')).toStrictEqual([]);
+        expect(findings(root, 'named-path-exists')).toHaveLength(1);
     });
 
     test('the single paths the checker probes — through the same tree — a manifest `.gitignore` names is no package (the member pass)', () => {
@@ -257,7 +255,7 @@ describe('checker', () => {
         ]);
     });
 
-    test('the single paths the checker probes — through the same tree — a golden `.gitignore` names is not one the mover points at (C13)', () => {
+    test('the single paths the checker probes — through the same tree — a golden `.gitignore` names is not one the mover points at (`ground-uses-reserved-name`)', () => {
         // Given - a 16 leaf whose `_expected/` holds a new golden and an ignored one
         const root = repository(
             [
@@ -282,7 +280,7 @@ describe('checker', () => {
         );
     });
 
-    test('the single paths the checker probes — through the same tree — an ignored fixture fixes no value for the document beside it (D5)', () => {
+    test('the single paths the checker probes — through the same tree — an ignored fixture fixes no value for the document beside it (`no-volatile-literal`)', () => {
         // Given - two documents asserting a temp path their `fixture:` holds, one of the two fixtures ignored
         const document = [
             'description: prints where it wrote',
@@ -310,8 +308,8 @@ describe('checker', () => {
         }
 
         // Then - the value the ignored fixture held is volatile again
-        expect(findings(root, 'd5').map((line) => line.split(':')[0])).toStrictEqual([
-            'local/prints-where.spec.yaml',
-        ]);
+        expect(
+            findings(root, 'no-volatile-literal').map((line) => line.split(':')[0]),
+        ).toStrictEqual(['local/prints-where.spec.yaml']);
     });
 });

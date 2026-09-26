@@ -1,7 +1,0 @@
-import { defineStub, http } from '@jterrazz/test';
-
-// A unit stub is named <kebab-name>.ts (C4).
-export default defineStub({
-    request: http.get('https://example.test/bad'),
-    response: http.json({ ok: true }),
-});

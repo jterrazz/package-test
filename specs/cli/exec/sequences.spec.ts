@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (D11 scalpel). */
+/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('sequences', () => {
     test('runs a command successfully', async () => {
@@ -40,7 +40,7 @@ describe('sequences', () => {
         expect(result.file('dist/index.js').exists).toBeTruthy();
     });
 
-    test('long-running (exec with waitFor/timeout — CONVENTIONS D11(b)) — rejects waitFor options on a command sequence', async () => {
+    test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — rejects waitFor options on a command sequence', async () => {
         // Given - an array of commands plus long-running options
         // Then - the combination is refused: `.exec()` answers a promise, so the refusal arrives as a rejection
         await expect(

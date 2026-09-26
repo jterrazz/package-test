@@ -30,7 +30,7 @@ src/presentation/posts/
 └── use-modal-dialog.test.tsx  # a hook's spec: its Host is written in the test file
 ```
 
-The suffix decides which project collects the file and therefore which rules judge it: `unit()` takes `**/*.test.ts` and excludes `**/*.test.tsx`; `component()` takes the `.tsx`. A rendered thing in a `.test.ts` is rule G4's error, and it names the move.
+The suffix decides which project collects the file and therefore which rules judge it: `unit()` takes `**/*.test.ts` and excludes `**/*.test.tsx`; `component()` takes the `.tsx`. A rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s error, and it names the move.
 
 ## What it does not do
 
@@ -133,14 +133,14 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | `.render(<X />, scenario?)` | A React tree                                                                  |
 | `.render((container) => …)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule W1). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — Elements § Verbs](13-elements.md#verbs) — plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — Elements § Verbs](13-elements.md#verbs) — plus the two only a parent has:
 
 | Verb           | Description                                               |
 | -------------- | --------------------------------------------------------- |
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included — [13 — Elements § Modifiers](13-elements.md#modifiers) owns them all, with the W3 refusal and the exact-name rule.
+`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included — [13 — Elements § Modifiers](13-elements.md#modifiers) owns them all, with the `descriptor-matches-one-element` refusal and the exact-name rule.
 
 ## The result
 
@@ -228,18 +228,18 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** A screen that renders `<Link>` or reads `useParams()` throws without a router. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's D7 stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-stubs.md#intercept--the-same-double-with-no-chain)).
+- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's `network-strict-after-first-stub` stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-stubs.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
 
-- **Reaching for `@testing-library/react` or `happy-dom`.** Rule F6 refuses both, and the second is the reason the facet exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
+- **Reaching for `@testing-library/react` or `happy-dom`.** Rule `no-second-test-runtime` refuses both, and the second is the reason the facet exists: a simulated DOM behaves almost like a browser, and what ships is judged by a real one.
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
-- **Hand-rolling `browser:` in a config.** Rule E6 refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
-- **Putting a rendered test in a `.test.ts`.** Rule G4 refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
+- **Hand-rolling `browser:` in a config.** Rule `browser-project-from-component` refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
+- **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
 - **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-elements.md#modifiers) says what asserts it.
 - **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
-- **Reading the W3 refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
+- **Reading the `descriptor-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.
 

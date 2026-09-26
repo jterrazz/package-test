@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -19,7 +18,7 @@ import type { LintRule, Visitor } from '../rule.js';
 
 const DEFAULT_THRESHOLD = 3;
 
-/** Not `status` (d15w's), nor `value` and `error`: single readings a golden would not improve. */
+/** Not `status` (`no-status-only-test`'s), nor `value` and `error`: single readings a golden would not improve. */
 const GOLDENABLE = new Set([
     'alternates',
     'canonical',
@@ -52,7 +51,7 @@ function thresholdOf(option: unknown): number {
 }
 
 /** The threshold is an option: how many probes make a cluster is taste. A golden on the same subject silences it. */
-export const d19wProbeCluster: LintRule = {
+export const noProbeCluster: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -95,8 +94,8 @@ export const d19wProbeCluster: LintRule = {
     },
     meta: {
         defaultOptions: [{ threshold: DEFAULT_THRESHOLD }],
-        docs: RULE_DOCS['d19w-probe-cluster'],
-        messages: lessons('d19w-probe-cluster', {
+        docs: rowOf('no-probe-cluster'),
+        messages: lessons('no-probe-cluster', {
             cluster: {
                 found: '{{count}} probes on `{{subject}}`',
                 fix: 'compare it whole — ``expect({{subject}}).toMatch(`…`)``, `TEST_UPDATE=1` writing the value — with tokens for what moves',

@@ -1,16 +1,16 @@
 import { resolve } from 'node:path';
 
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { e4wProjectBinding } from './project-named-for-its-facet.js';
+import { projectNamedForItsFacet } from './project-named-for-its-facet.js';
 
 const CONFIG = '/repo/vitest.config.ts';
 
 const UNDER_A_SPECS_PATH = resolve(
     import.meta.dirname,
-    '../../../specs/lint/e4w-project-binding/fixtures/compliant/vitest.config.ts',
+    '../../../specs/lint/project-named-for-its-facet/fixtures/compliant/vitest.config.ts',
 );
 
-ruleTester().run('e4w-project-binding', asOxlintRule(e4wProjectBinding), {
+ruleTester().run('project-named-for-its-facet', asOxlintRule(projectNamedForItsFacet), {
     invalid: [
         // A facet root under another name.
         {

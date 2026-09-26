@@ -209,7 +209,7 @@ describe('preset', () => {
         // Given - the preset alone
         const config = defineSpecConfig();
 
-        // Then - the three restores are on, which is what lets `clock.at()` and `vi.stubEnv()` be written with no teardown hook (J6w)
+        // Then - the three restores are on, which is what lets `clock.at()` and `vi.stubEnv()` be written with no teardown hook (`given-in-the-test`)
         expect(config.test?.restoreMocks).toBe(true);
         expect(config.test?.unstubGlobals).toBe(true);
         expect(config.test?.unstubEnvs).toBe(true);

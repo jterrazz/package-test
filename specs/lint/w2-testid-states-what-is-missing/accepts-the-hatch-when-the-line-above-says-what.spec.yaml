@@ -1,7 +1,0 @@
-description: accepts the hatch when the line above says what the element lacks
-fixture: ./fixtures/compliant/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/website/home/subscribe.spec.ts:11:15  jterrazz(w5w-scenario-settles)

@@ -13,7 +13,7 @@ import type { WebsiteConfig } from './website/website.handle.js';
 /** Every facet's configuration, as one. */
 export type SpecificationConfig = ApiConfig & CliConfig & JobConfig & MobileConfig & WebsiteConfig;
 
-/** Created in a `*.specification.ts` under `specs/`, destructured with canonical names, cleaned up via `afterAll(cleanup)` (A1/A3/A4). */
+/** Created in a `*.specification.ts` under `specs/`, destructured with canonical names, cleaned up via `afterAll(cleanup)` (`runner-in-specification-file`/A3/A4). */
 /** The six constructors, and only six — the framework's whole entry surface. */
 export type Specification = {
     api: typeof startApi;

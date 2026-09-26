@@ -1,4 +1,4 @@
-/** The one statement of engine ownership: I11 holds every import to it, and the layer map grants each folder the engines listed here. */
+/** The one statement of engine ownership: `one-owner-per-engine` holds every import to it, and the layer map grants each folder the engines listed here. */
 export const ENGINE_OWNERS: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
     '@vitest/browser-playwright': ['src/facets/component/'],

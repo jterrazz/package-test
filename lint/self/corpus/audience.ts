@@ -5,14 +5,11 @@ import { dirname, join, normalize, relative } from 'node:path';
 import { catalog } from '../catalogue/manifest.js';
 
 export type SelfRow = {
-    id: string;
     name: string;
 };
 
 export function selfRows(): SelfRow[] {
-    return catalog
-        .filter((entry) => entry.audience === 'self')
-        .map(({ id, name }) => ({ id, name }));
+    return catalog.filter((entry) => entry.audience === 'self').map(({ name }) => ({ name }));
 }
 
 export function selfRuleNames(): Set<string> {
@@ -42,19 +39,16 @@ export function filesUnder(dir: string): string[] {
         .toSorted();
 }
 
-/** `K1` and never the start of `K12`. */
-function codePattern(id: string): RegExp {
-    return new RegExp(String.raw`(?<![\w-])${id}(?![\w])`, 'u');
+/** `links-resolve` and never the start of `links-resolve-twice`. */
+function namePattern(name: string): RegExp {
+    return new RegExp(String.raw`(?<![\w-])${name}(?![\w-])`, 'u');
 }
 
 export function selfMentions(text: string, rows: SelfRow[]): string[] {
     const found = text.includes('jterrazz-self') ? ['jterrazz-self'] : [];
-    for (const { id, name } of rows) {
-        if (text.includes(name)) {
+    for (const { name } of rows) {
+        if (namePattern(name).test(text)) {
             found.push(name);
-        }
-        if (codePattern(id).test(text)) {
-            found.push(id);
         }
     }
     return found;

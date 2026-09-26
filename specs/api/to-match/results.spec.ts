@@ -21,7 +21,7 @@ describe('results', () => {
             .get('/users');
 
         // Then - status + body match expected/all-users.http
-        // checker-disable-next-line c28 -- the file form is the subject: a response compared to its .http golden on disk
+        // checker-disable-next-line ground-shared-or-inline -- the file form is the subject: a response compared to its .http golden on disk
         expect(result.response).toMatch(file('./expected/all-users.http'));
     });
 
@@ -85,7 +85,7 @@ describe('results', () => {
 
         // Then - clear error pointing at TEST_UPDATE frozen - the missing fixture is the behaviour under test; under TEST_UPDATE it must still throw "does not exist" rather than be spuriously created
         expect(() => {
-            // checker-disable-next-line c8 -- negative spec: the missing fixture IS the behaviour under test
+            // checker-disable-next-line named-path-exists -- negative spec: the missing fixture IS the behaviour under test
             expect(result.response).toMatch(file('./expected/nonexistent.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
     });
@@ -219,7 +219,7 @@ describe('results', () => {
         // Given - a spec with two postgres handles (db + analytics)
         const result = await api.get('/users');
 
-        // Then - table() without a database option violates A7 checker-disable-next-line a7 -- negative spec: the omitted database is the behaviour under test (runtime channel)
+        // Then - table() without a database option violates `database-named-only-when-several-at-runtime` checker-disable-next-line database-named-only-when-several -- negative spec: the omitted database is the behaviour under test (runtime channel)
         expect(() => result.table('users')).toThrow(
             'found: table() names no database, and 2 databases are declared ("analyticsDb", "db")',
         );

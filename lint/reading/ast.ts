@@ -267,7 +267,7 @@ export const MARKERS = ['Given', 'When', 'Then'] as const;
 
 export type Marker = (typeof MARKERS)[number];
 
-/** One reader of the `// Given -` shape for B4, B10 and B11, so the dialect has one definition. */
+/** One reader of the `// Given -` shape for `given-and-then-markers-present`, `when-between-given-and-then` and `marker-on-one-line`, so the dialect has one definition. */
 export function markerOf(comment: Comment): Marker | undefined {
     const text = comment.value.trimStart();
     return MARKERS.find((marker) => text.startsWith(`${marker} -`));

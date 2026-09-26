@@ -1,7 +1,6 @@
 import type { Context, Fix, Fixer } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -196,7 +195,7 @@ function declareOnce(
 }
 
 /** A warning: two chains alike may be a coincidence the next test breaks. */
-export const b16wFileContext: LintRule = {
+export const noRepeatedChainSetting: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'spec',
@@ -232,9 +231,9 @@ export const b16wFileContext: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b16w-file-context'],
+        docs: rowOf('no-repeated-chain-setting'),
         fixable: 'code',
-        messages: lessons('b16w-file-context', {
+        messages: lessons('no-repeated-chain-setting', {
             repeated: {
                 found: 'all {{count}} chains of this file state `{{setting}}` alike',
                 fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `make fix` writes it',

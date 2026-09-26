@@ -71,7 +71,7 @@ function compilePredicate(
         }
         default: {
             throw new Error(
-                refusal('w4-no-landmarks-on-mobile', {
+                refusal('no-landmark-on-mobile', {
                     fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
                     found: `${formatElement(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
                 }),
@@ -173,7 +173,7 @@ export class AppiumAdapter implements DevicePort {
             } catch (error) {
                 const evidence = await this.captureEvidence(driver);
                 const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                // A W3 refusal is already complete: re-wrapping would print it twice.
+                // A `descriptor-matches-one-element` refusal is already complete: re-wrapping would print it twice.
                 if (error instanceof AmbiguousElementError) {
                     error.message += suffix;
                     throw error;

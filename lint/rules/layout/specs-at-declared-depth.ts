@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 
 import { isGroundName, SHARED_GROUND } from '../../../src/kernel/files/ground.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { declaresTests, isStrayFolder } from '../../reading/first-level.js';
 import { isFile } from '../../reading/fs-cache.js';
@@ -22,7 +21,7 @@ function stemOf(base: string): string {
     return suffix === undefined ? base : base.slice(0, -suffix.length);
 }
 
-/** There a `.spec.ts` sits as deep as its subject's name (`events/list/`, `db/migrate/`), which C30 judges. */
+/** There a `.spec.ts` sits as deep as its subject's name (`events/list/`, `db/migrate/`), which `spec-in-subject-folder` judges. */
 const SUBJECT_PATH_FACETS = new Set(['api', 'cli']);
 
 function sitsInASubjectPath(relative: string[], base: string): boolean {
@@ -35,13 +34,13 @@ type Options = { depth?: SpecsDepth };
 
 const DEFAULT_DEPTH: SpecsDepth = 'facet-domain';
 
-/** I2's pairing tells a ground module's test from a spec that wandered into the ground. */
+/** `test-beside-its-module`'s pairing tells a ground module's test from a spec that wandered into the ground. */
 function testsItsNeighbour(filename: string): boolean {
     return filename.endsWith(TEST_SUFFIX) && isFile(`${filename.slice(0, -TEST_SUFFIX.length)}.ts`);
 }
 
 /** The ground clause, `shared/` reserved directly under `specs/`, and the first-level clause hold in every `depth` mode, `off` included: they are no question of depth. */
-export const c1DomainStructure: LintRule = {
+export const specsAtDeclaredDepth: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => specsAnchorOf(context) !== undefined,
@@ -71,7 +70,7 @@ export const c1DomainStructure: LintRule = {
                         if (!testsItsNeighbour(context.filename)) {
                             context.report({ data: { ground }, messageId: 'specInGround', node });
                         }
-                        // A ground module's test answers to I2, not to depth.
+                        // A ground module's test answers to `test-beside-its-module`, not to depth.
                         return;
                     }
                 }
@@ -136,8 +135,8 @@ export const c1DomainStructure: LintRule = {
     },
     meta: {
         defaultOptions: [{ depth: DEFAULT_DEPTH }],
-        docs: RULE_DOCS['c1-domain-structure'],
-        messages: lessons('c1-domain-structure', {
+        docs: rowOf('specs-at-declared-depth'),
+        messages: lessons('specs-at-declared-depth', {
             specInGround: {
                 found: 'a spec under `{{ground}}/`, a reserved ground name',
                 fix: 'move the spec out of `{{ground}}/` (rename a domain that took the name); ground that is code keeps only a `<module>.test.ts` next to its `<module>.ts`',

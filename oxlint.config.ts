@@ -18,10 +18,10 @@ const config: OxlintConfig = defineConfig(
             {
                 // These module tests unit-test the constructors, which is creating a runner outside a specification.
                 files: ['src/**/*.test.ts', 'lint/**/*.test.ts'],
-                rules: { 'jterrazz/a1-specification-file': 'off' },
+                rules: { 'jterrazz/runner-in-specification-file': 'off' },
             },
             {
-                // The sanctioned runner coupling (I1): the modules whose engine is a test package.
+                // The sanctioned runner coupling (`import-within-declared-layers`): the modules whose engine is a test package.
                 files: [
                     'src/vitest/**',
                     'src/facets/*/*.project.ts',
@@ -41,14 +41,14 @@ const config: OxlintConfig = defineConfig(
                     'src/expectations/goldens/**',
                     'src/expectations/in-place/**',
                 ],
-                rules: { 'jterrazz/f2-no-test-imports-in-prod': 'off' },
+                rules: { 'jterrazz/no-test-code-in-production': 'off' },
             },
         ],
         rules: {
             // reason: under `verbatimModuleSyntax` an inline type specifier still emits `import {} from 'm'`, a runtime edge, so a type-only cycle becomes a load-order crash; `import type` is erased whole.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
             // The rule ships inert: an architecture is the project's to declare.
-            'jterrazz/i1-layer-boundaries': ['error', { layers: FRAMEWORK_LAYERS }],
+            'jterrazz/import-within-declared-layers': ['error', { layers: FRAMEWORK_LAYERS }],
         },
     }),
 );

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { findTestCallback, isTestCallee, memberPropertyName, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -54,8 +53,8 @@ function isStatusProbe(node: AstNode): boolean {
     return isStatusLiteral(expected);
 }
 
-/** Fires only when every `expect(…)` of the callback is a status probe: one beside a real assertion is the scalpel, and d12w needs a cluster of three. */
-export const d15wStatusOnlyProbe: LintRule = {
+/** Fires only when every `expect(…)` of the callback is a status probe: one beside a real assertion is the scalpel, and `no-probe-cluster` needs a cluster of three. */
+export const noStatusOnlyTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -86,8 +85,8 @@ export const d15wStatusOnlyProbe: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d15w-status-only-probe'],
-        messages: lessons('d15w-status-only-probe', {
+        docs: rowOf('no-status-only-test'),
+        messages: lessons('no-status-only-test', {
             statusOnlyProbe: {
                 found: "the test's only assertions probe the HTTP status",
                 fix: 'compare the whole response, ``expect(result.response).toMatch(`HTTP/1.1 …`)`` (`TEST_UPDATE=1` fills an empty one), and keep the status probe beside it only if the status is the point',

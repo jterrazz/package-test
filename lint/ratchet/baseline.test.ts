@@ -27,30 +27,42 @@ describe('baseline', () => {
     test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — a published code is recorded under its plugin and rule', () => {
         // Given - one code per namespace this package owns
         // Then - the key is the code spelled as a path
-        expect(keyOf('jterrazz(i2-sibling-test-naming)')).toBe('jterrazz/i2-sibling-test-naming');
-        expect(keyOf('jterrazz-check(c15)')).toBe('jterrazz-check/c15');
+        expect(keyOf('jterrazz(test-beside-its-module)')).toBe('jterrazz/test-beside-its-module');
+        expect(keyOf('jterrazz-check(no-reach-into-sibling-ground)')).toBe(
+            'jterrazz-check/no-reach-into-sibling-ground',
+        );
     });
 
     test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — counts every finding under its key, whatever its severity', () => {
         // Given - two findings of one rule and one of another
         // Then - one line per key
         expect(
-            countsOf(['jterrazz-check(c9)', 'jterrazz-check(c9)', 'jterrazz(d16w-ambient-value)']),
-        ).toStrictEqual({ 'jterrazz-check/c9': 2, 'jterrazz/d16w-ambient-value': 1 });
+            countsOf([
+                'jterrazz-check(no-unused-ground)',
+                'jterrazz-check(no-unused-ground)',
+                'jterrazz(no-sampled-value-in-test)',
+            ]),
+        ).toStrictEqual({
+            'jterrazz-check/no-unused-ground': 2,
+            'jterrazz/no-sampled-value-in-test': 1,
+        });
     });
 
     test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — breaks on grown debt, new debt, and an entry the project paid', () => {
         // Given - a count above its entry, one with no entry, and an entry at zero
         const broken = judge(
-            { 'jterrazz-check/c9': 3, 'jterrazz/i2-sibling-test-naming': 1 },
-            { 'jterrazz-check/c15': 2, 'jterrazz-check/c9': 2 },
+            { 'jterrazz-check/no-unused-ground': 3, 'jterrazz/test-beside-its-module': 1 },
+            {
+                'jterrazz-check/no-reach-into-sibling-ground': 2,
+                'jterrazz-check/no-unused-ground': 2,
+            },
         );
 
         // Then - three reasons, in the order a reader scans them
         expect(broken).toStrictEqual([
-            'jterrazz-check/c9 is at 3, above its baseline of 2',
-            'jterrazz/i2-sibling-test-naming has 1 finding(s) and no entry — it is new debt',
-            'jterrazz-check/c15 is at zero — the ratchet moved, delete its entry',
+            'jterrazz-check/no-unused-ground is at 3, above its baseline of 2',
+            'jterrazz/test-beside-its-module has 1 finding(s) and no entry — it is new debt',
+            'jterrazz-check/no-reach-into-sibling-ground is at zero — the ratchet moved, delete its entry',
         ]);
     });
 
@@ -59,11 +71,11 @@ describe('baseline', () => {
         // Then - the fall is named, with the gesture that records it
         expect(
             judge(
-                { 'jterrazz-check/c9': 1, 'jterrazz/j6w': 4 },
-                { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4 },
+                { 'jterrazz-check/no-unused-ground': 1, 'jterrazz/given-in-the-test': 4 },
+                { 'jterrazz-check/no-unused-ground': 2, 'jterrazz/given-in-the-test': 4 },
             ),
         ).toStrictEqual([
-            'jterrazz-check/c9 is at 1, below its baseline of 2 — the debt fell, `--fix` re-records it',
+            'jterrazz-check/no-unused-ground is at 1, below its baseline of 2 — the debt fell, `--fix` re-records it',
         ]);
     });
 
@@ -72,8 +84,12 @@ describe('baseline', () => {
         // Then - nothing breaks
         expect(
             judge(
-                { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4 },
-                { 'jterrazz-check/c9': 2, 'jterrazz/j6w': 4, 'routes/unreached': 3 },
+                { 'jterrazz-check/no-unused-ground': 2, 'jterrazz/given-in-the-test': 4 },
+                {
+                    'jterrazz-check/no-unused-ground': 2,
+                    'jterrazz/given-in-the-test': 4,
+                    'routes/unreached': 3,
+                },
             ),
         ).toStrictEqual([]);
     });
@@ -147,7 +163,10 @@ describe('baseline', () => {
     test('ratchet — the test ratchet — exact counts that a fix may lower and never raise — the retired file is never read', () => {
         // Given - a project holding only the file this package kept alone before the merge
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));
-        writeFileSync(join(root, 'test.baseline.json'), '{ "jterrazz-check/c9": 1 }\n');
+        writeFileSync(
+            join(root, 'test.baseline.json'),
+            '{ "jterrazz-check/no-unused-ground": 1 }\n',
+        );
 
         // Then - it keeps no test ratchet, and records nothing
         expect(keepsBaseline(root)).toBe(false);
@@ -167,7 +186,7 @@ describe('baseline', () => {
         }).toThrow('holds no JSON object');
         writeFileSync(
             join(root, BASELINE_FILE),
-            '{ "test": { "jterrazz-check/c9": "two", "jterrazz/x": 1 } }',
+            '{ "test": { "jterrazz-check/no-unused-ground": "two", "jterrazz/x": 1 } }',
         );
         expect(readBaseline(root)).toStrictEqual({ 'jterrazz/x': 1 });
     });
@@ -178,14 +197,14 @@ describe('baseline', () => {
             JSON.stringify({
                 diagnostics: [
                     {
-                        code: 'jterrazz(i2-sibling-test-naming)',
+                        code: 'jterrazz(test-beside-its-module)',
                         filename: 'src/util.test.ts',
                         labels: [{ span: { column: 1, line: 1 } }],
                         message: 'a module test has a sibling module',
                         severity: 'error',
                     },
                     { code: 'eslint(no-debugger)', filename: 'src/a.ts', severity: 'error' },
-                    { code: 'jterrazz(j6w-given-in-the-test)', severity: 'warning' },
+                    { code: 'jterrazz(given-in-the-test)', severity: 'warning' },
                 ],
             }),
         );
@@ -193,7 +212,7 @@ describe('baseline', () => {
         // Then - the two of this plugin, positioned, the missing span read as the first column
         expect(pluginDiagnostics(root)).toStrictEqual([
             {
-                code: 'jterrazz(i2-sibling-test-naming)',
+                code: 'jterrazz(test-beside-its-module)',
                 column: 1,
                 file: 'src/util.test.ts',
                 line: 1,
@@ -201,7 +220,7 @@ describe('baseline', () => {
                 severity: 'error',
             },
             {
-                code: 'jterrazz(j6w-given-in-the-test)',
+                code: 'jterrazz(given-in-the-test)',
                 column: 1,
                 file: '',
                 line: 1,
@@ -238,7 +257,7 @@ describe('baseline', () => {
             JSON.stringify({
                 diagnostics: [
                     {
-                        code: 'jterrazz(c24-ground-role)',
+                        code: 'jterrazz(verb-reads-its-ground-folder)',
                         filename: 'specs/a.spec.ts',
                         labels: [{ span: { column: 9, line: 4 } }],
                         message: 'crossed',
@@ -251,7 +270,7 @@ describe('baseline', () => {
         // Then - the report's diagnostic, the binary never asked
         expect(pluginDiagnostics(root, report)).toStrictEqual([
             {
-                code: 'jterrazz(c24-ground-role)',
+                code: 'jterrazz(verb-reads-its-ground-folder)',
                 column: 9,
                 file: 'specs/a.spec.ts',
                 line: 4,

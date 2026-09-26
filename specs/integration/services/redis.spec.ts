@@ -3,7 +3,7 @@ import { describe, expect, inject, test } from 'vitest';
 import { redis } from '../../../src/index.js';
 import { integration } from '../redis.specification.js';
 
-/* A probe flushing keys binds a fresh handle: the runner's handle holds a worker index (G2), and index 0 is the container's own, which no reset flushes. */
+/* A probe flushing keys binds a fresh handle: the runner's handle holds a worker index (`state-isolated-per-worker`), and index 0 is the container's own, which no reset flushes. */
 
 describe('redis', () => {
     test('builds a connection string on the redis scheme', async () => {
@@ -29,7 +29,7 @@ describe('redis', () => {
         expect(result.error.text).toBe('');
     });
 
-    // RUNTIME G2 — isolation is per (worker, service) pair: the runner's handle holds this pair's database index, and the default index is the container's own.
+    // RUNTIME state-isolated-per-worker — isolation is per (worker, service) pair: the runner's handle holds this pair's database index, and the default index is the container's own.
     test('flushes every key on reset', async () => {
         // Given - a key written to the container, then a reset
         const result = await integration.call(async ({ cache }) => {
@@ -89,7 +89,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — two redis services of one worker are two indexes of one container.
+    // RUNTIME state-isolated-per-worker — two redis services of one worker are two indexes of one container.
     test('two redis services keep their own keys, whatever the other one resets', async () => {
         // Given - a key written through each service, then the second one reset
         const result = await integration.call(async ({ cache, queue }) => {
@@ -119,7 +119,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — the project starts ONE redis container: two services are two indexes, not two containers.
+    // RUNTIME state-isolated-per-worker — the project starts ONE redis container: two services are two indexes, not two containers.
     test('two redis services are served by the one container the project started', async () => {
         // Given - each service's address, and the project's answer to a redis request
         const result = await integration.call(async ({ cache, queue }) => {
@@ -153,7 +153,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — each worker takes its own database index, and the string the app is handed says which.
+    // RUNTIME state-isolated-per-worker — each worker takes its own database index, and the string the app is handed says which.
     test('two workers take two database indexes, and the connection string carries each', async () => {
         // Given - two "cache" handles on the runner's container, acquired by workers 40 and 41
         const result = await integration.call(async ({ cache }) => {
@@ -180,7 +180,7 @@ describe('redis', () => {
         expect(result.value).toMatch(['/157', '/161']);
     });
 
-    // RUNTIME G2 — a pool id is a worker at any --maxWorkers, not modulo a count of indexes.
+    // RUNTIME state-isolated-per-worker — a pool id is a worker at any --maxWorkers, not modulo a count of indexes.
     test('workers 1 and 16 take two indexes, and a key one writes the other never reads', async () => {
         // Given - two handles acquired by pool ids 1 and 16, the first writing
         const result = await integration.call(async ({ cache }) => {
@@ -221,7 +221,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — the project's container outlives a file, and a file that died before its release left its keys at its index.
+    // RUNTIME state-isolated-per-worker — the project's container outlives a file, and a file that died before its release left its keys at its index.
     test('a worker acquires its index empty, whatever a worker before it left there', async () => {
         // Given - one handle that writes at its index and never releases, then another acquired by the same worker
         const result = await integration.call(async ({ cache }) => {
@@ -256,7 +256,7 @@ describe('redis', () => {
         });
     });
 
-    // RUNTIME G2 — two workers on one container never share a key.
+    // RUNTIME state-isolated-per-worker — two workers on one container never share a key.
     test('two workers take two database indexes, and a key one writes the other never reads', async () => {
         // Given - two handles on the runner's container, acquired by two workers, one of them writing
         const result = await integration.call(async ({ cache }) => {

@@ -2,7 +2,7 @@ import { lessonLine } from '../../src/kernel/refusals/lesson.js';
 import type { Lesson } from '../../src/kernel/refusals/lesson.js';
 import { CATALOGUE_CHAPTER } from '../../src/kernel/refusals/refusal.js';
 import { consumerCatalog } from './manifest.js';
-import type { CatalogEntry, RULE_DOCS } from './manifest.js';
+import type { CatalogEntry } from './manifest.js';
 
 /** `why` and `read` come from the row, so a message and the catalogue never say two things. */
 export type Teaching = Pick<Lesson, 'fix' | 'found'>;
@@ -77,7 +77,7 @@ export function lessonsAt<Key extends string>(
 }
 
 export function lessons<Key extends string>(
-    rule: keyof typeof RULE_DOCS,
+    rule: string,
     messages: Record<Key, Teaching>,
 ): Record<Key, string> {
     return lessonsAt(rowOf(rule), messages);

@@ -25,7 +25,7 @@ const composition = {
     } satisfies Record<keyof ApiSpecificationOptions, MatrixRow>,
 } as const;
 
-/** The chain `specification.api()` hands out; the app answers in this process (A8). */
+/** The chain `specification.api()` hands out; the app answers in this process (`server-sees-declared-services`). */
 export interface ApiSpecification<DatabaseKey extends string = string> extends ChainOf<
     typeof composition,
     { databaseKey: DatabaseKey; services: Record<string, unknown> },

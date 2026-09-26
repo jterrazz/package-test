@@ -22,7 +22,7 @@ function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): 
     };
 }
 
-/** The one time primitive (D16): `at()` pins the calendar, `run()` the scheduler too. */
+/** The one time primitive (`no-sampled-value-in-expectation`): `at()` pins the calendar, `run()` the scheduler too. */
 export const clock = {
     /** Move the pinned clock forward; under `clock.run` fire what came due. Refused with no clock taken. */
     async advance(ms: number): Promise<void> {

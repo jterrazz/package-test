@@ -1,0 +1,7 @@
+description: warns on an include whose folder does not exist
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          vitest.config.ts:5:32  jterrazz(include-points-at-a-folder)

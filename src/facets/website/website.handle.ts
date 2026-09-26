@@ -64,11 +64,11 @@ export type WebsiteBackendOptions = {
 export type WebsiteSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
     /** Default `'block'` with a local `server`, `'allow'` with a deployed `url`. */
     external?: 'allow' | 'block';
-    /** Project-root override (A9): the working directory of the `server` command. */
+    /** Project-root override (`no-redundant-root`): the working directory of the `server` command. */
     root?: string;
     /** Services started before the site; `server` may be a function of them. */
     services?: Services;
-    /** Normaliser applied to every compared reading (D6); prefer `{{token}}` placeholders. */
+    /** Normaliser applied to every compared reading (`no-transform-duplicating-tokens`); prefer `{{token}}` placeholders. */
     transform?: ((text: string) => string) | undefined;
 } & (
     | {
@@ -125,7 +125,7 @@ async function startSite<Services extends ServiceRecord>(
         context.root,
         'website',
         {
-            // One id per run, minted by the facet, never sampled by a spec (D16).
+            // One id per run, minted by the facet, never sampled by a spec (`no-sampled-value-in-expectation`).
             TEST_RUN_ID: context.started?.runId ?? randomUUID(),
             ...serverBackendEnv(options.backend, context.backendUrl),
         },
@@ -154,7 +154,7 @@ function servicesOf<Services extends ServiceRecord>(
     return (options.services ?? {}) as Services;
 }
 
-/** What `specification.website()` returns: `const { website, cleanup } = …` (A3). */
+/** What `specification.website()` returns: `const { website, cleanup } = …` (`no-runner-alias`). */
 export type WebsiteHandle = {
     /** Stop the server process and the shared browser instance. */
     cleanup: () => Promise<void>;
@@ -198,7 +198,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // Launched lazily on the first `.visit()`; playwright is an optional peer (I1).
+    // Launched lazily on the first `.visit()`; playwright is an optional peer (`import-within-declared-layers`).
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {

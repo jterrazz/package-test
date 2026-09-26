@@ -4,7 +4,7 @@ import { directory, file } from '../../../src/index.js';
 import { cli } from '../db-cli.specification.js';
 
 describe('service-database', () => {
-    // RUNTIME B6 — the record key injects `<KEY>_URL` into the child process; `.env()` is for overriding it, never for restating it.
+    // RUNTIME service-urls-injected — the record key injects `<KEY>_URL` into the child process; `.env()` is for overriding it, never for restating it.
     test('runs a SQL seed against the declared service database', async () => {
         // Given - a SQL seed applied to the single sqlite service
         const result = await cli

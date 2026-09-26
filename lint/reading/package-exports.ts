@@ -2,7 +2,7 @@ import { readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
-/** F1's exemption is read from this package's own `exports`, so a subpath is exempt exactly while it is published. The manifest is found from this module and read from disk, never through the tree listing: in an install it sits under an ignored `node_modules/`. */
+/** `no-unpublished-subpath`'s exemption is read from this package's own `exports`, so a subpath is exempt exactly while it is published. The manifest is found from this module and read from disk, never through the tree listing: in an install it sits under an ignored `node_modules/`. */
 
 const PACKAGE = '@jterrazz/test';
 
@@ -37,7 +37,7 @@ function findOwnManifest(startDir: string): null | Record<string, unknown> {
     }
 }
 
-/** An unreadable manifest yields an empty list, and F1's plain rule applies. */
+/** An unreadable manifest yields an empty list, and `no-unpublished-subpath`'s plain rule applies. */
 export function declaredSubpaths(startDir?: string): string[] {
     if (startDir === undefined && cached !== null) {
         return cached;

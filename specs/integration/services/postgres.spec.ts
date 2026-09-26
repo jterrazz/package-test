@@ -223,7 +223,7 @@ describe('postgres', () => {
         expect(result.value).toMatch([['ok']]);
     });
 
-    /* D11 scalpel: the reason is postgres's own wording, unstable across image versions; the framework's half is probed. */
+    /* `output-asserted-as-a-golden` scalpel: the reason is postgres's own wording, unstable across image versions; the framework's half is probed. */
 
     test('what the database refuses — a failing statement surfaces the database own complaint', async () => {
         // Given - a statement naming a table that does not exist
@@ -267,7 +267,7 @@ describe('postgres', () => {
         expect(result.error.text).toContain('postgres/init.sql');
     });
 
-    // RUNTIME G2 — two workers on one container never share a row.
+    // RUNTIME state-isolated-per-worker — two workers on one container never share a row.
     test('two workers take two databases cloned from the template, and a row one writes the other never reads', async () => {
         // Given - two handles on the runner's container, initialised from the specimen's docker directory and acquired by two workers, one of them seeding
         const result = await integration.call(async ({ db }) => {

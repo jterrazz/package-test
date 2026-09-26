@@ -42,9 +42,9 @@ export type CliConfig = Pick<ResultConfig, 'transform'> &
     };
 
 export type CliSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /** The words the binary's commands are spelled with, read by the checker only (C29, C30): `exec('db migrate --dry')` is `db migrate`. */
+    /** The words the binary's commands are spelled with, read by the checker only (`one-subject-per-spec`, `spec-in-subject-folder`): `exec('db migrate --dry')` is `db migrate`. */
     commands?: readonly string[];
-    /** Opt-in Docker awareness; declare results with `await using` so leaked containers are removed (B5). */
+    /** Opt-in Docker awareness; declare results with `await using` so leaked containers are removed (`docker-exec-bound-with-await-using`). */
     docker?: DockerSpecConfig;
     /** Environment applied to every run (`TZ`, `NO_COLOR`, …); a chain's `.env()` and a document's `env:` win. */
     defaults?: CliEnv;
@@ -52,15 +52,15 @@ export type CliSpecificationOptions<Services extends ServiceRecord = ServiceReco
     env?: Record<string, CliEnv>;
     /** Named servers a document may start (`serve: [mcp]`). */
     serve?: Record<string, LiterateServeRegistration>;
-    /** Project-root override (A9), anchoring the local-bin resolution of the binary; not a fixtures root. */
+    /** Project-root override (`no-redundant-root`), anchoring the local-bin resolution of the binary; not a fixtures root. */
     root?: string;
-    /** Services started via testcontainers; `<KEY>_URL` is injected, plus `DATABASE_URL` / `REDIS_URL` when unambiguous (B6). */
+    /** Services started via testcontainers; `<KEY>_URL` is injected, plus `DATABASE_URL` / `REDIS_URL` when unambiguous (`service-urls-injected`). */
     services?: Services;
     /** Normaliser applied to stdout/stderr after the ANSI strip; prefer `{{token}}` placeholders. */
     transform?: ((text: string) => string) | undefined;
 };
 
-/** What `specification.cli()` returns: `const { cli, cleanup, docker } = …` (A3). */
+/** What `specification.cli()` returns: `const { cli, cleanup, docker } = …` (`no-runner-alias`). */
 export type CliHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;

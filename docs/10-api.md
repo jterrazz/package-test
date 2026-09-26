@@ -10,12 +10,12 @@ An api spec answers one question: **given this state and this request, what does
 
 ### The app runs in THIS process
 
-| Aspect             | What it means                                                              |
-| ------------------ | -------------------------------------------------------------------------- |
-| Your app           | In-process, built by `server(services)` — no container, no socket          |
-| Services           | Real containers, started by testcontainers from each handle's own defaults |
-| What it proves     | Application logic against real databases, caches and processes             |
-| Parallel isolation | Per-worker schema / db-index / file copy (rule G2)                         |
+| Aspect             | What it means                                                               |
+| ------------------ | --------------------------------------------------------------------------- |
+| Your app           | In-process, built by `server(services)` — no container, no socket           |
+| Services           | Real containers, started by testcontainers from each handle's own defaults  |
+| What it proves     | Application logic against real databases, caches and processes              |
+| Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`) |
 
 Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
 
@@ -52,28 +52,28 @@ afterAll(cleanup);
 | Option     | Required                     | Description                                                                                                                             |
 | ---------- | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | `services` | yes (if the app needs infra) | Named record of service factories (`postgres()`, `redis()`, `sqlite()`). Keys are your test vocabulary — see [services](17-services.md) |
-| `server`   | yes                          | `(services) => app` — receives the started services record, fully typed (rule A8)                                                       |
-| `root`     | no                           | Override for root resolution — reserved for cases where the convention is not enough (rule A9)                                          |
+| `server`   | yes                          | `(services) => app` — receives the started services record, fully typed (rule `server-sees-declared-services`)                          |
+| `root`     | no                           | Override for root resolution — reserved for cases where the convention is not enough (rule `no-redundant-root`)                         |
 
-### Root resolution (rule A9)
+### Root resolution
 
-Without `root`, the framework finds the package being tested by walking up from the specification file. The walk, the tree it reads and when a `root` is redundant are [17 — Services § Root auto-discovery](17-services.md#root-auto-discovery-rule-a9)'s.
+Without `root`, the framework finds the package being tested by walking up from the specification file. The walk, the tree it reads and when a `root` is redundant are [17 — Services § Root auto-discovery](17-services.md#root-auto-discovery)'s.
 
 ## The chain
 
 ### Setups (chainable)
 
-| Setup                                           | Description                                                                                                                                        |
-| ----------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file — beside the test that reads it, or at the level of the tests that share it (rule C28) |
-| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule A7)                                                 |
-| `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                                          |
-| `.intercept(stub)`                              | Mock an outgoing HTTP call with a declared [stub](16-stubs.md)                                                                                     |
-| `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                                                 |
-| `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths))                    |
-| `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))                          |
+| Setup                                           | Description                                                                                                                                                              |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `.seed(file('./seeds/file.sql'))`               | Load that `.sql` file, named by its path from the spec file — beside the test that reads it, or at the level of the tests that share it (rule `ground-shared-or-inline`) |
+| `.seed(file('./seeds/file.sql'), { database })` | Target a database by its record key — **mandatory with ≥ 2 databases, forbidden with 1** (rule `database-named-only-when-several`)                                       |
+| `.headers({ 'Name': 'value' })`                 | Set request headers; repeated calls merge                                                                                                                                |
+| `.intercept(stub)`                              | Mock an outgoing HTTP call with a declared [stub](16-stubs.md)                                                                                                           |
+| `.intercept(trigger, response)`                 | Inline intercept for one-off cases                                                                                                                                       |
+| `.clock('2026-03-04T09:30:00Z')`                | Pin the app's `Date` for this chain, released when the action resolves ([18](18-conventions.md#time--one-primitive-two-depths))                                          |
+| `api.with({ clock, headers })`                  | A view of the facet whose every chain starts with what the whole file shares ([18](18-conventions.md#what-a-file-shares))                                                |
 
-Stubs are **strict** (rule D7): once a chain declares one, every outgoing request must match a declared, non-exhausted stub or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [stubs](16-stubs.md#strict-by-construction-rule-d7)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
+Stubs are **strict** (rule `network-strict-after-first-stub`): once a chain declares one, every outgoing request must match a declared, non-exhausted stub or the spec fails with an explicit refusal naming "an unmatched outgoing request" (see [stubs](16-stubs.md#strict-by-construction)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
 test('serves french content', async () => {
@@ -85,7 +85,7 @@ test('serves french content', async () => {
 });
 ```
 
-#### Isolation between specs (rules B1, B7)
+#### Isolation between specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`)
 
 Databases are **reset at the start of every chain**. A spec never depends on a previous spec, and there is no "flow" mode — sequential scenarios are expressed through seeds:
 
@@ -101,7 +101,7 @@ test('starts clean between specs', async () => {
 
 ### Actions (terminal)
 
-Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the result.
+Exactly one per chain (rule `one-terminal-action-per-chain`/B2). Each executes the spec and resolves to the result.
 
 | Action                                   | Description                                                                           |
 | ---------------------------------------- | ------------------------------------------------------------------------------------- |
@@ -114,9 +114,9 @@ Exactly one per chain (rule B1/B2). Each executes the spec and resolves to the r
 
 The `body?` of `.post()` / `.put()` is a plain object, JSON-serialized with a `Content-Type: application/json` default header — or a body file from `requests/`, `.post(path, file('./requests/order.json'))`: a `.json` is parsed and sent as that value, any other extension is sent as its text. A complete request — method, headers and body — goes through `.request(file('./requests/file.http'))`, whose body section is sent **raw**: its surrounding whitespace is trimmed, but everything between is preserved byte-for-byte (interior double spaces, indentation, and non-JSON text are intact).
 
-A route with parameters is written as the app declares it, its values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`. The template types the params — every `:name` it holds takes a value, and no other name does (rule B12) — and the chain sends the path filled, each value URI-encoded, the query kept. The template is what the test's reader, the subject reader (C29, C30) and route coverage read, so none of them has to guess that `btc` is a value. A path with no parameter takes no options, or `{ params: {} }` to state that it is the route itself.
+A route with parameters is written as the app declares it, its values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })`. The template types the params — every `:name` it holds takes a value, and no other name does (rule `route-written-as-template`) — and the chain sends the path filled, each value URI-encoded, the query kept. The template is what the test's reader, the subject reader (`one-subject-per-spec`, `spec-in-subject-folder`) and route coverage read, so none of them has to guess that `btc` is a value. A path with no parameter takes no options, or `{ params: {} }` to state that it is the route itself.
 
-There is no label argument: the vitest test name is the spec's only description (rule B3).
+There is no label argument: the vitest test name is the spec's only description (rule `no-chain-label`).
 
 ```typescript
 test('returns 404 with a useful body', async () => {
@@ -134,7 +134,7 @@ test('returns 404 with a useful body', async () => {
 
 ### `.http` request files — full format
 
-Requests live in `requests/`, one file per request, extension `.http`; the body files a verb sends live beside them, each named with its extension (rule C2). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
+Requests live in `requests/`, one file per request, extension `.http`; the body files a verb sends live beside them, each named with its extension (rule `request-file-extension-known`). A request file is the **complete** request: method + path on the first line, then headers, then a blank line, then the body.
 
 ```http
 ### requests/create-user.http
@@ -147,12 +147,12 @@ Accept-Language: fr
 
 Format rules:
 
-- First line: `METHOD /path` — the file must start with it (rule C2). The path is relative to the app under test.
+- First line: `METHOD /path` — the file must start with it (rule `request-file-extension-known`). The path is relative to the app under test.
 - Header lines: `Name: value`, one per line, immediately after the request line.
 - Blank line, then the body (optional — a GET usually has none).
-- Executed with `api.request(file('./requests/create-user.http'))` — the argument is the file's path from the spec file, spelled in full; the type refuses a bare name (rule B2).
+- Executed with `api.request(file('./requests/create-user.http'))` — the argument is the file's path from the spec file, spelled in full; the type refuses a bare name (rule `disk-named-by-relative-path`).
 
-Expected responses live in `expected/`, like every other golden, same extension, and start with a status line (rule C3):
+Expected responses live in `expected/`, like every other golden, same extension, and start with a status line (rule `expected-headers-are-a-subset`):
 
 ```http
 ### expected/user-created.http
@@ -164,13 +164,13 @@ Location: /users/{{uuid#user}}
 ```
 
 - First line: `HTTP/1.1 <status>` — mandatory.
-- Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule C3).
+- Headers are matched as a **subset**: listed headers must match, unlisted headers are unconstrained (rule `expected-headers-are-a-subset`).
 - Body and headers both accept `{{token}}` placeholders, including `#ref` captures — `{{uuid#user}}` above must be the _same_ UUID in the `Location` header and the body. See [tokens](15-tokens.md).
 - The body is read by its `content-type` — the file's own, or the actual response's when the file states none — with its surrounding whitespace trimmed on both sides. A text type (`text/*`, `+xml`, `application/xml`, `application/x-ndjson`, …) is the text it is, even a `42` or a `true`: an HTML page, an event stream, a plain message. A binary type — `audio/*`, `font/*`, `image/*`, `video/*`, and under `application/` exactly `gzip`, `octet-stream`, `pdf`, `protobuf`, `vnd.google.protobuf`, `wasm`, `x-gzip`, `x-protobuf`, `x-tar` and `zip` — is not read: its body is `null`, so its `.http` states the status and the headers and no body. Any other type — a JSON type, one the lists above do not name (`application/graphql`, `multipart/*`), or no type at all — is the JSON value its text parses to, or its text when it does not parse.
 
 ## The result
 
-The result of an API action exposes read-only accessors (rule D1); all assertions go through `expect()`:
+The result of an API action exposes read-only accessors (rule `result-accessor-is-read-only`); all assertions go through `expect()`:
 
 | Member                      | Type             | Description                                                                                                             |
 | --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -179,7 +179,7 @@ The result of an API action exposes read-only accessors (rule D1); all assertion
 | `result.response.body`      | body             | The JSON value, or the text of a text body or one that is not JSON; `null` when empty or binary — for native assertions |
 | `result.table(name, opts?)` | table subject    | Database table — compared whole, `toMatch(<rows>)` / `toBeEmpty()` (async, `await expect`)                              |
 
-`expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule D3) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
+`expect(result.response).toMatch(file('./expected/user-created.http'))` reads the path it is given, like every other golden matcher (rule `golden-read-from-its-path`) — nothing resolves against a folder the line does not name. The full matcher reference is in [assertions](14-assertions.md).
 
 Beyond the result, the `specification.api()` handle destructures to `{ api, cleanup, docker }`. The `docker(containerId)` reader lazily runs `docker inspect` and returns a `ContainerAccessor` for an arbitrary container id — usable with `await expect(docker(id)).toBeRunning()` and the sync read accessors (`.exists`, `.status`, `.file(path)`, logs). An unknown id yields `exists: false` instead of throwing. (`specification.job()` has no `docker` member — jobs never spawn containers.)
 
@@ -259,11 +259,11 @@ test('links the analytics event to the created order', async () => {
 });
 ```
 
-> This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule A7). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
+> This project declares two databases, so `database:` is mandatory on every `.seed()` and `.table()` (rule `database-named-only-when-several`). With a single database you would write `api.seed(file('./seeds/catalog.sql'))` and `result.table('orders')` — and adding `database:` would be forbidden as redundant.
 
 ### A case, written whole
 
-A case is a TypeScript spec whose oracle is the WHOLE result, written where the test reads it: the given is the chain's setups — a seed is always a `.sql` file named with `file()`, beside the test when it alone reads it — the action is the request, and the response is compared whole to its `.http` text in place, tokens allowed ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
+A case is a TypeScript spec whose oracle is the WHOLE result, written where the test reads it: the given is the chain's setups — a seed is always a `.sql` file named with `file()`, beside the test when it alone reads it — the action is the request, and the response is compared whole to its `.http` text in place, tokens allowed ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
 
 ```typescript
 test('the users seeded are the users listed, in the order they were inserted', async () => {
@@ -340,10 +340,10 @@ The app runs in THIS process, always: there is no second mode, no container bind
 
 ## Pitfalls
 
-- **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule A7).
+- **Omitting `database:` with ≥ 2 databases, or passing it with 1** — both are convention violations (rule `database-named-only-when-several`).
 - **Expecting unlisted response headers to be constrained.** Response `expected/*.http` header matching is subset-only; if a header must be _absent_, that is not expressible in the file — assert on it in code.
-- **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules B1, B7).
-- **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule D7).
+- **Chaining two actions** (`api.get(...).get(...)`) or reusing state across tests. One chain = one terminal action; databases reset per chain (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
+- **Forgetting that `.intercept()` is strict.** After the first `.intercept()`, an unmatched or queue-exhausted outgoing request fails the spec (rule `network-strict-after-first-stub`).
 - **Putting the request body in the test file when it has any substance.** Requests of more than a line or two belong in `requests/*.http` — inline `.post()` is for trivial cases.
 
 ## Related

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { goldenOf } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -9,7 +8,7 @@ import { isTestRole } from '../../reading/role.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 /** A tree is `toMatch(directory(…))`, whose path ends in `/`: out of reach. */
-export const c6ToMatchExtension: LintRule = {
+export const goldenPathHasExtension: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -35,8 +34,8 @@ export const c6ToMatchExtension: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c6-tomatch-extension'],
-        messages: lessons('c6-tomatch-extension', {
+        docs: rowOf('golden-path-has-extension'),
+        messages: lessons('golden-path-has-extension', {
             missingExtension: {
                 found: '`toMatch(file("{{name}}"))` names a golden with no extension',
                 fix: 'add the extension to the path (`"./expected/help.txt"`), or compare a tree with `toMatch(directory("./expected/<name>/"))`',

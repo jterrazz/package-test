@@ -35,7 +35,7 @@ const SPEC = [
 ].join('\n');
 
 describe('mover', () => {
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — renames the ground folders and names every file by its path', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — renames the ground folders and names every file by its path', () => {
         // Given - a leaf with its four ground folders and a spec on the 16 verbs
         const root = tree16({
             '_fixtures/shop/index.ts': '',
@@ -76,7 +76,7 @@ describe('mover', () => {
         expect(existsSync(join(root, 'shared/fixtures/shop/index.ts'))).toBe(true);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — is idempotent on a tree already on 17', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — is idempotent on a tree already on 17', () => {
         // Given - a tree the mover already moved
         const root = tree16({
             'api/users/expected/created.http': '',
@@ -96,7 +96,7 @@ describe('mover', () => {
         });
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — never runs on a tree C13 finds on 17: its bare strings are values, or refusals kept on purpose', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — never runs on a tree `ground-uses-reserved-name` finds on 17: its bare strings are values, or refusals kept on purpose', () => {
         // Given - a 17 tree (no 16 folder) whose negative spec hands the verbs what they must refuse
         const source = [
             "import { directory, file } from '@jterrazz/test';",
@@ -121,7 +121,7 @@ describe('mover', () => {
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(source);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — moves the prototype verbs, and a path spelled in full against a 16 folder', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — moves the prototype verbs, and a path spelled in full against a 16 folder', () => {
         // Given - the intermediate form: …File verbs, old folder names, a relative entry import
         const root = tree16({
             'api/users/_seeds/users.sql': '',
@@ -147,7 +147,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — leaves what it cannot read as a 16 file name, and moves a document listing its fixtures', () => {
         // Given - a raw SQL string, a non-http request argument, an unknown marker, and a document with a fixture list
         const root = tree16({
             '_fixtures/shop/index.ts': '',
@@ -186,7 +186,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — never enters ground: a fixture project keeps the 16 folders it is made of', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — never enters ground: a fixture project keeps the 16 folders it is made of', () => {
         // Given - a pool entry and a leaf fixture that are 16 trees ON PURPOSE (a negative case's input)
         const root = tree16({
             'fixtures/old-tree/specs/app/_expected/out.txt': '',
@@ -201,7 +201,7 @@ describe('mover', () => {
         expect(migration.renamed).toStrictEqual([]);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a stream compared as a value reads its text, and a golden stays on the accessor', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a stream compared as a value reads its text, and a golden stays on the accessor', () => {
         // Given - the 16 value matchers on stream accessors, beside a golden and a text already read
         const root = tree16({
             'cli/build/_expected/build.txt': '',
@@ -241,7 +241,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — moves the module tests of a member that still stand on a 16 folder, and only those', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — moves the module tests of a member that still stand on a 16 folder, and only those', () => {
         // Given - a member whose module test reads a 16 golden, beside a nested package and a specs tree it must not walk
         const member = tree16(
             {
@@ -285,7 +285,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — leaves the module tests of a member on 17 as they are', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — leaves the module tests of a member on 17 as they are', () => {
         // Given - a member whose module tests stand on bare ground only
         const member = tree16(
             {
@@ -305,15 +305,15 @@ describe('mover', () => {
         });
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a directive naming a renamed rule names its new id, and the line it covers reads the raw capture', () => {
-        // Given - a 16 tree whose tests suppress D8w by its 16 id, on the next line and on its own
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a directive naming a renamed rule names its new id, and the line it covers reads the raw capture', () => {
+        // Given - a 16 tree whose tests suppress `no-raw-bypass` by its 16 id, on the next line and on its own
         const root = tree16({
             'cli/build/_expected/build.txt': '',
             'cli/build/build.spec.ts': [
                 '// oxlint-disable-next-line jterrazz/d8w-text-bypass -- asserts the colour codes themselves',
                 "expect(result.stdout.text).toContain('[31m');",
                 "expect(result.stderr.text).not.toContain('[0m'); // oxlint-disable-line jterrazz/d8w-text-bypass -- same",
-                '// oxlint-disable-next-line jterrazz/j2-no-sleep -- another rule',
+                '// oxlint-disable-next-line jterrazz/no-sleep -- another rule',
                 "expect(result.stdout.text).toContain('built');",
                 '',
             ].join('\n'),
@@ -322,21 +322,21 @@ describe('mover', () => {
         // When - the mover runs
         migrateTo17(root, renameSync);
 
-        // Then - the two directives name d8w-raw-bypass and their lines read .raw; the other directive, and its line, stay
+        // Then - the two directives name no-raw-bypass and their lines read .raw; the other directive, and its line, stay
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
             [
-                '// oxlint-disable-next-line jterrazz/d8w-raw-bypass -- asserts the colour codes themselves',
+                '// oxlint-disable-next-line jterrazz/no-raw-bypass -- asserts the colour codes themselves',
                 "expect(result.stdout.raw).toContain('[31m');",
-                "expect(result.stderr.raw).not.toContain('[0m'); // oxlint-disable-line jterrazz/d8w-raw-bypass -- same",
-                '// oxlint-disable-next-line jterrazz/j2-no-sleep -- another rule',
+                "expect(result.stderr.raw).not.toContain('[0m'); // oxlint-disable-line jterrazz/no-raw-bypass -- same",
+                '// oxlint-disable-next-line jterrazz/no-sleep -- another rule',
                 "expect(result.stdout.text).toContain('built');",
                 '',
             ].join('\n'),
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — the 16 id of C2 names its 17 id, and the line it covers keeps its reads', () => {
-        // Given - a 17 tree suppressing C2 by the id it had while `requests/` held `.http` only
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — the 16 id of `request-file-extension-known` names its 17 id, and the line it covers keeps its reads', () => {
+        // Given - a 17 tree suppressing `request-file-extension-known` by the id it had while `requests/` held `.http` only
         const root = tree16({
             'api/orders/orders.spec.ts': [
                 '/* oxlint-disable jterrazz/c2-http-only-requests -- a body file beside the requests */',
@@ -349,18 +349,18 @@ describe('mover', () => {
         // When - the mover runs
         migrateTo17(root, renameSync);
 
-        // Then - both directives name c2-request-extension, and `.text` is not D8w's to move
+        // Then - both directives name request-file-extension-known, and `.text` is not `no-raw-bypass`'s to move
         expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(
             [
-                '/* oxlint-disable jterrazz/c2-request-extension -- a body file beside the requests */',
-                '// oxlint-disable-next-line jterrazz/c2-request-extension -- the same, on one line',
+                '/* oxlint-disable jterrazz/request-file-extension-known -- a body file beside the requests */',
+                '// oxlint-disable-next-line jterrazz/request-file-extension-known -- the same, on one line',
                 "expect(result.stdout.text).toContain('sent');",
                 '',
             ].join('\n'),
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a directive naming a renamed rule is renamed on a tree on 17 too, once', () => {
         // Given - a 17 tree (no 16 folder) an earlier, ungated mover left naming the 16 id
         const root = tree16({
             'cli/build/build.spec.ts': [
@@ -385,7 +385,7 @@ describe('mover', () => {
         });
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
             [
-                '// oxlint-disable-next-line jterrazz/d8w-raw-bypass -- asserts the colour codes themselves',
+                '// oxlint-disable-next-line jterrazz/no-raw-bypass -- asserts the colour codes themselves',
                 "expect(result.stdout.raw).toContain('[31m');",
                 "expect(result.stdout).toMatch(file('./expected/build.txt'));",
                 '',
@@ -394,8 +394,8 @@ describe('mover', () => {
         expect(second).toStrictEqual({ directives: [], renamed: [], rewritten: [], stubs: [] });
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — renames the directive of a module test on 17 too', () => {
-        // Given - a member whose module tests stand on bare ground, one suppressing D8w by its 16 id
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — renames the directive of a module test on 17 too', () => {
+        // Given - a member whose module tests stand on bare ground, one suppressing `no-raw-bypass` by its 16 id
         const member = tree16(
             {
                 'package.json': '{}\n',
@@ -413,11 +413,11 @@ describe('mover', () => {
         // Then - the directive names the 17 id and the line reads the raw capture
         expect(migration.directives).toStrictEqual(['src/report/report.test.ts']);
         expect(readFileSync(join(member, 'src/report/report.test.ts'), 'utf8')).toBe(
-            "expect(accessor.stdout.raw).toContain('[0m'); // oxlint-disable-line jterrazz/d8w-raw-bypass -- colour\n",
+            "expect(accessor.stdout.raw).toContain('[0m'); // oxlint-disable-line jterrazz/no-raw-bypass -- colour\n",
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a directive is read in a comment, never in a string that spells one', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a directive is read in a comment, never in a string that spells one', () => {
         // Given - a 17 test whose Given is a 16 source, the directive and its read held in string literals
         const source = [
             'const given = [',
@@ -436,7 +436,7 @@ describe('mover', () => {
         expect(readFileSync(join(root, 'lint/mover/mover.test.ts'), 'utf8')).toBe(source);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — the gate is per file: a 17 file is left byte for byte beside a 16 one in the same tree', () => {
         // Given - one leaf still on 16 (its golden folder), and another leaf on 17 whose negative spec keeps the 16 spellings on purpose
         const refusal = [
             "import { file } from '@jterrazz/test';",
@@ -462,7 +462,7 @@ describe('mover', () => {
         expect(readFileSync(join(root, 'cli/refusal/refusal.spec.ts'), 'utf8')).toBe(refusal);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a 16 pool reaches only the files that name it', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a 16 pool reaches only the files that name it', () => {
         // Given - a 16 pool, a spec naming it by the 16 prefix, and a 17 spec that does not
         const other = "await expect(api.seed('users.sql' as never)).rejects.toThrow();\n";
         const root = tree16({
@@ -479,7 +479,7 @@ describe('mover', () => {
         expect(readFileSync(join(root, 'api/orders/orders.spec.ts'), 'utf8')).toBe(other);
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a module test naming the 16 pool follows it, and a command naming it is left', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a module test naming the 16 pool follows it, and a command naming it is left', () => {
         // Given - a 16 pool, and a module test of the member resolving it and running it
         const root = tree16({ '_fixtures/workspace/main.js': '' });
         const moduleTest = join(dirname(root), 'lint/member.test.ts');
@@ -507,7 +507,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a stream asserted empty is an empty text, and a table keeps its matcher', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a stream asserted empty is an empty text, and a table keeps its matcher', () => {
         // Given - 16's toBeEmpty on streams, awaited and negated, beside a table's
         const root = tree16({
             'integration/call/_expected/x.txt': '',
@@ -533,7 +533,7 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — every text member of a facet compared as a value reads its text, and a value stays a value', () => {
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — every text member of a facet compared as a value reads its text, and a value stays a value', () => {
         // Given - a website, a component and an integration result, each text member compared as a value, beside a call's value
         const root = tree16({
             'website/home/_expected/x.txt': '',
@@ -567,8 +567,8 @@ describe('mover', () => {
         );
     });
 
-    test('checker-migration — the 16 → 17 mover (C13 --fix) — a range directive naming a renamed rule is renamed, and the block it covers keeps its reads', () => {
-        // Given - a 16 tree suppressing D8w by its 16 id over a block, in both comment forms
+    test('checker-migration — the 16 → 17 mover (`ground-uses-reserved-name` --fix) — a range directive naming a renamed rule is renamed, and the block it covers keeps its reads', () => {
+        // Given - a 16 tree suppressing `no-raw-bypass` by its 16 id over a block, in both comment forms
         const root = tree16({
             'cli/build/_expected/build.txt': '',
             'cli/build/build.spec.ts': [
@@ -583,12 +583,12 @@ describe('mover', () => {
         // When - the mover runs
         migrateTo17(root, renameSync);
 
-        // Then - both directives name d8w-raw-bypass, and no line under them moved to .raw: a range covers what it covers, not one line
+        // Then - both directives name no-raw-bypass, and no line under them moved to .raw: a range covers what it covers, not one line
         expect(readFileSync(join(root, 'cli/build/build.spec.ts'), 'utf8')).toBe(
             [
-                '/* oxlint-disable jterrazz/d8w-raw-bypass -- asserts the colour codes themselves */',
+                '/* oxlint-disable jterrazz/no-raw-bypass -- asserts the colour codes themselves */',
                 "expect(result.stdout.text).toContain('[31m');",
-                '// oxlint-enable jterrazz/d8w-raw-bypass',
+                '// oxlint-enable jterrazz/no-raw-bypass',
                 "expect(result.stderr.text).toContain('[0m');",
                 '',
             ].join('\n'),
@@ -596,7 +596,7 @@ describe('mover', () => {
     });
 
     test('checker-migration — the 16 → 17 mover — the oxlint config — an override of a retired rule leaves with its comment, and one of a renamed rule names its 17 id', () => {
-        // Given - a member whose config overrides D12w, retired into D20, and D8w under its 16 id
+        // Given - a member whose config overrides `d12w-response-body-probe`, retired into `result-compared-whole`, and `no-raw-bypass` under its 16 id
         const member = tree16(
             {
                 'oxlint.config.ts': [
@@ -629,7 +629,7 @@ describe('mover', () => {
                 'export default defineConfig(',
                 '    compose(node, testing, {',
                 '        rules: {',
-                "            'jterrazz/d8w-raw-bypass': 'off',",
+                "            'jterrazz/no-raw-bypass': 'off',",
                 '        },',
                 '    }),',
                 ');',
@@ -666,8 +666,8 @@ describe('mover', () => {
         expect(again).toStrictEqual([]);
     });
 
-    test('checker-migration — the 16 → 17 mover — the oxlint config — an override of F3, a rule 17 retired, leaves too', () => {
-        // Given - a member that turned 16's F3 off for its specs
+    test('checker-migration — the 16 → 17 mover — the oxlint config — an override of `f3-specs-public-entry`, a rule 17 retired, leaves too', () => {
+        // Given - a member that turned 16's `f3-specs-public-entry` off for its specs
         const member = tree16(
             {
                 '.oxlintrc.json':

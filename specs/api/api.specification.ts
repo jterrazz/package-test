@@ -12,7 +12,7 @@ export const { api, cleanup } = await specification.api({
             redisUrl: cache.connectionString,
         }),
     services: {
-        // The first database handle is the default target of internal resets; the record key, kebab-cased, is the service name (A8).
+        // The first database handle is the default target of internal resets; the record key, kebab-cased, is the service name (`server-sees-declared-services`).
         analyticsDb: postgres(),
         cache: redis(),
         db: postgres(),

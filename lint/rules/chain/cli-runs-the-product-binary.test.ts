@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { b9wProductCommand } from './cli-runs-the-product-binary.js';
+import { cliRunsTheProductBinary } from './cli-runs-the-product-binary.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('b9w-product-command', b9wProductCommand as unknown as OxlintRule, {
+ruleTester.run('cli-runs-the-product-binary', cliRunsTheProductBinary as unknown as OxlintRule, {
     invalid: [
         // A bare literal pointing into a dependency's installed binary.
         {
@@ -42,7 +42,7 @@ ruleTester.run('b9w-product-command', b9wProductCommand as unknown as OxlintRule
             code: "const { cli } = await specification.cli('../fixtures/cli-app/cli.sh');",
             filename: '/repo/specs/cli/cli.specification.ts',
         },
-        // Outside a specification file the runner is A1's to refuse, not this rule's.
+        // Outside a specification file the runner is `runner-in-specification-file`'s to refuse, not this rule's.
         {
             code: "const { cli } = await specification.cli('./node_modules/.bin/oxlint');",
             filename: '/repo/specs/cli/lint/binary.spec.ts',

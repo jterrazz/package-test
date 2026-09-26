@@ -1,6 +1,6 @@
 # 20 — Spec documents (`<case>.spec.yaml`)
 
-A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's — and the lint rules', whose specifications are cli sessions of the linter; an api or a job case is a TypeScript spec, its whole result written in place ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)). This chapter owns the format, from the key a document opens with to the door that runs it.
+A terminal session that is data is written as data: one `<case>.spec.yaml` per test, beside the spec it belongs to, stating what the session stands on, the commands it runs and what each left behind. The format is the cli facet's — and the lint rules', whose specifications are cli sessions of the linter; an api or a job case is a TypeScript spec, its whole result written in place ([14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)). This chapter owns the format, from the key a document opens with to the door that runs it.
 
 - [One file, one test](#one-file-one-test) — the unit, and the golden of the whole session
 - [Paths](#paths) — `fixture:` names the disk the way `file()` and `directory()` do
@@ -17,12 +17,12 @@ A document is ONE test: its `description:` is the vitest title, and nothing in i
 
 ## Paths
 
-`fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives-rule-d3)):
+`fixture:` takes a path relative to the document, spelled in full (`./…`, `../…`), and is judged by the four guards a `file()` call is (chapter [14](14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)):
 
-- **Role** — a path whose first ground folder is not `fixtures/` is refused by the grammar, on its line, so the checker (`d4b-spec-shape`) and the runner refuse the same document (C24's law, for data).
-- **Locality** — a path leaves its leaf only into the specs root's shared `<specs>/shared/fixtures/`, or the ground of a leaf that encloses it (C15).
-- **Existence** — every path names an entry git does not ignore, of the kind it names — a directory with its trailing `/`, a file without (C8); at run time a missing one is refused with what it resolved to.
-- **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (C9, C28).
+- **Role** — a path whose first ground folder is not `fixtures/` is refused by the grammar, on its line, so the checker (`document-follows-its-grammar`) and the runner refuse the same document (`verb-reads-its-ground-folder`'s law, for data).
+- **Locality** — a path leaves its leaf only into the specs root's shared `<specs>/shared/fixtures/`, or the ground of a leaf that encloses it (`no-reach-into-sibling-ground`).
+- **Existence** — every path names an entry git does not ignore, of the kind it names — a directory with its trailing `/`, a file without (`named-path-exists`); at run time a missing one is refused with what it resolved to.
+- **Liveness** — a fixture a document names is referenced, exactly as a `file()` literal references it (`no-unused-ground`, `ground-shared-or-inline`).
 
 ## A cli document
 
@@ -117,7 +117,7 @@ The document's JSON Schema ships with the package at `schema/spec.schema.json`, 
 # yaml-language-server: $schema=./node_modules/@jterrazz/test/schema/spec.schema.json
 ```
 
-A schema says which keys exist, not which ORDER they come in. The canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — is the `d4b-spec-key-order` pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The whole document family of rules is in [19 — Linting](19-linting.md).
+A schema says which keys exist, not which ORDER they come in. The canonical order — `description, fixture, env, serve, runs` at the top, then `command, stdin, timeout, waitFor, exit, stdout, stderr, files` in a run — is the `document-keys-in-canonical-order` pass's, which also rewrites it: `npx jterrazz-test-check specs --fix`. The whole document family of rules is in [19 — Linting](19-linting.md).
 
 The whole [token vocabulary](15-tokens.md) works in what a document ASSERTS — a run's streams and `files:` texts — and **never** in `description`, `command` or `stdin`, which are prose and inputs.
 
@@ -177,9 +177,9 @@ A document that starts wanting a conditional is a chain wearing a header. Write 
 
 ## Pitfalls
 
-- **Putting a `<case>.spec.yaml` under `expected/`.** A document is the CASE, not a golden — it lives beside the spec it belongs to (C16).
+- **Putting a `<case>.spec.yaml` under `expected/`.** A document is the CASE, not a golden — it lives beside the spec it belongs to (`no-document-in-ground`).
 - **Writing a token in a `description:`, a `command:` or a `stdin:`.** Those are prose and inputs; placeholders work in what is asserted.
-- **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — `d4b-spec-block-scalar` rejects it and `--fix` rewrites it.
+- **Quoting a stream instead of writing a block scalar.** `stdout: "a\nb\n"` is a golden no diff can show — `document-streams-written-as-block-scalars` rejects it and `--fix` rewrites it.
 - **A `fixture:` naming a golden's folder.** It reads `fixtures/`; `./expected/shop/` is refused on its line.
 - **Listing cases in one file, or inheriting a given.** One file is one test, and the given is visible: a list of paths layers, `extends:` does not exist.
 - **Writing an api or a job case as a document.** The format is a cli session's; an api or job case is a spec, its whole result in place — `kind:` is an unknown key.

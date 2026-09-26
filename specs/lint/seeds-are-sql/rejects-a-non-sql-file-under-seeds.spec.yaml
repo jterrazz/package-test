@@ -1,0 +1,8 @@
+description: rejects a non-.sql file under seeds/
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/widget.test.ts:1:1  jterrazz(seeds-are-sql)
+          specs/app/widget/widget.test.ts:7:1  jterrazz(no-status-only-test)

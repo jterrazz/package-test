@@ -241,7 +241,7 @@ describe('structural', () => {
         expect(textEquals(mergedText, `id ${UUID_B}\nfresh`, new CaptureScope())).toBeTruthy();
     });
 
-    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
+    test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
         // Given - a fresh JSON fixture (no previous) whose values embed the cwd
         const actual = { cwd: WORKDIR, nested: { path: `${WORKDIR}/out.txt` }, other: 7 };
 
@@ -253,7 +253,7 @@ describe('structural', () => {
         });
     });
 
-    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — mergePreservingPlaceholders preserves a still-matching {{workdir}} placeholder', () => {
+    test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — mergePreservingPlaceholders preserves a still-matching {{workdir}} placeholder', () => {
         // Given - a previous fixture that already tokenised the cwd
         const previous = { cwd: '{{workdir}}', id: '{{uuid}}', name: 'STALE' };
         const actual = { cwd: WORKDIR, id: UUID_A, name: 'Alice' };
@@ -266,7 +266,7 @@ describe('structural', () => {
         });
     });
 
-    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — no workdir given: string leaves are left untouched (no-op parity)', () => {
+    test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — no workdir given: string leaves are left untouched (no-op parity)', () => {
         // Given - the same shape but no framework-known cwd (api/job mode)
         const actual = { cwd: WORKDIR };
 
@@ -274,7 +274,7 @@ describe('structural', () => {
         expect(mergePreservingPlaceholders(null, actual)).toStrictEqual({ cwd: WORKDIR });
     });
 
-    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — meta: a workdir-substituted JSON fixture passes the next run (with {{workdir}} inside)', () => {
+    test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — meta: a workdir-substituted JSON fixture passes the next run (with {{workdir}} inside)', () => {
         // Given - a golden freshly written by update mode from cwd-bearing output
         const actual = { cwd: WORKDIR, log: `wrote ${WORKDIR}/out.txt`, name: 'Alice' };
         const merged = mergePreservingPlaceholders(null, actual, WORKDIR);
@@ -288,7 +288,7 @@ describe('structural', () => {
         expect(structuralEquals(merged, actual, new CaptureScope(WORKDIR))).toBeTruthy();
     });
 
-    test('structural — update-mode workdir substitution (CONVENTIONS D5, JSON/text parity) — parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {
+    test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {
         // Given - the same cwd surfacing in a text stream and a JSON value
         const mergedText = mergeTextPreservingPlaceholders(
             null,

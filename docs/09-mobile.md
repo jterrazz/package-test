@@ -31,7 +31,7 @@ afterAll(cleanup);
 | `appium`   | `{ url }` — an Appium server already running, connected to instead of spawned; see [A declared Appium server](#a-declared-appium-server)                                                                                                                           |
 | `device`   | `{ name, os?, udid? }` — the simulator to run on, resolved through `xcrun simctl` and booted when shut down — or, under `appium`, asked of the server. Left out under a [`mobile({ device })` project](#one-session-per-run), which owns it; refused anywhere else |
 | `backend`  | `{ port? }` — start a declared stub backend; the handle gains `backendUrl` — see [Declared backend](#declared-backend)                                                                                                                                             |
-| `root`     | **Project-root override** (rule A9): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent                                                                                                           |
+| `root`     | **Project-root override** (rule `no-redundant-root`): where the `appium` binary is resolved from (`node_modules/.bin`). Auto-discovered from the calling file when absent                                                                                          |
 | `services` | A named record started with the runner and stopped with it — a `process()` for the bundler the app loads from, a database a dev build reads                                                                                                                        |
 | `timeouts` | `{ action?, launch? }` in ms — how long this runner waits. Each field falls back to the framework's default; see [Declared timeouts](#declared-timeouts)                                                                                                           |
 
@@ -61,7 +61,7 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 
 Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server is ended the way every `process()` is ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)).
 
-The handle destructures to `{ mobile, cleanup, udid }` (rule A3) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
+The handle destructures to `{ mobile, cleanup, udid }` (rule `no-runner-alias`) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
 ### A declared Appium server
 
@@ -156,15 +156,15 @@ test('bookmarks an event from its detail screen', async () => {
 });
 ```
 
-**No `expect()` inside a scenario (rule W1).** A scenario is pure interaction — assertions live in the Then, on the returned result.
+**No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result.
 
 The element vocabulary is [13 — Elements](13-elements.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this chapter's, and it is three things.
 
 **The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here ([13 § Verbs](13-elements.md#verbs) says why). Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality. Actionability includes **scroll-into-view**: when a descriptor matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
 
-**Four descriptors reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [13 — Elements](13-elements.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule W2's escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
+**Four descriptors reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [13 — Elements](13-elements.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule `test-id-states-what-is-missing`'s escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
 
-**W3 is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous descriptor and print the candidates with their accessibility identifiers; `see()` does not — [13 — Elements § `see()` and `gone()`](13-elements.md#see-and-gone-are-the-synchronization) says why, once.
+**`descriptor-matches-one-element` is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous descriptor and print the candidates with their accessibility identifiers; `see()` does not — [13 — Elements § `see()` and `gone()`](13-elements.md#see-and-gone-are-the-synchronization) says why, once.
 
 A mobile scope is any descriptor, most often a `testId()` on the containing view, because iOS has no landmarks:
 
@@ -273,7 +273,7 @@ Calling `specification.mobile()` (or `.open()`) without them throws exactly that
 
 ```
 specs/mobile/
-├── mobile.specification.ts     # runner at the facet ROOT (rule C1)
+├── mobile.specification.ts     # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/
     ├── <aspect>.spec.ts
     ├── expected/                # ALL expected fixtures, FLAT (*.screen.json, …)
@@ -286,10 +286,10 @@ No `seeds/` or `requests/` — a mobile chain has no `.seed()` and no request-fi
 
 ## Pitfalls
 
-- **Using `expect()` inside a scenario callback.** Forbidden (rule W1) — the scenario is the When; assertions belong on the result the `.open()` promise resolves to.
+- **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.open()` promise resolves to.
 - **The first session builds WebDriverAgent (~40 s, once per simulator).** Subsequent sessions on a warm simulator are seconds. Budget the first run; do not "fix" it with retries.
 - **Passing a landmark (`main()`, `navigation()`) to a mobile verb.** They are website concepts — iOS has no ARIA regions; the runtime refusal points at `within(testId('…'), …)` as the scoping tool.
-- **Reaching for `testId()` first.** It is the last rung, and W2 refuses it without the line naming what the element lacks — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
+- **Reaching for `testId()` first.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
 - **Expecting `.open()` to preserve app state between specs.** It never does — every open terminates and relaunches the app; a flow that spans screens belongs in ONE scenario.
 - **Asserting on off-screen content with `result.content`.** `content` carries only _visible_ texts; the mounted-but-offscreen rows live in `result.screen`. Use the golden for the whole list, `content` for what the user currently sees.
 - **Calling `specification.mobile()` without appium installed.** The error names the exact fix — `npm install -D appium webdriverio && npx appium driver install xcuitest` — there is no silent fallback.

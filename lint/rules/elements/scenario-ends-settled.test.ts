@@ -1,10 +1,10 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { w5wScenarioSettles } from './scenario-ends-settled.js';
+import { scenarioEndsSettled } from './scenario-ends-settled.js';
 
 const SPEC = '/repo/specs/website/posts/table.spec.ts';
 const COMPONENT = '/repo/src/web/post-table.test.tsx';
 
-ruleTester().run('w5w-scenario-settles', asOxlintRule(w5wScenarioSettles), {
+ruleTester().run('scenario-ends-settled', asOxlintRule(scenarioEndsSettled), {
     invalid: [
         // The capture is taken on whatever the click left on the screen.
         {

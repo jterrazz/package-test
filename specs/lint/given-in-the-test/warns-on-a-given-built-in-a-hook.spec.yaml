@@ -1,0 +1,7 @@
+description: warns on a Given built in a hook
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:7:1  jterrazz(given-in-the-test)

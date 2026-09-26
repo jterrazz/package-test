@@ -7,7 +7,7 @@ import { describe, expect, it, test } from 'vitest';
 
 import type { AstNode } from '../../reading/ast.js';
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { c7SeedsSqlOnly } from './seeds-are-sql.js';
+import { seedsAreSql } from './seeds-are-sql.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -37,7 +37,7 @@ writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/seeds/users.json'), '[]\n');
 writeFileSync(join(IGNORED_STRAY, '.gitignore'), '*.json\n');
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
 
-ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
+ruleTester.run('seeds-are-sql', seedsAreSql as unknown as OxlintRule, {
     invalid: [
         // Every stray is named, whatever its extension: two strays, two reports.
         {
@@ -55,19 +55,19 @@ ruleTester.run('c7-seeds-sql-only', c7SeedsSqlOnly as unknown as OxlintRule, {
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // Only .sql fragments in the compliant twin.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // No seeds/ directory at this level (the feature has no seeds/ sibling).
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c7-seeds-sql-only/fixtures/compliant/specs/app/app.test.ts`,
+            filename: `${SPECS_LINT}/seeds-are-sql/fixtures/compliant/specs/app/app.test.ts`,
         },
         // A file `.gitignore` names is on no checkout: it violates nothing.
         {
@@ -94,9 +94,9 @@ function lintPass(file: string): string[] {
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- the rule keys its answers on this object and reads nothing of it
         sourceCode: {} as Context['sourceCode'],
     };
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
-    const visitor = c7SeedsSqlOnly.createOnce(context as Context);
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- C7 reports on the program node and reads nothing of its span
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `seeds-are-sql` reads only the file's name and `report`; the rest of oxlint's context is not what this pass is about
+    const visitor = seedsAreSql.createOnce(context as Context);
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- `seeds-are-sql` reports on the program node and reads nothing of its span
     const program = { type: 'Program' } as AstNode;
     const { before, Program: enterProgram } = visitor;
     if (before?.() !== false) {
@@ -105,8 +105,8 @@ function lintPass(file: string): string[] {
     return reported;
 }
 
-describe('c7SeedsSqlOnly', () => {
-    test('c7-seeds-sql-only — the editor lints again in one process — a stray written after a first pass is seen by the second', () => {
+describe('seedsAreSql', () => {
+    test('seeds-are-sql — the editor lints again in one process — a stray written after a first pass is seen by the second', () => {
         // Given - a git checkout whose seeds/ holds one `.sql`, linted once
         const root = checkoutUnder('work', ['specs/app/widget/seeds']);
         writeFileSync(join(root, 'specs/app/widget/seeds/users.sql'), 'select 1;\n');

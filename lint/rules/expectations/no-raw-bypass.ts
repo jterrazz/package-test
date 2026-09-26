@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, childList, identifierName, memberPropertyName } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
@@ -23,7 +22,7 @@ function unnegated(node: AstNode | undefined): AstNode | undefined {
     return node !== undefined && memberPropertyName(node) === 'not' ? child(node, 'object') : node;
 }
 
-export const d8wRawBypass: LintRule = {
+export const noRawBypass: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -51,8 +50,8 @@ export const d8wRawBypass: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d8w-raw-bypass'],
-        messages: lessons('d8w-raw-bypass', {
+        docs: rowOf('no-raw-bypass'),
+        messages: lessons('no-raw-bypass', {
             rawBypass: {
                 found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
                 fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',

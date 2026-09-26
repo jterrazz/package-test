@@ -4,7 +4,7 @@ import { file } from '../../../src/index.js';
 import { tally } from '../../shared/fixtures/orders/tally.js';
 import { integration } from '../pure.specification.js';
 
-/** Golden names in a template literal: the shape C9 must read as a reference rather than silence. */
+/** Golden names in a template literal: the shape `no-unused-ground` must read as a reference rather than silence. */
 const CASES = [
     { name: 'empty', of: [] as number[] },
     { name: 'one', of: [7] },

@@ -2,8 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
 import { GROUND_REQUESTS } from '../../../src/kernel/files/ground.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { isDirectory, listDirectory } from '../../reading/fs-cache.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -11,7 +10,7 @@ import { isTestRole } from '../../reading/role.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 /** Anchored on the visited test file: its sibling `requests/` is probed, and a file with no extension is reported there. */
-export const c2RequestExtension: LintRule = {
+export const requestFileExtensionKnown: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -29,8 +28,8 @@ export const c2RequestExtension: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c2-request-extension'],
-        messages: lessons('c2-request-extension', {
+        docs: rowOf('request-file-extension-known'),
+        messages: lessons('request-file-extension-known', {
             noExtension: {
                 found: '`requests/{{entry}}` carries no extension',
                 fix: 'name it by how it is sent — `requests/{{entry}}.http` for a whole request, `requests/{{entry}}.json` for a body the app parses, any other extension for a body sent verbatim',

@@ -17,7 +17,7 @@ describe('escapes', () => {
         `);
 
         // Then - the raw accessor keeps the escapes
-        // oxlint-disable-next-line jterrazz/d8w-raw-bypass -- the raw accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
+        // oxlint-disable-next-line jterrazz/no-raw-bypass -- the raw accessor IS the subject: this test proves it retains ANSI escapes while matchers see the stripped form.
         expect(result.stdout.raw).toContain('\u001B[31m');
     });
 });

@@ -4,7 +4,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { c2RequestExtension } from './request-file-extension-known.js';
+import { requestFileExtensionKnown } from './request-file-extension-known.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -26,7 +26,7 @@ writeFileSync(join(SENT, 'specs/app/widget/requests/note.txt'), 'note\n');
 mkdirSync(join(SENT, 'specs/app/widget/requests/orders'), { recursive: true });
 writeFileSync(join(SENT, 'specs/app/widget/requests/orders/big.json'), '{}\n');
 
-ruleTester.run('c2-request-extension', c2RequestExtension as unknown as OxlintRule, {
+ruleTester.run('request-file-extension-known', requestFileExtensionKnown as unknown as OxlintRule, {
     invalid: [
         // Every bare file is named: two of them, two reports.
         {
@@ -38,14 +38,14 @@ ruleTester.run('c2-request-extension', c2RequestExtension as unknown as OxlintRu
         {
             code: 'test("x", () => {});',
             errors: 1,
-            filename: `${SPECS_LINT}/c2-request-extension/fixtures/violation/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/request-file-extension-known/fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],
     valid: [
         // A whole request and a body, side by side, in the compliant twin.
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c2-request-extension/fixtures/compliant/specs/app/widget/widget.test.ts`,
+            filename: `${SPECS_LINT}/request-file-extension-known/fixtures/compliant/specs/app/widget/widget.test.ts`,
         },
         // A `.http`, a `.json` and a `.txt` body, and a folder: everything a spec sends.
         {
@@ -55,7 +55,7 @@ ruleTester.run('c2-request-extension', c2RequestExtension as unknown as OxlintRu
         // No requests/ directory at this level (the feature has no requests/ sibling).
         {
             code: 'test("x", () => {});',
-            filename: `${SPECS_LINT}/c2-request-extension/fixtures/compliant/specs/app/app.test.ts`,
+            filename: `${SPECS_LINT}/request-file-extension-known/fixtures/compliant/specs/app/app.test.ts`,
         },
         // Outside specs/ the rule is inert.
         {

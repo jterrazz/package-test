@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { a2KnownConstructors } from './no-unknown-constructor.js';
+import { noUnknownConstructor } from './no-unknown-constructor.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('a2-known-constructors', a2KnownConstructors as unknown as OxlintRule, {
+ruleTester.run('no-unknown-constructor', noUnknownConstructor as unknown as OxlintRule, {
     invalid: [
         // The removed v8 vocabulary.
         { code: 'await specification.app({});', errors: 1 },

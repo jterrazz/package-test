@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -49,8 +48,8 @@ function sampledUnder(node: AstNode | undefined): AstNode[] {
     return found;
 }
 
-/** Deliberately narrow, the wider net is d16w's. A test pinning the clock is out of reach: its reading is a constant it chose. A specification may sample (a per-run label). */
-export const d16SampledOracle: LintRule = {
+/** Deliberately narrow, the wider net is `no-sampled-value-in-test`'s. A test pinning the clock is out of reach: its reading is a constant it chose. A specification may sample (a per-run label). */
+export const noSampledValueInExpectation: LintRule = {
     createOnce(context: Context): Visitor {
         const report = (found: AstNode[]): void => {
             for (const node of found) {
@@ -87,8 +86,8 @@ export const d16SampledOracle: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d16-sampled-oracle'],
-        messages: lessons('d16-sampled-oracle', {
+        docs: rowOf('no-sampled-value-in-expectation'),
+        messages: lessons('no-sampled-value-in-expectation', {
             sampledOracle: {
                 found: 'a sampled value under `expect`',
                 fix: "pin it with `clock.at('2026-01-01T00:00:00Z')`, or match it with an `iso8601` token or `match.uuid`",

@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { isDirectory } from '../../reading/fs-cache.js';
 import { isProductionFile } from '../../reading/linted-file.js';
 import { moduleReferenceVisitor } from '../../reading/production.js';
@@ -85,7 +84,7 @@ function boundaryOf(context: Context): Boundary | undefined {
 }
 
 /** Inert with no layer map, and it ships none: an architecture is the project's to state. */
-export const i1LayerBoundaries: LintRule = {
+export const importWithinDeclaredLayers: LintRule = {
     createOnce(context: Context): Visitor {
         let boundary: Boundary | undefined;
         return {
@@ -114,8 +113,8 @@ export const i1LayerBoundaries: LintRule = {
     },
     meta: {
         defaultOptions: [{ layers: {} }],
-        docs: RULE_DOCS['i1-layer-boundaries'],
-        messages: lessons('i1-layer-boundaries', {
+        docs: rowOf('import-within-declared-layers'),
+        messages: lessons('import-within-declared-layers', {
             crossLayer: {
                 found: 'the layer "{{layer}}" imports "{{source}}", outside the edges its map declares',
                 fix: 'reach it through a layer the map allows, or declare the edge in the layer map with the reason',

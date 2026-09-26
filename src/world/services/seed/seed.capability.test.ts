@@ -59,9 +59,9 @@ describe('seed', () => {
 
         // When - the chain is armed
         await chain
-            // checker-disable-next-line c8 -- the engine is a double that echoes the path it would read: no file is opened
+            // checker-disable-next-line named-path-exists -- the engine is a double that echoes the path it would read: no file is opened
             .seed(file('./seeds/users.sql'), { database: 'db' })
-            // checker-disable-next-line c8 -- the engine is a double that echoes the path it would read: no file is opened
+            // checker-disable-next-line named-path-exists -- the engine is a double that echoes the path it would read: no file is opened
             .seed(file('./seeds/events.sql'), { database: 'analytics' })
             .settle();
 
@@ -84,21 +84,21 @@ describe('seed', () => {
         expect(log).toStrictEqual(['reset']);
     });
 
-    test('.seed() — the SQL files a chain runs first — refuses an unnamed seed when two databases are declared, as it is stated (A7)', () => {
+    test('.seed() — the SQL files a chain runs first — refuses an unnamed seed when two databases are declared, as it is stated (`database-named-only-when-several-at-runtime`)', () => {
         // Given - two databases declared
         const chain = chainOver([], { databaseKeys: ['analytics', 'db'] });
 
         // Then - the seed is refused before any chain is armed
-        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => chain.seed(file('./seeds/users.sql'))).toThrow('2 databases are declared');
     });
 
-    test('.seed() — the SQL files a chain runs first — refuses a named seed when one database is declared, the option being redundant (A7)', () => {
+    test('.seed() — the SQL files a chain runs first — refuses a named seed when one database is declared, the option being redundant (`database-named-only-when-several-at-runtime`)', () => {
         // Given - one database declared, as "db"
         const chain = chainOver([], { databaseKeys: ['db'] });
 
         // Then - the seed is refused before any chain is armed
-        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => chain.seed(file('./seeds/users.sql'), { database: 'db' })).toThrow(
             'found: seed() names a database, and "db" is the only one declared',
         );
@@ -115,11 +115,11 @@ describe('seed', () => {
         expect(() => chain.seed("INSERT INTO users (name) VALUES ('Ada');" as never)).toThrow(
             /^found: seed\("INSERT INTO users \(name\) VALUES \('Ada'\);"\), a value where a file is read\n.*\nfix: name one file: seed\(file\('\.\/seeds\/rows\.sql'\)\)\n/u,
         );
-        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => chain.seed(directory('./seeds/') as never)).toThrow(
             /a directory where one file is read/u,
         );
-        // checker-disable-next-line c8 -- the refusal under test fires before the seed is read: the path names nothing on purpose
+        // checker-disable-next-line named-path-exists -- the refusal under test fires before the seed is read: the path names nothing on purpose
         expect(() => chain.seed(file('./seeds/rows.json') as never)).toThrow(
             /a file not ending in \.sql/u,
         );

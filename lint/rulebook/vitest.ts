@@ -7,7 +7,7 @@ export const TEST_GLOBS = [
     '**/specs/**/*.{ts,tsx}',
 ];
 
-/** D20 — every snapshot matcher points back at `toMatch(file('./expected/<name>.<ext>'))`. */
+/** `no-vitest-snapshot` — every snapshot matcher points back at `toMatch(file('./expected/<name>.<ext>'))`. */
 const SNAPSHOT_MATCHERS: Record<string, string> = {
     toMatchAriaSnapshot:
         "The ARIA tree is a golden: `expect(result.tree).toMatch(file('./expected/<case>.aria.yaml'))`.",
@@ -25,7 +25,7 @@ const SNAPSHOT_MATCHERS: Record<string, string> = {
         "State the message: `expect(fn).toThrow('<what the subject says>')`.",
 };
 
-/** M3 — `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on I4, whose allow-list the option cannot express. */
+/** `no-vitest-time-or-global-stub` — `stubEnv` is not here: it restores itself. `vi.mock`/`vi.doMock` stay on `no-module-mock`, whose allow-list the option cannot express. */
 const RESTRICTED_VI_METHODS: Record<string, string> = {
     setSystemTime: '`vi.setSystemTime` → `clock.at(iso)`, which gives the calendar back.',
     stubGlobal:
@@ -42,11 +42,11 @@ export const vitestOnTests: Override = {
             'error',
             { pattern: String.raw`.*\.(?:test\.[tj]sx?|spec\.[tj]s)$` },
         ],
-        // J10 — one level of `describe`.
+        // `one-describe-level` — one level of `describe`.
         'vitest/max-nested-describe': ['error', { max: 1 }],
         'vitest/no-restricted-matchers': ['error', SNAPSHOT_MATCHERS],
         'vitest/no-restricted-vi-methods': ['error', RESTRICTED_VI_METHODS],
-        // C31 — the describe is titled with its subject: `LocaleNote` keeps its case.
+        // `one-describe-per-file` — the describe is titled with its subject: `LocaleNote` keeps its case.
         'vitest/prefer-lowercase-title': ['error', { ignoreTopLevelDescribe: true }],
     },
 };

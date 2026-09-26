@@ -1,4 +1,4 @@
-/* oxlint-disable jterrazz/a1-specification-file -- the ledger is written by cleanup(), which is the behaviour under test: the runner is built and cleaned up inside the test that reads what its cleanup wrote, so it cannot live in a *.specification.ts whose afterAll owns the cleanup. */
+/* oxlint-disable jterrazz/runner-in-specification-file -- the ledger is written by cleanup(), which is the behaviour under test: the runner is built and cleaned up inside the test that reads what its cleanup wrote, so it cannot live in a *.specification.ts whose afterAll owns the cleanup. */
 import { Hono } from 'hono';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';

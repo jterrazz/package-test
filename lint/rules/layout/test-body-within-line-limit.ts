@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -23,7 +22,7 @@ function lineAt(text: string, offset: number): number {
     return text.slice(0, offset).split('\n').length - 1;
 }
 
-/** A `toMatch(<value>)` argument past its first line is no gesture: C28 caps it. */
+/** A `toMatch(<value>)` argument past its first line is no gesture: `ground-shared-or-inline` caps it. */
 function gestureLines(text: string, body: AstNode): number {
     const first = lineAt(text, nodeStart(body));
     const last = lineAt(text, nodeEnd(body));
@@ -51,8 +50,8 @@ function bodyOf(call: AstNode): AstNode | undefined {
         : undefined;
 }
 
-/** Counted as the toolchain's `max-lines-per-function` counts, which cannot reach a test inside C31's one `describe`. */
-export const c34TestBodySize: LintRule = {
+/** Counted as the toolchain's `max-lines-per-function` counts, which cannot reach a test inside `one-describe-per-file`'s one `describe`. */
+export const testBodyWithinLineLimit: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -76,8 +75,8 @@ export const c34TestBodySize: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c34-test-body-size'],
-        messages: lessons('c34-test-body-size', {
+        docs: rowOf('test-body-within-line-limit'),
+        messages: lessons('test-body-within-line-limit', {
             tooLong: {
                 found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch(<value>)` argument are not counted',
                 fix: 'split it into one test per behaviour, or move a long Given into a function the test calls',

@@ -51,13 +51,13 @@ describe('role', () => {
         expect(roleOf('/repo/specs/api/users/expected/user.http').role).toBe('ground');
     });
 
-    test("roleOf — the kind a path states — a ground module's own test keeps its kind — I2's one pairing", () => {
+    test("roleOf — the kind a path states — a ground module's own test keeps its kind — `test-beside-its-module`'s one pairing", () => {
         // Given - a `<module>.test.ts` inside ground
         // Then - the suffix wins: it is a module test, not inert material
         expect(roleOf('/repo/specs/fixtures/app/server.test.ts').role).toBe('module');
     });
 
-    test('roleOf — the kind a path states — a stubs/ unit is its own role — the half C10 keeps internal', () => {
+    test('roleOf — the kind a path states — a stubs/ unit is its own role — the half `stubs-imported-through-facade` keeps internal', () => {
         // Given - a file under a feature's stubs/ folder
         // Then - `stub`: the boundary rule asks the identity, not the path
         expect(roleOf('/repo/specs/api/news/stubs/http/latest.ts').role).toBe('stub');
@@ -72,7 +72,7 @@ describe('role', () => {
     });
 
     test('roleOf — the kind a path states — names the retired test roots, in both of their spellings', () => {
-        // Given - the three shapes I2 refuses, each anchored on a real package root
+        // Given - the three shapes `test-beside-its-module` refuses, each anchored on a real package root
         // Then - `legacyDir` is the third field a rule reads
         expect([
             legacyOf('/repo/src/matching/__tests__/match.test.ts'),

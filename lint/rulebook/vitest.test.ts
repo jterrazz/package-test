@@ -16,7 +16,7 @@ function optionOf(rule: string): { options: Record<string, string>; severity: un
 }
 
 describe('vitest', () => {
-    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — d20 — the seven snapshot matchers are refused, each naming the golden', () => {
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `no-vitest-snapshot` — the seven snapshot matchers are refused, each naming the golden', () => {
         // Given - the option the fragment sets on vitest's own rule
         const { options: matchers, severity } = optionOf('vitest/no-restricted-matchers');
 
@@ -36,7 +36,7 @@ describe('vitest', () => {
         }
     });
 
-    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — m3 — the four vi methods that take a seam, and not the one that restores itself', () => {
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `no-vitest-time-or-global-stub` — the four vi methods that take a seam, and not the one that restores itself', () => {
         // Given - the option the fragment sets
         const { options: methods, severity } = optionOf('vitest/no-restricted-vi-methods');
 
@@ -51,7 +51,7 @@ describe('vitest', () => {
         expect(methods).not.toHaveProperty('stubEnv');
     });
 
-    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — c31 — the top-level describe keeps the case of the subject it names', () => {
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `one-describe-per-file` — the top-level describe keeps the case of the subject it names', () => {
         // Given - the option the fragment sets on vitest's own rule
         const { options, severity } = optionOf('vitest/prefer-lowercase-title');
 
@@ -60,7 +60,7 @@ describe('vitest', () => {
         expect(options).toStrictEqual({ ignoreTopLevelDescribe: 'true' });
     });
 
-    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — j10 — one level of describe, and no more', () => {
+    test('the vitest rulebook — the upstream options this vocabulary owns (ADR-005) — `one-describe-level` — one level of describe, and no more', () => {
         // Given - the option the fragment sets on vitest's own rule
         const { options, severity } = optionOf('vitest/max-nested-describe');
 

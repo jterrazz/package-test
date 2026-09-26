@@ -28,7 +28,7 @@ describe('filters', () => {
         `);
     });
 
-    test('a request that fails the body filter counts as unmatched (D7)', async () => {
+    test('a request that fails the body filter counts as unmatched (`network-strict-after-first-stub`)', async () => {
         // Given - a filter demanding a role the outgoing body does not carry
         const chain = api
             .intercept(

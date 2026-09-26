@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { cli as transformCli } from '../transform-cli.specification.js';
 
 /* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */
-/* oxlint-disable jterrazz/d8w-raw-bypass -- The raw `.raw` accessor IS the subject
+/* oxlint-disable jterrazz/no-raw-bypass -- The raw `.raw` accessor IS the subject
    under test here (see the note above): every `.raw` assertion proves what the
    comparison strips. Whole-output goldens are the toMatch(file(…)) cases in this file. */
 

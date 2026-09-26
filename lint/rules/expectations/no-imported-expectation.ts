@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve, sep } from 'node:path';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -51,7 +50,7 @@ function rootRead(argument: AstNode): string | undefined {
 }
 
 /** A typed helper is called, and what it builds is the test's own. */
-export const d29NoForeignExpectation: LintRule = {
+export const noImportedExpectation: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () =>
@@ -82,8 +81,8 @@ export const d29NoForeignExpectation: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d29-no-foreign-expectation'],
-        messages: lessons('d29-no-foreign-expectation', {
+        docs: rowOf('no-imported-expectation'),
+        messages: lessons('no-imported-expectation', {
             imported: {
                 found: 'the expectation `{{name}}`, imported from "{{source}}"',
                 fix: 'write the expected value in this test — in place, or `file(…)` when several tests of this leaf share it — and stop importing `{{name}}`',

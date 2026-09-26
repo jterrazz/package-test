@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { RuleTester } from 'oxlint/plugins-dev';
 import { afterAll, describe, it } from 'vitest';
 
-import { d9wSingleUseRef } from './no-single-use-ref.js';
+import { noSingleUseRef } from './no-single-use-ref.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -30,7 +30,7 @@ afterAll(() => {
     rmSync(featureDir, { force: true, recursive: true });
 });
 
-ruleTester.run('d9w-single-use-ref', d9wSingleUseRef as unknown as OxlintRule, {
+ruleTester.run('no-single-use-ref', noSingleUseRef as unknown as OxlintRule, {
     invalid: [
         // A code ref that never asserts a second occurrence.
         {

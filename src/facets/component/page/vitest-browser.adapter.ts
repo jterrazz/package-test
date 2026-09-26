@@ -56,7 +56,7 @@ function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boole
     );
 }
 
-/** No `.first()`: taking the first match is the silent wrong-element bug W3 prevents. */
+/** No `.first()`: taking the first match is the silent wrong-element bug `descriptor-matches-one-element` prevents. */
 export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
     // An absent `exact` is the default, not a choice.

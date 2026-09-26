@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { j2NoSleep } from './no-sleep.js';
+import { noSleep } from './no-sleep.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -12,7 +12,7 @@ const ruleTester = new RuleTester();
 
 const SPEC_FILE = '/repo/specs/cli/exec/exec.test.ts';
 
-ruleTester.run('j2-no-sleep', j2NoSleep as unknown as OxlintRule, {
+ruleTester.run('no-sleep', noSleep as unknown as OxlintRule, {
     invalid: [
         // The classic promisified sleep.
         {

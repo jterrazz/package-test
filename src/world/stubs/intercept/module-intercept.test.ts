@@ -126,7 +126,7 @@ describe('interceptThrough', () => {
             await fetch('https://analytics.test/collect');
         };
 
-        // Then - the scope refuses it rather than letting it pass (D7)
+        // Then - the scope refuses it rather than letting it pass (`network-strict-after-first-stub`)
         await expect(escape()).rejects.toThrow('analytics.test');
     });
 

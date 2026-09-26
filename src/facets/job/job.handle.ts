@@ -27,7 +27,7 @@ export type JobSpecificationOptions<Services extends ServiceRecord = ServiceReco
     services?: Services;
 };
 
-/** What `specification.job()` returns: `const { job, cleanup } = …` (A3). */
+/** What `specification.job()` returns: `const { job, cleanup } = …` (`no-runner-alias`). */
 export type JobHandle<DatabaseKey extends string = string> = {
     /** Stop all infrastructure started by this specification. */
     cleanup: () => Promise<void>;

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { specificationMember } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -14,7 +13,7 @@ const SPECIFICATION_SUFFIXES = ['.specification.ts', '.specification.tsx'];
 const MEMBER_CALL = 'specification.';
 
 /** Out of reach of a `component`-role file: a rendered unit has no runner to create. This repository's own constructor tests disable the rule by a config override. */
-export const a1SpecificationFile: LintRule = {
+export const runnerInSpecificationFile: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () =>
@@ -30,8 +29,8 @@ export const a1SpecificationFile: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['a1-specification-file'],
-        messages: lessons('a1-specification-file', {
+        docs: rowOf('runner-in-specification-file'),
+        messages: lessons('runner-in-specification-file', {
             outsideSpecification: {
                 found: '`specification.{{member}}()` called outside a `*.specification.ts` file',
                 fix: 'move the call into `specs/{{member}}/{{member}}.specification.ts` and import the handle it exports',

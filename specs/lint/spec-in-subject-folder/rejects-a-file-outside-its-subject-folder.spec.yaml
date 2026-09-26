@@ -1,0 +1,7 @@
+description: a spec of GET /orders filed anywhere but orders/list/ is refused at its first line
+fixture: ./fixtures/misfiled/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/api/orders/listing.spec.ts:1:1  jterrazz-check(spec-in-subject-folder)

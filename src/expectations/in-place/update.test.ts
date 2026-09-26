@@ -39,7 +39,7 @@ describe('update', () => {
         // Given - explicitly disabled
         process.env.TEST_UPDATE = '0';
 
-        // Then - '0' is falsy too (only '1' enables, E1)
+        // Then - '0' is falsy too (only '1' enables, `environment-read-allow-listed`)
         expect(shouldUpdateSnapshots()).toBeFalsy();
     });
 

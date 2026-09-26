@@ -1,0 +1,7 @@
+description: rejects an instant sampled into the Given
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:8:21  jterrazz(no-sampled-value-in-test)

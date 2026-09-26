@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, childList, identifierName, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -53,7 +52,7 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
 }
 
 /** `export default <Identifier>` and a `satisfies`/`as` annotation both resolve. */
-export const e2PresetConfig: LintRule = {
+export const vitestConfigFromDefineSpecConfig: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'config',
@@ -76,8 +75,8 @@ export const e2PresetConfig: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['e2-preset-config'],
-        messages: lessons('e2-preset-config', {
+        docs: rowOf('vitest-config-from-define-spec-config'),
+        messages: lessons('vitest-config-from-define-spec-config', {
             offPreset: {
                 found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
                 fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { i1LayerBoundaries } from '../../rules/architecture/import-within-declared-layers.js';
+import { importWithinDeclaredLayers } from '../../rules/architecture/import-within-declared-layers.js';
 import { asOxlintRule, ruleTester } from '../../rules/rule-tester.fixtures.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 
@@ -26,8 +26,8 @@ describe('FRAMEWORK_LAYERS', () => {
     });
 
     ruleTester().run(
-        "i1-layer-boundaries (the package's own map refuses a reverse edge)",
-        asOxlintRule(i1LayerBoundaries),
+        "import-within-declared-layers (the package's own map refuses a reverse edge)",
+        asOxlintRule(importWithinDeclaredLayers),
         {
             invalid: [
                 // The kernel knows none of the layers built on it.

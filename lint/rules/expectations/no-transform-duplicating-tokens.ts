@@ -1,8 +1,7 @@
 import type { Context } from '@oxlint/plugins';
 
 import { TOKEN_KINDS } from '../../../src/expectations/tokens/match.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     findProperty,
     memberPropertyName,
@@ -47,7 +46,7 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     return sawReplace && expression?.type === 'Identifier';
 }
 
-export const d6wTransformTokenEquivalent: LintRule = {
+export const noTransformDuplicatingTokens: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -65,8 +64,8 @@ export const d6wTransformTokenEquivalent: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d6w-transform-token-equivalent'],
-        messages: lessons('d6w-transform-token-equivalent', {
+        docs: rowOf('no-transform-duplicating-tokens'),
+        messages: lessons('no-transform-duplicating-tokens', {
             tokenEquivalent: {
                 found: 'a `transform` that only rewrites output into token literals',
                 fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',

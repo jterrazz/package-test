@@ -52,7 +52,7 @@ describe('BaseResult', () => {
         });
     });
 
-    test('table() — the database option rule (CONVENTIONS A7) — with a single database, the option is refused as redundant', () => {
+    test('table() — the database option rule (rule `database-named-only-when-several-at-runtime`) — with a single database, the option is refused as redundant', () => {
         // Given - a result over one database, declared as "db"
         const result = new BaseResult({
             config: { database: holding([]), databaseKeys: ['db'] },

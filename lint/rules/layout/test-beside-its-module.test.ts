@@ -5,7 +5,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { i2SiblingTestNaming } from './test-beside-its-module.js';
+import { testBesideItsModule } from './test-beside-its-module.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -17,9 +17,9 @@ const ruleTester = new RuleTester();
 // Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.
 const FIXTURES = resolve(
     import.meta.dirname,
-    '../../../specs/lint/i2-sibling-test-naming/fixtures',
+    '../../../specs/lint/test-beside-its-module/fixtures',
 );
-const OWN = resolve(import.meta.dirname, '../../../specs/lint/i2-sibling-test-naming/fixtures');
+const OWN = resolve(import.meta.dirname, '../../../specs/lint/test-beside-its-module/fixtures');
 // The repo root DOES carry a package.json — the guard the rootTests branch reads.
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -29,7 +29,7 @@ writeFileSync(join(UNSTAGED, 'src/local.ts'), 'export {};\n');
 writeFileSync(join(UNSTAGED, '.gitignore'), 'src/local.ts\n');
 execFileSync('git', ['init', '--quiet'], { cwd: UNSTAGED });
 
-ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as OxlintRule, {
+ruleTester.run('test-beside-its-module', testBesideItsModule as unknown as OxlintRule, {
     invalid: [
         // A neighbour `.gitignore` names is on no checkout: the test is an orphan.
         {
@@ -94,7 +94,7 @@ ruleTester.run('i2-sibling-test-naming', i2SiblingTestNaming as unknown as Oxlin
             code: 'test("x", () => {});',
             filename: `${OWN}/sibling/src/use-toggle.test.tsx`,
         },
-        // A .js neighbour satisfies I2 too (JS-shipping packages).
+        // A .js neighbour satisfies `test-beside-its-module` too (JS-shipping packages).
         {
             code: 'test("x", () => {});',
             filename: `${OWN}/sibling/src/helper.test.ts`,

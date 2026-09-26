@@ -2,8 +2,7 @@ import type { Context } from '@oxlint/plugins';
 import { dirname, join, resolve } from 'node:path';
 
 import { isRelativePath } from '../../../src/kernel/files/spec-path.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { goldenOf, memberPropertyName, stringValue, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { isDirectory, isFile, listDirectory, readFileCached } from '../../reading/fs-cache.js';
@@ -50,7 +49,7 @@ function refsInFixture(target: string): string[] {
 }
 
 /** Counted per file: code `match.ref` literals plus the `{{kind#ref}}` tokens of the goldens it names. */
-export const d9wSingleUseRef: LintRule = {
+export const noSingleUseRef: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -103,8 +102,8 @@ export const d9wSingleUseRef: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d9w-single-use-ref'],
-        messages: lessons('d9w-single-use-ref', {
+        docs: rowOf('no-single-use-ref'),
+        messages: lessons('no-single-use-ref', {
             singleUse: {
                 found: 'the capture ref "{{ref}}" is used once in this spec',
                 fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',

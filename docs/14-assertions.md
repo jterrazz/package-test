@@ -1,12 +1,12 @@
 # 14 — Assertions: the reference
 
-Every assertion goes through `expect()` (rule D1). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
+Every assertion goes through `expect()` (rule `result-accessor-is-read-only`). The framework auto-registers its matchers into vitest and types them **by subject**: a table subject only offers table matchers, a stream subject only stream matchers — the wrong pairing is a compile error. Result accessors are read-only; there are no assertion methods on accessors (`result.stdout.toContain(…)` does not exist — the methods live on `expect()`).
 
 This chapter is the exhaustive matrix: every matcher, for every valid subject, with its sync/async rule and the file it reads.
 
 ## The two global rules
 
-### Sync vs async (rule D2)
+### Sync vs async
 
 `await expect(…)` is used **only** for matchers that perform IO, and this table is the whole list — the types say the same thing, so a mistaken `await` is a toolchain error (`typescript(await-thenable)`) in a consumer and a missed one is an assertion that never runs:
 
@@ -17,13 +17,13 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 | container subjects                                                     | Talks to the Docker daemon           |
 | every accessor of a COMPONENT result (`tree`, `html`, `content`, …)    | The capture crosses the browser seam |
 
-A missed `await` has two judges. `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever they are handed, so the type-aware `typescript/no-floating-promises` refuses one dropped; a `toMatch` is IO by its subject or its argument, so D2 reads the shape — a `.table(…)` read, rows written in place, `directory(…)` — and refuses it dropped.
+A missed `await` has two judges. `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever they are handed, so the type-aware `typescript/no-floating-promises` refuses one dropped; a `toMatch` is IO by its subject or its argument, so `io-matcher-awaited` reads the shape — a `.table(…)` read, rows written in place, `directory(…)` — and refuses it dropped.
 
 Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
-### One verb compares a whole result, and its argument says where the expectation lives (rule D3)
+### One verb compares a whole result, and its argument says where the expectation lives
 
-`toMatch` on a result the framework produced — a response, a stream, a json, a table, a tree — compares the WHOLE result, and its argument is the expectation: a value written in place, the default, or `file()`/`directory()` when the expectation lives on disk (rule D14):
+`toMatch` on a result the framework produced — a response, a stream, a json, a table, a tree — compares the WHOLE result, and its argument is the expectation: a value written in place, the default, or `file()`/`directory()` when the expectation lives on disk (rule `one-verb-per-meaning`):
 
 ```typescript
 expect(result.response).toMatch(`
@@ -47,12 +47,12 @@ expect(result.stdout).toMatch(file('./expected/help.txt'));
 
 A text written in place that opens on a line break is read without it, without the whitespace of its closing line, and without the indentation its lines share — a block indents with the test around it. The `{{token}}` grammar and `match.*` apply to a value in place exactly as to a file, and a mismatch prints the diff the same file would. A string handed a stream is a whole text, never vitest's substring: a RegExp matches a part, and on a result subject it does not compile — past the compiler it is refused, naming the form that takes it, `expect(result.stdout.text).toMatch(/built/)`. On a plain string — `result.stdout.text` is one — `toMatch`, `toBe` and `toContain` are vitest's, untouched.
 
-The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule C26); the type refuses a bare string where a file is meant (rule B2):
+The disk is named by one of two calls, `file()` and `directory()`, with the path relative to the spec file, spelled in full — and called in the test itself, never in a helper that would resolve it per caller (rule `paths-named-in-the-test`); the type refuses a bare string where a file is meant (rule `disk-named-by-relative-path-at-runtime`):
 
-- `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule C6); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule C5).
+- `toMatch(file('./expected/help.txt'))` — a golden FILE, for a response, a stream, a JSON body, a call's value, an ARIA tree. The extension is part of the path and mandatory (rule `golden-path-has-extension`); a path may name a subfolder, `./expected/build/verbose.txt`, and update mode creates it (rule `golden-path-creates-folders`).
 - `toMatch(directory('./expected/shop-scaffold/'))` — a golden TREE, for `result.directory(…)` or `result.filesystem`. The path ends in `/`.
 
-Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule D3). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
+Nothing resolves against a hidden folder: every golden is read where its path says, for every subject (rule `golden-read-from-its-path`). By convention it sits in `expected/` beside the spec — one of the four reserved ground folders ([18 — Conventions](18-conventions.md)).
 
 `toContain` handed a stream accessor does not compile: a stream is no list, and vitest would search an empty one — its text is `result.stdout.text`, the comparable text (ANSI stripped, the runner's `transform` applied, the text its golden compares).
 
@@ -85,7 +85,7 @@ Plain values take vitest's native matchers. No framework matcher exists (or is n
 | `toMatch(<.http text>)`     | sync       | ``expect(result.response).toMatch(`HTTP/1.1 201 Created …`)``           |
 | `toMatch(file('./….http'))` | sync       | `expect(result.response).toMatch(file('./expected/user-created.http'))` |
 
-Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule C3), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
+Checks, in order: the status line, the listed headers (**subset** — unlisted response headers are unconstrained, rule `expected-headers-are-a-subset`), then the body. Placeholders apply in headers _and_ body, with `#ref` captures shared across both:
 
 ```http
 HTTP/1.1 201 Created
@@ -108,14 +108,14 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 ## `result.table(name, { database }?)` — database tables (api, job, cli)
 
-Always `await expect(…)` (IO). When to name the `database:` is [17 § The `database:` rule (A7)](17-services.md#the-database-rule-a7)'s.
+Always `await expect(…)` (IO). When to name the `database:` is [17 § The `database:` rule (`database-named-only-when-several`)](17-services.md#the-database-rule)'s.
 
 | Matcher           | Sync/async | Example                                                                |
 | ----------------- | ---------- | ---------------------------------------------------------------------- |
 | `toMatch(<rows>)` | async      | see below                                                              |
 | `toBeEmpty()`     | async      | `await expect(result.table('orders', { database: 'db' })).toBeEmpty()` |
 
-The table is compared WHOLE: every row, and every column in the order the table declares it. A reset restarts the generated ids, so the first row a chain inserts is `1` ([17 — Services](17-services.md#per-worker-isolation-rule-g2)); an instant is compared as its ISO text.
+The table is compared WHOLE: every row, and every column in the order the table declares it. A reset restarts the generated ids, so the first row a chain inserts is `1` ([17 — Services](17-services.md#per-worker-isolation)); an instant is compared as its ISO text.
 
 A table has no order of its own, so its rows compare as a multiset: each row written in place is paired with a row of the table it matches, whatever order the database hands them back in — a first column of random ids orders them differently run to run. When the order IS the claim, `toMatch(rows, { ordered: true })` compares row by row in the order of the table's first column (the rows are read `ORDER BY 1`). A token that captures, `{{uuid#event}}`, binds on the pairing that holds, and update mode writes the rows in the order the value in place stated them, a new row after them.
 
@@ -133,7 +133,7 @@ A failing table `toMatch` prints the expected grid against the actual rows, ever
 
 ## `result.stdout` / `result.stderr` — stream subjects (cli, container `exec`)
 
-Streams are compared **after ANSI stripping** (rule D6): `.text` is that comparable text, `.raw` the capture as it was.
+Streams are compared **after ANSI stripping** (rule `no-transform-duplicating-tokens`): `.text` is that comparable text, `.raw` the capture as it was.
 
 | Matcher                    | Sync/async | Example                                                                |
 | -------------------------- | ---------- | ---------------------------------------------------------------------- |
@@ -223,7 +223,7 @@ Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` 
 
 ## Container subjects (docker-aware cli)
 
-Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule B5). `result.container(name)` looks a container up by its `nameLabel` value — lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing.
+Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule `docker-exec-bound-with-await-using`). `result.container(name)` looks a container up by its `nameLabel` value — lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing.
 
 The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.job()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing.
 
@@ -237,7 +237,7 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 `container.exec()` resolves to a result whose `stdout`/`stderr` are ordinary stream subjects — the same matchers as host streams. `.not.toBeRunning()` asserts a stopped (but existing) container; for a _removed_ container assert `exists` instead.
 
-**The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (D2): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
+**The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (`io-matcher-awaited`): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
 
 ## `result.tree` — the accessibility outline (website, component)
 
@@ -285,7 +285,7 @@ A call that threw leaves `result.value` empty and vice versa; asserting on both 
 
 ## Two helpers that are not matchers
 
-`expect()` is the only way an assertion is made (rule D1), but two gestures around an assertion had been hand-written in every repository that needed them.
+`expect()` is the only way an assertion is made (rule `result-accessor-is-read-only`), but two gestures around an assertion had been hand-written in every repository that needed them.
 
 **`required(value, why)`** — the value, or a failure that says what was missing and why it mattered. A test reaching into a captured structure meets `T | undefined` and has to answer for it; `!` erases the question and a three-line `if (…) throw` is the same three lines everywhere.
 
@@ -298,7 +298,7 @@ const id: number = required(body.id, 'the creation reply carries the new id');
 
 `null` and `undefined` are the only values it refuses: `0`, `''` and `false` are present, and go through.
 
-**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule J2 refuses `setTimeout` under `specs/`. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
+**`waitUntil(predicate, { timeout?, interval?, why? })`** — wait on a CONDITION, never on a duration. A spec that sleeps for a guessed number of milliseconds is slow on a fast machine and flaky on a slow one, which is why rule `no-sleep` refuses `setTimeout` under `specs/`. Every facet that drives something already waits on a condition; this is the primitive for the cases no facet owns — a background write to land, a queue to drain, a file to appear.
 
 ```typescript
 import { waitUntil } from '@jterrazz/test';
@@ -328,14 +328,14 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 
 ## Common mistakes
 
-- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule D1). Write `expect(result.stdout.text).toContain('x')`.
-- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule D2).
-- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract D2 states and the types carry.
-- **`file('./expected/help')` without extension.** The extension is part of the path (rule C6); a tree is `directory('./expected/help/')`.
-- **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule D14).
-- **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule B2).
-- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule D6) — and a substring check on it warns (D8).
-- **`database:` on a single-database project** (or missing on a multi-database one) — [17 § The `database:` rule (A7)](17-services.md#the-database-rule-a7).
+- **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-is-read-only`). Write `expect(result.stdout.text).toContain('x')`.
+- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule `io-matcher-awaited`).
+- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is `typescript(await-thenable)` in every consumer. The sync/async split is the contract `io-matcher-awaited` states and the types carry.
+- **`file('./expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./expected/help/')`.
+- **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./expected/help.txt')` (rule `one-verb-per-meaning`).
+- **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rule `disk-named-by-relative-path`).
+- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for (rule `no-transform-duplicating-tokens`) — and a substring check on it warns (`no-raw-bypass`).
+- **`database:` on a single-database project** (or missing on a multi-database one) — [17 § The `database:` rule (`database-named-only-when-several`)](17-services.md#the-database-rule).
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
 - **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [15 § Frozen fixtures](15-tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).
 

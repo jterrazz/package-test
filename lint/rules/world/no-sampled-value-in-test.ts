@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -31,8 +30,8 @@ function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
     });
 }
 
-/** Silent where D16 already refuses, and on a name built in a template literal: a per-run directory name is the one sampled value the framework cannot mint. */
-export const d16wAmbientValue: LintRule = {
+/** Silent where `no-sampled-value-in-expectation` already refuses, and on a name built in a template literal: a per-run directory name is the one sampled value the framework cannot mint. */
+export const noSampledValueInTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -81,8 +80,8 @@ export const d16wAmbientValue: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d16w-ambient-value'],
-        messages: lessons('d16w-ambient-value', {
+        docs: rowOf('no-sampled-value-in-test'),
+        messages: lessons('no-sampled-value-in-test', {
             ambientValue: {
                 found: 'time or randomness sampled in the test',
                 fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',

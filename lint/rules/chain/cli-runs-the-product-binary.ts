@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { specificationMember, stringValue, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -26,8 +25,8 @@ function embedsThirdPartyBin(root: AstNode | null | undefined): boolean {
     return found;
 }
 
-/** Reads the hoisted `const BIN = resolve(…, '…/.bin/oxlint')` idiom too. A runner created outside a specification file is A1's finding. */
-export const b9wProductCommand: LintRule = {
+/** Reads the hoisted `const BIN = resolve(…, '…/.bin/oxlint')` idiom too. A runner created outside a specification file is `runner-in-specification-file`'s finding. */
+export const cliRunsTheProductBinary: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'specification',
@@ -63,8 +62,8 @@ export const b9wProductCommand: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b9w-product-command'],
-        messages: lessons('b9w-product-command', {
+        docs: rowOf('cli-runs-the-product-binary'),
+        messages: lessons('cli-runs-the-product-binary', {
             thirdPartyBinary: {
                 found: '`specification.cli()` points at a third-party binary under `node_modules/.bin`',
                 fix: "point it at the product's own command (`bin/<product>`), or suppress with a reason when the product genuinely is this binary",

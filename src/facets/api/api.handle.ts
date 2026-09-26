@@ -18,7 +18,7 @@ export type ApiConfig = ServicesConfig & { server?: ServerPort | undefined };
 
 /** Options for {@link startApi | specification.api}. */
 export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceRecord> = {
-    /** Project root override; by default the nearest `package.json` above the specification file (A9). */
+    /** Project root override; by default the nearest `package.json` above the specification file (`no-redundant-root`). */
     root?: string;
     /** The app factory: receives the started services record, returns the Hono app. */
     server: (services: Services) => HonoApp;
@@ -26,7 +26,7 @@ export type ApiSpecificationOptions<Services extends ServiceRecord = ServiceReco
     services?: Services;
 };
 
-/** What `specification.api()` returns: `const { api, cleanup, docker } = …` (A3). */
+/** What `specification.api()` returns: `const { api, cleanup, docker } = …` (`no-runner-alias`). */
 export type ApiHandle<DatabaseKey extends string = string> = {
     api: ApiSpecification<DatabaseKey>;
     /** Stop all infrastructure started by this specification. */

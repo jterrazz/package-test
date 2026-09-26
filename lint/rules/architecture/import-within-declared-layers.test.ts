@@ -3,13 +3,13 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../rule-tester.fixtures.js';
-import { i1LayerBoundaries } from './import-within-declared-layers.js';
+import { importWithinDeclaredLayers } from './import-within-declared-layers.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
 
 type OxlintRule = Parameters<RuleTester['run']>[1];
-const rule = i1LayerBoundaries as unknown as OxlintRule;
+const rule = importWithinDeclaredLayers as unknown as OxlintRule;
 
 const ruleTester = new RuleTester();
 
@@ -43,7 +43,7 @@ const UNDER_SRC = checkoutUnder('src', ['src']);
 
 const REPOSITORY_UNDER_SRC = repositoryUnder('src', ['src']);
 
-ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
+ruleTester.run('import-within-declared-layers (a declared map)', rule, {
     invalid: [
         // A layer that declares no packages imports none.
         {
@@ -159,7 +159,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
         // An exact-module edge reached with its extension.
         {
             code: 'import { toKebabCase } from "../../src/model/chain/binding.js";',
-            filename: `${SPINE}/lint/rules/b8-kebab-trigger.ts`,
+            filename: `${SPINE}/lint/rules/trigger-name-is-kebab-case.ts`,
             options: framework,
         },
         // A `lint/` with no `src/` beside it is no spine, and no layer.
@@ -168,7 +168,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
             filename: '/nowhere/lint/rules/some-rule.ts',
             options: framework,
         },
-        // Module tests are exempt (F2/I4 govern them).
+        // Module tests are exempt (`no-test-code-in-production`/I4 govern them).
         {
             code: 'import { describe } from "vitest";',
             filename: '/repo/src/model/matching/match.test.ts',
@@ -196,7 +196,7 @@ ruleTester.run('i1-layer-boundaries (a declared map)', rule, {
     ],
 });
 
-ruleTester.run('i1-layer-boundaries (no map)', rule, {
+ruleTester.run('import-within-declared-layers (no map)', rule, {
     invalid: [],
     valid: [
         // No declared architecture: the rule is silent.
@@ -224,7 +224,7 @@ ruleTester.run('i1-layer-boundaries (no map)', rule, {
     ],
 });
 
-ruleTester.run('i1-layer-boundaries (any architecture)', rule, {
+ruleTester.run('import-within-declared-layers (any architecture)', rule, {
     invalid: [
         // A consumer's own layering, in its own vocabulary.
         {

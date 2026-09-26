@@ -1,8 +1,0 @@
-description: SQL written in a test is refused where its tag stands
-fixture: ./fixtures/inline-sql/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/api/users/listed.spec.ts:10:15  jterrazz-check(c28)
-          specs/api/users/listed.spec.ts:14:15  jterrazz-check(c28)

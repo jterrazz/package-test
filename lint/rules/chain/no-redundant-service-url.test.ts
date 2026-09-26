@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { b6wRedundantEnvUrl } from './no-redundant-service-url.js';
+import { noRedundantServiceUrl } from './no-redundant-service-url.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('b6w-redundant-env-url', b6wRedundantEnvUrl as unknown as OxlintRule, {
+ruleTester.run('no-redundant-service-url', noRedundantServiceUrl as unknown as OxlintRule, {
     invalid: [
         // The standard alias, hand-wired.
         { code: 'cli.env({ DATABASE_URL: db.connectionString });', errors: 1 },

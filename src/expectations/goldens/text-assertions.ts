@@ -51,7 +51,7 @@ export function compareStreamText(
 /** An empty stream is an empty text: `expect(stream.text).toBe('')`. */
 export function emptyStreamRefusal(accessor: TextAccessor): TypeError {
     return new TypeError(
-        refusal('d14-one-verb-per-meaning', {
+        refusal('one-verb-per-meaning', {
             fix: `compare its text: expect(<result>.${accessor.streamName}.text).toBe('')`,
             found: `toBeEmpty() on the stream "${accessor.streamName}" — an empty stream is an empty text`,
         }),
@@ -70,7 +70,7 @@ export function streamValueRoute(subject: unknown, value: unknown): ValueRoute {
     return typeof value === 'string'
         ? 'whole'
         : new TypeError(
-              refusal('d14-one-verb-per-meaning', {
+              refusal('one-verb-per-meaning', {
                   fix: `write the whole text in place, toMatch('…'), or match a part with vitest on its text: expect(<result>.${subject.streamName}.text).toMatch(…)`,
                   found: `toMatch(a ${value instanceof RegExp ? 'RegExp' : typeof value}) on the stream "${subject.streamName}"`,
               }),

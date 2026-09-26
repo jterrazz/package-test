@@ -55,7 +55,7 @@ export function describeMobileAmbiguity(options: {
     const { element, matches } = options;
     const fixes = formatFixes(element, matches).map((fix) => `  • ${fix}`);
 
-    return refusal('w3-unambiguous-element', {
+    return refusal('descriptor-matches-one-element', {
         fix: ['designate one of them:', ...fixes].join('\n'),
         found: [
             `Ambiguous element: ${formatElement(element)} matched ${matches.length} elements on the screen —`,

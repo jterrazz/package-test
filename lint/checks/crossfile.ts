@@ -196,7 +196,7 @@ function readSource(path: string): string {
     return blankComments(readText(path));
 }
 
-/** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`d4b-spec-shape` reports it). */
+/** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`document-follows-its-grammar` reports it). */
 function collectSpecLiterals(path: string): Set<string> {
     try {
         const document = parseSpecDocument(readText(path), path);
@@ -243,7 +243,7 @@ function collectLiterals(text: string): Set<string> {
     return found;
 }
 
-/** The hole is unreadable but its static ends are not: an entry matching the prefix and suffix could be asked for by the table, which is all C9 needs. */
+/** The hole is unreadable but its static ends are not: an entry matching the prefix and suffix could be asked for by the table, which is all `no-unused-ground` needs. */
 export type LiteralPattern = { directory: string; prefix: string; suffix: string };
 
 const TEMPLATE_WITH_HOLE = /`(?<body>(?:[^`\\]|\\.)*\$\{(?:[^`\\]|\\.)*)`/gu;
@@ -260,7 +260,7 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
         const cut = before.lastIndexOf('/');
         const prefix = before.slice(cut + 1);
         const suffix = body.slice(closes + 1);
-        // An all-hole template vouches for nothing; C9 already downgrades that file to warn through `hasNonLiteralFixtureArg`.
+        // An all-hole template vouches for nothing; `no-unused-ground` already downgrades that file to warn through `hasNonLiteralFixtureArg`.
         if (prefix.length > 0 || suffix.length > 0) {
             const folders = before.slice(0, Math.max(cut, 0));
             found.push({
@@ -379,7 +379,7 @@ type SpecModel = {
     dockerAware: boolean;
     file: string;
     runnerExports: Set<string>;
-    /** `null` when the record is absent or not a plain literal: A7 cannot be decided then. */
+    /** `null` when the record is absent or not a plain literal: `database-named-only-when-several` cannot be decided then. */
     sqlDatabaseCount: null | number;
 };
 
@@ -517,7 +517,10 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
         if (runners.size === 0) {
             continue;
         }
-        const suppressed = suppressedLines(readText(testFile), 'b5');
+        const suppressed = suppressedLines(
+            readText(testFile),
+            'docker-exec-bound-with-await-using',
+        );
         // The `await using` form matches group 1 and is exempt.
         const binding =
             /\b(?<kind>await\s+using|const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*await\s+(?<runner>[A-Za-z_$][\w$]*)\b[^;]*?\.exec\s*\(/gu;
@@ -537,7 +540,7 @@ export function checkDockerRunnerAwaitUsing(rootDir: string): TokenViolation[] {
                 line,
                 fix: `bind it with \`await using result = await ${runner}…\`, so the containers it started are removed at the end of the scope`,
                 found: `a result of the docker-aware runner "${runner}" bound without \`await using\``,
-                rule: 'b5-await-using-inference',
+                rule: 'docker-exec-bound-with-await-using',
                 severity: 'error',
             });
         }
@@ -603,7 +606,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
         }
         const count = onlyApplicable.sqlDatabaseCount ?? 0;
         const locals = localRunnerBindings(text);
-        const suppressed = suppressedLines(readText(testFile), 'a7');
+        const suppressed = suppressedLines(readText(testFile), 'database-named-only-when-several');
         const rel = relative(rootDir, testFile);
 
         for (const match of text.matchAll(/\.(?<verb>seed|table)\s*\(/gu)) {
@@ -624,7 +627,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                     line,
                     fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
                     found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
-                    rule: 'a7-database-property',
+                    rule: 'database-named-only-when-several',
                     severity: 'error',
                 });
             } else if (count === 1 && hasDatabase) {
@@ -633,7 +636,7 @@ export function checkDatabaseProperty(rootDir: string): TokenViolation[] {
                     line,
                     fix: `delete the \`{ database }\` option of \`.${verb}()\``,
                     found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,
-                    rule: 'a7-database-property',
+                    rule: 'database-named-only-when-several',
                     severity: 'error',
                 });
             }
@@ -739,14 +742,14 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
             .map((entry) => join(dir, entry.name));
         const rel = relative(rootDir, dir);
 
-        // A domain owns 1..n `<aspect>.test.ts` (C1'): its ground is dead only when it carries no test at all.
+        // A domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
         if (testFiles.length === 0) {
             violations.push({
                 file: rel,
                 line: 1,
                 fix: `write the test that stands on ${groundSubdirs.join(', ')}, or delete the folder`,
                 found: `a domain folder holding ${groundSubdirs.join(', ')} and no test or document`,
-                rule: 'c9-dead-fixtures',
+                rule: 'no-unused-ground',
                 severity: 'error',
             });
             continue;
@@ -774,7 +777,7 @@ export function checkDeadFixtures(rootDir: string): TokenViolation[] {
                     line: 1,
                     fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
                     found: `${sub}/${entry.name}, which no test of ${feature} names`,
-                    rule: 'c9-dead-fixtures',
+                    rule: 'no-unused-ground',
                     severity,
                 });
             }
@@ -801,7 +804,7 @@ function checkPoolFixtures(rootDir: string): TokenViolation[] {
                     line: 1,
                     fix: `delete ${entry.name}, or name it from the specs that share it`,
                     found: `the pool entry ${entry.name}, which no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} names`,
-                    rule: 'c9-dead-fixtures',
+                    rule: 'no-unused-ground',
                     severity: 'error',
                 });
             }
@@ -954,7 +957,7 @@ export function pathsModuleTestsName(member: string): string[] {
     return named;
 }
 
-/** Two documents of one leaf count once: the unit is the folder. An entry nothing names is C9's case, not this one. */
+/** Two documents of one leaf count once: the unit is the folder. An entry nothing names is `no-unused-ground`'s case, not this one. */
 function misplacedPoolFixtures(rootDir: string): MisplacedPoolFixture[] {
     const misplaced: MisplacedPoolFixture[] = [];
     const named = new Map<string, string[]>();
@@ -999,7 +1002,7 @@ export function checkPoolFixtureSharing(rootDir: string): TokenViolation[] {
             found: nested
                 ? `a pool entry only ${relLeaf} and the leaves inside it reach for`
                 : `a pool entry only ${relLeaf} reaches for`,
-            rule: 'c28-ground-shared-or-inline',
+            rule: 'ground-shared-or-inline',
             severity: 'error',
         };
     });
@@ -1142,7 +1145,7 @@ export function checkCopiedGround(rootDir: string): TokenViolation[] {
                 .filter((other) => other !== copy)
                 .map((other) => relative(rootDir, other))
                 .join(', ')}`,
-            rule: 'c27w-duplicate-ground',
+            rule: 'no-duplicate-ground',
             severity: 'warn' as const,
         }));
     });
@@ -1315,7 +1318,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                 line: 1,
                 fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_GROUND, role))}/ — \`make fix\` moves it and rewrites every path that names it`,
                 found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_GROUND))}/`,
-                rule: 'c15-local-fixture-reach',
+                rule: 'no-reach-into-sibling-ground',
                 severity: 'error',
             });
         }
@@ -1337,7 +1340,7 @@ export function checkLocalFixtureReach(rootDir: string): TokenViolation[] {
                     line,
                     fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the specs root's shared folder of its role: ${pools.map((pool) => `${relative(rootDir, pool)}/`).join(', ')}`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
-                    rule: 'c15-local-fixture-reach',
+                    rule: 'no-reach-into-sibling-ground',
                     severity: 'error',
                 });
             }
@@ -1449,7 +1452,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
     const violations: TokenViolation[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
-        : suppressedLines(readText(file), 'c8');
+        : suppressedLines(readText(file), 'named-path-exists');
     if (!file.endsWith(SPEC_EXTENSION)) {
         for (const { column, line, named, target } of anchoredPaths(file)) {
             if (treeKind(target) !== undefined || suppressed.has(line)) {
@@ -1460,7 +1463,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
                 file: relative(rootDir, file),
                 line,
                 ...missingTarget(named, relative(rootDir, target), existsSync(target)),
-                rule: 'c8-disk-target-exists',
+                rule: 'named-path-exists',
                 severity: 'error',
             });
         }
@@ -1483,7 +1486,7 @@ export function diskTargetFindings(file: string, rootDir: string): TokenViolatio
             ...(found === undefined
                 ? missingTarget(named, relative(rootDir, target), existsSync(target))
                 : crossedTarget(named, { found, key, path })),
-            rule: 'c8-disk-target-exists',
+            rule: 'named-path-exists',
             severity: 'error',
         });
     }
@@ -1544,7 +1547,7 @@ export function checkSuppressionReason(rootDir: string): TokenViolation[] {
                 line: index + 1,
                 fix: `end the directive with its reason: \`checker-disable-next-line ${idOf(match.groups?.rest)} -- <why this line is the exception>\``,
                 found: 'a checker suppression that does not say why',
-                rule: 'j9-checker-suppression-reason',
+                rule: 'checker-suppression-states-a-reason',
                 severity: 'error',
             });
         }

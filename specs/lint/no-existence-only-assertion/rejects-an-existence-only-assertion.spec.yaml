@@ -1,0 +1,7 @@
+description: rejects a test whose one assertion is an existence check
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:6:1  jterrazz(no-existence-only-assertion)

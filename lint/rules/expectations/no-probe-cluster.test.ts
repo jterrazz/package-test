@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d19wProbeCluster } from './no-probe-cluster.js';
+import { noProbeCluster } from './no-probe-cluster.js';
 
 const SPEC_FILE = '/repo/specs/cli/build/build.spec.ts';
 
-ruleTester().run('d19w-probe-cluster', asOxlintRule(d19wProbeCluster), {
+ruleTester().run('no-probe-cluster', asOxlintRule(noProbeCluster), {
     invalid: [
         // Three greps where a golden would say the whole thing.
         {
@@ -52,7 +52,7 @@ ruleTester().run('d19w-probe-cluster', asOxlintRule(d19wProbeCluster), {
             });`,
             filename: SPEC_FILE,
         },
-        // A status is one value: d15w owns that test, not this one.
+        // A status is one value: `no-status-only-test` owns that test, not this one.
         {
             code: `test('answers', async () => {
                 const result = await api.get('/health');

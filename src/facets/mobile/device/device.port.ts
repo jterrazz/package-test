@@ -12,7 +12,7 @@ export type MobileDevice = {
 /** The element kinds a mobile screen designates; landmarks have no iOS analog and are refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
 
-/** The shared element descriptor, translated to iOS predicates; exactly one match when a verb acts on it (W3). */
+/** The shared element descriptor, translated to iOS predicates; exactly one match when a verb acts on it (`descriptor-matches-one-element`). */
 export type MobileElementRef = ElementRef;
 
 /** One candidate of an ambiguous descriptor, as the refusal lists it. */

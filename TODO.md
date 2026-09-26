@@ -33,7 +33,7 @@ then implement against numbers. By expected return, descending.
 
 - **The spwn guards.** The forbidden-syntax rules wait for oxlint's `no-restricted-syntax`
   support; until then those guards live in `<specs>/lint/guards/` in that repository.
-- **A B4 codemod.** Auto-inserting the missing `// Given -` / `// Then -` skeletons — the
+- **A Given/Then codemod.** Auto-inserting the missing `// Given -` / `// Then -` skeletons — the
   dry run counts 2569 files that would take it. Value to be weighed against what a marker
   written by a machine is worth.
 - **The next large consumer.** A repository on another stack, to test how general the

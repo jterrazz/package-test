@@ -1,7 +1,0 @@
-description: warns on a scenario that ends on the action
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/website/posts/table.spec.ts:9:15  jterrazz(w5w-scenario-settles)

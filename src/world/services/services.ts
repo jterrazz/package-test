@@ -18,9 +18,9 @@ export function declaredDatabaseKeys(services: ServiceRecord): string[] {
 
 export type ServicesConfig = ChainConfig & {
     database?: DatabasePort | undefined;
-    /** Drives A7: with 2+ databases `database` is required on `.seed()` / `.table()`, with one it is refused. */
+    /** Drives `database-named-only-when-several-at-runtime`: with 2+ databases `database` is required on `.seed()` / `.table()`, with one it is refused. */
     databaseKeys?: string[] | undefined;
     databases?: Map<string, DatabasePort> | undefined;
-    /** In cli mode, drives the `<KEY>_URL` injection (B6), plus `DATABASE_URL` / `REDIS_URL` when unambiguous. */
+    /** In cli mode, drives the `<KEY>_URL` injection (`service-urls-injected`), plus `DATABASE_URL` / `REDIS_URL` when unambiguous. */
     services?: Record<string, ServiceHandle> | undefined;
 };

@@ -68,7 +68,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/elements/vocabulary-rows.ts',
             'src/world/services/containers/service-images.ts',
             'lint/catalogue/manifest.ts',
-            'lint/checks/code.ts',
+            'lint/catalogue/families.ts',
             'lint/rulebook/import.ts',
             'lint/self/checks/engines.ts',
             'lint/self/catalogue/manifest.ts',
@@ -76,7 +76,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/corpus/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `plugin.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `checker-source-imports.test.ts` and `self-layers.test.ts` for the engine owners)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `source-imports.test.ts` and `layers.test.ts` for the engine owners)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
@@ -89,7 +89,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/component/render/render.action.ts',
         ),
         name: 'a module that runs only in a page',
-        why: 'it reads the `document` and `window` of the page it renders in, which node has none of — E5 forbids a simulated one and M3 a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof',
+        why: 'it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof',
     },
     {
         claims: oneOf(

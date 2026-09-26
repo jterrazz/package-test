@@ -31,17 +31,17 @@ afterAll(cleanup);
 
 ### Options
 
-| Option     | Required                     | Description                                                                                            |
-| ---------- | ---------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](10-api.md), see [services](17-services.md) |
-| `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule A8)                   |
-| `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule A9)                                    |
+| Option     | Required                     | Description                                                                                                       |
+| ---------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](10-api.md), see [services](17-services.md)            |
+| `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule `server-sees-declared-services`) |
+| `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule `no-redundant-root`)                              |
 
 There is **no `server`** option: jobs run in-process by definition, and the record of services is the only outside world they meet. A `Job` carries the name you pass to `.trigger()` — the handles above respond to `'nightly-report'` and `'support-drafts'`.
 
 ## The chain
 
-Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule B2). No `.headers()` — there is no request.
+Setups: `.seed(file('./seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `disk-named-by-relative-path`). No `.headers()` — there is no request.
 
 `.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
 
@@ -68,9 +68,9 @@ describe('pipeline', () => {
 });
 ```
 
-Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](16-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules B1, B7).
+Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](16-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule D7): once a chain declares one stub, any outgoing request that matches nothing — including one whose matching stubs are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [stubs](16-stubs.md#strict-by-construction-rule-d7)). A chain with no stubs is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, any outgoing request that matches nothing — including one whose matching stubs are all exhausted — fails the spec with an explicit refusal — "an unmatched outgoing request" — naming the method, URL, and every declared route with its consumption state (see [stubs](16-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
 
 ### Seeding and sequences for pipelines
 
@@ -104,7 +104,7 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 | --------------------------- | ---------------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject, compared whole — `toMatch(<rows>)` / `toBeEmpty()`, `await`ed |
 
-With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule A7). See the [assertions reference](14-assertions.md).
+With ≥ 2 databases, `{ database: 'key' }` is mandatory on every `.seed()` and `.table()`; with one, forbidden (rule `database-named-only-when-several`). See the [assertions reference](14-assertions.md).
 
 ## Unique here
 
@@ -165,12 +165,12 @@ test('a crashed job leaves what it wrote first', async () => {
 
 ## Pitfalls
 
-- **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition; what a job reads from the outside is its `services` record (rule A8).
+- **Looking for a `server` option.** It exists only on `specification.api()` and `specification.website()` — jobs are in-process by definition; what a job reads from the outside is its `services` record (rule `server-sees-declared-services`).
 - **Asserting on a job's return value.** The result surface is the observable state (tables); jobs are specified by their effects.
 - **Forgetting `times` on the leading stub of a sequence.** With no `times` the first stub is unlimited, so it answers every call and the recovery stub behind it is never reached.
-- **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule B1); sequence scenarios are expressed by seeding the state the second job would have found (rule B7).
-- **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule D2 for `toMatch(<rows>)`, the type-aware `typescript/no-floating-promises` for `toBeEmpty`).
-- **Bounding the tail of a sequence.** The last stub of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule D7).
+- **One giant spec that triggers two jobs.** A chain has exactly one terminal action (rule `one-terminal-action-per-chain`); sequence scenarios are expressed by seeding the state the second job would have found (rule `sequence-expressed-by-seeding`).
+- **Forgetting `await` on table expectations.** `expect(result.table(…))` without `await` never runs the SQL — table matchers are IO matchers (rule `io-matcher-awaited` for `toMatch(<rows>)`, the type-aware `typescript/no-floating-promises` for `toBeEmpty`).
+- **Bounding the tail of a sequence.** The last stub of a sequence should stay unlimited; a `times` there turns one extra retry into an "unmatched outgoing request" failure (rule `network-strict-after-first-stub`).
 
 ## Related
 

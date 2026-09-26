@@ -23,7 +23,7 @@ const composition = {
     } satisfies Record<keyof JobSpecificationOptions, MatrixRow>,
 } as const;
 
-/** The chain `specification.job()` hands out; jobs run in this process (A8). */
+/** The chain `specification.job()` hands out; jobs run in this process (`server-sees-declared-services`). */
 export interface JobSpecification<DatabaseKey extends string = string> extends ChainOf<
     typeof composition,
     { databaseKey: DatabaseKey; services: Record<string, unknown> },

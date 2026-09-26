@@ -22,7 +22,7 @@ describe('waitUntil', () => {
     test('waitUntil — waiting on a condition, never on a duration — takes an asynchronous reading', async () => {
         // Given - a condition read through a promise
         let landed = false;
-        // oxlint-disable-next-line jterrazz/j2-no-sleep -- the subject IS the wait primitive: this timer is the test's Given (the condition landing later), not a synchronisation step standing in for `waitUntil`
+        // oxlint-disable-next-line jterrazz/no-sleep -- the subject IS the wait primitive: this timer is the test's Given (the condition landing later), not a synchronisation step standing in for `waitUntil`
         setTimeout(() => {
             landed = true;
         }, 5);

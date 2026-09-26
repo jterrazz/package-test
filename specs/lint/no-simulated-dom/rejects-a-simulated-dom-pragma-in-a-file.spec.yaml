@@ -1,0 +1,7 @@
+description: rejects a simulated-DOM pragma in a test file
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/widget.test.ts:2:1  jterrazz(no-simulated-dom)

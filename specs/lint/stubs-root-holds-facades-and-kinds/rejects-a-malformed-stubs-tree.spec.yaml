@@ -1,0 +1,12 @@
+description: rejects a malformed stubs/ tree
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/app/widget/stubs/http/Bad_Name.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/app/widget/stubs/latest.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/app/widget/stubs/openai/classify.ts:5:14  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/app/widget/stubs/openai/classify.ts:6:15  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/app/widget/widget.test.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
+          specs/app/widget/widget.test.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)

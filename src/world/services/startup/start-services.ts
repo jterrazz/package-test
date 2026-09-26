@@ -48,7 +48,7 @@ function splitProcesses(services: ServiceRecord): {
     return { infrastructure, processes };
 }
 
-/** Each carries the run's id, minted here, so a spec never samples `Date.now()` for a label (D16). */
+/** Each carries the run's id, minted here, so a spec never samples `Date.now()` for a label (`no-sampled-value-in-expectation`). */
 export async function startProcessServices(
     services: ServiceRecord,
     root: string,

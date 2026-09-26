@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -23,7 +22,7 @@ const NEGATED_EXISTENCE = new Set(['toBeNull', 'toBeUndefined']);
 const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
 
 /** Fires only when it is the whole proof: beside a real assertion it is a precondition. */
-export const d18wExistenceOnlyOracle: LintRule = {
+export const noExistenceOnlyAssertion: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -60,8 +59,8 @@ export const d18wExistenceOnlyOracle: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d18w-existence-only-oracle'],
-        messages: lessons('d18w-existence-only-oracle', {
+        docs: rowOf('no-existence-only-assertion'),
+        messages: lessons('no-existence-only-assertion', {
             existenceOnly: {
                 found: "`{{matcher}}()` is this test's only oracle, and passes for almost anything",
                 fix: 'assert the value itself — `toBe`/`toStrictEqual`, the whole result with `toMatch`, or the rows',

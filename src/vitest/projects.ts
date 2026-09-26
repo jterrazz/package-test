@@ -22,7 +22,7 @@ export { mobile, type MobileProjectOptions } from '../facets/mobile/mobile.proje
 export { website, type WebsiteProjectOptions } from '../facets/website/website.project.js';
 export { type FacetProjectOptions } from './project-kit.js';
 
-/** `unit()` — module tests, beside the modules they cover (CONVENTIONS I2). */
+/** `unit()` — module tests, beside the modules they cover (rule `test-beside-its-module`). */
 export type UnitProjectOptions = FacetProjectOptions & {
     /** `false` shares one module graph per worker (`isolate: false`); for pure projects only. */
     isolate?: boolean;

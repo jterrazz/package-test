@@ -1,0 +1,7 @@
+description: rejects three probes on one stream with no golden
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 0
+      stdout: |
+          scenario.test.ts:6:1  jterrazz(no-probe-cluster)

@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { c26DiskNamedInTheTest } from './paths-named-in-the-test.js';
+import { pathsNamedInTheTest } from './paths-named-in-the-test.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -13,7 +13,7 @@ const ruleTester = new RuleTester();
 const HELPER = '/repo/specs/api/orders/seeded.ts';
 const IMPORT = "import { directory, file } from '@jterrazz/test';\n";
 
-ruleTester.run('c26-disk-named-in-the-test', c26DiskNamedInTheTest as unknown as OxlintRule, {
+ruleTester.run('paths-named-in-the-test', pathsNamedInTheTest as unknown as OxlintRule, {
     invalid: [
         // A shared helper that builds the path it hands on.
         {

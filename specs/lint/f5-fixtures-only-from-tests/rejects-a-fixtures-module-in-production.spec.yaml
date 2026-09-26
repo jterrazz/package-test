@@ -1,7 +1,0 @@
-description: rejects a fixtures module imported from a non-test file
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/widget/helper.ts:1:28  jterrazz(f5-fixtures-only-from-tests)

@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 
 import { safeRealpath } from './resolve.js';
 
-/** Sibling module tests are callers, not internals (CONVENTIONS I2). */
+/** Sibling module tests are callers, not internals (rule `test-beside-its-module`). */
 const TEST_FILE = /\.test\.[cm]?[jt]s$/u;
 
 export type StackFrame = { column: number; file: string; line: number };

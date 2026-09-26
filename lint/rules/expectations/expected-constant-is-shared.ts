@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     child,
@@ -99,7 +98,7 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
 }
 
 /** A constant a helper reads counts as shared: no scan can tell how many tests call the helper. */
-export const d28SharedExpectation: LintRule = {
+export const expectedConstantIsShared: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'spec',
@@ -153,9 +152,9 @@ export const d28SharedExpectation: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d28-shared-expectation'],
+        docs: rowOf('expected-constant-is-shared'),
         fixable: 'code',
-        messages: lessons('d28-shared-expectation', {
+        messages: lessons('expected-constant-is-shared', {
             singleReader: {
                 found: 'the expectation `{{name}}`, declared for the file and read by one test',
                 fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',

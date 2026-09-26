@@ -1,14 +1,13 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { memberPropertyName, propertyKeyName } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import type { LintRule, Visitor } from '../rule.js';
 
 const URL_KEY = /^[A-Z0-9]+(?:_[A-Z0-9]+)*_URL$/u;
 
-export const b6wRedundantEnvUrl: LintRule = {
+export const noRedundantServiceUrl: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -37,8 +36,8 @@ export const b6wRedundantEnvUrl: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b6w-redundant-env-url'],
-        messages: lessons('b6w-redundant-env-url', {
+        docs: rowOf('no-redundant-service-url'),
+        messages: lessons('no-redundant-service-url', {
             redundant: {
                 found: '`.env({ {{key}}: ….connectionString })` restates what the framework injects',
                 fix: 'delete the `{{key}}` entry — the service record key already injects `<KEY>_URL`, and `DATABASE_URL`/`REDIS_URL` when unambiguous',

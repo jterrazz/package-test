@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d16SampledOracle } from './no-sampled-value-in-expectation.js';
+import { noSampledValueInExpectation } from './no-sampled-value-in-expectation.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('d16-sampled-oracle', asOxlintRule(d16SampledOracle), {
+ruleTester().run('no-sampled-value-in-expectation', asOxlintRule(noSampledValueInExpectation), {
     invalid: [
         // The oracle IS a second reading of the clock.
         {
@@ -54,7 +54,7 @@ ruleTester().run('d16-sampled-oracle', asOxlintRule(d16SampledOracle), {
             });`,
             filename: TEST_FILE,
         },
-        // Sampled OUTSIDE the oracle: d16w's net, not this one's.
+        // Sampled OUTSIDE the oracle: `no-sampled-value-in-test`'s net, not this one's.
         {
             code: `test('stamps', () => {
                 const started = Date.now();

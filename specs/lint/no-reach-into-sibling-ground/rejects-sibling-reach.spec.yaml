@@ -1,0 +1,7 @@
+description: a leaf reaching into a sibling leaf's ground is refused where the path is written
+fixture: ./fixtures/sibling-reach/
+runs:
+    - command: checker .
+      exit: 1
+      stderr: |
+          specs/widget/widget.test.ts:9:48  jterrazz-check(no-reach-into-sibling-ground)

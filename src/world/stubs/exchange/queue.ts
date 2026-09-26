@@ -1,4 +1,4 @@
-/** The first unexhausted stub in declaration order answers; `times: n` is spent after n serves. No match is a 501 and the chain fails (D7); a chain of zero stubs is unguarded. */
+/** The first unexhausted stub in declaration order answers; `times: n` is spent after n serves. No match is a 501 and the chain fails (`network-strict-after-first-stub`); a chain of zero stubs is unguarded. */
 
 import { CaptureScope } from '../../../expectations/tokens/match.js';
 import {
@@ -199,7 +199,7 @@ export class StubQueue {
                       .map((entry) => `  - ${describeRoute(entry.stub)}${stateOf(entry)}`)
                       .join('\n');
         return new Error(
-            refusal('d7-strict-intercepts', {
+            refusal('network-strict-after-first-stub', {
                 fix: `declare a stub for ${method} ${url} — or raise the \`times\` of the one it exhausted`,
                 found: `an unmatched outgoing request, ${method} ${url}; declared:\n${declared}`,
             }),

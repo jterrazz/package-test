@@ -1,7 +1,0 @@
-description: warns when a transform only rewrites output into known tokens
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/cli/tf.specification.ts:6:5  jterrazz(d6w-transform-token-equivalent)

@@ -57,7 +57,7 @@ describe('type-channel', () => {
             "import { specification } from './index.js';",
             'export async function row(): Promise<void> {',
             '    const { api } = await specification.api({ server: () => ({}) as never });',
-            "    // @ts-expect-error B2 — a bare string is a value [`is not assignable to parameter of type 'DiskFile`]",
+            "    // @ts-expect-error disk-named-by-relative-path — a bare string is a value [`is not assignable to parameter of type 'DiskFile`]",
             "    await api.seedFrom('./seeds/x.sql');",
             '}',
             '',

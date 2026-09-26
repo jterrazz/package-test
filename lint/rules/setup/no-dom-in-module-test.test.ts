@@ -1,5 +1,5 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { g4NoDomInModuleTest } from './no-dom-in-module-test.js';
+import { noDomInModuleTest } from './no-dom-in-module-test.js';
 
 const tester = ruleTester();
 
@@ -7,7 +7,7 @@ const MODULE_TEST = '/repo/src/ui/post-client.test.ts';
 const COMPONENT_TEST = '/repo/src/ui/post-table.test.tsx';
 const PRODUCT_SPEC = '/repo/specs/website/home/page.test.ts';
 
-tester.run('g4-no-dom-in-module-test', asOxlintRule(g4NoDomInModuleTest), {
+tester.run('no-dom-in-module-test', asOxlintRule(noDomInModuleTest), {
     invalid: [
         {
             code: 'test("x", () => { document.createElement("div"); });',
@@ -43,7 +43,7 @@ tester.run('g4-no-dom-in-module-test', asOxlintRule(g4NoDomInModuleTest), {
         { code: 'test("x", () => { capture.window; });', filename: MODULE_TEST },
         // A binding of that name is the test's own.
         { code: 'test("x", () => { const document = parse(html); });', filename: MODULE_TEST },
-        // Production code is F2/I4's, never G4's.
+        // Production code is `no-test-code-in-production`/I4's, never `no-dom-in-module-test`'s.
         { code: 'document.title;', filename: '/repo/src/ui/post-client.ts' },
     ],
 });

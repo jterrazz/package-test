@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d2AwaitIoMatcher } from './io-matcher-awaited.js';
+import { ioMatcherAwaited } from './io-matcher-awaited.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('d2-await-io-matcher', d2AwaitIoMatcher as unknown as OxlintRule, {
+ruleTester.run('io-matcher-awaited', ioMatcherAwaited as unknown as OxlintRule, {
     invalid: [
         // Bare IO matcher — never resolves.
         // A table compared whole — named by its read, or by the rows it is handed.

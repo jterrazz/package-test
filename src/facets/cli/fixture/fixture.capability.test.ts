@@ -55,11 +55,11 @@ describe('fixture', () => {
         // Given - a file named as a directory, and a directory named as a file
 
         // Then - each is refused when the chain is armed, with the kind on disk
-        // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
+        // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(chain().fixture(directory('./fixtures/config.json/')).list()).rejects.toThrow(
             /names a file\n.*\nfix: drop the \//u,
         );
-        // checker-disable-next-line c8 -- the kind on disk is the refusal under test: each path names the other kind on purpose
+        // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: each path names the other kind on purpose
         await expect(chain().fixture(file('./fixtures/shop')).list()).rejects.toThrow(
             /names a directory\n.*\nfix: end its path in \//u,
         );

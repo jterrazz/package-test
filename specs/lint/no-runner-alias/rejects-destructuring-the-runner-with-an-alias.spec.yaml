@@ -1,0 +1,7 @@
+description: rejects destructuring the runner with an alias
+fixture: ./fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/cli/alias.specification.ts:5:25  jterrazz(no-runner-alias)

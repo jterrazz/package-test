@@ -1,0 +1,8 @@
+description: a carried value also claimed is a read, and a later result only probed is refused
+fixture: ./fixtures/cursor-claimed/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          specs/api/facts/pagination.spec.ts:17:31  jterrazz(result-compared-whole)
+          specs/api/facts/pagination.spec.ts:35:12  jterrazz(result-compared-whole)

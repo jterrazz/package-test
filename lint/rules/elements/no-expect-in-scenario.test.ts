@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { w1ScenarioPure } from './no-expect-in-scenario.js';
+import { noExpectInScenario } from './no-expect-in-scenario.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -10,7 +10,7 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 
 const ruleTester = new RuleTester();
 
-ruleTester.run('w1-scenario-pure', w1ScenarioPure as unknown as OxlintRule, {
+ruleTester.run('no-expect-in-scenario', noExpectInScenario as unknown as OxlintRule, {
     invalid: [
         // An assertion inside a website visit scenario.
         {

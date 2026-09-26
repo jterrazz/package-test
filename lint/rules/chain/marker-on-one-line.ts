@@ -1,7 +1,6 @@
 import type { Comment, Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -34,7 +33,7 @@ function lineEndAt(text: string, offset: number): number {
 }
 
 /** The criterion is a marker comment with another `//` comment directly below it at the same indentation. */
-export const b11MarkerOneLine: LintRule = {
+export const markerOnOneLine: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => isTestRole(identityOf(context).role),
@@ -57,7 +56,7 @@ export const b11MarkerOneLine: LintRule = {
                         continue;
                     }
                     const indent = text.slice(lineStartAt(text, start), start);
-                    // A marker trailing code is A9's business, not this rule's.
+                    // A marker trailing code is `no-redundant-root`'s business, not this rule's.
                     if (indent.trim() !== '') {
                         continue;
                     }
@@ -80,8 +79,8 @@ export const b11MarkerOneLine: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['b11-marker-one-line'],
-        messages: lessons('b11-marker-one-line', {
+        docs: rowOf('marker-on-one-line'),
+        messages: lessons('marker-on-one-line', {
             wrapped: {
                 found: 'a marker continued on the comment line under it',
                 fix: "fold the continuation into the marker's one line, or separate the two with a blank line",

@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     child,
     childList,
@@ -72,7 +71,7 @@ function isDropped(node: AstNode): boolean {
 }
 
 /** `toBeEmpty` and `toBeRunning` are typed `Promise<void>`, so `typescript/no-floating-promises` refuses them dropped; `toMatch`'s type follows its subject, so it stays here. */
-export const d2AwaitIoMatcher: LintRule = {
+export const ioMatcherAwaited: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             CallExpression(node: AstNode) {
@@ -100,8 +99,8 @@ export const d2AwaitIoMatcher: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d2-await-io-matcher'],
-        messages: lessons('d2-await-io-matcher', {
+        docs: rowOf('io-matcher-awaited'),
+        messages: lessons('io-matcher-awaited', {
             mustAwait: {
                 found: '`expect(…).{{matcher}}` not awaited — it returns a promise',
                 fix: 'write `await expect(…).{{matcher}}(…)`, or return it',

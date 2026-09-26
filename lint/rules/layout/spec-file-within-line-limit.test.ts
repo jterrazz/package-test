@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { c33FileSize, groupsOf, MAX_SPEC_LINES } from './spec-file-within-line-limit.js';
+import {
+    groupsOf,
+    MAX_SPEC_LINES,
+    specFileWithinLineLimit,
+} from './spec-file-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
@@ -10,7 +14,7 @@ function specOf(lines: number, titles: string[]): string {
     return [...body, ...Array.from({ length: lines - body.length }, () => '// …')].join('\n');
 }
 
-ruleTester().run('c33-file-size', asOxlintRule(c33FileSize), {
+ruleTester().run('spec-file-within-line-limit', asOxlintRule(specFileWithinLineLimit), {
     invalid: [
         {
             code: specOf(MAX_SPEC_LINES + 1, ['rejects a', 'rejects b', 'accepts a']),
@@ -30,8 +34,8 @@ ruleTester().run('c33-file-size', asOxlintRule(c33FileSize), {
     ],
 });
 
-describe('spec-file-within-line-limit', () => {
-    test('c33FileSize — groupsOf — the cut a long file suggests — groups titles by what stands before a dash or a colon, else by their first word', () => {
+describe('specFileWithinLineLimit', () => {
+    test('spec-file-within-line-limit — specFileWithinLineLimit — groupsOf — the cut a long file suggests — groups titles by what stands before a dash or a colon, else by their first word', () => {
         // Given - titles of three shapes
         const titles = [
             'pagination — the first page',

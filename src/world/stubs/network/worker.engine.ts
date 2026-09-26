@@ -6,7 +6,7 @@ import type { StubRegistration } from './handlers.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
-/** What the runner itself fetches; everything else is the subject's traffic (D7). */
+/** What the runner itself fetches; everything else is the subject's traffic (`network-strict-after-first-stub`). */
 const RUNNER_PREFIXES = ['/.artifacts/', '/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
 
 let workerInstance: any = null;
@@ -34,7 +34,7 @@ export async function ensureStubWorker(): Promise<void> {
     });
 }
 
-/** Starts even for an empty list: D7 is total here, a component given no stub has no network. */
+/** Starts even for an empty list: `network-strict-after-first-stub` is total here, a component given no stub has no network. */
 export async function registerWorkerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {
     await ensureStubWorker();
     const msw = await import('msw');

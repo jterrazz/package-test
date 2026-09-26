@@ -2,7 +2,7 @@ import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../rule-tester.fixtures.js';
-import { i4NoModuleDoubles } from './no-module-mock.js';
+import { noModuleMock } from './no-module-mock.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -16,7 +16,7 @@ const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
 const UNDER_MOCKS = checkoutUnder('__mocks__', ['src']);
 
-ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRule, {
+ruleTester.run('no-module-mock', noModuleMock as unknown as OxlintRule, {
     invalid: [
         // Module mocking is banned under src/.
         { code: 'vi.mock("./match.js");', errors: [{ messageId: 'viMock' }], filename: SRC_TEST },
@@ -84,7 +84,7 @@ ruleTester.run('i4-no-module-doubles', i4NoModuleDoubles as unknown as OxlintRul
         { code: 'import { registry } from "@scope/kernel/plugin.registry";', filename: SRC_TEST },
         { code: 'import { schema } from "./user.schema.js";', filename: SRC_TEST },
         { code: 'import { version } from "node:process";', filename: SRC_TEST },
-        // Non-test src files may import what F2/I1 allow — assets are not
+        // Non-test src files may import what `no-test-code-in-production`/I1 allow — assets are not
         // checked there (only vi.mock and banned dirs apply).
         {
             code: 'import data from "./payload.json";',

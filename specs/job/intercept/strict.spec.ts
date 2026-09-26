@@ -20,7 +20,7 @@ describe('strict', () => {
     });
 
     test('strict by default: an outgoing request matching no intercept fails the trigger', async () => {
-        // Given - an intercept is declared, but for a DIFFERENT url than the job calls, so the chain's network is guarded (D7) yet the job's real request matches nothing
+        // Given - an intercept is declared, but for a DIFFERENT url than the job calls, so the chain's network is guarded (`network-strict-after-first-stub`) yet the job's real request matches nothing
         // Then - the trigger rejects, naming the offending request rather than letting it reach the network
         await expect(
             job

@@ -86,7 +86,7 @@ function positionOf(text: string, index: number): { column: number; line: number
     return { column: index - before.lastIndexOf('\n'), line: before.split('\n').length };
 }
 
-/** C24's reading. */
+/** `verb-reads-its-ground-folder`'s reading. */
 function roleOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundName(segment));
 }
@@ -186,7 +186,9 @@ function singleUseFiles(rootDir: string): SingleUse[] {
     }
     return single.filter(
         ({ reference }) =>
-            !suppressedLines(readFileSync(reference.file, 'utf8'), 'c28').has(reference.line),
+            !suppressedLines(readFileSync(reference.file, 'utf8'), 'ground-shared-or-inline').has(
+                reference.line,
+            ),
     );
 }
 
@@ -311,7 +313,7 @@ function oversizedIn(file: string): Oversized[] {
     const source = readFileSync(file, 'utf8');
     const text = withoutComments(source);
     const literals = literalSpans(text);
-    const suppressed = suppressedLines(source, 'c28');
+    const suppressed = suppressedLines(source, 'ground-shared-or-inline');
     return [...text.matchAll(VALUE_CALL)].flatMap((call) => {
         const candidate = candidateAt(text, call, literals);
         if (candidate === undefined) {
@@ -387,7 +389,7 @@ function capFinding(rootDir: string, oversized: Oversized): TokenViolation {
         fix: capFix(oversized, target),
         found: `${kind} of ${oversized.lines} lines written in the test, past the ${oversized.role}/ cap of ${INLINE_CAPS[oversized.role] ?? 0}`,
         line: oversized.line,
-        rule: 'c28-ground-shared-or-inline',
+        rule: 'ground-shared-or-inline',
         severity: 'error',
     };
 }
@@ -399,7 +401,7 @@ export function checkGroundSharing(rootDir: string): TokenViolation[] {
         line: reference.line,
         fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`make fix\` inlines it`,
         found: `${relative(rootDir, target)}, read by this test alone`,
-        rule: 'c28-ground-shared-or-inline' as const,
+        rule: 'ground-shared-or-inline' as const,
         severity: 'error' as const,
     }));
     const inlined = new Set(singleUseFiles(rootDir).map(({ target }) => relative(rootDir, target)));

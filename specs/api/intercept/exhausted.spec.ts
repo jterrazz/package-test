@@ -22,7 +22,7 @@ describe('exhausted', () => {
         `);
     });
 
-    // RUNTIME D7 — from the first stub the network is STRICT: an unmatched request, an exhausted queue included, fails the spec by name.
+    // RUNTIME network-strict-after-first-stub — from the first stub the network is STRICT: an unmatched request, an exhausted queue included, fails the spec by name.
     test('an exhausted stub rejects the action with method, URL, and the declared list', async () => {
         // Given - a stub allowed exactly once while the app calls twice
         const chain = api

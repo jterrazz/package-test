@@ -100,7 +100,7 @@ describe('comparison', () => {
         );
     });
 
-    // RUNTIME C3 — a response expectation starts with a status line and its headers are matched as a SUBSET: the ones listed must match, the rest are unconstrained.
+    // RUNTIME expected-headers-are-a-subset — a response expectation starts with a status line and its headers are matched as a SUBSET: the ones listed must match, the rest are unconstrained.
     test('reports a subset-header mismatch when the header is absent', async () => {
         // Given - an expectation listing a header the response does not carry
         const result = await api.get('/session');

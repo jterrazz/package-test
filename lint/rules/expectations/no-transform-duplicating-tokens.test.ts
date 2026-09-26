@@ -1,7 +1,7 @@
 import { RuleTester } from 'oxlint/plugins-dev';
 import { describe, it } from 'vitest';
 
-import { d6wTransformTokenEquivalent } from './no-transform-duplicating-tokens.js';
+import { noTransformDuplicatingTokens } from './no-transform-duplicating-tokens.js';
 
 RuleTester.describe = describe;
 RuleTester.it = it;
@@ -11,8 +11,8 @@ type OxlintRule = Parameters<RuleTester['run']>[1];
 const ruleTester = new RuleTester();
 
 ruleTester.run(
-    'd6w-transform-token-equivalent',
-    d6wTransformTokenEquivalent as unknown as OxlintRule,
+    'no-transform-duplicating-tokens',
+    noTransformDuplicatingTokens as unknown as OxlintRule,
     {
         invalid: [
             // Expression-bodied arrow, single token-equivalent replace.

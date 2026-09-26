@@ -1,7 +1,7 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { c32AspectName } from './spec-named-for-its-aspect.js';
+import { specNamedForItsAspect } from './spec-named-for-its-aspect.js';
 
-ruleTester().run('c32-aspect-name', asOxlintRule(c32AspectName), {
+ruleTester().run('spec-named-for-its-aspect', asOxlintRule(specNamedForItsAspect), {
     invalid: [
         // Each catch-all name the convention lists answers no question.
         ...['basic', 'edge-cases', 'general', 'main', 'misc', 'more', 'other', 'tests'].map(

@@ -8,14 +8,14 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — a root that is not a specs tree is read as the project holding one', async () => {
         // Given - the project root of a tree whose facet findings sit one level down
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c12-spec-placement/'))
+            .fixture(directory('./fixtures/lint-violations/file-suffix-matches-place-placement/'))
             .exec('.');
 
         // Then - the facet passes report what `specs` reports, anchored on the root that was named
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
-            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(c18): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#c18-module-test-under-facet
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#file-suffix-matches-place
+            specs/api/helpers/normalize.test.ts:1:1: error jterrazz-check(facet-test-uses-its-runner): found: a test under the \`api\` facet that reaches no runner · why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself. · fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module · read: docs/19-linting.md#facet-test-uses-its-runner
 
             conventions checker: 2 error(s) found under {{workdir}}
         `);
@@ -30,13 +30,13 @@ describe('checker-cli', () => {
         // Then - the `specs` above the package is the machine's: the run walks the project's own tree
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/api/users/creation.test.ts:1:1: error jterrazz-check(c12): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#c12-spec-file-name
+            specs/api/users/creation.test.ts:1:1: error jterrazz-check(file-suffix-matches-place): found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product · why: The suffix says the kind, and the tree agrees with it. · fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\` · read: docs/19-linting.md#file-suffix-matches-place
 
             conventions checker: 1 error(s) found under {{workdir}}/specs/checkout
         `);
     });
 
-    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
+    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a root holding no specs tree at all is refused, not reported clean', async () => {
         // Given - a package with module tests and no `specs/` anywhere below it
         const result = await cli
@@ -48,7 +48,7 @@ describe('checker-cli', () => {
         expect(result.stderr.text).toContain('no `specs/` tree under');
     });
 
-    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
+    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a nonexistent root fails loudly instead of reporting a clean tree', async () => {
         // Given - a target directory that does not exist
         const result = await cli.exec('does-not-exist-xyz');
@@ -61,13 +61,13 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — `baseline` records the project where it stands, and the next run is held by it', async () => {
         // Given - a project with one dead fixture and no ratchet, recorded then judged
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec(['baseline .', '.']);
 
         // Then - the family file holds the test section and its one finding, and the run it holds exits 0
         expect(result.exitCode).toBe(0);
         expect(result.file('jterrazz.baseline.json').content).toBe(
-            '{\n    "test": {\n        "jterrazz-check/c9": 1\n    }\n}\n',
+            '{\n    "test": {\n        "jterrazz-check/no-unused-ground": 1\n    }\n}\n',
         );
     });
 
@@ -80,14 +80,14 @@ describe('checker-cli', () => {
         // Then - the recorded debt is the tree's, and the other package's section is untouched
         expect(result.exitCode).toBe(0);
         expect(result.file('jterrazz.baseline.json').content).toBe(
-            '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {\n        "jterrazz-check/c9": 1\n    }\n}\n',
+            '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {\n        "jterrazz-check/no-unused-ground": 1\n    }\n}\n',
         );
     });
 
     test('lint — checker CLI contract — a leftover test.baseline.json is never read: the section alone judges', async () => {
         // Given - the retired file holding a count the project is far from, beside the recorded section
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .fixture(file('./fixtures/lint-violations/retired-baseline/test.baseline.json'))
             .exec(['baseline .', '.']);
 
@@ -100,7 +100,7 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — a green ratchet run prints exactly the held line, and not the findings it holds', async () => {
         // Given - a project with one dead fixture, recorded, then judged
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec(['baseline .', '.']);
 
         // Then - the summary alone; the held finding prints only when a verdict fails
@@ -112,7 +112,7 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — a green `--fix` run prints exactly the held line', async () => {
         // Given - a project with one dead fixture, recorded, then fixed
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec(['baseline .', '. --fix']);
 
         // Then - the same one line the check prints: nothing to rewrite, nothing more to say
@@ -124,13 +124,13 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — `--verbose` adds to the held line where the run stood and what ran', async () => {
         // Given - a project with one dead fixture, recorded, then judged verbosely
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec(['baseline .', '. --verbose']);
 
         // Then - the held line, then the project root and every pass
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            jterrazz.baseline.json › test: 1 held across 1 rule — conventions checker under {{workdir}} (a7-database-property, b5-await-using-inference, c12-spec-file-name, c15-local-fixture-reach, c16-document-outside-ground, c18-module-test-under-facet, c20-facet-folder, c21w-ground-owned-by-one, c23-seed-no-clock-read, c27w-duplicate-ground, c28-ground-shared-or-inline, c29-one-subject, c30-subject-folder, c8-disk-target-exists, c8-spec-registered-name, c9-dead-fixtures, d10w-tokens-in-requests, d11w-spec-silent-refusal, d4-malformed-ref, d4-unknown-token, d4b-http-first-line, d4b-spec-block-scalar, d4b-spec-key-order, d4b-spec-shape, d5-spec-volatile-literal, d5w-spec-pinned-value, j3w-spec-empty-assertion, j4-spec-description-unique, j9-checker-suppression-reason, j5-spec-description, c25-no-ground-synonym, e3-config-present, e5b-no-simulated-dom-config-member, f8-no-seam-dependency)
+            jterrazz.baseline.json › test: 1 held across 1 rule — conventions checker under {{workdir}} (database-named-only-when-several, docker-exec-bound-with-await-using, file-suffix-matches-place, no-reach-into-sibling-ground, no-document-in-ground, facet-test-uses-its-runner, facet-folder-has-specification, ground-beside-its-only-reader, seeds-state-absolute-time, no-duplicate-ground, ground-shared-or-inline, one-subject-per-spec, spec-in-subject-folder, named-path-exists, document-env-and-serve-registered, no-unused-ground, no-token-in-request, no-silent-refusal, no-malformed-ref, no-unknown-token, http-first-line-follows-its-grammar, document-streams-written-as-block-scalars, document-keys-in-canonical-order, document-follows-its-grammar, no-volatile-literal, pinned-value-from-the-input, no-empty-expected-stream, document-description-unique, checker-suppression-states-a-reason, document-description-is-a-title, no-snapshot-folder, member-has-vitest-config, no-simulated-dom-in-config, no-redundant-test-dependency)
         `);
         expect(result.stderr.text).toBe('');
     });
@@ -156,11 +156,11 @@ describe('checker-cli', () => {
         // Then - the tree's finding in full, the plugin's counted: oxlint's own pass is the one that prints it
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(c9): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
+            specs/widget/seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/c9 has 1 finding(s) and no entry — it is new debt
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz/i2-sibling-test-naming has 1 finding(s) and no entry — it is new debt
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/c14 is at zero — the ratchet moved, delete its entry
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/no-unused-ground has 1 finding(s) and no entry — it is new debt
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz/test-beside-its-module has 1 finding(s) and no entry — it is new debt
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/ground-shared-or-inline is at zero — the ratchet moved, delete its entry
             Run 'jterrazz-test-check baseline' to record where the project stands.
         `);
     });
@@ -179,7 +179,7 @@ describe('checker-cli', () => {
     test('lint — checker CLI contract — with no ratchet, the root member run judges and prints only its own findings', async () => {
         // Given - a dead fixture under specs/, no jterrazz.baseline.json
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec('--member .');
 
         // Then - the tree finding is the per-root run's: this run neither prints nor fails on it
@@ -197,7 +197,7 @@ describe('checker-cli', () => {
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
             conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
-            jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
+            jterrazz/test-beside-its-module  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
             Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
         `);
     });
@@ -211,13 +211,13 @@ describe('checker-cli', () => {
         // Then - the checker is the one printer of the diagnostic, in full, and counts it nowhere else
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
-            jterrazz/i2-sibling-test-naming  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
+            src/orphan.test.ts:1:1: error jterrazz(test-beside-its-module): a module test has a sibling module
+            jterrazz/test-beside-its-module  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
             Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
         `);
     });
 
-    // Scalpel (D11): a golden here would couple the CLI boundary to the diagnostic formatting.
+    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
     test('lint — checker CLI contract — a report path that names no file fails loudly instead of counting nothing', async () => {
         // Given - a report that was never written
         const result = await cli
@@ -238,7 +238,7 @@ describe('checker-cli', () => {
         // Then - the finding and the file that judges it, and no verdict of its own
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            widget/seeds/dead.sql:1:1: error jterrazz-check(c9): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures
+            widget/seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             conventions checker: 1 finding(s) under {{workdir}}/specs, judged by jterrazz.baseline.json › test
         `);
     });
@@ -246,13 +246,13 @@ describe('checker-cli', () => {
     test('lint — checker CLI, the logs a ratchet run prints — `--format json` prints the findings on a green ratchet run too', async () => {
         // Given - a project whose one finding is recorded, judged with the JSON format
         const result = await cli
-            .fixture(directory('./fixtures/lint-violations/c9-dead-fixtures/'))
+            .fixture(directory('./fixtures/lint-violations/no-unused-ground/'))
             .exec(['baseline .', '. --format json']);
 
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures","severity":"error"}]
+            [{"code":"jterrazz-check(no-unused-ground)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground","severity":"error"}]
         `);
     });
 
@@ -266,7 +266,7 @@ describe('checker-cli', () => {
         // Then - the verdict fails on both, and the JSON holds the tree's finding alone
         expect(result.exitCode).toBe(1);
         expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(c9)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#c9-dead-fixtures","severity":"error"}]
+            [{"code":"jterrazz-check(no-unused-ground)","file":"specs/widget/seeds/dead.sql","line":1,"message":"found: seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`seeds/\`/\`requests/\`/\`fixtures/\` and every top-level entry of \`expected/\` must be referenced — a leaf's, and the specs root's shared four under \`<specs>/shared/\`; a feature directory with no test file and no \`*.spec.yaml\` is an orphan (a warning when the argument is not a literal). · fix: delete seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground","severity":"error"}]
         `);
     });
 

@@ -23,7 +23,7 @@ export type ComponentVisitor = {
     unmount: () => Promise<void>;
 };
 
-/** The behaviour of a render; assertions stay in the Then, on the result (W1). */
+/** The behaviour of a render; assertions stay in the Then, on the result (`no-expect-in-scenario`). */
 export type ComponentScenario = (visitor: ComponentVisitor) => Promise<void>;
 
 /** A React element, or a function that fills a container. */

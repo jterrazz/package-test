@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (D11 scalpel). */
+/* Capability probes of stream capture and lifecycle, not of the fixture CLI's output (`output-asserted-as-a-golden` scalpel). */
 
 describe('fresh-workdir', () => {
     test('fresh working dir — runs in a fresh empty temp dir when no fixture is set', async () => {

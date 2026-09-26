@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, identifierName, propertyKeyName, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -36,7 +35,7 @@ function insideComponentCall(node: AstNode): boolean {
     return false;
 }
 
-export const e6ComponentProjectHelper: LintRule = {
+export const browserProjectFromComponent: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'config',
@@ -57,8 +56,8 @@ export const e6ComponentProjectHelper: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['e6-component-project-helper'],
-        messages: lessons('e6-component-project-helper', {
+        docs: rowOf('browser-project-from-component'),
+        messages: lessons('browser-project-from-component', {
             handRolled: {
                 found: 'a hand-rolled `browser:` block in a vitest config',
                 fix: "replace it with `component({ vite: './vite.config.ts' })`, which sets the provider, the worker and the pipeline",

@@ -19,7 +19,7 @@ export interface InterceptSignature extends ChainSignature {
     readonly chain: InterceptChain<this['self']>;
 }
 
-/** Calls append (D7); composition and overriding live in `defineStubs()` / `.with()`. Strict once armed. */
+/** Calls append (`network-strict-after-first-stub`); composition and overriding live in `defineStubs()` / `.with()`. Strict once armed. */
 export const intercept = defineCapability<
     'intercept',
     readonly Stub[],

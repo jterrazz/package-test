@@ -1,0 +1,9 @@
+description: a facet importing another, and an entry skipping the face, are refused at the import
+fixture: ./fixtures/crossing/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          src/facets/api/api.handle.ts:1:1  jterrazz-check(no-cross-facet-import)
+          src/index.ts:1:1  jterrazz-check(no-cross-facet-import)
+          src/index.ts:2:1  jterrazz-check(no-cross-facet-import)

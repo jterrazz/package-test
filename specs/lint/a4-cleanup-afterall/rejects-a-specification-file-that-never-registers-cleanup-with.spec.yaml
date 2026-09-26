@@ -1,7 +1,0 @@
-description: rejects a specification file that never registers cleanup with afterAll
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/cli/leak.specification.ts:3:14  jterrazz(a4-cleanup-afterall)

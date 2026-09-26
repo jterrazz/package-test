@@ -1,9 +1,9 @@
 import { asOxlintRule, ruleTester } from '../rule-tester.fixtures.js';
-import { d18wExistenceOnlyOracle } from './no-existence-only-assertion.js';
+import { noExistenceOnlyAssertion } from './no-existence-only-assertion.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('d18w-existence-only-oracle', asOxlintRule(d18wExistenceOnlyOracle), {
+ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAssertion), {
     invalid: [
         // The whole proof is that something came back.
         {

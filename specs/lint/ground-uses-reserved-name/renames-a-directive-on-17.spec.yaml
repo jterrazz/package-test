@@ -1,0 +1,10 @@
+description: --fix renames a directive naming a renamed rule on a tree with no 16 folder, and the read it covers
+fixture: ./fixtures/on-17-directive/
+runs:
+    - command: checker . --fix
+      exit: 0
+      files:
+          specs/cli/build/build.spec.ts:
+              contains: |
+                  // oxlint-disable-next-line jterrazz/no-raw-bypass -- asserts the colour codes themselves (a 16 id that no longer exists)
+                      expect(result.stdout.raw).toContain('[31m');

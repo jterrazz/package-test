@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import {
     assertionOf,
     chainRootName,
@@ -52,7 +51,7 @@ function doubleBindings(root: AstNode): Set<string> {
 }
 
 /** Module tests only: on a component a callback prop is the contract with the parent, and reading it is honest. */
-export const d17wDoubleOnlyOracle: LintRule = {
+export const noDoubleOnlyAssertion: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before() {
@@ -95,8 +94,8 @@ export const d17wDoubleOnlyOracle: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['d17w-double-only-oracle'],
-        messages: lessons('d17w-double-only-oracle', {
+        docs: rowOf('no-double-only-assertion'),
+        messages: lessons('no-double-only-assertion', {
             doubleOnly: {
                 found: 'every assertion reads a double this test built',
                 fix: 'assert the value the subject returned, or the state it left',

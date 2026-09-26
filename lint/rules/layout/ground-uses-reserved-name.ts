@@ -6,8 +6,7 @@ import {
     RENAMED_GROUND_DIRS,
     SHARED_GROUND,
 } from '../../../src/kernel/files/ground.js';
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import type { AstNode } from '../../reading/ast.js';
 import { isDirectory, listDirectory } from '../../reading/fs-cache.js';
 import { specsAnchorOf } from '../../reading/linted-file.js';
@@ -26,8 +25,8 @@ function isLeftoverContracts(dir: string, inSpecs: boolean): boolean {
     );
 }
 
-/** A tree keeping the 16 names still runs, so nothing else would say so. Anchored on the visited test file, as C2/C7/C11 are. */
-export const c13BareGround: LintRule = {
+/** A tree keeping the 16 names still runs, so nothing else would say so. Anchored on the visited test file, as `request-file-extension-known`/C7/C11 are. */
+export const groundUsesReservedName: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => TEST_FILE.test(context.physicalFilename),
@@ -65,8 +64,8 @@ export const c13BareGround: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c13-bare-ground'],
-        messages: lessons('c13-bare-ground', {
+        docs: rowOf('ground-uses-reserved-name'),
+        messages: lessons('ground-uses-reserved-name', {
             contracts: {
                 found: '"contracts/" is the 16.x name of a stubs folder',
                 fix: 'rename it "stubs/", its facades `*.stubs.ts` and the 16 names it imports — `jterrazz-test-check --fix` does all three (`make fix`)',

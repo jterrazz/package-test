@@ -1,7 +1,6 @@
 import type { Context } from '@oxlint/plugins';
 
-import { lessons } from '../../catalogue/lesson.js';
-import { RULE_DOCS } from '../../catalogue/manifest.js';
+import { lessons, rowOf } from '../../catalogue/lesson.js';
 import { child, isTestCallee, testName, walk } from '../../reading/ast.js';
 import type { AstNode } from '../../reading/ast.js';
 import { identityOf } from '../../reading/linted-file.js';
@@ -31,7 +30,7 @@ export function groupsOf(titles: string[]): string {
     return groups.length > GROUPS_SHOWN ? `${shown.join(', ')}, …` : shown.join(', ');
 }
 
-export const c33FileSize: LintRule = {
+export const specFileWithinLineLimit: LintRule = {
     createOnce(context: Context): Visitor {
         return {
             before: () => identityOf(context).role === 'spec',
@@ -55,8 +54,8 @@ export const c33FileSize: LintRule = {
         };
     },
     meta: {
-        docs: RULE_DOCS['c33-file-size'],
-        messages: lessons('c33-file-size', {
+        docs: rowOf('spec-file-within-line-limit'),
+        messages: lessons('spec-file-within-line-limit', {
             tooLong: {
                 found: 'a spec file of {{lines}} lines, over {{max}}',
                 fix: 'cut it along its tests’ groups — {{groups}} — one aspect per file',

@@ -1,7 +1,0 @@
-description: warns when the cli binary is a third-party node_modules/.bin
-fixture: ./fixtures/violation/
-runs:
-    - command: .
-      exit: 0
-      stdout: |
-          specs/cli/oxlint.specification.ts:9:39  jterrazz(b9w-product-command)

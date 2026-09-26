@@ -7,7 +7,7 @@ describe('docker', () => {
         // Given - a docker-aware runner result bound with a plain const
         const result = await dockerCli.exec('spawn thing');
 
-        // Then - the container would leak (B5)
+        // Then - the container would leak (`docker-exec-bound-with-await-using`)
         expect(result.exitCode).toBe(0);
     });
 });
