@@ -107,7 +107,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The folders of `lint/` import in one direction: `reading/` imports only itself; `catalogue/` itself and `reading/`; `rules/` those two; `checks/` and `ratchet/` those two, `checks/` the ratchet too; `rulebook/` the rules and those two; the entry `lint/index.ts` any of them; `migration/` every shipped folder; and nothing but `self/` imports `self/`, nor anything but `lint/checks/checker.cli.ts` imports `migration/`. Tests are exempt. An error at the import.',
+            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree; the command line that runs the mover is `lint/checks/checker.cli.ts`. Tests are exempt. An error at the import.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move what the importer needs into a folder it may import, or move the importer up the tree.',

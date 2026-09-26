@@ -9,7 +9,7 @@ const LINT_DIRECTION: Record<string, readonly string[]> = {
     migration: ['migration', 'catalogue', 'checks', 'ratchet', 'reading', 'rulebook', 'rules'],
     ratchet: ['ratchet', 'catalogue', 'reading'],
     reading: ['reading'],
-    rulebook: ['rulebook', 'catalogue', 'reading', 'rules'],
+    rulebook: ['rulebook', 'catalogue', 'reading'],
     rules: ['rules', 'catalogue', 'reading'],
 };
 
