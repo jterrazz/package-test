@@ -28,16 +28,18 @@ Decisions this package alone took are in `docs/decisions/`. The agent-facing ski
 
 ## Setup & commands
 
+What each target runs is [02 § The loop](docs/02-developing.md#the-loop)'s.
+
 ```bash
 make install                      # the dependencies
 make build                        # MUST precede lint and the unit project
-make lint                         # the static verdict — what it runs is docs/02-developing.md's make table
-make fix                          # the fixers: the checker's --fix, then typescript fix (the formatter last), each whatever the other said
-make test                         # every project, with coverage — needs Docker and chromium
+make lint                         # the static verdict
+make fix                          # the fixers
+make test                         # every suite — needs Docker and chromium
 make check                        # the whole verdict: build, lint, test
-make test-mobile                  # the mobile specs on a real iOS simulator — never in check, needs Xcode
-make test-changed                 # only the tests the uncommitted changes reach — the loop, never a verdict, no route ratchet
-make test SHARD=1/3               # one shard, with its blob report; make test-merge judges the floor and the routes on them all
+make test-mobile                  # the mobile specs — needs Xcode
+make test-changed                 # the loop over what changed
+make test SHARD=1/3               # one shard of a split run
 npx vitest --run --project unit   # the loop, no infrastructure
 npm run docs                      # regenerate the generated tables and the schema
 ```
