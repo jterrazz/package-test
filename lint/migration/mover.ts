@@ -597,3 +597,29 @@ export function migrateModuleTestsTo17(member: string, rename: Rename): Migratio
         stubs: stubs.rewritten,
     };
 }
+
+const LINTED_SOURCE = /\.(?:[cm]?[jt]sx?)$/u;
+
+export function migrateDirectives(member: string): string[] {
+    const rewritten: string[] = [];
+    const walk = (dir: string): void => {
+        for (const entry of treeEntries(dir)) {
+            const path = join(dir, entry.name);
+            if (entry.isDirectory()) {
+                const nested = treeKind(join(path, 'package.json')) === 'file';
+                if (!SKIPPED.has(entry.name) && !isGroundName(entry.name) && !nested) {
+                    walk(path);
+                }
+            } else if (entry.isFile() && LINTED_SOURCE.test(entry.name)) {
+                const text = readFileSync(path, 'utf8');
+                const next = renameDirectives(text);
+                if (next !== text) {
+                    writeFileSync(path, next);
+                    rewritten.push(relative(member, path));
+                }
+            }
+        }
+    };
+    walk(member);
+    return rewritten;
+}

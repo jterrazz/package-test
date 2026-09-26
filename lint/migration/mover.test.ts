@@ -12,7 +12,12 @@ import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { moveKeepingHistory } from '../../src/kernel/files/git-tree.js';
-import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from './mover.js';
+import {
+    migrateDirectives,
+    migrateLintConfig,
+    migrateModuleTestsTo17,
+    migrateTo17,
+} from './mover.js';
 
 function tree16(files: Record<string, string>, at = 'specs'): string {
     const scratch = mkdtempSync(join(tmpdir(), 'migrate-'));
@@ -748,6 +753,32 @@ describe('mover', () => {
         // Then - the new golden is named by its path, the ignored name stays a value
         expect(readFileSync(join(root, 'specs', 'cli', 'help', 'help.test.ts'), 'utf8')).toContain(
             "expect(a).toMatch(file('./expected/usage.txt'));\nexpect(b).toMatch('local.txt');",
+        );
+    });
+
+    test('mover — the old ids — renames a directive wherever oxlint reads it, the config and production sources included', () => {
+        // Given - a member whose vitest config and production module disable rules by their 17.0 codes
+        const member = tree16(
+            {
+                'package.json': '{}\n',
+                'src/fixtures.ts':
+                    '// oxlint-disable-next-line jterrazz/f2-no-test-imports-in-prod -- the test kit\nexport { seed } from "./seed.fixtures.js";\n',
+                'vitest.config.ts':
+                    '// oxlint-disable-next-line jterrazz/e2-preset-config -- a bare config on purpose\nexport default {};\n',
+            },
+            'member',
+        );
+
+        // When - the directives move
+        const rewritten = migrateDirectives(member);
+
+        // Then - both files name the rules as 17 does
+        expect(rewritten.toSorted()).toStrictEqual(['src/fixtures.ts', 'vitest.config.ts']);
+        expect(readFileSync(join(member, 'vitest.config.ts'), 'utf8')).toContain(
+            'jterrazz/vitest-config-from-define-spec-config',
+        );
+        expect(readFileSync(join(member, 'src/fixtures.ts'), 'utf8')).toContain(
+            'jterrazz/no-test-code-in-production',
         );
     });
 });

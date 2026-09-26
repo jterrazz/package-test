@@ -5,7 +5,12 @@ import { dirname, join, relative, resolve } from 'node:path';
 import { moveKeepingHistory } from '../../src/kernel/files/git-tree.js';
 import { migrateBaselineKeys } from '../migration/baseline-keys.js';
 import type { BaselineKeysMove } from '../migration/baseline-keys.js';
-import { migrateLintConfig, migrateModuleTestsTo17, migrateTo17 } from '../migration/mover.js';
+import {
+    migrateDirectives,
+    migrateLintConfig,
+    migrateModuleTestsTo17,
+    migrateTo17,
+} from '../migration/mover.js';
 import type { LintConfigMove, Migration } from '../migration/mover.js';
 import {
     BASELINE_FILE,
@@ -273,6 +278,12 @@ function fixProject(root: string): void {
     }
     for (const memberDir of discoverMembers(root)) {
         reportMigration(migrateModuleTestsTo17(memberDir, moveKeepingHistory));
+        reportMigration({
+            directives: migrateDirectives(memberDir),
+            renamed: [],
+            rewritten: [],
+            stubs: [],
+        });
         for (const move of migrateLintConfig(memberDir, root)) {
             reportLintConfigMove(move);
         }
