@@ -2,7 +2,7 @@ import { FAMILIES } from './families.js';
 import { consumerCatalog } from './manifest.js';
 import type { CatalogEntry } from './manifest.js';
 
-/** Rendered from `manifest.ts` and deterministic: `plugin.test.ts` asserts the committed chapters are reproduced byte for byte. */
+/** Rendered from `manifest.ts` and deterministic: `self/catalogue/manifest.test.ts` asserts the committed chapters are reproduced byte for byte. */
 
 export const DOCS_START =
     '<!-- GENERATED:catalog — do not edit by hand; run `npm run docs`. Source: lint/catalogue/manifest.ts -->';
@@ -35,7 +35,7 @@ const CHANNEL_ORDER: Record<CatalogEntry['channel'], number> = {
     process: 6,
 };
 
-/** A table row is not a heading: the anchor rides inside the Implementation cell, so `docs/19-linting.md#<implementation>` in a rule message resolves to the row. */
+/** A table row is not a heading: the anchor rides inside the Rule cell, so `docs/19-linting.md#<name>` in a rule message resolves to the row. */
 export function anchor(name: string): string {
     return `<a id="${name}"></a>`;
 }

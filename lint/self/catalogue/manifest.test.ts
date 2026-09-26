@@ -405,11 +405,11 @@ describe('manifest', () => {
                 ).toBe(false);
             }
         }
-        for (const [letter, title] of Object.entries(FAMILIES)) {
+        for (const [family, title] of Object.entries(FAMILIES)) {
             for (const token of FRENCH) {
                 expect(
                     carries(title, token),
-                    `family ${letter} carries the French token "${token}"`,
+                    `family ${family} carries the French token "${token}"`,
                 ).toBe(false);
             }
         }

@@ -202,7 +202,7 @@ export const META_ROWS: CatalogEntry[] = [
         fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/rules/plugin.ts` or `lint/checks/checker.ts`.',
         name: 'rule-declares-its-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` filed their specs by a capability matrix they do not have, and `f3-specs-public-entry` refused a consumer’s own `src/model/` until its self half left it as `no-framework-internals`.',
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` filed their specs by a capability matrix they do not have, and the retired specs-public-entry rule refused a consumer’s own `src/model/` until its self half left it as `no-framework-internals`.',
         reach: 'all',
     },
     ...ARCHITECTURE_META_ROWS,

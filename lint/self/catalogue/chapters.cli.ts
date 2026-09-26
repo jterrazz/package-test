@@ -10,7 +10,7 @@ import { spliceMetaTests } from '../corpus/meta-tests.js';
 import { spliceSiblings } from '../corpus/siblings.js';
 import { spliceSelfRules } from './chapter.js';
 
-/** `node dist/catalog.js [repoRoot]` (what `npm run docs` runs): regenerates every GENERATED table and the published schema; deterministic, and `plugin.test.ts` guards freshness. */
+/** `node dist/catalog.js [repoRoot]` (what `npm run docs` runs): regenerates every GENERATED table and the published schema; deterministic, and `self/catalogue/manifest.test.ts` guards freshness. */
 const root = resolve(process.argv[2] ?? '.');
 
 const docsPath = resolve(root, 'docs/19-linting.md');

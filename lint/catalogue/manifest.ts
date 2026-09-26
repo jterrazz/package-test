@@ -1,7 +1,7 @@
 import { REFUSAL_WHY } from '../../src/kernel/refusals/refusal.js';
 import type { RuleDoc } from './row.js';
 
-/** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self-manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (`import-within-declared-layers`). */
+/** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (`import-within-declared-layers`). */
 
 export type CatalogEntry = RuleDoc & {
     /** Unique across the catalogue. */
@@ -1160,7 +1160,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         fix: 'Regenerate with `TEST_UPDATE=1` and keep tokens only for the parts that move.',
         name: 'no-empty-expected-stream',
         rationale:
-            'The `no-empty-expected-stream` mirror for documents — an assertion that accepts anything is an absent assertion.',
+            'The `vitest/expect-expect` mirror for documents — an assertion that accepts anything is an absent assertion.',
         reach: 'document',
         severity: 'warn',
     },
@@ -1322,7 +1322,7 @@ export const CHECKER_PASSES: CatalogEntry[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "`docker-exec-bound-with-await-using`'s one channel: docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.",
+            'Docker-aware runners are inferred from the `docker:` option of the imported specification file, and every `.exec()` result bound without `await using` is reported.',
         facet: 'model',
         family: 'chain',
         fix: 'Bind the result with `await using`, so the containers the run spawned are disposed with the scope.',
