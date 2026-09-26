@@ -17,11 +17,11 @@ export type FileRole =
     | 'specification'
     | 'stub';
 
-export type LegacyDir = '__tests__' | 'test' | 'tests' | null;
+export type StrayTestRoot = '__tests__' | 'test' | 'tests' | null;
 
 export type FileIdentity = {
     inSpecs: boolean;
-    legacyDir: LegacyDir;
+    strayTestRoot: StrayTestRoot;
     role: FileRole;
 };
 
@@ -30,7 +30,7 @@ const GROUND = new Set<string>(GROUND_DIRS);
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 
 /** `__tests__/` anywhere; `test/` and `tests/` only directly under the project root, since a deeper `test` segment is an ordinary domain name. */
-function legacyDirOf(filename: string): LegacyDir {
+function strayTestRootOf(filename: string): StrayTestRoot {
     const parts = projectSegments(filename);
     if (parts.slice(0, -1).includes('__tests__')) {
         return '__tests__';
@@ -46,7 +46,7 @@ function legacyDirOf(filename: string): LegacyDir {
 export function roleOf(filename: string): FileIdentity {
     const parts = projectSegments(filename);
     const base = parts.at(-1) ?? '';
-    const identity = { inSpecs: isUnderSpecs(filename), legacyDir: legacyDirOf(filename) };
+    const identity = { inSpecs: isUnderSpecs(filename), strayTestRoot: strayTestRootOf(filename) };
 
     if (base.endsWith('.specification.ts') || base.endsWith('.specification.tsx')) {
         return { ...identity, role: 'specification' };

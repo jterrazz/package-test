@@ -15,8 +15,8 @@ function neighboursOf(file: string): string[] {
 }
 
 /** The orphan clause reads `role` and `inSpecs`, never a `src` segment: a repository suite covers a tree and has no neighbour to miss. */
-function owesANeighbour({ inSpecs, legacyDir, role }: FileIdentity): boolean {
-    if (legacyDir !== null) {
+function owesANeighbour({ inSpecs, strayTestRoot, role }: FileIdentity): boolean {
+    if (strayTestRoot !== null) {
         return false;
     }
     return role === 'component' || (role === 'module' && !inSpecs);
@@ -28,17 +28,18 @@ export const testBesideItsModule: LintRule = {
             before() {
                 const identity = identityOf(context);
                 return (
-                    identity.legacyDir !== null ||
+                    identity.strayTestRoot !== null ||
                     (owesANeighbour(identity) && TEST_FILE.test(context.physicalFilename))
                 );
             },
             Program(node: AstNode) {
                 const file = context.physicalFilename;
                 const identity = identityOf(context);
-                if (identity.legacyDir !== null) {
-                    const messageId = identity.legacyDir === '__tests__' ? 'testsDir' : 'rootTests';
+                if (identity.strayTestRoot !== null) {
+                    const messageId =
+                        identity.strayTestRoot === '__tests__' ? 'testsDir' : 'rootTests';
                     context.report({
-                        data: { directory: identity.legacyDir },
+                        data: { directory: identity.strayTestRoot },
                         messageId,
                         node,
                     });

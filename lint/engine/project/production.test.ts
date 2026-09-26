@@ -87,7 +87,7 @@ describe('production', () => {
         { path: 'src/domain/order.json', production: false },
     ])('isProductionModule — `$path` is production: $production', ({ path, production }) => {
         // Given - a module below the package root
-        // Then - every source module is production, unless it is test material, a tool's config or under a retired test root
+        // Then - every source module is production, unless it is test material, a tool's config or under a separate test root
         expect(isProductionModule(join(ROOT, path))).toBe(production);
     });
 
@@ -182,7 +182,7 @@ describe('production', () => {
     ])(
         'reachOf — sees what the non-production module `$module` names, parsed',
         ({ module, what }) => {
-            // Given - production importing a module under a retired test root
+            // Given - production importing a module under a separate test root
             const reach = reachOf(join(ROOT, 'src/domain/order.ts'), `../../tests/${module}.js`);
 
             // Then - the walk reads that module's program: a path it builds or reads, a type it imports

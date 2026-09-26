@@ -3,12 +3,12 @@ import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { checkoutUnder, repositoryUnder } from '../testing/package-tree.fixtures.js';
-import type { FileRole, LegacyDir } from './role.js';
+import type { FileRole, StrayTestRoot } from './role.js';
 import { isTestFile, isTestRole, projectRootOf, projectSegments, roleOf } from './role.js';
 
 const REPO_ROOT = resolve(import.meta.dirname, '../../..');
 
-const legacyOf = (path: string): LegacyDir => roleOf(path).legacyDir;
+const strayTestRootOf = (path: string): StrayTestRoot => roleOf(path).strayTestRoot;
 
 describe('role', () => {
     test('roleOf — the kind a path states — tells a rendered unit from a plain one by the suffix alone', () => {
@@ -71,13 +71,13 @@ describe('role', () => {
         expect(roleOf('/repo/src/matching/match.test.ts').inSpecs).toBeFalsy();
     });
 
-    test('roleOf — the kind a path states — names the retired test roots, in both of their spellings', () => {
+    test('roleOf — the kind a path states — names the separate test roots, in both of their spellings', () => {
         // Given - the three shapes `test-beside-its-module` refuses, each anchored on a real package root
-        // Then - `legacyDir` is the third field a rule reads
+        // Then - `strayTestRoot` is the third field a rule reads
         expect([
-            legacyOf('/repo/src/matching/__tests__/match.test.ts'),
-            legacyOf(`${REPO_ROOT}/tests/smoke.test.ts`),
-            legacyOf(`${REPO_ROOT}/test/corpus.test.ts`),
+            strayTestRootOf('/repo/src/matching/__tests__/match.test.ts'),
+            strayTestRootOf(`${REPO_ROOT}/tests/smoke.test.ts`),
+            strayTestRootOf(`${REPO_ROOT}/test/corpus.test.ts`),
         ]).toStrictEqual(['__tests__', 'tests', 'test']);
     });
 
@@ -85,9 +85,9 @@ describe('role', () => {
         // Given - a `tests` or `test` segment with no package above it, and a specs tree
         // Then - the clause is anchored on a package root, so a checkout under `~/tests/` is nobody's business
         expect([
-            legacyOf('/no-such-root-xyz/tests/smoke.test.ts'),
-            legacyOf('/no-such-root-xyz/test/smoke.test.ts'),
-            legacyOf('/repo/specs/api/users/create.test.ts'),
+            strayTestRootOf('/no-such-root-xyz/tests/smoke.test.ts'),
+            strayTestRootOf('/no-such-root-xyz/test/smoke.test.ts'),
+            strayTestRootOf('/repo/specs/api/users/create.test.ts'),
         ]).toStrictEqual([null, null, null]);
     });
 
@@ -101,11 +101,9 @@ describe('role', () => {
             'other',
             'other',
         ]);
-        expect(under.map((root) => legacyOf(join(root, 'src/widget.test.ts')))).toStrictEqual([
-            null,
-            null,
-            null,
-        ]);
+        expect(
+            under.map((root) => strayTestRootOf(join(root, 'src/widget.test.ts'))),
+        ).toStrictEqual([null, null, null]);
     });
 
     test('roleOf — read below the project root — the folders inside the project still say what they are', () => {
@@ -115,8 +113,8 @@ describe('role', () => {
         // Then - ground, stub and `__tests__` are read where the project names them
         expect(roleOf(join(root, 'specs/api/orders/fixtures/app.ts')).role).toBe('ground');
         expect(roleOf(join(root, 'specs/api/orders/stubs/http/latest.ts')).role).toBe('stub');
-        expect(legacyOf(join(root, 'src/__tests__/widget.test.ts'))).toBe('__tests__');
-        expect(legacyOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
+        expect(strayTestRootOf(join(root, 'src/__tests__/widget.test.ts'))).toBe('__tests__');
+        expect(strayTestRootOf(join(root, 'tests/widget.test.ts'))).toBe('tests');
     });
 
     test('roleOf — read below the project root — a file outside every package is read below its repository root', () => {
@@ -131,7 +129,7 @@ describe('role', () => {
         ]);
         expect(roleOf(join(underGround, 'src/widget.ts')).role).toBe('other');
         expect(roleOf(join(underSpecs, 'src/widget.test.ts')).inSpecs).toBe(false);
-        expect(legacyOf(join(underGround, 'tests/widget.test.ts'))).toBe('tests');
+        expect(strayTestRootOf(join(underGround, 'tests/widget.test.ts'))).toBe('tests');
     });
 
     test('roleOf — read below the project root — a path no package and no repository holds is read whole', () => {

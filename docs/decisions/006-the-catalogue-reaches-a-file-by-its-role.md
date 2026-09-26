@@ -36,7 +36,7 @@ been run against, and every consumer paid for it.
 
 ### One gate, by role
 
-**One gate, by ROLE.** `roleOf(file)` returns `{ role, inSpecs, legacyDir }`,
+**One gate, by ROLE.** `roleOf(file)` returns `{ role, inSpecs, strayTestRoot }`,
 and the role is read from the SUFFIX: `.specification.ts(x)`, `.spec.yaml`,
 `.spec.ts`, `.test.tsx`, `.test.ts`, `vitest.config.*`, a ground ancestor, a
 `contracts/` ancestor. A statique rule reads those three fields and, where it

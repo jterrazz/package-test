@@ -112,7 +112,7 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
             'pathRead',
         ),
         refused(`const golden = \`\${__dirname}/expected/out.txt\`;`, 'pathRead'),
-        // A reach through a module that is not production — a retired test root: the barrel re-exports it.
+        // A reach through a module that is not production — a separate test root: the barrel re-exports it.
         refused('export * from "../tests/render.js";', 'reachThrough', BARREL),
         refused('export { users } from "../tests/data.js";', 'reachThrough', BARREL),
         // That module is parsed: a path it builds into test material is a reach too.
@@ -163,7 +163,7 @@ ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProducti
             code: 'import { specification } from "@jterrazz/test";',
             filename: join(ROOT, 'specs/setup/api.specification.ts'),
         },
-        // A tool's config is the toolchain's, and a retired test root is `test-beside-its-module`'s.
+        // A tool's config is the toolchain's, and a separate test root is `test-beside-its-module`'s.
         {
             code: 'import { defineConfig } from "vitest/config";',
             filename: join(ROOT, 'vitest.config.ts'),

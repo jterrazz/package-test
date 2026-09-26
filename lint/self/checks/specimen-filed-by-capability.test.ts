@@ -162,8 +162,8 @@ describe('checkSpecimenFiledByCapability', () => {
             'component/intercept/post-table.tsx': 'export function PostTable() {}\n',
             'component/render/use-modal.test.tsx': "import { useModal } from './use-modal.js';\n",
             'component/render/use-modal.ts': 'export function useModal() {}\n',
-            'component/legacy.tsx':
-                '// checker-disable-next-line specimen-filed-by-capability -- moved with its consumer next release\nexport function Legacy() {}\n',
+            'component/banner.tsx':
+                '// checker-disable-next-line specimen-filed-by-capability -- moved with its consumer next release\nexport function Banner() {}\n',
         });
 
         // Then - no finding

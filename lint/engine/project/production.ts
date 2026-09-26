@@ -98,7 +98,7 @@ export function isProductionModule(filename: string): boolean {
     if (!SOURCE.test(filename) || materialAt(filename) !== undefined) {
         return false;
     }
-    return !TOOL_CONFIG.test(basename(filename)) && roleOf(filename).legacyDir === null;
+    return !TOOL_CONFIG.test(basename(filename)) && roleOf(filename).strayTestRoot === null;
 }
 
 export function testPackageOf(specifier: string): string | undefined {
