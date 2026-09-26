@@ -9,12 +9,11 @@ import type { AstNode, LintRule, Visitor } from '../../rule-shape.js';
 
 const TEST_FILE = /\.test\.[cm]?[jt]sx?$/u;
 
-/** The orphan clause reads `role` and `inSpecs`, never a `src` segment: a repository suite covers a tree and has no neighbour to miss. */
-/** `.js` for JS packages. */
 function neighboursOf(file: string): string[] {
     return ['.ts', '.tsx', '.js'].map((extension) => file.replace(TEST_FILE, extension));
 }
 
+/** The orphan clause reads `role` and `inSpecs`, never a `src` segment: a repository suite covers a tree and has no neighbour to miss. */
 function owesANeighbour({ inSpecs, legacyDir, role }: FileIdentity): boolean {
     if (legacyDir !== null) {
         return false;
