@@ -12,19 +12,19 @@ Which CHANNEL holds a given rule — static, checker, runtime, process, and the 
 
 ## The rule families
 
-The catalogue is organized by family. Each family's usage is illustrated in the chapters; the generated catalogue in [19 — Linting](19-linting.md) carries the normative sentence and channel of every rule.
+The catalogue is organized by family. What each family judges is its section heading in the generated catalogue of [19 — Linting](19-linting.md), rendered from `lint/catalogue/families.ts`; that catalogue also carries the normative sentence and channel of every rule, and the chapters the table names illustrate each family's usage.
 
-| Family         | Scope                                                                 | Explained in                                                                         |
-| -------------- | --------------------------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| `setup`        | Constructors, configuration, projects and infrastructure              | [02](02-developing.md), [07](07-component.md), [10](10-api.md), [17](17-services.md) |
-| `chain`        | The chain and its markers (setups, terminal actions, Given/Then)      | [10](10-api.md), [11](11-job.md), [12](12-cli.md)                                    |
-| `layout`       | Files, folders, sizes and names                                       | [02](02-developing.md), [14](14-assertions.md)                                       |
-| `expectations` | What is compared, and how (goldens, tokens, documents)                | [14](14-assertions.md), [15](15-tokens.md), [20](20-documents.md)                    |
-| `world`        | Stubs, doubles, time and seeds                                        | [16](16-stubs.md), [17](17-services.md)                                              |
-| `elements`     | Screens, descriptors and scenarios                                    | [08](08-website.md), [09](09-mobile.md)                                              |
-| `imports`      | Who imports whom, and protecting production                           | [02](02-developing.md)                                                               |
-| `architecture` | Source layers                                                         | below · [01](01-architecture.md) for this repo's own layer map                       |
-| `catalogue`    | The catalogue holding itself — every defect class grows its own guard | [03](03-testing.md#the-packages-own-rules), this package's own rules                 |
+| Family         | Explained in                                                                         |
+| -------------- | ------------------------------------------------------------------------------------ |
+| `setup`        | [02](02-developing.md), [07](07-component.md), [10](10-api.md), [17](17-services.md) |
+| `chain`        | [10](10-api.md), [11](11-job.md), [12](12-cli.md)                                    |
+| `layout`       | [02](02-developing.md), [14](14-assertions.md)                                       |
+| `expectations` | [14](14-assertions.md), [15](15-tokens.md), [20](20-documents.md)                    |
+| `world`        | [16](16-stubs.md), [17](17-services.md)                                              |
+| `elements`     | [08](08-website.md), [09](09-mobile.md)                                              |
+| `imports`      | [02](02-developing.md)                                                               |
+| `architecture` | below · [01](01-architecture.md) for this repo's own layer map                       |
+| `catalogue`    | [03](03-testing.md#the-packages-own-rules), this package's own rules                 |
 
 ## The reach of the conventions
 
