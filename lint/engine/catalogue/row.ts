@@ -13,7 +13,16 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
         | 'type'
         | 'upstream';
     /** Required: `model` is a statement (this reaches every facet), never a default. */
-    facet: 'api' | 'cli' | 'component' | 'integration' | 'job' | 'mobile' | 'model' | 'website';
+    facet:
+        | 'api'
+        | 'cli'
+        | 'component'
+        | 'integration'
+        | 'job'
+        | 'lint'
+        | 'mobile'
+        | 'model'
+        | 'website';
     family: Family;
     rationale: string;
     /** An `upstream` row names the rule whose option carries it; the completeness meta-test reads it. */

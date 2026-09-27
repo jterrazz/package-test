@@ -24,6 +24,7 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
     },
     integration: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/integration'] },
     job: { extensions: ['.spec.ts', '.spec.yaml', '.specification.ts'], roots: ['specs/job'] },
+    lint: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/lint'] },
     mobile: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/mobile'] },
     module: { extensions: ['.test.ts', '.test.tsx'], roots: ['src'] },
     website: { extensions: ['.spec.ts', '.specification.ts'], roots: ['specs/website'] },
@@ -155,6 +156,7 @@ function sourcesOf(root: string): Record<Column, Source[]> {
         component: read('component'),
         integration: read('integration'),
         job: read('job'),
+        lint: read('lint'),
         mobile: read('mobile'),
         module: read('module'),
         website: read('website'),
@@ -274,6 +276,7 @@ export function matrixRows(root: string): MatrixRow[] {
             component: count(capability, 'component'),
             integration: count(capability, 'integration'),
             job: count(capability, 'job'),
+            lint: count(capability, 'lint'),
             mobile: count(capability, 'mobile'),
             module: count(capability, 'module'),
             website: count(capability, 'website'),
@@ -359,7 +362,9 @@ export function layers(root: string): Layer[] {
         0,
     );
     // A `*.specification.ts` builds a runner and asserts nothing.
-    const facetSpecs = FACET_MATRIX_COLUMNS.filter((column) => column !== 'module').reduce(
+    const facetSpecs = FACET_MATRIX_COLUMNS.filter(
+        (column) => column !== 'module' && column !== 'lint',
+    ).reduce(
         (total, column) =>
             total +
             countUnder(
@@ -371,7 +376,7 @@ export function layers(root: string): Layer[] {
             ),
         0,
     );
-    const lintSuite = countUnder(root, ['specs/lint'], ['.test.ts']);
+    const lintSpecs = countUnder(root, ['specs/lint'], ['.spec.ts']);
     return [
         {
             count: allModuleTests,
@@ -392,10 +397,10 @@ export function layers(root: string): Layer[] {
             where: '`specs/<facet>/`',
         },
         {
-            count: lintSuite,
-            judges: 'the built binary end to end, over fixture projects',
-            layer: 'The lint suite',
-            where: '`specs/lint/**`',
+            count: lintSpecs,
+            judges: 'the built plugins, checkers and preset end to end, over fixture trees',
+            layer: 'The lint specs',
+            where: '`specs/lint/<rule>/`, on the lint facet',
         },
         {
             count: metaTests,

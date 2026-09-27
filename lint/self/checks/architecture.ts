@@ -11,6 +11,7 @@ const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 const SPAWNING_SITES = [
     'expectations/command/docker-cli.ts',
     'facets/cli/process/exec.adapter.ts',
+    'facets/lint/local-linters.adapter.ts',
     'facets/mobile/server/simulator.ts',
     'world/services/process/serve.ts',
 ];

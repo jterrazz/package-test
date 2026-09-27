@@ -5,6 +5,12 @@ export type * from './facets/cli/index.js';
 export * from './facets/component/index.js';
 export type * from './facets/integration/index.js';
 export type * from './facets/job/index.js';
+export type * from './facets/lint/index.js';
+export {
+    type PositionedCases,
+    type PositionedRuleTester,
+    ruleTester,
+} from '../lint/engine/testing/rule-tester.js';
 export type * from './facets/mobile/index.js';
 export type * from './facets/website/index.js';
 
@@ -124,6 +130,5 @@ export type { TextAccessor } from './expectations/text/text.js';
 export { text } from './expectations/text/text-subject.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil, type WaitUntilOptions } from './expectations/conditions/wait-until.js';
-export { lintReport } from './facets/cli/index.js';
 // Also carries the vitest `Assertion` augmentation: the one `types` entry publishes the matchers through it.
 export type { MatchFixtureOptions } from './expectations/goldens/match-options.js';

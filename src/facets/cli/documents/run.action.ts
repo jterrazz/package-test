@@ -50,5 +50,5 @@ export const run = defineAction<
         requireDiskFile('run', document, '.spec.yaml');
         return { workDir: scratchDirectory('spec-command-') };
     },
-    row: { group: 'Terminal action', name: '.run()', probe: '.run(file(' },
+    row: { group: 'Terminal action', name: '.run()', probe: '.run(' },
 });

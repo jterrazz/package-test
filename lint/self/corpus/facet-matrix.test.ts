@@ -13,7 +13,7 @@ import type { CallResult } from '../../../src/facets/integration/index.js';
 import type { MobileElementKind } from '../../../src/facets/mobile/device/device.port.js';
 import type { MobileVisitor, ScreenResult } from '../../../src/facets/mobile/index.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/index.js';
-import type { JobResult } from '../../../src/index.js';
+import type { JobResult, LintResult } from '../../../src/index.js';
 import {
     FACET_MATRIX_CAPABILITIES,
     FACET_MATRIX_COLUMNS,
@@ -30,6 +30,7 @@ const FACET_COLUMNS = [
     'component',
     'integration',
     'job',
+    'lint',
     'mobile',
     'website',
 ] as const satisfies readonly Exclude<Column, 'module'>[];
@@ -142,6 +143,14 @@ const mobileResult = {
     table: NO_DISK,
 } satisfies Record<keyof ScreenResult, Published>;
 
+const lintResult = {
+    captures: INTERNAL,
+    directory: true,
+    file: true,
+    report: true,
+    table: 'inherited from BaseResult; a lint starts no database to read',
+} satisfies Record<keyof LintResult, Published>;
+
 const componentResult = {
     console: true,
     content: true,
@@ -157,6 +166,7 @@ const RESULTS: Record<Exclude<Column, 'module'>, Record<string, Published>[]> = 
     component: [componentResult],
     integration: [integrationResult],
     job: [jobResult],
+    lint: [lintResult],
     mobile: [mobileResult],
     website: [websiteResult, fetchResult],
 };

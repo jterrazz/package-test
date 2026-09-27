@@ -3,6 +3,7 @@ import { cliFacet } from '../../../src/facets/cli/cli.facet.js';
 import { componentFacet } from '../../../src/facets/component/component.facet.js';
 import { integrationFacet } from '../../../src/facets/integration/integration.facet.js';
 import { jobFacet } from '../../../src/facets/job/job.facet.js';
+import { lintFacet } from '../../../src/facets/lint/lint.facet.js';
 import { mobileFacet } from '../../../src/facets/mobile/mobile.facet.js';
 import { websiteFacet } from '../../../src/facets/website/website.facet.js';
 import type { Composition } from '../../../src/kernel/chain/define-facet.js';
@@ -17,6 +18,7 @@ export const COMPOSITIONS: Record<Exclude<Column, 'module'>, Composition> = {
     component: componentFacet.composition,
     integration: integrationFacet.composition,
     job: jobFacet.composition,
+    lint: lintFacet.composition,
     mobile: mobileFacet.composition,
     website: websiteFacet.composition,
 };

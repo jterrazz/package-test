@@ -4,6 +4,7 @@ export const FACET_MATRIX_COLUMNS = [
     'api',
     'job',
     'cli',
+    'lint',
     'integration',
     'website',
     'mobile',

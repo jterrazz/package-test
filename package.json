@@ -1,7 +1,7 @@
 {
     "name": "@jterrazz/test",
     "version": "17.0.0",
-    "description": "Declarative testing framework for HTTP APIs, CLIs, background jobs, websites, mobile apps and rendered components — one entry point, real infrastructure and a real browser, golden-file assertions, plus an oxlint convention plugin.",
+    "description": "Declarative testing framework for HTTP APIs, CLIs, background jobs, websites, mobile apps, rendered components and the rules a project ships — one entry point, real infrastructure and a real browser, golden-file assertions, plus an oxlint convention plugin.",
     "keywords": [
         "api-testing",
         "browser-mode",
@@ -120,6 +120,7 @@
         "@vitest/browser-playwright": "*",
         "appium": "^3.0.0",
         "better-sqlite3": "^12.11.1 || ^13",
+        "oxlint": "^1.85.0",
         "pg": "^8.22.0",
         "playwright": "^1.49.0",
         "react": "^18 || ^19",
@@ -139,6 +140,9 @@
             "optional": true
         },
         "better-sqlite3": {
+            "optional": true
+        },
+        "oxlint": {
             "optional": true
         },
         "pg": {

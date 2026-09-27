@@ -27,10 +27,10 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         sentence:
-            'Six constructors and only six: `specification.api()`, `specification.job()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()`. Any other member (`.app`, `.http`, `.stack`…) is an error. A rendered component starts nothing: it is a chain, not a member of this record.',
+            'Seven constructors and only seven: `specification.api()`, `specification.job()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()`, `specification.lint()`. Any other member (`.app`, `.http`, `.stack`…) is an error. A rendered component starts nothing: it is a chain, not a member of this record.',
         facet: 'model',
         family: 'setup',
-        fix: 'Name one of the six, or reach for the `component` chain — a seventh subject is a decision before it is a constructor.',
+        fix: 'Name one of the seven, or reach for the `component` chain — an eighth subject is a decision before it is a constructor.',
         name: 'no-unknown-constructor',
         rationale:
             'A closed surface stops parallel constructors being invented and keeps the API memorable.',
@@ -910,7 +910,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         sentence:
-            "A first-level folder named for one of the six facets holds a `*.specification.ts(x)` calling `specification.<facet>(`. Positive-only: any other first-level name is a repository suite, judged by `specs-at-declared-depth`'s declared depth alone.",
+            "A first-level folder named for one of the seven facets holds a `*.specification.ts(x)` calling `specification.<facet>(`. Positive-only: any other first-level name is a repository suite, judged by `specs-at-declared-depth`'s declared depth alone.",
         facet: 'model',
         family: 'layout',
         fix: 'Create the specification the folder promises, or rename the folder.',

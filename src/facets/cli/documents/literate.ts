@@ -24,9 +24,9 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
+import { fsFixtures } from '../../../kernel/files/fs-fixtures.adapter.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
-import { fsFixtures } from '../../../kernel/files/fs-fixtures.adapter.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
 import { grammarRefusal } from './literate-plugin.js';

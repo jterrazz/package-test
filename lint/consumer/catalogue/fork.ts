@@ -61,6 +61,13 @@ export const FORK: ForkRow[] = [
         question: 'Is it a binary?',
     },
     {
+        constructor: '`specification.lint()`',
+        kind: 'lint',
+        livesAt: '`specs/lint/<rule>/<aspect>.spec.ts`',
+        project: '`lint`',
+        question: 'Is it a rule the project ships — a plugin, a checker, a preset?',
+    },
+    {
         constructor: '`specification.integration()`',
         kind: 'integration',
         livesAt: '`specs/integration/<domain>/<aspect>.spec.ts`',

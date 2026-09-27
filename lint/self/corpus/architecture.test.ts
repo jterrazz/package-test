@@ -14,6 +14,7 @@ const SETUPS = [
     'fixture',
     'headers',
     'intercept',
+    'rules',
     'seed',
     'viewport',
     'with',
@@ -86,9 +87,9 @@ describe('architecture', () => {
                 .map(({ definition }) => definition.name)
                 .toSorted();
 
-        // Then - one module per setup, and every action is one the list places
+        // Then - one module per setup, and every action is one the list places — a verb two facets share (`run`) is each facet's own module
         expect(named('setup context')).toStrictEqual(SETUPS);
-        expect(named('action')).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
+        expect([...new Set(named('action'))]).toStrictEqual(Object.keys(ACTION_MODULES).toSorted());
     });
 
     test('the architecture a facet is composed in (meta-tests) — `definition-is-its-module` — a definition is named for its module, tested beside itself or declared siblingless, and armed through a port of its own', async () => {

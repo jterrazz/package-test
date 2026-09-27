@@ -1,5 +1,6 @@
 /** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
 
+import type { ruleTester as ruleTesterFn } from '../lint/engine/testing/rule-tester.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';
@@ -17,16 +18,18 @@ export { component } from './facets/component/index.browser.js';
 
 export { intercept } from './world/stubs/delivery/browser-page/intercept.js';
 
-/** The six constructors, present and refusing in a page. */
+/** The seven constructors, present and refusing in a page. */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),
     cli: () => refuse('specification.cli()'),
     integration: () => refuse('specification.integration()'),
     job: () => refuse('specification.job()'),
+    lint: () => refuse('specification.lint()'),
     mobile: () => refuse('specification.mobile()'),
     website: () => refuse('specification.website()'),
 };
 
+export const ruleTester: typeof ruleTesterFn = () => refuse('ruleTester()');
 export const process: typeof processFn = () => refuse('process()');
 export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHandle');
 export const postgres: typeof postgresFn = () => refuse('postgres()');
@@ -71,4 +74,3 @@ export { disabled, enabled, focused, selected, valued } from './elements/descrip
 export { match, Matcher } from './expectations/tokens/match.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil } from './expectations/conditions/wait-until.js';
-export { lintReport } from './facets/cli/index.js';

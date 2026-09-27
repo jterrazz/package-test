@@ -7,7 +7,15 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-const KNOWN_CONSTRUCTORS = new Set(['api', 'cli', 'integration', 'job', 'mobile', 'website']);
+const KNOWN_CONSTRUCTORS = new Set([
+    'api',
+    'cli',
+    'integration',
+    'job',
+    'lint',
+    'mobile',
+    'website',
+]);
 
 export const noUnknownConstructor: LintRule = {
     createOnce(context: Context): Visitor {

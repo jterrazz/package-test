@@ -3,6 +3,7 @@ export const FACETS: ReadonlySet<string> = new Set([
     'cli',
     'integration',
     'job',
+    'lint',
     'mobile',
     'website',
 ]);

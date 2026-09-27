@@ -20,6 +20,7 @@ export {
     type IntegrationProjectOptions,
 } from './facets/integration/integration.project.js';
 export { job, type JobProjectOptions } from './facets/job/job.project.js';
+export { lint, type LintProjectOptions } from './facets/lint/lint.project.js';
 export { mobile, type MobileProjectOptions } from './facets/mobile/mobile.project.js';
 export { website, type WebsiteProjectOptions } from './facets/website/website.project.js';
 export { type FacetProjectOptions } from './vitest/project.js';

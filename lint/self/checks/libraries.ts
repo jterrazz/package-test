@@ -6,6 +6,7 @@ export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = 
     hono: ['src/facets/api/'],
     msw: ['src/world/stubs/delivery/'],
     'oxc-parser': ['lint/engine/project/module-parser.ts'],
+    oxlint: ['lint/engine/testing/rule-tester.ts'],
     pg: ['src/world/services/postgres/'],
     playwright: ['src/facets/website/'],
     react: ['src/facets/component/'],
