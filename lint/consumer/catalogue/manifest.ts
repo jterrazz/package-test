@@ -157,10 +157,10 @@ export const STATIQUE_RULES: Row[] = [
             "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → error (a suppression with a reason is accepted). Reach: a specification file — a runner created anywhere else is `runner-in-specification-file`'s.",
         facet: 'cli',
         family: 'chain',
-        fix: "Point the runner at the product's own binary; assert on a tool's output through `result.grep`.",
+        fix: "Point the runner at the product's own binary; compare its output whole with `toMatch`, and cut a block with `result.stdout.grep(…)` only where the rest is noise.",
         name: 'cli-runs-the-product-binary',
         rationale:
-            "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
+            "A spec has to exercise the product's real command, and asserts on what that command prints.",
         reach: 'specification',
     },
     {
