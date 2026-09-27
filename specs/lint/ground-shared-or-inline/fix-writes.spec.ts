@@ -12,7 +12,7 @@ describe('fix-writes', () => {
 
         // Then - nothing is reported
         expect(result.report).toMatch('');
-        expect(result.file('specs/widget/expected').exists).toBe(false);
+        expect(result.file('specs/widget/_expected/blank.txt').exists).toBe(false);
         expect(result.file('specs/widget/widget.test.ts').content).toBe(
             [
                 "import { text } from '@jterrazz/test';",

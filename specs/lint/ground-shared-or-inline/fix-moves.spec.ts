@@ -13,7 +13,7 @@ describe('fix-moves', () => {
         // Then - nothing is reported
         expect(result.report).toMatch('');
         expect(result.file('specs/_shared/_seeds/one-user.sql').exists).toBe(false);
-        expect(result.file('specs/_shared/seeds').exists).toBe(false);
+        expect(result.file('specs/_shared/_seeds').exists).toBe(false);
         expect(result.file('specs/api/users/_seeds/one-user.sql').exists).toBe(true);
         expect(result.file('specs/api/users/listed.spec.ts').content).toContain(
             "file('./_seeds/one-user.sql')",
@@ -78,7 +78,7 @@ describe('fix-moves', () => {
         // Then - nothing is reported
         expect(result.report).toMatch('');
         expect(result.file('specs/_shared/_fixtures/lonely-stub/main.js').exists).toBe(false);
-        expect(result.file('specs/_shared/fixtures').exists).toBe(false);
+        expect(result.file('specs/_shared/_fixtures').exists).toBe(false);
         expect(result.file('specs/widget/_fixtures/lonely-stub/main.js').exists).toBe(true);
         expect(result.file('specs/widget/widget.test.ts').content).toContain(
             './_fixtures/lonely-stub/',

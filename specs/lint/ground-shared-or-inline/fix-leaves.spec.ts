@@ -39,7 +39,7 @@ describe('fix-leaves', () => {
         // Then - nothing is reported
         expect(result.report).toMatch('');
         expect(result.file('specs/_shared/_fixtures/lonely-stub/main.js').exists).toBe(true);
-        expect(result.file('specs/widget/fixtures').exists).toBe(false);
+        expect(result.file('specs/widget/_fixtures').exists).toBe(false);
         expect(result.file('src/stub/stub.test.ts').content).toBe(
             [
                 "import { resolve } from 'node:path';",
@@ -69,7 +69,7 @@ describe('fix-leaves', () => {
         // Then - nothing is reported
         expect(result.report).toMatch('');
         expect(result.file('specs/_shared/_fixtures/lonely-stub/main.js').exists).toBe(true);
-        expect(result.file('specs/widget/fixtures').exists).toBe(false);
+        expect(result.file('specs/widget/_fixtures').exists).toBe(false);
         expect(result.file('src/stub/stub.test.ts').content).toBe(
             [
                 "import { resolve } from 'node:path';",
@@ -104,7 +104,7 @@ describe('fix-leaves', () => {
                 fix: a string has no golden: wrap it — \`expect(text(message)).toMatch(file('./_expected/a-long-message.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file
                 read: docs/19-linting.md#ground-shared-or-inline
         `);
-        expect(result.file('specs/widget/expected').exists).toBe(false);
+        expect(result.file('specs/widget/_expected').exists).toBe(false);
         expect(result.file('specs/widget/widget.test.ts').content).toContain(
             'expect(message).toMatch(`\n        line 0\n',
         );
