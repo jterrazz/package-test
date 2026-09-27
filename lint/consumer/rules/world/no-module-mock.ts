@@ -92,17 +92,38 @@ type Scope = {
     allowed: Set<string>;
     banned: string | undefined;
     isTest: boolean;
+    unreasoned: Set<string>;
 };
 
-function scopeOf(context: Context): Scope | undefined {
+type AllowList = { allowed: Set<string>; unreasoned: Set<string> };
+
+function textOf(entry: object, key: string): string {
+    const value: unknown = key in entry ? Reflect.get(entry, key) : undefined;
+    return typeof value === 'string' ? value.trim() : '';
+}
+
+function allowListOf(context: Context): AllowList {
     const option = context.options[0];
-    const stated =
+    const stated: unknown =
         typeof option === 'object' && option !== null && 'modules' in option
             ? option.modules
             : undefined;
-    const allowed = new Set(
-        Array.isArray(stated) ? stated.filter((entry) => typeof entry === 'string') : [],
-    );
+    const allowed = new Set<string>();
+    const unreasoned = new Set<string>();
+    const entries: unknown[] = Array.isArray(stated) ? stated : [];
+    for (const entry of entries) {
+        if (typeof entry === 'string') {
+            unreasoned.add(entry);
+        } else if (typeof entry === 'object' && entry !== null) {
+            const module = textOf(entry, 'module');
+            (textOf(entry, 'reason') === '' ? unreasoned : allowed).add(module);
+        }
+    }
+    return { allowed, unreasoned };
+}
+
+function scopeOf(context: Context): Scope | undefined {
+    const { allowed, unreasoned } = allowListOf(context);
     const { role } = identityOf(context);
     const banned = segmentsOf(context)
         .slice(0, -1)
@@ -112,10 +133,15 @@ function scopeOf(context: Context): Scope | undefined {
         return undefined;
     }
     // The module role's alone: a stub unit imports the `.response.json` it stands for.
-    return { allowed, banned, isTest: role === 'module' && TEST_FILE.test(context.filename) };
+    return {
+        allowed,
+        banned,
+        isTest: role === 'module' && TEST_FILE.test(context.filename),
+        unreasoned,
+    };
 }
 
-/** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it. `vi.stubGlobal` is an upstream option (`no-vitest-time-or-global-stub`, ADR-005). */
+/** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it, each entry stating its reason. `vi.stubGlobal` is an upstream option (`no-vitest-time-or-global-stub`, ADR-005). */
 export const noModuleMock: LintRule = {
     createOnce(context: Context): Visitor {
         let scope: Scope | undefined;
@@ -134,7 +160,9 @@ export const noModuleMock: LintRule = {
                     return;
                 }
                 const named = mockedSpecifier(childList(node, 'arguments')[0]);
-                if (named === undefined || scope?.allowed.has(named) !== true) {
+                if (named !== undefined && scope?.unreasoned.has(named) === true) {
+                    context.report({ data: { source: named }, messageId: 'unreasoned', node });
+                } else if (named === undefined || scope?.allowed.has(named) !== true) {
                     context.report({ messageId: 'viMock', node });
                 }
             },
@@ -158,9 +186,13 @@ export const noModuleMock: LintRule = {
                     found: 'a `{{dir}}/` directory',
                     fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a sibling `<file>.fixtures.ts`, a spec's in `_fixtures/` — and delete the directory",
                 },
+                unreasoned: {
+                    found: '"{{source}}" is on the `modules` allow-list with no reason',
+                    fix: "state why no consumer can inject it: `{ module: '{{source}}', reason: '<why>' }`",
+                },
                 viMock: {
                     found: '`vi.mock` doubles a module for every importer',
-                    fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list, with its reason',
+                    fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list: `{ module, reason }`',
                 },
             },
             CATALOGUE_CHAPTER,
@@ -168,7 +200,16 @@ export const noModuleMock: LintRule = {
         schema: [
             {
                 additionalProperties: false,
-                properties: { modules: { items: { type: 'string' }, type: 'array' } },
+                properties: {
+                    modules: {
+                        items: {
+                            additionalProperties: false,
+                            properties: { module: { type: 'string' }, reason: { type: 'string' } },
+                            type: ['object', 'string'],
+                        },
+                        type: 'array',
+                    },
+                },
                 type: 'object',
             },
         ],

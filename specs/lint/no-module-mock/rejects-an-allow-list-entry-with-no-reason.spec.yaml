@@ -1,0 +1,8 @@
+description: rejects an allow-list entry with no reason
+fixture: ./_fixtures/allow-listed/
+env: LINT_CONFIG=oxlint.module-mock-unreasoned.json
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          src/storage.test.ts:5:1  jterrazz(no-module-mock)

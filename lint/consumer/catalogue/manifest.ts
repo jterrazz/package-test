@@ -658,10 +658,10 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list (a config comment states why each entry is there), a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
+            "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
         facet: 'model',
         family: 'world',
-        fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module with its reason (chapter 05 § Doubles).",
+        fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module as `{ module, reason }` (chapter 05 § Doubles).",
         name: 'no-module-mock',
         rationale:
             'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',

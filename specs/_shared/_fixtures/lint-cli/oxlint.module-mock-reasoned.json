@@ -1,0 +1,19 @@
+{
+    "categories": {
+        "correctness": "off"
+    },
+    "jsPlugins": ["../../../../dist/oxlint.js"],
+    "rules": {
+        "jterrazz/no-module-mock": [
+            "error",
+            {
+                "modules": [
+                    {
+                        "module": "@react-native-async-storage/async-storage",
+                        "reason": "a native module no consumer can inject"
+                    }
+                ]
+            }
+        ]
+    }
+}

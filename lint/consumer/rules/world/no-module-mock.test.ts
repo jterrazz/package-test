@@ -7,6 +7,11 @@ const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
 const UNDER_MOCKS = checkoutUnder('__mocks__', ['src']);
 
+const STORAGE = {
+    module: '@react-native-async-storage/async-storage',
+    reason: 'a native module no consumer can inject',
+};
+
 ruleTester().run('no-module-mock', asOxlintRule(noModuleMock), {
     invalid: [
         // Module mocking is banned under src/.
@@ -56,7 +61,19 @@ ruleTester().run('no-module-mock', asOxlintRule(noModuleMock), {
             code: 'vi.mock(import("expo-secure-store"), () => ({}));',
             errors: [{ messageId: 'viMock' }],
             filename: SRC_TEST,
-            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+            options: [{ modules: [STORAGE] }],
+        },
+        {
+            code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
+            errors: [{ messageId: 'unreasoned' }],
+            filename: SRC_TEST,
+            options: [{ modules: [{ ...STORAGE, reason: ' ' }] }],
+        },
+        {
+            code: 'vi.mock(import("@react-native-async-storage/async-storage"), () => ({}));',
+            errors: [{ messageId: 'unreasoned' }],
+            filename: SRC_TEST,
+            options: [{ modules: [STORAGE.module] }],
         },
         // Banned directories.
         {
@@ -95,12 +112,12 @@ ruleTester().run('no-module-mock', asOxlintRule(noModuleMock), {
         {
             code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
             filename: SRC_TEST,
-            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+            options: [{ modules: [STORAGE] }],
         },
         {
             code: 'vi.mock(import("@react-native-async-storage/async-storage"), () => ({}));',
             filename: SRC_TEST,
-            options: [{ modules: ['@react-native-async-storage/async-storage'] }],
+            options: [{ modules: [STORAGE] }],
         },
     ],
 });
