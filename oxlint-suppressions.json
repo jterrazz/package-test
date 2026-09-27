@@ -85,33 +85,9 @@
             "count": 1
         }
     },
-    "lint/consumer/rules/chain/cli-runs-the-product-binary.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/chain/cli-runs-the-product-binary.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 5
-        }
-    },
-    "lint/consumer/rules/chain/given-and-then-markers-present.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/chain/no-redundant-service-url.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/chain/no-redundant-service-url.ts": {
@@ -122,33 +98,9 @@
             "count": 4
         }
     },
-    "lint/consumer/rules/chain/trigger-name-in-kebab-case.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/chain/trigger-name-in-kebab-case.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 2
-        }
-    },
-    "lint/consumer/rules/elements/no-expect-in-scenario.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/elements/test-id-states-what-is-missing.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/elements/test-id-states-what-is-missing.ts": {
@@ -159,25 +111,9 @@
             "count": 3
         }
     },
-    "lint/consumer/rules/expectations/negative-golden-frozen.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/expectations/negative-golden-frozen.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 11
-        }
-    },
-    "lint/consumer/rules/expectations/no-raw-bypass.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/expectations/no-raw-bypass.ts": {
@@ -188,25 +124,9 @@
             "count": 4
         }
     },
-    "lint/consumer/rules/expectations/no-single-use-ref.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/expectations/no-single-use-ref.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 3
-        }
-    },
-    "lint/consumer/rules/expectations/no-status-only-test.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/expectations/no-status-only-test.ts": {
@@ -217,14 +137,6 @@
             "count": 7
         }
     },
-    "lint/consumer/rules/expectations/no-transform-duplicating-tokens.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/expectations/no-transform-duplicating-tokens.ts": {
         "complexity": {
             "count": 1
@@ -233,72 +145,8 @@
             "count": 8
         }
     },
-    "lint/consumer/rules/expectations/result-compared-whole.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/imports/fixtures-imported-by-tests-only.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/imports/no-test-to-test-import.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/imports/no-unpublished-subpath.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/imports/no-unpublished-subpath.ts": {
         "unicorn/no-array-sort": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/golden-path-has-extension.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/paths-named-in-the-test.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/request-file-extension-known.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/specs-at-declared-depth.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 5
-        },
-        "typescript/strict-void-return": {
             "count": 1
         }
     },
@@ -313,36 +161,12 @@
             "count": 1
         }
     },
-    "lint/consumer/rules/layout/test-beside-its-module.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/layout/verb-reads-its-ground-folder.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/layout/verb-reads-its-ground-folder.ts": {
         "complexity": {
             "count": 1
         },
         "typescript/no-unsafe-type-assertion": {
             "count": 5
-        }
-    },
-    "lint/consumer/rules/setup/cleanup-passed-to-after-all.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/setup/cleanup-passed-to-after-all.ts": {
@@ -353,25 +177,9 @@
             "count": 6
         }
     },
-    "lint/consumer/rules/setup/no-redundant-root.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/setup/no-redundant-root.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 2
-        }
-    },
-    "lint/consumer/rules/setup/no-runner-alias.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
         }
     },
     "lint/consumer/rules/setup/no-runner-alias.ts": {
@@ -382,72 +190,8 @@
             "count": 7
         }
     },
-    "lint/consumer/rules/setup/no-unknown-constructor.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/setup/no-unknown-constructor.ts": {
         "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/setup/runner-in-specification-file.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/no-module-mock.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/no-sleep.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/seeds-are-sql.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/stub-data-has-a-builder.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/stubs-imported-through-facade.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/world/stubs-root-holds-facades-and-kinds.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
             "count": 1
         }
     },
@@ -687,14 +431,6 @@
     },
     "lint/self/corpus/type-channel.test.ts": {
         "jterrazz/no-expect-in-a-loop": {
-            "count": 1
-        }
-    },
-    "lint/self/rules/imports/no-framework-internals.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
             "count": 1
         }
     },

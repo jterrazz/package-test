@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { negativeGoldenFrozen } from './negative-golden-frozen.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC = '/repo/specs/api/session/session.test.ts';
 
-ruleTester.run('negative-golden-frozen', negativeGoldenFrozen as unknown as OxlintRule, {
+ruleTester().run('negative-golden-frozen', asOxlintRule(negativeGoldenFrozen), {
     invalid: [
         // Wrapped in expect(() => …).toThrow() — a negative assertion, unfrozen.
         {

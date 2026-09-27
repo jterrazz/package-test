@@ -1,22 +1,13 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noModuleMock } from './no-module-mock.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
 const SPEC = '/repo/specs/cli/exec/exec.spec.ts';
 
 const UNDER_MOCKS = checkoutUnder('__mocks__', ['src']);
 
-ruleTester.run('no-module-mock', noModuleMock as unknown as OxlintRule, {
+ruleTester().run('no-module-mock', asOxlintRule(noModuleMock), {
     invalid: [
         // Module mocking is banned under src/.
         {

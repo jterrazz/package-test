@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { resultComparedWhole } from './result-compared-whole.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC = '/repo/specs/api/users/users.spec.ts';
 
-ruleTester.run('result-compared-whole', resultComparedWhole as unknown as OxlintRule, {
+ruleTester().run('result-compared-whole', asOxlintRule(resultComparedWhole), {
     invalid: [
         // A body probe alone — the rest of the response regresses unseen.
         {

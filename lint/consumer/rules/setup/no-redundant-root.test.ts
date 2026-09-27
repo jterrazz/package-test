@@ -1,18 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noRedundantRoot } from './no-redundant-root.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees (the
 // violation fixture has a package.json at its root, so the walk-up derives it).
@@ -26,7 +18,7 @@ mkdirSync(join(IGNORED_MARKER, 'pkg/specs'), { recursive: true });
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_MARKER });
 const IGNORED_SPEC = join(IGNORED_MARKER, 'pkg/specs/rooted.specification.ts');
 
-ruleTester.run('no-redundant-root', noRedundantRoot as unknown as OxlintRule, {
+ruleTester().run('no-redundant-root', asOxlintRule(noRedundantRoot), {
     invalid: [
         // The checkout is what the runtime derives past an ignored marker.
         {

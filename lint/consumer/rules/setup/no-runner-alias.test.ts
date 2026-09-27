@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noRunnerAlias } from './no-runner-alias.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('no-runner-alias', noRunnerAlias as unknown as OxlintRule, {
+ruleTester().run('no-runner-alias', asOxlintRule(noRunnerAlias), {
     invalid: [
         // Renamed facet.
         {

@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noStatusOnlyTest } from './no-status-only-test.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC = '/repo/specs/api/events/create-event.test.ts';
 
-ruleTester.run('no-status-only-test', noStatusOnlyTest as unknown as OxlintRule, {
+ruleTester().run('no-status-only-test', asOxlintRule(noStatusOnlyTest), {
     invalid: [
         // A lone status probe as the test's sole assertion.
         {

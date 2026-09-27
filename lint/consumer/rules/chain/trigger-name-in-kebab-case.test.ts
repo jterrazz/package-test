@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { triggerNameInKebabCase } from './trigger-name-in-kebab-case.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('trigger-name-in-kebab-case', triggerNameInKebabCase as unknown as OxlintRule, {
+ruleTester().run('trigger-name-in-kebab-case', asOxlintRule(triggerNameInKebabCase), {
     invalid: [
         { code: 'await job.trigger("NightlyReport");', errors: 1 },
         { code: 'await job.trigger("nightly_report");', errors: 1 },

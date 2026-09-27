@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { cliRunsTheProductBinary } from './cli-runs-the-product-binary.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('cli-runs-the-product-binary', cliRunsTheProductBinary as unknown as OxlintRule, {
+ruleTester().run('cli-runs-the-product-binary', asOxlintRule(cliRunsTheProductBinary), {
     invalid: [
         // A bare literal pointing into a dependency's installed binary.
         {

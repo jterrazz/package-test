@@ -1,18 +1,10 @@
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { testBesideItsModule } from './test-beside-its-module.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 // Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.
 const FIXTURES = resolve(
@@ -29,7 +21,7 @@ writeFileSync(join(UNSTAGED, 'src/local.ts'), 'export {};\n');
 writeFileSync(join(UNSTAGED, '.gitignore'), 'src/local.ts\n');
 execFileSync('git', ['init', '--quiet'], { cwd: UNSTAGED });
 
-ruleTester.run('test-beside-its-module', testBesideItsModule as unknown as OxlintRule, {
+ruleTester().run('test-beside-its-module', asOxlintRule(testBesideItsModule), {
     invalid: [
         // A neighbour `.gitignore` names is on no checkout: the test is an orphan.
         {

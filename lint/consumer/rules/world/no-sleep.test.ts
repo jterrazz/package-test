@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noSleep } from './no-sleep.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC_FILE = '/repo/specs/cli/exec/exec.test.ts';
 
-ruleTester.run('no-sleep', noSleep as unknown as OxlintRule, {
+ruleTester().run('no-sleep', asOxlintRule(noSleep), {
     invalid: [
         // The classic promisified sleep.
         {

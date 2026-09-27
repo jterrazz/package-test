@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noRawBypass } from './no-raw-bypass.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('no-raw-bypass', noRawBypass as unknown as OxlintRule, {
+ruleTester().run('no-raw-bypass', asOxlintRule(noRawBypass), {
     invalid: [
         // Negated, on the other stream: the capture is still what the check reads.
         {

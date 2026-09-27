@@ -1,15 +1,7 @@
 import { resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
 
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { stubDataHasABuilder } from './stub-data-has-a-builder.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
@@ -17,7 +9,7 @@ const COMPLIANT = `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/compliant/spe
 
 const VIOLATION = `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/violation/specs/app/widget/_setup/stubs`;
 
-ruleTester.run('stub-data-has-a-builder', stubDataHasABuilder as unknown as OxlintRule, {
+ruleTester().run('stub-data-has-a-builder', asOxlintRule(stubDataHasABuilder), {
     invalid: [
         {
             code: "export const path = '/articles';",

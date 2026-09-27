@@ -1,17 +1,10 @@
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { afterAll, describe, it } from 'vitest';
+import { afterAll } from 'vitest';
 
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noSingleUseRef } from './no-single-use-ref.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 // Built at module load: the rule reads the fixtures on disk before the cases run.
 const featureDir = mkdtempSync(join(tmpdir(), 'no-single-use-ref-'));
@@ -30,7 +23,7 @@ afterAll(() => {
     rmSync(featureDir, { force: true, recursive: true });
 });
 
-ruleTester.run('no-single-use-ref', noSingleUseRef as unknown as OxlintRule, {
+ruleTester().run('no-single-use-ref', asOxlintRule(noSingleUseRef), {
     invalid: [
         // A code ref that never asserts a second occurrence.
         {

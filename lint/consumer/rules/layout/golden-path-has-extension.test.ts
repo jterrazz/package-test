@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { goldenPathHasExtension } from './golden-path-has-extension.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const VIOLATION = '/repo/specs/app/widget/widget.test.ts';
 
-ruleTester.run('golden-path-has-extension', goldenPathHasExtension as unknown as OxlintRule, {
+ruleTester().run('golden-path-has-extension', asOxlintRule(goldenPathHasExtension), {
     invalid: [
         // No extension.
         {

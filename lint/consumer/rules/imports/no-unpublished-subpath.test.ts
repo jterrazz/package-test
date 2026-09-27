@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noUnpublishedSubpath } from './no-unpublished-subpath.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('no-unpublished-subpath', noUnpublishedSubpath as unknown as OxlintRule, {
+ruleTester().run('no-unpublished-subpath', asOxlintRule(noUnpublishedSubpath), {
     invalid: [
         // A re-export reaches the subpath as surely as an import, and is reported where it is written.
         {

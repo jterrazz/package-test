@@ -1,14 +1,5 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noTestToTestImport } from './no-test-to-test-import.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC_TEST = '/repo/specs/cli/exec/exec.test.ts';
 const MODULE_TEST = '/repo/src/domain/user.test.ts';
@@ -16,7 +7,7 @@ const MODULE_TEST = '/repo/src/domain/user.test.ts';
 const FIX =
     /fix: under `specs\/`, move what both read into the `_setup\/` of the lowest folder they share; under `src\/`, into a sibling `<file>\.fixtures\.ts` for typed input data/u;
 
-ruleTester.run('no-test-to-test-import', noTestToTestImport as unknown as OxlintRule, {
+ruleTester().run('no-test-to-test-import', asOxlintRule(noTestToTestImport), {
     invalid: [
         {
             code: 'import { helper } from "./other.test.js";',

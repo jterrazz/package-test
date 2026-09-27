@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { runnerInSpecificationFile } from './runner-in-specification-file.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('runner-in-specification-file', runnerInSpecificationFile as unknown as OxlintRule, {
+ruleTester().run('runner-in-specification-file', asOxlintRule(runnerInSpecificationFile), {
     invalid: [
         // Constructor call inside a plain spec file.
         {

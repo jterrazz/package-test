@@ -1,18 +1,9 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { cleanupPassedToAfterAll } from './cleanup-passed-to-after-all.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPEC_FILE = '/repo/specs/cli/cli.specification.ts';
 
-ruleTester.run('cleanup-passed-to-after-all', cleanupPassedToAfterAll as unknown as OxlintRule, {
+ruleTester().run('cleanup-passed-to-after-all', asOxlintRule(cleanupPassedToAfterAll), {
     invalid: [
         // Destructured but never registered.
         {

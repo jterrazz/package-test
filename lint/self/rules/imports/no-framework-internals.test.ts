@@ -1,16 +1,7 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { noFrameworkInternals } from './no-framework-internals.js';
 
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
-
-ruleTester.run('no-framework-internals', noFrameworkInternals as unknown as OxlintRule, {
+ruleTester().run('no-framework-internals', asOxlintRule(noFrameworkInternals), {
     invalid: [
         // Deep specification-layer import from a spec.
         {

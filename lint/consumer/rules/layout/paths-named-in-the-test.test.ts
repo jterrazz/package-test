@@ -1,19 +1,10 @@
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
-
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { pathsNamedInTheTest } from './paths-named-in-the-test.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const HELPER = '/repo/specs/api/orders/seeded.ts';
 const IMPORT = "import { directory, file } from '@jterrazz/test';\n";
 
-ruleTester.run('paths-named-in-the-test', pathsNamedInTheTest as unknown as OxlintRule, {
+ruleTester().run('paths-named-in-the-test', asOxlintRule(pathsNamedInTheTest), {
     invalid: [
         // A shared helper that builds the path it hands on.
         {

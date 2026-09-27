@@ -1,17 +1,9 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { requestFileExtensionKnown } from './request-file-extension-known.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
@@ -26,7 +18,7 @@ writeFileSync(join(SENT, 'specs/app/widget/_requests/note.txt'), 'note\n');
 mkdirSync(join(SENT, 'specs/app/widget/_requests/orders'), { recursive: true });
 writeFileSync(join(SENT, 'specs/app/widget/_requests/orders/big.json'), '{}\n');
 
-ruleTester.run('request-file-extension-known', requestFileExtensionKnown as unknown as OxlintRule, {
+ruleTester().run('request-file-extension-known', asOxlintRule(requestFileExtensionKnown), {
     invalid: [
         // Every bare file is named: two of them, two reports.
         {

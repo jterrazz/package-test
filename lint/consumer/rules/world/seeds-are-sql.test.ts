@@ -2,19 +2,12 @@ import type { Context } from '@oxlint/plugins';
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, expect, it, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import type { AstNode } from '../../../engine/project/ast.js';
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { seedsAreSql } from './seeds-are-sql.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 // The fs-anchored cases run against the shared E2E fixture trees.
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
@@ -37,7 +30,7 @@ writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/_seeds/users.json'), '[]\n')
 writeFileSync(join(IGNORED_STRAY, '.gitignore'), '*.json\n');
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
 
-ruleTester.run('seeds-are-sql', seedsAreSql as unknown as OxlintRule, {
+ruleTester().run('seeds-are-sql', asOxlintRule(seedsAreSql), {
     invalid: [
         // Every stray is named, whatever its extension: two strays, two reports.
         {

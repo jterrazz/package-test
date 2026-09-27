@@ -1,16 +1,8 @@
 import { resolve } from 'node:path';
-import { RuleTester } from 'oxlint/plugins-dev';
-import { describe, it } from 'vitest';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
+import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
 import { stubsRootHoldsFacadesAndKinds } from './stubs-root-holds-facades-and-kinds.js';
-
-RuleTester.describe = describe;
-RuleTester.it = it;
-
-type OxlintRule = Parameters<RuleTester['run']>[1];
-
-const ruleTester = new RuleTester();
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
 
@@ -20,9 +12,9 @@ const UNDER_STUBS = checkoutUnder('stubs', ['specs/api/feature']);
 const FACADE = `${FEATURE}/newsroom.stubs.ts`;
 const UNIT = `${FEATURE}/http/events.ts`;
 
-ruleTester.run(
+ruleTester().run(
     'stubs-root-holds-facades-and-kinds',
-    stubsRootHoldsFacadesAndKinds as unknown as OxlintRule,
+    asOxlintRule(stubsRootHoldsFacadesAndKinds),
     {
         invalid: [
             // A unit stub left at the _setup/stubs/ root.
