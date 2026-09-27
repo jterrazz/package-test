@@ -24,11 +24,11 @@ export const clock = defineCapability<
     { clock: ClockPort },
     'clock'
 >({
-    arm: (instant, drivers) => {
+    arm: (instant, adapters) => {
         if (instant !== null) {
             instantOf('at', instant);
         }
-        return drivers.clock.pin(instant);
+        return adapters.clock.pin(instant);
     },
     context: 'clock',
     initial: null,

@@ -36,7 +36,7 @@ export const mobileFacet = defineFacet<
     Started<MobileConfig, 'bundleId' | 'device'>
 >()({
     ...composition,
-    drivers: (config: Started<MobileConfig, 'bundleId' | 'device'>) => ({
+    adapters: (config: Started<MobileConfig, 'bundleId' | 'device'>) => ({
         app: appiumApp(config),
         network: stubBackend(config.backend, 'mobile'),
     }),

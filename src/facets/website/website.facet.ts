@@ -37,7 +37,7 @@ export interface WebsiteSpecification extends ChainOf<
 
 export const websiteFacet = defineFacet<WebsiteSpecification, Started<WebsiteConfig, 'browser'>>()({
     ...composition,
-    drivers: (config: Started<WebsiteConfig, 'browser'>) => ({
+    adapters: (config: Started<WebsiteConfig, 'browser'>) => ({
         browser: config.browser,
         clock: pageClock,
         network: stubBackend(config.backend, 'website'),

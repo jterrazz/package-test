@@ -21,6 +21,6 @@ function sorted(jobs: string[]): string[] {
 
 export const jobFacet = defineFacet<JobSpecification>()({
     ...composition,
-    drivers: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: sorted(config.jobs ?? []) }),
+    adapters: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: sorted(config.jobs ?? []) }),
     locate: getCallerDir,
 });

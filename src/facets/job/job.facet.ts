@@ -32,7 +32,7 @@ export interface JobSpecification<DatabaseKey extends string = string> extends C
 
 export const jobFacet = defineFacet<JobSpecification>()({
     ...composition,
-    drivers: (config: JobConfig) => ({
+    adapters: (config: JobConfig) => ({
         clock: processClock,
         databases: databaseSet(config),
         jobs: config.jobs ?? [],

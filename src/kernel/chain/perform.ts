@@ -6,7 +6,7 @@ import type { ChainState } from './state.js';
 
 export type Performed = {
     readonly config: ChainConfig;
-    readonly drivers: object;
+    readonly adapters: object;
     readonly state: ChainState;
     readonly testDir: string;
 };
@@ -16,7 +16,7 @@ export async function perform(
     setups: readonly AnyCapability[],
     action: AnyAction,
     args: readonly unknown[],
-    { config, drivers, state, testDir }: Performed,
+    { config, adapters, state, testDir }: Performed,
 ): Promise<unknown> {
     const read = readerOf(state);
     const { workDir } = (await action.prepare?.(args, read)) ?? { workDir: null };
@@ -27,10 +27,10 @@ export async function perform(
     try {
         for (const setup of setups.toSorted((one, other) => one.phase - other.phase)) {
             // oxlint-disable-next-line eslint/no-await-in-loop -- the order IS the contract: a seed lands before the stubs that serve it, the clock last
-            const effect = await setup.arm?.(read(setup), drivers, run);
+            const effect = await setup.arm?.(read(setup), adapters, run);
             armed.push(effect ?? {});
         }
-        const value = await action.perform(args, read, drivers, run);
+        const value = await action.perform(args, read, adapters, run);
         const failed = violation();
         if (failed !== null) {
             throw failed;

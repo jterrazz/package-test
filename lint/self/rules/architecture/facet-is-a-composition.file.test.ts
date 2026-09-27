@@ -19,7 +19,7 @@ function findingsOf(source: string): string[] {
     );
 }
 
-function facetWiring(drivers: string): string {
+function facetWiring(adapters: string): string {
     return `
 import { seed } from '../../../../world/services/seed/seed.capability.js';
 import { getCallerDir } from '../../../../kernel/files/caller.js';
@@ -32,7 +32,7 @@ const composition = {
     options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } },
 } as const;
 
-export const jobFacet = defineFacet()({ ...composition, drivers: ${drivers}, locate: getCallerDir });
+export const jobFacet = defineFacet()({ ...composition, adapters: ${adapters}, locate: getCallerDir });
 `;
 }
 
@@ -62,12 +62,12 @@ describe('facet-is-a-composition.file', () => {
         ]);
     });
 
-    test('facet-file — facetFileFindings — drivers not written as an arrow handing back an object are one finding', () => {
-        // Given - drivers computed in a block
+    test('facet-file — facetFileFindings — adapters not written as an arrow handing back an object are one finding', () => {
+        // Given - adapters computed in a block
         const source = facetWiring('(config) => { return { seed }; }');
 
-        // Then - the drivers, and nothing about what the block holds
-        expect(findingsOf(source)).toStrictEqual(['drivers']);
+        // Then - the adapters, and nothing about what the block holds
+        expect(findingsOf(source)).toStrictEqual(['adapters']);
     });
 
     test('facet-file — importsOf — maps every local name a program imports to its source', () => {

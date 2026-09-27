@@ -39,7 +39,7 @@ function chainOver(pinned: (null | string)[]): Chain {
     return defineFacet<Chain, WebsiteConfig>()({
         actions: [rawFetch],
         capabilities: [clock, headers],
-        drivers: () => ({
+        adapters: () => ({
             clock: {
                 pin: (iso: null | string) => {
                     pinned.push(iso);

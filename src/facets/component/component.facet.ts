@@ -34,7 +34,7 @@ export interface ComponentChain extends ChainOf<typeof composition, FacetParams,
 
 export const componentFacet = defineFacet<ComponentChain>()({
     ...composition,
-    drivers: (_config: ChainConfig) => ({
+    adapters: (_config: ChainConfig) => ({
         clock: pageClock,
         network: mswWorker(afterThisTest),
         page: vitestBrowserPage,

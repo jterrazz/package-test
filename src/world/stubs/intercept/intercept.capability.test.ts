@@ -34,7 +34,7 @@ function chainOver(refusal?: Error): { armed: (readonly Stub[])[]; chain: Chain 
     const facet = defineFacet<Chain>()({
         actions: [settle],
         capabilities: [intercept],
-        drivers: () => ({ network }),
+        adapters: () => ({ network }),
         locate: () => '/specs',
         options: {},
     });

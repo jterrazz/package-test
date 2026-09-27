@@ -38,7 +38,7 @@ export interface CliSpecification<DatabaseKey extends string = string> extends C
 
 export const cliFacet = defineFacet<CliSpecification, Started<CliConfig, 'command'>>()({
     ...composition,
-    drivers: (config: Started<CliConfig, 'command'>) => ({
+    adapters: (config: Started<CliConfig, 'command'>) => ({
         command: config.command,
         databases: databaseSet(config),
         workdir: fsFixtures,

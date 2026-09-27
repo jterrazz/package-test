@@ -45,7 +45,7 @@ function chainOver(log: string[], config: ServicesConfig): Chain {
     return defineFacet<Chain>()({
         actions: [settle],
         capabilities: [seed],
-        drivers: () => ({ databases }),
+        adapters: () => ({ databases }),
         locate: () => '/specs/users',
         options: {},
     }).open(config);

@@ -34,7 +34,7 @@ export interface ApiSpecification<DatabaseKey extends string = string> extends C
 
 export const apiFacet = defineFacet<ApiSpecification, Started<ApiConfig, 'server'>>()({
     ...composition,
-    drivers: (config: Started<ApiConfig, 'server'>) => ({
+    adapters: (config: Started<ApiConfig, 'server'>) => ({
         clock: processClock,
         databases: databaseSet(config),
         network: mswNode,

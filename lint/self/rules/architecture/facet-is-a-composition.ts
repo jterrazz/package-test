@@ -56,9 +56,9 @@ export const facetIsAComposition: LintRule = {
                     found: '`defineFacet` is handed a {{what}}, and it takes nothing but the chain type',
                     fix: 'write `defineFacet<Chain>()({ … })`: the facet object carries everything the facet composes',
                 },
-                drivers: {
-                    found: "the facet's `drivers` is not an arrow handing back the object of its adapters",
-                    fix: 'write `drivers: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its adapter module',
+                adapters: {
+                    found: "the facet's `adapters` is not an arrow handing back the object of its adapters",
+                    fix: 'write `adapters: (config) => ({ <port>: <adapter>, … })`, its parameter a bare name; what builds an adapter is its adapter module',
                 },
                 inline: {
                     found: "the facet's `{{key}}` is a {{what}} written in the facet, not a reference imported from its module",

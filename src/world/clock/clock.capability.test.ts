@@ -20,7 +20,7 @@ function chain(adapter: ClockPort = processClock): Chain {
     return defineFacet<Chain>()({
         actions: [now],
         capabilities: [clock],
-        drivers: () => ({ clock: adapter }),
+        adapters: () => ({ clock: adapter }),
         locate: () => '/specs',
         options: {},
     }).open({});

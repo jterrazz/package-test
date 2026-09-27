@@ -54,7 +54,7 @@ export type Run<Config extends ChainConfig = ChainConfig> = {
 
 export type SetupContext<Needs, Config extends ChainConfig = ChainConfig> = {
     readonly config: Config;
-    readonly drivers: Needs;
+    readonly adapters: Needs;
 };
 
 export type Capability<
@@ -76,13 +76,13 @@ export type Capability<
     /** A type alone, never set at runtime: `ChainOf` reads it. */
     readonly signature?: Signature;
     /** Absent when the action reads the slice instead. */
-    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and drivers is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
+    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and adapters is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     arm?(
         slice: Slice,
-        drivers: Needs,
+        adapters: Needs,
         run: Run<Config>,
     ): Armed | Promise<Armed | undefined> | undefined;
-    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and drivers is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
+    // oxlint-disable-next-line typescript/method-signature-style -- a method, so a definition of any slice, arguments and adapters is an `AnyCapability`: a method's parameters compare bivariantly, a property's would pin each definition to its own types
     reduce(slice: Slice, args: Args, setup: SetupContext<Needs, Config>): Slice;
 };
 

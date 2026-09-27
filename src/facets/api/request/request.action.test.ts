@@ -7,8 +7,8 @@ import type { ServerPort, ServerRequestOptions } from '../server/server.port.js'
 import { get } from './request.action.js';
 
 const armed = defineCapability({
-    arm: (_slice: null, drivers: { log: string[] }) => {
-        drivers.log.push('armed');
+    arm: (_slice: null, adapters: { log: string[] }) => {
+        adapters.log.push('armed');
         return {};
     },
     initial: null,
@@ -34,7 +34,7 @@ function chainOver(log: string[]): Chain {
     return defineFacet<Chain>()({
         actions: [get],
         capabilities: [armed, headers],
-        drivers: () => ({ log, server }),
+        adapters: () => ({ log, server }),
         locate: () => '/specs/users',
         options: {},
     }).open({});

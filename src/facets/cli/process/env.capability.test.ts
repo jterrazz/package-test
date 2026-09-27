@@ -75,7 +75,7 @@ type Chain = {
 const handed = defineAction({
     accessors: [],
     name: 'handed',
-    perform: async (_args: [], read, _drivers, { config }) =>
+    perform: async (_args: [], read, _adapters, { config }) =>
         await Promise.resolve(childEnv(config, read(env), WORKDIR)),
     row: { group: 'Terminal action', name: '.handed()', probe: '.handed(' },
 });
@@ -155,7 +155,7 @@ describe('env', () => {
         const chain = defineFacet<Chain>()({
             actions: [handed],
             capabilities: [env, sharing],
-            drivers: () => ({}),
+            adapters: () => ({}),
             locate: () => WORKDIR,
             options: {},
         })

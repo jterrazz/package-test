@@ -39,7 +39,7 @@ export const integrationFacet = defineFacet<
     Started<ServicesConfig, 'services'>
 >()({
     ...composition,
-    drivers: (config: Started<ServicesConfig, 'services'>) => ({
+    adapters: (config: Started<ServicesConfig, 'services'>) => ({
         clock: processClock,
         databases: databaseSet(config),
         network: mswNode,

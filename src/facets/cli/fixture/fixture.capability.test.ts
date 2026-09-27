@@ -14,7 +14,7 @@ type Chain = { fixture: FixtureMethod<Chain>; list: () => Promise<string[]> };
 const list = defineAction({
     accessors: [],
     name: 'list',
-    perform: async (_args: [], _read, _drivers, { workDir }) =>
+    perform: async (_args: [], _read, _adapters, { workDir }) =>
         await Promise.resolve(readdirSync(workDir ?? '').toSorted()),
     prepare: () => ({ workDir: scratchDirectory('fixture-') }),
     row: { group: 'Terminal action', name: '.list()', probe: '.list(' },
@@ -24,7 +24,7 @@ function chain(): Chain {
     return defineFacet<Chain>()({
         actions: [list],
         capabilities: [fixture],
-        drivers: () => ({ workdir: fsFixtures }),
+        adapters: () => ({ workdir: fsFixtures }),
         locate: () => import.meta.dirname,
         options: {},
     }).open({});

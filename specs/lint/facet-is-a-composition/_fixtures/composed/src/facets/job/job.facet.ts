@@ -16,6 +16,6 @@ export interface JobSpecification extends ChainOf<typeof composition, never, Job
 
 export const jobFacet = defineFacet<JobSpecification>()({
     ...composition,
-    drivers: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: config.jobs ?? [] }),
+    adapters: (config: { jobs?: string[] }) => ({ clock: processClock, jobs: config.jobs ?? [] }),
     locate: getCallerDir,
 });

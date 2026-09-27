@@ -46,7 +46,7 @@ function acting(log: string[], outcome: unknown): AnyAction {
     });
 }
 
-const WHERE = { config: {}, drivers: {}, state: EMPTY_STATE, testDir: '/specs' };
+const WHERE = { config: {}, adapters: {}, state: EMPTY_STATE, testDir: '/specs' };
 
 describe('perform', () => {
     test('perform — the one pipeline a terminal action runs through — arms every setup in phase order, runs the action, and releases in reverse', async () => {

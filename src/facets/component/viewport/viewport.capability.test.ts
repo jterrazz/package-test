@@ -26,7 +26,7 @@ function chainOver(): { chain: Chain; resized: { height: number; width: number }
     const facet = defineFacet<Chain>()({
         actions: [settle],
         capabilities: [viewport],
-        drivers: () => ({ viewport: page }),
+        adapters: () => ({ viewport: page }),
         locate: () => '/specs',
         options: {},
     });

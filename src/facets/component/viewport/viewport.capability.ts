@@ -24,7 +24,7 @@ export const viewport = defineCapability<
     ViewportSignature,
     { viewport: ViewportPort }
 >({
-    arm: async (size, drivers) => (size === null ? undefined : await drivers.viewport.size(size)),
+    arm: async (size, adapters) => (size === null ? undefined : await adapters.viewport.size(size)),
     initial: null,
     name: 'viewport',
     phase: 30,
