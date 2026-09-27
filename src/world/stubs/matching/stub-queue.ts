@@ -1,5 +1,3 @@
-/** The first unexhausted stub in declaration order answers; `times: n` is spent after n serves. No match is a 501 and the chain fails (`network-strict-after-first-stub`); a chain of zero stubs is unguarded. */
-
 import { refusal } from '../../../../lint/index.refusal.js';
 import type { MatchableRequest } from '../exchange.js';
 import type { Stub } from '../stub.js';
@@ -34,6 +32,7 @@ function stateOf({ stub, served }: StubEntry): string {
     return served === 0 ? '' : ` (served ${served} time(s))`;
 }
 
+/** The first unexhausted stub in declaration order answers; `times: n` is spent after n serves. */
 export class StubQueue {
     private readonly entries: StubEntry[];
 
