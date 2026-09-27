@@ -7,8 +7,6 @@ dist
 .turbo
 *.tgz
 
-# The stub oxlint a checker spec runs in place of the project's own.
-!specs/lint/checker/_fixtures/lint-violations/checker-oxlint-run/node_modules/
 # The oxlint a checker spec's project runs: the repository's own, behind a stub.
 !specs/lint/checker/_fixtures/lint-violations/checker-own-fixes/node_modules/
 # The oxlint of a checker spec's JSON-configured project, which lays its configs down.
