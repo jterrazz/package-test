@@ -9,7 +9,6 @@ import { routeCoverageSetup } from './routes/route-coverage.js';
 /** `api()` — the app met through HTTP. */
 export type ApiProjectOptions = FacetProjectOptions;
 
-/** An api project: collects the facet's `.spec.ts` files, serves the service containers, measures route coverage. */
 export function api(options: ApiProjectOptions = {}): TestProjectInlineConfiguration {
     return mergeConfig(facetProject('api', options), {
         test: { globalSetup: [servicesSetup(), routeCoverageSetup()] },

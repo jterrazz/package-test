@@ -8,7 +8,6 @@ import { servicesSetup } from '../../world/services/containers/run-setup.js';
 /** `integration()` — a module against real services, or against a golden. */
 export type IntegrationProjectOptions = FacetProjectOptions;
 
-/** An integration project collects the facet's `.spec.ts` files. */
 export function integration(
     options: IntegrationProjectOptions = {},
 ): TestProjectInlineConfiguration {
