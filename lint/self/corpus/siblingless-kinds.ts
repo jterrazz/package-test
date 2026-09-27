@@ -75,6 +75,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/consumer/catalogue/chapter.ts',
             'lint/consumer/catalogue/refusals.ts',
             'lint/consumer/rulebook/import.ts',
+            'lint/self/checks/layers.ts',
             'lint/self/checks/libraries.ts',
             'lint/self/catalogue/manifest.ts',
             'lint/self/catalogue/architecture.ts',
@@ -83,7 +84,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/corpus/siblingless-kinds.ts',
         ),
         name: 'constant data',
-        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `index.refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `one-owner-per-library.test.ts` and `layers.test.ts` for the library owners)',
+        why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `index.refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners)',
     },
     {
         claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),

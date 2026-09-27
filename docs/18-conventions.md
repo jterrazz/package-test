@@ -231,7 +231,7 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 
 The `architecture` family governs the source tree rather than the spec tree, and it splits in two.
 
-**The layer map is the project's to declare.** `import-within-declared-layers` ships **inert**: this package cannot know another repository's architecture, so the rule enforces nothing until the project states its own layers in `oxlint.config.ts`. What THIS repository declares, and why each sanctioned edge exists, is [01 — Architecture](01-architecture.md) — a consumer's own map is its own chapter's, written the same way.
+**The layer map is the project's to declare.** This package cannot know another repository's architecture, so it ships no layer rule: a project states its layers in `jterrazz.config.ts`, under `typescript.architecture`, and `@jterrazz/typescript`'s Architecture pass holds its imports to them. What THIS repository declares, and why each sanctioned edge exists, is [01 — Architecture](01-architecture.md) — a consumer's own map is its own chapter's, written the same way.
 
 **The test-file rules need no declaration.** `test-beside-its-module` (a module's test is its sibling) and `no-module-mock` (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 

@@ -65,28 +65,6 @@
         "jterrazz/fixtures-imported-by-tests-only": "error",
         "jterrazz/no-second-test-runtime": "error",
         "jterrazz/no-dom-in-module-test": "error",
-        "jterrazz/import-within-declared-layers": [
-            "error",
-            {
-                "layers": {
-                    "core": {
-                        "imports": [
-                            "core/"
-                        ]
-                    },
-                    "integrations": {
-                        "folders": {
-                            "postgres": [
-                                "pg"
-                            ]
-                        },
-                        "imports": [
-                            "core/"
-                        ]
-                    }
-                }
-            }
-        ],
         "jterrazz/test-beside-its-module": "error",
         "jterrazz/no-module-mock": "error",
         "jterrazz/no-sleep": "error",

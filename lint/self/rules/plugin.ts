@@ -18,6 +18,7 @@ export const selfPluginRules: Record<string, 'error' | 'warn'> = Object.fromEntr
     ]),
 );
 
+export { ARCHITECTURE } from '../checks/architecture.js';
 export { FRAMEWORK_LAYERS } from '../checks/layers.js';
 
 export default selfPlugin;

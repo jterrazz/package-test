@@ -16,7 +16,7 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** This repository's runner coupling (`import-within-declared-layers`) turns the rule off by path in its own oxlint config. */
+/** This repository's runner coupling (the layer map) turns the rule off by path in its own oxlint config. */
 export const noTestCodeInProduction: LintRule = {
     createOnce(context: Context): Visitor {
         let allowed: ReadonlySet<string> = new Set();

@@ -1,7 +1,17 @@
-import type { LayerOptions } from '../../consumer/rules/architecture/import-within-declared-layers.js';
 import { librariesOwnedIn } from './libraries.js';
 
-/** This package's layer map (`import-within-declared-layers`), which `oxlint.config.ts` hands the rule: `kernel ← world · elements · expectations ← vitest ← facets ← the entries`. What a map cannot express is the self checker's, `SELF_CHECKER_PASS_IDS` in `checker.ts`; library ownership is read off `OWNERS_OF_LIBRARIES`. */
+export type LayerOptions = {
+    /** Each key a direct child folder of the layer, its value the packages that folder may import. */
+    folders?: Record<string, string[]>;
+    /** A prefix when it ends with `/`, an exact module path otherwise. */
+    imports?: string[];
+    /** Whole name, or `<name>/…`. */
+    packages?: string[];
+    /** The lazy seam a layer opens once. */
+    seams?: Record<string, string[]>;
+};
+
+/** This package's layer map: `kernel ← world · elements · expectations ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {

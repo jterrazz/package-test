@@ -215,7 +215,7 @@ export async function startWebsite<Services extends ServiceRecord>(
         started,
     });
 
-    // Launched lazily on the first `.visit()`; playwright is an optional peer (`import-within-declared-layers`).
+    // Launched lazily on the first `.visit()`; playwright is an optional peer (the layer map).
     let browser: BrowserPort | null = null;
     const getBrowser = async (): Promise<BrowserPort> => {
         if (!browser) {

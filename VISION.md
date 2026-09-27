@@ -3919,7 +3919,7 @@ judge's five points:
   The `docker` CLI stays in `expectations/command/docker-cli.ts`, now its
   only spawning site: it reads the containers the SUBJECT started to
   judge a result, and `expectations/` may not import `world/`.
-- **Lock 2 has its spec**: `lint/self/checks/layers.test.ts` runs I1 with the
+- **Lock 2 has its spec**: `lint/self/checks/architecture.test.ts` runs I1 with the
   real `FRAMEWORK_LAYERS` on the reverse edges it forbids.
 - **Suffixes**: of the engine wrappers this pass renamed, only
   `testcontainers.adapter.ts` and `process.adapter.ts` implement a port

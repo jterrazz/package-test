@@ -29,7 +29,7 @@ The `sqlite()` specs of the `unit` project need no rebuild after `npm ci`: this 
 
 The key reads the lockfile, not the installed toolchain. `@jterrazz/typescript` installed from a sibling checkout (`file:../package-typescript`) is locked by version alone, so a preset change reinstalled at the same version leaves the key unchanged, and `make build` restores a bundle built under the old `compilerOptions`. After such a reinstall, run `npx turbo run build --force` or `rm -rf .artifacts/turbo`. A restore only adds files, so `npm run build:cached` removes `dist/` first: nothing left there by another branch survives into the bundle or a local `npm pack`.
 
-That config is also where this repository DECLARES its own architecture: `import-within-declared-layers` ships inert, and `FRAMEWORK_LAYERS` in `lint/self/checks/layers.ts`, which that config wires, is the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
+This repository DECLARES its own architecture in `jterrazz.config.ts`, under `typescript.architecture`: `ARCHITECTURE` in `lint/self/checks/architecture.ts` compiles `FRAMEWORK_LAYERS` (`lint/self/checks/layers.ts`), the library owners and the lint direction into dependency-cruiser rules, and the toolchain's Architecture pass holds the resolved import graph to them — the enforced statement of the trees [01 — Architecture](01-architecture.md) describes.
 
 ### Which file a change opens
 

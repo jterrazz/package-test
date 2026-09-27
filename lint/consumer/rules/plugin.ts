@@ -1,5 +1,4 @@
 import type { LintPlugin } from '../../engine/project/rule.js';
-import { importWithinDeclaredLayers } from './architecture/import-within-declared-layers.js';
 import { cliRunsTheProductBinary } from './chain/cli-runs-the-product-binary.js';
 import { givenAndThenMarkersPresent } from './chain/given-and-then-markers-present.js';
 import { givenInTheTest } from './chain/given-in-the-test.js';
@@ -118,7 +117,6 @@ const plugin: LintPlugin = {
         'fixtures-imported-by-tests-only': fixturesImportedByTestsOnly,
         'no-second-test-runtime': noSecondTestRuntime,
         'no-dom-in-module-test': noDomInModuleTest,
-        'import-within-declared-layers': importWithinDeclaredLayers,
         'test-beside-its-module': testBesideItsModule,
         'no-module-mock': noModuleMock,
         'no-sleep': noSleep,

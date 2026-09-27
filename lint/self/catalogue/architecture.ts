@@ -31,7 +31,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
         fix: 'Put what needs the builtin or the package behind the port of the adapter that owns it — an adapter a world area or the facet\u2019s own concept folder exports, handed in by the facet — or import only its type.',
         name: 'kernel-loads-in-a-page',
         rationale:
-            'The component facet composes the same kernel and setups inside a browser page, and `import-within-declared-layers` cannot see a builtin: it judges declared edges between trees and skips `node:*`, so one reached at any depth — directly, or inside a package — is a component chain that stops bundling.',
+            'The component facet composes the same kernel and setups inside a browser page, and the layer map cannot see a builtin: it judges declared edges between trees and lets a builtin through, so one reached at any depth — directly, or inside a package — is a component chain that stops bundling.',
         reach: 'module',
     },
     {
@@ -68,34 +68,6 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'A facet never imports another: no production module under `src/facets/<a>/` names a module under `src/facets/<b>/`, types included. From outside a facet, a production module enters it by its face (`index.ts`, `index.browser.ts`); each other root file has its one reader — the runner-config entry `index.vitest.ts` for each `<facet>.project.ts` (the cli\u2019s carries its literate plugin), the handle `facets/specification.ts`, the composition `lint/self/corpus/compositions.ts` — and a concept folder is never reached, but for the modules reached by one tree for their reason: the route ratchet and the `.spec.yaml` grammar `lint/` reads with the runner. An error at the import.',
-        facet: 'model',
-        family: 'architecture',
-        fix: 'Move what two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and export what the entries publish from the facet\u2019s `index.ts`.',
-        name: 'no-cross-facet-import',
-        rationale:
-            '`import-within-declared-layers` judges edges between layers and cannot tell one facet from another inside `facets/`: a facet reaching into a sibling is the coupling the slices exist to prevent, and a concept folder reached from outside is an internal that can no longer move.',
-        reach: 'module',
-        severity: 'error',
-    },
-    {
-        audience: 'self',
-        channel: 'checker',
-        convention:
-            'Each third-party library is imported — statically, dynamically or for a type — by exactly one slice: `webdriverio` by `facets/mobile/`, `playwright` by `facets/website/`, `react`, `react-dom`, `vite`, `@vitest/browser-playwright`, `vitest-browser-react` and `vitest/browser` by `facets/component/`, `hono` and `@hono/node-server` by `facets/api/`, `msw` by `world/stubs/delivery/`, `testcontainers` by `world/services/containers/`, `pg`, `redis` and `better-sqlite3` by their own `world/services/<db>/`, `vitest-mock-extended` by `world/mocks/`, `yaml` by `lint/engine/project/yaml-document.ts` and `oxc-parser` by `lint/engine/project/module-parser.ts`. A node builtin is no library ([ADR-009](decisions/009-node-builtins-are-not-libraries.md)): `node:child_process` is imported by the one module of each slice that owns the program it spawns — the subject binary by `facets/cli/process/`, `xcrun simctl` by `facets/mobile/server/`, `docker` by `expectations/command/docker-cli.ts`, `git` by `lint/engine/project/git-tree.ts`, and every process of `world/` by `world/services/process/serve.ts` — which review holds, not this pass. An error at the import.',
-        facet: 'model',
-        family: 'architecture',
-        fix: 'Reach the library through the port its owner implements, handed in by the facet — or import only what the owner exports.',
-        name: 'one-owner-per-library',
-        rationale:
-            'A library imported from two slices is two adapters of it that drift, and an optional peer loaded where its owner did not ask is a missing-peer refusal nobody wrote; the layer map declares packages per layer, too coarse to say which folder owns one.',
-        reach: 'module',
-        severity: 'error',
-    },
-    {
-        audience: 'self',
-        channel: 'checker',
-        convention:
             'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a facet with concept folders holds at its root its face alone: `index.ts` (and the component\u2019s `index.browser.ts`), `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts` and their tests. Ground (`_fixtures/`, `_expected/`, `_requests/`, `_seeds/`) is exempt. An error at the folder, or at the stray file.',
         facet: 'model',
         family: 'architecture',
@@ -110,27 +82,13 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The folders of `lint/` import in the one direction [01 — Architecture](01-architecture.md#the-source-trees) draws, the same in every repository that keeps the tree — `engine/` imports no declaration, a consumer folder the catalogue and the engine alone, nothing shipped imports `self/` — and the shipped `lint/` imports nothing of `src/`: what both read lives in `lint/engine/`, or is composed by a `lint/` index — the runtime refusals by `lint/index.refusal.ts` — and `src/` imports those two alone. Tests are exempt. An error at the import.',
-        facet: 'model',
-        family: 'architecture',
-        fix: 'Move what the importer needs into a folder it may import — a module both `lint/` and `src/` read into `lint/engine/`, or a declaration the product speaks into a `lint/` index that composes it — or move the importer up the tree.',
-        name: 'lint-imports-follow-the-direction',
-        rationale:
-            '`import-within-declared-layers` sees `lint/` as one layer, so the engine reaching a rule, a check reaching a rule, or a shipped module typed against `self/` — erased at bundling, beyond the tarball proof — all passed it.',
-        reach: 'module',
-        severity: 'error',
-    },
-    {
-        audience: 'self',
-        channel: 'checker',
-        convention:
             'The stubs are entered by what they publish: from outside `src/world/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts` or `intercept/intercept.capability.ts` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a facet the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` (the delivery port `intercept.port.ts` among it) and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
         facet: 'model',
         family: 'architecture',
         fix: 'Import what the stubs publish; a facet that wires a delivery adapter declares the edge in `DELIVERY_READERS`, beside the pass.',
         name: 'stubs-reached-by-their-surface',
         rationale:
-            '`import-within-declared-layers` lets every facet reach all of `world/`, so the queue that matches a request and the msw server that serves it were one relative import away from any module: an internal reached from outside is one that can no longer move, and a delivery wired by a facet that never declared it is a second channel nobody chose.',
+            'the layer map lets every facet reach all of `world/`, so the queue that matches a request and the msw server that serves it were one relative import away from any module: an internal reached from outside is one that can no longer move, and a delivery wired by a facet that never declared it is a second channel nobody chose.',
         reach: 'module',
         severity: 'error',
     },

@@ -1,5 +1,0 @@
-description: a rule importing the engine passes
-fixture: ./_fixtures/downward/
-runs:
-    - command: self-checker .
-      exit: 0

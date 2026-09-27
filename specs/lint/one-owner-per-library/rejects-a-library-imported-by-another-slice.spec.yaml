@@ -1,7 +1,0 @@
-description: a library imported by a slice that does not own it is refused at the import
-fixture: ./_fixtures/borrowed/
-runs:
-    - command: self-checker .
-      exit: 1
-      stderr: |
-          src/facets/api/api.handle.ts:2:12  jterrazz-check(one-owner-per-library)

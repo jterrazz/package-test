@@ -3,7 +3,7 @@ import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 // Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: `npm run build` precedes lint.
 import { testing } from './dist/oxlint.js';
-import { FRAMEWORK_LAYERS, selfPluginRules } from './dist/self-oxlint.js';
+import { selfPluginRules } from './dist/self-oxlint.js';
 
 // This repository is the package the fragment names, so it lints itself from the bundle it just built, plus the self plugin.
 const selfTesting = {
@@ -47,8 +47,6 @@ const config: OxlintConfig = defineConfig(
         rules: {
             // reason: under `verbatimModuleSyntax` an inline type specifier still emits `import {} from 'm'`, a runtime edge, so a type-only cycle becomes a load-order crash; `import type` is erased whole.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
-            // The rule ships inert: an architecture is the project's to declare.
-            'jterrazz/import-within-declared-layers': ['error', { layers: FRAMEWORK_LAYERS }],
         },
     }),
 );

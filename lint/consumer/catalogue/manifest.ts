@@ -5,7 +5,7 @@ import { REFUSAL_WHY } from './refusals.js';
 
 type Row = CatalogueRow<Family>;
 
-/** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (`import-within-declared-layers`). */
+/** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (the layer map). */
 
 /** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. The one warn tier is the row's `severity`. */
 export const STATIQUE_RULES: Row[] = [
@@ -740,20 +740,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A module test runs under node, where `document` does not exist: a test asking for one is not testing a module, it is rendering something — and it now has somewhere to go.',
         reach: 'module',
-        severity: 'error',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
-            'A project DECLARES its layers under `src/` through the `layers` option (allowed packages, internal imports, one folder per dependency, seams); any import outside the declared edges is an error. With no layer map the rule is inert.',
-        facet: 'model',
-        family: 'architecture',
-        fix: 'Declare the edge in the layer map, or route the import through the layer that owns it.',
-        name: 'import-within-declared-layers',
-        rationale:
-            'An architecture belongs to the project: declared boundaries are checkable, an assumed one is worked around.',
-        reach: 'all',
         severity: 'error',
     },
     {

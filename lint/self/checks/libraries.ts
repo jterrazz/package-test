@@ -1,4 +1,4 @@
-/** The one statement of library ownership: `one-owner-per-library` holds every import to it, and the layer map grants each folder the libraries listed here. */
+/** The one statement of library ownership: the layer map (`architecture.ts`) holds every import to its owner, and grants each folder the libraries listed here. */
 export const OWNERS_OF_LIBRARIES: Readonly<Record<string, readonly string[]>> = {
     '@hono/node-server': ['src/facets/api/'],
     '@vitest/browser-playwright': ['src/facets/component/'],

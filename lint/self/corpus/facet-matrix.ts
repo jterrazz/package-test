@@ -1,4 +1,4 @@
-/** A facet's own rows are stated by its composition's definitions (`self/compositions.ts`), never here; zero framework imports, so the lint layer stays runtime-free (`import-within-declared-layers`). */
+/** A facet's own rows are stated by its composition's definitions (`self/compositions.ts`), never here; zero framework imports, so the lint layer stays runtime-free (the layer map). */
 
 export const FACET_MATRIX_COLUMNS = [
     'api',
