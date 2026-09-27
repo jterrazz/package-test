@@ -139,7 +139,7 @@ function pluginKeysLeft(baseline: Readonly<Record<string, number>>): string[] {
         .toSorted()
         .map(
             (key) =>
-                `${key} is the plugin's rule, which oxlint-suppressions.json holds now — run 'typescript baseline', then 'jterrazz-test-check baseline'`,
+                `found: \`${key}\` is held in the test section · why: the plugin's rules are oxlint's own, held file by file in oxlint-suppressions.json — one finding, one judge · fix: run 'typescript baseline', then 'jterrazz-test-check baseline' · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson`,
         );
 }
 
