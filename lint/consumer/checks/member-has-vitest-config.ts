@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import { isTestFileName } from '../../engine/project/role.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** A directory carrying its own `package.json` is another package's tree, and its tests are its own to configure. */
 function holdsTests(dir: string): boolean {
@@ -49,7 +49,7 @@ export function checkMemberHasVitestConfig(
     memberDir: string,
     label: string,
     subject: string,
-): Finding[] {
+): Spotted[] {
     // A delegating `test` script runs the members' tests, not this package's.
     const testScript = manifest.scripts?.test;
     const ownsTests =
@@ -60,7 +60,7 @@ export function checkMemberHasVitestConfig(
     }
     return [
         {
-            file: join(label, 'package.json'),
+            path: join(label, 'package.json'),
             line: 1,
             fix: `write ${join(label, 'vitest.config.ts')}: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\``,
             found: `${subject} has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` are running its tests`,

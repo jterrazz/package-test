@@ -12,8 +12,8 @@ describe('document-format', () => {
 
         // Then - the formatter names the document, and the run fails with nothing held
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml  found: a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars · read: docs/20-documents.md#the-schema-and-the-format
+        expect(result.stdout).toMatch(`
+            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars · read: docs/20-documents.md#the-schema-and-the-format
         `);
     });
 
@@ -25,8 +25,8 @@ describe('document-format', () => {
 
         // Then - the formatter names the document
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            specs/widget/builds.spec.yaml  found: a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars · read: docs/20-documents.md#the-schema-and-the-format
+        expect(result.stdout).toMatch(`
+            found: \`specs/widget/builds.spec.yaml\`, a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars · read: docs/20-documents.md#the-schema-and-the-format
         `);
     });
 

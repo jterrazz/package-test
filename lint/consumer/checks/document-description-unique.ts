@@ -3,11 +3,11 @@ import { dirname, relative } from 'node:path';
 import { listSpecFiles } from '../../engine/project/document-model.js';
 import { readSpecFile } from '../../engine/project/spec-document.js';
 import { readText } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
-export function checkDocumentDescriptionUnique(rootDir: string): Finding[] {
+export function checkDocumentDescriptionUnique(rootDir: string): Spotted[] {
     const byDirectory = new Map<string, Map<string, string>>();
-    const violations: Finding[] = [];
+    const violations: Spotted[] = [];
     for (const path of listSpecFiles(rootDir)) {
         let document;
         try {
@@ -25,7 +25,7 @@ export function checkDocumentDescriptionUnique(rootDir: string): Finding[] {
             continue;
         }
         violations.push({
-            file: rel,
+            path: rel,
             line: document.descriptionLine,
             fix: `retitle one of the two for what it proves apart from the other`,
             found: `"${document.description}", already the description of ${first}`,

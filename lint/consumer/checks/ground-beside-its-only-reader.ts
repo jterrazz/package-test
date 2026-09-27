@@ -3,7 +3,7 @@ import { join, relative } from 'node:path';
 
 import { entriesOf, SKIPPED, textOf, walkFiles } from '../../engine/project/facet-folders.js';
 import { isNodeTestFileName } from '../../engine/project/role.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 function* walkDirectories(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
@@ -24,8 +24,8 @@ const GROUND = new Set<string>(GROUND_FOLDERS);
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;
 
 /** Not where the folder is the subject's standard name (`spec-in-subject-folder`): there the leaf is the subject, and its aspect files share it by design. */
-export function checkGroundBesideItsOnlyReader(specsRoot: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkGroundBesideItsOnlyReader(specsRoot: string): Spotted[] {
+    const violations: Spotted[] = [];
     const derived = (directory: string): boolean =>
         SUBJECT_FOLDER_FACETS.has(relative(specsRoot, directory).split(/[/\\]/u)[0] ?? '');
     for (const directory of [specsRoot, ...walkDirectories(specsRoot)].filter(
@@ -63,7 +63,7 @@ export function checkGroundBesideItsOnlyReader(specsRoot: string): Finding[] {
             const reader = readers[0] ?? '';
             const rel = relative(specsRoot, join(directory, ground));
             violations.push({
-                file: rel,
+                path: rel,
                 line: 1,
                 fix: `give \`${relative(directory, reader)}\` a domain folder of its own, and move \`${ground}/\` into it`,
                 found: `\`${ground}/\`, read by \`${relative(directory, reader)}\` alone of the tests beside it`,

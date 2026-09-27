@@ -23,7 +23,7 @@ import {
     readText,
     specsRootOfPool,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** Read through the runner's own parser, so the two channels cannot disagree; an unparseable file vouches for nothing (`document-follows-its-grammar` reports it). */
 function collectSpecLiterals(path: string): Set<string> {
@@ -139,8 +139,8 @@ function entryReferenced(path: string, references: References): boolean {
     return false;
 }
 
-export function checkNoUnusedGround(rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkNoUnusedGround(rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     for (const dir of listDirs(rootDir)) {
         if (basename(dir) === 'specs' || basename(dir) === SETUP_FOLDER || isSharedFolder(dir)) {
             continue;
@@ -169,7 +169,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
         // A domain owns 1..n `<aspect>.test.ts` (`specs-at-declared-depth`'): its ground is dead only when it carries no test at all.
         if (testFiles.length === 0) {
             violations.push({
-                file: rel,
+                path: rel,
                 line: 1,
                 fix: `write the test that stands on ${groundSubdirs.join(', ')}, or delete the folder`,
                 found: `a domain folder holding ${groundSubdirs.join(', ')} and no test or document`,
@@ -194,7 +194,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
                 }
                 const relEntry = relative(rootDir, join(subPath, entry.name));
                 violations.push({
-                    file: relEntry,
+                    path: relEntry,
                     line: 1,
                     fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
                     found: `${sub}/${entry.name}, which no test of ${feature} names`,
@@ -207,8 +207,8 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
     return violations;
 }
 
-function checkPoolFixtures(rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+function checkPoolFixtures(rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     for (const pool of findPools(rootDir)) {
         const specsRoot = specsRootOfPool(pool);
         // A reference made from inside the pool is left out: a dead entry cannot vouch for another.
@@ -220,7 +220,7 @@ function checkPoolFixtures(rootDir: string): Finding[] {
             if (!entryReferenced(join(pool, entry.name), references)) {
                 const relEntry = relative(rootDir, join(pool, entry.name));
                 violations.push({
-                    file: relEntry,
+                    path: relEntry,
                     line: 1,
                     fix: `delete ${entry.name}, or name it from the specs that share it`,
                     found: `the pool entry ${entry.name}, which no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} names`,

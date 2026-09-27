@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember } from '../../engine/checker/member-run.js';
-import { checkerMessage } from '../../engine/checker/tree-run.js';
+import { teacherOf } from '../../engine/checker/teacher.js';
 import { CHECKER } from './checker.js';
 import { CARRIED, CARRIED_IN_DEV } from './no-redundant-test-dependency.js';
 
@@ -26,15 +26,15 @@ describe('no-redundant-test-dependency', () => {
             'no-redundant-test-dependency',
             'no-redundant-test-dependency',
         ]);
-        expect(found[0] === undefined ? '' : checkerMessage(CHECKER, found[0])).toContain(
-            '@testing-library/react',
-        );
-        expect(found[0] === undefined ? '' : checkerMessage(CHECKER, found[0])).toContain(
-            'is a seam `@jterrazz/test` replaced',
-        );
-        expect(found[1] === undefined ? '' : checkerMessage(CHECKER, found[1])).toContain(
-            '`msw` is a transitive of `@jterrazz/test`',
-        );
+        expect(
+            found[0] === undefined ? '' : (teacherOf(CHECKER)([found[0]])[0]?.message ?? ''),
+        ).toContain('@testing-library/react');
+        expect(
+            found[0] === undefined ? '' : (teacherOf(CHECKER)([found[0]])[0]?.message ?? ''),
+        ).toContain('is a seam `@jterrazz/test` replaced');
+        expect(
+            found[1] === undefined ? '' : (teacherOf(CHECKER)([found[1]])[0]?.message ?? ''),
+        ).toContain('`msw` is a transitive of `@jterrazz/test`');
         expect(found.every((violation) => !violation.found.includes('playwright'))).toBe(true);
     });
 

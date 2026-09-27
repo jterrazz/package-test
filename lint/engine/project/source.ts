@@ -2,7 +2,7 @@ import { GROUND_FOLDERS, treeEntries } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, posix, resolve } from 'node:path';
 
-import type { Finding } from '../checker/finding.js';
+import type { Spotted } from '../checker/registry.js';
 import { child, childList, isNode, nodeStart, stringValue, walk } from './ast.js';
 import type { AstNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
@@ -40,16 +40,16 @@ const AT_ITS_TOP = { column: 1, line: 1 };
 
 export function finding<PassId extends string>(
     rule: PassId,
-    file: string,
-    teaching: Pick<Finding, 'fix' | 'found'>,
+    path: string,
+    teaching: Pick<Spotted, 'fix' | 'found'>,
     at: { column: number; line: number } = AT_ITS_TOP,
-): Finding<PassId> {
-    return { ...teaching, ...at, file, rule };
+): Spotted<PassId> {
+    return { ...teaching, ...at, path, rule };
 }
 
-export function byPosition(one: Finding, other: Finding): number {
+export function byPosition(one: Spotted, other: Spotted): number {
     return (
-        one.file.localeCompare(other.file) ||
+        one.path.localeCompare(other.path) ||
         one.line - other.line ||
         (one.column ?? 1) - (other.column ?? 1)
     );

@@ -9,10 +9,10 @@ import {
 } from '../../engine/project/spec-subjects.js';
 import type { SpecRead } from '../../engine/project/spec-subjects.js';
 import { ambiguousSegment } from '../../engine/project/subject.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** No folder is derived from a word that may be a value: the author writes the template that says which it is. */
-function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Finding | undefined {
+function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Spotted | undefined {
     const at = spec.subjects.get(name);
     const segment = at === undefined ? undefined : ambiguousSegment(at.subject, spec.reading);
     if (at === undefined || segment === undefined || at.subject.facet !== 'api') {
@@ -25,14 +25,14 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Finding |
     const collection = bare.split('/').at(bare.split('/').indexOf(segment) - 1) ?? '';
     return {
         ...positionOf(spec.text, at.index),
-        file: shown(specsRoot, spec.file),
+        path: shown(specsRoot, spec.file),
         fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` — or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
         found: `\`${method} ${bare}\` names \`${segment}\` right after the collection \`${collection}\`: a value or a segment of the route, and the folder depends on which`,
         rule: 'spec-in-subject-folder' as const,
     };
 }
 
-export function checkSpecInSubjectFolder(specsRoot: string): Finding[] {
+export function checkSpecInSubjectFolder(specsRoot: string): Spotted[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         const [only] = [...spec.subjects.keys()];
         if (
@@ -52,7 +52,7 @@ export function checkSpecInSubjectFolder(specsRoot: string): Finding[] {
         }
         return [
             {
-                file: shown(specsRoot, spec.file),
+                path: shown(specsRoot, spec.file),
                 fix: `move it to ${shown(specsRoot, target)} — \`make fix\` moves it, and the ground it stands on`,
                 found: `a spec of ${only}, filed under ${shown(specsRoot, dirname(spec.file))}/`,
                 line: 1,

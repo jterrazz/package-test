@@ -1,9 +1,15 @@
-import type { Chapter, Manifest } from '@jterrazz/typescript/rules';
+import type { Chapter, Manifest, Teaching } from '@jterrazz/typescript/rules';
 
 import type { Row } from '../catalogue/row.js';
 import type { DocumentFinding } from '../project/document-model.js';
 import type { SpecFile } from '../project/spec-document.js';
-import type { Finding } from './finding.js';
+
+export type Spotted<Rule extends string = string> = Teaching & {
+    column?: number;
+    line: number;
+    path: string;
+    rule: Rule;
+};
 
 export type GroundEntry = { name: string; path: string; rel: string };
 
@@ -18,7 +24,7 @@ export type ReadDocument = {
 };
 
 export type MemberRead = {
-    anchored: (findings: Finding[]) => Finding[];
+    anchored: (findings: Spotted[]) => Spotted[];
     config: null | string;
     label: string;
     manifest: Manifest;
@@ -27,7 +33,7 @@ export type MemberRead = {
     subject: string;
 };
 
-type Judge<Read> = (read: Read) => Finding[];
+type Judge<Read> = (read: Read) => Spotted[];
 
 export type GroundPasses = {
     document: Judge<FoundDocument>;
@@ -43,15 +49,14 @@ export type CheckerRegistry = {
     member: Judge<MemberRead>;
     memberPassIds: readonly string[];
     rows: readonly Row[];
-    tree: readonly ((specsRoot: string) => Finding[])[];
+    tree: readonly ((specsRoot: string) => Spotted[])[];
     treePassIds: readonly string[];
 };
 
-export type AtZeroRegistry = {
+export type SelfRegistry = {
     chapter: Chapter;
-    label: string;
     passIds: readonly string[];
     rows: readonly Row[];
-    source: readonly ((root: string) => Finding[])[];
-    specs: readonly ((specsRoot: string) => Finding[])[];
+    source: readonly ((root: string) => Spotted[])[];
+    specs: readonly ((specsRoot: string) => Spotted[])[];
 };

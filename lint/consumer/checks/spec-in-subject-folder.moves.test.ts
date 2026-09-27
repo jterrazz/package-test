@@ -281,7 +281,7 @@ describe('fixSpecInSubjectFolder', () => {
             journey: created.includes("test('creates then lists'"),
             listed: existsSync(join(root, 'api/orders/list/orders.spec.ts')),
         }).toStrictEqual({ journey: true, listed: true });
-        expect(checkOneSubjectPerSpec(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkOneSubjectPerSpec(root).map(({ path }) => path)).toStrictEqual([
             'api/orders/create/orders.spec.ts',
         ]);
     });

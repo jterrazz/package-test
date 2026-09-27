@@ -1,4 +1,4 @@
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 function firstLine(text: string): string {
     for (const line of text.split('\n')) {
@@ -34,13 +34,13 @@ export function checkHttpFirstLineFollowsItsGrammar(
     name: string,
     text: string,
     side: keyof typeof GRAMMAR,
-): Finding[] {
+): Spotted[] {
     const { line, teaching } = GRAMMAR[side];
     return line.test(firstLine(text))
         ? []
         : [
               {
-                  file,
+                  path: file,
                   line: 1,
                   ...teaching(name),
                   rule: 'http-first-line-follows-its-grammar',

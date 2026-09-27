@@ -9,14 +9,14 @@ import {
 } from '../../engine/project/facet-folders.js';
 import { reachesRunner } from '../../engine/project/facets.js';
 import { isTestFileName } from '../../engine/project/role.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 function isUnderGround(relativePath: string): boolean {
     return relativePath.split(/[/\\]/u).some((segment) => isGroundFolder(segment));
 }
 
-export function checkFacetTestUsesItsRunner(specsRoot: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkFacetTestUsesItsRunner(specsRoot: string): Spotted[] {
+    const violations: Spotted[] = [];
     for (const { facet, path } of facetFoldersOf(specsRoot)) {
         if (specificationsIn(path).length === 0) {
             // `facet-folder-has-specification` owns the folder with no runner at all.
@@ -36,7 +36,7 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Finding[] {
             }
             const rel = relative(specsRoot, file);
             violations.push({
-                file: rel,
+                path: rel,
                 line: 1,
                 fix: `import \`{ ${facet} }\` from \`${facet}.specification.js\` and drive the product through it, or move the module test beside its module`,
                 found: `a test under the \`${facet}\` facet that reaches no runner`,

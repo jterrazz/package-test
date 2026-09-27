@@ -10,7 +10,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 
 import { SKIPPED } from '../../engine/project/module-tests.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */
 export const CARRIED = new Set(['msw', 'vitest-mock-extended']);
@@ -167,12 +167,12 @@ export function checkNoRedundantTestDependency(member: {
     manifest: Manifest;
     memberDir: string;
     subject: string;
-}): Finding[] {
+}): Spotted[] {
     const { label, manifest, memberDir, subject } = member;
     const jestRuns =
         declaresJest(manifest) || jestReachesMember(memberDir, workspaceRootOf(memberDir));
     return declaredSeams(manifest, jestRuns).map((seam) => ({
-        file: join(label, 'package.json'),
+        path: join(label, 'package.json'),
         line: lineOfKey(memberDir, seam.name),
         fix:
             seam.kind === 'carried'

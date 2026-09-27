@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { Finding } from '../../engine/checker/finding.js';
+import type { Spotted } from '../../engine/checker/registry.js';
 import {
     child,
     childList,
@@ -21,7 +21,7 @@ const SYNONYM = /\.driver(?<tail>(?:\.[a-z-]+)*)\.(?<extension>tsx?)$/u;
 
 const ADAPTER = /\.adapter\.tsx?$/u;
 
-function synonymOf(path: string): Finding<SelfPassId> {
+function synonymOf(path: string): Spotted<SelfPassId> {
     const name = path.split('/').at(-1) ?? '';
     const { extension = 'ts', tail = '' } = SYNONYM.exec(name)?.groups ?? {};
     return finding('one-word-for-an-adapter', path, {
@@ -71,7 +71,7 @@ function implementedPort(node: AstNode, ports: ReadonlySet<string>): string | un
     return typeof literal === 'string' && ports.has(literal) ? literal : undefined;
 }
 
-function unsuffixedImplementations(root: string, path: string): Finding<SelfPassId>[] {
+function unsuffixedImplementations(root: string, path: string): Spotted<SelfPassId>[] {
     const text = readFileSync(resolve(root, path), 'utf8');
     const program = parseProgram(path, text);
     if (!isNode(program)) {
@@ -79,7 +79,7 @@ function unsuffixedImplementations(root: string, path: string): Finding<SelfPass
     }
     const ports = portsImported(program);
     const name = path.split('/').at(-1) ?? '';
-    const found: Finding<SelfPassId>[] = [];
+    const found: Spotted<SelfPassId>[] = [];
     walk(program, (node) => {
         const port = ports.size === 0 ? undefined : implementedPort(node, ports);
         if (port === undefined) {
@@ -101,7 +101,7 @@ function unsuffixedImplementations(root: string, path: string): Finding<SelfPass
     return found;
 }
 
-export function checkOneWordForAnAdapter(root: string): Finding<SelfPassId>[] {
+export function checkOneWordForAnAdapter(root: string): Spotted<SelfPassId>[] {
     const files = listed(resolve(root, 'src'), 'src').filter(({ directory }) => !directory);
     return [
         ...files.filter(({ path }) => SYNONYM.test(path)).map(({ path }) => synonymOf(path)),

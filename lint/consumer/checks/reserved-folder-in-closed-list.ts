@@ -16,13 +16,13 @@ import { basename, dirname, join, relative } from 'node:path';
 
 import { isModuleName, isUnmarkedReserved } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 const CLOSED_LIST = RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ');
 
-function finding(rootDir: string, path: string, found: string, fix: string): Finding {
+function finding(rootDir: string, path: string, found: string, fix: string): Spotted {
     return {
-        file: isDir(path) ? `${relative(rootDir, path)}/` : relative(rootDir, path),
+        path: isDir(path) ? `${relative(rootDir, path)}/` : relative(rootDir, path),
         line: 1,
         fix,
         found,
@@ -35,7 +35,7 @@ function judged(
     specsRoot: string,
     folder: string,
     name: string,
-): Finding | undefined {
+): Spotted | undefined {
     const atRoot = relative(specsRoot, folder) === name;
     if ((name === SHARED_FOLDER || name === 'shared') && !atRoot) {
         if (name === SHARED_FOLDER || isUnmarkedReserved(specsRoot, folder)) {
@@ -91,7 +91,7 @@ function refusedInSetup(
     setup: string,
     path: string,
     isDirectory: boolean,
-): Finding | undefined {
+): Spotted | undefined {
     const name = basename(path);
     const owner = ownerShown(specsRoot, setup);
     if (isDirectory && isGroundFolder(name)) {
@@ -122,8 +122,8 @@ function refusedInSetup(
     );
 }
 
-function refusedInsideSetup(place: Place, setup: string): Finding[] {
-    const found: Finding[] = [];
+function refusedInsideSetup(place: Place, setup: string): Spotted[] {
+    const found: Spotted[] = [];
     const visit = (dir: string): void => {
         for (const entry of entriesOf(dir)) {
             if (PRUNED.has(entry.name)) {
@@ -142,8 +142,8 @@ function refusedInsideSetup(place: Place, setup: string): Finding[] {
     return found;
 }
 
-function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
-    const found: Finding[] = [];
+function refusedUnder(rootDir: string, specsRoot: string): Spotted[] {
+    const found: Spotted[] = [];
     const visit = (dir: string, inShared: boolean): void => {
         for (const entry of entriesOf(dir)) {
             const path = join(dir, entry.name);
@@ -175,6 +175,6 @@ function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
     return found;
 }
 
-export function checkReservedFolderInClosedList(rootDir: string): Finding[] {
+export function checkReservedFolderInClosedList(rootDir: string): Spotted[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) => refusedUnder(rootDir, specsRoot));
 }

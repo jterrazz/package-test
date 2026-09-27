@@ -2,7 +2,7 @@ import { isGroundFolder, treeEntries, treeKind, treeNames } from '@jterrazz/type
 import { join, relative, sep } from 'node:path';
 
 import { SKIPPED } from '../../engine/project/module-tests.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
 const GROUND_SYNONYMS = new Set(['__snapshots__', 'golden', 'goldens', 'snapshots']);
@@ -22,8 +22,8 @@ function holdsGround(path: string, memberDir: string): boolean {
 }
 
 /** The walk stops at a nested package and never enters ground: a fixture project may carry the word on purpose. */
-export function checkNoSnapshotFolder(memberDir: string, label: string): Finding[] {
-    const found: Finding[] = [];
+export function checkNoSnapshotFolder(memberDir: string, label: string): Spotted[] {
+    const found: Spotted[] = [];
     const walk = (dir: string): void => {
         let entries;
         try {
@@ -38,7 +38,7 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Finding
             }
             if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {
                 found.push({
-                    file: join(label, relative(memberDir, path), '/'),
+                    path: join(label, relative(memberDir, path), '/'),
                     line: 1,
                     fix: `rename \`${entry.name}/\` to \`_expected/\`, beside the test that reads it`,
                     found: `\`${entry.name}/\`, a synonym of \`_expected/\``,

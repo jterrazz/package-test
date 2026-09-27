@@ -20,7 +20,7 @@ describe('checkOneWordForAnAdapter', () => {
         expect(checkOneWordForAnAdapter(ROOT)).toStrictEqual([]);
         expect(
             checkOneWordForAnAdapter(drifted).map(
-                ({ file, fix, found, line }) => `${file}:${line} ${found} | ${fix}`,
+                ({ fix, found, line, path }) => `${path}:${line} ${found} | ${fix}`,
             ),
         ).toStrictEqual([
             "src/world/clock/clock.driver.browser.ts:1 `clock.driver.browser.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.browser.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",

@@ -3,12 +3,12 @@ import {
     readSpecFile,
     SpecSyntaxError,
 } from '../../engine/project/spec-document.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 import { noMalformedRefFindings } from './no-malformed-ref.js';
 import { noUnknownTokenFindings } from './no-unknown-token.js';
 
 /** `document-follows-its-grammar` through the runner's own parser, then `no-unknown-token` and `no-malformed-ref` over the streams only: a `{{token}}` in a description or a command is text, and `stdin:` is never compared. */
-export function checkDocumentFollowsItsGrammar(text: string, rel: string): Finding[] {
+export function checkDocumentFollowsItsGrammar(text: string, rel: string): Spotted[] {
     let document;
     try {
         document = readSpecFile(text, rel).document;
@@ -18,7 +18,7 @@ export function checkDocumentFollowsItsGrammar(text: string, rel: string): Findi
         }
         return [
             {
-                file: rel,
+                path: rel,
                 line: error.line,
                 fix: 'rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires',
                 found: error.reason,

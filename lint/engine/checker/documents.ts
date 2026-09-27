@@ -15,15 +15,14 @@ import type { SpecFile } from '../project/spec-document.js';
 import { readText } from '../project/tree.js';
 import { renderYamlSource, Scalar } from '../project/yaml-document.js';
 import type { YAMLMap } from '../project/yaml-document.js';
-import type { Finding } from './finding.js';
-import type { GroundPasses } from './registry.js';
+import type { GroundPasses, Spotted } from './registry.js';
 
 export function runDocument(
     text: string,
     rel: string,
     path: string,
     read: GroundPasses['read'],
-): Finding[] {
+): Spotted[] {
     let file: SpecFile;
     try {
         file = readSpecFile(text, rel);
@@ -31,10 +30,10 @@ export function runDocument(
         return [];
     }
     return read({ dir: dirname(path), file, rel }).map(({ fix, found, line, rule }) => ({
-        file: rel,
         fix,
         found,
         line,
+        path: rel,
         rule,
     }));
 }

@@ -1,17 +1,16 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { Finding } from './finding.js';
 import { walkGround } from './ground-walk.js';
-import type { GroundPasses } from './registry.js';
+import type { GroundPasses, Spotted } from './registry.js';
 
 const TREE = resolve(
     import.meta.dirname,
     '../../../specs/lint/no-unknown-token/_fixtures/no-unknown-token',
 );
 
-function visited(kind: string, rel: string): Finding {
-    return { file: rel, fix: '', found: kind, line: 1, rule: 'probe' };
+function visited(kind: string, rel: string): Spotted {
+    return { path: rel, fix: '', found: kind, line: 1, rule: 'probe' };
 }
 
 const RECORDING: GroundPasses = {

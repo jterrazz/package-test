@@ -25,7 +25,7 @@ import {
     readText,
     removeIfEmpty,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 export function poolsOf(specsRoot: string): string[] {
     return GROUND_FOLDERS.map((ground) => join(specsRoot, SHARED_FOLDER, ground));
@@ -49,14 +49,14 @@ function rootGroundOf(specsRoot: string): string[] {
     return GROUND_FOLDERS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
 }
 
-export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkNoReachIntoSiblingGround(rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     for (const specsRoot of findSpecsRoots(rootDir)) {
         const pools = poolsOf(specsRoot);
         for (const folder of rootGroundOf(specsRoot)) {
             const role = basename(folder);
             violations.push({
-                file: relative(rootDir, folder),
+                path: relative(rootDir, folder),
                 line: 1,
                 fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_FOLDER, role))}/ — \`make fix\` moves it and rewrites every whole relative path that names it`,
                 found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/`,
@@ -77,7 +77,7 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                 const rel = relative(rootDir, file);
                 violations.push({
                     column,
-                    file: rel,
+                    path: rel,
                     line,
                     fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/<role>/ when they span facets`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,

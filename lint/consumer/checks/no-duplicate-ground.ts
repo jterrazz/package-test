@@ -27,7 +27,7 @@ import {
     readText,
     reservedFolderOf,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** A tree compares by the listing git keeps, so an ignored file is no difference. */
 function fingerprintOf(path: string): string {
@@ -123,11 +123,11 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
 }
 
 /** `--fix` acts only when the copies share one name, the only name a fix could keep. */
-export function checkNoDuplicateGround(rootDir: string): Finding[] {
+export function checkNoDuplicateGround(rootDir: string): Spotted[] {
     return copiedGround(rootDir).flatMap((group) => {
         const advice = copyAdvice(rootDir, group);
         return group.copies.map((copy) => ({
-            file: relative(rootDir, copy),
+            path: relative(rootDir, copy),
             line: 1,
             fix: advice,
             found: `the same ${isDir(copy) ? 'tree' : 'file'} as ${group.copies

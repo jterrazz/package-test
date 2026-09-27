@@ -9,11 +9,11 @@ import {
 import type { SpecModel } from '../../engine/project/spec-model.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { lineAt, listFiles, readSource, readText } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** The runners are inferred from the `docker:` option of the imported spec files, where the oxlint rule needs them spelled by hand. */
-export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     const specFiles = listFiles(rootDir, (path) => path.endsWith('.specification.ts'));
     const dockerSpecs = new Map<string, SpecModel>();
     for (const file of specFiles) {
@@ -58,7 +58,7 @@ export function checkDockerExecBoundWithAwaitUsing(rootDir: string): Finding[] {
             }
             const rel = relative(rootDir, testFile);
             violations.push({
-                file: rel,
+                path: rel,
                 line,
                 fix: `bind it with \`await using result = await ${runner}…\`, so the containers it started are removed at the end of the scope`,
                 found: `a result of the docker-aware runner "${runner}" bound without \`await using\``,

@@ -1,6 +1,6 @@
 import { dirname, resolve } from 'node:path';
 
-import type { Finding } from '../../engine/checker/finding.js';
+import type { Spotted } from '../../engine/checker/registry.js';
 import { byPosition, facetOf, finding, inGround, listed } from '../../engine/project/source.js';
 import type { Listed } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
@@ -23,7 +23,7 @@ const ROLE_NAMES = new Set([
 ]);
 
 /** Ground is exempt: it is what a test stands on. */
-export function checkFolderNamedForAConcept(root: string): Finding<SelfPassId>[] {
+export function checkFolderNamedForAConcept(root: string): Spotted<SelfPassId>[] {
     const paths = listed(resolve(root, 'src'), 'src');
     const folders = paths.filter(({ directory, path }) => directory && !inGround(path));
     const childrenOf = (folder: string): Listed[] =>
@@ -53,7 +53,7 @@ export function checkFolderNamedForAConcept(root: string): Finding<SelfPassId>[]
     return [...found, ...strayFaceFiles(paths, folders)].toSorted(byPosition);
 }
 
-function strayFaceFiles(paths: Listed[], folders: Listed[]): Finding<SelfPassId>[] {
+function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>[] {
     const facets = folders.filter(
         ({ path }) => path.split('/').length === 3 && facetOf(`${path}/x`) !== undefined,
     );

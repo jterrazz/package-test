@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember } from '../../engine/checker/member-run.js';
-import { checkerMessage } from '../../engine/checker/tree-run.js';
+import { teacherOf } from '../../engine/checker/teacher.js';
 import { CHECKER } from './checker.js';
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
@@ -16,8 +16,8 @@ describe('checkNoSimulatedDomInConfig', () => {
         // Then - the finding names the line and the move
         expect(violation?.rule).toBe('no-simulated-dom-in-config');
         expect(violation?.line).toBe(5);
-        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
-            'a drawing of a browser',
-        );
+        expect(
+            violation === undefined ? '' : (teacherOf(CHECKER)([violation])[0]?.message ?? ''),
+        ).toContain('a drawing of a browser');
     });
 });

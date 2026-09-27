@@ -18,7 +18,7 @@ import {
 import { skipString, withoutComments } from '../../engine/project/subject.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { findSpecsRoots, listFiles } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** The seed name is the first `--` comment of the SQL, else the first four meaningful words of the test's title, else `seed`; a name taken by other bytes gains `-2`, `-3`, … */
 
@@ -127,10 +127,10 @@ function inlineSeeds(rootDir: string): InlineSeed[] {
     );
 }
 
-export function checkInlineSeeds(rootDir: string): Finding[] {
+export function checkInlineSeeds(rootDir: string): Spotted[] {
     return inlineSeeds(rootDir).map((seed) => ({
         column: seed.column,
-        file: relative(rootDir, seed.file),
+        path: relative(rootDir, seed.file),
         fix: `write the statements to ./${GROUND_SEEDS}/${seed.name}.sql and seed it with file('./${GROUND_SEEDS}/${seed.name}.sql') — \`make fix\` writes the file`,
         found: 'SQL written in the test, tagged `sql`',
         line: seed.line,

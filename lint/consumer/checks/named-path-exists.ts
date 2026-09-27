@@ -13,7 +13,7 @@ import {
     listReaders,
     readText,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 /** Inside a git work tree a path names only what git keeps: an ignored target exists on this workstation and on no checkout. */
 function missingTarget(named: string, target: string, onDisk: boolean): Teaching {
@@ -43,8 +43,8 @@ function crossedTarget(
     };
 }
 
-export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkNamedPathExistsIn(file: string, rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     const suppressed = file.endsWith(SPEC_EXTENSION)
         ? new Set<number>()
         : suppressedLines(readText(file), 'named-path-exists');
@@ -55,7 +55,7 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
             }
             violations.push({
                 column,
-                file: relative(rootDir, file),
+                path: relative(rootDir, file),
                 line,
                 ...missingTarget(named, relative(rootDir, target), existsSync(target)),
                 rule: 'named-path-exists',
@@ -75,7 +75,7 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
         const named = key === undefined ? `${kind}('${path}')` : `${key}: "${path}"`;
         violations.push({
             column,
-            file: relative(rootDir, file),
+            path: relative(rootDir, file),
             line,
             ...(found === undefined
                 ? missingTarget(named, relative(rootDir, target), existsSync(target))
@@ -86,7 +86,7 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
     return violations;
 }
 
-export function checkNamedPathExists(rootDir: string): Finding[] {
+export function checkNamedPathExists(rootDir: string): Spotted[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         listReaders(specsRoot).flatMap((file) => checkNamedPathExistsIn(file, rootDir)),
     );

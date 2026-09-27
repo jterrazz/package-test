@@ -1,9 +1,8 @@
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { Finding } from './finding.js';
 import { runMember, runMembers } from './member-run.js';
-import type { CheckerRegistry, MemberRead } from './registry.js';
+import type { CheckerRegistry, MemberRead, Spotted } from './registry.js';
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
@@ -12,8 +11,8 @@ type Seen = Pick<MemberRead, 'label' | 'subject'> & { config: null | string; fin
 
 function recording(): { registry: CheckerRegistry; seen: Seen[] } {
     const seen: Seen[] = [];
-    const probe: Finding = {
-        file: 'package.json',
+    const probe: Spotted = {
+        path: 'package.json',
         fix: '',
         found: '',
         line: 1,
@@ -26,7 +25,7 @@ function recording(): { registry: CheckerRegistry; seen: Seen[] } {
             const [anchored] = read.anchored([probe]);
             seen.push({
                 config: read.config === null ? null : read.config.slice(read.memberDir.length + 1),
-                findingAt: anchored?.file ?? '',
+                findingAt: anchored?.path ?? '',
                 label: read.label,
                 subject: read.subject,
             });

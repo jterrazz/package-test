@@ -12,7 +12,7 @@ import {
     setupFolderOf,
 } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, reservedFolderOf } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 const FIXTURES_MODULE = /\.fixtures\.[cm]?[jt]sx?$/u;
 
@@ -41,8 +41,8 @@ function setupTargetOf(specsRoot: string, file: string, readers: readonly string
     return relative(specsRoot, join(home, relative(subject, file)));
 }
 
-function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
-    const found: Finding[] = [];
+function codeOutsideSetup(rootDir: string, specsRoot: string): Spotted[] {
+    const found: Spotted[] = [];
     const modules = modulesUnder(specsRoot);
     const readers = readersOf(modules);
     for (const file of modules) {
@@ -56,7 +56,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
                     ? dirname(setupTargetOf(specsRoot, file, read))
                     : dirname(rel);
             found.push({
-                file: shown,
+                path: shown,
                 line: 1,
                 fix: `name the module for what it holds and move it into the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — \`specs/${home}/<meaning>.ts\` — and the paths that import it`,
                 found: `\`${name}\` under specs/: a fixture is input data, a file in \`_fixtures/\`, never a module`,
@@ -75,7 +75,7 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
             continue;
         }
         found.push({
-            file: shown,
+            path: shown,
             line: 1,
             fix: `move it to \`specs/${setupTargetOf(specsRoot, file, read)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it`,
             found: `\`${name}\`, code that prepares specs outside every \`${SETUP_FOLDER}/\``,
@@ -85,6 +85,6 @@ function codeOutsideSetup(rootDir: string, specsRoot: string): Finding[] {
     return found;
 }
 
-export function checkSpecCodeInSetupFolder(rootDir: string): Finding[] {
+export function checkSpecCodeInSetupFolder(rootDir: string): Spotted[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) => codeOutsideSetup(rootDir, specsRoot));
 }

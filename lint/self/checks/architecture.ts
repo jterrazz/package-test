@@ -1,12 +1,13 @@
 import type { ArchitectureRule } from '@jterrazz/typescript/config';
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
+import type { ChapterAnchor } from '@jterrazz/typescript/rules';
 
 import { TEST_SUFFIX } from '../../engine/project/source.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';
 
-const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
+const READ_LAYERS: ChapterAnchor = 'docs/01-architecture.md#the-source-trees';
 
 const SPAWNING_SITES = [
     'expectations/command/docker-cli.ts',
@@ -201,7 +202,7 @@ function grantedTargets(paths: readonly string[]): string[] {
 function facetRules(): ArchitectureRule[] {
     const face = String.raw`^src/facets/[^/]+/index(\.browser)?\.ts$`;
     const readers = facetReaders();
-    const outside = {
+    const outside: Pick<ArchitectureRule, 'fix' | 'read' | 'why'> = {
         fix: 'import it from the facet’s face — export it from `src/facets/<facet>/index.ts` — or move it below the facets',
         read: READ_LAYERS,
         why: 'a facet is entered from outside by its face, and a concept folder reached from outside is an internal that can no longer move',

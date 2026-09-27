@@ -13,7 +13,7 @@ describe('ratchet', () => {
 
         // Then - both falls, each naming its gesture; the run's own key is never the checker's
         expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
+        expect(result.stdout).toMatch(`
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-unused-ground\` is at 1, below its baseline of 3 · why: each count is held exactly, so a debt that fell is recorded the day it falls and cannot grow back unseen · fix: run 'jterrazz-test-check --fix', which re-records the fall · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
             baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-reach-into-sibling-ground\` is at zero, and its entry is still recorded · why: an entry with nothing left to hold would let the debt grow back to its old count unseen · fix: run 'jterrazz-test-check --fix', which deletes the entry · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
@@ -31,8 +31,8 @@ describe('ratchet', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toBe(
             [
-                'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/no-reach-into-sibling-ground 2 → 0',
-                'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/no-unused-ground 3 → 1',
+                're-recorded jterrazz.baseline.json › test › jterrazz-check/no-reach-into-sibling-ground 2 → 0',
+                're-recorded jterrazz.baseline.json › test › jterrazz-check/no-unused-ground 3 → 1',
                 'jterrazz.baseline.json › test: 3 held across 2 rules',
                 '',
             ].join('\n'),
@@ -50,13 +50,12 @@ describe('ratchet', () => {
 
         // Then - the paid entry goes, the new debt still fails the run and is not written
         expect(result.exitCode).toBe(1);
-        expect(result.stdout.text).toBe(
-            'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0\n',
-        );
-        expect(result.stderr).toMatch(`
+        expect(result.stdout).toMatch(`
+            re-recorded jterrazz.baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz-check/no-unused-ground\` has 1 finding(s) and no entry records them · why: the section holds the debt the project recorded, and a finding no entry holds is new debt · fix: fix the findings, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
+        expect(result.stderr.text).toBe('');
         expect(result.file('jterrazz.baseline.json').content).toBe(
             '{\n    "typescript": { "eslint/complexity": 3 },\n    "test": {}\n}\n',
         );

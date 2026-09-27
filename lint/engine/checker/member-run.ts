@@ -2,8 +2,7 @@ import { readManifest, treeKind } from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
 import { discoverMembers } from '../project/members.js';
-import type { Finding } from './finding.js';
-import type { CheckerRegistry } from './registry.js';
+import type { CheckerRegistry, Spotted } from './registry.js';
 
 const CONFIG_NAMES = [
     'vitest.config.ts',
@@ -24,11 +23,11 @@ function configOf(dir: string): null | string {
     return null;
 }
 
-function anchoredTo(label: string): (findings: Finding[]) => Finding[] {
+function anchoredTo(label: string): (findings: Spotted[]) => Spotted[] {
     return (findings) =>
         label === '.'
             ? findings
-            : findings.map((finding) => ({ ...finding, file: join(label, finding.file) }));
+            : findings.map((finding) => ({ ...finding, path: join(label, finding.path) }));
 }
 
 /** What a workspace member owes, read from the member itself: a member with no `specs/` root is still judged. */
@@ -36,7 +35,7 @@ export function runMember(
     memberDir: string,
     rootDir: string,
     registry: CheckerRegistry,
-): Finding[] {
+): Spotted[] {
     const manifest = readManifest(memberDir);
     if (manifest === null) {
         return [];
@@ -55,6 +54,6 @@ export function runMember(
     });
 }
 
-export function runMembers(rootDir: string, registry: CheckerRegistry): Finding[] {
+export function runMembers(rootDir: string, registry: CheckerRegistry): Spotted[] {
     return discoverMembers(rootDir).flatMap((member) => runMember(member, rootDir, registry));
 }

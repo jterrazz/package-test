@@ -25,7 +25,7 @@ import {
     readText,
     removeIfEmpty,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 type Entry = { entry: string; ground: string };
 
@@ -171,7 +171,7 @@ function misplacedGround(rootDir: string): Misplaced[] {
     return misplaced;
 }
 
-export function checkGroundPlacement(rootDir: string): Finding[] {
+export function checkGroundPlacement(rootDir: string): Spotted[] {
     return misplacedGround(rootDir).map(({ entry, ground, lowest, spread }) => {
         const role = basename(ground);
         const home = `${relative(rootDir, lowest)}/${role}/${entry}`;
@@ -179,7 +179,7 @@ export function checkGroundPlacement(rootDir: string): Finding[] {
             ? `directory('./${role}/${entry}/')`
             : `file('./${role}/${entry}')`;
         return {
-            file: relative(rootDir, join(ground, entry)),
+            path: relative(rootDir, join(ground, entry)),
             line: 1,
             fix: spread
                 ? `move it to ${home}, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both`

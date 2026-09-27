@@ -1,4 +1,4 @@
-import type { AtZeroRegistry } from '../../engine/checker/registry.js';
+import type { SelfRegistry } from '../../engine/checker/registry.js';
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 import { checkErrorIsARefusalOrAnInvariant } from './error-is-a-refusal-or-an-invariant.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
@@ -17,9 +17,8 @@ export const SELF_CHECKER_PASS_IDS = [
 
 export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
 
-export const SELF_CHECKER: AtZeroRegistry = {
+export const SELF_CHECKER: SelfRegistry = {
     chapter: SELF_CHAPTER,
-    label: 'self checker',
     passIds: SELF_CHECKER_PASS_IDS,
     rows: selfRows,
     source: [

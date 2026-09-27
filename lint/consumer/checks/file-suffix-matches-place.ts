@@ -5,7 +5,7 @@ import { basename, dirname, join, relative } from 'node:path';
 import { finding } from '../../engine/project/document-model.js';
 import { FACETS, reachesRunner } from '../../engine/project/facets.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
-import type { DocumentFinding, Finding } from './checker.js';
+import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
 
@@ -49,7 +49,7 @@ export type PlacementMove = {
 };
 
 /** ls-lint never judges a file at the root it runs from, so a project's own root stays this rule's: every folder below it is `spec-file-in-a-specs-tree`'s. */
-export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[] {
+export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Spotted[] {
     let entries;
     try {
         entries = treeEntries(memberDir);
@@ -59,7 +59,7 @@ export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[
     return entries
         .filter((entry) => entry.isFile() && entry.name.endsWith('.spec.ts'))
         .map(({ name }) => ({
-            file: name,
+            path: name,
             line: 1,
             fix: `move it under \`specs/<facet>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
             found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
@@ -68,13 +68,13 @@ export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[
 }
 
 /** A file reaching no runner is `facet-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */
-export function checkFileSuffixMatchesPlace(specsRoot: string): Finding[] {
+export function checkFileSuffixMatchesPlace(specsRoot: string): Spotted[] {
     return movesUnderFacet(specsRoot).map(({ from }) => {
         const rel = relative(specsRoot, from);
         const first = rel.split(/[/\\]/u)[0] ?? '';
         const where = FACETS.has(first) ? `specs/${first}/` : 'specs/';
         return {
-            file: rel,
+            path: rel,
             line: 1,
             fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`make fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,

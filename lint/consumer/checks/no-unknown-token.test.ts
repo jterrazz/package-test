@@ -1,14 +1,17 @@
+import { reportLine } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { Finding } from '../../engine/checker/finding.js';
-import { checkerLine, runTree } from '../../engine/checker/tree-run.js';
+import type { Spotted } from '../../engine/checker/registry.js';
+import { teacherOf } from '../../engine/checker/teacher.js';
 import { CHECKER } from './checker.js';
 
 const FIXTURES = resolve(import.meta.dirname, '../../../specs/lint/no-unknown-token/_fixtures');
 
-function groundFindings(root: string): Finding[] {
-    return runTree(root, CHECKER).filter(({ rule }) => rule === 'no-unknown-token');
+function groundFindings(root: string): Spotted[] {
+    return CHECKER.tree
+        .flatMap((pass) => pass(root))
+        .filter(({ rule }) => rule === 'no-unknown-token');
 }
 
 describe('noUnknownTokenFindings', () => {
@@ -19,14 +22,15 @@ describe('noUnknownTokenFindings', () => {
         // Then - the finding names the relative file, line and token
         expect(violations).toStrictEqual([
             expect.objectContaining({
-                file: 'specs/widget/_expected/out.txt',
                 line: 1,
-                token: '{{userid}}',
+                path: 'specs/widget/_expected/out.txt',
             }),
         ]);
 
         // Then - the rendering carries file, token and the known vocabulary
-        const rendered = violations.map((violation) => checkerLine(CHECKER, violation)).join('\n');
+        const rendered = teacherOf(CHECKER)(violations)
+            .map((violation) => reportLine(violation))
+            .join('\n');
         expect(rendered).toContain('specs/widget/_expected/out.txt:1');
         expect(rendered).toContain('{{userid}}');
         expect(rendered).toContain('uuid');

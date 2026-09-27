@@ -5,7 +5,6 @@ import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { CHECKER } from '../../consumer/checks/checker.js';
-import { runTree } from '../../engine/checker/tree-run.js';
 import { SELF_CHECKER, SELF_CHECKER_PASS_IDS } from './checker.js';
 
 function specsTree(files: Record<string, string>): string {
@@ -35,7 +34,7 @@ describe('checker', () => {
         expect(
             SELF_CHECKER.specs
                 .flatMap((pass) => pass(root))
-                .map(({ file, rule }) => `${file} ${rule}`),
+                .map(({ path, rule }) => `${path} ${rule}`),
         ).toStrictEqual(['api/users/list/listing.spec.ts specimen-filed-by-capability']);
     });
 
@@ -45,6 +44,8 @@ describe('checker', () => {
         const selfPasses = new Set<string>(SELF_CHECKER_PASS_IDS);
 
         // Then - no finding belongs to a self pass: a consumer's run never meets this package's own discipline
-        expect(runTree(root, CHECKER).filter(({ rule }) => selfPasses.has(rule))).toStrictEqual([]);
+        expect(
+            CHECKER.tree.flatMap((pass) => pass(root)).filter(({ rule }) => selfPasses.has(rule)),
+        ).toStrictEqual([]);
     });
 });

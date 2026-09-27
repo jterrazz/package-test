@@ -1,53 +1,62 @@
-import { stop } from '@jterrazz/typescript/rules';
+import { labelOf, readCommandLine, refusal } from '@jterrazz/typescript/rules';
+import type { Counts, EngineCommand } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
 import {
+    COVERAGE_READ,
     COVERAGE_SECTION,
-    raised,
-    readFloors,
+    readFloor,
     readSummary,
+    recordFloor,
     report,
+    scopeOf,
     SUMMARY_FILE,
-    writeFloors,
 } from '../baseline/coverage.js';
-import type { CoverageMetrics } from '../baseline/coverage.js';
 
-/* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a gate that wrote anywhere else would be reporting to nobody. */
+export type CoverageJudge = (floor: Counts | undefined, now: Counts, scope: string) => string[];
 
-export type CoverageJudge = (
-    floor: CoverageMetrics | undefined,
-    now: CoverageMetrics,
-    scope: string,
-) => string[];
+const say = (line: string): void => {
+    process.stdout.write(`${line}\n`);
+};
 
-/** `--write` records; `--scope <name>` keeps one project's floor apart. Neither runs the suite: they read the last `--coverage` report, or a second run could disagree with the first. */
-export function runCoverageFloor(judge: CoverageJudge, cliArguments: readonly string[]): never {
-    const write = cliArguments.includes('--write');
-    const scopeFlag = cliArguments.indexOf('--scope');
-    const scope = scopeFlag === -1 ? 'all' : (cliArguments[scopeFlag + 1] ?? 'all');
-    const root = resolve('.');
+// Neither gesture runs the suite: each reads the last `--coverage` report, so a second run cannot disagree with the first.
+export function coverageFloor(judge: CoverageJudge): EngineCommand {
+    return (args) => {
+        const commandLine = readCommandLine(args, ['--scope']);
+        const scope = commandLine.value('--scope', 'all');
+        const root = resolve('.');
+        const now = readSummary(root, scope);
+        if (now === null) {
+            say(
+                refusal({
+                    fix: 'run `npx vitest --run --coverage` first, then this gesture',
+                    found: `no coverage report at ${SUMMARY_FILE}`,
+                    read: COVERAGE_READ,
+                    why: 'the floor is judged on the last `--coverage` run, and a run that wrote no report measured nothing',
+                }),
+            );
 
-    const now = readSummary(root);
-    if (now === null) {
-        console.error(
-            `coverage: no report at ${SUMMARY_FILE} — run \`npx vitest --run --coverage\` first.`,
-        );
-        stop(1);
-    }
-    const floors = readFloors(root);
-    const floor = floors[scope];
-    if (write) {
-        const next = raised(floor, now);
-        writeFloors(root, { ...floors, [scope]: next });
-        console.log(
-            `coverage: ${report(scope, next)} → jterrazz.baseline.json › ${COVERAGE_SECTION}`,
-        );
-        stop(0);
-    }
-    console.log(`coverage: ${report(scope, now)}`);
-    const refusals = judge(floor, now, scope);
-    for (const line of refusals) {
-        console.error(`coverage: ${line}`);
-    }
-    stop(refusals.length > 0 ? 1 : 0);
+            return 1;
+        }
+        const { floor, problem } = readFloor(root);
+        if (problem !== null) {
+            say(problem);
+
+            return 1;
+        }
+        const scoped = scopeOf(floor, scope);
+        if (commandLine.has('--write')) {
+            const next = recordFloor(root, floor, now);
+            say(`coverage: ${report(scope, next)} → ${labelOf(COVERAGE_SECTION)}`);
+
+            return 0;
+        }
+        say(`coverage: ${report(scope, now)}`);
+        const refusals = judge(Object.keys(scoped).length === 0 ? undefined : scoped, now, scope);
+        for (const line of refusals) {
+            say(`coverage: ${line}`);
+        }
+
+        return refusals.length > 0 ? 1 : 0;
+    };
 }

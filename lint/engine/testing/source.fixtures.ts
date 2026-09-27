@@ -2,7 +2,7 @@ import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join, resolve } from 'node:path';
 
-import type { Finding } from '../checker/finding.js';
+import type { Spotted } from '../checker/registry.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -15,8 +15,8 @@ export function treeOf(files: Record<string, string>): string {
     return root;
 }
 
-export function located(findings: Finding[]): string[] {
+export function located(findings: Spotted[]): string[] {
     return findings.map(
-        ({ column, file, found, line, rule }) => `${file}:${line}:${column ?? 1} ${rule}: ${found}`,
+        ({ column, found, line, path, rule }) => `${path}:${line}:${column ?? 1} ${rule}: ${found}`,
     );
 }

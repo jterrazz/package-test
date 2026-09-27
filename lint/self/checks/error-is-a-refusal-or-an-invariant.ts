@@ -2,7 +2,7 @@ import { anchorsOf } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { Finding } from '../../engine/checker/finding.js';
+import type { Spotted } from '../../engine/checker/registry.js';
 import {
     child,
     childList,
@@ -49,7 +49,7 @@ function stackReadOf(node: AstNode): AstNode | undefined {
     return readsStack ? child(node, 'init') : undefined;
 }
 
-type Judged = { at: AstNode; teaching: Pick<Finding, 'fix' | 'found'> };
+type Judged = { at: AstNode; teaching: Pick<Spotted, 'fix' | 'found'> };
 
 function errorClasses(programs: AstNode[]): ReadonlySet<string> {
     const classes = new Set(BUILT_IN_ERRORS);
@@ -180,7 +180,7 @@ function isHeading(read: string, root: string): boolean {
     );
 }
 
-export function checkErrorIsARefusalOrAnInvariant(root: string): Finding<SelfPassId>[] {
+export function checkErrorIsARefusalOrAnInvariant(root: string): Spotted<SelfPassId>[] {
     const modules = listed(resolve(root, 'src'), 'src')
         .filter(({ directory, path }) => !directory && isProduction(path))
         .flatMap(({ path }) => {

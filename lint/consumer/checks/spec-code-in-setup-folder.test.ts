@@ -26,7 +26,7 @@ describe('checkSpecCodeInSetupFolder', () => {
         });
 
         // Then - each fix names the _setup/ its importers share, not the one beside the file
-        const fixes = checkSpecCodeInSetupFolder(root).map(({ file, fix }) => [file, fix]);
+        const fixes = checkSpecCodeInSetupFolder(root).map(({ fix, path }) => [path, fix]);
         expect(fixes).toStrictEqual([
             [
                 'specs/cli/orders/clock.ts',

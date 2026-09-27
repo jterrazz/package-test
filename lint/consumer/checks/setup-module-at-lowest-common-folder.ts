@@ -19,7 +19,7 @@ import {
     removeIfEmpty,
     reservedFolderOf,
 } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 const STUBS_FOLDER = 'stubs';
 
@@ -99,12 +99,12 @@ function misplacedUnder(specsRoot: string): Misplaced[] {
     return found;
 }
 
-function findingOf(rootDir: string, misplaced: Misplaced): Finding {
+function findingOf(rootDir: string, misplaced: Misplaced): Spotted {
     const { module, specsRoot } = misplaced;
     const rel = relative(specsRoot, module);
     if (misplaced.kind === 'inline') {
         return {
-            file: relative(rootDir, module),
+            path: relative(rootDir, module),
             line: 1,
             fix: `write what it holds in \`specs/${relative(specsRoot, misplaced.only)}\`, and delete the module — a \`${SETUP_FOLDER}/\` module exists only while several read it`,
             found: `\`specs/${rel}\`, read by \`${basename(misplaced.only)}\` alone`,
@@ -112,7 +112,7 @@ function findingOf(rootDir: string, misplaced: Misplaced): Finding {
         };
     }
     return {
-        file: relative(rootDir, module),
+        path: relative(rootDir, module),
         line: 1,
         fix: misplaced.aliased
             ? `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the \`imports\` alias that reaches it, by hand: \`make fix\` moves no module an alias reaches`
@@ -122,7 +122,7 @@ function findingOf(rootDir: string, misplaced: Misplaced): Finding {
     };
 }
 
-export function checkSetupModuleAtLowestCommonFolder(rootDir: string): Finding[] {
+export function checkSetupModuleAtLowestCommonFolder(rootDir: string): Spotted[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) =>
         misplacedUnder(specsRoot).map((misplaced) => findingOf(rootDir, misplaced)),
     );

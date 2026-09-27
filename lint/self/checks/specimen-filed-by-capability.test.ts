@@ -35,7 +35,7 @@ describe('checkSpecimenFiledByCapability', () => {
 
         // Then - each, at its first line
         expect(
-            checkSpecimenFiledByCapability(root).map(({ file, found }) => `${file} ${found}`),
+            checkSpecimenFiledByCapability(root).map(({ found, path }) => `${path} ${found}`),
         ).toStrictEqual([
             'api/assertions/whole.spec.ts a spec of the specimen `specimen-api`, filed under `api/assertions/`',
             'api/seed/nominal/nominal.spec.ts a spec of the specimen `specimen-api`, filed under `api/seed/nominal/`',
@@ -53,7 +53,7 @@ describe('checkSpecimenFiledByCapability', () => {
 
         // Then - refused, naming the cli column's own capabilities
         expect(
-            checkSpecimenFiledByCapability(root).map(({ file, fix }) => `${file} ${fix}`),
+            checkSpecimenFiledByCapability(root).map(({ fix, path }) => `${path} ${fix}`),
         ).toStrictEqual([
             'cli/appium/session.spec.ts file it under the capability it specifies, one folder below its facet — `cli/<capability>/<aspect>.spec.ts`, the capability a name the matrix gives the `cli` column, kebab-cased (`seed`, `to-match`, `exec`, …; docs/03-testing.md § The capability matrix)',
         ]);
@@ -87,7 +87,7 @@ describe('checkSpecimenFiledByCapability', () => {
 
         // Then - the silenced file passes, and the other is reported at its first line of code
         expect(
-            checkSpecimenFiledByCapability(root).map(({ file, line }) => `${file}:${line}`),
+            checkSpecimenFiledByCapability(root).map(({ line, path }) => `${path}:${line}`),
         ).toStrictEqual(['api/users/get/reading.spec.ts:2']);
     });
 
@@ -103,7 +103,7 @@ describe('checkSpecimenFiledByCapability', () => {
         });
 
         // Then - only the folder no column names is refused
-        expect(checkSpecimenFiledByCapability(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkSpecimenFiledByCapability(root).map(({ path }) => path)).toStrictEqual([
             'surface/misc/grab-bag.spec.ts',
         ]);
     });
@@ -119,7 +119,7 @@ describe('checkSpecimenFiledByCapability', () => {
         });
 
         // Then - the one calling the fixtures' module is refused; the inline module is out of reach
-        expect(checkSpecimenFiledByCapability(root).map(({ file }) => file)).toStrictEqual([
+        expect(checkSpecimenFiledByCapability(root).map(({ path }) => path)).toStrictEqual([
             'integration/timekeeping/imported.spec.ts',
         ]);
     });
@@ -139,7 +139,7 @@ describe('checkSpecimenFiledByCapability', () => {
         // Then - each, at its first line of code, named with the column's own capabilities
         expect(
             checkSpecimenFiledByCapability(root).map(
-                ({ file, found, line }) => `${file}:${line} ${found}`,
+                ({ found, line, path }) => `${path}:${line} ${found}`,
             ),
         ).toStrictEqual([
             'component/exec/runner.tsx:1 a file of the component tree, filed under `component/exec/`',

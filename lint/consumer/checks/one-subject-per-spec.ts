@@ -6,7 +6,7 @@ import {
     subjectSpecs,
 } from '../../engine/project/spec-subjects.js';
 import type { SpecRead, TestOf } from '../../engine/project/spec-subjects.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 function journeyOf(spec: SpecRead): TestOf | undefined {
     return spec.tests.find((test) => test.subjects.length > 1);
@@ -26,7 +26,7 @@ function splitAdvice(specsRoot: string, spec: SpecRead): string {
     return journey === undefined ? split : `${split}; ${seed}`;
 }
 
-export function checkOneSubjectPerSpec(specsRoot: string): Finding[] {
+export function checkOneSubjectPerSpec(specsRoot: string): Spotted[] {
     return subjectSpecs(specsRoot).flatMap((spec) => {
         if (spec.subjects.size < 2 || silenced(spec, 'one-subject-per-spec')) {
             return [];
@@ -35,7 +35,7 @@ export function checkOneSubjectPerSpec(specsRoot: string): Finding[] {
         return [
             {
                 ...secondSubjectAt(spec),
-                file: shown(specsRoot, spec.file),
+                path: shown(specsRoot, spec.file),
                 fix: splitAdvice(specsRoot, spec),
                 found: `a spec reaching ${names.length} subjects — ${names.join(', ')}`,
                 rule: 'one-subject-per-spec' as const,

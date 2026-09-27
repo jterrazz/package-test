@@ -1,7 +1,7 @@
 import { finding, fixedData } from '../../engine/project/document-model.js';
 import { assertedStreams } from '../../engine/project/spec-document.js';
 import type { SpecDocument } from '../../engine/project/spec-document.js';
-import type { DocumentFinding, Finding } from './checker.js';
+import type { DocumentFinding, Spotted } from './checker.js';
 
 const VOLATILE = [
     {
@@ -66,14 +66,14 @@ export function checkNoVolatileLiteral(document: SpecDocument, dir: string): Doc
     return findings;
 }
 
-export function noVolatileLiteralsInGround(file: string, text: string): Finding[] {
+export function noVolatileLiteralsInGround(file: string, text: string): Spotted[] {
     return text.split('\n').flatMap((line, index) => {
         const volatileLiteral = volatileLiteralIn(line);
         return volatileLiteral === undefined
             ? []
             : [
                   {
-                      file,
+                      path: file,
                       line: index + 1,
                       fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
                       found: `"${volatileLiteral.found}", a value the next run will not reproduce`,

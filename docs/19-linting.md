@@ -369,14 +369,14 @@ jterrazz-test-check --verbose                            # a green verdict that 
 npx jterrazz-test-check specs   # or `node node_modules/@jterrazz/test/dist/checker.js specs`
 ```
 
-**It prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding, the message last:
+**It is the rules kit's checker** — `runChecker` of `@jterrazz/typescript/rules`, the conventions pass and the `baseline` command handed to it — and **it prints the line oxlint's findings normalise to**, the compiler convention every editor's problem matcher parses — one line per finding on stdout, the message last:
 
 ```text
 specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): found: "../users/_fixtures/x/" leaves specs/api/orders · why: … · fix: … · read: docs/19-linting.md#no-reach-into-sibling-ground
 specs/api/_requests/x.http:3:1: error jterrazz-check(no-token-in-request): found: token {{uuid}} in a _requests/ file · why: … · fix: … · read: docs/19-linting.md#no-token-in-request
 ```
 
-The code is the pass's name, so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A spec proves a finding with `specification.lint()` ([21](21-lint.md)): its report reads oxlint's `unix` lines and these alike, heads each finding `file:line:column  jterrazz-check(<code>)` and writes its lesson a part per line below it, and drops every other line — a tally, a summary. It states oxlint's format itself, `--format=unix`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and the report refuses them rather than read them as a clean run.
+The code is the pass's name, so it is the key a suppression names and the ratchet counts. A finding about a whole file or folder points at `:1:1`. A check spots what it finds and teaches it — the position, what was found, the fix for this case — and the pass makes each finding with the kit's `defineCheck(row).finding(…)`, the row giving the why and the read. A spec proves a finding with `specification.lint()` ([21](21-lint.md)): its report reads oxlint's `unix` lines and these alike, heads each finding `file:line:column  jterrazz-check(<code>)` and writes its lesson a part per line below it, and drops every other line — a tally, a summary. It states oxlint's format itself, `--format=unix`: without one, oxlint renders graphical frames outside an agent's shell — CI included — and the report refuses them rather than read them as a clean run.
 
 **A path is read for what it IS.** A directory with a `specs` segment below
 the project root that holds it is a tree, walked as one. Anything else is a project root, and takes the
@@ -423,7 +423,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 `jterrazz-test-check --member <dir>` runs them over one member. `jterrazz-test-check` with NO path runs both halves over the whole project: every `specs/` root discovered from the root manifest's `workspaces`, and every member. That is the run the ratchet rests on ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), so the contract is exactly "a path-less run reports what the per-root and per-member runs report" — and the discovery is the toolchain's, to the segment: a `workspaces` glob expands with `*` for one segment and `**` for any depth (bounded at six), and each member is walked for the spec roots it owns, a nested `web/specs` included. A shape `@jterrazz/typescript` reaches and this run did not would be a root its Test Conventions pass runs and the ratchet never counts.
 
-`--format json` prints `[{ code, file, line, message }]` on stdout and nothing else. `code` is `jterrazz-check(<name>)` — `jterrazz-check(no-unknown-token)`, `jterrazz-check(no-redundant-test-dependency)`.
+`--format json` prints the kit's findings, `[{ column, line, message, path, rule }]`, on stdout and nothing else, and the exit is still the verdict. `rule` is the key the ratchet counts, `jterrazz-check/<name>` — `jterrazz-check/no-unknown-token`, `jterrazz-check/no-redundant-test-dependency`.
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
@@ -449,13 +449,13 @@ ONE run owns it: the run over the whole project — path-less, a named project r
 
 It counts the project's checker findings; oxlint judges the plugin's diagnostics itself, against its suppressions file, in the Oxlint pass. It fails on a count above its entry, a key with findings and no entry, a count below its entry, an entry at zero, or a `jterrazz/<rule>` key left from before oxlint held its own.
 
-A project with no `test` section fails on any finding, and says in four parts, beneath the count, the gesture that records them.
+A project with no `test` section fails on any finding, and says in four parts, beneath the findings, the gesture that records them.
 
 #### What it prints
 
-- **Green, exactly one line** — `jterrazz.baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `jterrazz.baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run, and where the run stood and what ran are added only by `--verbose`.
+- **Green, exactly one line** — `jterrazz.baseline.json › test: 106 held across 7 rules`, every entry the section holds, the run's `routes/unreached` included, or `jterrazz.baseline.json › test: nothing held` when it holds none (a project with no section included) — whether the run checked, fixed or judged the root member. It is the form `typescript check` shows beside its own ratchet's; the held findings are not repeated on every run, and where the run stood and what ran are added above it only by `--verbose`. A fall `--fix` re-records is named above it, `re-recorded jterrazz.baseline.json › test › <key> <was> → <now>`.
 - **Failing**, every checker finding it counts, before the reasons, so a failing verdict and its evidence are one log. The plugin's diagnostics are oxlint's to print, in the Oxlint pass.
-- **`--format json`** prints the checker's findings whatever the verdict.
+- **`--format json`** prints the checker's findings whatever the verdict, and nothing else.
 
 The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
 

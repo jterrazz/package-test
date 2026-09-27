@@ -2,7 +2,7 @@ import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember } from '../../engine/checker/member-run.js';
-import { checkerMessage } from '../../engine/checker/tree-run.js';
+import { teacherOf } from '../../engine/checker/teacher.js';
 import { CHECKER } from './checker.js';
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
@@ -19,12 +19,12 @@ describe('checkMemberHasVitestConfig', () => {
 
         // Then - the finding names the budget and the fixtures that are running
         expect(violation?.rule).toBe('member-has-vitest-config');
-        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
-            'no vitest.config.ts',
-        );
-        expect(violation === undefined ? '' : checkerMessage(CHECKER, violation)).toContain(
-            'defineSpecConfig()',
-        );
+        expect(
+            violation === undefined ? '' : (teacherOf(CHECKER)([violation])[0]?.message ?? ''),
+        ).toContain('no vitest.config.ts');
+        expect(
+            violation === undefined ? '' : (teacherOf(CHECKER)([violation])[0]?.message ?? ''),
+        ).toContain('defineSpecConfig()');
     });
 
     test('members — members — the member pass — what a workspace member owes — the pass reaches a member with no specs/ root at all (`member-has-vitest-config`)', () => {

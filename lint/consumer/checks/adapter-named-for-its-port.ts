@@ -14,7 +14,7 @@ import { parseProgram } from '../../engine/project/module-parser.js';
 import { resolveSpecifier } from '../../engine/project/production.js';
 import { modulesUnder, setupFolderOf } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, isWithin, lineAt, readText } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 const ADAPTER_SUFFIX = '.adapter.ts';
 
@@ -106,8 +106,8 @@ function implementersOf(program: AstNode, ports: PortsImported): Implementer[] {
     return found;
 }
 
-function misnamedAdapters(rootDir: string, specsRoot: string): Finding[] {
-    const found: Finding[] = [];
+function misnamedAdapters(rootDir: string, specsRoot: string): Spotted[] {
+    const found: Spotted[] = [];
     for (const file of modulesUnder(specsRoot)) {
         if (setupFolderOf(specsRoot, file) === undefined) {
             continue;
@@ -125,7 +125,7 @@ function misnamedAdapters(rootDir: string, specsRoot: string): Finding[] {
         }
         const named = relative(specsRoot, join(dirname(file), adapterNameOf(first.port)));
         found.push({
-            file: relative(rootDir, file),
+            path: relative(rootDir, file),
             line: lineAt(text, first.at),
             fix: `name the file for the port it replaces: \`specs/${named}\` — the class keeps whatever name it has`,
             found: `\`${basename(file)}\`, whose \`${first.name}\` implements the port \`${first.port}\``,
@@ -135,6 +135,6 @@ function misnamedAdapters(rootDir: string, specsRoot: string): Finding[] {
     return found;
 }
 
-export function checkAdapterNamedForItsPort(rootDir: string): Finding[] {
+export function checkAdapterNamedForItsPort(rootDir: string): Spotted[] {
     return findSpecsRoots(rootDir).flatMap((specsRoot) => misnamedAdapters(rootDir, specsRoot));
 }

@@ -1,19 +1,25 @@
-import { refusal } from '@jterrazz/typescript/rules';
+import { labelOf, refusal } from '@jterrazz/typescript/rules';
+import type { Counts } from '@jterrazz/typescript/rules';
 
 import { COVERAGE_SECTION, drops } from '../../engine/baseline/coverage.js';
-import type { CoverageMetrics } from '../../engine/baseline/coverage.js';
 
 export function checkCoverageFloor(
-    floor: CoverageMetrics | undefined,
-    now: CoverageMetrics,
+    floor: Counts | undefined,
+    now: Counts,
     scope: string,
 ): string[] {
     if (floor === undefined) {
         return [
-            `jterrazz.baseline.json › ${COVERAGE_SECTION} has no \`${scope}\` floor — run \`npm run coverage\` to record one.`,
+            refusal({
+                fix: 'run `npm run coverage`, which records the floor the suite reached',
+                found: `${labelOf(COVERAGE_SECTION)} holds no \`${scope}\` floor`,
+                read: 'docs/03-testing.md#coverage-is-a-ratchet-not-a-threshold',
+                why: 'a scope with no floor is held to nothing, so its coverage could fall unseen',
+            }),
         ];
     }
-    return drops(floor, now, scope).map(({ teaching }) =>
+
+    return drops(floor, now).map(({ teaching }) =>
         refusal({ ...teaching, read: 'docs/03-testing.md#coverage-is-a-ratchet-not-a-threshold' }),
     );
 }

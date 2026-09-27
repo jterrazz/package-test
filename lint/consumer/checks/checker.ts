@@ -1,7 +1,11 @@
 import { fixSpecFiles } from '../../engine/checker/documents.js';
-import type { Finding as CheckerFinding } from '../../engine/checker/finding.js';
 import { walkGround } from '../../engine/checker/ground-walk.js';
-import type { CheckerRegistry, GroundPasses, MemberRead } from '../../engine/checker/registry.js';
+import type {
+    CheckerRegistry,
+    Spotted as CheckerSpotted,
+    GroundPasses,
+    MemberRead,
+} from '../../engine/checker/registry.js';
 import type { DocumentFinding as CheckerDocumentFinding } from '../../engine/project/document-model.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
@@ -109,7 +113,7 @@ export const CHECKER_PASS_IDS: string[] = [
 
 export type CheckerPassId = (typeof MEMBER_PASS_IDS)[number] | (typeof TREE_PASS_IDS)[number];
 
-export type Finding<PassId extends string = CheckerPassId> = CheckerFinding<PassId>;
+export type Spotted<PassId extends string = CheckerPassId> = CheckerSpotted<PassId>;
 
 export type DocumentFinding = CheckerDocumentFinding<CheckerPassId>;
 
@@ -155,7 +159,7 @@ function memberFindings({
     memberDir,
     rootDir,
     subject,
-}: MemberRead): CheckerFinding[] {
+}: MemberRead): CheckerSpotted[] {
     return [
         ...(config === null ? checkMemberHasVitestConfig(manifest, memberDir, label, subject) : []),
         ...(config === null ? [] : checkNoSimulatedDomInConfig(config, rootDir)),

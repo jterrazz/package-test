@@ -10,8 +10,7 @@ import { join, relative } from 'node:path';
 import { SPEC_EXTENSION } from '../project/spec-document.js';
 import { decodeText } from '../project/tree.js';
 import { runDocument } from './documents.js';
-import type { Finding } from './finding.js';
-import type { GroundEntry, GroundPasses } from './registry.js';
+import type { GroundEntry, GroundPasses, Spotted } from './registry.js';
 
 type Ground = typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SEEDS;
 
@@ -20,7 +19,7 @@ const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SE
 /** `_fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
 const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
-function documentFindings(entry: GroundEntry, passes: GroundPasses): Finding[] {
+function documentFindings(entry: GroundEntry, passes: GroundPasses): Spotted[] {
     const text = decodeText(entry.path);
     return [
         ...passes.document({ name: entry.name, rel: entry.rel, text }),
@@ -33,7 +32,7 @@ function groundFindings(
     inside: Ground,
     atTop: boolean,
     passes: GroundPasses,
-): Finding[] {
+): Spotted[] {
     if (inside === GROUND_SEEDS) {
         return passes.seed(entry);
     }
@@ -49,8 +48,8 @@ function nextGround(name: string, inside: Ground | null): Ground | null {
     return GROUND_DIRS.has(name) ? (name as Ground) : inside;
 }
 
-export function walkGround(rootDir: string, passes: GroundPasses): Finding[] {
-    const findings: Finding[] = [];
+export function walkGround(rootDir: string, passes: GroundPasses): Spotted[] {
+    const findings: Spotted[] = [];
     const visit = (dir: string, inside: Ground | null): void => {
         let entries;
         try {

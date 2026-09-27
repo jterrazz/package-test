@@ -12,7 +12,7 @@ import {
 import type { SpecModel } from '../../engine/project/spec-model.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { lineAt, listFiles, readSource, readText } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 
 function localRunnerBindings(text: string): Set<string> {
     const locals = new Set<string>();
@@ -38,8 +38,8 @@ function memberObjectIdentifier(text: string, dotIndex: number): null | string {
     return match === null ? match : (match.groups?.name ?? null);
 }
 
-export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
-    const violations: Finding[] = [];
+export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Spotted[] {
+    const violations: Spotted[] = [];
     const enforced = new Map<string, SpecModel>();
     for (const file of listFiles(rootDir, (path) => path.endsWith('.specification.ts'))) {
         const model = modelSpecFile(file);
@@ -89,7 +89,7 @@ export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
             }
             if (count >= 2 && !hasDatabase) {
                 violations.push({
-                    file: rel,
+                    path: rel,
                     line,
                     fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
                     found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
@@ -97,7 +97,7 @@ export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
                 });
             } else if (count === 1 && hasDatabase) {
                 violations.push({
-                    file: rel,
+                    path: rel,
                     line,
                     fix: `delete the \`{ database }\` option of \`.${verb}()\``,
                     found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,

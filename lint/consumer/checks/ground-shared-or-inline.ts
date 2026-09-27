@@ -17,7 +17,7 @@ import type { Span } from '../../engine/project/spec-values.js';
 import { closingOf, literalEnd, withoutComments } from '../../engine/project/subject.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { blankComments, findSpecsRoots, listFiles } from '../../engine/project/tree.js';
-import type { Finding } from './checker.js';
+import type { Spotted } from './checker.js';
 import {
     checkGroundPlacement,
     fixGroundPlacement,
@@ -383,12 +383,12 @@ function capFix(oversized: Oversized, target: string): string {
         : `move it to ${target} and name it with file('${target}') — \`make fix\` moves it`;
 }
 
-function capFinding(rootDir: string, oversized: Oversized): Finding {
+function capFinding(rootDir: string, oversized: Oversized): Spotted {
     const kind = oversized.role === GROUND_EXPECTED ? 'an expectation' : 'a request';
     const target = `./${oversized.role}/${oversized.name}${oversized.extension ?? ''}`;
     return {
         column: oversized.column,
-        file: relative(rootDir, oversized.file),
+        path: relative(rootDir, oversized.file),
         fix: capFix(oversized, target),
         found: `${kind} of ${oversized.lines} lines written in the test, past the ${oversized.role}/ cap of ${INLINE_CAPS[oversized.role] ?? 0}`,
         line: oversized.line,
@@ -396,10 +396,10 @@ function capFinding(rootDir: string, oversized: Oversized): Finding {
     };
 }
 
-export function checkGroundSharedOrInline(rootDir: string): Finding[] {
+export function checkGroundSharedOrInline(rootDir: string): Spotted[] {
     const single = singleUseFiles(rootDir).map(({ reference, target }) => ({
         column: reference.column,
-        file: relative(rootDir, reference.file),
+        path: relative(rootDir, reference.file),
         line: reference.line,
         fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`make fix\` inlines it`,
         found: `${relative(rootDir, target)}, read by this test alone`,
@@ -410,7 +410,7 @@ export function checkGroundSharedOrInline(rootDir: string): Finding[] {
         ...single,
         ...oversizedValues(rootDir).map((oversized) => capFinding(rootDir, oversized)),
         ...checkInlineSeeds(rootDir),
-        ...checkGroundPlacement(rootDir).filter((finding) => !inlined.has(finding.file)),
+        ...checkGroundPlacement(rootDir).filter((finding) => !inlined.has(finding.path)),
     ];
 }
 

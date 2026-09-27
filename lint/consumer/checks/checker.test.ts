@@ -6,7 +6,6 @@ import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember, runMembers } from '../../engine/checker/member-run.js';
-import { runTree } from '../../engine/checker/tree-run.js';
 import { checkoutUnder } from '../../engine/testing/package-tree.fixtures.js';
 import { CHECKER } from './checker.js';
 
@@ -33,9 +32,10 @@ function repository(files: string[], add: string[], ignore = ''): string {
     return root;
 }
 function findings(root: string, rule: string): string[] {
-    return runTree(join(root, 'specs'), CHECKER)
+    return CHECKER.tree
+        .flatMap((pass) => pass(join(root, 'specs')))
         .filter((violation) => violation.rule === rule)
-        .map((violation) => `${violation.file}:${violation.line}: ${violation.found}`)
+        .map((violation) => `${violation.path}:${violation.line}: ${violation.found}`)
         .toSorted();
 }
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');

@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import type { Finding } from '../../engine/checker/finding.js';
+import type { Spotted } from '../../engine/checker/registry.js';
 import {
     byPosition,
     finding,
@@ -58,7 +58,7 @@ function reachable(from: string, inside: string, readers: DeliveryReaders): bool
 function reachesBelowTheSurface(
     references: ProductionReference[],
     readers: DeliveryReaders,
-): Finding<SelfPassId>[] {
+): Spotted<SelfPassId>[] {
     return references.flatMap(({ from, reference }) => {
         const target = targetOf(from, reference.specifier);
         if (!target.startsWith(STUBS) || reachable(from, target.slice(STUBS.length), readers)) {
@@ -81,7 +81,7 @@ function reachesBelowTheSurface(
 function edgesNobodyTakes(
     references: ProductionReference[],
     readers: DeliveryReaders,
-): Finding<SelfPassId>[] {
+): Spotted<SelfPassId>[] {
     const taken = new Set(
         references.map(({ from, reference }) => `${from} → ${targetOf(from, reference.specifier)}`),
     );
@@ -100,7 +100,7 @@ function edgesNobodyTakes(
 export function checkStubsReachedByTheirSurface(
     root: string,
     readers: DeliveryReaders = DELIVERY_READERS,
-): Finding<SelfPassId>[] {
+): Spotted<SelfPassId>[] {
     const references = productionReferences(root).filter(
         ({ from, reference }) => reference.specifier.startsWith('.') && !from.startsWith(STUBS),
     );
