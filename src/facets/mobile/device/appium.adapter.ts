@@ -1,13 +1,13 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
+import { scenarioFailure } from '../../../kernel/refusals/scenario-failure.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
@@ -115,23 +115,6 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     };
 }
 
-function scenarioFailure(error: unknown, suffix: string): Error {
-    if (error instanceof Error && missingParts(error.message).length === 0) {
-        error.message += suffix;
-        return error;
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(
-        refusal({
-            fix: 'correct the step that failed, or the screen it drives',
-            found: `the open scenario failed:\n  ${message.replaceAll('\n', '\n  ')}${suffix}`,
-            read: 'docs/09-mobile.md#open-scenarios--the-when',
-            why: 'An open scenario drives the screen step by step, and the first step that fails ends it.',
-        }),
-        { cause: error },
-    );
-}
-
 /** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */
 export class AppiumAdapter implements DevicePort {
     private readonly actionTimeoutMs: number;
@@ -187,8 +170,7 @@ export class AppiumAdapter implements DevicePort {
                 await options.scenario(this.createVisitor(driver));
             } catch (error) {
                 const evidence = await this.captureEvidence(driver);
-                const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                throw scenarioFailure(error, suffix);
+                throw scenarioFailure(error, evidence, 'open');
             }
         }
 

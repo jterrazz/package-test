@@ -3,7 +3,6 @@ import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
-import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
 import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
@@ -11,6 +10,7 @@ import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/cand
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
+import { scenarioFailure } from '../../../kernel/refusals/scenario-failure.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -279,23 +279,6 @@ function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {
     return shared;
 }
 
-function scenarioFailure(error: unknown, suffix: string): Error {
-    if (error instanceof Error && missingParts(error.message).length === 0) {
-        error.message += suffix;
-        return error;
-    }
-    const message = error instanceof Error ? error.message : String(error);
-    return new Error(
-        refusal({
-            fix: 'correct the step that failed, or the page it drives',
-            found: `the visit scenario failed:\n  ${message.replaceAll('\n', '\n  ')}${suffix}`,
-            read: 'docs/08-website.md#visit-scenarios--the-when',
-            why: 'A visit scenario drives the page step by step, and the first step that fails ends it.',
-        }),
-        { cause: error },
-    );
-}
-
 /** One browser per worker, launched lazily; each visit gets a fresh `BrowserContext`. */
 export class PlaywrightAdapter implements BrowserPort {
     private readonly browser: () => Promise<Browser>;
@@ -362,8 +345,7 @@ export class PlaywrightAdapter implements BrowserPort {
                     await options.scenario(createVisitor(page, options.baseUrl));
                 } catch (error) {
                     const evidence = await this.captureEvidence(page);
-                    const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                    throw scenarioFailure(error, suffix);
+                    throw scenarioFailure(error, evidence, 'visit');
                 }
             }
 
