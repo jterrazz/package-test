@@ -70,19 +70,32 @@ export type FacetProjectOptions = {
     timeout?: number;
 };
 
-/** Group order: node projects 0, website 1, component 2, mobile 3, so two Chromiums never share a slot on a two-vCPU runner and a simulator runs alone. */
+type CanonicalGlobs = { exclude?: string[]; include: string[] };
+
+type ProjectTest = NonNullable<TestProjectInlineConfiguration['test']>;
+
+/** A stated `include` or `exclude` replaces the canonical one; the group is 0 until a facet states its own. */
+export function projectTest(
+    name: string,
+    options: FacetProjectOptions,
+    canonical: CanonicalGlobs,
+): ProjectTest {
+    const exclude = options.exclude ?? canonical.exclude;
+    return {
+        ...(exclude === undefined ? {} : { exclude }),
+        include: options.include ?? canonical.include,
+        ...(options.serial === true ? { fileParallelism: false } : {}),
+        name,
+        sequence: { groupOrder: 0 },
+        ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
+    };
+}
+
 export function facetProject(
     facet: string,
     options: FacetProjectOptions,
 ): TestProjectInlineConfiguration {
     return onProjectDefaults({
-        test: {
-            ...(options.exclude === undefined ? {} : { exclude: options.exclude }),
-            include: options.include ?? [`specs/${facet}/**/*.spec.ts`],
-            ...(options.serial === true ? { fileParallelism: false } : {}),
-            name: facet,
-            sequence: { groupOrder: 0 },
-            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
-        },
+        test: projectTest(facet, options, { include: [`specs/${facet}/**/*.spec.ts`] }),
     });
 }

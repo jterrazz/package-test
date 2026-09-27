@@ -8,7 +8,7 @@ import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/proj
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { callerFrames } from '../../kernel/files/caller.js';
 import type { FacetProjectOptions } from '../../vitest/project.js';
-import { onProjectDefaults } from '../../vitest/project.js';
+import { onProjectDefaults, projectTest } from '../../vitest/project.js';
 import { mswWorkerScript } from '../../world/stubs/delivery/browser-page/worker-script.js';
 import { COMPONENT_COMMANDS } from './golden/commands.js';
 
@@ -249,16 +249,6 @@ function viewportOf(options: ComponentProjectOptions): { height: number; width: 
     return options.viewport ?? { height: 720, width: 1280 };
 }
 
-function componentGlobs(options: ComponentProjectOptions): {
-    exclude: string[];
-    include: string[];
-} {
-    return {
-        exclude: options.exclude ?? (options.include === undefined ? ['specs/**'] : []),
-        include: options.include ?? ['**/*.test.tsx'],
-    };
-}
-
 /** A component project: renders in a real Chromium; the default `exclude` keeps it out of `specs/`. */
 export async function component(
     options: ComponentProjectOptions = {},
@@ -293,16 +283,16 @@ export async function component(
                 screenshotDirectory: SCREENSHOTS_DIR,
                 viewport: viewportOf(options),
             },
-            ...componentGlobs(options),
-            ...(options.serial === true ? { fileParallelism: false } : {}),
-            name: 'component',
+            ...projectTest('component', options, {
+                exclude: options.include === undefined ? ['specs/**'] : [],
+                include: ['**/*.test.tsx'],
+            }),
             // The page has no `process.env`/`argv`, and imports the wrap by URL: both cross as provided values.
             provide: providedToPage(options),
             ...(options.wrap === undefined
                 ? {}
                 : { setupFiles: [writeSetupFile(options.wrap, root)] }),
             sequence: { groupOrder: 2 },
-            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
     };
     return onProjectDefaults(project);

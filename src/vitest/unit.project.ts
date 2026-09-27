@@ -1,7 +1,7 @@
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import type { FacetProjectOptions } from './project.js';
-import { onProjectDefaults } from './project.js';
+import { onProjectDefaults, projectTest } from './project.js';
 
 /** `unit()` — module tests, beside the modules they cover (rule `test-beside-its-module`). */
 export type UnitProjectOptions = FacetProjectOptions & {
@@ -16,13 +16,11 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
     const fromRoots = options.roots?.map((root) => `${root.replace(/\/+$/u, '')}/**/*.test.ts`);
     return onProjectDefaults({
         test: {
-            exclude: options.exclude ?? ['specs/**', '**/*.test.tsx'],
-            include: options.include ?? fromRoots ?? ['**/*.test.ts'],
+            ...projectTest('unit', options, {
+                exclude: ['specs/**', '**/*.test.tsx'],
+                include: fromRoots ?? ['**/*.test.ts'],
+            }),
             ...(options.isolate === undefined ? {} : { isolate: options.isolate }),
-            ...(options.serial === true ? { fileParallelism: false } : {}),
-            name: 'unit',
-            sequence: { groupOrder: 0 },
-            ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },
     });
 }
