@@ -10,7 +10,7 @@ const CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
 
 const DEPCRUISE = join(ROOT, 'node_modules/.bin/depcruise');
 
-type Diagnostic = { code: string; filename: string; message: string };
+type Row = { message: string; path: string; rule: string };
 
 function writeTargets(tree: string, files: Record<string, string>): void {
     for (const [from, text] of Object.entries(files)) {
@@ -39,13 +39,13 @@ function violationsIn(files: Record<string, string>): string[] {
             [CHECKER, 'architecture', '.', '--depcruise', DEPCRUISE, '--format', 'json'],
             { cwd: tree, encoding: 'utf8' },
         );
-        const { diagnostics } = JSON.parse(stdout) as { diagnostics: Diagnostic[] };
+        const rows = JSON.parse(stdout) as Row[];
 
-        return diagnostics
-            .map(({ code, filename, message }) => {
+        return rows
+            .map(({ message, path, rule }) => {
                 const to = /imports `(?<to>[^`]+)`/u.exec(message)?.groups?.to ?? '';
 
-                return `${filename.replace(/:\d+:\d+$/u, '')} → ${to.replace(/^.*node_modules\//u, 'node_modules/')}  ${code.replace(/^architecture\((?<rule>.+)\)$/u, '$<rule>')}`;
+                return `${path.replace(/:\d+:\d+$/u, '')} → ${to.replace(/^.*node_modules\//u, 'node_modules/')}  ${rule.replace(/^architecture\//u, '')}`;
             })
             .toSorted();
     } finally {
