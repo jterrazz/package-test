@@ -49,6 +49,9 @@ export const FACET_MATRIX_EXEMPTIONS: Readonly<Record<string, Partial<Record<Col
     'Constructor option · root': {
         lint: 'a lint specification resolves its plugins and checkers from the project it sits in, and `no-redundant-root` refuses a `root` the walk already finds; the option is proven where a facet runs a product of its own (api, integration)',
     },
+    'Constructor option · settings': {
+        lint: "what a repository adds beside its presets is `@jterrazz/typescript`'s to resolve, and its own lint specs run it (`declared-preset-lint`); this package states its additions as the `self()` preset, which `presets` carries",
+    },
 };
 
 export const FACET_MATRIX_CAPABILITIES: Capability[] = [
