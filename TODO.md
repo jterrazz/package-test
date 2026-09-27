@@ -63,7 +63,7 @@ probe that suggested it was confounded by two Vite versions. The proof owed is a
 spike inside a `jterrazz-web` worktree; until it lands, chapter 07 sends a consumer to the
 app's own `vite.config.ts`.
 
-## 5. Defects and debt found by vision/17
+## 5. Known defects and debt
 
 - **A server command outlives a killed run.** `serve.ts` spawns every `process()` service
   and the run's Appium server `detached`, in a process group of its own, so a vitest killed
