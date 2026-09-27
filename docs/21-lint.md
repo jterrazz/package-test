@@ -132,7 +132,9 @@ A linter that fails and reports no diagnostic is refused in four parts rather th
 
 ### A rule alone: `ruleTester()`
 
-A rule's visitor, on snippets, is a module test beside the rule. `ruleTester()` is oxlint's `RuleTester` (`oxlint/plugins-dev`) bound to vitest — its suites and cases are vitest's — and it requires a position on every invalid case: each expected error is an object stating its `line` and `column`. A count, or an error with no position, is refused before the case runs, since it passes for a report on any node.
+A rule's visitor, on snippets, is a module test beside the rule. `ruleTester()` is oxlint's `RuleTester` (`oxlint/plugins-dev`) bound to vitest — its suites and cases are vitest's — and it requires a position on every invalid case: each expected error is an object stating its `line` and `column`. A count, an empty list, or an error with no position, is refused before the case runs, since it passes for a report on any node.
+
+The two tools count columns differently, and each keeps its own convention: `ruleTester()` reads oxlint's RuleTester columns, **0-based** — `column: 25` below is the `setTimeout` at index 25 — while a lint spec's report prints the compiler's `file:line:column`, **1-based**, so the same finding reads `:1:26` there.
 
 ```typescript
 // src/rules/no-sleep.test.ts
