@@ -11,7 +11,12 @@ const STUBS = 'src/world/stubs/';
 
 const ENTRIES = new Set(['src/index.browser.ts', 'src/index.ts']);
 
-const SURFACE = [/^stub\.ts$/u, /^exchange\.ts$/u, /^kinds\//u, /^intercept\//u];
+const SURFACE = [
+    /^stub\.ts$/u,
+    /^exchange\.ts$/u,
+    /^kinds\//u,
+    /^intercept\/intercept(?:\.capability|\.port)?\.ts$/u,
+];
 
 const CHANNEL_PICK = /^delivery\/[a-z-]+\/intercept\.ts$/u;
 
@@ -56,7 +61,7 @@ export function checkStubsReachedByTheirSurface(root: string): Finding<SelfPassI
                     'stubs-reached-by-their-surface',
                     from,
                     {
-                        fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`lint/self/checks/stubs-reached-by-their-surface.ts\`)`,
+                        fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\`, \`intercept/intercept.port.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`lint/self/checks/stubs-reached-by-their-surface.ts\`)`,
                         found: `\`${target}\` is reached from outside the stubs, below their surface`,
                     },
                     reference,
