@@ -153,7 +153,6 @@ async function reroot(
     return kept;
 }
 
-/** A dependency Vite finds only when a test imports it is optimised then, and the reload fails the loading tests. */
 function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include: string[] } {
     const own = typeof declared === 'object' && declared !== null ? { ...declared } : {};
     const listed = 'include' in own && Array.isArray(own.include) ? own.include : [];
@@ -263,7 +262,6 @@ export async function component(
     const project = {
         ...pipeline,
         ...jsxPipeline(pipeline),
-        // A cold Vite cache optimises during the first run and reloads the tester mid-flight: a fresh CI checkout is that state.
         optimizeDeps: optimizeDepsOf(pipeline.optimizeDeps),
         plugins: [mswWorkerPlugin(), ...consumerPlugins],
         test: {
@@ -287,7 +285,6 @@ export async function component(
                 exclude: options.include === undefined ? ['specs/**'] : [],
                 include: ['**/*.test.tsx'],
             }),
-            // The page has no `process.env`/`argv`, and imports the wrap by URL: both cross as provided values.
             provide: providedToPage(options),
             ...(options.wrap === undefined
                 ? {}
