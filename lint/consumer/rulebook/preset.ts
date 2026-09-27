@@ -10,7 +10,7 @@ import {
     whyOf,
 } from '@jterrazz/typescript/rules';
 
-import { TEST_DEFAULTS } from '../../engine/project/test-section.js';
+import { TEST_DEFAULTS, TEST_SECTION } from '../../engine/project/test-section.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
@@ -212,9 +212,9 @@ const NAMES: NamesRule[] = [
 
 export function testPreset(): Preset {
     return {
-        baseline: ['test'],
+        baseline: [TEST_SECTION],
         layers: LAYERS,
-        name: 'test',
+        name: TEST_SECTION,
         names: NAMES,
         oxlint: {
             jsPlugins: ['@jterrazz/test/oxlint'],

@@ -4,11 +4,11 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { heldUnreached, recordUnreached, writeBaseline } from './ratchet.js';
+import { heldUnreached, recordUnreached, writeBaseline } from './test-baseline.js';
 
 const FILE = 'jterrazz.baseline.json';
 
-describe('ratchet', () => {
+describe('test-baseline', () => {
     test("the test ratchet — a recording keeps the routes the run holds, which are the run's", () => {
         // Given - a test section holding a checker key and the run's route key
         const root = mkdtempSync(join(tmpdir(), 'ratchet-'));

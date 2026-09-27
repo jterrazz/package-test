@@ -1,4 +1,8 @@
+import { readSettings, readSettingsSync } from '@jterrazz/typescript/rules';
+
 import type { TestSettings } from './settings.js';
+
+export const TEST_SECTION = 'test';
 
 export type ReadTestSettings = Pick<TestSettings, 'routes'> &
     Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>>;
@@ -43,4 +47,13 @@ export function testSettingsOf(test: unknown): ReadTestSettings {
         production: allow === undefined ? TEST_DEFAULTS.production : { allow },
         ...(typeof section.routes === 'string' ? { routes: section.routes } : {}),
     };
+}
+
+/** Every pass is sync, so the file is loaded synchronously, once per process; the runtime reads the same resolution, so the run and the checker agree. A file that does not resolve is no settings: the toolchain already reports it. */
+export const testSettingsAtSync = (root: string): ReadTestSettings =>
+    testSettingsOf(readSettingsSync(root).resolved.sections[TEST_SECTION]);
+
+export async function testSettingsAt(root: string): Promise<ReadTestSettings> {
+    const { resolved } = await readSettings(root);
+    return testSettingsOf(resolved.sections[TEST_SECTION]);
 }

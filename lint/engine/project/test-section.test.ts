@@ -3,10 +3,10 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { testSectionAt, testSettingsAt } from './test-settings.js';
+import { testSettingsAt, testSettingsAtSync } from './test-section.js';
 
 function unit(config?: string): string {
-    const root = mkdtempSync(join(tmpdir(), 'test-settings-'));
+    const root = mkdtempSync(join(tmpdir(), 'test-section-'));
     if (config !== undefined) {
         writeFileSync(join(root, 'jterrazz.config.ts'), config);
     }
@@ -15,7 +15,7 @@ function unit(config?: string): string {
 
 const DEFAULTS = { collections: [], methodless: [], production: { allow: {} } };
 
-describe('test-settings', () => {
+describe('test-section', () => {
     test('the test section of jterrazz.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
         // Given - a config typed as a repository writes it
         const root = unit(
@@ -23,7 +23,7 @@ describe('test-settings', () => {
         );
 
         // Then - the section, as declared
-        expect(testSettingsAt(root)).toStrictEqual({
+        expect(testSettingsAtSync(root)).toStrictEqual({
             collections: ['data', 'people'],
             methodless: [],
             production: { allow: {} },
@@ -35,7 +35,7 @@ describe('test-settings', () => {
         const root = unit("export default { test: { methodless: ['/mcp'] } };\n");
 
         // Then - the paths, as declared
-        expect(testSettingsAt(root)).toStrictEqual({
+        expect(testSettingsAtSync(root)).toStrictEqual({
             collections: [],
             methodless: ['/mcp'],
             production: { allow: {} },
@@ -49,7 +49,7 @@ describe('test-settings', () => {
         );
 
         // Then - the allow list, reasons and all
-        expect(testSettingsAt(root)).toStrictEqual({
+        expect(testSettingsAtSync(root)).toStrictEqual({
             collections: [],
             methodless: [],
             production: { allow: { playwright: 'the gate drives a browser in production' } },
@@ -63,7 +63,7 @@ describe('test-settings', () => {
         );
 
         // Then - nothing is allowed
-        expect(testSettingsAt(root)).toStrictEqual(DEFAULTS);
+        expect(testSettingsAtSync(root)).toStrictEqual(DEFAULTS);
     });
 
     test('the test section of jterrazz.config.ts, as the checker reads it — no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
@@ -76,7 +76,7 @@ describe('test-settings', () => {
         ];
 
         // Then - each reads as the defaults
-        expect(roots.map((root) => testSettingsAt(root))).toStrictEqual([
+        expect(roots.map((root) => testSettingsAtSync(root))).toStrictEqual([
             DEFAULTS,
             DEFAULTS,
             DEFAULTS,
@@ -91,7 +91,7 @@ describe('test-settings', () => {
         );
 
         // Then - both reach the run as declared
-        await expect(testSectionAt(root)).resolves.toStrictEqual({
+        await expect(testSettingsAt(root)).resolves.toStrictEqual({
             collections: [],
             methodless: ['/mcp'],
             production: { allow: {} },
@@ -104,7 +104,7 @@ describe('test-settings', () => {
         const roots = [unit(), unit('export default { test: { routes: 42 } };\n')];
 
         // Then - neither declares anything the run would half-use
-        await expect(Promise.all(roots.map(testSectionAt))).resolves.toStrictEqual([
+        await expect(Promise.all(roots.map(testSettingsAt))).resolves.toStrictEqual([
             DEFAULTS,
             DEFAULTS,
         ]);
@@ -122,7 +122,7 @@ describe('test-settings', () => {
         );
 
         // Then - the preset's default and the unit's own addition, merged
-        expect(testSettingsAt(root)).toStrictEqual({
+        expect(testSettingsAtSync(root)).toStrictEqual({
             collections: ['data', 'people'],
             methodless: [],
             production: { allow: {} },

@@ -3,9 +3,9 @@ import type { Context, Finding, Pass, PassResult } from '@jterrazz/typescript/ru
 import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-import { BASELINE_SECTION } from '../baseline/ratchet.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { projectRootOf } from '../project/role.js';
+import { TEST_SECTION } from '../project/test-section.js';
 import { unformattedSpecFiles } from './documents.js';
 import { runMember, runMembers } from './member-run.js';
 import { applyOwnFixes } from './own-fixes.js';
@@ -44,14 +44,14 @@ function unformattedRefusals(root: string, specsRoots: readonly string[]): strin
 }
 
 function pluginKeysLeft(root: string): string[] {
-    return Object.keys(sectionOf(root, BASELINE_SECTION) ?? {})
+    return Object.keys(sectionOf(root, TEST_SECTION) ?? {})
         .filter((key) => key.startsWith(PLUGIN_PREFIX))
         .toSorted()
         .map(
             (key) =>
-                `baseline-ratchet  ${labelOf(BASELINE_SECTION)}  ${refusal({
+                `baseline-ratchet  ${labelOf(TEST_SECTION)}  ${refusal({
                     fix: "run 'typescript baseline', then 'jterrazz-test-check baseline'",
-                    found: `\`${key}\` is held in the ${BASELINE_SECTION} section`,
+                    found: `\`${key}\` is held in the ${TEST_SECTION} section`,
                     read: 'docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
                     why: "the plugin's rules are oxlint's own, held file by file in oxlint-suppressions.json — one finding, one judge",
                 })}`,
@@ -99,7 +99,7 @@ type Judged = {
 function judgedWhere({ context }: Run, judged: Judged, deferring: boolean): PassResult {
     const { findings, fixes = [], passes, refusals = [], what } = judged;
     const judge = process.cwd();
-    const deferred = deferring && keepsSection(judge, BASELINE_SECTION);
+    const deferred = deferring && keepsSection(judge, TEST_SECTION);
 
     return {
         ...(refusals.length > 0 ? { failed: true } : {}),
@@ -110,7 +110,7 @@ function judgedWhere({ context }: Run, judged: Judged, deferring: boolean): Pass
             ...refusals,
             ...(deferred && findings.length > 0
                 ? [
-                      `conventions checker: ${String(findings.length)} finding(s) ${what}, judged by ${relative(judge, join(judge, BASELINE)) || BASELINE} › ${BASELINE_SECTION}`,
+                      `conventions checker: ${String(findings.length)} finding(s) ${what}, judged by ${relative(judge, join(judge, BASELINE)) || BASELINE} › ${TEST_SECTION}`,
                   ]
                 : []),
             ...(context.has('--verbose')
@@ -144,7 +144,7 @@ function memberRun(run: Run, member: string): PassResult {
     if (context.fix) {
         applyOwnFixes(root);
     }
-    const spotted = keepsSection(root, BASELINE_SECTION)
+    const spotted = keepsSection(root, TEST_SECTION)
         ? projectSpotted(registry, root)
         : runMember(dir, root, registry);
 

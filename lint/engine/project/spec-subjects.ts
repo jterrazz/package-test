@@ -15,7 +15,7 @@ import {
 } from './subject.js';
 import type { Subject, SubjectReading } from './subject.js';
 import { suppressedLines } from './suppression.js';
-import { testSettingsAt } from './test-settings.js';
+import { testSettingsAtSync } from './test-section.js';
 import { listFiles } from './tree.js';
 
 /** A spec of a specimen (`lint/engine/project/specimen.ts`) is out of reach: it is filed by the capability it specifies. Every move keeps each path the code names pointing where it pointed. */
@@ -95,7 +95,7 @@ function readBeside(file: string, path: string): string | undefined {
 }
 
 function readingOf(specsRoot: string, file: string, text: string): SubjectReading {
-    const { collections, methodless } = testSettingsAt(
+    const { collections, methodless } = testSettingsAtSync(
         projectRootOf(specsRoot) ?? dirname(specsRoot),
     );
     const commands: Record<string, readonly string[]> = {};

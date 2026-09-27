@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { testSectionAt } from '../../../../lint/engine/project/test-settings.js';
+import { testSettingsAt } from '../../../../lint/engine/project/test-section.js';
 import { parseYamlSource } from '../../../../lint/engine/project/yaml-document.js';
 
 /** Measured against the app's own route table (Hono's `app.routes`) or a declared OpenAPI document. */
@@ -81,7 +81,7 @@ export function openApiRoutes(text: string, json: boolean): Route[] {
 }
 
 export async function declaredRoutes(root: string): Promise<Route[] | undefined> {
-    const { routes } = await testSectionAt(root);
+    const { routes } = await testSettingsAt(root);
     if (routes === undefined) {
         return undefined;
     }
@@ -89,6 +89,6 @@ export async function declaredRoutes(root: string): Promise<Route[] | undefined>
 }
 
 export async function declaredMethodless(root: string): Promise<string[]> {
-    const { methodless } = await testSectionAt(root);
+    const { methodless } = await testSettingsAt(root);
     return [...methodless];
 }

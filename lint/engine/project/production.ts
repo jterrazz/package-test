@@ -21,7 +21,7 @@ import type { AstNode, ImportSource } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
-import { testSettingsAt } from './test-settings.js';
+import { testSettingsAtSync } from './test-section.js';
 
 const SOURCE = /\.[cm]?[jt]sx?$/u;
 
@@ -391,7 +391,7 @@ function reachFrom(
 
 export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
     const root = packageRootOf(dirname(filename));
-    const allow = root === undefined ? undefined : testSettingsAt(root).production.allow;
+    const allow = root === undefined ? undefined : testSettingsAtSync(root).production.allow;
     return new Set(Object.keys(allow ?? {}));
 }
 
