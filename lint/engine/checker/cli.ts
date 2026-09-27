@@ -13,6 +13,7 @@ import {
 } from '../baseline/ratchet.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { projectRootOf } from '../project/role.js';
+import { unformattedSpecFiles } from './documents.js';
 import { CHECKER_NAMESPACE } from './finding.js';
 import type { Finding } from './finding.js';
 import { runMember, runMembers } from './member-run.js';
@@ -36,6 +37,7 @@ type Run = {
     fix: boolean;
     json: boolean;
     registry: CheckerRegistry;
+    unformatted: number;
     verbose: boolean;
 };
 
@@ -109,7 +111,7 @@ function verdict(
             run,
             `conventions checker: ${violations.length} finding(s) ${what}, judged by ${relative(process.cwd(), join(deferredTo, BASELINE_FILE)) || BASELINE_FILE} › test`,
         );
-        stop(0);
+        settle(run);
     }
     if (violations.length > 0) {
         say(run, `\nconventions checker: ${violations.length} error(s) found ${what}`);
@@ -122,7 +124,7 @@ function verdict(
                 : NOTHING_HELD,
         );
     }
-    stop(0);
+    settle(run);
 }
 
 type RatchetRun = Verdict & {
@@ -169,10 +171,31 @@ function judgeHeld(run: Run, ratchetRun: RatchetRun): never {
     if (!run.json) {
         console.log(heldSummary(run, baseline, { passes, what }));
     }
-    stop(0);
+    settle(run);
+}
+
+/** A document out of its format is the formatter's, never debt: `--fix` writes it, and nothing holds it. */
+function refuseUnformatted(run: Run, files: readonly string[]): void {
+    run.unformatted = files.length;
+    for (const file of files) {
+        console.error(
+            `${file}  found: a spec document out of its format · why: one key order and block-scalar streams make every document read and diff alike, and the formatter writes them · fix: run 'jterrazz-test-check --fix' (make fix), which orders its keys and writes its streams as block scalars · read: docs/20-documents.md#the-schema-and-the-format`,
+        );
+    }
+}
+
+function settle(run: Run): never {
+    stop(run.unformatted > 0 ? 1 : 0);
+}
+
+function unformattedUnder(root: string): string[] {
+    return discoverSpecRoots(root).flatMap((specsRoot) =>
+        unformattedSpecFiles(specsRoot).map((rel) => relative(root, join(specsRoot, rel))),
+    );
 }
 
 function ratchet(run: Run, ratchetRun: RatchetRun): never {
+    refuseUnformatted(run, unformattedUnder(ratchetRun.root));
     if (keepsBaseline(ratchetRun.root)) {
         judgeHeld(run, ratchetRun);
     }
@@ -324,6 +347,7 @@ export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly 
         fix: argv.includes('--fix'),
         json: valueOf(argv, '--format') === 'json',
         registry,
+        unformatted: 0,
         verbose: argv.includes('--verbose'),
     };
     const member = valueOf(argv, '--member');
@@ -342,6 +366,7 @@ export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly 
         if (run.fix) {
             applyFixes(run, root);
         }
+        refuseUnformatted(run, unformattedSpecFiles(root));
         report(
             run,
             runTree(root, registry),

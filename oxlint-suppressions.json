@@ -4,11 +4,6 @@
             "count": 1
         }
     },
-    "lint/consumer/checks/checker.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/consumer/checks/database-named-only-when-several.ts": {
         "complexity": {
             "count": 1
@@ -485,9 +480,6 @@
     "lint/engine/checker/documents.ts": {
         "typescript/no-non-null-assertion": {
             "count": 2
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
         },
         "unicorn/no-array-sort": {
             "count": 1

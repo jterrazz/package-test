@@ -1,5 +1,5 @@
 import { writeFileSync } from 'node:fs';
-import { dirname, relative } from 'node:path';
+import { dirname, join, relative } from 'node:path';
 
 import {
     documentMap,
@@ -13,8 +13,8 @@ import {
 import { DOCUMENT_KEYS, readSpecFile, RUN_KEYS } from '../project/spec-document.js';
 import type { SpecFile } from '../project/spec-document.js';
 import { readText } from '../project/tree.js';
-import { isScalar, renderYamlSource, Scalar } from '../project/yaml-document.js';
-import type { Node, Pair, YAMLMap } from '../project/yaml-document.js';
+import { renderYamlSource, Scalar } from '../project/yaml-document.js';
+import type { YAMLMap } from '../project/yaml-document.js';
 import type { Finding } from './finding.js';
 import type { GroundPasses } from './registry.js';
 
@@ -30,13 +30,7 @@ export function runDocument(
     } catch {
         return [];
     }
-    const lineAt = (node: Pair<Node, Node> | Scalar): number => {
-        const range = 'range' in node && Array.isArray(node.range) ? node.range : undefined;
-        const { key } = node as Pair<Node, Node>;
-        const target = range ?? (isScalar(key) && Array.isArray(key.range) ? key.range : undefined);
-        return target === undefined ? 1 : file.source.lineAt(target[0]);
-    };
-    return read({ dir: dirname(path), file, lineAt, rel }).map(({ fix, found, line, rule }) => ({
+    return read({ dir: dirname(path), file, rel }).map(({ fix, found, line, rule }) => ({
         file: rel,
         fix,
         found,
@@ -79,6 +73,12 @@ export function fixSpecDocument(text: string, rel: string): null | string {
     }
     const next = renderYamlSource(file.source);
     return next === text ? null : next;
+}
+
+export function unformattedSpecFiles(rootDir: string): string[] {
+    return listSpecFiles(rootDir)
+        .map((path) => relative(rootDir, path))
+        .filter((rel) => fixSpecDocument(readText(join(rootDir, rel)), rel) !== null);
 }
 
 export function fixSpecFiles(rootDir: string): string[] {

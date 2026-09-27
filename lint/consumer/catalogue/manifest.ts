@@ -996,32 +996,6 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'The keys of a `<case>.spec.yaml` follow the canonical order — `description, fixture, env, serve, runs` at document level, `command, stdin, timeout, waitFor, exit, stdout, stderr, files` inside a run. Fixable (`--fix`).',
-        facet: 'cli',
-        family: 'expectations',
-        fix: 'Run `jterrazz-test-check <root> --fix`; it rewrites the order.',
-        name: 'document-keys-in-canonical-order',
-        rationale:
-            'The setting before the session, the input before the output: one order makes documents comparable and removes the diffs that change nothing.',
-        reach: 'document',
-    },
-    {
-        audience: 'consumer',
-        channel: 'checker',
-        convention:
-            '`stdout`, `stderr`, `stdin` and `files.*.equals` of a `<case>.spec.yaml` are written as block scalars (`|` keeps the trailing newline, `|-` drops it), never as a quoted string carrying `\\n`. Fixable (`--fix`).',
-        facet: 'cli',
-        family: 'expectations',
-        fix: 'Run `jterrazz-test-check <root> --fix`; it rewrites the scalar.',
-        name: 'document-streams-written-as-block-scalars',
-        rationale:
-            'Expected output has to look like output — a golden on one line is unreadable and no diff can show it.',
-        reach: 'document',
-    },
-    {
-        audience: 'consumer',
-        channel: 'checker',
-        convention:
             'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
         facet: 'model',
         family: 'layout',

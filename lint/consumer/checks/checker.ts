@@ -4,7 +4,6 @@ import { walkGround } from '../../engine/checker/ground-walk.js';
 import type { CheckerRegistry, GroundPasses, MemberRead } from '../../engine/checker/registry.js';
 import type { DocumentFinding as CheckerDocumentFinding } from '../../engine/project/document-model.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
-import type { Scalar } from '../../engine/project/yaml-document.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows } from '../catalogue/manifest.js';
 import { checkAdapterNamedForItsPort } from './adapter-named-for-its-port.js';
@@ -15,8 +14,6 @@ import { checkDocumentDescriptionReadsAsATitle } from './document-description-re
 import { checkDocumentDescriptionUnique } from './document-description-unique.js';
 import { checkDocumentEnvAndServeRegistered } from './document-env-and-serve-registered.js';
 import { checkDocumentFollowsItsGrammar } from './document-follows-its-grammar.js';
-import { checkDocumentKeysInCanonicalOrder } from './document-keys-in-canonical-order.js';
-import { checkDocumentStreamsWrittenAsBlockScalars } from './document-streams-written-as-block-scalars.js';
 import { checkFacetFolderHasSpecification } from './facet-folder-has-specification.js';
 import { checkFacetTestUsesItsRunner } from './facet-test-uses-its-runner.js';
 import {
@@ -87,8 +84,6 @@ export const TREE_PASS_IDS = [
     'no-malformed-ref',
     'no-unknown-token',
     'http-first-line-follows-its-grammar',
-    'document-streams-written-as-block-scalars',
-    'document-keys-in-canonical-order',
     'document-follows-its-grammar',
     'no-volatile-literal',
     'pinned-value-from-the-input',
@@ -132,9 +127,7 @@ const GROUND: GroundPasses = {
         ...noMalformedRefFindings(text, rel),
         ...noVolatileLiteralsInGround(rel, text),
     ],
-    read: ({ dir, file, lineAt, rel }) => [
-        ...checkDocumentKeysInCanonicalOrder(file, (pair) => lineAt(pair.key as unknown as Scalar)),
-        ...checkDocumentStreamsWrittenAsBlockScalars(file, (scalar) => lineAt(scalar)),
+    read: ({ dir, file, rel }) => [
         ...checkFileSuffixMatchesPlaceOfDocument(rel),
         ...checkDocumentDescriptionReadsAsATitle(file.document),
         ...checkNoVolatileLiteral(file.document, dir),

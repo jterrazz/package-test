@@ -2,7 +2,6 @@ import type { Row } from '../catalogue/row.js';
 import type { DocumentFinding } from '../project/document-model.js';
 import type { Manifest } from '../project/member-manifest.js';
 import type { SpecFile } from '../project/spec-document.js';
-import type { Node, Pair, Scalar } from '../project/yaml-document.js';
 import type { Finding } from './finding.js';
 
 export type GroundEntry = { name: string; path: string; rel: string };
@@ -14,7 +13,6 @@ export type FoundDocument = { name: string; rel: string; text: null | string };
 export type ReadDocument = {
     dir: string;
     file: SpecFile;
-    lineAt: (node: Pair<Node, Node> | Scalar) => number;
     rel: string;
 };
 
