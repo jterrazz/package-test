@@ -285,7 +285,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         sentence:
-            "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A colocated test's is its subject, read from the module beside it (`<base>.ts`, `<base>.tsx`): the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase, or the base less its role suffix (`request.action` → `request`); else the base name — `locale-note.test.tsx` beside `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`; a subject keeps its case, the `testing` fragment exempting the top-level `describe` from `vitest/prefer-lowercase-title` (`ignoreTopLevelDescribe`). A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
+            "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A colocated test's is its subject, read from the module beside it (`<base>.ts`, `<base>.tsx`): the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase, or the base less its role suffix (`request.action` → `request`); else the base name — `locale-note.test.tsx` beside `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`; a subject keeps its case, the `test()` preset exempting the top-level `describe` from `vitest/prefer-lowercase-title` (`ignoreTopLevelDescribe`). A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
         facet: 'model',
         family: 'layout',
         fix: "Title the file's one `describe` with its aspect or its subject, and put every test inside it — `make fix` renames a title (the title it said kept on each test, `<title> — <test>`, when the group holds tests alone; a table's by prefixing the name), wraps a file that has none, and merges several groups into one, each test titled `<group> — <test>`, when every group holds tests alone; what stands between the tests stays at module scope.",
@@ -1434,7 +1434,7 @@ export const UPSTREAM_RULES: Row[] = [
         audience: 'consumer',
         channel: 'upstream',
         sentence:
-            'No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `testing` fragment sets (ADR-005).',
+            'No vitest snapshot matcher: `toMatchSnapshot`, `toMatchInlineSnapshot`, `toMatchFileSnapshot`, `toMatchAriaSnapshot`, `toMatchScreenshot`, `toThrowErrorMatchingSnapshot` and `toThrowErrorMatchingInlineSnapshot` are refused by `vitest/no-restricted-matchers`, whose option the `test()` preset sets (ADR-005).',
         facet: 'model',
         family: 'expectations',
         fix: "Write the golden: `expect(subject).toMatch(file('./_expected/<name>.<ext>'))`; under `src/` compare to a literal with `toStrictEqual`.",
@@ -1448,7 +1448,7 @@ export const UPSTREAM_RULES: Row[] = [
         audience: 'consumer',
         channel: 'upstream',
         sentence:
-            'At most one level of `describe` — `vitest/max-nested-describe` with `{ max: 1 }`, set by the `testing` fragment.',
+            'At most one level of `describe` — `vitest/max-nested-describe` with `{ max: 1 }`, set by the `test()` preset.',
         facet: 'model',
         family: 'layout',
         fix: 'Flatten the nesting: the test name is the sentence, and one level groups the file.',

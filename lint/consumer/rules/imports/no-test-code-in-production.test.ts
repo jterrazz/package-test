@@ -201,6 +201,6 @@ ruleTester().run('no-test-code-in-production', noTestCodeInProduction, {
         },
         { code: 'import { expect } from "vitest";', filename: join(ROOT, 'tests/helpers.ts') },
         // The lint entry is exempt: a shared oxlint preset imports it.
-        { code: 'import { testing } from "@jterrazz/test/oxlint";', filename: PROD },
+        { code: 'import { recommendedRules } from "@jterrazz/test/oxlint";', filename: PROD },
     ],
 });

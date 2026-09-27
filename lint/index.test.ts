@@ -1,10 +1,7 @@
 import { materialAt, testPackageOf } from '@jterrazz/test/oxlint';
-import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
-
-import { testing } from './index.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -24,44 +21,6 @@ function answersOf(readers: MaterialReaders): unknown[] {
 }
 
 describe('index', () => {
-    test('the ./oxlint entry — the composable fragment — what a consumer wires — `testing` is an oxlint config, so compose(<profile>, testing) needs no assertion', () => {
-        // Given - the fragment as a consumer's oxlint.config.ts receives it. The annotation IS the test: an inferred `rules` widens each severity to `string`, which oxlint's closed union refuses, and this line stops compiling — no consumer should need `testing as OxlintConfig`.
-        const composed: OxlintConfig = testing;
-
-        // Then - it carries the plugin wiring
-        expect(composed.jsPlugins).toStrictEqual(['@jterrazz/test/oxlint']);
-    });
-
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — is self-sufficient (no `extends` needed): plugin + every rule + the `cleanup-passed-to-after-all` override', () => {
-        // Given - a consumer NOT using @jterrazz/typescript adopts just the conventions via `export default testing` — the fragment must be a COMPLETE oxlint config
-        // Then - it registers the tool-facing plugin, enables every shipped rule, and ships the one override the `cleanup-passed-to-after-all` idiom needs — without pulling in any base preset
-        expect(testing.jsPlugins).toContain('@jterrazz/test/oxlint');
-        expect(testing.overrides?.[0]?.files).toContain('**/*.specification.ts');
-        expect('extends' in testing).toBe(false);
-    });
-
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — declares no `categories` — every rule it ships is decided by name', () => {
-        // Given - the fragment, top level and every override entry (the `categories` block of specs/lint/lint.specification.ts is a test harness muting oxlint's own defaults, not a config this package ships)
-        const layers: Record<string, unknown>[] = [
-            testing as unknown as Record<string, unknown>,
-            ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),
-        ];
-
-        // Then - none of them opens a category: a category turns on rules nobody decided, and composing it over a base preset silently re-enables them
-        for (const layer of layers) {
-            expect('categories' in layer).toBe(false);
-        }
-    });
-
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — its overrides add a layer instead of replacing one', () => {
-        // Given - each override entry of the fragment
-        for (const entry of testing.overrides ?? []) {
-            // Then - it is scoped by `files` and carries `rules` only, so a profile already holding its own overrides (v10 puts the `vitest` plugin on the test globs that way) keeps them: oxlint concatenates the arrays
-            expect(entry.files.length).toBeGreaterThan(0);
-            expect(Object.keys(entry).sort()).toStrictEqual(['files', 'rules']);
-        }
-    });
-
     test('the ./oxlint entry — the ./oxlint entry publishes what test material is — both builds answer materialAt and testPackageOf, typed from the published declarations', () => {
         // Given - the entry as a consumer imports it, and its CommonJS build (`npm run build` first)
         // oxlint-disable-next-line typescript/no-unsafe-assignment -- `require` answers `any`: the ESM build's published types are the shape the CJS build must carry

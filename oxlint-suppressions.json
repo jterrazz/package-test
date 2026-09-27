@@ -311,17 +311,6 @@
             "count": 1
         }
     },
-    "lint/index.test.ts": {
-        "jterrazz/no-expect-in-a-loop": {
-            "count": 3
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        },
-        "unicorn/no-array-sort": {
-            "count": 1
-        }
-    },
     "lint/self/catalogue/manifest.test.ts": {
         "jterrazz/no-expect-in-a-loop": {
             "count": 27

@@ -1,5 +1,4 @@
 import type { ArchitectureRule, NamesRule, Preset } from '@jterrazz/typescript/config';
-import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import {
     declaredSubpaths,
     GROUND_FOLDERS,
@@ -211,19 +210,17 @@ const NAMES: NamesRule[] = [
     },
 ];
 
-export const TESTING_PRESET_OXLINT: OxlintConfig = {
-    jsPlugins: ['@jterrazz/test/oxlint'],
-    overrides: [importRulesForSpecifications, vitestOnTests],
-    rules: recommendedRules,
-};
-
 export function testPreset(): Preset {
     return {
         baseline: ['test'],
         layers: LAYERS,
         name: 'test',
         names: NAMES,
-        oxlint: TESTING_PRESET_OXLINT,
+        oxlint: {
+            jsPlugins: ['@jterrazz/test/oxlint'],
+            overrides: [importRulesForSpecifications, vitestOnTests],
+            rules: recommendedRules,
+        },
         package: '@jterrazz/test',
         settings: TEST_DEFAULTS,
     };
