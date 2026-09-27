@@ -1,5 +1,9 @@
-import { readManifest, treeEntries, workspaceMembers } from '@jterrazz/typescript/rules';
-import { spawnSync } from 'node:child_process';
+import {
+    ignoredPaths,
+    readManifest,
+    treeEntries,
+    workspaceMembers,
+} from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
 import { SKIPPED } from './module-tests.js';
@@ -10,26 +14,6 @@ export function discoverMembers(rootDir: string): string[] {
         return [];
     }
     return [rootDir, ...workspaceMembers(rootDir).map((member) => join(rootDir, member))];
-}
-
-/** The toolchain skips them too, so the two lists agree. */
-function ignoredPaths(rootDir: string, candidates: string[]): Set<string> {
-    if (candidates.length === 0) {
-        return new Set();
-    }
-    try {
-        const answer = spawnSync('git', ['check-ignore', '--stdin'], {
-            cwd: rootDir,
-            encoding: 'utf8',
-            input: `${candidates.join('\n')}\n`,
-        });
-        if (answer.error !== undefined || answer.stdout === '') {
-            return new Set();
-        }
-        return new Set(answer.stdout.split('\n').filter(Boolean));
-    } catch {
-        return new Set();
-    }
 }
 
 const SPECS_DEPTH = 6;

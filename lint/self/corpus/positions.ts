@@ -1,4 +1,5 @@
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { filesUnder } from '@jterrazz/typescript/rules';
+import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import type { Row } from '../../engine/catalogue/row.js';
@@ -7,14 +8,7 @@ const STATIC_CHANNELS: ReadonlySet<string> = new Set(['checker', 'statique']);
 
 const RULE_ROOTS = ['lint/consumer/rules', 'lint/self/rules'];
 
-function filesUnder(dir: string): string[] {
-    if (!existsSync(dir)) {
-        return [];
-    }
-    return readdirSync(dir, { recursive: true, withFileTypes: true })
-        .filter((entry) => entry.isFile())
-        .map((entry) => join(entry.parentPath, entry.name));
-}
+const pathsUnder = (dir: string): string[] => filesUnder(dir).map((path) => join(dir, path));
 
 function reportedAt(name: string): RegExp {
     return new RegExp(
@@ -24,13 +18,13 @@ function reportedAt(name: string): RegExp {
 }
 
 function goldens(root: string, name: string): string[] {
-    return filesUnder(join(root, 'specs/lint', name)).filter(
+    return pathsUnder(join(root, 'specs/lint', name)).filter(
         (path) => !path.includes('/_fixtures/'),
     );
 }
 
 function ruleTests(root: string, name: string): string[] {
-    return RULE_ROOTS.flatMap((dir) => filesUnder(join(root, dir))).filter((path) =>
+    return RULE_ROOTS.flatMap((dir) => pathsUnder(join(root, dir))).filter((path) =>
         path.endsWith(`/${name}.test.ts`),
     );
 }

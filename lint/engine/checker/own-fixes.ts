@@ -1,13 +1,12 @@
 import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
-import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
+import { GROUND_FOLDERS, OXLINT_SUPPRESSIONS } from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-const CONFIG_NAMES: readonly string[] = configNames;
+import { SKIPPED } from '../project/module-tests.js';
 
-/** oxlint rewrites its suppressions file on every `--fix` run, dropping every rule the run did not arm: the wrapper arms this plugin's alone. */
-const OXLINT_SUPPRESSIONS = 'oxlint-suppressions.json';
+const CONFIG_NAMES: readonly string[] = configNames;
 
 /** Never one found above the root: a fixture project inside another repository would be linted with that repository's config. */
 function oxlintOf(root: string): string | undefined {
@@ -26,14 +25,7 @@ const NESTED_CONFIG_NAMES = [
     '.oxlintrc.jsonc',
 ] as const;
 
-const UNWALKED = new Set<string>([
-    '.artifacts',
-    '.git',
-    'coverage',
-    'dist',
-    'node_modules',
-    ...GROUND_FOLDERS,
-]);
+const UNWALKED = new Set<string>([...SKIPPED, ...GROUND_FOLDERS]);
 
 /** A config that fails to load exits 1 too, which alone reads as diagnostics left. */
 const CONFIG_FAILURES = [
@@ -203,6 +195,7 @@ export function applyOwnFixes(root: string): void {
     if (oxlint === undefined || config === undefined) {
         return;
     }
+    // oxlint rewrites its suppressions file on every `--fix`, dropping each rule the run did not arm, so it is put back as it was.
     const suppressions = join(root, OXLINT_SUPPRESSIONS);
     const held = existsSync(suppressions) ? readFileSync(suppressions, 'utf8') : undefined;
     try {
