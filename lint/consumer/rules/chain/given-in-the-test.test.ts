@@ -1,19 +1,19 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { givenInTheTest } from './given-in-the-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('given-in-the-test', asOxlintRule(givenInTheTest), {
+ruleTester().run('given-in-the-test', givenInTheTest, {
     invalid: [
         // The Given, above the tests that stand on it.
         {
             code: `beforeEach(() => { order = paid(); });`,
-            errors: [{ messageId: 'givenInAHook' }],
+            errors: [{ column: 0, line: 1, messageId: 'givenInAHook' }],
             filename: TEST_FILE,
         },
         {
             code: `beforeAll(async () => { server = await start(); });`,
-            errors: [{ messageId: 'givenInAHook' }],
+            errors: [{ column: 0, line: 1, messageId: 'givenInAHook' }],
             filename: TEST_FILE,
         },
     ],

@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noRawEnvWrite } from './no-raw-env-write.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-raw-env-write', asOxlintRule(noRawEnvWrite), {
+ruleTester().run('no-raw-env-write', noRawEnvWrite, {
     invalid: [
         // The assignment outlasts the test.
         {
@@ -11,7 +11,7 @@ ruleTester().run('no-raw-env-write', asOxlintRule(noRawEnvWrite), {
                 process.env.API_TOKEN = 'secret';
                 expect(read()).toBe('secret');
             });`,
-            errors: [{ messageId: 'rawAssignment' }],
+            errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
         // The computed form says the same thing.
@@ -20,7 +20,7 @@ ruleTester().run('no-raw-env-write', asOxlintRule(noRawEnvWrite), {
                 process.env['API_TOKEN'] = 'secret';
                 expect(read()).toBe('secret');
             });`,
-            errors: [{ messageId: 'rawAssignment' }],
+            errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
     ],
@@ -48,7 +48,7 @@ ruleTester().run('no-raw-env-write', asOxlintRule(noRawEnvWrite), {
     ],
 });
 
-ruleTester().run('no-raw-env-write — the other two spellings', asOxlintRule(noRawEnvWrite), {
+ruleTester().run('no-raw-env-write — the other two spellings', noRawEnvWrite, {
     invalid: [
         // Replacing the whole environment outlasts the test just the same.
         {
@@ -56,7 +56,7 @@ ruleTester().run('no-raw-env-write — the other two spellings', asOxlintRule(no
                 process.env = { ...process.env, API_TOKEN: 'secret' };
                 expect(read()).toBe('secret');
             });`,
-            errors: [{ messageId: 'rawAssignment' }],
+            errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
         // And so does taking a variable away.
@@ -65,7 +65,7 @@ ruleTester().run('no-raw-env-write — the other two spellings', asOxlintRule(no
                 delete process.env.API_TOKEN;
                 expect(read()).toBe(undefined);
             });`,
-            errors: [{ messageId: 'rawAssignment' }],
+            errors: [{ column: 16, line: 2, messageId: 'rawAssignment' }],
             filename: TEST_FILE,
         },
     ],

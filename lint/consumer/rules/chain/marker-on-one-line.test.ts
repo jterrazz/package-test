@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { markerOnOneLine } from './marker-on-one-line.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('marker-on-one-line', asOxlintRule(markerOnOneLine), {
+ruleTester().run('marker-on-one-line', markerOnOneLine, {
     invalid: [
         // The sentence wrapped onto a second comment line.
         {
@@ -14,7 +14,7 @@ ruleTester().run('marker-on-one-line', asOxlintRule(markerOnOneLine), {
     // Then - it leaves the warehouse
     expect(ship(order)).toBe(true);
 });`,
-            errors: [{ messageId: 'wrapped' }],
+            errors: [{ column: 4, line: 2, messageId: 'wrapped' }],
             filename: TEST_FILE,
         },
         // Both markers wrapped: one report each.
@@ -27,7 +27,10 @@ ruleTester().run('marker-on-one-line', asOxlintRule(markerOnOneLine), {
     // through the loading dock
     expect(ship(order)).toBe(true);
 });`,
-            errors: [{ messageId: 'wrapped' }, { messageId: 'wrapped' }],
+            errors: [
+                { column: 4, line: 2, messageId: 'wrapped' },
+                { column: 4, line: 5, messageId: 'wrapped' },
+            ],
             filename: TEST_FILE,
         },
     ],

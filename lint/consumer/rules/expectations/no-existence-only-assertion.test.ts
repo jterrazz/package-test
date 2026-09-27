@@ -1,16 +1,16 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noExistenceOnlyAssertion } from './no-existence-only-assertion.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAssertion), {
+ruleTester().run('no-existence-only-assertion', noExistenceOnlyAssertion, {
     invalid: [
         // The whole proof is that something came back.
         {
             code: `test('builds', () => {
                 expect(build()).toBeDefined();
             });`,
-            errors: [{ messageId: 'existenceOnly' }],
+            errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
             filename: TEST_FILE,
         },
         // The negated form says no more.
@@ -18,7 +18,7 @@ ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAsse
             code: `test('builds', () => {
                 expect(build()).not.toBeNull();
             });`,
-            errors: [{ messageId: 'existenceOnly' }],
+            errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
             filename: TEST_FILE,
         },
         {
@@ -26,7 +26,7 @@ ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAsse
                 notify({ onSent });
                 expect(onSent).toHaveBeenCalled();
             });`,
-            errors: [{ messageId: 'existenceOnly' }],
+            errors: [{ column: 0, line: 1, messageId: 'existenceOnly' }],
             filename: TEST_FILE,
         },
     ],

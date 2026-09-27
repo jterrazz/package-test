@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { requestFileExtensionKnown } from './request-file-extension-known.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
@@ -18,18 +18,21 @@ writeFileSync(join(SENT, 'specs/app/widget/_requests/note.txt'), 'note\n');
 mkdirSync(join(SENT, 'specs/app/widget/_requests/orders'), { recursive: true });
 writeFileSync(join(SENT, 'specs/app/widget/_requests/orders/big.json'), '{}\n');
 
-ruleTester().run('request-file-extension-known', asOxlintRule(requestFileExtensionKnown), {
+ruleTester().run('request-file-extension-known', requestFileExtensionKnown, {
     invalid: [
         // Every bare file is named: two of them, two reports.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'noExtension' }, { messageId: 'noExtension' }],
+            errors: [
+                { column: 0, line: 1, messageId: 'noExtension' },
+                { column: 0, line: 1, messageId: 'noExtension' },
+            ],
             filename: `${TWO_BARE}/specs/app/widget/widget.test.ts`,
         },
         // The violation fixture keeps a body with no extension next to the .http.
         {
             code: 'test("x", () => {});',
-            errors: 1,
+            errors: [{ column: 0, line: 1, messageId: 'noExtension' }],
             filename: `${SPECS_LINT}/request-file-extension-known/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],

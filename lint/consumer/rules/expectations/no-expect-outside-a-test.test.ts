@@ -1,16 +1,16 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noExpectOutsideATest } from './no-expect-outside-a-test.js';
 
 const SETUP_MODULE = '/repo/specs/cli/_setup/built.ts';
 
-ruleTester().run('no-expect-outside-a-test', asOxlintRule(noExpectOutsideATest), {
+ruleTester().run('no-expect-outside-a-test', noExpectOutsideATest, {
     invalid: [
         {
             code: `import { expect } from 'vitest';
 export function expectBuilt(stdout: string): void {
     expect(stdout).toContain('Built.');
 }`,
-            errors: [{ line: 3, messageId: 'expectOutsideATest' }],
+            errors: [{ column: 4, line: 3, messageId: 'expectOutsideATest' }],
             filename: SETUP_MODULE,
         },
         {
@@ -20,8 +20,8 @@ export async function settled(read: () => Promise<number>): Promise<void> {
     await check.poll(read).toBe(0);
 }`,
             errors: [
-                { line: 3, messageId: 'expectOutsideATest' },
-                { line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 3, messageId: 'expectOutsideATest' },
+                { column: 10, line: 4, messageId: 'expectOutsideATest' },
             ],
             filename: SETUP_MODULE,
         },
@@ -29,7 +29,7 @@ export async function settled(read: () => Promise<number>): Promise<void> {
             code: `import { expect } from 'vitest';
 export const { cli } = await specification.cli('./bin/cli.js');
 expect(cli).toBeDefined();`,
-            errors: [{ line: 3, messageId: 'expectOutsideATest' }],
+            errors: [{ column: 0, line: 3, messageId: 'expectOutsideATest' }],
             filename: '/repo/specs/cli/cli.specification.ts',
         },
         {
@@ -39,8 +39,8 @@ export function expectBuilt(stdout: string): void {
     vitest.expect.soft(stdout).toContain('Done.');
 }`,
             errors: [
-                { line: 3, messageId: 'expectOutsideATest' },
-                { line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 3, messageId: 'expectOutsideATest' },
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
             ],
             filename: SETUP_MODULE,
         },
@@ -52,8 +52,8 @@ export function expectBuilt(stdout: string): void {
     runner.expect(stdout).toContain('Done.');
 }`,
             errors: [
-                { line: 4, messageId: 'expectOutsideATest' },
-                { line: 5, messageId: 'expectOutsideATest' },
+                { column: 4, line: 4, messageId: 'expectOutsideATest' },
+                { column: 4, line: 5, messageId: 'expectOutsideATest' },
             ],
             filename: SETUP_MODULE,
         },

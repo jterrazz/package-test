@@ -1,7 +1,7 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noRawBypass } from './no-raw-bypass.js';
 
-ruleTester().run('no-raw-bypass', asOxlintRule(noRawBypass), {
+ruleTester().run('no-raw-bypass', noRawBypass, {
     invalid: [
         // Negated, on the other stream: the capture is still what the check reads.
         {
@@ -9,7 +9,10 @@ ruleTester().run('no-raw-bypass', asOxlintRule(noRawBypass), {
             errors: [{ column: 0, line: 1, messageId: 'rawBypass' }],
         },
         // The stream as captured, handed to a substring check.
-        { code: 'expect(result.stdout.raw).toContain("hi");', errors: 1 },
+        {
+            code: 'expect(result.stdout.raw).toContain("hi");',
+            errors: [{ column: 0, line: 1, messageId: 'rawBypass' }],
+        },
     ],
     valid: [
         // The comparable text: what a golden compares.

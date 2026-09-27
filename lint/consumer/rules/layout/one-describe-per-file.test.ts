@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
 import { packageWith } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { oneDescribePerFile } from './one-describe-per-file.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
@@ -14,7 +14,7 @@ const ROOT = packageWith({
 const MODULE_TEST = join(ROOT, 'src/route-judge.test.ts');
 const COMPONENT_TEST = join(ROOT, 'src/locale-note.test.tsx');
 
-ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
+ruleTester().run('one-describe-per-file', oneDescribePerFile, {
     invalid: [
         // No describe: the tests are wrapped in one titled with the aspect.
         {
@@ -26,7 +26,7 @@ ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
         // A file with no vitest import gets one line of its own.
         {
             code: "test('a', () => {});",
-            errors: [{ messageId: 'noDescribe' }],
+            errors: [{ column: 0, line: 1, messageId: 'noDescribe' }],
             filename: SPEC,
             output: "import { describe } from 'vitest';\ndescribe('pagination', () => {\ntest('a', () => {});\n});",
         },
@@ -47,34 +47,34 @@ ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
         // What stands between the tests stays at module scope, a blank line above the describe.
         {
             code: "import { test } from 'vitest';\ntest('a', () => {});\nconst page = 1;\ntest('b', () => { page; });",
-            errors: [{ messageId: 'noDescribe' }],
+            errors: [{ column: 0, line: 2, messageId: 'noDescribe' }],
             filename: SPEC,
             output: "import { describe, test } from 'vitest';\nconst page = 1;\n\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('b', () => { page; });\n});",
         },
         // Two groups merge into one, one level deep: a group's tests carry its title.
         {
             code: "describe('pagination', () => {\n    test('a', () => {});\n});\nconst page = 1;\ndescribe('filters', () => {\n    test('by date', () => {});\n    test(`by place`, () => {});\n});",
-            errors: [{ messageId: 'severalDescribes' }],
+            errors: [{ column: 0, line: 5, messageId: 'severalDescribes' }],
             filename: SPEC,
             output: "const page = 1;\n\ndescribe('pagination', () => {\ntest('a', () => {});\ntest('filters — by date', () => {});\n    test(`filters — by place`, () => {});\n});",
         },
         // A group title is escaped for the quotes of the test it prefixes.
         {
             code: "describe('pagination', () => {});\ndescribe(\"the user's page\", () => {\n    test('a', () => {});\n});",
-            errors: [{ messageId: 'severalDescribes' }],
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
             filename: SPEC,
             output: "describe('pagination', () => {\ntest('the user\\'s page — a', () => {});\n});",
         },
         // A group with a hook, or run per row, is a scope: refused, left to the author.
         {
             code: "describe('pagination', () => {});\ndescribe('filters', () => {\n    beforeEach(reset);\n    test('a', () => {});\n});",
-            errors: [{ messageId: 'severalDescribes' }],
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
             filename: SPEC,
             output: null,
         },
         {
             code: "describe('pagination', () => {});\ndescribe.each([1, 2])('page %s', () => {\n    test('a', () => {});\n});",
-            errors: [{ messageId: 'severalDescribes' }],
+            errors: [{ column: 0, line: 2, messageId: 'severalDescribes' }],
             filename: SPEC,
             output: null,
         },
@@ -88,13 +88,13 @@ ruleTester().run('one-describe-per-file', asOxlintRule(oneDescribePerFile), {
         // A table names its rows: the aspect is prefixed, the rest kept.
         {
             code: "describe.each([1, 2])('page %s', (n) => {\n    test('a', () => {});\n});",
-            errors: [{ messageId: 'tableTitle' }],
+            errors: [{ column: 22, line: 1, messageId: 'tableTitle' }],
             filename: SPEC,
             output: "describe.each([1, 2])('pagination — page %s', (n) => {\n    test('a', () => {});\n});",
         },
         {
             code: 'describe.each([1, 2])(TITLE, (n) => {});',
-            errors: [{ messageId: 'tableTitle' }],
+            errors: [{ column: 22, line: 1, messageId: 'tableTitle' }],
             filename: SPEC,
             output: null,
         },

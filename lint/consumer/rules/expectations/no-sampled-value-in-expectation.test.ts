@@ -1,16 +1,16 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSampledValueInExpectation } from './no-sampled-value-in-expectation.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-sampled-value-in-expectation', asOxlintRule(noSampledValueInExpectation), {
+ruleTester().run('no-sampled-value-in-expectation', noSampledValueInExpectation, {
     invalid: [
         // The oracle IS a second reading of the clock.
         {
             code: `test('stamps', () => {
                 expect(stamp().at).toBe(Date.now());
             });`,
-            errors: [{ messageId: 'sampledOracle' }],
+            errors: [{ column: 40, line: 2, messageId: 'sampledOracle' }],
             filename: TEST_FILE,
         },
         // The subject side reads the machine.
@@ -18,7 +18,7 @@ ruleTester().run('no-sampled-value-in-expectation', asOxlintRule(noSampledValueI
             code: `test('stamps', () => {
                 expect(new Date()).toEqual(stamp().at);
             });`,
-            errors: [{ messageId: 'sampledOracle' }],
+            errors: [{ column: 23, line: 2, messageId: 'sampledOracle' }],
             filename: TEST_FILE,
         },
         // Buried inside a structural matcher's expected shape.
@@ -26,7 +26,10 @@ ruleTester().run('no-sampled-value-in-expectation', asOxlintRule(noSampledValueI
             code: `test('stamps', () => {
                 expect(stamp()).toStrictEqual({ at: Date.now(), id: randomUUID() });
             });`,
-            errors: [{ messageId: 'sampledOracle' }, { messageId: 'sampledOracle' }],
+            errors: [
+                { column: 52, line: 2, messageId: 'sampledOracle' },
+                { column: 68, line: 2, messageId: 'sampledOracle' },
+            ],
             filename: TEST_FILE,
         },
         // Entropy under the oracle.
@@ -34,7 +37,7 @@ ruleTester().run('no-sampled-value-in-expectation', asOxlintRule(noSampledValueI
             code: `test('rolls', () => {
                 expect(roll()).toBe(Math.random());
             });`,
-            errors: [{ messageId: 'sampledOracle' }],
+            errors: [{ column: 36, line: 2, messageId: 'sampledOracle' }],
             filename: TEST_FILE,
         },
     ],

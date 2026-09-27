@@ -1,21 +1,21 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { expectedConstantShared } from './expected-constant-shared.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-ruleTester().run('expected-constant-shared', asOxlintRule(expectedConstantShared), {
+ruleTester().run('expected-constant-shared', expectedConstantShared, {
     invalid: [
         // One test reads it once: the value goes in place, the constant goes.
         {
             code: "const PAGE = 'HTTP/1.1 200 OK';\ntest('a', () => {\n    expect(result.response).toMatch(PAGE);\n});",
-            errors: [{ messageId: 'singleReader' }],
+            errors: [{ column: 6, line: 1, messageId: 'singleReader' }],
             filename: SPEC,
             output: "test('a', () => {\n    expect(result.response).toMatch('HTTP/1.1 200 OK');\n});",
         },
         // One test reading it twice is still one reader — reported, left to the author.
         {
             code: "const PAGE = 'x';\ntest('a', () => {\n    expect(a).toBe(PAGE);\n    expect(b).toBe(PAGE);\n});",
-            errors: [{ messageId: 'singleReader' }],
+            errors: [{ column: 6, line: 1, messageId: 'singleReader' }],
             filename: SPEC,
         },
     ],

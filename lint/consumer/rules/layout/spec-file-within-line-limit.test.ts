@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { MAX_SPEC_LINES } from '../../../engine/project/specs-modules.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { groupsOf, specFileWithinLineLimit } from './spec-file-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
@@ -11,12 +11,14 @@ function specOf(lines: number, titles: string[]): string {
     return [...body, ...Array.from({ length: lines - body.length }, () => '// …')].join('\n');
 }
 
-ruleTester().run('spec-file-within-line-limit', asOxlintRule(specFileWithinLineLimit), {
+ruleTester().run('spec-file-within-line-limit', specFileWithinLineLimit, {
     invalid: [
         {
             code: specOf(MAX_SPEC_LINES + 1, ['rejects a', 'rejects b', 'accepts a']),
             errors: [
                 {
+                    column: 0,
+                    line: 1,
                     message:
                         /fix: cut it along its tests’ groups — "rejects" \(2\), "accepts" \(1\)/u,
                 },

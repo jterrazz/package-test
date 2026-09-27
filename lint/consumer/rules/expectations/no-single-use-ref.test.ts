@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll } from 'vitest';
 
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSingleUseRef } from './no-single-use-ref.js';
 
 // Built at module load: the rule reads the fixtures on disk before the cases run.
@@ -23,19 +23,19 @@ afterAll(() => {
     rmSync(featureDir, { force: true, recursive: true });
 });
 
-ruleTester().run('no-single-use-ref', asOxlintRule(noSingleUseRef), {
+ruleTester().run('no-single-use-ref', noSingleUseRef, {
     invalid: [
         // A code ref that never asserts a second occurrence.
         {
             code: 'expect(result.value).toEqual({ id: match.ref("order") });',
-            errors: 1,
+            errors: [{ column: 35, line: 1, message: /order/u }],
             filename: WIDGET,
         },
         // A ref that lives ONLY in a referenced fixture, used once: reported on
         // the referencing toMatch node (the rule enhancement — no code site).
         {
             code: 'expect(result.stdout).toMatch(file("./_expected/lonely.txt"));',
-            errors: 1,
+            errors: [{ column: 0, line: 1, message: /lonely/u }],
             filename: WIDGET,
         },
     ],

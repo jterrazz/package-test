@@ -1,5 +1,5 @@
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noModuleMock } from './no-module-mock.js';
 
 const SRC_TEST = '/repo/src/specification/matching/match.test.ts';
@@ -12,78 +12,82 @@ const STORAGE = {
     reason: 'a native module no consumer can inject',
 };
 
-ruleTester().run('no-module-mock', asOxlintRule(noModuleMock), {
+ruleTester().run('no-module-mock', noModuleMock, {
     invalid: [
         // Module mocking is banned under src/.
         {
             code: 'vi.mock("../../../rules/world/match.js");',
-            errors: [{ messageId: 'viMock' }],
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SRC_TEST,
         },
-        { code: 'vi.doMock("./match.js");', errors: [{ messageId: 'viMock' }], filename: SRC_TEST },
+        {
+            code: 'vi.doMock("./match.js");',
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
+            filename: SRC_TEST,
+        },
         // Data assets are code, not files.
         {
             code: 'import data from "./payload.json";',
-            errors: [{ messageId: 'assetImport' }],
+            errors: [{ column: 17, line: 1, messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
         {
             code: 'import sql from "./seed.sql";',
-            errors: [{ messageId: 'assetImport' }],
+            errors: [{ column: 16, line: 1, messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
         {
             code: 'import config from "./compose.test.yaml";',
-            errors: [{ messageId: 'assetImport' }],
+            errors: [{ column: 19, line: 1, messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
         // A bundler suffix does not launder a data asset.
         {
             code: 'import raw from "./payload.json?raw";',
-            errors: [{ messageId: 'assetImport' }],
+            errors: [{ column: 16, line: 1, messageId: 'assetImport' }],
             filename: SRC_TEST,
         },
         // A spec under specs/ is a test too: module mocking is banned there as
         // well — the reach is every test file, not the src/ tree.
         {
             code: 'vi.mock("../../../rules/world/x.js");',
-            errors: [{ messageId: 'viMock' }],
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SPEC,
         },
         // The dynamic-import spelling is the same double, and an allow-list
         // that does not name it does not clear it.
         {
             code: 'vi.mock(import("./match.js"), () => ({}));',
-            errors: [{ messageId: 'viMock' }],
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SRC_TEST,
         },
         {
             code: 'vi.mock(import("expo-secure-store"), () => ({}));',
-            errors: [{ messageId: 'viMock' }],
+            errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SRC_TEST,
             options: [{ modules: [STORAGE] }],
         },
         {
             code: 'vi.mock("@react-native-async-storage/async-storage", () => ({}));',
-            errors: [{ messageId: 'unreasoned' }],
+            errors: [{ column: 0, line: 1, messageId: 'unreasoned' }],
             filename: SRC_TEST,
             options: [{ modules: [{ ...STORAGE, reason: ' ' }] }],
         },
         {
             code: 'vi.mock(import("@react-native-async-storage/async-storage"), () => ({}));',
-            errors: [{ messageId: 'unreasoned' }],
+            errors: [{ column: 0, line: 1, messageId: 'unreasoned' }],
             filename: SRC_TEST,
             options: [{ modules: [STORAGE.module] }],
         },
         // Banned directories.
         {
             code: 'export {};',
-            errors: [{ messageId: 'bannedDir' }],
+            errors: [{ column: 0, line: 1, messageId: 'bannedDir' }],
             filename: '/repo/src/specification/__mocks__/match.ts',
         },
         {
             code: 'export {};',
-            errors: [{ messageId: 'bannedDir' }],
+            errors: [{ column: 0, line: 1, messageId: 'bannedDir' }],
             filename: '/repo/src/specification/__fixtures__/data.ts',
         },
     ],

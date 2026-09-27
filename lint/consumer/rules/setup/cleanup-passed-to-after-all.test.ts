@@ -1,21 +1,21 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { cleanupPassedToAfterAll } from './cleanup-passed-to-after-all.js';
 
 const SPEC_FILE = '/repo/specs/cli/cli.specification.ts';
 
-ruleTester().run('cleanup-passed-to-after-all', asOxlintRule(cleanupPassedToAfterAll), {
+ruleTester().run('cleanup-passed-to-after-all', cleanupPassedToAfterAll, {
     invalid: [
         // Destructured but never registered.
         {
             code: 'const { cli, cleanup } = await specification.cli("./bin");',
-            errors: 1,
+            errors: [{ column: 6, line: 1, messageId: 'unregistered' }],
             filename: SPEC_FILE,
         },
         // An afterAll without cleanup does not count.
         {
             code: `const { cli, cleanup } = await specification.cli("./bin");
                 afterAll(() => other());`,
-            errors: 1,
+            errors: [{ column: 6, line: 1, messageId: 'unregistered' }],
             filename: SPEC_FILE,
         },
     ],

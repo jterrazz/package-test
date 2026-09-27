@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { whenBetweenGivenAndThen } from './when-between-given-and-then.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('when-between-given-and-then', asOxlintRule(whenBetweenGivenAndThen), {
+ruleTester().run('when-between-given-and-then', whenBetweenGivenAndThen, {
     invalid: [
         // The action narrated before the setup it acts on.
         {
@@ -14,7 +14,7 @@ ruleTester().run('when-between-given-and-then', asOxlintRule(whenBetweenGivenAnd
                 // Then - it leaves the warehouse
                 expect(ship(order)).toBe(true);
             });`,
-            errors: [{ messageId: 'beforeGiven' }],
+            errors: [{ column: 0, line: 1, messageId: 'beforeGiven' }],
             filename: TEST_FILE,
         },
         // The action narrated after the outcome.
@@ -26,7 +26,7 @@ ruleTester().run('when-between-given-and-then', asOxlintRule(whenBetweenGivenAnd
                 expect(ship(order)).toBe(true);
                 // When - the order is shipped
             });`,
-            errors: [{ messageId: 'afterThen' }],
+            errors: [{ column: 0, line: 1, messageId: 'afterThen' }],
             filename: TEST_FILE,
         },
     ],

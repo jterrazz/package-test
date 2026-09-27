@@ -1,59 +1,59 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSleep } from './no-sleep.js';
 
 const SPEC_FILE = '/repo/specs/cli/exec/exec.test.ts';
 
-ruleTester().run('no-sleep', asOxlintRule(noSleep), {
+ruleTester().run('no-sleep', noSleep, {
     invalid: [
         // The classic promisified sleep.
         {
             code: 'await new Promise((resolve) => setTimeout(resolve, 500));',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 31, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // Member form.
         {
             code: 'globalThis.setTimeout(done, 100);',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 0, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // Timer-promise import.
         {
             code: 'import { setTimeout as sleep } from "node:timers/promises";',
-            errors: [{ messageId: 'timersImport' }],
+            errors: [{ column: 36, line: 1, messageId: 'timersImport' }],
             filename: SPEC_FILE,
         },
         // Interval polling is a sleep too.
         {
             code: 'setInterval(poll, 50);',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 0, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // The Atomics.wait primitive blocks the thread.
         {
             code: 'Atomics.wait(view, 0, 0, 500);',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 0, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // A double's implementation ends where its call does: the sleep AFTER
         // one is the test waiting, and still an error.
         {
             code: 'const clone = vi.fn(() => 1); await new Promise((resolve) => setTimeout(resolve, 5));',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 61, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // An object literal's implementation ends where the function does: the
         // sleep in the test body after it is the test waiting.
         {
             code: 'const git: GitPort = { clone: async () => await Promise.resolve() }; await new Promise((resolve) => setTimeout(resolve, 5));',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 100, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
         // A property that is not a function is no implementation: the timer is
         // the test's own, wherever the object it sits in came from.
         {
             code: 'const options = { handle: setTimeout(tick, 5) };',
-            errors: [{ messageId: 'sleep' }],
+            errors: [{ column: 26, line: 1, messageId: 'sleep' }],
             filename: SPEC_FILE,
         },
     ],

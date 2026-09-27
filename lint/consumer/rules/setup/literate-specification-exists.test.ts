@@ -1,13 +1,13 @@
 import { resolve } from 'node:path';
 
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { literateSpecificationExists } from './literate-specification-exists.js';
 
 // The config sits at this package's root: the rule answers against its real specification files.
 const ROOT = resolve(import.meta.dirname, '../../../..');
 const CONFIG = resolve(ROOT, 'vitest.config.ts');
 
-ruleTester().run('literate-specification-exists', asOxlintRule(literateSpecificationExists), {
+ruleTester().run('literate-specification-exists', literateSpecificationExists, {
     invalid: [
         // The top-level door, and the node its missing path is written on.
         {
@@ -17,7 +17,7 @@ ruleTester().run('literate-specification-exists', asOxlintRule(literateSpecifica
         },
         {
             code: `export default defineSpecConfig({ test: { projects: [cli({ literate: { specification: './specs/cli/nowhere.specification.ts' } })] } });`,
-            errors: [{ messageId: 'missing' }],
+            errors: [{ column: 71, line: 1, messageId: 'missing' }],
             filename: CONFIG,
         },
     ],

@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSampledValueInTest } from './no-sampled-value-in-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest), {
+ruleTester().run('no-sampled-value-in-test', noSampledValueInTest, {
     invalid: [
         // Sampled into the Given, read back through the subject.
         {
@@ -11,7 +11,7 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
                 const started = Date.now();
                 expect(stamp(started).at).toBe(started);
             });`,
-            errors: [{ messageId: 'ambientValue' }],
+            errors: [{ column: 32, line: 2, messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
         // Entropy anywhere in the body.
@@ -20,7 +20,7 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
                 const seed = Math.random();
                 expect(roll(seed)).toBeLessThan(7);
             });`,
-            errors: [{ messageId: 'ambientValue' }],
+            errors: [{ column: 29, line: 2, messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
         {
@@ -34,8 +34,8 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
                 expect(stamp(before, after)).toBe(true);
             });`,
             errors: [
-                { line: 2, messageId: 'ambientValue' },
-                { line: 6, messageId: 'ambientValue' },
+                { column: 31, line: 2, messageId: 'ambientValue' },
+                { column: 30, line: 6, messageId: 'ambientValue' },
             ],
             filename: TEST_FILE,
         },
@@ -48,9 +48,9 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
                 expect(make(id, roll, started)).toBe(true);
             });`,
             errors: [
-                { line: 3, messageId: 'ambientValue' },
-                { line: 4, messageId: 'ambientValue' },
-                { line: 5, messageId: 'ambientValue' },
+                { column: 27, line: 3, messageId: 'ambientValue' },
+                { column: 29, line: 4, messageId: 'ambientValue' },
+                { column: 32, line: 5, messageId: 'ambientValue' },
             ],
             filename: TEST_FILE,
         },
@@ -60,7 +60,7 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
                 const started = new Date();
                 expect(stamp(started)).toBe(true);
             });`,
-            errors: [{ line: 3, messageId: 'ambientValue' }],
+            errors: [{ column: 32, line: 3, messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
     ],

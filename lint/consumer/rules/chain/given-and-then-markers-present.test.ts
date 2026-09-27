@@ -1,33 +1,39 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { givenAndThenMarkersPresent } from './given-and-then-markers-present.js';
 
-ruleTester().run('given-and-then-markers-present', asOxlintRule(givenAndThenMarkersPresent), {
+ruleTester().run('given-and-then-markers-present', givenAndThenMarkersPresent, {
     invalid: [
         // Missing Given.
         {
             code: `test("x", () => {
                 // Then - it works
             });`,
-            errors: [{ messageId: 'missing' }],
+            errors: [{ column: 0, line: 1, messageId: 'missing' }],
         },
         // Missing Then.
         {
             code: `test("x", () => {
                 // Given - a thing
             });`,
-            errors: [{ messageId: 'missing' }],
+            errors: [{ column: 0, line: 1, messageId: 'missing' }],
         },
         // Missing both.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'missing' }, { messageId: 'missing' }],
+            errors: [
+                { column: 0, line: 1, messageId: 'missing' },
+                { column: 0, line: 1, messageId: 'missing' },
+            ],
         },
         // A table narrated nowhere — neither on the table nor in the callback.
         {
             code: `test.each([{ a: 1 }])("x $a", ({ a }) => {
                 expect(a).toBe(1);
             });`,
-            errors: [{ messageId: 'missing' }, { messageId: 'missing' }],
+            errors: [
+                { column: 0, line: 1, messageId: 'missing' },
+                { column: 0, line: 1, messageId: 'missing' },
+            ],
         },
         // Given after Then — narrative order violated.
         {
@@ -35,14 +41,14 @@ ruleTester().run('given-and-then-markers-present', asOxlintRule(givenAndThenMark
                 // Then - it works
                 // Given - a thing
             });`,
-            errors: [{ messageId: 'givenAfterThen' }],
+            errors: [{ column: 0, line: 1, messageId: 'givenAfterThen' }],
         },
         // Wrapper form still enforced.
         {
             code: `test.skipIf(cond)("x", () => {
                 // Given - a thing
             });`,
-            errors: [{ messageId: 'missing' }],
+            errors: [{ column: 0, line: 1, messageId: 'missing' }],
         },
     ],
     valid: [

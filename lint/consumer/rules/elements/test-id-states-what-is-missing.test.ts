@@ -1,16 +1,16 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { testIdStatesWhatIsMissing } from './test-id-states-what-is-missing.js';
 
 const SPEC = '/repo/specs/website/home/subscribe.spec.ts';
 
-ruleTester().run('test-id-states-what-is-missing', asOxlintRule(testIdStatesWhatIsMissing), {
+ruleTester().run('test-id-states-what-is-missing', testIdStatesWhatIsMissing, {
     invalid: [
         // The escape hatch with nothing stated about it.
         {
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(testId('subscribe-cta'));
             });`,
-            errors: 1,
+            errors: [{ column: 36, line: 2, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
         // The mobile twin — `.open()` carries the same element vocabulary.
@@ -18,7 +18,7 @@ ruleTester().run('test-id-states-what-is-missing', asOxlintRule(testIdStatesWhat
             code: `const result = await mobile.open('home', async (visitor) => {
                 await visitor.tap(testId('cta'));
             });`,
-            errors: 1,
+            errors: [{ column: 34, line: 2, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
         // One report per unexplained escape, scoping included.
@@ -27,7 +27,10 @@ ruleTester().run('test-id-states-what-is-missing', asOxlintRule(testIdStatesWhat
                 await visitor.fill(within(testId('form'), field('Email')), 'a@b.test');
                 await visitor.click(testId('subscribe-cta'));
             });`,
-            errors: 2,
+            errors: [
+                { column: 42, line: 2, messageId: 'unexplainedTestId' },
+                { column: 36, line: 3, messageId: 'unexplainedTestId' },
+            ],
             filename: SPEC,
         },
         // A comment that names no invariant is not a statement.
@@ -36,7 +39,7 @@ ruleTester().run('test-id-states-what-is-missing', asOxlintRule(testIdStatesWhat
                 // testId:
                 await visitor.click(testId('subscribe-cta'));
             });`,
-            errors: 1,
+            errors: [{ column: 36, line: 3, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
         // A comment two lines up is out of the window: it reads as being
@@ -47,7 +50,7 @@ ruleTester().run('test-id-states-what-is-missing', asOxlintRule(testIdStatesWhat
                 await visitor.fill(field('Email'), 'a@b.test');
                 await visitor.click(testId('subscribe-cta'));
             });`,
-            errors: 1,
+            errors: [{ column: 36, line: 4, messageId: 'unexplainedTestId' }],
             filename: SPEC,
         },
     ],

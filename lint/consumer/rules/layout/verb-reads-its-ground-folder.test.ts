@@ -1,16 +1,22 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { verbReadsItsGroundFolder } from './verb-reads-its-ground-folder.js';
 
 const SPEC = '/repo/specs/api/orders/orders.spec.ts';
 const MODULE_TEST = '/repo/src/report/report.test.ts';
 
-ruleTester().run('verb-reads-its-ground-folder', asOxlintRule(verbReadsItsGroundFolder), {
+ruleTester().run('verb-reads-its-ground-folder', verbReadsItsGroundFolder, {
     invalid: [
-        { code: "api.seed(file('./_fixtures/rows.sql'));", errors: 1, filename: SPEC },
+        {
+            code: "api.seed(file('./_fixtures/rows.sql'));",
+            errors: [{ column: 14, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
         {
             code: "api.seed(file('../../_shared/_fixtures/_seeds/rows.sql'));",
             errors: [
                 {
+                    column: 14,
+                    line: 1,
                     message:
                         /^found: `seed\(\)` reads _seeds\/, and `file\('\.\.\/\.\.\/_shared\/_fixtures\/_seeds\/rows\.sql'\)` names _fixtures\/ · .* · fix: move the file to \.\/_seeds\/ beside the test, or in the _seeds\/ of the lowest folder the leaves share \(specs\/_shared\/_seeds\/ across facets\)/u,
                 },
@@ -18,38 +24,62 @@ ruleTester().run('verb-reads-its-ground-folder', asOxlintRule(verbReadsItsGround
             filename: SPEC,
         },
         // `_shared/` is no role: a path into it passes through the role folder of what it holds.
-        { code: "api.seed(file('../../_shared/rows.sql'));", errors: 1, filename: SPEC },
-        { code: "api.request(file('./_expected/create.http'));", errors: 1, filename: SPEC },
-        { code: "api.post('/orders', file('./_fixtures/order.json'));", errors: 1, filename: SPEC },
-        { code: "cli.fixture(directory('./_expected/shop/'));", errors: 1, filename: SPEC },
         {
-            code: "expect(r.stdout).toMatch(file('./_requests/out.txt'));",
-            errors: 1,
+            code: "api.seed(file('../../_shared/rows.sql'));",
+            errors: [{ column: 14, line: 1, messageId: 'crossed' }],
             filename: SPEC,
         },
-        { code: "expect(r.stdout).toMatch(file('./out.txt'));", errors: 1, filename: MODULE_TEST },
-        { code: "cli.run(file('./_expected/case.spec.yaml'));", errors: 1, filename: SPEC },
+        {
+            code: "api.request(file('./_expected/create.http'));",
+            errors: [{ column: 17, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
+        {
+            code: "api.post('/orders', file('./_fixtures/order.json'));",
+            errors: [{ column: 25, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
+        {
+            code: "cli.fixture(directory('./_expected/shop/'));",
+            errors: [{ column: 22, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
+        {
+            code: "expect(r.stdout).toMatch(file('./_requests/out.txt'));",
+            errors: [{ column: 30, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
+        {
+            code: "expect(r.stdout).toMatch(file('./out.txt'));",
+            errors: [{ column: 30, line: 1, messageId: 'crossed' }],
+            filename: MODULE_TEST,
+        },
+        {
+            code: "cli.run(file('./_expected/case.spec.yaml'));",
+            errors: [{ column: 13, line: 1, messageId: 'crossed' }],
+            filename: SPEC,
+        },
         // A `const` is followed to the verb it reaches.
         {
             code: "const rows = file('./_fixtures/rows.sql');\napi.seed(rows);",
-            errors: 1,
+            errors: [{ column: 9, line: 2, messageId: 'crossed' }],
             filename: SPEC,
         },
         // A binding is the file's own: the `rows` the case above declared names nothing here.
         {
             code: "api.seed(rows);\napi.seed(file('./_fixtures/rows.sql'));",
-            errors: 1,
+            errors: [{ column: 14, line: 2, messageId: 'crossed' }],
             filename: SPEC,
         },
         {
             code: "test('x', async () => {\n    const golden = file('./_requests/out.txt');\n    expect(r.stdout).toMatch(golden);\n});",
-            errors: 1,
+            errors: [{ column: 29, line: 3, messageId: 'crossed' }],
             filename: SPEC,
         },
         // The nearest declaration is the one the language reads.
         {
             code: "const shop = directory('./_fixtures/shop/');\ntest('x', () => {\n    const shop = directory('./_expected/shop/');\n    cli.fixture(shop);\n});",
-            errors: 1,
+            errors: [{ column: 16, line: 4, messageId: 'crossed' }],
             filename: SPEC,
         },
     ],

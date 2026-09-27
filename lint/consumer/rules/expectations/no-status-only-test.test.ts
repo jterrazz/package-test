@@ -1,16 +1,16 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noStatusOnlyTest } from './no-status-only-test.js';
 
 const SPEC = '/repo/specs/api/events/create-event.test.ts';
 
-ruleTester().run('no-status-only-test', asOxlintRule(noStatusOnlyTest), {
+ruleTester().run('no-status-only-test', noStatusOnlyTest, {
     invalid: [
         // A lone status probe as the test's sole assertion.
         {
             code: `test('rejects', async () => {
                 expect(result.status).toBe(422);
             });`,
-            errors: 1,
+            errors: [{ column: 0, line: 1, messageId: 'statusOnlyProbe' }],
             filename: SPEC,
         },
         // Several status probes, still nothing but status probes.
@@ -19,7 +19,7 @@ ruleTester().run('no-status-only-test', asOxlintRule(noStatusOnlyTest), {
                 expect(result.response.status).toEqual(201);
                 expect(first.status).toBe(200);
             });`,
-            errors: 1,
+            errors: [{ column: 0, line: 1, messageId: 'statusOnlyProbe' }],
             filename: SPEC,
         },
     ],

@@ -1,20 +1,20 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noImportedExpectation } from './no-imported-expectation.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 
-ruleTester().run('no-imported-expectation', asOxlintRule(noImportedExpectation), {
+ruleTester().run('no-imported-expectation', noImportedExpectation, {
     invalid: [
         // An expectation written in another module.
         {
             code: "import { FIRST_PAGE } from '../_setup/pages.js';\ntest('a', () => { expect(result.response).toMatch(FIRST_PAGE); });",
-            errors: [{ messageId: 'imported' }],
+            errors: [{ column: 50, line: 2, messageId: 'imported' }],
             filename: SPEC,
         },
         // A member of one is the same expectation.
         {
             code: "import { pages } from '../../expectations.js';\ntest('a', () => { expect(result.json).toMatch(pages.first); });",
-            errors: [{ messageId: 'imported' }],
+            errors: [{ column: 46, line: 2, messageId: 'imported' }],
             filename: SPEC,
         },
     ],

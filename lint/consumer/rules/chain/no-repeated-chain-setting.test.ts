@@ -1,10 +1,10 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noRepeatedChainSetting } from './no-repeated-chain-setting.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
 const IMPORT = "import { api } from '../../api.specification.js';";
 
-ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSetting), {
+ruleTester().run('no-repeated-chain-setting', noRepeatedChainSetting, {
     invalid: [
         // Every chain pins the same instant: the view is declared once, the setting leaves each chain.
         {
@@ -13,7 +13,7 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
                 "test('a', async () => { await api.clock('2026-01-01T00:00:00Z').get('/events'); });",
                 "test('b', async () => { await api.seed(file('./_seeds/x.sql')).clock('2026-01-01T00:00:00Z').get('/events?page=2'); });",
             ].join('\n'),
-            errors: [{ messageId: 'repeated' }],
+            errors: [{ column: 30, line: 2, messageId: 'repeated' }],
             filename: SPEC,
             output: [
                 IMPORT,
@@ -32,6 +32,8 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
             ].join('\n'),
             errors: [
                 {
+                    column: 30,
+                    line: 2,
                     message:
                         /fix: state it once for the file — `const events = api\.with\(\{ headers: \{ 'accept-language': 'fr' \} \}\)`/u,
                 },
@@ -52,7 +54,7 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
                 "test('a', async () => { await job.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
                 "test('b', async () => { await job.clock('2026-01-01T00:00:00Z').trigger('report-refresh'); });",
             ].join('\n'),
-            errors: [{ messageId: 'repeated' }],
+            errors: [{ column: 30, line: 2, messageId: 'repeated' }],
             filename: '/repo/specs/job/report-refresh/stale-reports.spec.ts',
             output: [
                 "import { job } from '../job.specification.js';",
@@ -70,7 +72,7 @@ ruleTester().run('no-repeated-chain-setting', asOxlintRule(noRepeatedChainSettin
                 "test('a', async () => { await api.clock('x').get('/indicators/:symbol/chart', { params: chart }); });",
                 "test('b', async () => { await api.clock('x').get('/indicators/:symbol/chart', { params: chart }); });",
             ].join('\n'),
-            errors: [{ messageId: 'repeated' }],
+            errors: [{ column: 30, line: 3, messageId: 'repeated' }],
             filename: '/repo/specs/api/indicators/chart/range.spec.ts',
             output: [
                 IMPORT,

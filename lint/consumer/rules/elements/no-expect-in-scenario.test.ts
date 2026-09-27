@@ -1,7 +1,7 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noExpectInScenario } from './no-expect-in-scenario.js';
 
-ruleTester().run('no-expect-in-scenario', asOxlintRule(noExpectInScenario), {
+ruleTester().run('no-expect-in-scenario', noExpectInScenario, {
     invalid: [
         // An assertion inside a website visit scenario.
         {
@@ -9,14 +9,14 @@ ruleTester().run('no-expect-in-scenario', asOxlintRule(noExpectInScenario), {
                 await visitor.click(button('Subscribe'));
                 expect(visitor).toBeDefined();
             });`,
-            errors: 1,
+            errors: [{ column: 16, line: 3, messageId: 'expectInScenario' }],
         },
         // The mobile twin — `.open()` carries the same scenario grammar.
         {
             code: `const result = await mobile.open('home', async (visitor) => {
                 expect(await visitor.see(content('Welcome'))).toBe(true);
             });`,
-            errors: 1,
+            errors: [{ column: 16, line: 2, messageId: 'expectInScenario' }],
         },
         // Two assertions in one scenario are two reports.
         {
@@ -24,7 +24,10 @@ ruleTester().run('no-expect-in-scenario', asOxlintRule(noExpectInScenario), {
                 expect(visitor).toBeDefined();
                 expect(visitor).not.toBeNull();
             });`,
-            errors: 2,
+            errors: [
+                { column: 16, line: 2, messageId: 'expectInScenario' },
+                { column: 16, line: 3, messageId: 'expectInScenario' },
+            ],
         },
     ],
     valid: [

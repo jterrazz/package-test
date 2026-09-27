@@ -3,7 +3,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noRedundantRoot } from './no-redundant-root.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees (the
@@ -18,24 +18,24 @@ mkdirSync(join(IGNORED_MARKER, 'pkg/specs'), { recursive: true });
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_MARKER });
 const IGNORED_SPEC = join(IGNORED_MARKER, 'pkg/specs/rooted.specification.ts');
 
-ruleTester().run('no-redundant-root', asOxlintRule(noRedundantRoot), {
+ruleTester().run('no-redundant-root', noRedundantRoot, {
     invalid: [
         // The checkout is what the runtime derives past an ignored marker.
         {
             code: 'await specification.cli("./bin", { root: "../.." });',
-            errors: 1,
+            errors: [{ column: 35, line: 1, messageId: 'redundant' }],
             filename: IGNORED_SPEC,
         },
         // Every facet takes the option: an api runner's root is as redundant.
         {
             code: 'await specification.api({ root: "../..", server: () => app });',
-            errors: 1,
+            errors: [{ column: 26, line: 1, messageId: 'redundant' }],
             filename: SPEC_FILE,
         },
         // Root points exactly at the derived root (fixture root, via package.json).
         {
             code: 'await specification.cli("./bin", { root: "../.." });',
-            errors: 1,
+            errors: [{ column: 35, line: 1, messageId: 'redundant' }],
             filename: SPEC_FILE,
         },
     ],

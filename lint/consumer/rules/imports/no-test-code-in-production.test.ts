@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 
 import { packageWith } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noTestCodeInProduction } from './no-test-code-in-production.js';
 
 // One package on disk: the aliases, the stubs folders and the modules a
@@ -44,90 +44,121 @@ const GATE = packageWith({
 const GATE_SERVICE = join(GATE, 'src/browser/service.ts');
 const BARREL = join(ROOT, 'src/index.ts');
 
-const refused = (code: string, messageId: string, filename = PROD) => ({
+const refused = (
+    code: string,
+    messageId: string,
+    [line, column]: [number, number],
+    filename = PROD,
+) => ({
     code,
-    errors: [{ messageId }],
+    errors: [{ column, line, messageId }],
     filename,
 });
 
-ruleTester().run('no-test-code-in-production', asOxlintRule(noTestCodeInProduction), {
+ruleTester().run('no-test-code-in-production', noTestCodeInProduction, {
     invalid: [
         // An allowed package is the only one: the unit's other test packages stay refused.
-        refused('import { expect } from "vitest";', 'reach', GATE_SERVICE),
+        refused('import { expect } from "vitest";', 'reach', [1, 23], GATE_SERVICE),
         // Through a relay that is not production, the other packages stay refused too.
         refused(
             'export { setupServer } from "../../tests/server.js";',
             'reachThrough',
+            [1, 28],
             GATE_SERVICE,
         ),
         // The test packages.
-        refused('import { expect } from "vitest";', 'reach'),
-        refused('import { mockOf } from "@jterrazz/test";', 'reach'),
-        refused('import { expect } from "@vitest/expect";', 'reach'),
-        refused('import { setupServer } from "msw/node";', 'reach'),
-        refused('import { render } from "@testing-library/react";', 'reach'),
-        refused('import { chromium } from "playwright";', 'reach'),
+        refused('import { expect } from "vitest";', 'reach', [1, 23]),
+        refused('import { mockOf } from "@jterrazz/test";', 'reach', [1, 23]),
+        refused('import { expect } from "@vitest/expect";', 'reach', [1, 23]),
+        refused('import { setupServer } from "msw/node";', 'reach', [1, 28]),
+        refused('import { render } from "@testing-library/react";', 'reach', [1, 23]),
+        refused('import { chromium } from "playwright";', 'reach', [1, 25]),
         // Test files, by their suffix.
-        refused('import { helper } from "./user.test.js";', 'reach'),
-        refused('import { helper } from "./user.spec.js";', 'reach'),
-        refused('import { api } from "../api.specification.js";', 'reach'),
-        refused('import { data } from "./user.fixtures.js";', 'reach'),
-        refused('import type { Row } from "./user.test-d.js";', 'reach'),
+        refused('import { helper } from "./user.test.js";', 'reach', [1, 23]),
+        refused('import { helper } from "./user.spec.js";', 'reach', [1, 23]),
+        refused('import { api } from "../api.specification.js";', 'reach', [1, 20]),
+        refused('import { data } from "./user.fixtures.js";', 'reach', [1, 21]),
+        refused('import type { Row } from "./user.test-d.js";', 'reach', [1, 25]),
         // Ground, wherever it sits, and the specs tree.
-        refused('import rows from "./_fixtures/rows.js";', 'reach'),
-        refused('import golden from "../_expected/user.json";', 'reach'),
-        refused('import body from "./_requests/create.js";', 'reach'),
-        refused('import rows from "./_seeds/rows.js";', 'reach'),
-        refused('import { users } from "../../specs/_shared/_fixtures/users.js";', 'reach'),
-        refused('import { seed } from "../../specs/_shared/_setup/seed.js";', 'reach'),
+        refused('import rows from "./_fixtures/rows.js";', 'reach', [1, 17]),
+        refused('import golden from "../_expected/user.json";', 'reach', [1, 19]),
+        refused('import body from "./_requests/create.js";', 'reach', [1, 17]),
+        refused('import rows from "./_seeds/rows.js";', 'reach', [1, 17]),
+        refused(
+            'import { users } from "../../specs/_shared/_fixtures/users.js";',
+            'reach',
+            [1, 22],
+        ),
+        refused('import { seed } from "../../specs/_shared/_setup/seed.js";', 'reach', [1, 21]),
         // Stubs: the facade, and a unit of the folder it makes a stubs folder.
-        refused('import { news } from "./news.stubs.js";', 'reach'),
-        refused('import { news } from "../features/stubs/news.stubs.js";', 'reach'),
-        refused('import events from "../features/stubs/http/events.js";', 'reach'),
+        refused('import { news } from "./news.stubs.js";', 'reach', [1, 21]),
+        refused('import { news } from "../features/stubs/news.stubs.js";', 'reach', [1, 21]),
+        refused('import events from "../features/stubs/http/events.js";', 'reach', [1, 19]),
         // Every form a module names another in.
-        refused('import type { User } from "./user.fixtures.js";', 'reach'),
-        refused('export { user } from "./user.fixtures.js";', 'reach'),
-        refused('export * from "./user.fixtures.js";', 'reach'),
-        refused('export * as data from "./user.fixtures.js";', 'reach'),
-        refused('const data = await import("./user.fixtures.js");', 'reach'),
-        refused('const data = require("./user.fixtures.js");', 'reach'),
-        refused('const path = require.resolve("vitest");', 'reach'),
-        refused('const path = import.meta.resolve("./user.fixtures.js");', 'reach'),
-        refused('import msw = require("msw");', 'reach'),
-        refused('type User = import("./user.fixtures.js").User;', 'reach'),
+        refused('import type { User } from "./user.fixtures.js";', 'reach', [1, 26]),
+        refused('export { user } from "./user.fixtures.js";', 'reach', [1, 21]),
+        refused('export * from "./user.fixtures.js";', 'reach', [1, 14]),
+        refused('export * as data from "./user.fixtures.js";', 'reach', [1, 22]),
+        refused('const data = await import("./user.fixtures.js");', 'reach', [1, 26]),
+        refused('const data = require("./user.fixtures.js");', 'reach', [1, 21]),
+        refused('const path = require.resolve("vitest");', 'reach', [1, 29]),
+        refused('const path = import.meta.resolve("./user.fixtures.js");', 'reach', [1, 33]),
+        refused('import msw = require("msw");', 'reach', [1, 21]),
+        refused('type User = import("./user.fixtures.js").User;', 'reach', [1, 19]),
         // An alias that resolves to test material.
-        refused('import { users } from "@test-data/users";', 'reach'),
-        refused('import { users } from "#fixtures/users.js";', 'reach'),
+        refused('import { users } from "@test-data/users";', 'reach', [1, 22]),
+        refused('import { users } from "#fixtures/users.js";', 'reach', [1, 22]),
         // A path the module builds from where it sits, or reads.
-        refused('const rows = new URL("./_fixtures/rows.json", import.meta.url);', 'pathRead'),
-        refused('const rows = new URL("../../specs/_fixtures/", import.meta.url);', 'pathRead'),
-        refused('const rows = readFileSync("./specs/_fixtures/rows.json", "utf8");', 'pathRead'),
-        refused('const app = readFileSync("./specs/api/app.ts", "utf8");', 'pathRead'),
+        refused(
+            'const rows = new URL("./_fixtures/rows.json", import.meta.url);',
+            'pathRead',
+            [1, 21],
+        ),
+        refused(
+            'const rows = new URL("../../specs/_fixtures/", import.meta.url);',
+            'pathRead',
+            [1, 21],
+        ),
+        refused(
+            'const rows = readFileSync("./specs/_fixtures/rows.json", "utf8");',
+            'pathRead',
+            [1, 26],
+        ),
+        refused('const app = readFileSync("./specs/api/app.ts", "utf8");', 'pathRead', [1, 25]),
         refused(
             'const rows = readFileSync(join(import.meta.dirname, "_fixtures", "rows.json"));',
             'pathRead',
+            [1, 26],
         ),
         refused(
             'const here = dirname(fileURLToPath(import.meta.url));\nconst all = readdirSync(join(here, "..", "_seeds", name));',
             'pathRead',
+            [2, 24],
         ),
-        refused(`const golden = \`\${__dirname}/_expected/out.txt\`;`, 'pathRead'),
+        refused(`const golden = \`\${__dirname}/_expected/out.txt\`;`, 'pathRead', [1, 15]),
         // A reach through a module that is not production — a separate test root: the barrel re-exports it.
-        refused('export * from "../tests/render.js";', 'reachThrough', BARREL),
-        refused('export { users } from "../tests/data.js";', 'reachThrough', BARREL),
+        refused('export * from "../tests/render.js";', 'reachThrough', [1, 14], BARREL),
+        refused('export { users } from "../tests/data.js";', 'reachThrough', [1, 22], BARREL),
         // That module is parsed: a path it builds into test material is a reach too.
-        refused('export { rows } from "../tests/rows.js";', 'reachThrough', BARREL),
+        refused('export { rows } from "../tests/rows.js";', 'reachThrough', [1, 21], BARREL),
         // Production is every module outside the test material: `lint/`, a script, a bin, the root.
-        refused('import { it } from "vitest";', 'reach', join(ROOT, 'lint/rule.ts')),
-        refused('import { expect } from "vitest";', 'reach', join(ROOT, 'scripts/seed.ts')),
+        refused('import { it } from "vitest";', 'reach', [1, 19], join(ROOT, 'lint/rule.ts')),
+        refused(
+            'import { expect } from "vitest";',
+            'reach',
+            [1, 23],
+            join(ROOT, 'scripts/seed.ts'),
+        ),
         refused(
             'import { users } from "./specs/_fixtures/users.js";',
             'reach',
+            [1, 22],
             join(ROOT, 'index.ts'),
         ),
         refused(
             'const { mockOf } = require("@jterrazz/test");',
             'reach',
+            [1, 27],
             join(ROOT, 'bin/cli.cjs'),
         ),
     ],

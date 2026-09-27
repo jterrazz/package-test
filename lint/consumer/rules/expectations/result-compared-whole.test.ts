@@ -1,44 +1,57 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { resultComparedWhole } from './result-compared-whole.js';
 
 const SPEC = '/repo/specs/api/users/users.spec.ts';
 
-ruleTester().run('result-compared-whole', asOxlintRule(resultComparedWhole), {
+ruleTester().run('result-compared-whole', resultComparedWhole, {
     invalid: [
         // A body probe alone — the rest of the response regresses unseen.
         {
             code: "test('t', async () => { const result = await api.get('/users'); expect(result.response.body.total).toBe(1); });",
-            errors: [{ message: /reads result\.response and never compares it whole/u }],
+            errors: [
+                {
+                    column: 71,
+                    line: 1,
+                    message: /reads result\.response and never compares it whole/u,
+                },
+            ],
             filename: SPEC,
         },
         // A json probed, a table probed through a RegExp, each reported once.
         {
             code: "test('t', async () => { const result = await cli.exec('x'); expect(result.json.value.a).toBe(1); expect(result.json.value.b).toBe(2); });",
-            errors: 1,
+            errors: [{ column: 67, line: 1, messageId: 'partialOracle' }],
             filename: SPEC,
         },
         // A negation, and a RegExp, compare no whole result.
         {
             code: "test('t', async () => { const result = await api.get('/x'); expect(result.response).not.toMatch(`HTTP/1.1 500`); expect(result.json).toMatch(/ok/u); });",
-            errors: 2,
+            errors: [
+                { column: 67, line: 1, messageId: 'partialOracle' },
+                { column: 120, line: 1, messageId: 'partialOracle' },
+            ],
             filename: SPEC,
         },
         // Two tables, one compared whole: the other is reported by its name.
         {
             code: "test('t', async () => { const result = await job.trigger('x'); await expect(result.table('a')).toBeEmpty(); expect(await result.table('b').query(['id'])).toHaveLength(1); });",
-            errors: [{ message: /reads result\.table\('b'\)/u }],
+            errors: [{ column: 121, line: 1, message: /reads result\.table\('b'\)/u }],
             filename: SPEC,
         },
         // A chain held in a name and never awaited sends nothing: the read is a read.
         {
             code: "test('t', async () => { const first = await api.get('/facts'); const next = api.get('/facts?cursor=' + first.json.next); expect(next).toBeDefined(); });",
-            errors: [{ message: /reads first\.json and never compares it whole/u }],
+            errors: [
+                { column: 103, line: 1, message: /reads first\.json and never compares it whole/u },
+            ],
             filename: SPEC,
         },
         // A cursor passed through five names is past the carry depth: the read is a read.
         {
             code: "test('t', async () => { const first = await api.get('/facts'); const a = first.json.next; const b = a; const c = b; const d = c; const e = d; const second = await api.get('/facts?cursor=' + e); expect(second.response).toMatch(`HTTP/1.1 200 OK`); });",
-            errors: [{ column: 73, message: /reads first\.json and never compares it whole/u }],
+            errors: [
+                { column: 73, line: 1, message: /reads first\.json and never compares it whole/u },
+            ],
             filename: SPEC,
         },
     ],

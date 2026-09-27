@@ -1,12 +1,18 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noRedundantServiceUrl } from './no-redundant-service-url.js';
 
-ruleTester().run('no-redundant-service-url', asOxlintRule(noRedundantServiceUrl), {
+ruleTester().run('no-redundant-service-url', noRedundantServiceUrl, {
     invalid: [
         // The standard alias, hand-wired.
-        { code: 'cli.env({ DATABASE_URL: db.connectionString });', errors: 1 },
+        {
+            code: 'cli.env({ DATABASE_URL: db.connectionString });',
+            errors: [{ column: 10, line: 1, messageId: 'redundant' }],
+        },
         // Any *_URL key fed from a connectionString is the injection re-done.
-        { code: 'cli.env({ ANALYTICS_DB_URL: analyticsDb.connectionString });', errors: 1 },
+        {
+            code: 'cli.env({ ANALYTICS_DB_URL: analyticsDb.connectionString });',
+            errors: [{ column: 10, line: 1, messageId: 'redundant' }],
+        },
     ],
     valid: [
         // Non-URL keys.

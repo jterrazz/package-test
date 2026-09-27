@@ -1,37 +1,37 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { negativeGoldenFrozen } from './negative-golden-frozen.js';
 
 const SPEC = '/repo/specs/api/session/session.test.ts';
 
-ruleTester().run('negative-golden-frozen', asOxlintRule(negativeGoldenFrozen), {
+ruleTester().run('negative-golden-frozen', negativeGoldenFrozen, {
     invalid: [
         // Wrapped in expect(() => …).toThrow() — a negative assertion, unfrozen.
         {
             code: `test('t', () => { expect(() => expect(result.response).toMatch(file('./_expected/wrong.http'))).toThrow(/x/); });`,
-            errors: 1,
+            errors: [{ column: 31, line: 1, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
         // Wrapped in expect(…).rejects.toThrow() — the async tree/filesystem form.
         {
             code: `test('t', async () => { await expect(expect(result.directory('out')).toMatch(directory('./_expected/tree/'))).rejects.toThrow(/x/); });`,
-            errors: 1,
+            errors: [{ column: 37, line: 1, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
         // A value in place is rewritten in the test as a file is on disk.
         {
             code: "test('t', () => { expect(() => expect(result.response).toMatch(`HTTP/1.1 500`)).toThrow(/x/); });",
-            errors: 1,
+            errors: [{ column: 31, line: 1, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
         {
             code: "test('t', async () => { await expect(expect(result.table('users')).toMatch([[1, 'Wrong']])).rejects.toThrow(/x/); });",
-            errors: 1,
+            errors: [{ column: 37, line: 1, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
         // Frozen:false is not an opt-out.
         {
             code: `test('t', () => { expect(() => expect(a.stdout).toMatch(file('./_expected/w.txt'), { frozen: false })).toThrow(); });`,
-            errors: 1,
+            errors: [{ column: 31, line: 1, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
         // The bounded heuristic: the helper owns the try/catch, so the
@@ -41,7 +41,7 @@ ruleTester().run('negative-golden-frozen', asOxlintRule(negativeGoldenFrozen), {
                 expect(result.stdout).toMatch(file('./_expected/wrong.txt'));
                 expect(run).toThrow();
             });`,
-            errors: 1,
+            errors: [{ column: 16, line: 2, messageId: 'unfrozenNegativeFixture' }],
             filename: SPEC,
         },
     ],

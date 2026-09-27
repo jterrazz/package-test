@@ -1,4 +1,4 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { MAX_TEST_LINES, testBodyWithinLineLimit } from './test-body-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';
@@ -17,36 +17,56 @@ function claimedTestOf(gestures: number, claim: number): string {
     ].join('\n');
 }
 
-ruleTester().run('test-body-within-line-limit', asOxlintRule(testBodyWithinLineLimit), {
+ruleTester().run('test-body-within-line-limit', testBodyWithinLineLimit, {
     invalid: [
         {
             code: testOf(MAX_TEST_LINES + 1),
-            errors: [{ message: /found: a test body of 61 lines of gestures, over 60/u }],
+            errors: [
+                {
+                    column: 10,
+                    line: 1,
+                    message: /found: a test body of 61 lines of gestures, over 60/u,
+                },
+            ],
             filename: SPEC,
         },
         // A `toMatch` value spares its own lines, never the gestures around it.
         {
             code: claimedTestOf(MAX_TEST_LINES + 1, 5),
-            errors: [{ message: /found: a test body of 61 lines of gestures, over 60/u }],
+            errors: [
+                {
+                    column: 10,
+                    line: 1,
+                    message: /found: a test body of 61 lines of gestures, over 60/u,
+                },
+            ],
             filename: SPEC,
         },
         // Every form of the test call: `it`, a modifier, a table.
-        { code: testOf(MAX_TEST_LINES + 1, "it('a', () => {"), errors: 1, filename: SPEC },
+        {
+            code: testOf(MAX_TEST_LINES + 1, "it('a', () => {"),
+            errors: [{ column: 8, line: 1, messageId: 'tooLong' }],
+            filename: SPEC,
+        },
         {
             code: testOf(MAX_TEST_LINES + 1, "test.skip('a', async function () {"),
-            errors: 1,
+            errors: [{ column: 15, line: 1, messageId: 'tooLong' }],
             filename: SPEC,
         },
         {
             code: testOf(MAX_TEST_LINES + 1, "test.each([1, 2])('a %s', (n) => {"),
-            errors: 1,
+            errors: [{ column: 26, line: 1, messageId: 'tooLong' }],
             filename: SPEC,
         },
         // A module test and a component test are tests too.
-        { code: testOf(MAX_TEST_LINES + 1), errors: 1, filename: '/repo/src/events/list.test.ts' },
         {
             code: testOf(MAX_TEST_LINES + 1),
-            errors: 1,
+            errors: [{ column: 10, line: 1, messageId: 'tooLong' }],
+            filename: '/repo/src/events/list.test.ts',
+        },
+        {
+            code: testOf(MAX_TEST_LINES + 1),
+            errors: [{ column: 10, line: 1, messageId: 'tooLong' }],
             filename: '/repo/src/components/table.test.tsx',
         },
     ],

@@ -1,20 +1,20 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { goldenPathHasExtension } from './golden-path-has-extension.js';
 
 const VIOLATION = '/repo/specs/app/widget/widget.test.ts';
 
-ruleTester().run('golden-path-has-extension', asOxlintRule(goldenPathHasExtension), {
+ruleTester().run('golden-path-has-extension', goldenPathHasExtension, {
     invalid: [
         // No extension.
         {
             code: 'expect(result.stdout).toMatch(file("./_expected/help"));',
-            errors: 1,
+            errors: [{ column: 35, line: 1, messageId: 'missingExtension' }],
             filename: VIOLATION,
         },
         // A path in a subfolder still needs its extension.
         {
             code: 'expect(result.stdout).toMatch(file("./_expected/build/verbose"));',
-            errors: 1,
+            errors: [{ column: 35, line: 1, messageId: 'missingExtension' }],
             filename: VIOLATION,
         },
     ],

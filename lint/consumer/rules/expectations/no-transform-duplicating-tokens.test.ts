@@ -1,14 +1,14 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noTransformDuplicatingTokens } from './no-transform-duplicating-tokens.js';
 
-ruleTester().run('no-transform-duplicating-tokens', asOxlintRule(noTransformDuplicatingTokens), {
+ruleTester().run('no-transform-duplicating-tokens', noTransformDuplicatingTokens, {
     invalid: [
         // Expression-bodied arrow, single token-equivalent replace.
         {
             code: `await specification.cli("./bin", {
                     transform: (text) => text.replace(/[0-9a-f-]{36}/g, "{{uuid}}"),
                 });`,
-            errors: 1,
+            errors: [{ column: 20, line: 2, messageId: 'tokenEquivalent' }],
         },
         // Chained token-equivalent replaces, block body with one return.
         {
@@ -17,14 +17,14 @@ ruleTester().run('no-transform-duplicating-tokens', asOxlintRule(noTransformDupl
                         return text.replace(/[0-9a-f-]{36}/g, "{{uuid}}").replace(/\\d+ms/g, "{{duration}}");
                     },
                 });`,
-            errors: 1,
+            errors: [{ column: 20, line: 2, messageId: 'tokenEquivalent' }],
         },
         // Captured token literals count too.
         {
             code: `await specification.cli("./bin", {
                     transform: (text) => text.replace(/run-\\d+/g, "{{int#run}}"),
                 });`,
-            errors: 1,
+            errors: [{ column: 20, line: 2, messageId: 'tokenEquivalent' }],
         },
     ],
     valid: [

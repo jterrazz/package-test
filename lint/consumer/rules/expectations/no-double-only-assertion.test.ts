@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noDoubleOnlyAssertion } from './no-double-only-assertion.js';
 
 const MODULE_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-double-only-assertion', asOxlintRule(noDoubleOnlyAssertion), {
+ruleTester().run('no-double-only-assertion', noDoubleOnlyAssertion, {
     invalid: [
         // The whole proof is the call log of a port the test built.
         {
@@ -12,7 +12,7 @@ ruleTester().run('no-double-only-assertion', asOxlintRule(noDoubleOnlyAssertion)
                 notify(mailer);
                 expect(mailer.send).toHaveBeenCalledOnce();
             });`,
-            errors: [{ messageId: 'doubleOnly' }],
+            errors: [{ column: 0, line: 1, messageId: 'doubleOnly' }],
             filename: MODULE_FILE,
         },
         // Two assertions, both on doubles.
@@ -23,7 +23,7 @@ ruleTester().run('no-double-only-assertion', asOxlintRule(noDoubleOnlyAssertion)
                 expect(send).toHaveBeenCalledOnce();
                 expect(send).toHaveBeenCalledWith('hello');
             });`,
-            errors: [{ messageId: 'doubleOnly' }],
+            errors: [{ column: 0, line: 1, messageId: 'doubleOnly' }],
             filename: MODULE_FILE,
         },
     ],

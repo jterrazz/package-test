@@ -1,4 +1,4 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSimulatedDom } from './no-simulated-dom.js';
 /* Joined at runtime: vitest scans a test file's SOURCE for the pragma, and a literal here would switch this file's own environment. */
 const PRAGMA = ['@vitest', 'environment'].join('-');
@@ -7,16 +7,16 @@ const tester = ruleTester();
 
 const MODULE_TEST = '/repo/src/ui/post-client.test.ts';
 
-tester.run('no-simulated-dom', asOxlintRule(noSimulatedDom), {
+tester.run('no-simulated-dom', noSimulatedDom, {
     invalid: [
         {
             code: `// ${PRAGMA} happy-dom\ntest("x", () => {});`,
-            errors: [{ messageId: 'pragma' }],
+            errors: [{ column: 0, line: 2, messageId: 'pragma' }],
             filename: MODULE_TEST,
         },
         {
             code: `/** ${PRAGMA} jsdom */\ntest("x", () => {});`,
-            errors: [{ messageId: 'pragma' }],
+            errors: [{ column: 0, line: 2, messageId: 'pragma' }],
             filename: MODULE_TEST,
         },
     ],

@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { projectNamedForItsFacet } from './project-named-for-its-facet.js';
 
 const CONFIG = '/repo/vitest.config.ts';
@@ -10,24 +10,24 @@ const UNDER_A_SPECS_PATH = resolve(
     '../../../../specs/lint/project-named-for-its-facet/_fixtures/compliant/vitest.config.ts',
 );
 
-ruleTester().run('project-named-for-its-facet', asOxlintRule(projectNamedForItsFacet), {
+ruleTester().run('project-named-for-its-facet', projectNamedForItsFacet, {
     invalid: [
         // A facet root under another name.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'http', include: ['specs/api/**/*.spec.ts'] }] } });`,
-            errors: [{ messageId: 'nameTheFacet' }],
+            errors: [{ column: 55, line: 1, messageId: 'nameTheFacet' }],
             filename: CONFIG,
         },
         // A facet name over another root.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'api', include: ['src/**/*.test.ts'] }] } });`,
-            errors: [{ messageId: 'rootTheFacet' }],
+            errors: [{ column: 78, line: 1, messageId: 'rootTheFacet' }],
             filename: CONFIG,
         },
         // `unit` reaching inside a specs tree.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'unit', include: ['specs/build/**/*.test.ts'] }] } });`,
-            errors: [{ messageId: 'unitOutsideSpecs' }],
+            errors: [{ column: 79, line: 1, messageId: 'unitOutsideSpecs' }],
             filename: CONFIG,
         },
     ],

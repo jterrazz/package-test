@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { includePointsAtAFolder } from './include-points-at-a-folder.js';
 
 // Placed at this package's own root: `specs/api` exists here and `specs/lint2`
@@ -8,18 +8,18 @@ import { includePointsAtAFolder } from './include-points-at-a-folder.js';
 const ROOT = resolve(import.meta.dirname, '../../../..');
 const CONFIG = resolve(ROOT, 'vitest.config.ts');
 
-ruleTester().run('include-points-at-a-folder', asOxlintRule(includePointsAtAFolder), {
+ruleTester().run('include-points-at-a-folder', includePointsAtAFolder, {
     invalid: [
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'lint', include: ['specs/lint2/**/*.test.ts'] }] } });`,
-            errors: [{ messageId: 'missingPrefix' }],
+            errors: [{ column: 79, line: 1, messageId: 'missingPrefix' }],
             filename: CONFIG,
         },
         // The folder is there and the suite is not: the suffix moved
         // (`.test.ts` → `.spec.ts`) and the glob stayed behind.
         {
             code: `export default defineSpecConfig({ test: { projects: [{ name: 'api', include: ['specs/api/**/*.test.ts'] }] } });`,
-            errors: [{ messageId: 'collectsNothing' }],
+            errors: [{ column: 78, line: 1, messageId: 'collectsNothing' }],
             filename: CONFIG,
         },
     ],

@@ -1,4 +1,4 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noDomInModuleTest } from './no-dom-in-module-test.js';
 
 const tester = ruleTester();
@@ -7,21 +7,21 @@ const MODULE_TEST = '/repo/src/ui/post-client.test.ts';
 const COMPONENT_TEST = '/repo/src/ui/post-table.test.tsx';
 const PRODUCT_SPEC = '/repo/specs/website/home/page.test.ts';
 
-tester.run('no-dom-in-module-test', asOxlintRule(noDomInModuleTest), {
+tester.run('no-dom-in-module-test', noDomInModuleTest, {
     invalid: [
         {
             code: 'test("x", () => { document.createElement("div"); });',
-            errors: [{ messageId: 'domGlobal' }],
+            errors: [{ column: 18, line: 1, messageId: 'domGlobal' }],
             filename: MODULE_TEST,
         },
         {
             code: 'test("x", () => { window.location.href; });',
-            errors: [{ messageId: 'domGlobal' }],
+            errors: [{ column: 18, line: 1, messageId: 'domGlobal' }],
             filename: MODULE_TEST,
         },
         {
             code: 'test("x", () => { navigator.userAgent; });',
-            errors: [{ messageId: 'domGlobal' }],
+            errors: [{ column: 18, line: 1, messageId: 'domGlobal' }],
             filename: MODULE_TEST,
         },
     ],

@@ -1,26 +1,26 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { stubsImportedThroughFacade } from './stubs-imported-through-facade.js';
 
 const TEST_FILE = '/repo/specs/api/feature/feature.test.ts';
 
-ruleTester().run('stubs-imported-through-facade', asOxlintRule(stubsImportedThroughFacade), {
+ruleTester().run('stubs-imported-through-facade', stubsImportedThroughFacade, {
     invalid: [
         // A test reaching into a kind folder.
         {
             code: `import events from './stubs/http/events.js';`,
-            errors: [{ messageId: 'internal' }],
+            errors: [{ column: 19, line: 1, messageId: 'internal' }],
             filename: TEST_FILE,
         },
         // Same through a re-export, from a neighbouring feature.
         {
             code: `export { default } from '../../pipeline/stubs/openai/classify.js';`,
-            errors: [{ messageId: 'internal' }],
+            errors: [{ column: 24, line: 1, messageId: 'internal' }],
             filename: TEST_FILE,
         },
         // And from a specification file.
         {
             code: `import gone from './articles/stubs/anthropic/draft.js';`,
-            errors: [{ messageId: 'internal' }],
+            errors: [{ column: 17, line: 1, messageId: 'internal' }],
             filename: '/repo/specs/api/api.specification.ts',
         },
     ],

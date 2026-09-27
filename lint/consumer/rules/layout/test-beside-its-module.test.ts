@@ -3,7 +3,7 @@ import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { testBesideItsModule } from './test-beside-its-module.js';
 
 // Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.
@@ -21,42 +21,42 @@ writeFileSync(join(UNSTAGED, 'src/local.ts'), 'export {};\n');
 writeFileSync(join(UNSTAGED, '.gitignore'), 'src/local.ts\n');
 execFileSync('git', ['init', '--quiet'], { cwd: UNSTAGED });
 
-ruleTester().run('test-beside-its-module', asOxlintRule(testBesideItsModule), {
+ruleTester().run('test-beside-its-module', testBesideItsModule, {
     invalid: [
         // A neighbour `.gitignore` names is on no checkout: the test is an orphan.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'orphanTest' }],
+            errors: [{ column: 0, line: 1, messageId: 'orphanTest' }],
             filename: `${UNSTAGED}/src/local.test.ts`,
         },
         // No util.ts neighbour in the violation fixture.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'orphanTest' }],
+            errors: [{ column: 0, line: 1, messageId: 'orphanTest' }],
             filename: `${OWN}/orphan/src/util.test.ts`,
         },
         // __tests__ directories are banned under src/.
         {
             code: 'export {};',
-            errors: [{ messageId: 'testsDir' }],
+            errors: [{ column: 0, line: 1, messageId: 'testsDir' }],
             filename: '/repo/src/specification/__tests__/match.test.ts',
         },
         // A rendered unit with nothing beside it — the same law, outside src/.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'orphanComponent' }],
+            errors: [{ column: 0, line: 1, messageId: 'orphanComponent' }],
             filename: `${OWN}/orphan/src/orphan-card.test.tsx`,
         },
         // A root-level tests/ dir (guarded by a real package.json at that root) is banned.
         {
             code: 'export {};',
-            errors: [{ messageId: 'rootTests' }],
+            errors: [{ column: 0, line: 1, messageId: 'rootTests' }],
             filename: `${REPO_ROOT}/tests/foo.test.ts`,
         },
         // And so is the singular spelling of the same root.
         {
             code: 'export {};',
-            errors: [{ messageId: 'rootTests' }],
+            errors: [{ column: 0, line: 1, messageId: 'rootTests' }],
             filename: `${REPO_ROOT}/test/corpus.test.ts`,
         },
     ],

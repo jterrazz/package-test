@@ -1,17 +1,17 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { scenarioEndsSettled } from './scenario-ends-settled.js';
 
 const SPEC = '/repo/specs/website/posts/table.spec.ts';
 const COMPONENT = '/repo/src/web/post-table.test.tsx';
 
-ruleTester().run('scenario-ends-settled', asOxlintRule(scenarioEndsSettled), {
+ruleTester().run('scenario-ends-settled', scenarioEndsSettled, {
     invalid: [
         // The capture is taken on whatever the click left on the screen.
         {
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(button('Next'));
             });`,
-            errors: [{ messageId: 'unsettled' }],
+            errors: [{ column: 22, line: 2, messageId: 'unsettled' }],
             filename: SPEC,
         },
         // A fill that settles nothing.
@@ -20,7 +20,7 @@ ruleTester().run('scenario-ends-settled', asOxlintRule(scenarioEndsSettled), {
                 await visitor.see(heading('Posts'));
                 await visitor.fill(field('Search'), 'draft');
             });`,
-            errors: [{ messageId: 'unsettled' }],
+            errors: [{ column: 22, line: 3, messageId: 'unsettled' }],
             filename: SPEC,
         },
         // A facet spec that has not taken the suffix yet is the same scenario.
@@ -28,7 +28,7 @@ ruleTester().run('scenario-ends-settled', asOxlintRule(scenarioEndsSettled), {
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(button('Next'));
             });`,
-            errors: [{ messageId: 'unsettled' }],
+            errors: [{ column: 22, line: 2, messageId: 'unsettled' }],
             filename: '/repo/specs/website/posts/table.test.ts',
         },
         // A scenario ending on a loop full of clicks settles nothing either.
@@ -38,7 +38,7 @@ ruleTester().run('scenario-ends-settled', asOxlintRule(scenarioEndsSettled), {
                     await visitor.click(button(tab));
                 }
             });`,
-            errors: [{ messageId: 'unsettled' }],
+            errors: [{ column: 26, line: 3, messageId: 'unsettled' }],
             filename: SPEC,
         },
     ],

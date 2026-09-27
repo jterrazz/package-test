@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 
 import type { AstNode } from '../../../engine/project/ast.js';
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { seedsAreSql } from './seeds-are-sql.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.
@@ -30,24 +30,27 @@ writeFileSync(join(IGNORED_STRAY, 'specs/app/widget/_seeds/users.json'), '[]\n')
 writeFileSync(join(IGNORED_STRAY, '.gitignore'), '*.json\n');
 execFileSync('git', ['init', '--quiet'], { cwd: IGNORED_STRAY });
 
-ruleTester().run('seeds-are-sql', asOxlintRule(seedsAreSql), {
+ruleTester().run('seeds-are-sql', seedsAreSql, {
     invalid: [
         // Every stray is named, whatever its extension: two strays, two reports.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'notSql' }, { messageId: 'notSql' }],
+            errors: [
+                { column: 0, line: 1, messageId: 'notSql' },
+                { column: 0, line: 1, messageId: 'notSql' },
+            ],
             filename: `${TWO_STRAYS}/specs/app/widget/widget.test.ts`,
         },
         // A file nobody added is still in the tree: it violates like a tracked one.
         {
             code: 'test("x", () => {});',
-            errors: [{ messageId: 'notSql' }],
+            errors: [{ column: 0, line: 1, messageId: 'notSql' }],
             filename: `${UNTRACKED_STRAY}/specs/app/widget/widget.test.ts`,
         },
         // The violation fixture keeps a .json next to the .sql.
         {
             code: 'test("x", () => {});',
-            errors: 1,
+            errors: [{ column: 0, line: 1, messageId: 'notSql' }],
             filename: `${SPECS_LINT}/seeds-are-sql/_fixtures/violation/specs/app/widget/widget.test.ts`,
         },
     ],

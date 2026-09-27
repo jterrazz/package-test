@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noExpectInALoop } from './no-expect-in-a-loop.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';
 
-ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
+ruleTester().run('no-expect-in-a-loop', noExpectInALoop, {
     invalid: [
         {
             code: `test('totals', () => {
@@ -11,7 +11,7 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
         expect(order.total).toBeGreaterThan(0);
     }
 });`,
-            errors: [{ line: 3, messageId: 'expectInALoop' }],
+            errors: [{ column: 8, line: 3, messageId: 'expectInALoop' }],
             filename: TEST_FILE,
         },
         {
@@ -22,7 +22,7 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
         index += 1;
     }
 });`,
-            errors: [{ line: 4, messageId: 'expectInALoop' }],
+            errors: [{ column: 8, line: 4, messageId: 'expectInALoop' }],
             filename: TEST_FILE,
         },
         {
@@ -31,7 +31,7 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
         expect(order.total).toBeGreaterThan(0);
     });
 });`,
-            errors: [{ line: 3, messageId: 'expectInALoop' }],
+            errors: [{ column: 8, line: 3, messageId: 'expectInALoop' }],
             filename: TEST_FILE,
         },
         {
@@ -45,10 +45,10 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
     rows.some((row) => expect(row.id).toBe('a'));
 });`,
             errors: [
-                { line: 2, messageId: 'expectInALoop' },
-                { line: 3, messageId: 'expectInALoop' },
-                { line: 5, messageId: 'expectInALoop' },
-                { line: 8, messageId: 'expectInALoop' },
+                { column: 22, line: 2, messageId: 'expectInALoop' },
+                { column: 27, line: 3, messageId: 'expectInALoop' },
+                { column: 8, line: 5, messageId: 'expectInALoop' },
+                { column: 23, line: 8, messageId: 'expectInALoop' },
             ],
             filename: TEST_FILE,
         },

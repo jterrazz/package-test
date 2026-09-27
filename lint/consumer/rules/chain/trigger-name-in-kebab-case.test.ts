@@ -1,12 +1,24 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { triggerNameInKebabCase } from './trigger-name-in-kebab-case.js';
 
-ruleTester().run('trigger-name-in-kebab-case', asOxlintRule(triggerNameInKebabCase), {
+ruleTester().run('trigger-name-in-kebab-case', triggerNameInKebabCase, {
     invalid: [
-        { code: 'await job.trigger("NightlyReport");', errors: 1 },
-        { code: 'await job.trigger("nightly_report");', errors: 1 },
-        { code: 'await job.trigger("nightly report");', errors: 1 },
-        { code: 'await job.trigger("nightly--report");', errors: 1 },
+        {
+            code: 'await job.trigger("NightlyReport");',
+            errors: [{ column: 18, line: 1, messageId: 'notKebab' }],
+        },
+        {
+            code: 'await job.trigger("nightly_report");',
+            errors: [{ column: 18, line: 1, messageId: 'notKebab' }],
+        },
+        {
+            code: 'await job.trigger("nightly report");',
+            errors: [{ column: 18, line: 1, messageId: 'notKebab' }],
+        },
+        {
+            code: 'await job.trigger("nightly--report");',
+            errors: [{ column: 18, line: 1, messageId: 'notKebab' }],
+        },
     ],
     valid: [
         { code: 'await job.trigger("nightly-report");' },

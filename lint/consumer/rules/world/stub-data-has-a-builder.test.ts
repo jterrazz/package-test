@@ -1,6 +1,6 @@
 import { resolve } from 'node:path';
 
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { stubDataHasABuilder } from './stub-data-has-a-builder.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');
@@ -9,11 +9,11 @@ const COMPLIANT = `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/compliant/spe
 
 const VIOLATION = `${SPECS_LINT}/stub-data-has-a-builder/_fixtures/violation/specs/app/widget/_setup/stubs`;
 
-ruleTester().run('stub-data-has-a-builder', asOxlintRule(stubDataHasABuilder), {
+ruleTester().run('stub-data-has-a-builder', stubDataHasABuilder, {
     invalid: [
         {
             code: "export const path = '/articles';",
-            errors: [{ messageId: 'orphan' }],
+            errors: [{ column: 0, line: 1, messageId: 'orphan' }],
             filename: `${VIOLATION}/http/articles.request.ts`,
         },
     ],

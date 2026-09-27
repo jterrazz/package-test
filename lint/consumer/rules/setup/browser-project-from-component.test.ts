@@ -1,20 +1,20 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { browserProjectFromComponent } from './browser-project-from-component.js';
 
 const tester = ruleTester();
 
 const CONFIG = '/repo/vitest.config.ts';
 
-tester.run('browser-project-from-component', asOxlintRule(browserProjectFromComponent), {
+tester.run('browser-project-from-component', browserProjectFromComponent, {
     invalid: [
         {
             code: 'export default { test: { browser: { enabled: true, instances: [] } } };',
-            errors: [{ messageId: 'handRolled' }],
+            errors: [{ column: 25, line: 1, messageId: 'handRolled' }],
             filename: CONFIG,
         },
         {
             code: 'export default { test: { projects: [{ test: { browser: { enabled: true } } }] } };',
-            errors: [{ messageId: 'handRolled' }],
+            errors: [{ column: 46, line: 1, messageId: 'handRolled' }],
             filename: CONFIG,
         },
     ],

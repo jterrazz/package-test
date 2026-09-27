@@ -1,9 +1,9 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noProbeCluster } from './no-probe-cluster.js';
 
 const SPEC_FILE = '/repo/specs/cli/build/build.spec.ts';
 
-ruleTester().run('no-probe-cluster', asOxlintRule(noProbeCluster), {
+ruleTester().run('no-probe-cluster', noProbeCluster, {
     invalid: [
         // Three greps where a golden would say the whole thing.
         {
@@ -13,7 +13,7 @@ ruleTester().run('no-probe-cluster', asOxlintRule(noProbeCluster), {
                 expect(result.stdout).toContain('2 files');
                 expect(result.stdout).toContain('done');
             });`,
-            errors: [{ messageId: 'cluster' }],
+            errors: [{ column: 0, line: 1, messageId: 'cluster' }],
             filename: SPEC_FILE,
         },
         // Two subjects, each with its own cluster.
@@ -27,7 +27,10 @@ ruleTester().run('no-probe-cluster', asOxlintRule(noProbeCluster), {
                 expect(result.stderr).toContain('warn: b');
                 expect(result.stderr).toContain('warn: c');
             });`,
-            errors: [{ messageId: 'cluster' }, { messageId: 'cluster' }],
+            errors: [
+                { column: 0, line: 1, messageId: 'cluster' },
+                { column: 0, line: 1, messageId: 'cluster' },
+            ],
             filename: SPEC_FILE,
         },
     ],

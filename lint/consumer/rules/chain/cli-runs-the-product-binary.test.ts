@@ -1,24 +1,24 @@
-import { asOxlintRule, ruleTester } from '../../../engine/testing/rule-tester.fixtures.js';
+import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { cliRunsTheProductBinary } from './cli-runs-the-product-binary.js';
 
-ruleTester().run('cli-runs-the-product-binary', asOxlintRule(cliRunsTheProductBinary), {
+ruleTester().run('cli-runs-the-product-binary', cliRunsTheProductBinary, {
     invalid: [
         // A bare literal pointing into a dependency's installed binary.
         {
             code: "const { cli } = await specification.cli('./node_modules/.bin/oxlint');",
-            errors: 1,
+            errors: [{ column: 22, line: 1, messageId: 'thirdPartyBinary' }],
             filename: '/repo/specs/cli/lint.specification.ts',
         },
         // The literal wrapped in a resolve(...) call.
         {
             code: "const { cli } = await specification.cli(resolve(dir, '../../node_modules/.bin/oxfmt'));",
-            errors: 1,
+            errors: [{ column: 22, line: 1, messageId: 'thirdPartyBinary' }],
             filename: '/repo/specs/cli/fmt.specification.ts',
         },
         // The idiom real specs use: the bin path hoisted into a const.
         {
             code: "const BIN = resolve(dir, '../../node_modules/.bin/tsc');\nconst { cli } = await specification.cli(BIN);",
-            errors: 1,
+            errors: [{ column: 22, line: 2, messageId: 'thirdPartyBinary' }],
             filename: '/repo/specs/cli/tsc.specification.ts',
         },
     ],
