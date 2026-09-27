@@ -3,8 +3,7 @@ import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
-import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
-import { candidateOf, MAX_REPORTED_MATCHES } from '../../../elements/ambiguity/candidate.js';
+import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
@@ -85,10 +84,6 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     );
 }
 
-function candidates(locator: Locator): ElementMatch[] {
-    return locator.elements().slice(0, MAX_REPORTED_MATCHES).map(candidateOf);
-}
-
 function ambiguousLevel(element: ElementRef): ElementRef {
     for (const level of scopeChain(element).slice(0, -1)) {
         if (locate(page, level).elements().length > 1) {
@@ -111,7 +106,7 @@ export async function act<T>(
             throw error;
         }
         const culprit = ambiguousLevel(element);
-        const matches = candidates(locate(page, culprit));
+        const matches = candidatesOf(locate(page, culprit).elements(), CANDIDATE_LIMITS);
         const url = globalThis.location.href;
         throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
     }

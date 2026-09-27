@@ -56,7 +56,7 @@ const config = defineSpecConfig({
             component({
                 // Every value is away from its default, so the app proves each one reaches the page.
                 clock: '2026-01-02T03:04:05.000Z',
-                include: ['specs/component/**/*.test.tsx'],
+                include: ['specs/component/**/*.test.tsx', 'src/**/*.test.tsx'],
                 locale: 'fr-FR',
                 // `wrap` is read against the app's folder, not the config's.
                 root: resolve(import.meta.dirname, 'specs/component'),

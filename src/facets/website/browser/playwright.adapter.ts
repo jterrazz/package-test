@@ -5,9 +5,7 @@ import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwr
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
-import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
-import { MATCH_TEXT_LENGTH, MAX_REPORTED_MATCHES } from '../../../elements/ambiguity/candidate.js';
-import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
+import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
@@ -79,52 +77,6 @@ function isStrictViolation(error: unknown): boolean {
     return error instanceof Error && error.message.includes('strict mode violation');
 }
 
-async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
-    return await locator.evaluateAll(
-        (nodes, { landmarks, limit, textLength }) => {
-            // Its label, else the text of what its `aria-labelledby` names.
-            // oxlint-disable-next-line unicorn/consistent-function-scoping -- this function is serialized into the page: a helper at module scope never reaches it
-            const nameOf = (landmark: Element | null | undefined): string | undefined => {
-                const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
-                    .split(/\s+/u)
-                    .filter((id) => id !== '')
-                    .map((id) => document.querySelector(`#${CSS.escape(id)}`)?.textContent ?? '')
-                    .join(' ');
-                const name = (landmark?.getAttribute('aria-label') ?? labelledBy)
-                    .replaceAll(/\s+/gu, ' ')
-                    .trim();
-                return name === '' ? undefined : name;
-            };
-            return nodes.slice(0, limit).map((node) => {
-                const element = node as HTMLElement;
-                const landmark = element.parentElement?.closest(landmarks);
-                const context = landmark
-                    ? (landmark.getAttribute('role') ?? landmark.tagName.toLowerCase())
-                    : null;
-                const detail = element.getAttribute('href') ?? element.getAttribute('name');
-                const text = (element.textContent ?? '')
-                    .replaceAll(/\s+/gu, ' ')
-                    .trim()
-                    .slice(0, textLength);
-                const label = element.getAttribute('aria-label')?.trim();
-                return {
-                    accessibleName: label && label !== text ? label : undefined,
-                    context: context ?? undefined,
-                    contextName: nameOf(landmark),
-                    detail: detail ?? undefined,
-                    tag: element.tagName.toLowerCase(),
-                    text,
-                };
-            });
-        },
-        {
-            landmarks: LANDMARK_SELECTOR,
-            limit: MAX_REPORTED_MATCHES,
-            textLength: MATCH_TEXT_LENGTH,
-        },
-    );
-}
-
 /** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 async function act<T>(
     page: Page,
@@ -138,7 +90,7 @@ async function act<T>(
             throw error;
         }
         const culprit = await findAmbiguousLevel(page, element);
-        const matches = await captureMatches(locate(page, culprit));
+        const matches = await locate(page, culprit).evaluateAll(candidatesOf, CANDIDATE_LIMITS);
         throw new AmbiguousElementError(
             describeAmbiguity({ element: culprit, matches, url: page.url() }),
         );
