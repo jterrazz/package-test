@@ -1,11 +1,11 @@
-import { GROUND_FIXTURES, treeEntries } from '@jterrazz/typescript/rules';
+import { GROUND_FIXTURES, PRUNED, treeEntries } from '@jterrazz/typescript/rules';
 import type { TreeEntry } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { FACETS } from './facets.js';
 
-export const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
+export const SKIPPED: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
 
 export function entriesOf(dir: string): TreeEntry[] {
     try {

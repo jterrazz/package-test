@@ -1,10 +1,8 @@
-import { GROUND_FIXTURES, treeEntries } from '@jterrazz/typescript/rules';
+import { GROUND_FIXTURES, PRUNED, treeEntries } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
 import { SPEC_EXTENSION } from './spec-document.js';
 import { parseYamlSource } from './yaml-document.js';
-
-const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
 export function isFixture(file: string): boolean {
     return file.split('/').includes(GROUND_FIXTURES);
@@ -15,7 +13,7 @@ export function specDocuments(root: string): string[] {
     const visit = (dir: string): void => {
         for (const entry of treeEntries(dir)) {
             const path = join(dir, entry.name);
-            if (entry.isDirectory() && !SKIPPED.has(entry.name)) {
+            if (entry.isDirectory() && !PRUNED.has(entry.name)) {
                 visit(path);
             } else if (entry.isFile() && entry.name.endsWith(SPEC_EXTENSION)) {
                 found.push(relative(root, path));
