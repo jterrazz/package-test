@@ -44,7 +44,7 @@ export default defineStubs(
 );
 ```
 
-If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). A chain that declares **no** stub is not guarded at all: strictness begins with the first `.intercept()`.
+If every matching stub is exhausted, or nothing matches at all, the spec fails (strict — see [below](#strict-by-construction)). Under node and on the stub backend, a chain that declares **no** stub is not guarded: strictness begins with the first `.intercept()`. In a page it is ([07](07-component.md)).
 
 ### `times` and `required` — saying what you mean
 
