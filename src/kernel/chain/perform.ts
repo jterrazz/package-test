@@ -11,7 +11,7 @@ export type Performed = {
     readonly testDir: string;
 };
 
-/** A driver's recorded violation wins over the action's error and over its success; every armed effect is released in reverse. */
+/** An adapter's recorded violation wins over the action's error and over its success; every armed effect is released in reverse. */
 export async function perform(
     setups: readonly AnyCapability[],
     action: AnyAction,

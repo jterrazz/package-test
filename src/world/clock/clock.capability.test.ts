@@ -16,11 +16,11 @@ const now = defineAction({
     row: { group: 'Terminal action', name: '.now()', probe: '.now(' },
 });
 
-function chain(driver: ClockPort = processClock): Chain {
+function chain(adapter: ClockPort = processClock): Chain {
     return defineFacet<Chain>()({
         actions: [now],
         capabilities: [clock],
-        drivers: () => ({ clock: driver }),
+        drivers: () => ({ clock: adapter }),
         locate: () => '/specs',
         options: {},
     }).open({});
@@ -38,8 +38,8 @@ describe('clock', () => {
         });
     });
 
-    test('.clock() — the calendar a chain pins — judges the instant when the chain is armed, whatever the driver pins', async () => {
-        // Given - a chain stated with something that is not an instant, on a driver that pins nothing
+    test('.clock() — the calendar a chain pins — judges the instant when the chain is armed, whatever the adapter pins', async () => {
+        // Given - a chain stated with something that is not an instant, on an adapter that pins nothing
         const stated = chain({ pin: () => ({}) }).clock('soon');
 
         // Then - stating it passed; running it is refused in the calendar's own words

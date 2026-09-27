@@ -37,7 +37,7 @@ export const jobFacet = defineFacet()({ ...composition, drivers: ${drivers}, loc
 }
 
 describe('facet-is-a-composition.file', () => {
-    test('facet-file — facetFileFindings — an adapter is a name, a read of the config, or a driver built on them', () => {
+    test('facet-file — facetFileFindings — an adapter is a name, a read of the config, or an adapter constructor built on them', () => {
         // Given - the three forms an adapter takes
         const source = facetWiring(
             '(config) => ({ databases: databaseSet(config), jobs: config.jobs ?? [], seed })',

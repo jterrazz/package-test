@@ -71,7 +71,7 @@ describe('rawFetch', () => {
     });
 
     test('.fetch() — one raw exchange with the site — refuses a pinned clock before any setup is armed', async () => {
-        // Given - a chain pinning a clock, over a driver logging every pin
+        // Given - a chain pinning a clock, over an adapter logging every pin
         const pinned: (null | string)[] = [];
 
         // When - it asks for one raw exchange

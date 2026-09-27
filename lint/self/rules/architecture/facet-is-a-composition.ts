@@ -45,7 +45,7 @@ export const facetIsAComposition: LintRule = {
             rowNamed(selfRows, 'facet-is-a-composition'),
             {
                 adapter: {
-                    found: 'the driver `{{port}}` is a {{what}} written in the facet, not an adapter its module builds',
+                    found: 'the adapter `{{port}}` is a {{what}} written in the facet, not one its adapter module builds',
                     fix: 'name the adapter, or call the constructor its adapter module exports — under `src/world/`, or in a concept folder of the facet — on the config alone',
                 },
                 buildsResult: {

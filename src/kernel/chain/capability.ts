@@ -40,7 +40,7 @@ export interface ChainSignature {
 }
 
 export type Armed = {
-    /** Released in reverse arm order; a driver may defer it to the test's end. */
+    /** Released in reverse arm order; an adapter may defer it to the test's end. */
     readonly release?: () => void;
     /** Preferred over the action's own error. */
     readonly violation?: () => Error | null;

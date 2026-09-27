@@ -82,11 +82,11 @@ describe('intercept', () => {
         expect(replies(armed)).toStrictEqual([{ n: 9 }, { n: 2 }]);
     });
 
-    test('.intercept() — the calls a chain declares — is refused when stated, before anything is parsed, by a driver that serves nothing', () => {
-        // Given - a driver that cannot serve a stub at all
+    test('.intercept() — the calls a chain declares — is refused when stated, before anything is parsed, by an adapter that serves nothing', () => {
+        // Given - an adapter that cannot serve a stub at all
         const { chain } = chainOver(new Error('this runner has no declared backend'));
 
-        // Then - the driver's refusal is the one raised, even for a call that would itself be refused
+        // Then - the adapter's refusal is the one raised, even for a call that would itself be refused
         // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a bare request half is what only an untyped caller can hand over: the overloads refuse it at every typed site
         expect(() => chain.intercept(http.get('https://x.test/') as never)).toThrow(
             'this runner has no declared backend',
