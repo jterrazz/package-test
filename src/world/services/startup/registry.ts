@@ -1,5 +1,5 @@
 import type { ContainerPort, ContainerRequest } from '../containers/container.port.js';
-import { ServiceContainer, serviceContainers } from '../containers/service-container.js';
+import { ServiceContainer, serviceContainers } from '../containers/service-container.adapter.js';
 
 export type ContainerIntegrations = {
     /** Start a single container programmatically (testcontainers). */

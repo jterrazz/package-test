@@ -138,10 +138,10 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`); a module whose name carries `.driver` before its extension — the module, its test, type test, fixtures or browser entry, `.ts` or `.tsx` — is an error at its first line.',
+            'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`). Implementing is read off the module: a class whose `implements` names a `*Port` imported from a `*.port.ts`, or an object literal annotated with one or `satisfies` one; a delegate choosing between adapters implements the port too, and is one. Such an implementation outside a `*.adapter.ts` is an error at it; a module whose name carries `.driver` before its extension — the module, its test, type test, fixtures or browser entry, `.ts` or `.tsx` — is an error at its first line.',
         facet: 'model',
         family: 'architecture',
-        fix: 'Rename the file `<what it adapts>.adapter.ts`, and the paths that import it.',
+        fix: 'Rename the file `<what it adapts>.adapter.ts`, keeping its sibling kind and extension, and the paths that import it.',
         name: 'one-word-for-an-adapter',
         rationale:
             'Two suffixes for one role split every search in two: the reader looking for what implements a port opens the `*.adapter.ts` files and misses the half named `*.driver.ts`.',

@@ -36,7 +36,7 @@ const config: OxlintConfig = defineConfig(
                     'src/world/stubs/delivery/**',
                     'src/world/clock/**',
                     'src/world/mocks/**',
-                    'src/world/services/containers/service-container.ts',
+                    'src/world/services/containers/service-container.adapter.ts',
                     'src/kernel/files/scratch.ts',
                     'src/expectations/goldens/**',
                     'src/expectations/in-place/**',

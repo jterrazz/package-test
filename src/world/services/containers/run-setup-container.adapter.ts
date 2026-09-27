@@ -30,7 +30,7 @@ function relayed(message: string, image: string): Error {
 }
 
 /** Started by asking the project's setup, never stopped by the worker. */
-export class RunContainer implements ContainerPort {
+export class RunSetupContainer implements ContainerPort {
     private address: null | RunAddress = null;
     private readonly url: string;
     private readonly request: ContainerRequest;

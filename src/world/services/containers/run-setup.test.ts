@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { RunContainer } from './run-container.js';
+import { RunSetupContainer } from './run-setup-container.adapter.js';
 import setup, { DOCKER_ABSENT } from './run-setup.js';
 
 describe('setup', () => {
@@ -21,7 +21,10 @@ describe('setup', () => {
 
         // When - a worker asks for a container
         const url = String(provided.get('serviceContainers'));
-        const start = new RunContainer(url, { image: 'postgres:17-alpine', port: 5432 }).start();
+        const start = new RunSetupContainer(url, {
+            image: 'postgres:17-alpine',
+            port: 5432,
+        }).start();
 
         // Then - the address is the loopback's, and the refusal names Docker
         try {

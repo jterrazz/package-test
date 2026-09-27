@@ -1,6 +1,6 @@
 import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
-import { RunContainer } from './run-container.js';
+import { RunSetupContainer } from './run-setup-container.adapter.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 /** The project's container when its setup serves one, asked for at start; its own otherwise. */
@@ -19,7 +19,7 @@ export class ServiceContainer implements ContainerPort {
         this.delegate =
             url === undefined
                 ? new TestcontainersAdapter(this.request)
-                : new RunContainer(url, this.request);
+                : new RunSetupContainer(url, this.request);
         await this.delegate.start();
     }
 
