@@ -1,4 +1,5 @@
 import { refusal } from '../../../lint/index.refusal.js';
+import { A_FILE_IS_READ_WHERE_IT_EXISTS } from '../result.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
@@ -94,7 +95,7 @@ export class ContainerAccessor {
                         fix: 'assert `.exists` first, or name a file the container holds',
                         found: `file(${JSON.stringify(path)}).content, and the container holds no such file`,
                         read: 'docs/14-assertions.md#container-subjects-docker-aware-cli',
-                        why: 'A file is read only where it exists.',
+                        why: A_FILE_IS_READ_WHERE_IT_EXISTS,
                     }),
                 );
             }

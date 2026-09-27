@@ -10,7 +10,7 @@ function holding(rows: unknown[][]): TableSource {
     };
 }
 
-describe('BaseResult', () => {
+describe('result', () => {
     test('table() — the lone declared database — reads the named table from it, whole', async () => {
         // Given - a result over one database, declared as "db"
         const result = new BaseResult({

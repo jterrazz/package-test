@@ -12,6 +12,19 @@ import { TextAccessor } from './text/text.js';
 import { CaptureScope } from './tokens/match.js';
 
 /** Read-only handle to a single file produced by a spec action. */
+export const A_FILE_IS_READ_WHERE_IT_EXISTS = 'A file is read only where it exists.';
+
+function missingFile(path: string): Error {
+    return new Error(
+        refusal({
+            fix: 'assert `.exists` first, or name a file the run left',
+            found: `file(${JSON.stringify(path)}), and the run left no such file`,
+            read: 'docs/14-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+            why: A_FILE_IS_READ_WHERE_IT_EXISTS,
+        }),
+    );
+}
+
 export type FileAccessor = {
     /** The UTF-8 text content. Throws if the file does not exist. */
     readonly content: string;
@@ -63,33 +76,19 @@ export class BaseResult {
         const resolvedPath = resolve(baseDir, path);
         const exists = existsSync(resolvedPath);
         const { captures, testDir } = this;
+        const readContent = (): string => {
+            if (!exists) {
+                throw missingFile(path);
+            }
+            return readFileSync(resolvedPath, 'utf8');
+        };
         return {
             get content(): string {
-                if (!exists) {
-                    throw new Error(
-                        refusal({
-                            fix: 'assert `.exists` first, or name a file the run left',
-                            found: `file(${JSON.stringify(path)}), and the run left no such file`,
-                            read: 'docs/14-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
-                            why: 'A file is read only where it exists.',
-                        }),
-                    );
-                }
-                return readFileSync(resolvedPath, 'utf8');
+                return readContent();
             },
             exists,
             grep(pattern: string): TextAccessor {
-                if (!exists) {
-                    throw new Error(
-                        refusal({
-                            fix: 'assert `.exists` first, or name a file the run left',
-                            found: `file(${JSON.stringify(path)}), and the run left no such file`,
-                            read: 'docs/14-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
-                            why: 'A file is read only where it exists.',
-                        }),
-                    );
-                }
-                return new TextAccessor(readFileSync(resolvedPath, 'utf8'), path, testDir, {
+                return new TextAccessor(readContent(), path, testDir, {
                     captures,
                 }).grep(pattern);
             },
