@@ -102,17 +102,17 @@ describe('index.vitest', () => {
         expect(testOf(integration()).fileParallelism).toBeUndefined();
     });
 
-    test('the node facet helpers — one canonical project per kind — every helper takes it, not only the ones 15.2 shipped it on', () => {
-        // Given - the four other helpers this release adds
-        const serial = [api, job, mobile].map((helper) => testOf(helper({ serial: true })));
+    test('the node facet helpers — one canonical project per kind — every helper takes `serial`', () => {
+        // Given - each node facet helper asked to run serially
+        const serial = [
+            api({ serial: true }),
+            job({ serial: true }),
+            mobile({ serial: true }),
+            cli({ literate: false, serial: true }),
+        ].map((project) => testOf(project).fileParallelism);
 
         // Then - `serial` is what chapter 02 says it is: every helper's
-        expect(serial.map((project) => project.fileParallelism)).toStrictEqual([
-            false,
-            false,
-            false,
-        ]);
-        expect(testOf(cli({ literate: false, serial: true })).fileParallelism).toBe(false);
+        expect(serial).toStrictEqual([false, false, false, false]);
     });
 
     test('defineSpecConfig() — the literate plugin — registers the plugin when a specification is given', () => {
