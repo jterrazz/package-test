@@ -7,6 +7,7 @@ import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows } from '../catalogue/manifest.js';
 import { checkAdapterNamedForItsPort } from './adapter-named-for-its-port.js';
+import { checkCheckerSuppressionNamesAPass } from './checker-suppression-names-a-pass.js';
 import { checkCheckerSuppressionStatesAReason } from './checker-suppression-states-a-reason.js';
 import { checkDatabaseNamedOnlyWhenSeveral } from './database-named-only-when-several.js';
 import { checkDockerExecBoundWithAwaitUsing } from './docker-exec-bound-with-await-using.js';
@@ -88,6 +89,7 @@ export const TREE_PASS_IDS = [
     'no-empty-expected-stream',
     'document-description-unique',
     'checker-suppression-states-a-reason',
+    'checker-suppression-names-a-pass',
     'document-description-reads-as-a-title',
 ] as const;
 
@@ -205,6 +207,7 @@ export const CHECKER: CheckerRegistry = {
         checkFacetTestUsesItsRunner,
         checkGroundBesideItsOnlyReader,
         checkCheckerSuppressionStatesAReason,
+        (root) => checkCheckerSuppressionNamesAPass(root, CHECKER_PASS_IDS),
         (root) => walkGround(root, GROUND),
         checkDocumentDescriptionUnique,
         checkNoUnusedGround,

@@ -961,6 +961,19 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
+            'Every id a `checker-disable-next-line` / `checker-disable-line` directive names is a pass of the checker, or `*`. An id no pass has — misspelled, or retired by a major — is an error at the directive.',
+        facet: 'model',
+        family: 'layout',
+        fix: 'Name the pass the line is the exception to, or delete the directive.',
+        name: 'checker-suppression-names-a-pass',
+        rationale:
+            'A directive naming an id no pass has silences nothing, and reads as if it did: a major renames its passes with no bridge, so without this pass every directive naming a retired id would stay in the tree forever, stating an exception nobody holds.',
+        reach: 'specs',
+    },
+    {
+        audience: 'consumer',
+        channel: 'checker',
+        convention:
             'Every workspace member with tests OF ITS OWN (a `test` script that does not delegate to members, or a `*.test.ts(x)` outside another package’s tree) declares a vitest config (`vitest.config.*`). The MEMBER pass judges the member itself, with or without a `specs/` root; a root that only delegates owes nothing.',
         facet: 'model',
         family: 'setup',

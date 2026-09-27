@@ -187,6 +187,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/consumer/checks/file-suffix-matches-place.ts',
             'lint/consumer/checks/ground-shared-or-inline.ts',
             'lint/consumer/checks/checker-suppression-states-a-reason.ts',
+            'lint/consumer/checks/checker-suppression-names-a-pass.ts',
             'lint/consumer/checks/database-named-only-when-several.ts',
             'lint/consumer/checks/docker-exec-bound-with-await-using.ts',
             'lint/consumer/checks/named-path-exists.ts',

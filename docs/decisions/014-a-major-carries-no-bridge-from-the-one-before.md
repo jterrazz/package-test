@@ -30,7 +30,11 @@ no floor kept for an older checker: each is deleted in the release that
 would have needed it. Consumers move by hand, or through agents, during the
 migration wave that follows the release; the rules of the new major name
 what is wrong in their own terms, and a directive naming a retired id is dead
-and reported like any other.
+and reported like any other: an `oxlint-disable` by oxlint's
+`reportUnusedDisableDirectives`, a ratchet key by the ratchet (a key at zero
+below its entry fails it), a `checker-disable` by
+`checker-suppression-names-a-pass`. A `checker-disable` naming a live pass
+over a line that pass no longer flags is not detected.
 
 The same holds for a peer range: 17 requires `@jterrazz/typescript ^11` and
 no `^10` range, so the toolchain's major ships first.

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { suppressedLines } from './suppression.js';
 
-describe('suppressedLines', () => {
+describe('suppression', () => {
     test('checker-disable comments — disable-next-line suppresses the next NON-BLANK line, skipping blanks/comments', () => {
         // Given - a directive with a blank line before the real statement
         const text = [

@@ -166,13 +166,19 @@ const citingFiles = (): string[] => {
     return found;
 };
 
+const DEAD_ID_INPUT =
+    'specs/lint/checker/_fixtures/lint-violations/checker-suppression-names-a-pass/';
+
 /** Comments cite too. */
 const citingSources = (): string[] => {
     const found: string[] = [];
     for (const root of ['src', 'specs']) {
         for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
-            if (path.endsWith('.ts') || path.endsWith('.tsx')) {
+            if (
+                (path.endsWith('.ts') || path.endsWith('.tsx')) &&
+                !path.startsWith(DEAD_ID_INPUT)
+            ) {
                 found.push(path);
             }
         }

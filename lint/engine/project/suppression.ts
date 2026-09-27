@@ -29,3 +29,32 @@ export function suppressedLines(text: string, id: string): Set<number> {
     }
     return suppressed;
 }
+
+const DIRECTIVE_TEXT = /\.(?:[cm]?[jt]sx?|ya?ml|json|md|sql|http|txt)$/u;
+
+export function holdsDirectives(path: string): boolean {
+    return DIRECTIVE_TEXT.test(path);
+}
+
+export type Directive = { ids: string[]; line: number; rest: string };
+
+const DIRECTIVE = /(?<lead>.*?)checker-disable(?:-next-line|-line)\s+(?<rest>.*)$/iu;
+
+/** Only in a comment: the word inside a string is a test talking about suppressions. */
+const COMMENT_LEAD = /(?:^|\s)(?:\/\/|\/\*|\*|#)\s*$/u;
+
+export function directivesIn(text: string): Directive[] {
+    return text.split('\n').flatMap((line, index) => {
+        const match = DIRECTIVE.exec(line);
+        if (match === null || !COMMENT_LEAD.test(match.groups?.lead ?? '')) {
+            return [];
+        }
+        const rest = match.groups?.rest ?? '';
+        const ids = rest
+            .replace(/--.*$/u, '')
+            .trim()
+            .split(/[\s,]+/u)
+            .filter((id) => id !== '');
+        return [{ ids, line: index + 1, rest }];
+    });
+}
