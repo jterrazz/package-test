@@ -20,7 +20,16 @@ import { byPosition, finding, isProduction, listed } from '../../engine/project/
 import { positionOf } from '../../engine/project/spec-subjects.js';
 import type { SelfPassId } from './checker.js';
 
-const ERROR_CLASSES = new Set(['Error', 'RangeError', 'SyntaxError', 'TypeError']);
+const BUILT_IN_ERRORS: ReadonlySet<string> = new Set([
+    'AggregateError',
+    'Error',
+    'EvalError',
+    'RangeError',
+    'ReferenceError',
+    'SyntaxError',
+    'TypeError',
+    'URIError',
+]);
 
 const INVARIANT_MODULE = 'src/kernel/refusals/invariant.ts';
 
@@ -44,7 +53,36 @@ function stackReadOf(node: AstNode): AstNode | undefined {
 
 type Judged = { at: AstNode; teaching: Pick<Finding, 'fix' | 'found'> };
 
-function constructions(program: AstNode): Judged[] {
+function errorClasses(programs: AstNode[]): ReadonlySet<string> {
+    const classes = new Set(BUILT_IN_ERRORS);
+    const declared: { name: string; parent: string }[] = [];
+    for (const program of programs) {
+        walk(program, (node) => {
+            const name = identifierName(child(node, 'id'));
+            const parent = identifierName(child(node, 'superClass'));
+            if (name !== undefined && parent !== undefined) {
+                declared.push({ name, parent });
+            }
+        });
+    }
+    let grew = true;
+    while (grew) {
+        const before = classes.size;
+        for (const { name, parent } of declared) {
+            if (classes.has(parent)) {
+                classes.add(name);
+            }
+        }
+        grew = classes.size > before;
+    }
+    return classes;
+}
+
+function messageArgument(node: AstNode, name: string): AstNode | undefined {
+    return childList(node, 'arguments')[name === 'AggregateError' ? 1 : 0];
+}
+
+function constructions(program: AstNode, classes: ReadonlySet<string>): Judged[] {
     const stackReads = new Set<AstNode>();
     const found: Judged[] = [];
     walk(program, (node) => {
@@ -53,17 +91,19 @@ function constructions(program: AstNode): Judged[] {
             stackReads.add(read);
         }
         const name = identifierName(child(node, 'callee'));
-        if (node.type !== 'NewExpression' || name === undefined || !ERROR_CLASSES.has(name)) {
+        const constructs =
+            name !== undefined &&
+            ((node.type === 'NewExpression' && classes.has(name)) ||
+                (node.type === 'CallExpression' && BUILT_IN_ERRORS.has(name)));
+        if (!constructs || stackReads.has(node) || isRefusalCall(messageArgument(node, name))) {
             return;
         }
-        if (stackReads.has(node) || isRefusalCall(childList(node, 'arguments')[0])) {
-            return;
-        }
+        const written = `${node.type === 'NewExpression' ? 'new ' : ''}${name}`;
         found.push({
             at: node,
             teaching: {
                 fix: `a user can cause it: \`new ${name}(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\``,
-                found: `\`new ${name}(…)\` carries a message written by hand`,
+                found: `\`${written}(…)\` carries a message written by hand`,
             },
         });
     });
@@ -143,16 +183,18 @@ function isHeading(read: string, root: string): boolean {
 }
 
 export function checkErrorIsARefusalOrAnInvariant(root: string): Finding<SelfPassId>[] {
-    return listed(resolve(root, 'src'), 'src')
+    const modules = listed(resolve(root, 'src'), 'src')
         .filter(({ directory, path }) => !directory && isProduction(path))
         .flatMap(({ path }) => {
             const text = readFileSync(resolve(root, path), 'utf8');
             const program = parseProgram(path, text);
-            if (!isNode(program)) {
-                return [];
-            }
-            return [
-                ...(path === INVARIANT_MODULE ? [] : constructions(program)),
+            return isNode(program) ? [{ path, program, text }] : [];
+        });
+    const classes = errorClasses(modules.map(({ program }) => program));
+    return modules
+        .flatMap(({ path, program, text }) =>
+            [
+                ...(path === INVARIANT_MODULE ? [] : constructions(program, classes)),
                 ...readsOf(program),
                 ...anchorsNamed(program, root),
             ].map(({ at, teaching }) =>
@@ -162,7 +204,7 @@ export function checkErrorIsARefusalOrAnInvariant(root: string): Finding<SelfPas
                     teaching,
                     positionOf(text, nodeStart(at)),
                 ),
-            );
-        })
+            ),
+        )
         .toSorted(byPosition);
 }
