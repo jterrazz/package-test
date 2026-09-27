@@ -12,30 +12,31 @@ What proves a change here: this package specifies itself with itself. The suites
 | Spec documents  | `specs/cli/<domain>/<case>.spec.yaml`                         | A cli session as data, collected as a test file by `literate()` ([20](20-documents.md)) |
 | Meta-tests      | `lint/self/corpus/*.test.ts`, `lint/self/catalogue/*.test.ts` | The framework applied to itself and to its own projections                              |
 
-## The eight projects
+## The nine projects
 
-`test.projects` in `vitest.config.ts` declares eight, and which one you can run is decided by what is installed and running on the machine.
+`test.projects` in `vitest.config.ts` declares nine, and which one you can run is decided by what is installed and running on the machine.
 
-| Project       | Collects                                                                                                                                                          | Needs                                                                |
-| ------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------- |
-| `unit`        | `src/**/*.test.ts`, `lint/**/*.test.ts` and `specs/lint/**/*.test.ts`, plus the lint documents `specs/lint/*/*.spec.yaml` through `literate()`, built by `unit()` | Nothing — the lint specs need `npm run build` first                  |
-| `cli`         | `specs/cli/**`, built by `cli()`, plus the documents `specs/cli/run/*.spec.yaml` (depth 1 only) through `literate()`                                              | Nothing — the Docker specs self-skip                                 |
-| `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                                                                     | Docker                                                               |
-| `job`         | `specs/job/**`, built by `job()`                                                                                                                                  | Docker                                                               |
-| `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included                                                                   | Docker                                                               |
-| `website`     | `specs/website/**`, built by `website()`                                                                                                                          | playwright + `npx playwright install chromium`; no Docker            |
-| `component`   | `specs/component/**/*.test.tsx` and `src/**/*.test.tsx` — a module test that needs a real DOM — built by `component()`                                            | the same chromium; no Docker. Runs in its own group, after `website` |
-| `mobile`      | `specs/mobile/**`, built by `mobile()` — serial by default, one driver session per run                                                                            | Nothing — the Appium protocol double, served once per run            |
+| Project       | Collects                                                                                                               | Needs                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------- |
+| `unit`        | `src/**/*.test.ts` and `lint/**/*.test.ts`, built by `unit()`                                                          | Nothing                                                                |
+| `lint`        | `specs/lint/**`, built by `lint()`                                                                                     | `npm run build` first — the plugins and the checkers load from `dist/` |
+| `cli`         | `specs/cli/**`, built by `cli()`, plus the documents `specs/cli/run/*.spec.yaml` (depth 1 only) through `literate()`   | Nothing — the Docker specs self-skip                                   |
+| `api`         | `specs/api/**`, built by `api()` (node mode, in-process Hono)                                                          | Docker                                                                 |
+| `job`         | `specs/job/**`, built by `job()`                                                                                       | Docker                                                                 |
+| `integration` | `specs/integration/**`, built by `integration({ serial: true })` — the container seams included                        | Docker                                                                 |
+| `website`     | `specs/website/**`, built by `website()`                                                                               | playwright + `npx playwright install chromium`; no Docker              |
+| `component`   | `specs/component/**/*.test.tsx` and `src/**/*.test.tsx` — a module test that needs a real DOM — built by `component()` | the same chromium; no Docker. Runs in its own group, after `website`   |
+| `mobile`      | `specs/mobile/**`, built by `mobile()` — serial by default, one driver session per run                                 | Nothing — the Appium protocol double, served once per run              |
 
-Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included, with the globs it takes naming the one specs tree that is no facet's. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
+Every project the package runs comes from a helper, so `--project api` means the same tree here as in any consumer — `unit()` included. A member without `"type": "module"` writes its config as `vitest.config.mts`: the helpers ship ESM only, a CJS config would have to `require()` them, and `roleOf` already reads `.mts` as the config role — so the rules that judge a config still find it.
 
 Why a file is reached by its ROLE and named by its suffix, and what was weighed against it: [ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md).
 
-**`specs/lint/` is a repository suite, and it keeps `.test.ts`.** A repository suite covers a TREE rather than one assembled product: these files run the plugin and the checker over fixture PROJECTS, one per rule, and what they specify is a convention over a repository's shape. Its first level is not one of the six facets, so `file-suffix-matches-place`'s rename clause never reaches it, `specs-at-declared-depth`'s declared depth is what judges it, and `unit()` is what collects it — the shape the constitution calls [the third door](18-conventions.md#the-third-door-a-repository-suite).
+**`specs/lint/` is the lint facet's folder.** Its specs run the plugin, the checker and the preset over fixture TREES, one folder per rule, through `specification.lint()` ([21](21-lint.md)): the rules this package ships are a subject like its binary, and they are specified the way a consumer specifies its own.
 
-**The `unit` project's budget is the whole suite's floor.** It collects the module tests and the lint suite and runs with no service, no browser and no container, so it is the one project a developer runs on every save: the same tree took between nine and eleven seconds on consecutive runs of an idle developer machine, and **the budget a change is designed against is twelve**. It is a design budget, not a gate: wall time is the machine's — the same run takes four times as long on a loaded one — so no check fails on it, and a change that adds a slow file to the project is judged at review against it. The budget sits above the range, not at the best measurement, so a measurement read against it is not read on noise. The meta-test that proves every rule's reach (`every-reach-proven`) runs inside it on ONE oxlint run for the same reason.
+**The `unit` project's budget is the whole suite's floor.** It collects the module tests and runs with no service, no browser and no container, so it is the one project a developer runs on every save: the same tree took between nine and eleven seconds on consecutive runs of an idle developer machine, and **the budget a change is designed against is twelve**. It is a design budget, not a gate: wall time is the machine's — the same run takes four times as long on a loaded one — so no check fails on it, and a change that adds a slow file to the project is judged at review against it. The budget sits above the range, not at the best measurement, so a measurement read against it is not read on noise.
 
-Every FACET folder under `specs/` is named for its facet: six belong to a constructor, and `specs/component/` to the one facet that is a chain — it is the rendered subject this package ships, and its component tests sit beside its components because that is what a rendered unit's test does (`no-unknown-constructor`, `test-beside-its-module`). A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/services/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the container adapters the public entry does not publish (`TestcontainersAdapter`, `RunSetupContainer`, `ServiceContainer`), are module tests beside their modules under `src/world/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (the layer map's `architecture/no-framework-internals`, [§ A spec reaches the framework by its entry](#a-spec-reaches-the-framework-by-its-entry)).
+Every FACET folder under `specs/` is named for its facet: seven belong to a constructor, and `specs/component/` to the one facet that is a chain — it is the rendered subject this package ships, and its component tests sit beside its components because that is what a rendered unit's test does (`no-unknown-constructor`, `test-beside-its-module`). A probe of a container seam — the postgres and redis handles — is a module against a real service, so it is an integration spec: `specs/integration/services/`, on `specification.integration({ services })` and its one terminal action. What the seam answers BEFORE it reaches a container, and the container adapters the public entry does not publish (`TestcontainersAdapter`, `RunSetupContainer`, `ServiceContainer`), are module tests beside their modules under `src/world/` — a spec reaches the framework through its public entry, and a probe that cannot is telling you where it belongs (the layer map's `architecture/no-framework-internals`, [§ A spec reaches the framework by its entry](#a-spec-reaches-the-framework-by-its-entry)).
 
 ```bash
 npm test                            # every project — Docker and chromium both required
@@ -71,7 +72,7 @@ specs/
 
 The law of the tree — the closed list of `_` folders, `_setup/` for code, the lowest-common placement — is [18 — Conventions § The naming recap](18-conventions.md#the-naming-recap)'s, and this tree follows it: the capability folders' stubs sit in `_setup/stubs/`, and a seed only one facet reads sits in that facet's `_seeds/`. Which of the two legal shapes a given tree takes — its own domain, or sibling tests in a named group folder — is decided by the assets, and that judgement is the process channel's ([18 — Conventions](18-conventions.md)).
 
-The fixture apps the specs drive are SPECIMENS, each named for the facet that drives it, and they follow the placement law like any ground: a specimen one facet reads sits in that facet's `_fixtures/` — `specimen-api-outbound` in api's, `specimen-job` in job's, `specimen-website` and its `specimen-website-backend` in website's, `specimen-cli` and its `-docker`, `-vitest` and `-literate` variants in cli's, `orders`, the module integration's specs call, in integration's, `checker-cli` in lint's, and the `broken-*` trees for the infrastructure failure paths in `specs/api/services/_fixtures/`. The pool, `specs/_shared/_fixtures/`, holds what several facets or a reader outside the specs tree name: `specimen-api` (which carries the jobs too), `specimen-mobile`, which the Makefile runs, and `lint-cli` and `member-workspace`, which lint's module tests read. The code several facets share sits beside the pool, in `specs/_shared/_setup/`: `appium/`, the protocol double the vitest config runs as a global setup, is TypeScript that prepares specs, not data a spec stands on. A lint rule's trees are not in the pool: a rule specified by documents keeps them in its own `specs/lint/<rule-id>/_fixtures/`, and the checker's twins sit in `specs/lint/checker/_fixtures/`.
+The fixture apps the specs drive are SPECIMENS, each named for the facet that drives it, and they follow the placement law like any ground: a specimen one facet reads sits in that facet's `_fixtures/` — `specimen-api-outbound` in api's, `specimen-job` in job's, `specimen-website` and its `specimen-website-backend` in website's, `specimen-cli` and its `-docker`, `-vitest` and `-literate` variants in cli's, `orders`, the module integration's specs call, in integration's, `checker-cli` in lint's, and the `broken-*` trees for the infrastructure failure paths in `specs/api/services/_fixtures/`. The pool, `specs/_shared/_fixtures/`, holds what several facets or a reader outside the specs tree name: `specimen-api` (which carries the jobs too), `specimen-mobile`, which the Makefile runs, and `lint-cli` and `member-workspace`, which lint's module tests read. The code several facets share sits beside the pool, in `specs/_shared/_setup/`: `appium/`, the protocol double the vitest config runs as a global setup, is TypeScript that prepares specs, not data a spec stands on. A lint rule's trees are not in the pool: each rule keeps them in its own `specs/lint/<rule-id>/_fixtures/`, and a tree several rules or the checker's command line read sits in the lowest folder they share.
 
 **The component tree is the one exception, and the exception is the rule it dogfoods.** A rendered unit's test sits BESIDE the unit, so `specs/component/` holds the fixture app and its specs as neighbours. It is not under `_fixtures/`: ground is what a spec stands on from a distance, and here the spec stands next to it. The exception is HELD by rules, not granted by omission: `test-beside-its-module` requires every one of those `.test.tsx` files to have the `.tsx` (or the `.ts` of a hook) of the same basename beside it, and `specs-at-declared-depth`'s row says a `.test.tsx` is out of its reach because a rendered unit never lives in a facet/domain tree.
 
@@ -91,22 +92,21 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 123   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
-| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 163   |
-| The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 165   |
-| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 24    |
+| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 175   |
+| The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 252   |
+| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
 <!-- /GENERATED:layers -->
 
 The counts are generated: a layer that stops growing while the surface does is visible here before it is visible in a bug.
 
-## The lint suite is end-to-end
+## The lint specs are end-to-end
 
-`specs/lint/**` runs the REAL oxlint binary and the real checker over fixture projects and goldens their output. Because it loads `dist/oxlint.js` and `dist/checker.js`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
+`specs/lint/**` runs the REAL oxlint, the real checker and the preset's real passes over fixture trees and goldens their whole report, on the lint facet ([21](21-lint.md)). Because the plugins and the checkers load from `dist/`, `npm run build` must precede it — the same ordering `npm run lint` depends on.
 
-A rule is specified in one of two forms, and the first is the one a new rule takes:
+A rule is specified in `specs/lint/<rule-id>/<rule-id>.spec.ts` — a folder growing an aspect file of its own when one grows past the line limit — over the trees in its local `_fixtures/`, on one of five runners at the facet root: `lint.specification.ts` (both oxlint plugins, every rule on), `checker-lint.specification.ts` (the conventions checker), `self-lint.specification.ts` (the passes only this package runs), `preset-lint.specification.ts` (the `test()` preset's laws) and `self-preset-lint.specification.ts` (the same preset and this package's own name rule). Every report golden names each finding at its `file:line:column`, then its lesson a part per line; a meta-test holds every rule of the two plugins and every checker pass to a spec there, and every one of them to a golden naming the line and column it fires on. `meta/` holds the reach meta-test, and `kitchen-sink/` the checker's whole-surface regression net.
 
-- **Documents.** `specs/lint/<rule-id>/<case>.spec.yaml`, the trees it lints in a local `_fixtures/`: a tree in, the command, the report out. The runner is `specs/lint/report.specification.ts` — one wrapper for both channels (`command: .` lints with oxlint, `command: checker .` runs the checker, `command: self-checker .` the passes only this package runs), bound with the published `lintReport` as its `transform`: every diagnostic of either channel reads `file:line:column  plugin(rule)`, so the golden proves where the rule fired and which rule it was, and every other line — a tally, a summary — is dropped, so a clean run is an empty stream. The `unit` project collects these documents through `literate()`. Every rule of the two oxlint plugins takes this form, each with at least one document whose golden names the line and column it fires on, which a meta-test holds — and so do checker passes, `no-duplicate-ground`'s moves and `ground-shared-or-inline`'s inlining and moves among them, and every pass of the self checker; a second meta-test holds every checker pass to a spec of either form.
-- **A test file per checker pass**, `specs/lint/checker/<pass>.test.ts` (and the reach meta-test under `specs/lint/meta/`), over a violation/compliant twin in `specs/lint/checker/_fixtures/lint-violations/` — the pool entry moved beside the one leaf that reads it (`ground-shared-or-inline`). The checker's goldens there are full snapshots: `specs/lint/checker/_expected/*.txt` holds the exact report lines the checker prints. A message that changes its wording moves its golden with it, in the same commit — the reason the documents golden the normalised report instead.
+The checker's own command line — the ratchet, `baseline`, `--member`, `--verbose`, `--format json`, what a document out of its format prints — is a binary, so it is a cli spec: `specs/cli/checker/` and `specs/cli/baseline/`, on `specs/cli/checker-cli.specification.ts`, whose goldens are the exact streams the checker prints.
 
 ## Coverage is a ratchet, not a threshold
 
@@ -181,20 +181,20 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **165 modules** have no sibling test, and every one of them is claimed:
+Today **174 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                  | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| composition root or barrel (13)       | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| type-only declaration (26)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                                                                                                                            |
+| composition root or barrel (14)       | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                                                                                                                                                                                        |
+| type-only declaration (27)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                                                                                                                            |
 | constant data (16)                    | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `index.refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners) |
-| a facet's vitest project (3)          | `index.vitest.test.ts` builds them through the entry, or `<facet>.project.test.ts` beside it, and asserts the project it produces                                                                                                                                                                                                                                                                                                                                                                                                               |
+| a facet's vitest project (4)          | `index.vitest.test.ts` builds them through the entry, or `<facet>.project.test.ts` beside it, and asserts the project it produces                                                                                                                                                                                                                                                                                                                                                                                                               |
 | a module that runs only in a page (2) | it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                                                                                                                                 |
-| a facet module (13)                   | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| a result accessor (17)                | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                                                                                                                                                                                                                                                                                                                   |
-| an adapter (14)                       | an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)                                                                                                                                                                                                                                                                                                                                       |
-| a bundled CLI entry (7)               | it is argument parsing over a module that has its own tests, and `specs/lint/` runs the built binary end to end                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| a lint-layer module (48)              | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture projects                                                                                                                                                                                                                                                                                                                                   |
+| a facet module (17)                   | the facet is proven end to end by its own tree under `specs/<facet>/`, which is what the constructor exists to make possible                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| a result accessor (18)                | an accessor is what a terminal action hands back: it is exercised by every spec that asserts on a result, and `result.test.ts` holds the base                                                                                                                                                                                                                                                                                                                                                                                                   |
+| an adapter (15)                       | an adapter, and what only an adapter reads, is proven through the facet that wires it — a probe that could only reach it directly is an integration spec under `specs/integration/services/` (chapter 03)                                                                                                                                                                                                                                                                                                                                       |
+| a bundled CLI entry (7)               | it is argument parsing over a module that has its own tests, and `specs/lint/` and `specs/cli/checker/` run the built binary end to end                                                                                                                                                                                                                                                                                                                                                                                                         |
+| a lint-layer module (48)              | the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture trees on the lint facet                                                                                                                                                                                                                                                                                                                    |
 | a chain or runner internal (6)        | it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to                                                                                                                                                                                                                                                                                                                                                                                             |
 
 <!-- /GENERATED:siblings -->
@@ -229,201 +229,207 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 ### Constructor option
 
-| Capability  | api | job | cli | integration | website | mobile | component | module |
-| ----------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `root`      | 3   | 1   | 1   | 2           | 1       | 1      | 1         | —      |
-| `server`    | 5   | —   | —   | —           | 4       | —      | —         | —      |
-| `services`  | 2   | 1   | 1   | 2           | 1       | 1      | —         | —      |
-| `jobs`      | —   | 2   | —   | —           | —       | —      | —         | —      |
-| `commands`  | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `defaults`  | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `docker`    | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `env`       | —   | —   | 5   | —           | —       | —      | —         | —      |
-| `serve`     | —   | —   | 3   | —           | —       | —      | —         | —      |
-| `transform` | —   | —   | 2   | —           | 1       | —      | —         | —      |
-| `backend`   | —   | —   | —   | —           | 1       | 1      | —         | —      |
-| `external`  | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `url`       | —   | —   | —   | —           | 2       | —      | —         | —      |
-| `app`       | —   | —   | —   | —           | —       | 1      | —         | —      |
-| `appium`    | —   | —   | —   | —           | —       | 1      | —         | —      |
-| `device`    | —   | —   | —   | —           | —       | 1      | —         | —      |
-| `timeouts`  | —   | —   | —   | —           | —       | 1      | —         | —      |
-| `clock`     | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `locale`    | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `timezone`  | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `viewport`  | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `vite`      | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `wrap`      | —   | —   | —   | —           | —       | —      | 1         | —      |
+| Capability  | api | job | cli | lint | integration | website | mobile | component | module |
+| ----------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `root`      | 3   | 1   | 1   | 1    | 2           | 1       | 1      | 1         | —      |
+| `server`    | 5   | —   | —   | —    | —           | 4       | —      | —         | —      |
+| `services`  | 2   | 1   | 1   | —    | 2           | 1       | 1      | —         | —      |
+| `jobs`      | —   | 2   | —   | —    | —           | —       | —      | —         | —      |
+| `commands`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
+| `defaults`  | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
+| `docker`    | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
+| `env`       | —   | —   | 6   | —    | —           | —       | —      | —         | —      |
+| `serve`     | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
+| `transform` | —   | —   | 2   | —    | —           | 1       | —      | —         | —      |
+| `checkers`  | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
+| `config`    | —   | —   | —   | 1    | —           | —       | —      | —         | —      |
+| `plugins`   | —   | —   | —   | 1    | —           | —       | —      | —         | —      |
+| `presets`   | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
+| `backend`   | —   | —   | —   | —    | —           | 1       | 1      | —         | —      |
+| `external`  | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `url`       | —   | —   | —   | —    | —           | 2       | —      | —         | —      |
+| `app`       | —   | —   | —   | —    | —           | —       | 1      | —         | —      |
+| `appium`    | —   | —   | —   | —    | —           | —       | 1      | —         | —      |
+| `device`    | —   | —   | —   | —    | —           | —       | 1      | —         | —      |
+| `timeouts`  | —   | —   | —   | —    | —           | —       | 1      | —         | —      |
+| `clock`     | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `locale`    | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `timezone`  | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `viewport`  | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `vite`      | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `wrap`      | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
 
 ### Setup
 
-| Capability     | api | job | cli | integration | website | mobile | component | module |
-| -------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.clock()`     | 1   | 2   | —   | 2           | 1       | —      | 1         | —      |
-| `.headers()`   | 5   | —   | —   | —           | 1       | —      | —         | —      |
-| `.intercept()` | 10  | 1   | —   | 2           | 1       | 1      | 6         | —      |
-| `.seed()`      | 9   | 1   | 1   | 3           | —       | —      | —         | —      |
-| `.with()`      | 4   | 1   | 1   | 1           | 1       | —      | —         | —      |
-| `.env()`       | —   | —   | 4   | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —   | 29  | —           | —       | —      | —         | —      |
-| `.viewport()`  | —   | —   | —   | —           | —       | —      | 2         | —      |
-| `.wrap()`      | —   | —   | —   | —           | —       | —      | 1         | —      |
+| Capability     | api | job | cli | lint | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.clock()`     | 1   | 2   | —   | —    | 2           | 1       | —      | 1         | —      |
+| `.headers()`   | 5   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.intercept()` | 10  | 1   | —   | —    | 2           | 1       | 1      | 6         | —      |
+| `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
+| `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
+| `.env()`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 35  | 117  | —           | —       | —      | —         | —      |
+| `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
+| `.viewport()`  | —   | —   | —   | —    | —           | —       | —      | 2         | —      |
+| `.wrap()`      | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
 
 ### Terminal action
 
-| Capability   | api | job | cli | integration | website | mobile | component | module |
-| ------------ | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.request()` | 2   | —   | —   | —           | —       | —      | —         | —      |
-| `.get()`     | 21  | —   | —   | —           | —       | —      | —         | —      |
-| `.post()`    | 7   | —   | —   | —           | —       | —      | —         | —      |
-| `.put()`     | 1   | —   | —   | —           | —       | —      | —         | —      |
-| `.delete()`  | 1   | —   | —   | —           | —       | —      | —         | —      |
-| `.trigger()` | —   | 7   | —   | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 35  | —           | —       | —      | —         | —      |
-| `.run()`     | —   | —   | 5   | —           | —       | —      | —         | —      |
-| `.call()`    | —   | —   | —   | 9           | —       | —      | —         | —      |
-| `.visit()`   | —   | —   | —   | —           | 21      | —      | —         | —      |
-| `.fetch()`   | —   | —   | —   | —           | 3       | —      | —         | —      |
-| `.open()`    | —   | —   | —   | —           | —       | 7      | —         | —      |
-| `.render()`  | —   | —   | —   | —           | —       | —      | 30        | —      |
+| Capability   | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.request()` | 2   | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.get()`     | 21  | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.post()`    | 7   | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 42  | —    | —           | —       | —      | —         | —      |
+| `.run()`     | —   | —   | 5   | 113  | —           | —       | —      | —         | —      |
+| `.call()`    | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
+| `.visit()`   | —   | —   | —   | —    | —           | 21      | —      | —         | —      |
+| `.fetch()`   | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.open()`    | —   | —   | —   | —    | —           | —       | 7      | —         | —      |
+| `.render()`  | —   | —   | —   | —    | —           | —       | —      | 30        | —      |
 
 ### Route option
 
-| Capability   | api | job | cli | integration | website | mobile | component | module |
-| ------------ | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{ params }` | 1   | —   | —   | —           | —       | —      | —         | —      |
+| Capability   | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------ | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `{ params }` | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 
 ### Verb
 
-| Capability | api | job | cli | integration | website | mobile | component | module |
-| ---------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `see`      | —   | —   | —   | —           | 11      | 6      | 28        | —      |
-| `fill`     | —   | —   | —   | —           | 4       | 1      | 3         | —      |
-| `click`    | —   | —   | —   | —           | 3       | —      | 8         | —      |
-| `gone`     | —   | —   | —   | —           | 3       | —      | 8         | —      |
-| `press`    | —   | —   | —   | —           | 1       | —      | 2         | —      |
-| `hover`    | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `check`    | —   | —   | —   | —           | 1       | —      | 2         | —      |
-| `select`   | —   | —   | —   | —           | 1       | —      | 3         | —      |
-| `goto`     | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `tap`      | —   | —   | —   | —           | —       | 3      | —         | —      |
-| `rerender` | —   | —   | —   | —           | —       | —      | 1         | —      |
-| `unmount`  | —   | —   | —   | —           | —       | —      | 1         | —      |
+| Capability | api | job | cli | lint | integration | website | mobile | component | module |
+| ---------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `see`      | —   | —   | —   | —    | —           | 11      | 6      | 28        | —      |
+| `fill`     | —   | —   | —   | —    | —           | 4       | 1      | 3         | —      |
+| `click`    | —   | —   | —   | —    | —           | 3       | —      | 8         | —      |
+| `gone`     | —   | —   | —   | —    | —           | 3       | —      | 8         | —      |
+| `press`    | —   | —   | —   | —    | —           | 1       | —      | 2         | —      |
+| `hover`    | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `check`    | —   | —   | —   | —    | —           | 1       | —      | 2         | —      |
+| `select`   | —   | —   | —   | —    | —           | 1       | —      | 3         | —      |
+| `goto`     | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `tap`      | —   | —   | —   | —    | —           | —       | 3      | —         | —      |
+| `rerender` | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
+| `unmount`  | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
 
 ### Descriptor
 
-| Capability      | api | job | cli | integration | website | mobile | component | module |
-| --------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `button`        | —   | —   | —   | —           | 4       | 3      | 8         | —      |
-| `field`         | —   | —   | —   | —           | 6       | 1      | 7         | —      |
-| `content`       | —   | —   | —   | —           | 7       | 6      | 17        | —      |
-| `testId`        | —   | —   | —   | —           | 1       | 1      | 1         | —      |
-| `heading`       | —   | —   | —   | —           | 3       | —      | 3         | —      |
-| `link`          | —   | —   | —   | —           | 3       | —      | 3         | —      |
-| `dialog`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `status`        | —   | —   | —   | —           | 1       | —      | 3         | —      |
-| `table`         | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `row`           | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `listitem`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `option`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `banner`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `complementary` | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `contentinfo`   | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `form`          | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `main`          | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `navigation`    | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `region`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `search`        | —   | —   | —   | —           | 2       | —      | 2         | —      |
-| `within`        | —   | —   | —   | —           | 4       | 1      | 6         | —      |
-| `focused`       | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `selected`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `valued`        | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `disabled`      | —   | —   | —   | —           | 1       | —      | 1         | —      |
-| `enabled`       | —   | —   | —   | —           | 1       | —      | 1         | —      |
+| Capability      | api | job | cli | lint | integration | website | mobile | component | module |
+| --------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `button`        | —   | —   | —   | —    | —           | 4       | 3      | 8         | —      |
+| `field`         | —   | —   | —   | —    | —           | 6       | 1      | 7         | —      |
+| `content`       | —   | —   | —   | —    | —           | 7       | 6      | 17        | —      |
+| `testId`        | —   | —   | —   | —    | —           | 1       | 1      | 1         | —      |
+| `heading`       | —   | —   | —   | —    | —           | 3       | —      | 3         | —      |
+| `link`          | —   | —   | —   | —    | —           | 3       | —      | 3         | —      |
+| `dialog`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `status`        | —   | —   | —   | —    | —           | 1       | —      | 3         | —      |
+| `table`         | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `row`           | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `listitem`      | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `option`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `banner`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `complementary` | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `contentinfo`   | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `form`          | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `main`          | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `navigation`    | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `region`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `search`        | —   | —   | —   | —    | —           | 2       | —      | 2         | —      |
+| `within`        | —   | —   | —   | —    | —           | 4       | 1      | 6         | —      |
+| `focused`       | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `selected`      | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `valued`        | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `disabled`      | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
+| `enabled`       | —   | —   | —   | —    | —           | 1       | —      | 1         | —      |
 
 ### Result accessor
 
-| Capability      | api | job | cli | integration | website | mobile | component | module |
-| --------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 23  | —   | —   | —           | —       | —      | —         | —      |
-| `.status`       | 1   | —   | —   | —           | 3       | —      | —         | —      |
-| `.table()`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
-| `.file()`       | 1   | —   | 9   | 1           | —       | —      | —         | —      |
-| `.directory()`  | 1   | —   | 4   | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —   | 17  | —           | —       | —      | —         | —      |
-| `.stderr`       | —   | —   | 7   | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —   | 26  | —           | —       | —      | —         | —      |
-| `.json`         | —   | —   | 5   | —           | 2       | —      | —         | —      |
-| `.filesystem`   | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `.container()`  | —   | —   | 3   | —           | —       | —      | —         | —      |
-| `.containerIds` | —   | —   | 1   | —           | —       | —      | —         | —      |
-| `.value`        | —   | —   | —   | 8           | —       | —      | —         | —      |
-| `.error`        | —   | —   | —   | 5           | —       | —      | —         | —      |
-| `.tree`         | —   | —   | —   | —           | 5       | —      | 6         | —      |
-| `.content`      | —   | —   | —   | —           | 10      | 5      | 18        | —      |
-| `.console`      | —   | —   | —   | —           | 4       | —      | 4         | —      |
-| `.errors`       | —   | —   | —   | —           | 8       | —      | 8         | —      |
-| `.html`         | —   | —   | —   | —           | 2       | —      | 5         | —      |
-| `.title`        | —   | —   | —   | —           | 3       | —      | —         | —      |
-| `.url`          | —   | —   | —   | —           | 3       | —      | —         | —      |
-| `.head`         | —   | —   | —   | —           | 3       | —      | —         | —      |
-| `.jsonLd`       | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.canonical`    | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.alternates`   | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.links`        | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.meta()`       | —   | —   | —   | —           | 2       | —      | —         | —      |
-| `.body`         | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.headers`      | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.location`     | —   | —   | —   | —           | 1       | —      | —         | —      |
-| `.screen`       | —   | —   | —   | —           | —       | 3      | —         | —      |
+| Capability      | api | job | cli | lint | integration | website | mobile | component | module |
+| --------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `.response`     | 23  | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.table()`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 13  | 7    | 1           | —       | —      | —         | —      |
+| `.directory()`  | 1   | —   | 4   | 10   | 1           | —       | —      | —         | —      |
+| `.stdout`       | —   | —   | 23  | —    | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —   | 13  | —    | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 33  | —    | —           | —       | —      | —         | —      |
+| `.json`         | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |
+| `.filesystem`   | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
+| `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
+| `.containerIds` | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
+| `.report`       | —   | —   | —   | 113  | —           | —       | —      | —         | —      |
+| `.value`        | —   | —   | —   | —    | 8           | —       | —      | —         | —      |
+| `.error`        | —   | —   | —   | —    | 5           | —       | —      | —         | —      |
+| `.tree`         | —   | —   | —   | —    | —           | 5       | —      | 6         | —      |
+| `.content`      | —   | —   | —   | —    | —           | 10      | 5      | 18        | —      |
+| `.console`      | —   | —   | —   | —    | —           | 4       | —      | 4         | —      |
+| `.errors`       | —   | —   | —   | —    | —           | 8       | —      | 8         | —      |
+| `.html`         | —   | —   | —   | —    | —           | 2       | —      | 5         | —      |
+| `.title`        | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.url`          | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.head`         | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
+| `.jsonLd`       | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.canonical`    | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.alternates`   | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.links`        | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.meta()`       | —   | —   | —   | —    | —           | 2       | —      | —         | —      |
+| `.body`         | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.headers`      | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.location`     | —   | —   | —   | —    | —           | 1       | —      | —         | —      |
+| `.screen`       | —   | —   | —   | —    | —           | —       | 3      | —         | —      |
 
 ### Golden
 
-| Capability             | api | job | cli | integration | website | mobile | component | module |
-| ---------------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `toMatch(file())`      | 1   | —   | 6   | 4           | 0       | —      | 1         | 3      |
-| `toMatch(directory())` | 1   | —   | 5   | 1           | —       | —      | —         | 1      |
-| `toMatch(<rows>)`      | 7   | 4   | 1   | 1           | —       | —      | —         | —      |
-| `.http exchange`       | 3   | —   | —   | —           | —       | —      | —         | 5      |
-| `.aria.yaml tree`      | —   | —   | —   | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 2   | 3           | 0       | —      | —         | 10     |
-| `.txt stream`          | 1   | —   | 7   | 1           | 1       | —      | —         | 9      |
-| `{ frozen }`           | 2   | —   | 11  | —           | —       | —      | 1         | 2      |
+| Capability             | api | job | cli | lint | integration | website | mobile | component | module |
+| ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `toMatch(file())`      | 1   | —   | 8   | —    | 4           | 0       | —      | 1         | 3      |
+| `toMatch(directory())` | 1   | —   | 5   | —    | 1           | —       | —      | —         | 1      |
+| `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
+| `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 5      |
+| `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
+| `.json body`           | 3   | —   | 6   | —    | 3           | 0       | —      | —         | 10     |
+| `.txt stream`          | 1   | —   | 9   | —    | 1           | 1       | —      | —         | 9      |
+| `{ frozen }`           | 2   | —   | 13  | —    | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
-| Capability    | api | job | cli | integration | website | mobile | component | module |
-| ------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `clock()`     | —   | —   | —   | —           | —       | —      | —         | 8      |
-| `intercept()` | —   | —   | —   | —           | —       | —      | —         | 2      |
-| `mockOf()`    | —   | —   | —   | —           | —       | —      | —         | 1      |
-| `match.*`     | —   | —   | —   | —           | —       | —      | —         | 8      |
+| Capability    | api | job | cli | lint | integration | website | mobile | component | module |
+| ------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `clock()`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
+| `intercept()` | —   | —   | —   | —    | —           | —       | —      | —         | 2      |
+| `mockOf()`    | —   | —   | —   | —    | —           | —       | —      | —         | 1      |
+| `match.*`     | —   | —   | —   | —    | —           | —       | —      | —         | 8      |
 
 ### Token
 
-| Capability     | api | job | cli | integration | website | mobile | component | module |
-| -------------- | --- | --- | --- | ----------- | ------- | ------ | --------- | ------ |
-| `{{any}}`      | 0   | —   | 3   | 0           | 0       | —      | —         | 2      |
-| `{{base64}}`   | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
-| `{{date}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{duration}}` | 0   | —   | 1   | 0           | 0       | —      | —         | 2      |
-| `{{email}}`    | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{float}}`    | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
-| `{{hex}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
-| `{{int}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{ip}}`       | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{iso8601}}`  | 6   | —   | 0   | 1           | 0       | —      | —         | 2      |
-| `{{number}}`   | 1   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{path}}`     | 1   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{port}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 2      |
-| `{{semver}}`   | 0   | —   | 2   | 0           | 0       | —      | —         | 1      |
-| `{{sha}}`      | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{string}}`   | 2   | —   | 1   | 0           | 0       | —      | —         | 1      |
-| `{{time}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{ulid}}`     | 0   | —   | 0   | 0           | 0       | —      | —         | 1      |
-| `{{url}}`      | 0   | —   | 4   | 0           | 0       | —      | —         | 1      |
-| `{{uuid}}`     | 2   | —   | 0   | 0           | 0       | —      | —         | 3      |
-| `{{workdir}}`  | 0   | —   | 6   | 0           | 0       | —      | —         | 1      |
+| Capability     | api | job | cli | lint | integration | website | mobile | component | module |
+| -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
+| `{{any}}`      | 0   | —   | 3   | —    | 0           | 0       | —      | —         | 2      |
+| `{{base64}}`   | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
+| `{{date}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{duration}}` | 0   | —   | 1   | —    | 0           | 0       | —      | —         | 2      |
+| `{{email}}`    | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{float}}`    | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
+| `{{hex}}`      | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
+| `{{int}}`      | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{ip}}`       | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{iso8601}}`  | 6   | —   | 0   | —    | 1           | 0       | —      | —         | 2      |
+| `{{number}}`   | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{path}}`     | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{port}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
+| `{{semver}}`   | 0   | —   | 2   | —    | 0           | 0       | —      | —         | 1      |
+| `{{sha}}`      | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{string}}`   | 2   | —   | 1   | —    | 0           | 0       | —      | —         | 1      |
+| `{{time}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{ulid}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
+| `{{url}}`      | 0   | —   | 4   | —    | 0           | 0       | —      | —         | 1      |
+| `{{uuid}}`     | 2   | —   | 0   | —    | 0           | 0       | —      | —         | 3      |
+| `{{workdir}}`  | 0   | —   | 9   | —    | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions
 
@@ -440,16 +446,15 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**25 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**24 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |
-| `lint/self/catalogue/manifest.test.ts`       | manifest           | 33    |
+| `lint/self/catalogue/manifest.test.ts`       | manifest           | 31    |
 | `lint/self/corpus/architecture.test.ts`      | architecture       | 4     |
 | `lint/self/corpus/audience.test.ts`          | audience           | 10    |
 | `lint/self/corpus/compositions.test.ts`      | compositions       | 4     |
 | `lint/self/corpus/docs-typecheck.test.ts`    | docs-typecheck     | 6     |
-| `lint/self/corpus/document-report.test.ts`   | silentLintFailures | 2     |
 | `lint/self/corpus/env-allowlist.test.ts`     | env-allowlist      | 4     |
 | `lint/self/corpus/facet-matrix.test.ts`      | facet-matrix       | 5     |
 | `lint/self/corpus/makefile.test.ts`          | makefile           | 5     |
@@ -468,7 +473,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/skill.test.ts`             | skill              | 6     |
 | `lint/self/corpus/type-aware.test.ts`        | typeAwareFindings  | 4     |
 | `lint/self/corpus/type-channel.test.ts`      | type-channel       | 3     |
-| `specs/lint/meta/every-reach-proven.test.ts` | every-reach-proven | 7     |
+| `specs/lint/meta/every-reach-proven.spec.ts` | every-reach-proven | 7     |
 
 <!-- /GENERATED:meta-tests -->
 
@@ -504,13 +509,12 @@ A rule that is both is two: its consumer half ships, its self half stays home. `
 | <a id="error-is-a-refusal-or-an-invariant"></a>`error-is-a-refusal-or-an-invariant` | model | checker   | module | An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: `new Error(refusal(…))`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (`docs/05-module-tests.md#time`) or a catalogue row. An error only the framework can cause, a broken internal invariant, is `invariant('<what broke>')`, whose message says the bug is the framework’s. Any other construction of an error under `src/` — `new` on a built-in error class or on a class of `src/` that extends one, or a built-in called bare (`Error(…)`) — is an error at the construction, a stack read (`new Error().stack`) and tests excepted; a refusal reading a heading no chapter has, an error at its read.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Throw `new Error(refusal({ found, why, fix, read }))` for what a user can cause, reading the heading that explains it (write that section where none does), and `invariant('<what broke>')` for what only the framework can.                               | A message written by hand at the throw says what went wrong and stops: the reader is left to guess the law and the gesture, and a hundred of them drifted into a hundred shapes. Split in two declared forms, a refusal teaches its reader, and an invariant tells them the bug is not theirs to fix.                                        |
 | <a id="every-capability-exercised"></a>`every-capability-exercised`                 | model | meta      | specs  | Every capability a facet DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package’s own test files in that facet, or its row names the reason it is not.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         | Write the spec, or state the reason on the capability row — a blank cell says nothing and a zero with no reason is a surface nobody holds.                                                                                                                 | A suite proves what it runs, never what it does not: a facet can grow a method and be green forever without one test touching it.                                                                                                                                                                                                            |
 | <a id="every-constructor-has-specs"></a>`every-constructor-has-specs`               | model | meta      | all    | Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              | Specify the facet on the package itself before a rule presumes it.                                                                                                                                                                                         | A facet the framework never ran against itself is a surface nobody has met, and a seam is proven before the rule that presumes it.                                                                                                                                                                                                           |
-| <a id="every-position-proven"></a>`every-position-proven`                           | model | meta      | all    | Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a golden of its `specs/lint/<rule>/` folder or its `specs/lint/checker/<rule>.test.ts` naming the rule at a `line:col`, or a RuleTester case of its unit test stating the `line`. A row with none cannot enter the catalogue.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.                                                                                                                                          | A finding at the wrong place sends the reader to a line that holds nothing wrong; an exit code proves a rule fires, never that it points at the fault.                                                                                                                                                                                       |
+| <a id="every-position-proven"></a>`every-position-proven`                           | model | meta      | all    | Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a report golden of its `specs/lint/<rule>/` folder naming the rule at a `line:col`, or a `ruleTester()` case of its unit test, which states the `line` and `column` of every error. A row with none cannot enter the catalogue.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 | Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.                                                                                                                                          | A finding at the wrong place sends the reader to a line that holds nothing wrong; an exit code proves a rule fires, never that it points at the fault.                                                                                                                                                                                       |
 | <a id="every-reach-proven"></a>`every-reach-proven`                                 | model | meta      | all    | Every REACH a row can state is proven on one fixture project laid out with every path role, by at least one rule of that reach, judged by a single oxlint run.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Add the path to the reach fixture and state what each rule says about it.                                                                                                                                                                                  | A stated reach nothing checks is a sentence: the gates that drifted from their rows were the ones no fixture ever put a file in front of.                                                                                                                                                                                                    |
 | <a id="facet-is-a-composition"></a>`facet-is-a-composition`                         | model | statique  | all    | A facet file — `src/facets/<facet>/<facet>.facet.ts` — is a composition and nothing else: its imports, one `const composition = { … }` listing the setups, the actions and the constructor options it composes, the chain type it names as an interface, and one exported `defineFacet<…>()({ … })` — the definer handed nothing — whose `adapters` is an arrow, each parameter a bare name with no default nor pattern, handing back the object of the adapters it wires; any other statement — a function, a class, a variable, a call — is an error. Nothing in them is written inline either: the composition lists by name setups and actions imported from a `*.capability.ts` or `*.action.ts` module, and states each option as a matrix row of string literals; each adapter that arrow hands back is a name, a read of the config, or a constructor an adapter module (`*.adapter.ts`) exports — under `world/`, or in a concept folder of the facet — called on those; and every other member of the facet is a reference imported from its module. Every key of the composition, of its options and their rows, of the facet and of the adapters is a name written as it is, never a computed `[…]`. The constructor beside it, `<facet>.handle.ts`, starts the infrastructure and opens the facet: it never calls a step (`reduce`, `arm`, `perform`) of a definition imported from a `*.capability.ts` or `*.action.ts` module — read off it by a written or a string key, through a namespace import, a cast or a `const` alias of it or of the step, destructured (a default included), off the facet’s composition, or through `call`/`apply`, wherever in the file the alias is declared — nor builds with `new` a result imported from a `*.result.ts` module or `expectations/`, by name or through a namespace import. A step reaching the constructor any other way — a function parameter, a `bind`, a value it computes — is beyond the rule’s reach.                                                                                                     | Move the logic to the capability, the action or the adapter that owns it; the facet file lists definitions and wires adapters, the constructor opens it.                                                                                                   | A setup is defined once and composed by every facet that offers it; logic written in one facet file is a second definition of it, which the next facet does not share and the matrix cannot see.                                                                                                                                             |
 | <a id="folder-named-for-a-concept"></a>`folder-named-for-a-concept`                 | model | checker   | module | A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a facet with concept folders holds at its root its face alone: `index.ts` (and the component’s `index.browser.ts`), `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts` and their tests. Ground (`_fixtures/`, `_expected/`, `_requests/`, `_seeds/`) is exempt. An error at the folder, or at the stray file.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | Name the folder for what its files are about, fold a lone file into its parent, and move a facet’s other root files into the concept folder they belong to.                                                                                                | A role folder gathers files by what they are, so one change opens five of them; a one-file folder is a name with nothing to group; and a facet root that grows loose files stops reading as its face.                                                                                                                                        |
 | <a id="kernel-loads-in-a-page"></a>`kernel-loads-in-a-page`                         | model | meta      | module | The chain kernel and every setup load in a page: no module of the chain kernel (`src/kernel/chain/`) or a setup module (`src/**/*.capability.ts`) reaches — through its value imports, its re-exports and every `import()` of a string literal, at any depth — imports a node builtin, or a package at all: the walk cannot follow a package into its own imports, so none is reached. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Put what needs the builtin or the package behind the port of the adapter that owns it — an adapter a world area or the facet’s own concept folder exports, handed in by the facet — or import only its type.                                               | The component facet composes the same kernel and setups inside a browser page, and a builtin reached at any depth — directly, or inside a package — is a component chain that stops bundling. The layer map judges one edge at a time and lets a builtin through by choice: its package rules name the npm dependency types alone.           |
 | <a id="links-resolve"></a>`links-resolve`                                           | model | meta      | all    | Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every `docs/NN` a source comment cites names a chapter that exists.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    | Point the link at the heading as it is now written, or restore the heading it named.                                                                                                                                                                       | A renamed heading leaves a link that scrolls nowhere and a renumbered chapter one that 404s.                                                                                                                                                                                                                                                 |
-| <a id="lint-document-goldens-the-report"></a>`lint-document-goldens-the-report`     | model | meta      | all    | A lint-rule document — under `specs/lint/`, less the fixtures another document feeds a violation through — that asserts a failing `exit:` also goldens `stdout:` or `stderr:`: the report that says WHICH rule fired, not only that one did.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | Golden the run’s report beside its `exit:`.                                                                                                                                                                                                                | An exit code alone proves a rule ended the run, never which one: a document pinned to it keeps passing once the wrong rule starts firing for the wrong reason.                                                                                                                                                                               |
 | <a id="message-has-four-parts"></a>`message-has-four-parts`                         | model | meta      | all    | Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | Write the message as its `found` and its `fix` — `lessonsAt()` in a rule, the finding's two fields in a checker pass, `refusal()` in the runtime — and let the row give the `why` and the `read`.                                                          | A message is the only page of the catalogue most readers see: one that names the fault without its reason or its gesture sends the reader to the chapter for what the line could have said.                                                                                                                                                  |
 | <a id="message-reads-its-row"></a>`message-reads-its-row`                           | model | meta      | all    | Every diagnostic's `read:` part is its own row's heading, generated from the row, and the heading exists in the generated chapter.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | Let `lessonsAt()` write the `read:` part; never type one.                                                                                                                                                                                                  | The anchor is the only route most readers ever take into the catalogue, and forty hand-written tails drifted the first time a heading moved.                                                                                                                                                                                                 |
 | <a id="one-word-for-an-adapter"></a>`one-word-for-an-adapter`                       | model | checker   | module | A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`). Implementing is read off the module: a class whose `implements` names a `*Port` imported from a `*.port.ts`, or an object literal annotated with one or `satisfies` one; a delegate choosing between adapters implements the port too, and is one. Such an implementation outside a `*.adapter.ts` is an error at it; a module whose name carries `.driver` before its extension — the module, its test, type test, fixtures or browser entry, `.ts` or `.tsx` — is an error at its first line.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           | Rename the file `<what it adapts>.adapter.ts`, keeping its sibling kind and extension, and the paths that import it.                                                                                                                                       | Two suffixes for one role split every search in two: the reader looking for what implements a port opens the `*.adapter.ts` files and misses the half named `*.driver.ts`.                                                                                                                                                                   |
@@ -586,8 +590,8 @@ The workflow is `.github/workflows/validate.yaml`, on every push to `main` and e
 
 ## Pitfalls
 
-- **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the suite judges the previous build's rules and reports a green that means nothing.
-- **Hand-editing a golden under `specs/lint/checker/_expected/`.** Those are full-output snapshots of a real binary. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the checker's output.
+- **Running the lint specs on a stale `dist/`.** `specs/lint/**` and `oxlint.config.ts` both load `dist/oxlint.js`. Without `npm run build`, the specs judge the previous build's rules and report a green that means nothing.
+- **Hand-editing a report golden.** A lint spec's report and the checker's streams under `specs/cli/checker/` are the real output. Change the message in the code and regenerate with `TEST_UPDATE=1`; a hand-tuned golden asserts your typing, not the linter's output.
 - **Expecting `npm test` to pass with Docker stopped.** Only `unit` and `cli` are infrastructure-free. The Docker-backed tests self-skip inside them, but `api`, `job` and `integration` fail honestly.
 - **Adding a test at a facet root.** `specs/<facet>/<aspect>.spec.ts` is refused by `specs-at-declared-depth` in this repository's default depth — the runner lives at the root, the tests live one level down.
 - **Writing a facet spec with the unit’s suffix.** `file-suffix-matches-place` refuses it and `jterrazz-test-check specs --fix` renames it with `git mv` — and names every `include`/`exclude` entry of the member the rename broke — the globs whose prefix covers a file it moved and the literals naming one — since an entry the rename leaves behind collects nothing and the run stays green with fewer files. The reverse — a `.spec.ts` with no `specs/` ancestor — is the member pass's finding.

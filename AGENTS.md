@@ -1,10 +1,10 @@
 # Agent brief — `@jterrazz/test`
 
-A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered websites and native mobile apps, plus the oxlint plugin and checker that enforce its conventions. This file **routes**; it never restates what the corpus already says.
+A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered websites, native mobile apps and the rules a project ships, plus the oxlint plugin and checker that enforce its conventions. This file **routes**; it never restates what the corpus already says.
 
 ## Mental model
 
-- **Six constructors, and only six.** `specification.api()`, `.job()`, `.cli()`, `.integration()`, `.website()`, `.mobile()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. A seventh subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
+- **Seven constructors, and only seven.** `specification.api()`, `.job()`, `.cli()`, `.integration()`, `.website()`, `.mobile()`, `.lint()` — each returns a handle, each chain is zero or more setups closed by exactly ONE terminal action, and every assertion goes through vitest's `expect()`. An eighth subject is a decision before it is a constructor, and `component` is the one facet that is a chain rather than a constructor.
 - **The root reads the sentence of a test.** `src/` holds the three entries (`index.ts`, `index.browser.ts`, `index.vitest.ts`), `vitest/`, and the trees `facets/`, `world/`, `elements/`, `expectations/`, `kernel/`; `lint/` sits at the repository root beside it. The edges point one way. The map, its edges and the passes that hold it: [01 § The source trees](docs/01-architecture.md#the-source-trees); the declaration: `lint/self/checks/layers.ts`.
 - **The code owns the rules.** A mechanized rule's normative sentence lives in `lint/consumer/catalogue/manifest.ts` beside its implementation — in `lint/self/catalogue/manifest.ts` for a rule only this package is held to, which no published entry imports — and the catalogue is GENERATED from it. Add a rule to the manifest, never to a chapter.
 - **The package specifies itself with itself.** `specs/` is written with `@jterrazz/test` against fixture apps, and a family of meta-tests runs the framework on its own output.

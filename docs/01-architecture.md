@@ -1,6 +1,6 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind six constructors, one chain that needs none, source trees with declared edges, and eight channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind seven constructors, one chain that needs none, source trees with declared edges, and eight channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                                                                        |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
@@ -15,7 +15,7 @@ The rules themselves — what each family says, what a reviewer must judge — a
 
 Every facet is the same four steps. A **constructor** takes options and returns a **handle**; the handle opens a **chain** of zero or more setups closed by exactly one terminal action; the action executes and resolves to a **typed result**; the result is asserted through vitest's `expect()`. Nothing else is public — there is no imperative escape hatch, because a spec that can do anything proves nothing in particular.
 
-Six constructors exist and the list is closed (`src/facets/specification.ts`):
+Seven constructors exist and the list is closed (`src/facets/specification.ts`):
 
 | Constructor                   | Handle destructures to      | Subject under test                               |
 | ----------------------------- | --------------------------- | ------------------------------------------------ |
@@ -25,8 +25,9 @@ Six constructors exist and the list is closed (`src/facets/specification.ts`):
 | `specification.integration()` | `{ integration, cleanup }`  | A module against real services, or a golden      |
 | `specification.website()`     | `{ website, cleanup, url }` | A rendered page — fetched, or driven in chromium |
 | `specification.mobile()`      | `{ mobile, cleanup, udid }` | A native screen on an iOS simulator              |
+| `specification.lint()`        | `{ lint, cleanup }`         | The rules a project ships, over a fixture tree   |
 
-The asymmetry in that column is the model, not an oversight: `docker` reads a container the subject itself started, and neither a pipeline triggered by name nor a module called in-process is specified by the containers it starts, so `job` and `integration` are handed none; `website` and `mobile` drive a browser and a simulator rather than an orchestrated stack, so they carry neither.
+The asymmetry in that column is the model, not an oversight: `docker` reads a container the subject itself started, and neither a pipeline triggered by name nor a module called in-process is specified by the containers it starts, so `job` and `integration` are handed none; `website` and `mobile` drive a browser and a simulator rather than an orchestrated stack, so they carry neither; and `lint` starts nothing at all, its `cleanup` releasing nothing.
 
 **One facet has no constructor**, and the same reason explains it: a rendered component starts nothing. `component` ([07 — Component specs](07-component.md)) is a chain the package exports directly — `component.intercept(…).render(<X />)` — so there is no handle to destructure and no `cleanup` to pass to `afterAll`. What every render of a project shares (the providers, the Vite pipeline, the viewport) is the PROJECT's, stated once by `component()` in `vitest.config.ts`.
 
@@ -101,7 +102,7 @@ The bundle is built by `tsdown` into `dist/` and its shape follows how each entr
 
 **There are FIVE entries and no more**: `@jterrazz/test` for everything a spec uses, `@jterrazz/test/vitest` for what `vitest.config.ts` needs, `@jterrazz/test/oxlint` for the lint plugin, `@jterrazz/test/config` for the `test()` preset a `jterrazz.config.ts` lists, `@jterrazz/test/schema` for an editor validating a `<case>.spec.yaml`. That is rule `no-unpublished-subpath` rather than a convention of taste, and the exemption is derived from the manifest's own `exports` map (the kit's `declaredSubpaths`), so a subpath is exempt the moment it is published and stops being exempt the moment it is withdrawn.
 
-**The root entry has two runtimes.** A component test renders in a real browser, and the node entry cannot load there: it imports node builtins at load — `node:fs` and `node:child_process` among them — while the native seams (`pg`, `better-sqlite3`, `testcontainers`) are lazy peers, opened on first use. So `exports["."]` carries a `browser` condition resolving to `dist/browser/index.js` — the same public surface, built for a page, where every node-only name (the six constructors, the services, the docker accessors, the results that walk a disk) is a stub that throws where it was called, naming the facet and saying it runs under node. The split is the RUNTIME's and never the facets': one specifier, so no spec has to remember which entry it may import.
+**The root entry has two runtimes.** A component test renders in a real browser, and the node entry cannot load there: it imports node builtins at load — `node:fs` and `node:child_process` among them — while the native seams (`pg`, `better-sqlite3`, `testcontainers`) are lazy peers, opened on first use. So `exports["."]` carries a `browser` condition resolving to `dist/browser/index.js` — the same public surface, built for a page, where every node-only name (the seven constructors, `ruleTester()`, the services, the docker accessors, the results that walk a disk) is a stub that throws where it was called, naming the facet and saying it runs under node. The split is the RUNTIME's and never the facets': one specifier, so no spec has to remember which entry it may import.
 
 `types` is stated once, and it is the node build's — so the two runtimes are ONE type surface and a name cannot exist on one side only. The page's entry takes its types from the node's (`export type *`), so they cannot drift, and the `package-exports` meta-test compares the two builds' exported names on every run.
 
@@ -110,7 +111,7 @@ The API is the types the package publishes, and nothing re-states it. What the c
 ## Pitfalls
 
 - **Reaching for a dependency from `kernel/`.** A new external package belongs to the ONE slice that needs it — a world area or a facet — and nowhere else. Only a library every layer truly shares sits behind the kernel, in the one folder `FRAMEWORK_LAYERS` grants it to: vitest's test hooks in `files/`; the `yaml` library and the toolchain's config types sit in `lint/engine/project/`, which the kernel reaches. Anything else the kernel imports is the boundary this package cannot afford to blur, and the layer map and the library-ownership rules refuse it.
-- **Adding a seventh constructor.** The six are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor — as `integration` did in [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
+- **Adding an eighth constructor.** The seven are the closed vocabulary the conventions, the linter and the documentation are all shaped around. A new SUBJECT to specify is a design decision, and it earns a record in [`decisions/`](decisions/) before it earns a constructor — as `integration` did in [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md) and `lint` in [ADR-015](decisions/015-a-rule-a-project-ships-is-the-lint-facet.md).
 - **Writing a rule's normative sentence into a chapter.** It belongs in `lint/consumer/catalogue/manifest.ts` beside the implementation; a chapter that restates it is the second copy the whole design exists to prevent.
 
 ## Related

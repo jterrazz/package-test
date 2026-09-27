@@ -25,7 +25,7 @@ src/domain/posts/
 
 The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([07 — Component specs](07-component.md)).
 
-Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save, and this package holds its own to a time budget ([03 — Testing § The eight projects](03-testing.md#the-eight-projects) states it).
+Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save, and this package holds its own to a time budget ([03 — Testing § The eight projects](03-testing.md#the-nine-projects) states it).
 
 ## The constructor: there is none
 

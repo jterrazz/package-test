@@ -1,6 +1,6 @@
 ---
 name: jterrazz-test
-description: Testing conventions for @jterrazz projects — the eight kinds (module, integration, component, website, mobile, api, job, cli) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
+description: Testing conventions for @jterrazz projects — the nine kinds (module, integration, component, website, mobile, api, job, cli, lint) plus the repository suite, vitest, real services, golden files, doubles. Use when writing, organizing, or debugging ANY test in a jterrazz repo, a plain module test included.
 metadata:
     version: '17'
 ---
@@ -19,9 +19,10 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts` — the folder derived from the route (`GET /events` → `events/list/`)
 5. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
 6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
-7. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
-8. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
-9. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
+7. A rule the project ships — a plugin, a checker, a preset? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`, each error at its `line` and `column`
+8. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
+9. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
+10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
 The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60. A colocated `.test.ts(x)` holds one `describe` too, titled with its subject — the export of the module beside it (`describe('LocaleNote', …)`). `make fix` splits, moves and retitles ([docs/18](../../docs/18-conventions.md#one-file-one-subject)).
 
@@ -108,11 +109,11 @@ What a test stands on is named by one of two calls, with the path relative to th
 | job                                         | [docs/11-job.md](../../docs/11-job.md)                   |
 | cli                                         | [docs/12-cli.md](../../docs/12-cli.md)                   |
 | a cli `<case>.spec.yaml`                    | [docs/20-documents.md](../../docs/20-documents.md)       |
+| lint — a rule over a tree, or alone         | [docs/21-lint.md](../../docs/21-lint.md)                 |
 | naming an element on any surface that draws | [docs/13-elements.md](../../docs/13-elements.md)         |
 | a matcher, sync or awaited                  | [docs/14-assertions.md](../../docs/14-assertions.md)     |
 | a `{{token}}`, or update mode               | [docs/15-tokens.md](../../docs/15-tokens.md)             |
 | what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |
 | a database, a cache, a process              | [docs/17-services.md](../../docs/17-services.md)         |
-| a rule id a diagnostic printed              | [docs/19-linting.md](../../docs/19-linting.md)           |
-| wiring the `test()` preset, its section     | [docs/19-linting.md](../../docs/19-linting.md)           |
+| a rule id, or wiring the `test()` preset    | [docs/19-linting.md](../../docs/19-linting.md)           |
 | anything else — the API is the types        | [docs/README.md](../../docs/README.md), the manual's map |

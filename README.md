@@ -1,6 +1,6 @@
 # @jterrazz/test
 
-Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Six constructors — `specification.api()`, `specification.job()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()` — plus the `component` chain, which starts nothing and needs none, and the module test, which needs neither.
+Declarative testing framework for modules, APIs, jobs, CLIs, rendered components, websites and native apps. Seven constructors — `specification.api()`, `specification.job()`, `specification.cli()`, `specification.integration()`, `specification.website()`, `specification.mobile()`, `specification.lint()` — plus the `component` chain, which starts nothing and needs none, and the module test, which needs neither.
 
 A spec reads as a sentence: given → action → assertions. The vitest test name is its only description, every assertion goes through `expect()` with subject-typed matchers, and the infrastructure a spec declares — Postgres, Redis, SQLite, a child process, a real Chromium, an iOS simulator — is started, isolated per worker and cleaned up for you.
 
@@ -200,19 +200,19 @@ runs:
 
 Everything is stated ONCE, in the chapter that owns it — a second copy here would be a second answer, and the one a reader meets first is the one that goes stale. The corpus map is [docs/README.md](docs/README.md).
 
-| Subject                                                          | Chapter                                                          |
-| ---------------------------------------------------------------- | ---------------------------------------------------------------- |
-| What the framework is, its trees, its channels, its five entries | [docs/01](docs/01-architecture.md)                               |
-| Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
-| What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)       |
-| Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
-| A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                  |
-| Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                   |
-| Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                 |
-| The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                     |
-| Stubs, selection, provider builders, `intercept()`               | [docs/16](docs/16-stubs.md)                                      |
-| Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                   |
-| The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md) |
+| Subject                                                          | Chapter                                                                                  |
+| ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| What the framework is, its trees, its channels, its five entries | [docs/01](docs/01-architecture.md)                                                       |
+| Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)                                |
+| What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)                               |
+| Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md), [docs/21](docs/21-lint.md) |
+| A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                                          |
+| Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                                           |
+| Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                                         |
+| The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                                             |
+| Stubs, selection, provider builders, `intercept()`               | [docs/16](docs/16-stubs.md)                                                              |
+| Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                                           |
+| The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md)                         |
 
 The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), a preset carrying all of it — the oxlint rules, the import and naming rules `@jterrazz/typescript`'s dependency-cruiser and ls-lint judge, the settings and the debt of its section (`test()`, from `@jterrazz/test/config`, listed in `jterrazz.config.ts`), and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships neither can. Every diagnostic teaches in four parts — what it found, why the convention holds, the fix for this case, and the catalogue row to read.
 

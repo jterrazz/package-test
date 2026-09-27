@@ -43,7 +43,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                         |
 | A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                       |
 
-**What runs under node stays there.** In a page, each node-only name the entry publishes — the six constructors, the services, the docker accessors, the results that walk a disk — refuses where it is called: a page has no filesystem, no child process and no socket.
+**What runs under node stays there.** In a page, each node-only name the entry publishes — the seven constructors, the services, the docker accessors, the results that walk a disk — refuses where it is called: a page has no filesystem, no child process and no socket.
 
 **Point `vite` at the app's own `vite.config.ts`.** A framework's config function — Astro's `getViteConfig()` among them — is not yet a supported shape: the allow-list takes the pipeline from the app's own config.
 
