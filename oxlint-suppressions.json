@@ -189,9 +189,6 @@
         }
     },
     "lint/consumer/rules/expectations/no-single-use-ref.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
         "typescript/no-unsafe-type-assertion": {
             "count": 1
         },
@@ -495,11 +492,6 @@
             "count": 1
         }
     },
-    "lint/engine/project/ast.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
     "lint/engine/project/ast.ts": {
         "max-lines": {
             "count": 1
@@ -537,7 +529,7 @@
     },
     "lint/engine/project/resolve.test.ts": {
         "jterrazz/given-in-the-test": {
-            "count": 2
+            "count": 1
         }
     },
     "lint/engine/project/resolve.ts": {
@@ -868,11 +860,6 @@
             "count": 3
         }
     },
-    "src/expectations/command/cli.result.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
     "src/expectations/command/cli.result.ts": {
         "import/no-cycle": {
             "count": 1
@@ -1012,7 +999,7 @@
     },
     "src/expectations/in-place/update.test.ts": {
         "jterrazz/given-in-the-test": {
-            "count": 2
+            "count": 1
         },
         "jterrazz/no-raw-env-write": {
             "count": 5
@@ -1142,7 +1129,7 @@
     },
     "src/facets/cli/fixture/fs-fixtures.adapter.test.ts": {
         "jterrazz/given-in-the-test": {
-            "count": 2
+            "count": 1
         }
     },
     "src/facets/cli/process/exec.adapter.test.ts": {
@@ -1254,7 +1241,7 @@
     },
     "src/facets/specification.test.ts": {
         "jterrazz/given-in-the-test": {
-            "count": 2
+            "count": 1
         },
         "jterrazz/no-status-only-test": {
             "count": 1
@@ -1297,11 +1284,6 @@
     "src/kernel/database-option.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 2
-        }
-    },
-    "src/kernel/files/caller.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
         }
     },
     "src/kernel/files/spec-path.test.ts": {
@@ -1379,16 +1361,6 @@
             "count": 1
         }
     },
-    "src/world/services/process/process.adapter.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
-    "src/world/services/process/serve.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
     "src/world/services/process/serve.ts": {
         "class-methods-use-this": {
             "count": 1
@@ -1431,9 +1403,6 @@
         }
     },
     "src/world/services/sqlite/sqlite.adapter.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
         "jterrazz/no-expect-in-a-loop": {
             "count": 4
         },
@@ -1461,11 +1430,6 @@
             "count": 5
         },
         "unicorn/no-array-sort": {
-            "count": 1
-        }
-    },
-    "src/world/services/startup/orchestrator.test.ts": {
-        "jterrazz/given-in-the-test": {
             "count": 1
         }
     },
@@ -1514,9 +1478,6 @@
         }
     },
     "src/world/stubs/delivery/other-process/stub-backend.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
         "jterrazz/no-status-only-test": {
             "count": 1
         },
@@ -1553,9 +1514,6 @@
         }
     },
     "src/world/stubs/intercept/intercept.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
         "unicorn/consistent-function-scoping": {
             "count": 3
         }

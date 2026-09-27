@@ -16,15 +16,18 @@ ruleTester().run('given-in-the-test', asOxlintRule(givenInTheTest), {
             errors: [{ messageId: 'givenInAHook' }],
             filename: TEST_FILE,
         },
-        // A teardown that does more than give back.
-        {
-            code: `afterEach(() => { vi.restoreAllMocks(); rmSync(directory, { recursive: true }); });`,
-            errors: [{ messageId: 'teardownDoesMore' }],
-            filename: TEST_FILE,
-        },
     ],
     valid: [
-        // A teardown that only restores.
+        // A teardown gives back what the tests took: a temp directory, a server, a restore.
+        {
+            code: `afterAll(() => { rmSync(tmp, { force: true, recursive: true }); });`,
+            filename: TEST_FILE,
+        },
+        { code: `afterEach(async () => server.stop());`, filename: TEST_FILE },
+        {
+            code: `afterEach(() => { vi.restoreAllMocks(); rmSync(directory, { recursive: true }); });`,
+            filename: TEST_FILE,
+        },
         {
             code: `afterEach(() => { vi.restoreAllMocks(); vi.unstubAllEnvs(); });`,
             filename: TEST_FILE,

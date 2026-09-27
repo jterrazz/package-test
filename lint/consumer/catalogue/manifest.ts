@@ -733,7 +733,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A `beforeEach`/`beforeAll` in a test file is an error, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`) — handed over by name (`afterEach(vi.restoreAllMocks)`) or called in the body. `afterAll(cleanup)` in a `*.specification.ts` is `cleanup-passed-to-after-all`'s own idiom and out of reach by role.",
+            'A `beforeEach`/`beforeAll` in a test file is an error: the Given is built in the test. An `afterEach`/`afterAll` gives back what the tests took — a temp directory removed, a server stopped, a mock restored — and stands.',
         facet: 'model',
         family: 'chain',
         fix: 'Call a function from each test instead of a hook; `clock.at()` and `intercept()` restore themselves.',
