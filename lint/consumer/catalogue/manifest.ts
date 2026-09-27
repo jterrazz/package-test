@@ -372,6 +372,19 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
+            "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest`, under any local name, and `expect.soft`, `expect.poll` on it — so a method or a local of that name is not.",
+        facet: 'model',
+        family: 'expectations',
+        fix: 'Return what the module reads, and assert it in the test that calls it.',
+        name: 'no-expect-outside-a-test',
+        rationale:
+            'An assertion in a helper fails far from the test that owns the claim, fires alike for every caller, and takes the Then out of the test body where a reader looks for it.',
+        reach: 'specs',
+    },
+    {
+        audience: 'consumer',
+        channel: 'statique',
+        convention:
             'A test whose ONE assertion is an existence check (`toBeDefined`, `not.toBeNull`, `not.toBeUndefined` or a bare `toHaveBeenCalled`) is an error. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one. `toBeTruthy` and a bare `toThrow` are refused wherever they stand, by `vitest/prefer-strict-boolean-matchers` and `vitest/require-to-throw-message`.',
         facet: 'model',
         family: 'expectations',

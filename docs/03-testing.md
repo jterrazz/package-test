@@ -90,7 +90,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 124   |
-| Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 59    |
+| Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 60    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 163   |
 | The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 163   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
@@ -458,7 +458,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/oxlint-pin.test.ts`        | oxlint-pin         | 2     |
 | `lint/self/corpus/package-exports.test.ts`   | package-exports    | 6     |
 | `lint/self/corpus/port-readers.test.ts`      | portReaders        | 2     |
-| `lint/self/corpus/positions.test.ts`         | positions          | 2     |
+| `lint/self/corpus/positions.test.ts`         | unpositionedRules  | 2     |
 | `lint/self/corpus/published-names.test.ts`   | published-names    | 3     |
 | `lint/self/corpus/rule-state.test.ts`        | rule-state         | 2     |
 | `lint/self/corpus/schema-documents.test.ts`  | schema-documents   | 9     |

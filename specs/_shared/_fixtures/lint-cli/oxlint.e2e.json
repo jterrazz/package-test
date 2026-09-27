@@ -41,6 +41,7 @@
         "jterrazz/no-sampled-value-in-test": "error",
         "jterrazz/no-double-only-assertion": "error",
         "jterrazz/no-existence-only-assertion": "error",
+        "jterrazz/no-expect-outside-a-test": "error",
         "jterrazz/no-probe-cluster": "error",
         "jterrazz/no-transform-duplicating-tokens": "error",
         "jterrazz/no-raw-bypass": "error",
