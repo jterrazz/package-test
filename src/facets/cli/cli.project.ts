@@ -14,34 +14,26 @@ export {
 
 /** The literate door of the facet that reads documents — the cli. */
 export type LiterateDoor = {
-    /** Every `specs/<facet>/` `.spec.yaml` becomes a test bound to `specs/<facet>/<facet>.specification.ts`; `false` collects none. */
+    /** Every `specs/cli/` `.spec.yaml` becomes a test bound to `specs/cli/cli.specification.ts`; `false` collects none. */
     literate?: false | Partial<LiterateOptions>;
 };
 
-/** The plugin's glob joins the include of the collecting project, never the root config. */
-function documentProject(
-    facet: string,
-    options: FacetProjectOptions & LiterateDoor,
-): TestProjectInlineConfiguration {
+/** `cli()` — a binary, and the documents that specify it. */
+export type CliProjectOptions = FacetProjectOptions & LiterateDoor;
+
+/** A cli project: the facet's `.spec.ts` files and its documents (docs/20); the plugin's glob joins this project's include, never the root config. */
+export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
     const { literate: door, ...common } = options;
-    const project = facetProject(facet, common);
+    const project = facetProject('cli', common);
     if (door === false) {
         return project;
     }
     return mergeConfig(project, {
         plugins: [
             literate({
-                include: door?.include ?? [`specs/${facet}/**/*.spec.yaml`],
-                specification: door?.specification ?? `./specs/${facet}/${facet}.specification.ts`,
+                include: door?.include ?? ['specs/cli/**/*.spec.yaml'],
+                specification: door?.specification ?? './specs/cli/cli.specification.ts',
             }),
         ],
     }) as TestProjectInlineConfiguration;
-}
-
-/** `cli()` — a binary, and the documents that specify it. */
-export type CliProjectOptions = FacetProjectOptions & LiterateDoor;
-
-/** A cli project: the facet's `.spec.ts` files and its documents (docs/20). */
-export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
-    return documentProject('cli', options);
 }
