@@ -43,7 +43,6 @@ type Run = {
 
 const VALUED_FLAGS = new Set(['--format', '--member']);
 
-/** The plugin's rules are oxlint's own, held in oxlint-suppressions.json; the section holds the checker's passes alone. */
 const PLUGIN_PREFIX = 'jterrazz/';
 
 function valueOf(argv: readonly string[], flag: string): string | undefined {
@@ -174,7 +173,6 @@ function judgeHeld(run: Run, ratchetRun: RatchetRun): never {
     settle(run);
 }
 
-/** A document out of its format is the formatter's, never debt: `--fix` writes it, and nothing holds it. */
 function refuseUnformatted(run: Run, files: readonly string[]): void {
     run.unformatted = files.length;
     for (const file of files) {

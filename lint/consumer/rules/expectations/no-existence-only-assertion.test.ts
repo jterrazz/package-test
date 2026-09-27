@@ -40,7 +40,6 @@ ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAsse
             });`,
             filename: TEST_FILE,
         },
-        // `toBeTruthy` and a bare `toThrow` are vitest/prefer-strict-boolean-matchers' and vitest/require-to-throw-message's.
         {
             code: `test('builds', () => {
                 expect(build()).toBeTruthy();

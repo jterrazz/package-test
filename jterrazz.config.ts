@@ -1,6 +1,5 @@
 import { defineConfig } from '@jterrazz/typescript/config';
 
-// Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: the layer map is read from the build, like oxlint.config.ts.
 import { ARCHITECTURE } from './dist/self-oxlint.js';
 
 export default defineConfig({
