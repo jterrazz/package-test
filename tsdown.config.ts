@@ -1,6 +1,6 @@
 import { defineConfig } from 'tsdown';
 
-// ESM-only for the node entries and CLIs; the browser build has no `dts`, so there is one type surface; the oxlint plugin ships ESM and CJS, since a consumer's config may be either. `files` leaves the source maps out of the tarball.
+// ESM-only for the node entries and CLIs, which read the rules kit from the @jterrazz/typescript peer; the browser build carries the part of the kit it reads, since no page loads a toolchain; the browser build has no `dts`, so there is one type surface; the oxlint plugin ships ESM and CJS, since a consumer's config may be either. `files` leaves the source maps out of the tarball.
 export default defineConfig([
     {
         clean: true,
@@ -10,6 +10,7 @@ export default defineConfig([
         dts: true,
         entry: {
             checker: 'lint/index.checker.ts',
+            config: 'lint/index.config.ts',
             index: 'src/index.ts',
             'in-place-setup': 'src/expectations/in-place/in-place-setup.ts',
             'mobile-session': 'src/facets/mobile/session/mobile-session.ts',
@@ -48,6 +49,7 @@ export default defineConfig([
             'browser/index': 'src/index.browser.ts',
         },
         deps: {
+            alwaysBundle: ['@jterrazz/typescript/rules'],
             neverBundle: ['msw/browser', 'react-dom/client', 'vitest', 'vitest-browser-react'],
         },
         format: ['esm'],

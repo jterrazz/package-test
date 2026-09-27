@@ -1,3 +1,4 @@
+import { anchor, anchorsOf, lessonParts, spliceBetween } from '@jterrazz/typescript/rules';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -16,11 +17,9 @@ import {
     UPSTREAM_RULES,
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
-import { anchorsOf } from '../../engine/catalogue/anchors.js';
-import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
-import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
+import { testPreset } from '../../consumer/rulebook/preset.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
-import plugin, { recommendedRules, testingPreset } from '../../index.js';
+import plugin, { recommendedRules } from '../../index.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 import { chapterAt } from '../index.js';
@@ -127,8 +126,8 @@ const TOOLCHAIN_ROWS = new Set(
 );
 
 const handedToTheToolchain = new Set([
-    ...(testingPreset.architecture?.layers ?? []).map(({ name }) => name),
-    ...(testingPreset.names ?? []).map(({ name }) => name),
+    ...(testPreset().layers ?? []).map(({ name }) => name),
+    ...(testPreset().names ?? []).map(({ name }) => name),
     sourceRootHoldsKnownEntries.name,
 ]);
 
@@ -306,14 +305,9 @@ describe('manifest', () => {
         const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
 
         // Then - splicing a fresh table changes nothing
-        expect(
-            spliceBetween(
-                committed,
-                FORK_MARKERS,
-                forkTable().join('\n'),
-                'docs/18-conventions.md',
-            ),
-        ).toBe(committed);
+        expect(spliceBetween(committed, FORK_MARKERS, forkTable(), 'docs/18-conventions.md')).toBe(
+            committed,
+        );
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the docs/03 table of the self rows is byte-identical to a fresh generation', () => {
@@ -389,7 +383,7 @@ describe('manifest', () => {
         // Given - the review-borne / execution-time channels
         for (const entry of [...RUNTIME_RULES, ...PROCESS_RULES, ...SELF_PROCESS_RULES]) {
             // Then - each carries non-empty normative text and a rationale (its "implementation" is the framework runtime or human review — documented here, not a lint rule)
-            expect(entry.convention.length, `${entry.name} convention`).toBeGreaterThan(0);
+            expect(entry.sentence.length, `${entry.name} convention`).toBeGreaterThan(0);
             expect(entry.rationale.length, `${entry.name} rationale`).toBeGreaterThan(0);
         }
     });
@@ -417,7 +411,7 @@ describe('manifest', () => {
 
         // Then - every sentence the catalogue publishes is English
         for (const entry of allRows) {
-            const sentences = `${entry.convention} ${entry.rationale} ${entry.fix}`;
+            const sentences = `${entry.sentence} ${entry.rationale} ${entry.fix}`;
             for (const token of FRENCH) {
                 expect(
                     carries(sentences, token),

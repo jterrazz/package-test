@@ -6,6 +6,7 @@
         "lint/index.ts",
         "lint/self/rules/plugin.ts",
         "lint/index.checker.ts",
+        "lint/index.config.ts",
         "lint/self/index.ts",
         "src/facets/cli/documents/schema-cli.ts"
     ],

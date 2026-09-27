@@ -117,36 +117,6 @@ describe('ARCHITECTURE', () => {
         ]);
     });
 
-    test('lint/ imports in one direction, and the product reads the engine and the indexes alone', () => {
-        // Given - the engine reaching a rule, folders reaching sideways and upward, the entry reaching self, the product reaching a rule
-        const violations = violationsIn({
-            'lint/consumer/catalogue/manifest.ts': "import '../rules/plugin.js';\n",
-            'lint/consumer/checks/tree.ts': "import '../../self/checks/checker.js';\n",
-            'lint/consumer/rules/chain/no-sleep.ts':
-                "import '../../catalogue/manifest.js';\nimport '../../checks/checker.js';\n",
-            'lint/engine/project/role.ts': "import '../../consumer/rules/plugin.js';\n",
-            'lint/index.ts':
-                "import './consumer/rules/plugin.js';\nimport './self/rules/plugin.js';\n",
-            'src/kernel/files/scratch.ts': [
-                "import '../../../lint/engine/project/ground.js';",
-                "import '../../../lint/consumer/rules/world/no-sleep.js';",
-                "import '../../../lint/index.refusal.js';",
-                '',
-            ].join('\n'),
-        });
-
-        // Then - each edge against the direction is named by the folder it leaves
-        expect(violations).toStrictEqual([
-            'lint/consumer/catalogue/manifest.ts → lint/consumer/rules/plugin.ts  lint-direction-consumer-catalogue',
-            'lint/consumer/checks/tree.ts → lint/self/checks/checker.ts  lint-direction-consumer-checks',
-            'lint/consumer/rules/chain/no-sleep.ts → lint/consumer/checks/checker.ts  lint-direction-consumer-rules',
-            'lint/engine/project/role.ts → lint/consumer/rules/plugin.ts  lint-direction-engine',
-            'lint/index.ts → lint/self/rules/plugin.ts  lint-direction-index',
-            'src/kernel/files/scratch.ts → lint/consumer/rules/world/no-sleep.ts  layer-src-kernel-files-imports-within-its-map',
-            'src/kernel/files/scratch.ts → lint/consumer/rules/world/no-sleep.ts  lint-direction-src',
-        ]);
-    });
-
     test('a spec reaches the framework by its entry, never by its internals', () => {
         // Given - specs reaching two internals, the entry, and their own app's source
         const violations = violationsIn({

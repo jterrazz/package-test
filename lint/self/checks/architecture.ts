@@ -1,11 +1,10 @@
 import type { ArchitectureRule } from '@jterrazz/typescript/config';
+import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 
-import { GROUND_DIRS } from '../../engine/project/ground.js';
 import { TEST_SUFFIX } from '../../engine/project/source.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';
-import { LINT_DIRECTION } from './lint-direction.js';
 
 const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 
@@ -16,7 +15,7 @@ const SPAWNING_SITES = [
     'world/services/process/serve.ts',
 ];
 
-const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_DIRS.join('|')})/`;
+const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_FOLDERS.join('|')})/`;
 
 const LOCAL_DEPENDENCY: NonNullable<ArchitectureRule['to']['dependencyTypes']> = [
     'local',
@@ -240,42 +239,13 @@ function facetRules(): ArchitectureRule[] {
     ];
 }
 
-function placeOf(place: string): string {
-    if (place === 'src') {
-        return '^src/';
-    }
-    if (place === 'index') {
-        return '^lint/[^/]+$';
-    }
-    if (place === 'self/index') {
-        return '^lint/self/[^/]+$';
-    }
-
-    return `^lint/${escaped(place)}/`;
-}
-
-function directionRules(): ArchitectureRule[] {
-    return Object.entries(LINT_DIRECTION).map(([place, allowed]) => ({
-        fix:
-            place === 'src'
-                ? 'move what it needs out of the shipped `lint/` rules into `lint/engine/`, or compose it in a `lint/` index, and let `src/` import it from there'
-                : `move what it needs into a folder it may import — ${allowed.join(', ')} — or move the importer up the tree`,
-        from: { path: placeOf(place), pathNot: TEST_MATERIAL },
-        name: ruleName('lint-direction', place),
-        read: READ_LAYERS,
-        to: { path: '^(src|lint)/', pathNot: either(allowed.map((one) => placeOf(one))) },
-        why: `\`${place}\` imports ${allowed.join(', ')} alone: the folders of \`lint/\` import in one direction, and the shipped \`lint/\` never reads the product`,
-    }));
-}
-
-/** This package's layer map, the edges `FRAMEWORK_LAYERS`, `OWNERS_OF_LIBRARIES` and the lint direction declare, in dependency-cruiser's vocabulary: `jterrazz.config.ts` hands it to the toolchain's Architecture pass. */
+/** This package's layer map, the edges `FRAMEWORK_LAYERS` and `OWNERS_OF_LIBRARIES` declare — the direction of `lint/` is the base preset's — in dependency-cruiser's vocabulary: `jterrazz.config.ts` hands it to the toolchain's Architecture pass. */
 export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
     ...Object.entries<LayerOptions>(FRAMEWORK_LAYERS).flatMap(([layer, options]) =>
         layerRules(layer, options),
     ),
     ...ownerRules(),
     ...facetRules(),
-    ...directionRules(),
     {
         fix: "spawn it from the concept folder that owns the program, or, inside `world/`, through `world/services/process/serve.ts`'s `runToCompletion`",
         from: { path: '^src/', pathNot: either([TEST_MATERIAL, ...SPAWNING_SITES.map(targetOf)]) },

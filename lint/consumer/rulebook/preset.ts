@@ -1,22 +1,28 @@
-import type { ArchitectureRule, NamesRule, TypescriptPreset } from '@jterrazz/typescript/config';
-
-import { readAt, rowNamed, whyOf } from '../../engine/catalogue/lesson.js';
+import type { ArchitectureRule, NamesRule, Preset } from '@jterrazz/typescript/config';
+import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import {
-    GROUND_DIRS,
+    declaredSubpaths,
+    firstSentence,
+    GROUND_FOLDERS,
+    readAt,
     RESERVED_FOLDERS,
+    rowNamed,
     SETUP_FOLDER,
     SHARED_FOLDER,
-} from '../../engine/project/ground.js';
-import { declaredSubpaths } from '../../engine/project/package-exports.js';
+} from '@jterrazz/typescript/rules';
+
+import type { TestSettings } from '../../engine/project/settings.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows } from '../catalogue/manifest.js';
+import { importRulesForSpecifications } from './import.js';
+import { vitestOnTests } from './vitest.js';
 
 type Lesson = Pick<ArchitectureRule, 'read' | 'why'>;
 
 function lessonOf(name: string): Lesson {
     const row = rowNamed(consumerRows, name);
 
-    return { read: readAt(row, CATALOGUE_CHAPTER), why: whyOf(row.convention) };
+    return { read: readAt(row, CATALOGUE_CHAPTER), why: firstSentence(row.sentence) };
 }
 
 const escaped = (text: string): string => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
@@ -101,7 +107,7 @@ const SEAMS: readonly Seam[] = [
 const secondRuntime = lessonOf('no-second-test-runtime');
 
 function publishedFix(): string {
-    const published = declaredSubpaths();
+    const published = declaredSubpaths('@jterrazz/test', import.meta.dirname);
 
     return `import from "@jterrazz/test"; the published subpaths are ${published.length === 0 ? 'none' : published.join(', ')}`;
 }
@@ -191,7 +197,7 @@ const NAMES: NamesRule[] = [
         ignore: [
             `**/${SETUP_FOLDER}`,
             `**/specs/${SHARED_FOLDER}`,
-            ...GROUND_DIRS.map((name) => `**/${name}`),
+            ...GROUND_FOLDERS.map((name) => `**/${name}`),
         ],
         ls: { '**/specs/**': { '.dir': CLOSED_LIST } },
         name: 'underscore-name-in-closed-list',
@@ -205,8 +211,32 @@ const NAMES: NamesRule[] = [
     },
 ];
 
-export const testingPreset: TypescriptPreset = {
-    architecture: { layers: LAYERS },
-    name: '@jterrazz/test',
-    names: NAMES,
+/** Every static rule of the catalogue, armed: the plugin registers exactly the rules the `statique` rows name. Typed as oxlint's own config, so an inferred `rules` does not widen each severity to `string`. */
+export const TESTING_PRESET_OXLINT: OxlintConfig = {
+    jsPlugins: ['@jterrazz/test/oxlint'],
+    overrides: [importRulesForSpecifications, vitestOnTests],
+    rules: Object.fromEntries(
+        consumerRows
+            .filter(({ channel }) => channel === 'statique')
+            .map(({ name }) => [`jterrazz/${name}`, 'error']),
+    ),
 };
+
+const DEFAULTS: Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>> = {
+    collections: [],
+    methodless: [],
+    production: { allow: {} },
+};
+
+export function testPreset(): Preset {
+    return {
+        baseline: ['test', 'test.coverage'],
+        floors: ['test.coverage'],
+        layers: LAYERS,
+        name: 'test',
+        names: NAMES,
+        oxlint: TESTING_PRESET_OXLINT,
+        package: '@jterrazz/test',
+        settings: DEFAULTS,
+    };
+}

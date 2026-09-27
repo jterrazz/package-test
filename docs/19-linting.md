@@ -66,18 +66,28 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 
 ### Declaring the preset
 
-Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it as a preset rather than run by code of this package. `testingPreset`, from the same `@jterrazz/test/oxlint` entry, is declared in `jterrazz.config.ts` beside the `testing` fragment `oxlint.config.ts` composes:
+Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, the `testing` fragment of oxlint rules, those import and naming rules, and the two sections of `jterrazz.baseline.json` it owns — `test`, the checker's debt, and `test.coverage`, a floor. A project lists it in `jterrazz.config.ts`, after the base preset, and its `oxlint.config.ts` composes the same presets:
 
 ```typescript
-import { testingPreset } from '@jterrazz/test/oxlint';
-import { defineConfig } from '@jterrazz/typescript/config';
+// jterrazz.config.ts
+import { test } from '@jterrazz/test/config';
+import { defineConfig, typescript } from '@jterrazz/typescript/config';
 
-export default defineConfig({
-    typescript: { presets: [testingPreset] },
-});
+export default defineConfig({ presets: [typescript({ profile: 'node' }), test()] });
 ```
 
-Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered, as the toolchain's chapter states (`@jterrazz/typescript` `docs/06-quality-checks.md` § What a package declares for its consumers). Their debt is the toolchain's ratchet, `jterrazz.baseline.json › typescript`, recorded by `typescript baseline`.
+```typescript
+// oxlint.config.ts
+import { defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
+
+import settings from './jterrazz.config.ts';
+
+export default defineConfig(fromPresets(settings));
+```
+
+How the presets merge, and how a project sets one of their laws aside, is `@jterrazz/typescript`'s (`docs/09-rules-kit.md` § Presets).
+
+Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered, as the toolchain's chapter states (`@jterrazz/typescript` `docs/09-rules-kit.md` § Presets). Their debt is the toolchain's ratchet, `jterrazz.baseline.json › typescript`, recorded by `typescript baseline`.
 
 ### Standalone — without `@jterrazz/typescript`
 
@@ -126,7 +136,7 @@ specs/api/users/users.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-gr
 
 A refusal the runtime throws is a block, a part per line: vitest prints an error whole, and what it found (the candidates of an ambiguous element) may take several lines.
 
-The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessonsAt()` in `lint/engine/catalogue/lesson.ts`, handed the rule's row by name from the consumer catalogue; a finding's two fields in the checker), and the row gives the other two — its convention's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
+The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessonsAt()` of `@jterrazz/typescript/rules`, handed the rule's row by name from the consumer catalogue; a finding's two fields in the checker), and the row gives the other two — its sentence's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
 
 ## The rule catalogue
 
@@ -310,7 +320,7 @@ Every rule a project using the framework meets, across its enforcement channels 
 
 A convention with no oxlint rule is held by another channel, and the Channel column above names which.
 
-A statique rule that probes the filesystem anchors on a file oxlint is already visiting (a feature's sibling `_requests/`, `_seeds/`, `_expected/`, a module test's neighbour), with per-run caching (`lint/engine/project/fs-cache.ts`) — it never scans the tree blindly.
+A statique rule that probes the filesystem anchors on a file oxlint is already visiting (a feature's sibling `_requests/`, `_seeds/`, `_expected/`, a module test's neighbour), with per-run caching (the kit's `readFileCached` and `listDirectory`) — it never scans the tree blindly.
 
 ## Writing the Given and Then markers under `--fix`
 
@@ -417,7 +427,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
-This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per package — `{ "typescript": {...}, "test": {...} }` — and this package owns the `test` section.
+This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns two: `test`, this section, and `test.coverage`, the floor this repository's own suite is held to ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)). Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
 
 #### The section
 
@@ -487,7 +497,7 @@ The self checks' verdicts are [03 — Testing § The package's own rules](03-tes
 
 ## The generated catalogue (docs-as-code)
 
-The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/consumer/catalogue/manifest.ts`, which holds the consumer rows; this package's own are in `lint/self/catalogue/manifest.ts`), and the two manifests assemble all eight channels — statique (the oxlint rules), toolchain (the rules `testingPreset` hands `@jterrazz/typescript`'s dependency-cruiser and ls-lint), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like `folder-follows-assets` and `output-asserted-as-a-golden`). A generator splices the `consumer` rows above between GENERATED markers in this file, and the `self` rows into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules), deterministically: its entry is `lint/self/index.ts`, bundled as `dist/self.js` and run by `npm run docs` as `node dist/self.js chapters`, which splices, through `spliceBetween` in `lint/engine/catalogue/chapter.ts`, the consumer rows, the self rows (`lint/self/catalogue/chapter.ts`), the fork, the matrix, the meta-test and siblingless tables; the published schema is written by `dist/schema.js` (`src/facets/cli/documents/schema-cli.ts`), which the same script runs.
+The rule catalogue is **generated from the code**, not hand-maintained. Each rule carries its normative sentence as `meta.docs` (sourced from `lint/consumer/catalogue/manifest.ts`, which holds the consumer rows; this package's own are in `lint/self/catalogue/manifest.ts`), and the two manifests assemble all eight channels — statique (the oxlint rules), toolchain (the rules the `test()` preset hands `@jterrazz/typescript`'s dependency-cruiser and ls-lint), upstream (the options this vocabulary sets on rules the `vitest` plugin owns), checker (the passes above), runtime (execution-time refusals), type (what the compiler refuses, proven in `src/type-channel.test-d.ts`), meta (what this package's own tests hold), and process (review-borne rules like `folder-follows-assets` and `output-asserted-as-a-golden`). A generator splices the `consumer` rows above between GENERATED markers in this file, and the `self` rows into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules), deterministically: its entry is `lint/self/index.ts`, bundled as `dist/self.js` and run by `npm run docs` as `node dist/self.js chapters`, which splices, through the kit's `writeProjections`, the consumer rows, the self rows (`lint/self/catalogue/chapter.ts`), the fork, the matrix, the meta-test and siblingless tables; the published schema is written by `dist/schema.js` (`src/facets/cli/documents/schema-cli.ts`), which the same script runs.
 
 The narrative constitution lives in [18 — Conventions](18-conventions.md): principles, non-mechanizable criteria, and design rationales; the enforcement channels are [01 — Architecture](01-architecture.md#the-eight-enforcement-channels)'s — no per-rule normative lines, so there is no duplication. A meta-test (`lint/self/catalogue/manifest.test.ts`) guards the contract: **freshness** (re-running the generator reproduces the committed catalogue byte-for-byte) and **completeness** (every shipped rule carries `meta.docs`; every manifest entry maps to a plugin rule, a checker pass, or a documented runtime/process rule), plus the standing E2E inventory (every rule has a `specs/lint/**` spec + fixture pair).
 

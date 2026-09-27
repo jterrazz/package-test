@@ -8,15 +8,15 @@ import { pathToFileURL } from 'node:url';
 
 const [repository = '', audience = 'consumer'] = process.argv.slice(2);
 const built = (file) => pathToFileURL(join(repository, 'dist', file)).href;
-const own = audience === 'self' ? `names: [sourceRootHoldsKnownEntries], ` : '';
+const own = audience === 'self' ? `typescript: { names: [sourceRootHoldsKnownEntries] }, ` : '';
 
 writeFileSync(
     'jterrazz.config.ts',
     [
-        `import { testingPreset } from '${built('oxlint.js')}';`,
+        `import { test } from '${built('config.js')}';`,
         `import { sourceRootHoldsKnownEntries } from '${built('self-oxlint.js')}';`,
         '',
-        `export default { typescript: { ${own}presets: [testingPreset] } };`,
+        `export default { ${own}presets: [test()] };`,
         '',
     ].join('\n'),
 );

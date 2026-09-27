@@ -202,7 +202,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 
 | Subject                                                          | Chapter                                                          |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------- |
-| What the framework is, its trees, its channels, its four entries | [docs/01](docs/01-architecture.md)                               |
+| What the framework is, its trees, its channels, its five entries | [docs/01](docs/01-architecture.md)                               |
 | Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)        |
 | What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)       |
 | Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md)     |
@@ -214,7 +214,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                   |
 | The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md) |
 
-The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), a preset handing `@jterrazz/typescript` the import and naming rules its dependency-cruiser and ls-lint judge (`testingPreset`, declared in `jterrazz.config.ts`), and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships neither can. Every diagnostic teaches in four parts — what it found, why the convention holds, the fix for this case, and the catalogue row to read.
+The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), a preset carrying all of it — the oxlint rules, the import and naming rules `@jterrazz/typescript`'s dependency-cruiser and ls-lint judge, the settings and the debt of its section (`test()`, from `@jterrazz/test/config`, listed in `jterrazz.config.ts`), and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships neither can. Every diagnostic teaches in four parts — what it found, why the convention holds, the fix for this case, and the catalogue row to read.
 
 Node 24, vitest 5 and `@jterrazz/typescript` 11 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
 

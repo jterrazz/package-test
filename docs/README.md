@@ -4,7 +4,7 @@ The manual of this repository: what the framework is, how it is changed, what pr
 
 | Chapter                                     | Holds                                                                                                                                                              |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| [01 — Architecture](01-architecture.md)     | The runner model behind the six constructors, the source trees and their edges, the eight enforcement channels, the four entries, what the tarball publishes       |
+| [01 — Architecture](01-architecture.md)     | The runner model behind the six constructors, the source trees and their edges, the eight enforcement channels, the five entries, what the tarball publishes       |
 | [02 — Developing](02-developing.md)         | The repository's own loop and what a change owes; then install, first specs, the vitest preset and its helpers                                                     |
 | [03 — Testing](03-testing.md)               | The vitest projects, the generated capability matrix, the layered reading, the coverage ratchet, the meta-test channel, the package's own rules, what CI runs      |
 | [04 — Operating](04-operating.md)           | The npm release; the peers a consumer brings — required, optional, the provider's exact pin, the native seams; Node 24; the ARIA dialect                           |

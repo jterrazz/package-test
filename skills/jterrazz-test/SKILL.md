@@ -114,4 +114,5 @@ What a test stands on is named by one of two calls, with the path relative to th
 | what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |
 | a database, a cache, a process              | [docs/17-services.md](../../docs/17-services.md)         |
 | a rule id a diagnostic printed              | [docs/19-linting.md](../../docs/19-linting.md)           |
+| wiring the `test()` preset, its section     | [docs/19-linting.md](../../docs/19-linting.md)           |
 | anything else — the API is the types        | [docs/README.md](../../docs/README.md), the manual's map |
