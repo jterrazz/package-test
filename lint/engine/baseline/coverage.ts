@@ -1,9 +1,9 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { judgeFloor, raisedFloor, sectionOf, writeSection } from '@jterrazz/typescript/rules';
+import type { Broken, Counts } from '@jterrazz/typescript/rules';
+import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { COVERAGE_DIR } from '../project/artifacts.js';
-
-/** A floor that only ever rises: lowering it is an edit to a committed file, with a commit saying why. */
 
 export type CoverageMetrics = {
     branches: number;
@@ -14,13 +14,13 @@ export type CoverageMetrics = {
 
 export type CoverageBaseline = Record<string, CoverageMetrics>;
 
-export const BASELINE_FILE = 'coverage.baseline.json';
+export const COVERAGE_SECTION = 'test.coverage';
 
 export const SUMMARY_FILE = `${COVERAGE_DIR}/coverage-summary.json`;
 
 const METRICS = ['statements', 'branches', 'functions', 'lines'] as const;
 
-/** Rounded as the file records it, two decimals. */
+/** Rounded as the section records it, two decimals. */
 function percent(value: unknown): number {
     return typeof value === 'number' ? Math.round(value * 100) / 100 : 0;
 }
@@ -51,66 +51,58 @@ export function readSummary(root: string): CoverageMetrics | null {
     };
 }
 
+/** One key per scope and metric, `all/branches`: a section of the baseline holds counts alone. */
+export function flattened(scope: string, metrics: CoverageMetrics): Counts {
+    return Object.fromEntries(METRICS.map((metric) => [`${scope}/${metric}`, metrics[metric]]));
+}
+
 /** A scope missing a metric is refused, never read as zero: a floor of 0 forbids nothing. */
-export function readBaseline(root: string): CoverageBaseline {
-    const path = resolve(root, BASELINE_FILE);
-    if (!existsSync(path)) {
-        return {};
-    }
-    const parsed: unknown = JSON.parse(readFileSync(path, 'utf8'));
-    if (typeof parsed !== 'object' || parsed === null) {
-        return {};
-    }
-    const baseline: CoverageBaseline = {};
-    for (const scope of Object.keys(parsed)) {
-        const entry: unknown = Reflect.get(parsed, scope);
-        if (typeof entry !== 'object' || entry === null) {
-            throw new Error(`${BASELINE_FILE}: the \`${scope}\` floor is not an object.`);
-        }
-        const missing = METRICS.filter((metric) => typeof Reflect.get(entry, metric) !== 'number');
+export function readFloors(root: string): CoverageBaseline {
+    const section = sectionOf(root, COVERAGE_SECTION) ?? {};
+    const scopes = new Set(Object.keys(section).map((key) => key.slice(0, key.lastIndexOf('/'))));
+    const floors: CoverageBaseline = {};
+    for (const scope of scopes) {
+        const missing = METRICS.filter((metric) => section[`${scope}/${metric}`] === undefined);
         if (missing.length > 0) {
             throw new Error(
-                `${BASELINE_FILE}: the \`${scope}\` floor has no ${missing.join(', ')} — ` +
+                `jterrazz.baseline.json › ${COVERAGE_SECTION}: the \`${scope}\` floor has no ${missing.join(', ')} — ` +
                     'a missing metric is a floor of zero, which forbids nothing. Run `npm run coverage`.',
             );
         }
-        baseline[scope] = {
-            branches: percent(Reflect.get(entry, 'branches')),
-            functions: percent(Reflect.get(entry, 'functions')),
-            lines: percent(Reflect.get(entry, 'lines')),
-            statements: percent(Reflect.get(entry, 'statements')),
+        floors[scope] = {
+            branches: percent(section[`${scope}/branches`]),
+            functions: percent(section[`${scope}/functions`]),
+            lines: percent(section[`${scope}/lines`]),
+            statements: percent(section[`${scope}/statements`]),
         };
     }
-    return baseline;
+    return floors;
 }
 
-export function drops(floor: CoverageMetrics | undefined, now: CoverageMetrics): string[] {
-    if (floor === undefined) {
-        return [];
-    }
-    return METRICS.filter((metric) => now[metric] < floor[metric]).map(
-        (metric) =>
-            `${metric} fell to ${now[metric].toFixed(2)}% — the floor is ${floor[metric].toFixed(2)}%`,
-    );
+export function drops(
+    floor: CoverageMetrics | undefined,
+    now: CoverageMetrics,
+    scope: string,
+): Broken[] {
+    return floor === undefined ? [] : judgeFloor(flattened(scope, now), flattened(scope, floor));
 }
 
 export function raised(floor: CoverageMetrics | undefined, now: CoverageMetrics): CoverageMetrics {
+    const next = raisedFloor(flattened('', now), flattened('', floor ?? now));
     return {
-        branches: Math.max(floor?.branches ?? 0, now.branches),
-        functions: Math.max(floor?.functions ?? 0, now.functions),
-        lines: Math.max(floor?.lines ?? 0, now.lines),
-        statements: Math.max(floor?.statements ?? 0, now.statements),
+        branches: next['/branches'] ?? now.branches,
+        functions: next['/functions'] ?? now.functions,
+        lines: next['/lines'] ?? now.lines,
+        statements: next['/statements'] ?? now.statements,
     };
 }
 
-/** Sorted, with a trailing newline: the formatter's shape. */
-export function writeBaseline(root: string, baseline: CoverageBaseline): void {
-    const sorted = Object.fromEntries(
-        Object.keys(baseline)
-            .toSorted()
-            .map((key) => [key, baseline[key]]),
-    );
-    writeFileSync(resolve(root, BASELINE_FILE), `${JSON.stringify(sorted, null, 4)}\n`);
+export function writeFloors(root: string, floors: CoverageBaseline): void {
+    const section: Counts = {};
+    for (const [scope, metrics] of Object.entries(floors)) {
+        Object.assign(section, flattened(scope, metrics));
+    }
+    writeSection(root, COVERAGE_SECTION, section);
 }
 
 export function report(scope: string, metrics: CoverageMetrics): string {

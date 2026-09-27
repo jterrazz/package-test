@@ -1,4 +1,6 @@
-import { BASELINE_FILE, drops } from '../../engine/baseline/coverage.js';
+import { refusal } from '@jterrazz/typescript/rules';
+
+import { COVERAGE_SECTION, drops } from '../../engine/baseline/coverage.js';
 import type { CoverageMetrics } from '../../engine/baseline/coverage.js';
 
 export function checkCoverageFloor(
@@ -8,14 +10,10 @@ export function checkCoverageFloor(
 ): string[] {
     if (floor === undefined) {
         return [
-            `${BASELINE_FILE} has no \`${scope}\` floor — run \`npm run coverage\` to record one.`,
+            `jterrazz.baseline.json › ${COVERAGE_SECTION} has no \`${scope}\` floor — run \`npm run coverage\` to record one.`,
         ];
     }
-    const fell = drops(floor, now);
-    return fell.length === 0
-        ? []
-        : [
-              ...fell,
-              'the ratchet only rises. Cover what the change left bare, or lower the floor in a commit that says why.',
-          ];
+    return drops(floor, now, scope).map(({ teaching }) =>
+        refusal({ ...teaching, read: 'docs/03-testing.md#coverage-is-a-ratchet-not-a-threshold' }),
+    );
 }

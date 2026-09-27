@@ -1,6 +1,12 @@
 {
     "typescript": {
-        "comments/comment-lines-held-by-the-baseline": 2360
+        "comments/comment-lines-held-by-the-baseline": 2332
     },
-    "test": {}
+    "test": {},
+    "test.coverage": {
+        "all/branches": 70.25,
+        "all/functions": 80.13,
+        "all/lines": 76.95,
+        "all/statements": 76.9
+    }
 }

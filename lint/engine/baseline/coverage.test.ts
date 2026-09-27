@@ -1,13 +1,16 @@
-import { mkdtempSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { BASELINE_FILE, drops, raised, readBaseline, report } from './coverage.js';
+import { drops, raised, readFloors, report, writeFloors } from './coverage.js';
 
-function rootWith(contents: string): string {
+function rootWith(section: string): string {
     const root = mkdtempSync(join(tmpdir(), 'coverage-baseline-'));
-    writeFileSync(join(root, BASELINE_FILE), contents);
+    writeFileSync(
+        join(root, 'jterrazz.baseline.json'),
+        `{ "test": {}, "test.coverage": ${section} }`,
+    );
     return root;
 }
 
@@ -19,24 +22,24 @@ describe('coverage', () => {
         const now = { ...floor };
 
         // Then - equal is not a drop: the gate asks "worse than last time", not "better"
-        expect(drops(floor, now)).toStrictEqual([]);
+        expect(drops(floor, now, 'all')).toStrictEqual([]);
     });
 
     test('the coverage ratchet — names every metric that fell, and by how much', () => {
         // Given - a run that lost statements and functions
         const now = { ...floor, functions: 79.5, statements: 74.25 };
 
-        // Then - one line per metric, each carrying both numbers
-        expect(drops(floor, now)).toStrictEqual([
-            'statements fell to 74.25% — the floor is 76.00%',
-            'functions fell to 79.50% — the floor is 80.00%',
+        // Then - one lesson per metric, each carrying both numbers
+        expect(drops(floor, now, 'all').map(({ teaching }) => teaching.found)).toStrictEqual([
+            '`all/functions` fell to 79.50, below its floor of 80.00',
+            '`all/statements` fell to 74.25, below its floor of 76.00',
         ]);
     });
 
     test('the coverage ratchet — has nothing to say before a floor exists', () => {
         // Given - the first run of a project, with no recorded floor
         // Then - the ratchet does not fail a run it has no comparison for
-        expect(drops(undefined, floor)).toStrictEqual([]);
+        expect(drops(undefined, floor, 'all')).toStrictEqual([]);
     });
 
     test('the coverage ratchet — raises each metric on its own', () => {
@@ -67,25 +70,37 @@ describe('coverage', () => {
     });
 
     test('the coverage ratchet — refuses a floor that is missing a metric', () => {
-        // Given - a baseline whose `all` entry carries branches alone
-        const root = rootWith('{ "all": { "branches": 69.89 } }');
+        // Given - a section whose `all` floor carries branches alone
+        const root = rootWith('{ "all/branches": 69.89 }');
 
         // Then - it is refused rather than read as three floors of zero, which would forbid nothing
-        expect(() => readBaseline(root)).toThrow(/statements, functions, lines/u);
+        expect(() => readFloors(root)).toThrow(/statements, functions, lines/u);
     });
 
     test('the coverage ratchet — reads a complete floor', () => {
-        // Given - a baseline with the four metrics
+        // Given - a section with the four metrics of one scope
         const root = rootWith(
-            '{ "all": { "branches": 1, "functions": 2, "lines": 3, "statements": 4 } }',
+            '{ "all/branches": 1, "all/functions": 2, "all/lines": 3, "all/statements": 4 }',
         );
 
-        // Then - the four come back, rounded the way the file records them
-        expect(readBaseline(root).all).toStrictEqual({
+        // Then - the four come back as one floor
+        expect(readFloors(root).all).toStrictEqual({
             branches: 1,
             functions: 2,
             lines: 3,
             statements: 4,
         });
+    });
+
+    test('the coverage ratchet — records its floor as a section of the family file, the others kept', () => {
+        // Given - a family file holding the checker's section
+        const root = rootWith('{}');
+
+        // When - the floor is recorded
+        writeFloors(root, { all: floor });
+
+        // Then - it reads back whole, and the checker's section is still there
+        expect(readFloors(root)).toStrictEqual({ all: floor });
+        expect(readFileSync(join(root, 'jterrazz.baseline.json'), 'utf8')).toContain('"test": {}');
     });
 });

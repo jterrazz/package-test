@@ -1,16 +1,16 @@
+import { stop } from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 
 import {
-    BASELINE_FILE,
+    COVERAGE_SECTION,
     raised,
-    readBaseline,
+    readFloors,
     readSummary,
     report,
     SUMMARY_FILE,
-    writeBaseline,
+    writeFloors,
 } from '../baseline/coverage.js';
 import type { CoverageMetrics } from '../baseline/coverage.js';
-import { stop } from './stop.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a gate that wrote anywhere else would be reporting to nobody. */
 
@@ -34,12 +34,14 @@ export function runCoverageFloor(judge: CoverageJudge, cliArguments: readonly st
         );
         stop(1);
     }
-    const baseline = readBaseline(root);
-    const floor = baseline[scope];
+    const floors = readFloors(root);
+    const floor = floors[scope];
     if (write) {
         const next = raised(floor, now);
-        writeBaseline(root, { ...baseline, [scope]: next });
-        console.log(`coverage: ${report(scope, next)} → ${BASELINE_FILE}`);
+        writeFloors(root, { ...floors, [scope]: next });
+        console.log(
+            `coverage: ${report(scope, next)} → jterrazz.baseline.json › ${COVERAGE_SECTION}`,
+        );
         stop(0);
     }
     console.log(`coverage: ${report(scope, now)}`);
