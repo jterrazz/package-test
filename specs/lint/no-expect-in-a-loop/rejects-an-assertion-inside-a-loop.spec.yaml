@@ -1,0 +1,7 @@
+description: rejects an assertion inside a loop
+fixture: ./_fixtures/violation/
+runs:
+    - command: .
+      exit: 1
+      stdout: |
+          scenario.test.ts:11:9  jterrazz(no-expect-in-a-loop)

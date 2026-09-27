@@ -80,6 +80,11 @@
             "count": 1
         }
     },
+    "lint/consumer/rulebook/vitest.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 1
+        }
+    },
     "lint/consumer/rules/chain/cli-runs-the-product-binary.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
@@ -610,6 +615,9 @@
         }
     },
     "lint/index.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 3
+        },
         "typescript/no-unsafe-type-assertion": {
             "count": 2
         },
@@ -618,6 +626,9 @@
         }
     },
     "lint/self/catalogue/manifest.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 27
+        },
         "max-lines": {
             "count": 1
         },
@@ -641,19 +652,50 @@
             "count": 1
         }
     },
+    "lint/self/corpus/facet-matrix.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 1
+        }
+    },
+    "lint/self/corpus/matrix.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 1
+        }
+    },
     "lint/self/corpus/matrix.ts": {
         "max-lines": {
             "count": 1
         }
     },
     "lint/self/corpus/messages.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 10
+        },
         "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
+    "lint/self/corpus/meta-tests.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 2
+        }
+    },
     "lint/self/corpus/schema-documents.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 2
+        },
         "typescript/no-unsafe-type-assertion": {
             "count": 3
+        }
+    },
+    "lint/self/corpus/siblings.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 2
+        }
+    },
+    "lint/self/corpus/type-channel.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 1
         }
     },
     "lint/self/rules/imports/no-framework-internals.test.ts": {
@@ -662,6 +704,11 @@
         },
         "typescript/strict-void-return": {
             "count": 1
+        }
+    },
+    "lint/self/rules/plugin.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 2
         }
     },
     "specs/api/intercept/filters.spec.ts": {
@@ -798,6 +845,11 @@
     },
     "specs/component/intercept/token-feed.tsx": {
         "no-await-in-loop": {
+            "count": 1
+        }
+    },
+    "specs/lint/checker/ratchet.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
             "count": 1
         }
     },
@@ -1237,6 +1289,11 @@
             "count": 1
         }
     },
+    "src/index.vitest.test.ts": {
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 1
+        }
+    },
     "src/kernel/database-option.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 2
@@ -1376,6 +1433,9 @@
     "src/world/services/sqlite/sqlite.adapter.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
+        },
+        "jterrazz/no-expect-in-a-loop": {
+            "count": 4
         },
         "jterrazz/no-sampled-value-in-test": {
             "count": 1

@@ -14,6 +14,7 @@ import { expectedConstantShared } from './expectations/expected-constant-shared.
 import { negativeGoldenFrozen } from './expectations/negative-golden-frozen.js';
 import { noDoubleOnlyAssertion } from './expectations/no-double-only-assertion.js';
 import { noExistenceOnlyAssertion } from './expectations/no-existence-only-assertion.js';
+import { noExpectInALoop } from './expectations/no-expect-in-a-loop.js';
 import { noExpectOutsideATest } from './expectations/no-expect-outside-a-test.js';
 import { noImportedExpectation } from './expectations/no-imported-expectation.js';
 import { noProbeCluster } from './expectations/no-probe-cluster.js';
@@ -92,6 +93,7 @@ const plugin: LintPlugin = {
         'no-sampled-value-in-test': noSampledValueInTest,
         'no-double-only-assertion': noDoubleOnlyAssertion,
         'no-existence-only-assertion': noExistenceOnlyAssertion,
+        'no-expect-in-a-loop': noExpectInALoop,
         'no-expect-outside-a-test': noExpectOutsideATest,
         'no-probe-cluster': noProbeCluster,
         'result-compared-whole': resultComparedWhole,

@@ -372,6 +372,19 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
+            'An `expect()` in a test is not called inside a loop — a `for`, a `for…of`, a `for…in`, a `while`, a `do…while` — nor inside a `forEach` callback, in the same function: a loop runs its assertion once per element, and not at all over an empty collection. `vitest/no-conditional-expect` holds the other assertion that may not run, one under a condition.',
+        facet: 'model',
+        family: 'expectations',
+        fix: 'Compare the whole collection in one assertion — `expect(rows.map(…)).toStrictEqual([…])` — or state each case with `test.each`.',
+        name: 'no-expect-in-a-loop',
+        rationale:
+            'A loop over nothing passes with no assertion made, and a loop that fails names one element where a whole comparison would show them all.',
+        reach: 'tests',
+    },
+    {
+        audience: 'consumer',
+        channel: 'statique',
+        convention:
             "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest`, under any local name, and `expect.soft`, `expect.poll` on it — so a method or a local of that name is not.",
         facet: 'model',
         family: 'expectations',
