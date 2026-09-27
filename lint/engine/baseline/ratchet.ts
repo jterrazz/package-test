@@ -12,7 +12,7 @@ export const BASELINE_SECTION = 'test';
 
 export const BASELINE_LABEL = `${BASELINE_FILE} › ${BASELINE_SECTION}`;
 
-/** `jterrazz(test-beside-its-module)` → `jterrazz/test-beside-its-module`. */
+/** `jterrazz-check(no-unused-ground)` → `jterrazz-check/no-unused-ground`. */
 export function keyOf(printedRule: string): string {
     const match = /^(?<plugin>[\w-]+)\((?<rule>[^)]+)\)$/u.exec(printedRule);
     return match?.groups === undefined
