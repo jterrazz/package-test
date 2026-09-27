@@ -1,4 +1,3 @@
-import type { ElementRef } from '../../../elements/descriptors/element.js';
 import type { PageVerbs } from '../../../elements/verbs.js';
 
 export type MobileDevice = {
@@ -10,11 +9,8 @@ export type MobileDevice = {
     udid?: string;
 };
 
-/** The element kinds a mobile screen designates; landmarks have no iOS analog and are refused. */
+/** The element kinds a mobile screen designates, each compiled to an iOS predicate; every other kind is refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
-
-/** The shared element descriptor, translated to iOS predicates; exactly one match when a verb acts on it (`descriptor-matches-one-element`). */
-export type MobileElementRef = ElementRef;
 
 /** One candidate of an ambiguous descriptor, as the refusal lists it. */
 export type MobileElementMatch = {
@@ -30,7 +26,7 @@ export type MobileElementMatch = {
 
 /** The verbs a mobile scenario is handed: a page's `see` and `fill`, and a `tap`; each polls until a visible match exists. */
 export type MobileVisitor = Pick<PageVerbs, 'fill' | 'see'> & {
-    tap: (element: MobileElementRef) => Promise<void>;
+    tap: PageVerbs['click'];
 };
 
 /** The behavior of an open — the When of the spec; assertions stay in the Then. */

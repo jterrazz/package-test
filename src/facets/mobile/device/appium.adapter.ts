@@ -6,6 +6,7 @@ import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
+import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
@@ -17,8 +18,8 @@ import type {
     DeviceScreen,
     DeviceTimeouts,
     MobileDevice,
+    MobileElementKind,
     MobileElementMatch,
-    MobileElementRef,
     MobileVisitor,
 } from './device.port.js';
 import { projectScreen } from './projection.js';
@@ -43,48 +44,52 @@ function escapePredicate(value: string): string {
     return value.replaceAll('\\', String.raw`\\`).replaceAll("'", String.raw`\'`);
 }
 
-/** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
-function compilePredicate(
-    element: MobileElementRef,
-    options?: { anyVisibility?: boolean },
-): string {
-    const name = escapePredicate(element.name ?? '');
-    // A label designates the whole label, compiled to equality; `{ exact: false }` compiles to `CONTAINS`.
-    const contains = (attribute: string): string =>
-        element.exact === false ? `${attribute} CONTAINS '${name}'` : `${attribute} == '${name}'`;
-    const visible = options?.anyVisibility ? '1 == 1' : 'visible == 1';
+type PredicateParts = {
+    contains: (attribute: string) => string;
+    name: string;
+    visible: string;
+};
 
-    switch (element.kind) {
-        case 'button': {
-            return `type == 'XCUIElementTypeButton' AND ${contains('label')} AND ${visible}`;
-        }
-        case 'field': {
-            return (
-                `type IN {'XCUIElementTypeTextField','XCUIElementTypeSecureTextField'}` +
-                ` AND (${contains('label')} OR ${contains('value')}) AND ${visible}`
-            );
-        }
-        case 'testId': {
-            return `name == '${name}' AND ${visible}`;
-        }
-        case 'text': {
-            return `(${contains('label')} OR ${contains('value')}) AND ${visible}`;
-        }
-        default: {
-            throw new Error(
-                refusal('no-landmark-on-mobile', {
-                    fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
-                    found: `${asWritten(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
-                }),
-            );
-        }
+const PREDICATES: Record<MobileElementKind, (parts: PredicateParts) => string> = {
+    button: ({ contains, visible }) =>
+        `type == 'XCUIElementTypeButton' AND ${contains('label')} AND ${visible}`,
+    field: ({ contains, visible }) =>
+        `type IN {'XCUIElementTypeTextField','XCUIElementTypeSecureTextField'}` +
+        ` AND (${contains('label')} OR ${contains('value')}) AND ${visible}`,
+    testId: ({ name, visible }) => `name == '${name}' AND ${visible}`,
+    text: ({ contains, visible }) =>
+        `(${contains('label')} OR ${contains('value')}) AND ${visible}`,
+};
+
+function isMobileKind(kind: ElementRef['kind']): kind is MobileElementKind {
+    return Object.hasOwn(PREDICATES, kind);
+}
+
+/** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
+function compilePredicate(element: ElementRef, options?: { anyVisibility?: boolean }): string {
+    if (!isMobileKind(element.kind)) {
+        throw new Error(
+            refusal('no-landmark-on-mobile', {
+                fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
+                found: `${asWritten(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
+            }),
+        );
     }
+    const name = escapePredicate(element.name ?? '');
+    return PREDICATES[element.kind]({
+        contains: (attribute) =>
+            element.exact === false
+                ? `${attribute} CONTAINS '${name}'`
+                : `${attribute} == '${name}'`,
+        name,
+        visible: options?.anyVisibility ? '1 == 1' : 'visible == 1',
+    });
 }
 
 /** `$$` answers a chainable typed as its array: the one await of it lives here. */
 async function matching(
     scope: MatchScope,
-    element: MobileElementRef,
+    element: ElementRef,
     options?: { anyVisibility?: boolean },
 ): Promise<ElementList> {
     /* oxlint-disable typescript/await-thenable -- webdriverio's chainable is TYPED as the array it resolves to and is a promise at runtime: the await is what runs the query */
@@ -201,7 +206,7 @@ export class AppiumAdapter implements DevicePort {
     /** Scopes stay strict in both modes; the chain resolves outside-in, so an ambiguous scope names itself. */
     private async resolveOne(
         driver: Driver,
-        element: MobileElementRef,
+        element: ElementRef,
         verb: string,
         cardinality: 'any' | 'one',
     ): Promise<DriverElement> {
@@ -227,7 +232,7 @@ export class AppiumAdapter implements DevicePort {
 
     private async resolveChain(
         driver: Driver,
-        chain: MobileElementRef[],
+        chain: ElementRef[],
         cardinality: 'any' | 'one',
         options?: { tryScroll?: boolean },
     ): Promise<DriverElement | null> {
@@ -295,11 +300,7 @@ export class AppiumAdapter implements DevicePort {
         }
     }
 
-    private async timeoutError(
-        driver: Driver,
-        element: MobileElementRef,
-        verb: string,
-    ): Promise<Error> {
+    private async timeoutError(driver: Driver, element: ElementRef, verb: string): Promise<Error> {
         let excerpt = '';
         try {
             const source = await driver.getPageSource();

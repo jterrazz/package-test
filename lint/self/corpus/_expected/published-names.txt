@@ -74,9 +74,7 @@ dist/index.d.ts:
     Matcher
     MatcherKind
     MobileBackendOptions
-    MobileElementKind
     MobileElementMatch
-    MobileElementRef
     MobileHandle
     MobileScenario
     MobileSpecification

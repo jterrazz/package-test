@@ -1,6 +1,7 @@
 import { ambiguityRefusal } from '../../../elements/ambiguity/ambiguity.js';
 import { asWrittenUnscoped } from '../../../elements/descriptors/as-written.js';
-import type { MobileElementMatch, MobileElementRef } from './device.port.js';
+import type { ElementRef } from '../../../elements/descriptors/element.js';
+import type { MobileElementMatch } from './device.port.js';
 
 function formatMatch(match: MobileElementMatch, index: number): string {
     const label = match.label === undefined ? '' : ` ${JSON.stringify(match.label)}`;
@@ -10,7 +11,7 @@ function formatMatch(match: MobileElementMatch, index: number): string {
 }
 
 /** `exact` is offered only to a descriptor that opted out; distinct identifiers make `testId()` a concrete rewrite. */
-function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): string[] {
+function formatFixes(element: ElementRef, matches: MobileElementMatch[]): string[] {
     const fixes: string[] = [];
 
     if (!element.scope) {
@@ -49,7 +50,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
 }
 
 export function describeMobileAmbiguity(options: {
-    element: MobileElementRef;
+    element: ElementRef;
     matches: MobileElementMatch[];
 }): string {
     const { element, matches } = options;

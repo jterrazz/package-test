@@ -10,11 +10,8 @@ import type { HttpResult } from '../../../src/facets/api/index.js';
 import type { RouteOptionsAny } from '../../../src/facets/api/request/route.js';
 import type { ComponentVisitor, RenderResult } from '../../../src/facets/component/index.js';
 import type { CallResult } from '../../../src/facets/integration/index.js';
-import type {
-    MobileElementKind,
-    MobileVisitor,
-    ScreenResult,
-} from '../../../src/facets/mobile/index.js';
+import type { MobileElementKind } from '../../../src/facets/mobile/device/device.port.js';
+import type { MobileVisitor, ScreenResult } from '../../../src/facets/mobile/index.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/index.js';
 import type { JobResult } from '../../../src/index.js';
 import {
