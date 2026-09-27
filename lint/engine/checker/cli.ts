@@ -5,12 +5,14 @@ import { tightened } from '../baseline/fix.js';
 import {
     BASELINE_FILE,
     BASELINE_LABEL,
+    BASELINE_SECTION,
     countsOf,
     judge,
     keepsBaseline,
     readBaseline,
     writeBaseline,
 } from '../baseline/ratchet.js';
+import { lessonLine } from '../catalogue/lesson-parts.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { projectRootOf } from '../project/role.js';
 import { unformattedSpecFiles } from './documents.js';
@@ -85,6 +87,15 @@ function printFindings(run: Run, violations: Finding[]): void {
 
 const NOTHING_HELD = `${BASELINE_LABEL}: nothing held`;
 
+const RATCHET_READ = 'docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson';
+
+const UNRECORDED = lessonLine({
+    fix: "fix them, or run 'jterrazz-test-check baseline' to record where the project stands",
+    found: `every finding above, and ${BASELINE_FILE} keeps no \`${BASELINE_SECTION}\` section to hold one`,
+    read: RATCHET_READ,
+    why: 'a project that recorded no debt is held at zero, so each finding fails the run as new debt',
+});
+
 function say(run: Run, line: string): void {
     if (!run.json) {
         console.error(line);
@@ -114,6 +125,7 @@ function verdict(
     }
     if (violations.length > 0) {
         say(run, `\nconventions checker: ${violations.length} error(s) found ${what}`);
+        say(run, UNRECORDED);
         stop(1);
     }
     if (!run.json) {

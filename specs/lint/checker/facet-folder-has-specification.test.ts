@@ -17,6 +17,7 @@ describe('facet-folder-has-specification', () => {
             job:1:1: error jterrazz-check(facet-folder-has-specification): found: \`specs/job/\`, a facet folder with no specification constructing \`specification.job()\` · why: A first-level folder named for one of the six facets holds a \`*.specification.ts(x)\` calling \`specification.<facet>(\`. · fix: create \`specs/job/job.specification.ts\` calling \`specification.job()\`, or rename the folder · read: docs/19-linting.md#facet-folder-has-specification
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

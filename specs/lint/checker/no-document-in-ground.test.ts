@@ -18,6 +18,7 @@ describe('no-document-in-ground', () => {
             widget:1:1: error jterrazz-check(no-unused-ground): found: a domain folder holding _expected and no test or document · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: write the test that stands on _expected, or delete the folder · read: docs/19-linting.md#no-unused-ground
 
             conventions checker: 2 error(s) found under {{workdir}}/specs
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

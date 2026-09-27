@@ -17,6 +17,7 @@ describe('docker-exec-bound-with-await-using', () => {
             specs/widget/widget.test.ts:8:1: error jterrazz-check(docker-exec-bound-with-await-using): found: a result of the docker-aware runner "dockerCli" bound without \`await using\` · why: Docker-aware runners are inferred from the \`docker:\` option of the imported specification file, and every \`.exec()\` result bound without \`await using\` is reported. · fix: bind it with \`await using result = await dockerCli…\`, so the containers it started are removed at the end of the scope · read: docs/19-linting.md#docker-exec-bound-with-await-using
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

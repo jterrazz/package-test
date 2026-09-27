@@ -413,7 +413,7 @@ ONE run owns it: the run over the whole project — path-less, a named project r
 
 It counts the project's checker findings; oxlint judges the plugin's diagnostics itself, against its suppressions file, in the Oxlint pass. It fails on a count above its entry, a key with findings and no entry, a count below its entry, an entry at zero, or a `jterrazz/<rule>` key left from before oxlint held its own.
 
-A project with no `test` section fails on any finding, naming the gesture that records them.
+A project with no `test` section fails on any finding, and says in four parts, beneath the count, the gesture that records them.
 
 #### What it prints
 

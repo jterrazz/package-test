@@ -19,6 +19,7 @@ describe('seeds-state-absolute-time', () => {
             widget/_seeds/posts.sql:4:1: error jterrazz-check(seeds-state-absolute-time): found: \`NOW()\` reads the clock in a seed · why: A \`_seeds/**/*.sql\` states absolute timestamps: \`CURRENT_TIMESTAMP\`/\`CURRENT_DATE\`/\`CURRENT_TIME\`, \`NOW()\` and the quoted \`'now'\` SQLite's date functions take (\`datetime('now')\`, \`strftime(…, 'now')\`, \`date('now', '-1 day')\`) are refused. · fix: replace \`NOW()\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\` · read: docs/19-linting.md#seeds-state-absolute-time
 
             conventions checker: 3 error(s) found under {{workdir}}/specs
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

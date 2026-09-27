@@ -17,6 +17,7 @@ describe('no-token-in-request', () => {
             specs/widget/_requests/create.http:4:1: error jterrazz-check(no-token-in-request): found: the token {{string}} in a _requests/ file · why: A known token in a file under \`_requests/\` → error: requests are inputs, never matched. · fix: write the literal value the request sends — a request is sent, never matched · read: docs/19-linting.md#no-token-in-request
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

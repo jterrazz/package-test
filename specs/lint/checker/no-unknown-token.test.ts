@@ -17,6 +17,7 @@ describe('no-unknown-token', () => {
             specs/widget/_expected/out.txt:1:1: error jterrazz-check(no-unknown-token): found: the unknown token {{userid}} · why: Every \`{{token}}\` in an \`_expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error. · fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir · read: docs/19-linting.md#no-unknown-token
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -32,6 +33,7 @@ describe('no-unknown-token', () => {
             specs/widget/builds.spec.yaml:6:1: error jterrazz-check(no-unknown-token): found: the unknown token {{widget}} · why: Every \`{{token}}\` in an \`_expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error. · fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir · read: docs/19-linting.md#no-unknown-token
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

@@ -17,6 +17,7 @@ describe('checker-suppression-states-a-reason', () => {
             api/orders/orders.spec.ts:9:1: error jterrazz-check(checker-suppression-states-a-reason): found: a checker suppression that does not say why · why: Every \`checker-disable-next-line\` / \`checker-disable-line\` directive carries \`-- <reason>\`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. · fix: end the directive with its reason: \`checker-disable-next-line database-named-only-when-several -- <why this line is the exception>\` · read: docs/19-linting.md#checker-suppression-states-a-reason
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

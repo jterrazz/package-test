@@ -17,6 +17,7 @@ describe('document-follows-its-grammar', () => {
             specs/widget/builds.spec.yaml:2:1: error jterrazz-check(document-follows-its-grammar): found: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs · why: A \`<case>.spec.yaml\` document follows its grammar: closed keys — \`description\`, \`fixture\`, \`env\`, \`serve\`, \`runs\` — and closed keys inside a run; \`description:\` and \`runs:\` required; \`command:\` and \`exit:\` required in every run, \`exit:\` an integer literal, \`waitFor:\` only on the last run and never with \`stdin:\`, a \`files:\` path relative and under the workdir; every \`fixture:\` path relative, reaching \`_fixtures/\`. · fix: rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires · read: docs/19-linting.md#document-follows-its-grammar
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

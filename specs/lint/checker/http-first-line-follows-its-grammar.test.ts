@@ -17,6 +17,7 @@ describe('http-first-line-follows-its-grammar', () => {
             specs/widget/_requests/create.http:1:1: error jterrazz-check(http-first-line-follows-its-grammar): found: the first line of create.http is no request line · why: The first line of a depth-1 \`.http\` follows its grammar: a request line (\`METHOD /path\`) under \`_requests/\`, a status line (\`HTTP/1.1 <status>\`) under \`_expected/\`. · fix: start create.http with its request line, \`GET /path\` or another method · read: docs/19-linting.md#http-first-line-follows-its-grammar
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

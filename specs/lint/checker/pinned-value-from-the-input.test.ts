@@ -17,6 +17,7 @@ describe('pinned-value-from-the-input', () => {
             specs/widget/stamps.spec.yaml:6:1: error jterrazz-check(pinned-value-from-the-input): found: "2026-07-17T10:00:00.000Z", which no \`fixture:\` or \`stdin:\` of this document pins · why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` → error, unless the same value appears in a \`fixture:\`, the document's sibling \`_fixtures/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile). · fix: write {{string}} where "2026-07-17T10:00:00.000Z" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document · read: docs/19-linting.md#pinned-value-from-the-input
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

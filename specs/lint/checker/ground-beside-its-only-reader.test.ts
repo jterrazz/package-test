@@ -18,6 +18,7 @@ describe('ground-beside-its-only-reader', () => {
             integration/orders/_expected:1:1: error jterrazz-check(ground-beside-its-only-reader): found: \`_expected/\`, read by \`total.spec.ts\` alone of the tests beside it · why: Ground in a leaf holding ≥ 2 node tests (\`.test.ts\`, \`.spec.ts\`) that a single one of them reads is an error. · fix: give \`total.spec.ts\` a domain folder of its own, and move \`_expected/\` into it · read: docs/19-linting.md#ground-beside-its-only-reader
 
             conventions checker: 1 error(s) found under {{workdir}}/specs
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

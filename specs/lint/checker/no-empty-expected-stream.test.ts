@@ -17,6 +17,7 @@ describe('no-empty-expected-stream', () => {
             specs/widget/builds.spec.yaml:6:1: error jterrazz-check(no-empty-expected-stream): found: a stream that is only {{any}} · why: An expected stream whose whole content is \`{{any}}\` → error: the run executes and proves nothing. · fix: write what the command actually printed, tokens for what moves · read: docs/19-linting.md#no-empty-expected-stream
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

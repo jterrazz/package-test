@@ -17,6 +17,7 @@ describe('database-named-only-when-several', () => {
             specs/widget/widget.test.ts:9:1: error jterrazz-check(database-named-only-when-several): found: \`.seed()\` with no \`{ database }\`, while 2 SQL databases are declared · why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests. · fix: pass \`.seed(…, { database: '<key>' })\`, naming one of the 2 databases the services record declares · read: docs/19-linting.md#database-named-only-when-several
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -45,6 +46,7 @@ describe('database-named-only-when-several', () => {
             specs/widget/widget.test.ts:9:1: error jterrazz-check(database-named-only-when-several): found: \`.seed()\` passes \`{ database }\`, while a single SQL database is declared · why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests. · fix: delete the \`{ database }\` option of \`.seed()\` · read: docs/19-linting.md#database-named-only-when-several
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

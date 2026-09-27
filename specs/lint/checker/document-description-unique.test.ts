@@ -17,6 +17,7 @@ describe('document-description-unique', () => {
             specs/widget/rebuilds.spec.yaml:1:1: error jterrazz-check(document-description-unique): found: "builds the widget", already the description of widget/builds.spec.yaml · why: Two \`<case>.spec.yaml\` documents in one directory do not share a \`description:\`. · fix: retitle one of the two for what it proves apart from the other · read: docs/19-linting.md#document-description-unique
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

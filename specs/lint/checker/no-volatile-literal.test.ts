@@ -17,6 +17,7 @@ describe('no-volatile-literal', () => {
             specs/widget/serves.spec.yaml:6:1: error jterrazz-check(no-volatile-literal): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#no-volatile-literal
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -33,6 +34,7 @@ describe('no-volatile-literal', () => {
             specs/cli/report/_expected/summary.txt:2:1: error jterrazz-check(no-volatile-literal): found: "127.0.0.1:52341", a value the next run will not reproduce · why: No expected output carries a literal volatile value: a loopback origin with a port (\`127.0.0.1:8080\`, \`localhost:3000\`), an absolute temporary path (\`/tmp/\`, \`/private/tmp/\`, \`/var/folders/\`) or a home path (\`/Users/…\`, \`/home/…\`). · fix: write {{string}} (or {{string}}) where "127.0.0.1:52341" stands · read: docs/19-linting.md#no-volatile-literal
 
             conventions checker: 2 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

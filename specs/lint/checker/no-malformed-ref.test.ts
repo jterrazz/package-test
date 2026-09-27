@@ -17,6 +17,7 @@ describe('no-malformed-ref', () => {
             specs/widget/_expected/out.txt:1:1: error jterrazz-check(no-malformed-ref): found: the malformed token {{iso8601#}} · why: A malformed ref of a known kind (\`{{iso8601#}}\`, \`{{uuid #id}}\`) in a text file under \`_expected/\` is an error. · fix: write iso8601 bare, or its named capture iso8601#<name>, between double braces · read: docs/19-linting.md#no-malformed-ref
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

@@ -17,6 +17,7 @@ describe('no-unused-ground', () => {
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -43,6 +44,7 @@ describe('no-unused-ground', () => {
             specs/widget:1:1: error jterrazz-check(no-unused-ground): found: a domain folder holding _expected and no test or document · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: write the test that stands on _expected, or delete the folder · read: docs/19-linting.md#no-unused-ground
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -58,6 +60,7 @@ describe('no-unused-ground', () => {
             specs/widget/_seeds/orphaned.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/orphaned.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/orphaned.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
 
             conventions checker: 1 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -74,6 +77,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_fixtures/used-app:1:1: error jterrazz-check(ground-shared-or-inline): found: ground only widget reaches for, kept above it · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: move it to widget/_fixtures/used-app and name it directory('./_fixtures/used-app/') — \`make fix\` does both · read: docs/19-linting.md#ground-shared-or-inline
 
             conventions checker: 2 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -90,6 +94,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_seeds/two-users.sql:1:1: error jterrazz-check(ground-shared-or-inline): found: ground only the leaves under api reach for, kept above them · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: move it to api/_seeds/two-users.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both · read: docs/19-linting.md#ground-shared-or-inline
 
             conventions checker: 2 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
@@ -107,6 +112,7 @@ describe('no-unused-ground', () => {
             specs/_shared/_seeds/one-user.sql:1:1: error jterrazz-check(ground-shared-or-inline): found: ground only the leaves under api reach for, kept above them · why: A ground file exists only if it is shared, and a value lives in a test only while it stays short. · fix: move it to api/_seeds/one-user.sql, the ground of the lowest folder its readers share, and name it from each leaf by the path that climbs to it — \`make fix\` does both · read: docs/19-linting.md#ground-shared-or-inline
 
             conventions checker: 3 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

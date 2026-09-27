@@ -18,6 +18,7 @@ describe('document-env-and-serve-registered', () => {
             specs/widget/builds.spec.yaml:5:1: error jterrazz-check(document-env-and-serve-registered): found: serve: "dashbord", which no specification registers · why: A document's bare \`env:\` words and \`serve:\` names are keys of the \`env\`/\`serve\` objects of a \`specification.cli(…)\` in the nearest directory carrying \`*.specification.ts\` files (literals read statically; ignored otherwise). · fix: name one of api, or register "dashbord" in \`specification.cli({ serve })\` · read: docs/19-linting.md#document-env-and-serve-registered
 
             conventions checker: 2 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 

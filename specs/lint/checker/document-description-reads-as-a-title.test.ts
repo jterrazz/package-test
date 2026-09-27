@@ -20,6 +20,7 @@ describe('document-description-reads-as-a-title', () => {
             specs/widget/builds.spec.yaml:1:1: error jterrazz-check(document-description-reads-as-a-title): found: a \`description:\` starting with a capital · why: A document's \`description:\` is a title: one line, lowercase initial (an all-caps identifier exempted), no trailing period, under 100 characters. · fix: start it lowercase: "builds the widget." · read: docs/19-linting.md#document-description-reads-as-a-title
 
             conventions checker: 2 error(s) found under {{workdir}}
+            found: every finding above, and jterrazz.baseline.json keeps no \`test\` section to hold one · why: a project that recorded no debt is held at zero, so each finding fails the run as new debt · fix: fix them, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
         `);
     });
 
