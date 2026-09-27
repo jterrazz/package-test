@@ -1,10 +1,10 @@
 import { readdirSync } from 'node:fs';
 import { describe, expect, test } from 'vitest';
 
-import { defineAction } from '../../../kernel/chain/action.js';
-import { defineFacet } from '../../../kernel/chain/define-facet.js';
-import { scratchDirectory } from '../../../kernel/files/scratch.js';
-import { directory, file } from '../../../kernel/files/spec-path.js';
+import { defineAction } from '../chain/action.js';
+import { defineFacet } from '../chain/define-facet.js';
+import { scratchDirectory } from './scratch.js';
+import { directory, file } from './spec-path.js';
 import { fixture } from './fixture.capability.js';
 import type { FixtureMethod } from './fixture.capability.js';
 import { fsFixtures } from './fs-fixtures.adapter.js';

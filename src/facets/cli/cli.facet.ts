@@ -8,8 +8,8 @@ import { databaseSet } from '../../world/services/seed/database-set.adapter.js';
 import { seed } from '../../world/services/seed/seed.capability.js';
 import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
 import { run } from './documents/run.action.js';
-import { fixture } from './fixture/fixture.capability.js';
-import { fsFixtures } from './fixture/fs-fixtures.adapter.js';
+import { fixture } from '../../kernel/files/fixture.capability.js';
+import { fsFixtures } from '../../kernel/files/fs-fixtures.adapter.js';
 import { env } from './process/env.capability.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { exec } from './process/exec.action.js';

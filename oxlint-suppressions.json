@@ -822,12 +822,12 @@
             "count": 1
         }
     },
-    "src/facets/cli/fixture/fixture.capability.test.ts": {
+    "src/kernel/files/fixture.capability.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
         }
     },
-    "src/facets/cli/fixture/fs-fixtures.adapter.test.ts": {
+    "src/kernel/files/fs-fixtures.adapter.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
         }

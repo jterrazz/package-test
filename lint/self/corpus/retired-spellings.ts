@@ -8,7 +8,7 @@ export const NEGATIVE_INPUTS = [
     'lint/engine/project/spec-document.test.ts',
     'lint/self/corpus/retired-spellings.test.ts',
     'lint/self/corpus/retired-spellings.ts',
-    'src/facets/cli/fixture/fs-fixtures.adapter.test.ts',
+    'src/kernel/files/fs-fixtures.adapter.test.ts',
     'src/kernel/files/spec-path.test.ts',
 ];
 

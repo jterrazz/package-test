@@ -38,7 +38,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/facets/component/render/page.port.ts',
             'src/facets/component/render/scenario.ts',
             'src/world/clock/clock.port.ts',
-            'src/facets/cli/fixture/fixture.port.ts',
+            'src/kernel/files/fixture.port.ts',
             'src/world/stubs/intercept/intercept.port.ts',
             'src/world/services/seed/seed.port.ts',
             'src/facets/component/viewport/viewport.port.ts',
