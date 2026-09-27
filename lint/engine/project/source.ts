@@ -56,7 +56,7 @@ export function byPosition(one: Finding, other: Finding): number {
     );
 }
 
-function isProduction(path: string): boolean {
+export function isProduction(path: string): boolean {
     return (
         /\.tsx?$/u.test(path) && !/\.(?:test|test-d|fixtures)\.tsx?$/u.test(path) && !inGround(path)
     );

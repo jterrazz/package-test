@@ -1,5 +1,6 @@
 import type { AtZeroRegistry } from '../../engine/checker/registry.js';
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
+import { checkErrorIsARefusalOrAnInvariant } from './error-is-a-refusal-or-an-invariant.js';
 import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
@@ -19,6 +20,7 @@ export const SELF_CHECKER_PASS_IDS = [
     'lint-imports-follow-the-direction',
     'stubs-reached-by-their-surface',
     'one-word-for-an-adapter',
+    'error-is-a-refusal-or-an-invariant',
 ] as const;
 
 export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
@@ -36,6 +38,7 @@ export const SELF_CHECKER: AtZeroRegistry = {
         checkLintImportsFollowTheDirection,
         checkStubsReachedByTheirSurface,
         checkOneWordForAnAdapter,
+        checkErrorIsARefusalOrAnInvariant,
     ],
     specs: [checkSpecimenFiledByCapability],
 };

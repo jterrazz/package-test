@@ -148,4 +148,18 @@ export const ARCHITECTURE_PASSES: Row[] = [
         reach: 'module',
         severity: 'error',
     },
+    {
+        audience: 'self',
+        channel: 'checker',
+        convention:
+            "An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks — is thrown as a refusal: `new Error(refusal(…))`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (`docs/05-module-tests.md#time`) or a catalogue row. An error only the framework can cause, a broken internal invariant, is `invariant('<what broke>')`, whose message says the bug is the framework\u2019s. Any other `new Error(…)`, `new TypeError(…)`, `new RangeError(…)` or `new SyntaxError(…)` under `src/` is an error at the construction, a stack read (`new Error().stack`) and tests excepted; a refusal reading a heading no chapter has, an error at its read.",
+        facet: 'model',
+        family: 'architecture',
+        fix: "Throw `new Error(refusal({ found, why, fix, read }))` for what a user can cause, reading the heading that explains it (write that section where none does), and `invariant('<what broke>')` for what only the framework can.",
+        name: 'error-is-a-refusal-or-an-invariant',
+        rationale:
+            'A message written by hand at the throw says what went wrong and stops: the reader is left to guess the law and the gesture, and a hundred of them drifted into a hundred shapes. Split in two declared forms, a refusal teaches its reader, and an invariant tells them the bug is not theirs to fix.',
+        reach: 'module',
+        severity: 'error',
+    },
 ];

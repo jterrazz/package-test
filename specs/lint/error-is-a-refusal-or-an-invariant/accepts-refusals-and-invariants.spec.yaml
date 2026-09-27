@@ -1,0 +1,5 @@
+description: a refusal reading a heading that exists, and an invariant, pass
+fixture: ./_fixtures/declared/
+runs:
+    - command: self-checker .
+      exit: 0

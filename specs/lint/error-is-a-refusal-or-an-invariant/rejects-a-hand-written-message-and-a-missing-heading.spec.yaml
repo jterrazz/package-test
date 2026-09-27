@@ -1,0 +1,8 @@
+description: a hand-written message is refused where it is built, a heading no chapter has where it is read
+fixture: ./_fixtures/hand-written/
+runs:
+    - command: self-checker .
+      exit: 1
+      stderr: |
+          src/world/clock/clock.ts:3:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
+          src/world/clock/instant.ts:8:19  jterrazz-check(error-is-a-refusal-or-an-invariant)
