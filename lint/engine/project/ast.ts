@@ -1,6 +1,6 @@
-import { isFile, isOnDisk } from '@jterrazz/typescript/rules';
+import { isProjectRoot } from '@jterrazz/typescript/rules';
 import type { AfterHook, BeforeHook, Comment, Node } from '@oxlint/plugins';
-import { basename, dirname, join } from 'node:path';
+import { basename, dirname } from 'node:path';
 
 /** A rule reads a node by its `type` and span and every other field defensively, decoupled from the generated ESTree union. The published declarations import `@oxlint/plugins`, so it is a dependency. */
 
@@ -20,12 +20,6 @@ export type SpecsAnchor = {
     /** `[facet, domain, basename]`. */
     relative: string[];
 };
-
-/** A tree no package holds is still a project: a `.git` directory or worktree file marks its root too. */
-export function isProjectRoot(directory: string): boolean {
-    const git = join(directory, '.git');
-    return isFile(join(directory, 'package.json')) || isOnDisk(git);
-}
 
 /** The NEAREST `specs` ancestor, never above the project root: a checkout living under `~/specs/` must not read as one whole specs tree. */
 export function specsAnchor(filename: string): SpecsAnchor | undefined {

@@ -4,12 +4,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { discoverRoot, findRoot, resolveRoot } from './resolve.js';
-
-const probe =
-    (...present: string[]) =>
-    (path: string): boolean =>
-        present.includes(path);
+import { discoverRoot, resolveRoot } from './resolve.js';
 
 let base: string;
 
@@ -25,26 +20,6 @@ describe('resolve', () => {
 
     afterAll(() => {
         rmSync(base, { force: true, recursive: true });
-    });
-
-    test('findRoot — the one walk both the runner and `no-redundant-root` use — the NEAREST ancestor that declares itself a project wins', () => {
-        // Given - a manifest at the monorepo root and one in the package
-        const exists = probe('/mono/package.json', '/mono/apps/cli/package.json');
-
-        // Then - the walk stops at the package, not at the repository
-        expect(findRoot('/mono/apps/cli/specs/logs', exists)).toBe('/mono/apps/cli');
-    });
-
-    test('findRoot — the one walk both the runner and `no-redundant-root` use — returns undefined when no ancestor carries a marker', () => {
-        // Given - a probe that finds nothing
-        // Then - there is no root to derive, and the caller decides the fallback
-        expect(findRoot('/nowhere/at/all', probe())).toBeUndefined();
-    });
-
-    test('findRoot — the one walk both the runner and `no-redundant-root` use — a directory carrying a marker is its own root', () => {
-        // Given - the starting directory itself declares the package
-        // Then - the walk does not climb past it
-        expect(findRoot('/pkg', probe('/pkg/package.json'))).toBe('/pkg');
     });
 
     test('root discovery (rule `no-redundant-root`) — walks up to the nearest directory carrying a root marker', () => {

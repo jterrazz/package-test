@@ -1,16 +1,14 @@
-import { defineRule, isFile, readAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, holdsManifest, nearestRoot, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
 import { findProperty, specificationMember, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { findRoot } from '../../../engine/project/resolve.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-/** The framework's own walk-up, run against this layer's fs probe: the rule and the runner must share one function. */
 function derivedRoot(startDir: string): string | undefined {
-    return findRoot(startDir, isFile);
+    return nearestRoot(startDir, holdsManifest);
 }
 
 const row = rowNamed(consumerRows, 'no-redundant-root');

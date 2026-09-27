@@ -1,7 +1,7 @@
+import { nearestRoot } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { findRoot } from '../../../lint/engine/project/resolve.js';
 import { refusal } from '../../../lint/index.refusal.js';
 
 /** The lockfile each package manager leaves, and the install command its user types. */
@@ -37,7 +37,7 @@ function isUnbuilt(error: unknown): boolean {
 const NATIVE_PEERS = new Set(['better-sqlite3']);
 
 export function installerAt(from: string): { command: string; name: string } {
-    const root = findRoot(from, existsSync);
+    const root = nearestRoot(from, (directory) => existsSync(resolve(directory, 'package.json')));
     if (root === undefined) {
         return DEFAULT_INSTALLER;
     }

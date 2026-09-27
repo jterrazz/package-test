@@ -1,7 +1,13 @@
-import { folderChanged, GROUND_FOLDERS, isFile } from '@jterrazz/typescript/rules';
-import { basename, dirname, join, relative } from 'node:path';
+import {
+    folderChanged,
+    GROUND_FOLDERS,
+    holdsManifest,
+    isProjectRoot,
+    nearestRoot,
+} from '@jterrazz/typescript/rules';
+import { basename, dirname, relative } from 'node:path';
 
-import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
+import { isUnderSpecs, segments } from './ast.js';
 
 /** The suffix decides the kind, and folders are read below the project root: a checkout under `_fixtures/` or `__tests__/` is the machine's business. */
 
@@ -100,17 +106,7 @@ export function directoryOf(filename: string): string {
 }
 
 export function packageRootOf(directory: string): string | undefined {
-    let current = directory;
-    for (;;) {
-        if (isFile(join(current, 'package.json'))) {
-            return current;
-        }
-        const parent = dirname(current);
-        if (parent === current) {
-            return undefined;
-        }
-        current = parent;
-    }
+    return nearestRoot(directory, holdsManifest);
 }
 
 const projectRoots = new Map<string, string | undefined>();
@@ -120,19 +116,9 @@ export function projectRootOf(directory: string): string | undefined {
     if (!folderChanged(directory) && projectRoots.has(directory)) {
         return projectRoots.get(directory);
     }
-    let current = directory;
-    for (;;) {
-        if (isProjectRoot(current)) {
-            projectRoots.set(directory, current);
-            return current;
-        }
-        const parent = dirname(current);
-        if (parent === current) {
-            projectRoots.set(directory, undefined);
-            return undefined;
-        }
-        current = parent;
-    }
+    const root = nearestRoot(directory, isProjectRoot);
+    projectRoots.set(directory, root);
+    return root;
 }
 
 /** A path no package and no repository holds (a rule's test case, `/repo/…`) is read whole. */

@@ -1,25 +1,9 @@
-import { treeKind } from '@jterrazz/typescript/rules';
+import { holdsManifest, nearestRoot } from '@jterrazz/typescript/rules';
 import { realpathSync } from 'node:fs';
-import { dirname, isAbsolute, resolve } from 'node:path';
-
-const ROOT_MARKER = 'package.json';
-
-export function findRoot(startDir: string, exists: (path: string) => boolean): string | undefined {
-    let dir = startDir;
-    for (;;) {
-        if (exists(resolve(dir, ROOT_MARKER))) {
-            return dir;
-        }
-        const parent = dirname(dir);
-        if (parent === dir) {
-            return undefined;
-        }
-        dir = parent;
-    }
-}
+import { isAbsolute, resolve } from 'node:path';
 
 export function discoverRoot(startDir: string): string {
-    return findRoot(startDir, (path) => treeKind(path) === 'file') ?? startDir;
+    return nearestRoot(startDir, holdsManifest) ?? startDir;
 }
 
 export function resolveRoot(root: string | undefined, callerDir: string): string {
