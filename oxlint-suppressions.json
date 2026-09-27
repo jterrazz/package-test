@@ -242,9 +242,6 @@
         "complexity": {
             "count": 1
         },
-        "no-plusplus": {
-            "count": 2
-        },
         "typescript/no-unsafe-type-assertion": {
             "count": 7
         }
@@ -512,9 +509,6 @@
         }
     },
     "lint/engine/checker/documents.ts": {
-        "no-plusplus": {
-            "count": 1
-        },
         "typescript/no-non-null-assertion": {
             "count": 2
         },
@@ -1006,9 +1000,6 @@
         }
     },
     "src/expectations/goldens/diff.ts": {
-        "no-plusplus": {
-            "count": 7
-        },
         "typescript/no-base-to-string": {
             "count": 1
         },
@@ -1064,9 +1055,6 @@
         }
     },
     "src/expectations/http/http-file.ts": {
-        "no-plusplus": {
-            "count": 3
-        },
         "typescript/strict-boolean-expressions": {
             "count": 1
         }
@@ -1150,9 +1138,6 @@
         "max-lines": {
             "count": 1
         },
-        "no-plusplus": {
-            "count": 1
-        },
         "typescript/no-non-null-assertion": {
             "count": 9
         },
@@ -1234,11 +1219,6 @@
             "count": 2
         }
     },
-    "src/facets/cli/process/exec.action.test.ts": {
-        "class-methods-use-this": {
-            "count": 1
-        }
-    },
     "src/facets/cli/process/exec.adapter.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
@@ -1255,9 +1235,6 @@
             "count": 2
         },
         "no-use-before-define": {
-            "count": 1
-        },
-        "promise/avoid-new": {
             "count": 1
         },
         "typescript/no-dynamic-delete": {
@@ -1308,9 +1285,6 @@
         }
     },
     "src/facets/mobile/device/appium.adapter.ts": {
-        "class-methods-use-this": {
-            "count": 2
-        },
         "max-depth": {
             "count": 1
         },
@@ -1320,13 +1294,7 @@
         "no-await-in-loop": {
             "count": 9
         },
-        "no-plusplus": {
-            "count": 1
-        },
         "no-promise-executor-return": {
-            "count": 1
-        },
-        "promise/avoid-new": {
             "count": 1
         },
         "promise/param-names": {
@@ -1375,9 +1343,6 @@
         }
     },
     "src/facets/website/browser/playwright.adapter.ts": {
-        "class-methods-use-this": {
-            "count": 1
-        },
         "max-lines": {
             "count": 1
         },
@@ -1435,11 +1400,6 @@
             "count": 2
         }
     },
-    "src/kernel/pause.ts": {
-        "promise/avoid-new": {
-            "count": 1
-        }
-    },
     "src/kernel/refusals/node-only.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
@@ -1464,9 +1424,6 @@
         }
     },
     "src/world/services/containers/testcontainers.adapter.ts": {
-        "promise/avoid-new": {
-            "count": 1
-        },
         "typescript/no-explicit-any": {
             "count": 1
         },
@@ -1531,9 +1488,6 @@
         "no-await-in-loop": {
             "count": 6
         },
-        "promise/avoid-new": {
-            "count": 2
-        },
         "typescript/no-unsafe-call": {
             "count": 2
         },
@@ -1550,9 +1504,6 @@
         }
     },
     "src/world/services/redis/redis.adapter.ts": {
-        "class-methods-use-this": {
-            "count": 3
-        },
         "typescript/no-explicit-any": {
             "count": 1
         },
@@ -1581,17 +1532,11 @@
         "max-lines": {
             "count": 1
         },
-        "no-await-in-loop": {
-            "count": 1
-        },
         "vitest/prefer-strict-boolean-matchers": {
             "count": 18
         }
     },
     "src/world/services/sqlite/sqlite.adapter.ts": {
-        "class-methods-use-this": {
-            "count": 1
-        },
         "max-lines": {
             "count": 1
         },
@@ -1686,9 +1631,6 @@
         },
         "max-lines-per-function": {
             "count": 1
-        },
-        "promise/avoid-new": {
-            "count": 2
         },
         "typescript/no-unsafe-type-assertion": {
             "count": 1

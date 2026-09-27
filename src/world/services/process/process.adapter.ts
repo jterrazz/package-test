@@ -1,4 +1,3 @@
-/* oxlint-disable eslint/class-methods-use-this -- a `ServiceHandle` is an interface of eleven members and a process answers "nothing to do" to most of them: no image to pull, no database adapter, no per-worker namespace. Each stub states that answer where the contract asks for it. */
 import { refusal } from '../../../../lint/index.refusal.js';
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
