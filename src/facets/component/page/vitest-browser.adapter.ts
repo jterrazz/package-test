@@ -7,6 +7,7 @@ import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
 import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
+import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
@@ -121,11 +122,7 @@ function candidates(locator: Locator): ElementMatch[] {
 }
 
 function ambiguousLevel(element: ElementRef): ElementRef {
-    const chain: ElementRef[] = [];
-    for (let current: ElementRef | undefined = element; current; current = current.scope) {
-        chain.unshift(current);
-    }
-    for (const level of chain.slice(0, -1)) {
+    for (const level of scopeChain(element).slice(0, -1)) {
         if (locate(page, level).elements().length > 1) {
             return level;
         }

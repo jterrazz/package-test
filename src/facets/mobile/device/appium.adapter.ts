@@ -5,6 +5,7 @@ import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js'
 import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
+import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
@@ -91,14 +92,6 @@ async function matching(
     return await scope.$$(`-ios predicate string:${compilePredicate(element, options)}`);
     /* oxlint-enable typescript/return-await */
     /* oxlint-enable typescript/await-thenable */
-}
-
-function scopeChain(element: MobileElementRef): MobileElementRef[] {
-    const chain: MobileElementRef[] = [];
-    for (let current: MobileElementRef | undefined = element; current; current = current.scope) {
-        chain.unshift(current);
-    }
-    return chain;
 }
 
 async function captureMatch(element: DriverElement): Promise<MobileElementMatch> {

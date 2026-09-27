@@ -9,6 +9,7 @@ import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
 import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
+import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -142,11 +143,7 @@ async function act<T>(
 }
 
 async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<ElementRef> {
-    const chain: ElementRef[] = [];
-    for (let current: ElementRef | undefined = element; current; current = current.scope) {
-        chain.unshift(current);
-    }
-    for (const level of chain.slice(0, -1)) {
+    for (const level of scopeChain(element).slice(0, -1)) {
         if ((await locate(page, level).count()) > 1) {
             return level;
         }
