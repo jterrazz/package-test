@@ -104,7 +104,7 @@ await cli.fixtureDirectory('../../fixtures/shop/').exec('build'); // the shared 
 A file is never named after a language construct. Refused basenames, in
 `src/`, `lint/` and `specs/` alike:
 
-```
+```text
 types  type  interfaces  constants  utils  util  helpers  helper
 common  shared  misc  setup  lib   and any  *.types.ts  suffix
 ```
@@ -118,7 +118,7 @@ not only tests. Existing sites go on the ratchet and are renamed by domain.
 Every repository root has the same shape, written once and checked by the
 toolchain:
 
-```
+```text
 src/     the product's code, and nothing else
 lint/    the lint rules the package ships — one folder per rule
 specs/   the specifications, one folder per facet (+ repository suites)
@@ -134,7 +134,7 @@ tree in, the command, the normalised report out (one line per diagnostic,
 `file:line:column  plugin(rule)`), so the golden proves the position and not
 only the presence:
 
-```
+```text
 specs/lint/test-beside-its-module/
   rejects-orphan-test.spec.yaml
   accepts-sibling.spec.yaml
@@ -340,7 +340,7 @@ commit, prototype plumbing that never reaches the release.
 Both channels print the compiler convention every editor's problem matcher
 parses, and a golden keeps only the part that proves the finding:
 
-```
+```text
 report  specs/api/orders/create.spec.ts:7:5: error jterrazz-check(c15): a path may leave its leaf only into specs/fixtures/
 report  src/orphan.test.ts:1:1: error jterrazz(i2-sibling-test-naming): a module test has a sibling module
 golden  specs/api/orders/create.spec.ts:7:5  jterrazz-check(c15)

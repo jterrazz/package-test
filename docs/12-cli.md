@@ -262,7 +262,7 @@ test('reports what the cluster holds', async () => {
 
 A stub fixture is a `bin/` holding one script per binary the run must not find for real:
 
-```
+```text
 specs/_shared/_fixtures/cluster-stub/
 └── bin/
     ├── kubectl

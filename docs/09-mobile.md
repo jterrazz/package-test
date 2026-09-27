@@ -271,7 +271,7 @@ Calling `specification.mobile()` (or `.open()`) without them throws exactly that
 
 ### Folder layout
 
-```
+```text
 specs/mobile/
 ├── mobile.specification.ts     # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/

@@ -1002,7 +1002,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'Every `checker-disable-next-line` / `checker-disable-line` directive carries ` -- <reason>`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. The word inside a string is prose, not a directive.',
+            'Every `checker-disable-next-line` / `checker-disable-line` directive carries `-- <reason>`, wherever a checker pass can be silenced: a test, a document, a fixture under ground. The word inside a string is prose, not a directive.',
         facet: 'model',
         family: 'layout',
         fix: 'Write `checker-disable-next-line <name> -- <reason>`.',

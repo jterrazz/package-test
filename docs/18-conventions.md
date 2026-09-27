@@ -56,7 +56,7 @@ What they specify is a REPOSITORY's own surface: the subpaths its `package.json`
 
 Two suites carry names the whole estate shares, because two repositories inventing two names for one idea is the drift a vocabulary exists to stop: a package's own published SURFACE is `surface/`, and a repository's own lint guards are `lint/`. Every other suite is named for what it covers.
 
-```
+```text
 specs/
 ├── surface/                      # what the package publishes
 │   └── package/

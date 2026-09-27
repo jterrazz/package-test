@@ -52,7 +52,7 @@ A second hole is the RENDERER's, and it is not this repository's to close: a Rea
 
 The layout is the one the conventions enforce on every consumer (rules `specs-at-declared-depth`, `one-subject-per-spec`, `spec-in-subject-folder`), and this repository is its first consumer — with one difference an application never meets: every app its specs drive is a SPECIMEN, kept as ground under `specs/_shared/_fixtures/`, so every spec here specifies the FRAMEWORK ([18 — Conventions § A specimen's spec](18-conventions.md#a-specimens-spec)), and is filed by the CAPABILITY it asks about rather than by the route, the command or the job it reaches ([§ A specimen's capability folder](#a-specimens-capability-folder)). A facet carries its runners at its ROOT and its tests one folder below, one file per aspect of the capability:
 
-```
+```text
 specs/
 ├── api/
 │   ├── api.specification.ts          # runners at the facet root

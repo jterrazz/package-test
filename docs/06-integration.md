@@ -162,7 +162,7 @@ integration({
 
 ### Folder layout
 
-```
+```text
 specs/integration/
 ├── integration.specification.ts   # the runner, at the facet root
 ├── pure.specification.ts          # a second runner: no services, goldens only

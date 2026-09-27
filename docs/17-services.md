@@ -120,7 +120,7 @@ await expect(result.table('events', { database: 'analyticsDb' })).toMatch([…])
 
 ## `docker/<service>/init.sql`
 
-```
+```text
 docker/
 ├── db/
 │   └── init.sql            # schema for the "db" service — builds its template database

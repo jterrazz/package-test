@@ -356,7 +356,7 @@ Provisioning the environment is not this package's job. In CI, the shared valida
 
 ### Folder layout
 
-```
+```text
 specs/website/
 ├── website.specification.ts    # runner at the facet ROOT (rule `specs-at-declared-depth`)
 └── <domain>/

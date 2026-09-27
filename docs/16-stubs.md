@@ -116,7 +116,7 @@ export const withArticleGone = (id: string) =>
 
 The file layout follows the same split: a **public facade** per feature, **internal units** under it.
 
-```
+```text
 specs/<facet>/<feature>/
 ├── <feature>.test.ts
 ├── _fixtures/
@@ -413,7 +413,7 @@ The `request` handed to it is the same `MatchableRequest` the match ran on: `{ b
 
 The moment a chain declares one stub, the network is guarded: every outgoing request during the action must match a declared, non-exhausted stub. Anything else fails the spec with an explicit error that rejects the action promise (never an unhandled rejection):
 
-```
+```text
 found: an unmatched outgoing request, POST https://api.openai.com/v1/chat/completions; declared:
   - POST https://api.openai.com/v1/chat/completions (exhausted after 1)
 why: From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.

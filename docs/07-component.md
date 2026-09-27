@@ -22,7 +22,7 @@ A component test answers one question: **given this network and this parent, wha
 
 It is a UNIT, so it lives beside its subject:
 
-```
+```text
 src/presentation/posts/
 ├── post-table.tsx
 ├── post-table.test.tsx        # the component's spec — the `.tsx` suffix IS the kind

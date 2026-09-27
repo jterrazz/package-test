@@ -19,7 +19,7 @@ Location: /orders/{{uuid#order}}
 { "id": "{{uuid#order}}", "total": "{{number}}", "createdAt": "{{iso8601}}" }
 ```
 
-```
+```text
 ### _expected/help.txt — tokens in a TEXT snapshot
 shoply v{{semver}}
 Started at {{iso8601}} in {{workdir}}
@@ -146,7 +146,7 @@ await expect(result.table('payment_intents', { database: 'db' })).toMatch([
 
 Example — starting from actual output:
 
-```
+```text
 shoply v9.1.0
 Started at 2026-07-17T09:12:44.031Z in /tmp/shoply-spec-x9y8z7
 Done in 0.83s
@@ -154,7 +154,7 @@ Done in 0.83s
 
 with an existing fixture:
 
-```
+```text
 shoply v{{semver}}
 Started at {{iso8601}} in {{workdir}}
 Done in {{duration}}

@@ -290,7 +290,7 @@ A journey — a request carrying what an earlier response returned — is code: 
 
 Line coverage says which lines of the app ran; it cannot say which routes no case asked for. The api project measures it at run time: every request a test sends is recorded, and after the last test the run names each route the app declares that no request reached. The measure is the `api()` project's global setup; a project written by hand measures nothing.
 
-```
+```text
 api routes: all 12 declared routes reached
 ```
 

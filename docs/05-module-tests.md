@@ -16,7 +16,7 @@ A module test is the majority kind: one file of source code, met through its own
 
 A module test answers one question: **given these inputs and these ports, what does this module return, and what does it ask of its collaborators?** Its subject is a unit of code, so it sits beside that code:
 
-```
+```text
 src/domain/posts/
 ├── ranking.ts
 ├── ranking.test.ts          # the module's spec — the `.test.ts` suffix IS the kind

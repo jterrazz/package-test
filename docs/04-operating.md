@@ -35,7 +35,7 @@ The package refuses to guess at its environment, so several things it uses are t
 
     A facet's refusal — a page, a screen, a component — names the peers it lacks and the `npm install -D` that brings them. A service's names the service that asked, the peer, and the install command of the package manager the project's own lockfile names (`src/world/services/peer.ts`); under pnpm a native binding also has to be listed to be BUILT, so the message adds that line:
 
-    ```
+    ```text
     found: sqlite() requires `better-sqlite3`, and it is not installed
     why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.
     fix: pnpm add -D better-sqlite3; under pnpm the binding is not built unless the package is listed: add "better-sqlite3" to `onlyBuiltDependencies` in package.json (or `only-built-dependencies` in .npmrc) and reinstall
@@ -44,7 +44,7 @@ The package refuses to guess at its environment, so several things it uses are t
 
     **A native peer has a second way of not being there**, and it is the one that costs an afternoon: the package installed, and its `.node` never compiled, because the package manager withheld the install script — npm since 11, pnpm since 10 and bun since 1.2 all do, by default. It is `better-sqlite3` 12's: the peer range takes `^12.11.1 || ^13`, and 13 ships its binding prebuilt, so it loads with no install script at all. `sqlite()` opens one in-memory database the first time it loads the driver, so that failure is caught where it can be named rather than surfacing as a `bindings` stack trace from whichever spec seeded first:
 
-    ```
+    ```text
     found: sqlite() found `better-sqlite3`, and its native binding is not built
     why: A native peer is built by its install script, and npm runs a dependency's install script only once it is told to.
     fix: npm install-scripts approve better-sqlite3 && npm rebuild better-sqlite3

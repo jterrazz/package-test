@@ -133,7 +133,7 @@ Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard t
 
 **A descriptor must match exactly one element (rule `descriptor-matches-one-element`).** When several match, the framework refuses the action instead of taking the first one:
 
-```
+```text
 found: Ambiguous element: link("Articles") matched 2 elements on http://site.test/ambiguous —
   1. <a href="/articles">Articles</a>  in <nav>
   2. <a href="/articles">Articles</a>  in <footer>
@@ -150,7 +150,7 @@ Every suggestion carries what it LEAVES, so a rewrite that would keep the spec a
 
 On a device the same refusal reads in the device's terms — there are no landmarks to offer, so the evidence offers the accessibility identifiers it found:
 
-```
+```text
 found: Ambiguous element: button("Bookmark") matched 3 elements on the screen —
   1. Button "Bookmark"  [testId: event-1-bookmark]
   2. Button "Bookmark"  [testId: event-2-bookmark]

@@ -96,7 +96,7 @@ Location: /orders/{{uuid#order}}
 
 On mismatch the failure shows which part diverged. A status mismatch is a three-line message naming the fixture:
 
-```
+```text
 Response status mismatch (./_expected/user-created.http)
   expected: 201
   received: 500

@@ -89,7 +89,7 @@ import { match, mockOf, openai, required, waitUntil } from '@jterrazz/test';
 
 A **specification file** (`*.specification.ts`, under `specs/`) creates a runner once per suite. A **test file** imports the runner and writes specs. Every spec is one chain: zero or more setups, then exactly one terminal action, resolving to a typed result you assert on with `expect()`.
 
-```
+```text
 specification.api(…)         → { api, cleanup, docker }
 specification.job(…)         → { job, cleanup }            // no docker — jobs never spawn containers
 specification.cli(…)         → { cli, cleanup, docker }
@@ -188,7 +188,7 @@ describe('usage', () => {
 });
 ```
 
-```
+```text
 ### specs/cli/help/_expected/help.txt — tokens work in text snapshots too
 my-cli v{{semver}}
 Started at {{iso8601}} in {{workdir}}
@@ -337,7 +337,7 @@ You set exactly one variable, prefixed `TEST_`: `TEST_UPDATE=1` turns on update 
 
 ### Directory layout at a glance
 
-```
+```text
 specs/
 ├── api/
 │   ├── api.specification.ts
