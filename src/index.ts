@@ -104,7 +104,7 @@ export type {
     ElementRef,
     LandmarkKind,
 } from './elements/descriptors/element.js';
-export type { ElementMatch } from './elements/ambiguity/ambiguity.js';
+export type { ElementMatch } from './elements/ambiguity/candidate.js';
 
 export {
     type CaptureScope,

@@ -4,7 +4,7 @@ import { REFUSAL_WHY } from '../../../lint/index.refusal.js';
 import { navigation, within } from '../descriptors/landmarks.js';
 import { link } from '../descriptors/roles.js';
 import { describeAmbiguity } from './ambiguity.js';
-import type { ElementMatch } from './ambiguity.js';
+import type { ElementMatch } from './candidate.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     tag: 'a',

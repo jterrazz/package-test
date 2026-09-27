@@ -1,23 +1,8 @@
 import { refusal } from '../../../lint/index.refusal.js';
 import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../descriptors/as-written.js';
 import type { ElementRef } from '../descriptors/element.js';
+import type { ElementMatch } from './candidate.js';
 import { landmarkOfTagOrRole } from './landmark-of-tag.js';
-
-/** One candidate of an ambiguous descriptor, as the refusal lists it. */
-export type ElementMatch = {
-    /** The accessible name, when it differs from the text (an `aria-label`). */
-    accessibleName?: string | undefined;
-    /** Nearest landmark ancestor (`nav`, `footer`, `main`…), when there is one. */
-    context?: string | undefined;
-    /** That landmark's accessible name. */
-    contextName?: string | undefined;
-    /** The attribute that disambiguates most — `href` for links, `name` for fields. */
-    detail?: string | undefined;
-    /** Tag name, lower-cased. */
-    tag: string;
-    /** Text content, whitespace-collapsed and truncated. */
-    text: string;
-};
 
 /** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
 function landmarkOf(match: ElementMatch): string | undefined {
@@ -95,17 +80,17 @@ export class AmbiguousElementError extends Error {
 }
 
 export function ambiguityRefusal(options: {
-    candidates: string[];
     element: ElementRef;
     fixes: string[];
+    lines: string[];
     where: string;
 }): string {
-    const { candidates, element, fixes, where } = options;
+    const { element, fixes, lines, where } = options;
     return refusal('descriptor-matches-one-element', {
         fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
         found: [
-            `Ambiguous element: ${asWritten(element)} matched ${candidates.length} elements on ${where} —`,
-            ...candidates,
+            `Ambiguous element: ${asWritten(element)} matched ${lines.length} elements on ${where} —`,
+            ...lines,
         ].join('\n'),
     });
 }
@@ -117,9 +102,9 @@ export function describeAmbiguity(options: {
 }): string {
     const { element, matches, url } = options;
     return ambiguityRefusal({
-        candidates: matches.map((match, index) => formatMatch(match, index)),
         element,
         fixes: formatFixes(element, matches),
+        lines: matches.map((match, index) => formatMatch(match, index)),
         where: url,
     });
 }

@@ -55,9 +55,9 @@ export function describeMobileAmbiguity(options: {
 }): string {
     const { element, matches } = options;
     return ambiguityRefusal({
-        candidates: matches.map((match, index) => formatMatch(match, index)),
         element,
         fixes: formatFixes(element, matches),
+        lines: matches.map((match, index) => formatMatch(match, index)),
         where: 'the screen',
     });
 }
