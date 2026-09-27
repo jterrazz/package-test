@@ -301,7 +301,6 @@ export async function component(
             ...(options.wrap === undefined
                 ? {}
                 : { setupFiles: [writeSetupFile(options.wrap, root)] }),
-            // Two Chromiums never share a slot on a 2-vCPU runner: node projects (0), website (1), component (2).
             sequence: { groupOrder: 2 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },

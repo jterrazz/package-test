@@ -21,7 +21,6 @@ export function unit(options: UnitProjectOptions = {}): TestProjectInlineConfigu
             ...(options.isolate === undefined ? {} : { isolate: options.isolate }),
             ...(options.serial === true ? { fileParallelism: false } : {}),
             name: 'unit',
-            // Node projects run first; the two browser projects follow.
             sequence: { groupOrder: 0 },
             ...(options.timeout === undefined ? {} : { testTimeout: options.timeout }),
         },

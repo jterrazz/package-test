@@ -70,7 +70,7 @@ export type FacetProjectOptions = {
     timeout?: number;
 };
 
-/** Group 0: the browser facets follow, so two Chromiums never share a slot on a two-vCPU runner. */
+/** Group order: node projects 0, website 1, component 2, mobile 3, so two Chromiums never share a slot on a two-vCPU runner and a simulator runs alone. */
 export function facetProject(
     facet: string,
     options: FacetProjectOptions,

@@ -10,7 +10,7 @@ import { mobileSessionSetup } from './session/mobile-session.js';
 export type MobileProjectOptions = FacetProjectOptions &
     ({ device: MobileDevice; root?: string } | { device?: never; root?: never });
 
-/** A simulator cannot share a machine with itself: last (group 3) and serial. A global setup holds one driver session for the run. */
+/** A simulator cannot share a machine with itself: serial. A global setup holds one driver session for the run. */
 export function mobile(options: MobileProjectOptions = {}): TestProjectInlineConfiguration {
     const { device, root, ...common } = options;
     return mergeConfig(facetProject('mobile', common), {
