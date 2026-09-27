@@ -1,4 +1,4 @@
-import type { Preset } from '@jterrazz/typescript/rules';
+import type { Preset } from '@jterrazz/typescript/config';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';

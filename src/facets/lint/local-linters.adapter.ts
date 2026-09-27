@@ -1,5 +1,5 @@
 import { presetChecks } from '@jterrazz/typescript/rules';
-import type { Preset } from '@jterrazz/typescript/rules';
+import type { Preset } from '@jterrazz/typescript/config';
 import { spawnSync } from 'node:child_process';
 import { existsSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
