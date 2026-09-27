@@ -15,6 +15,7 @@ import {
     UPSTREAM_RULES,
 } from '../../consumer/catalogue/manifest.js';
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
+import { anchorsOf } from '../../engine/catalogue/anchors.js';
 import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
 import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
@@ -220,29 +221,6 @@ const e2eSpecIds = new Set([
 ]);
 
 /** Meta-test `links-resolve` — every relative link and heading anchor of the corpus resolves, generated pages included. */
-function slugOf(heading: string): string {
-    return heading
-        .trim()
-        .toLowerCase()
-        .replaceAll(/[^\s\w-]/gu, '')
-        .replaceAll(/\s/gu, '-');
-}
-
-function anchorsOf(text: string): Set<string> {
-    const found = new Set<string>();
-    for (const line of text.split('\n')) {
-        const heading = /^#{1,6}\s+(?<title>.+?)\s*$/u.exec(line)?.groups?.title;
-        if (heading !== undefined) {
-            found.add(slugOf(heading));
-        }
-        // A catalogue row carries its rule id as an anchor.
-        for (const rowAnchor of line.matchAll(/<a id="(?<id>[^"]+)"><\/a>/gu)) {
-            found.add(rowAnchor.groups?.id ?? '');
-        }
-    }
-    return found;
-}
-
 type Coordinate = { fragment: string | undefined; from: string; target: string };
 
 /** An absolute url is somebody else's. */

@@ -24,4 +24,24 @@ describe('index.refusal', () => {
             'docs/19-linting.md#disk-named-by-relative-path-at-runtime',
         );
     });
+
+    test('refusal — a refusal read in its chapter — states its four parts in their order, the read the heading that explains it', () => {
+        // Given - a refusal no catalogue row owns, read in the chapter of its verb
+        const message = refusal({
+            fix: "take one first: using _ = clock.at('2026-03-04T09:30:00Z')",
+            found: 'clock.advance(), and no clock is pinned',
+            read: 'docs/05-module-tests.md#time',
+            why: 'A clock moves only once it is pinned.',
+        });
+
+        // Then - four lines, found first and read last
+        expect(message).toBe(
+            [
+                'found: clock.advance(), and no clock is pinned',
+                'why: A clock moves only once it is pinned.',
+                "fix: take one first: using _ = clock.at('2026-03-04T09:30:00Z')",
+                'read: docs/05-module-tests.md#time',
+            ].join('\n'),
+        );
+    });
 });
