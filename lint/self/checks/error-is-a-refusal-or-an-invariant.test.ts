@@ -64,8 +64,6 @@ describe('checkErrorIsARefusalOrAnInvariant', () => {
         // Given - the package's own tree, and one with refusals (a lesson passed by name, a conditional lesson), an invariant and stack reads, beside one with hand-written messages (a built-in, a subclass of a subclass, a bare call) and broken reads (a lesson with none, a conditional read falling back on a variable)
         const declared = treeOf({
             'docs/05-module-tests.md': CHAPTER,
-            'src/kernel/refusals/invariant.ts':
-                'export const invariant = (broken: string): Error => new Error(broken);\n',
             'src/world/clock/clock.ts': REFUSED,
         });
         const drifted = treeOf({

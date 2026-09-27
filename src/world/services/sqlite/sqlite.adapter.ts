@@ -19,8 +19,8 @@ import { join, resolve } from 'node:path';
 
 import { SQLITE_TEMPLATE_DIR } from '../../../../lint/engine/project/artifacts.js';
 import { discoverRoot } from '../../../../lint/engine/project/resolve.js';
+import { invariant } from '../../../../lint/index.refusal.js';
 import { pause } from '../../../kernel/pause.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';

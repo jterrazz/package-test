@@ -3,9 +3,8 @@ import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
-import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../lint/index.refusal.js';
 import { pause } from '../../../kernel/pause.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 /** Grace period between SIGTERM and the SIGKILL escalation. */

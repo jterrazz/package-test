@@ -2,10 +2,9 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
-import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../lint/index.refusal.js';
 import { renderText, writeInPlace } from '../../../expectations/in-place/in-place.js';
 import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 
 /** `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root. */
 

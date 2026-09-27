@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { lessonParts } from './engine/catalogue/lesson-parts.js';
-import { refusal, REFUSAL_WHY } from './index.refusal.js';
+import { invariant, refusal, REFUSAL_WHY } from './index.refusal.js';
 
 describe('index.refusal', () => {
     test('refusal — a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
@@ -49,11 +49,23 @@ describe('index.refusal', () => {
         // Given - an untyped caller naming a row and nothing else
         const row = ['disk-named-by-relative-path-at-runtime'];
 
-        // Then - refused, naming the row it was handed
+        // Then - a broken invariant of the framework, naming the row it was handed
         expect(() => {
             Reflect.apply(refusal, undefined, row);
         }).toThrow(
-            "refusal('disk-named-by-relative-path-at-runtime') was handed no found and no fix for its case",
+            new Error(
+                "@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: refusal('disk-named-by-relative-path-at-runtime') was handed no found and no fix for its case",
+            ),
+        );
+    });
+
+    test('invariant — a broken invariant — is an error that says the bug is the framework’s, then what broke', () => {
+        // Given - an invariant the framework holds for itself
+        const error = invariant('the run containers are served on no port');
+
+        // Then - the message clears the test, and names the invariant
+        expect(error.message).toBe(
+            '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: the run containers are served on no port',
         );
     });
 });

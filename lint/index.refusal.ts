@@ -11,6 +11,12 @@ export type ChapterAnchor = `docs/${string}.md#${string}`;
 
 export type ChapterLesson = Lesson & { read: ChapterAnchor };
 
+export function invariant(broken: string): Error {
+    return new Error(
+        `@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: ${broken}`,
+    );
+}
+
 export function refusal(row: RefusalRow, teaching: { fix: string; found: string }): string;
 export function refusal(lesson: ChapterLesson): string;
 export function refusal(
@@ -21,9 +27,7 @@ export function refusal(
         return lessonBlock(rowOrLesson);
     }
     if (teaching === undefined) {
-        throw new TypeError(
-            `refusal('${rowOrLesson}') was handed no found and no fix for its case`,
-        );
+        throw invariant(`refusal('${rowOrLesson}') was handed no found and no fix for its case`);
     }
     return lessonBlock({
         fix: teaching.fix,

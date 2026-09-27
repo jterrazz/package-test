@@ -1,6 +1,6 @@
 import { hostname } from 'node:os';
 
-import { invariant } from '../../../kernel/refusals/invariant.js';
+import { invariant } from '../../../../lint/index.refusal.js';
 import { loadPeer } from '../peer.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 

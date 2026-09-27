@@ -3,7 +3,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { text } from 'node:stream/consumers';
 
-import { invariant } from '../../../kernel/refusals/invariant.js';
+import { invariant } from '../../../../lint/index.refusal.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
 /** Two requests alike (image, port, environment, options) share one container; the run stops them all at teardown. */

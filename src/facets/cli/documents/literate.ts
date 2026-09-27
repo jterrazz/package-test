@@ -13,7 +13,7 @@ import type {
     SpecFileAssertion,
     SpecRun,
 } from '../../../../lint/engine/project/spec-document.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../lint/index.refusal.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
@@ -24,7 +24,6 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fs-fixtures.adapter.js';

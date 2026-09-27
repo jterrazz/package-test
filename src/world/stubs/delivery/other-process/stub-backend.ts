@@ -1,10 +1,9 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
-import { refusal } from '../../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../../lint/index.refusal.js';
 import type { ChainConfig } from '../../../../kernel/chain/config.js';
 import { pause } from '../../../../kernel/pause.js';
-import { invariant } from '../../../../kernel/refusals/invariant.js';
 import { isStreamBody } from '../../exchange.js';
 import type { MatchableRequest } from '../../exchange.js';
 import { StubQueue } from '../../matching/stub-queue.js';

@@ -1,3 +1,4 @@
+import { invariant } from '../../../../lint/index.refusal.js';
 import {
     BROWSER_DESCRIPTORS,
     BROWSER_STATES,
@@ -9,7 +10,6 @@ import {
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';

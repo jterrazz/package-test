@@ -1,6 +1,5 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../lint/index.refusal.js';
 import type { MatrixRow } from '../../kernel/chain/capability.js';
-import { invariant } from '../../kernel/refusals/invariant.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
 import { BaseResult } from '../result.js';
 import type { ResultConfig } from '../result.js';

@@ -31,8 +31,6 @@ const BUILT_IN_ERRORS: ReadonlySet<string> = new Set([
     'URIError',
 ]);
 
-const INVARIANT_MODULE = 'src/kernel/refusals/invariant.ts';
-
 const CHAPTER_ANCHOR = /^(?<chapter>docs\/[^#]+\.md)#(?<anchor>.+)$/u;
 
 function isRefusalCall(node: AstNode | undefined): boolean {
@@ -194,7 +192,7 @@ export function checkErrorIsARefusalOrAnInvariant(root: string): Finding<SelfPas
     return modules
         .flatMap(({ path, program, text }) =>
             [
-                ...(path === INVARIANT_MODULE ? [] : constructions(program, classes)),
+                ...constructions(program, classes),
                 ...readsOf(program),
                 ...anchorsNamed(program, root),
             ].map(({ at, teaching }) =>
