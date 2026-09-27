@@ -2,13 +2,13 @@ import type { ArchitectureRule, NamesRule, Preset } from '@jterrazz/typescript/c
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 import {
     declaredSubpaths,
-    firstSentence,
     GROUND_FOLDERS,
     readAt,
     RESERVED_FOLDERS,
     rowNamed,
     SETUP_FOLDER,
     SHARED_FOLDER,
+    whyOf,
 } from '@jterrazz/typescript/rules';
 
 import type { TestSettings } from '../../engine/project/settings.js';
@@ -19,10 +19,10 @@ import { vitestOnTests } from './vitest.js';
 
 type Lesson = Pick<ArchitectureRule, 'read' | 'why'>;
 
-function lessonOf(name: string): Lesson {
+function taughtBy(name: string): Lesson {
     const row = rowNamed(consumerRows, name);
 
-    return { read: readAt(row, CATALOGUE_CHAPTER), why: firstSentence(row.sentence) };
+    return { read: readAt(row, CATALOGUE_CHAPTER), why: whyOf(row) };
 }
 
 const escaped = (text: string): string => text.replaceAll(/[.*+?^${}()|[\]\\]/gu, String.raw`\$&`);
@@ -104,7 +104,7 @@ const SEAMS: readonly Seam[] = [
     },
 ];
 
-const secondRuntime = lessonOf('no-second-test-runtime');
+const secondRuntime = taughtBy('no-second-test-runtime');
 
 function publishedFix(): string {
     const published = declaredSubpaths('@jterrazz/test', import.meta.dirname);
@@ -114,14 +114,14 @@ function publishedFix(): string {
 
 const LAYERS: ArchitectureRule[] = [
     {
-        ...lessonOf('no-test-to-test-import'),
+        ...taughtBy('no-test-to-test-import'),
         fix: 'under `specs/`, move what both read into the `_setup/` of the lowest folder they share; under `src/`, into a sibling `<file>.fixtures.ts` for typed input data',
         from: { path: TEST_FILE },
         name: 'no-test-to-test-import',
         to: { path: String.raw`\.test\.[cm]?[jt]sx?$` },
     },
     {
-        ...lessonOf('fixtures-imported-by-tests-only'),
+        ...taughtBy('fixtures-imported-by-tests-only'),
         fix: 'import it from a `*.test.ts` only, or move what the file needs into a module of its own',
         from: { pathNot: TEST_FILE },
         name: 'fixtures-imported-by-tests-only',
@@ -136,7 +136,7 @@ const LAYERS: ArchitectureRule[] = [
         why: secondRuntime.why,
     })),
     {
-        ...lessonOf('no-unpublished-subpath'),
+        ...taughtBy('no-unpublished-subpath'),
         fix: publishedFix(),
         from: {},
         name: 'no-unpublished-subpath',
@@ -182,7 +182,7 @@ const CLOSED_LIST = `regex:${either(['[^_].*', ...RESERVED_FOLDERS.map((name) =>
 
 const NAMES: NamesRule[] = [
     {
-        ...lessonOf('specs-root-holds-facets-and-shared'),
+        ...taughtBy('specs-root-holds-facets-and-shared'),
         fix: `move a file where it belongs — code into \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\` or the \`${SETUP_FOLDER}/\` of the one facet that reads it, data into the ground folder of its role — and a \`${SETUP_FOLDER}/\` to \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\``,
         ls: {
             '**/specs': specsRootFiles(),
@@ -192,7 +192,7 @@ const NAMES: NamesRule[] = [
         name: 'specs-root-holds-facets-and-shared',
     },
     {
-        ...lessonOf('underscore-name-in-closed-list'),
+        ...taughtBy('underscore-name-in-closed-list'),
         fix: `rename it to the reserved folder that says what it holds — ${RESERVED_FOLDERS.map((name) => `\`${name}/\``).join(', ')} — or drop the \`_\` if it is a subject`,
         ignore: [
             `**/${SETUP_FOLDER}`,
@@ -203,7 +203,7 @@ const NAMES: NamesRule[] = [
         name: 'underscore-name-in-closed-list',
     },
     {
-        ...lessonOf('spec-file-in-a-specs-tree'),
+        ...taughtBy('spec-file-in-a-specs-tree'),
         fix: 'move it under `specs/<facet>/`, or rename it `.test.ts` beside the module it covers',
         ignore: ['specs', '**/specs'],
         ls: { '**': { '.*.spec.ts': 'exists:0', '.spec.ts': 'exists:0' } },
