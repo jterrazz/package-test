@@ -39,6 +39,30 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
             ],
             filename: TEST_FILE,
         },
+        {
+            code: `test('mints', () => {
+                using _ = clock.at('2026-03-04T09:30:00Z');
+                const id = randomUUID();
+                const roll = Math.random();
+                const started = performance.now();
+                expect(make(id, roll, started)).toBe(true);
+            });`,
+            errors: [
+                { line: 3, messageId: 'ambientValue' },
+                { line: 4, messageId: 'ambientValue' },
+                { line: 5, messageId: 'ambientValue' },
+            ],
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('runs', async () => {
+                using _ = clock.run();
+                const started = new Date();
+                expect(stamp(started)).toBe(true);
+            });`,
+            errors: [{ line: 3, messageId: 'ambientValue' }],
+            filename: TEST_FILE,
+        },
     ],
     valid: [
         {

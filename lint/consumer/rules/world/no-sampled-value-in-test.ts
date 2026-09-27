@@ -38,6 +38,10 @@ const PINNING_CALLS = new Set(['clock.at', 'clock.run']);
 
 type Span = readonly [number, number];
 
+function isDateReading(node: AstNode): boolean {
+    return node.type === 'NewExpression' || memberPath(child(node, 'callee')) === 'Date.now';
+}
+
 function isPinning(statement: AstNode): boolean {
     return (
         statement.type === 'VariableDeclaration' &&
@@ -49,7 +53,8 @@ function isPinning(statement: AstNode): boolean {
 
             return (
                 call?.type === 'CallExpression' &&
-                PINNING_CALLS.has(memberPath(child(call, 'callee')) ?? '')
+                PINNING_CALLS.has(memberPath(child(call, 'callee')) ?? '') &&
+                childList(call, 'arguments').length > 0
             );
         })
     );
@@ -69,7 +74,7 @@ function pinnedSpans(body: AstNode): Span[] {
     return spans;
 }
 
-/** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal — a per-run directory name is the one sampled value the framework cannot mint — and after a `using` that pins the clock in the same block. */
+/** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal — a per-run directory name is the one sampled value the framework cannot mint — and on a `Date` reading after a `using` that pins the clock to an instant in the same block. */
 export const noSampledValueInTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -117,7 +122,7 @@ export const noSampledValueInTest: LintRule = {
                     if (
                         isSampledValue(inner) &&
                         !covered.has(nodeStart(inner)) &&
-                        !isPinned(nodeStart(inner))
+                        !(isDateReading(inner) && isPinned(nodeStart(inner)))
                     ) {
                         context.report({ messageId: 'ambientValue', node: inner });
                     }
