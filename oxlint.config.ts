@@ -1,19 +1,14 @@
-import { compose, defineConfig, node } from '@jterrazz/typescript/oxlint';
+import { compose, defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
 import type { OxlintConfig } from '@jterrazz/typescript/oxlint';
 
 // Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: `npm run build` precedes lint.
-import { testing } from './dist/oxlint.js';
 import { selfPluginRules } from './dist/self-oxlint.js';
+import settings from './jterrazz.config.ts';
 
-// This repository is the package the fragment names, so it lints itself from the bundle it just built, plus the self plugin.
-const selfTesting = {
-    ...testing,
-    jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js'],
-    rules: { ...testing.rules, ...selfPluginRules },
-};
-
+// `@jterrazz/test/oxlint`, which `test()` names, resolves to this package's own build; the self plugin is this repository's addition.
 const config: OxlintConfig = defineConfig(
-    compose(node, selfTesting, {
+    compose(fromPresets(settings), {
+        jsPlugins: ['./dist/self-oxlint.js'],
         overrides: [
             {
                 // These module tests unit-test the constructors, which is creating a runner outside a specification.
@@ -46,6 +41,7 @@ const config: OxlintConfig = defineConfig(
             },
         ],
         rules: {
+            ...selfPluginRules,
             // reason: under `verbatimModuleSyntax` an inline type specifier still emits `import {} from 'm'`, a runtime edge, so a type-only cycle becomes a load-order crash; `import type` is erased whole.
             'import/consistent-type-specifier-style': ['error', 'prefer-top-level'],
         },
