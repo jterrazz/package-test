@@ -9,6 +9,8 @@ import {
     isExpectCall,
     isSampledValue,
     isTestCallee,
+    memberPath,
+    nodeEnd,
     nodeStart,
     walk,
 } from '../../../engine/project/ast.js';
@@ -32,7 +34,42 @@ function sampledOffsets(node: AstNode | undefined, into: Set<number>): void {
     });
 }
 
-/** Silent where `no-sampled-value-in-expectation` already refuses, and on a name built in a template literal: a per-run directory name is the one sampled value the framework cannot mint. */
+const PINNING_CALLS = new Set(['clock.at', 'clock.run']);
+
+type Span = readonly [number, number];
+
+function isPinning(statement: AstNode): boolean {
+    return (
+        statement.type === 'VariableDeclaration' &&
+        typeof statement.kind === 'string' &&
+        statement.kind.endsWith('using') &&
+        childList(statement, 'declarations').some((declarator) => {
+            const init = child(declarator, 'init');
+            const call = init?.type === 'AwaitExpression' ? child(init, 'argument') : init;
+
+            return (
+                call?.type === 'CallExpression' &&
+                PINNING_CALLS.has(memberPath(child(call, 'callee')) ?? '')
+            );
+        })
+    );
+}
+
+function pinnedSpans(body: AstNode): Span[] {
+    const spans: Span[] = [];
+    walk(body, (inner) => {
+        if (inner.type !== 'BlockStatement') {
+            return;
+        }
+        for (const statement of childList(inner, 'body').filter((one) => isPinning(one))) {
+            spans.push([nodeEnd(statement), nodeEnd(inner)]);
+        }
+    });
+
+    return spans;
+}
+
+/** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal — a per-run directory name is the one sampled value the framework cannot mint — and after a `using` that pins the clock in the same block. */
 export const noSampledValueInTest: LintRule = {
     createOnce(context: Context): Visitor {
         return {
@@ -73,8 +110,15 @@ export const noSampledValueInTest: LintRule = {
                         }
                     }
                 });
+                const pinned = pinnedSpans(callback);
+                const isPinned = (at: number): boolean =>
+                    pinned.some(([start, end]) => at >= start && at < end);
                 walk(callback, (inner) => {
-                    if (isSampledValue(inner) && !covered.has(nodeStart(inner))) {
+                    if (
+                        isSampledValue(inner) &&
+                        !covered.has(nodeStart(inner)) &&
+                        !isPinned(nodeStart(inner))
+                    ) {
                         context.report({ messageId: 'ambientValue', node: inner });
                     }
                 });

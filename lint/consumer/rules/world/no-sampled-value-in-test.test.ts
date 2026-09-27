@@ -23,8 +23,41 @@ ruleTester().run('no-sampled-value-in-test', asOxlintRule(noSampledValueInTest),
             errors: [{ messageId: 'ambientValue' }],
             filename: TEST_FILE,
         },
+        {
+            code: `test('stamps', () => {
+                const before = Date.now();
+                {
+                    using _ = clock.at('2026-03-04T09:30:00Z');
+                }
+                const after = new Date();
+                using _ = clock.at('2026-03-04T09:30:00Z');
+                expect(stamp(before, after)).toBe(true);
+            });`,
+            errors: [
+                { line: 2, messageId: 'ambientValue' },
+                { line: 6, messageId: 'ambientValue' },
+            ],
+            filename: TEST_FILE,
+        },
     ],
     valid: [
+        {
+            code: `test('pins', async () => {
+                using _ = clock.at('2026-03-04T09:30:00Z');
+                const now = Date.now();
+                expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
+                expect(stamp(now)).toBe(true);
+            });`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('runs', async () => {
+                using _ = clock.run('2026-03-04T09:30:00Z');
+                await clock.advance(5000);
+                expect(stamp(new Date())).toBe(true);
+            });`,
+            filename: TEST_FILE,
+        },
         // Silent where `no-sampled-value-in-expectation` already refuses: one fault, one diagnostic.
         {
             code: `test('stamps', () => {

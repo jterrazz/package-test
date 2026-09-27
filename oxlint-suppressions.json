@@ -820,11 +820,6 @@
             "count": 1
         }
     },
-    "specs/component/clock/clock-stamp.test.tsx": {
-        "jterrazz/no-sampled-value-in-test": {
-            "count": 1
-        }
-    },
     "specs/component/fill/filters.tsx": {
         "max-lines-per-function": {
             "count": 1
@@ -1316,7 +1311,7 @@
     },
     "src/world/clock/clock.test.ts": {
         "jterrazz/no-sampled-value-in-test": {
-            "count": 5
+            "count": 1
         }
     },
     "src/world/services/containers/testcontainers.adapter.ts": {

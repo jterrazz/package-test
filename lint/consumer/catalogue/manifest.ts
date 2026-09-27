@@ -346,7 +346,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A sampled value anywhere in a test callback is an error — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses and on a name built in a template literal. A `*.specification.ts(x)` is out of reach.',
+            'A sampled value anywhere in a test callback is an error — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal, and after a `using _ = clock.at(…)` or `clock.run(…)` in the same block, where the reading is the pinned instant. A `*.specification.ts(x)` is out of reach.',
         facet: 'model',
         family: 'world',
         fix: 'Reach for `clock.at()`, `clock.advance()`, or a token in the golden.',
