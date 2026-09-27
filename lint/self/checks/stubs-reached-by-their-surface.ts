@@ -1,3 +1,6 @@
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
+
 import type { Finding } from '../../engine/checker/finding.js';
 import {
     byPosition,
@@ -20,7 +23,9 @@ const SURFACE = [
 
 const CHANNEL_PICK = /^delivery\/[a-z-]+\/intercept\.ts$/u;
 
-const DELIVERY_READERS: Readonly<Record<string, readonly string[]>> = {
+type DeliveryReaders = Readonly<Record<string, readonly string[]>>;
+
+const DELIVERY_READERS: DeliveryReaders = {
     'delivery/browser-page/msw-worker.adapter.ts': ['src/facets/component/component.facet.ts'],
     'delivery/browser-page/worker-script.ts': ['src/facets/component/component.project.ts'],
     'delivery/other-process/stub-backend.adapter.ts': [
@@ -38,35 +43,70 @@ const DELIVERY_READERS: Readonly<Record<string, readonly string[]>> = {
     ],
 };
 
-function reachable(from: string, inside: string): boolean {
+const LOCK = 'lint/self/checks/stubs-reached-by-their-surface.ts';
+
+type ProductionReference = ReturnType<typeof productionReferences>[number];
+
+function reachable(from: string, inside: string, readers: DeliveryReaders): boolean {
     return (
         SURFACE.some((pattern) => pattern.test(inside)) ||
         (ENTRIES.has(from) && CHANNEL_PICK.test(inside)) ||
-        (DELIVERY_READERS[inside] ?? []).includes(from)
+        (readers[inside] ?? []).includes(from)
     );
 }
 
-export function checkStubsReachedByTheirSurface(root: string): Finding<SelfPassId>[] {
-    return productionReferences(root)
-        .filter(
-            ({ from, reference }) => reference.specifier.startsWith('.') && !from.startsWith(STUBS),
-        )
-        .flatMap(({ from, reference }) => {
-            const target = targetOf(from, reference.specifier);
-            if (!target.startsWith(STUBS) || reachable(from, target.slice(STUBS.length))) {
-                return [];
-            }
-            return [
-                finding(
-                    'stubs-reached-by-their-surface',
-                    from,
-                    {
-                        fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\`, \`intercept/intercept.port.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`lint/self/checks/stubs-reached-by-their-surface.ts\`)`,
-                        found: `\`${target}\` is reached from outside the stubs, below their surface`,
-                    },
-                    reference,
-                ),
-            ];
-        })
-        .toSorted(byPosition);
+function reachesBelowTheSurface(
+    references: ProductionReference[],
+    readers: DeliveryReaders,
+): Finding<SelfPassId>[] {
+    return references.flatMap(({ from, reference }) => {
+        const target = targetOf(from, reference.specifier);
+        if (!target.startsWith(STUBS) || reachable(from, target.slice(STUBS.length), readers)) {
+            return [];
+        }
+        return [
+            finding(
+                'stubs-reached-by-their-surface',
+                from,
+                {
+                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\`, \`intercept/intercept.port.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
+                    found: `\`${target}\` is reached from outside the stubs, below their surface`,
+                },
+                reference,
+            ),
+        ];
+    });
+}
+
+function edgesNobodyTakes(
+    references: ProductionReference[],
+    readers: DeliveryReaders,
+): Finding<SelfPassId>[] {
+    const taken = new Set(
+        references.map(({ from, reference }) => `${from} → ${targetOf(from, reference.specifier)}`),
+    );
+    return Object.entries(readers).flatMap(([inside, declared]) =>
+        declared
+            .filter((reader) => !taken.has(`${reader} → ${STUBS}${inside}`))
+            .map((reader) =>
+                finding('stubs-reached-by-their-surface', LOCK, {
+                    fix: `drop \`${reader}\` from the \`${inside}\` row of \`DELIVERY_READERS\`, or restore the import it declares`,
+                    found: `\`DELIVERY_READERS\` lets \`${reader}\` reach \`${inside}\`, an edge it no longer takes`,
+                }),
+            ),
+    );
+}
+
+export function checkStubsReachedByTheirSurface(
+    root: string,
+    readers: DeliveryReaders = DELIVERY_READERS,
+): Finding<SelfPassId>[] {
+    const references = productionReferences(root).filter(
+        ({ from, reference }) => reference.specifier.startsWith('.') && !from.startsWith(STUBS),
+    );
+    const holdsTheTable = existsSync(resolve(root, LOCK));
+    return [
+        ...reachesBelowTheSurface(references, readers),
+        ...(holdsTheTable ? edgesNobodyTakes(references, readers) : []),
+    ].toSorted(byPosition);
 }
