@@ -75,11 +75,11 @@ app's own `vite.config.ts`.
   timed `make test-mobile` on a warm simulator, then probe before attaching.
 - **The cli facet cannot install a package into its fixture.** A spec whose subject
   resolves an installed package stays a raw chain: `@jterrazz/typescript`'s publish-guard
-  spec links `node_modules/@jterrazz/test` into its fixture by hand, one of the 22
-  `facet-test-uses-its-runner` entries its ratchet holds. A setup verb that links
-  or installs a package into the fixture (`.link(name, path)`) pays it off.
-- **190 `typescript/no-unsafe-type-assertion` held by the ratchet.** 68 are `as AstNode` or
-  `as AstNode[]` in the consumer rules, a node narrowed by hand: a typed accessor in
-  `lint/engine/project/ast.ts` per shape the rules narrow to (a call's callee, a
-  declaration's declarators) retires them. The rest are `JSON.parse` and computed-import
-  results, each to be narrowed by a named shape.
+  spec links `node_modules/@jterrazz/test` into its fixture by hand, one of the
+  `facet-test-uses-its-runner` entries its baseline holds. A setup verb that links or
+  installs a package into the fixture (`.link(name, path)`) pays it off.
+- **`typescript/no-unsafe-type-assertion` held by the ratchet** (`oxlint-suppressions.json`
+  counts them). The largest group is `as AstNode` or `as AstNode[]` in the consumer rules,
+  a node narrowed by hand: a typed accessor in `lint/engine/project/ast.ts` per shape the
+  rules narrow to (a call's callee, a declaration's declarators) retires them. The rest are
+  `JSON.parse` and computed-import results, each to be narrowed by a named shape.
