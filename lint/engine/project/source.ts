@@ -56,10 +56,10 @@ export function byPosition(one: Finding, other: Finding): number {
     );
 }
 
+export const TEST_SUFFIX = /\.(?:test|test-d|fixtures)\.tsx?$/u;
+
 export function isProduction(path: string): boolean {
-    return (
-        /\.tsx?$/u.test(path) && !/\.(?:test|test-d|fixtures)\.tsx?$/u.test(path) && !inGround(path)
-    );
+    return /\.tsx?$/u.test(path) && !TEST_SUFFIX.test(path) && !inGround(path);
 }
 
 type Reference = { column: number; line: number; specifier: string };

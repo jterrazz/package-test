@@ -1,12 +1,14 @@
 import type { ArchitectureRule } from '@jterrazz/typescript/config';
 
+import { GROUND_DIRS } from '../../engine/project/ground.js';
+import { TEST_SUFFIX } from '../../engine/project/source.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';
 
 const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 
-const TEST_MATERIAL = String.raw`\.(test|test-d|fixtures)\.tsx?$|/_(fixtures|expected|seeds|requests)/`;
+const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_DIRS.join('|')})/`;
 
 const PACKAGE_DEPENDENCY: NonNullable<ArchitectureRule['to']['dependencyTypes']> = [
     'npm',
