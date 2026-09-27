@@ -1,7 +1,10 @@
 # ADR-009: A node builtin is not a library, and each slice spawns only its own subject
 
-**Status:** Proposed
+**Status:** Accepted
 **Date:** 2026-09-25
+
+The owner delegated the decision ("go tout faire") on 2026-09-27; this record
+states the decision taken within that delegation.
 
 ## Context
 
@@ -49,8 +52,12 @@ forbids.
 
 ## Consequences
 
-- No lock holds the builtin rule; a second spawning site inside one area is
-  caught by review, not by I11.
+- The layer map holds the builtin rule: `architecture/process-spawned-by-its-program-owner`
+  lets `node:child_process` into `src/` from the four spawning sites alone —
+  `expectations/command/docker-cli.ts`, `facets/cli/process/exec.adapter.ts`,
+  `facets/mobile/server/simulator.ts` and `world/services/process/serve.ts` —
+  so a second spawning site fails the Architecture pass. `lint/`'s own tools
+  and probes are not the product's slices, and stay outside it.
 - A future port for spawning is not ruled out: when two slices spawn the SAME
   program with the same lifecycle, that program's owner exports it and the
   other imports it, as any shared concept.

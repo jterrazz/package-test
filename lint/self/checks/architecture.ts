@@ -9,6 +9,13 @@ import { LINT_DIRECTION } from './lint-direction.js';
 
 const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 
+const SPAWNING_SITES = [
+    'expectations/command/docker-cli.ts',
+    'facets/cli/process/exec.adapter.ts',
+    'facets/mobile/server/simulator.ts',
+    'world/services/process/serve.ts',
+];
+
 const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_DIRS.join('|')})/`;
 
 const LOCAL_DEPENDENCY: NonNullable<ArchitectureRule['to']['dependencyTypes']> = [
@@ -269,6 +276,14 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
     ...ownerRules(),
     ...facetRules(),
     ...directionRules(),
+    {
+        fix: "spawn it from the concept folder that owns the program, or, inside `world/`, through `world/services/process/serve.ts`'s `runToCompletion`",
+        from: { path: '^src/', pathNot: either([TEST_MATERIAL, ...SPAWNING_SITES.map(targetOf)]) },
+        name: 'process-spawned-by-its-program-owner',
+        read: READ_LAYERS,
+        to: { dependencyTypes: ['core'], path: '^(node:)?child_process$' },
+        why: 'each program the framework runs has one module that spawns it, so its lifecycle, its options and its errors have one owner (ADR-009)',
+    },
     {
         fix: 'reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers, as a module test',
         from: { path: '(^|/)specs/' },
