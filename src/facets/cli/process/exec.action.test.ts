@@ -46,7 +46,16 @@ describe('exec', () => {
         const chain = chainOver(new RecordingCommand());
 
         // Then - an empty command sequence is a usage error, and `.exec()` answers it as a rejection
-        await expect(chain.exec([])).rejects.toThrow('found: .exec([]), a sequence of no command');
+        await expect(chain.exec([])).rejects.toThrow(
+            new Error(
+                [
+                    'found: .exec([]), a sequence of no command',
+                    'why: A sequence runs its commands in order, and runs at least one.',
+                    "fix: name at least one command: .exec(['build', 'test'])",
+                    'read: docs/12-cli.md#sequences-array-form',
+                ].join('\n'),
+            ),
+        );
     });
 
     test('.exec() — the arguments a command runs with — refuses a sequence with waitFor/timeout', async () => {
@@ -55,7 +64,14 @@ describe('exec', () => {
 
         // Then - the combination is refused
         await expect(chain.exec(['a', 'b'], { waitFor: 'x' })).rejects.toThrow(
-            'found: .exec([…], { waitFor/timeout }), options on a command sequence',
+            new Error(
+                [
+                    'found: .exec([…], { waitFor/timeout }), options on a command sequence',
+                    'why: `waitFor` and `timeout` wait on one long-running process.',
+                    'fix: wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
+                    'read: docs/12-cli.md#long-running-processes-waitfor--timeout',
+                ].join('\n'),
+            ),
         );
     });
 

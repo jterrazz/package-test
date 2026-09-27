@@ -71,7 +71,9 @@ describe('redis', () => {
             .healthcheck()
             .then(() => null)
             .catch((error: unknown) => (error instanceof Error ? error : null));
-        expect(failure?.message).toMatch(/^found: redis\(\) did not answer its healthcheck: \S/u);
+        expect(failure?.message).toMatch(
+            /^found: redis\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/17-services\.md#service-factories$/u,
+        );
         expect(failure?.cause).toBeDefined();
     });
 

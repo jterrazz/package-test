@@ -69,6 +69,15 @@ describe('process.adapter', () => {
         const handle = processService({ command: SERVER, ready: READY });
 
         // Then - the refusal says where the url comes from
-        expect(() => handle.url).toThrow('found: process().url read before the process was ready');
+        expect(() => handle.url).toThrow(
+            new Error(
+                [
+                    'found: process().url read before the process was ready',
+                    'why: A process’s URL is known once it is ready.',
+                    'fix: read it from the started services record — `env: (services) => …` or `server: (services) => …` — never at declaration time',
+                    'read: docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                ].join('\n'),
+            ),
+        );
     });
 });

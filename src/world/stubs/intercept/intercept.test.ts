@@ -113,7 +113,16 @@ describe('interceptThrough', () => {
         };
 
         // Then - the message says what an origin is
-        await expect(scope()).rejects.toThrow('`origin` is `console.test`, not an absolute URL');
+        await expect(scope()).rejects.toThrow(
+            new Error(
+                [
+                    'found: intercept(): `origin` is `console.test`, not an absolute URL',
+                    'why: `origin` states where a relative request resolves, so it is an absolute URL.',
+                    "fix: state an absolute URL: intercept(stubs, { origin: 'http://console.test' })",
+                    'read: docs/16-stubs.md#intercept--the-same-double-with-no-chain',
+                ].join('\n'),
+            ),
+        );
     });
 
     test('intercept — the network double in module scope — raises the undeclared call when the scope ends', async () => {

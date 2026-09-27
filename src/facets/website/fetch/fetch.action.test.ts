@@ -79,7 +79,14 @@ describe('rawFetch', () => {
 
         // Then - refused for opening no page, and nothing was pinned on the way
         await expect(fetched).rejects.toThrow(
-            'found: .clock() on a chain ending in .fetch(), which opens no page',
+            new Error(
+                [
+                    'found: .clock() on a chain ending in .fetch(), which opens no page',
+                    'why: .clock() pins the clock of a page, and .fetch() is one raw HTTP exchange.',
+                    'fix: assert the moment with a token ({{iso8601}}) in the golden, or visit the page',
+                    'read: docs/08-website.md#setup-clock',
+                ].join('\n'),
+            ),
         );
         expect(pinned).toStrictEqual([]);
     });
