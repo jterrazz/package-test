@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { located, ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { checkStubsReachedByTheirSurface } from './stubs-reached-by-their-surface.js';
 
-describe('stubs-reached-by-their-surface', () => {
+describe('checkStubsReachedByTheirSurface', () => {
     test('stubs-reached-by-their-surface — the stubs are entered by what they publish, a delivery by the facet that wires it', () => {
         // Given - the package's own tree, and one where a facet reaches the matching, another facet a delivery it does not wire, a third the intercept's input normaliser, and the kernel an entry's channel pick
         const reaching = treeOf({
