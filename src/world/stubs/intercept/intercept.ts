@@ -3,7 +3,7 @@ import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
 
 export type StubRegistration = {
-    /** Remove the chain's handlers from the shared msw server. */
+    /** Drop the handlers this registration installed. */
     cleanup: () => void;
     /** The strict-stub violation observed during the chain, if any. */
     violation: () => Error | null;
