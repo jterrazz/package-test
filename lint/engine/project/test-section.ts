@@ -1,9 +1,7 @@
 import type { TestSettings } from './settings.js';
 
-export type ReadTestSettings = Required<
-    Pick<TestSettings, 'collections' | 'methodless' | 'production'>
-> &
-    Pick<TestSettings, 'routes'>;
+export type ReadTestSettings = Pick<TestSettings, 'routes'> &
+    Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>>;
 
 export const TEST_DEFAULTS: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.freeze({
     collections: [],
