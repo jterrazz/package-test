@@ -19,6 +19,7 @@ const composition = {
         plugins: { group: 'Constructor option', name: 'plugins', probe: 'plugins:' },
         presets: { group: 'Constructor option', name: 'presets', probe: 'presets:' },
         root: { group: 'Constructor option', name: 'root', probe: 'root:' },
+        settings: { group: 'Constructor option', name: 'settings', probe: 'settings:' },
     } satisfies Record<keyof LintSpecificationOptions, MatrixRow>,
 } as const;
 

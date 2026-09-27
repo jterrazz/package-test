@@ -17,8 +17,9 @@ export type Linters = {
     config: LintConfig;
     oxlint: null | string;
     plugins: readonly string[];
-    presets: readonly Preset[];
+    presets: readonly Preset[] | undefined;
     root: string;
+    settings: Readonly<Record<string, unknown>>;
 };
 
 const environment = (): NodeJS.ProcessEnv => ({ ...process.env, INIT_CWD: undefined });
@@ -94,10 +95,13 @@ function linted(tree: string, linters: Linters, run: LintRun, fix: boolean): Dia
 }
 
 async function presetDiagnostics(tree: string, linters: Linters): Promise<Diagnostic[]> {
-    if (linters.presets.length === 0) {
+    if (linters.presets === undefined) {
         return [];
     }
-    const { findings, problems } = await presetChecks(tree, linters.presets);
+    const { findings, problems } = await presetChecks(tree, {
+        ...linters.settings,
+        presets: linters.presets,
+    });
     if (problems.length > 0) {
         throw unreported('the presets’ checks', problems.join('\n'));
     }

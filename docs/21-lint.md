@@ -43,15 +43,16 @@ afterAll(cleanup);
 
 ### Options
 
-At least one linter — a plugin, a checker or a preset; a specification naming none is refused.
+At least one linter — a plugin, a checker or presets, `presets: []` holding the tree to the base preset alone; a specification naming none is refused.
 
-| Option     | Description                                                                                                                                                                                           |
-| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `plugins`  | oxlint JS plugins, each a path from the specification's folder or a package specifier. They run in the real oxlint, `oxlint` being an optional peer the project installs                              |
-| `config`   | The oxlint config the plugins run under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states                                                                   |
-| `presets`  | `@jterrazz/typescript` presets whose laws run on the tree: the Architecture pass over their `layers`, the Names pass over their `names`, resolved after the base preset as `jterrazz.config.ts` would |
-| `checkers` | Cross-file checkers, each a command printing one finding a line in the compiler's convention — `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree last           |
-| `root`     | Root-resolution override (rule `no-redundant-root`); the plugins' specifiers and the checkers' commands resolve from its `node_modules`                                                               |
+| Option     | Description                                                                                                                                                                                                                               |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `plugins`  | oxlint JS plugins, each a path from the specification's folder or a package specifier. They run in the real oxlint, `oxlint` being an optional peer the project installs                                                                  |
+| `config`   | The oxlint config the plugins run under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states                                                                                                       |
+| `presets`  | `@jterrazz/typescript` presets whose laws run on the tree — the Architecture pass over every `layers`, each declared `names` rule — resolved after the always-on base preset as `jterrazz.config.ts` would; `[]` is the base preset alone |
+| `checkers` | Cross-file checkers, each a command printing one finding a line in the compiler's convention — `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree last                                               |
+| `root`     | Root-resolution override (rule `no-redundant-root`); the plugins' specifiers and the checkers' commands resolve from its `node_modules`                                                                                                   |
+| `settings` | What the project adds beside its presets, written as `jterrazz.config.ts` writes it — `typescript: { names, architecture: { layers } }`, `optOuts` — so a repository's own additions are its own, never a preset it makes up              |
 
 There is nothing to start and nothing to stop: `cleanup` is handed to `afterAll` like every constructor's, and releases nothing.
 
@@ -125,7 +126,7 @@ Each linter the specification names, over the working directory:
 
 1. **oxlint**, when `plugins` is not empty: the real binary, with a config the facet writes outside the tree — `jsPlugins` the plugins, `rules` the specification's `config.rules` and the chain's `.rules()` over them — at `--format=unix`.
 2. **each checker**, as `<command> <args> .`, from the tree, its first word resolved from the project's `node_modules/.bin` when it is installed there.
-3. **the presets' laws**, in process, through `presetChecks` of `@jterrazz/typescript/rules`: a finding about a whole file or folder stands at `:1:1`.
+3. **the presets' laws**, in process, through `presetChecks` of `@jterrazz/typescript/rules`, handed the `presets` and the `settings` as one settings object: each finding at its position, one about a whole file or folder at `:1:1`. Settings the kit cannot resolve are refused like a linter that fails with no diagnostic.
 
 A linter that fails and reports no diagnostic is refused in four parts rather than read as a clean tree — a plugin that does not load, a config oxlint cannot build, a checker that cannot start.
 

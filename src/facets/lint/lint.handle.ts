@@ -24,10 +24,12 @@ export type LintSpecificationOptions = {
     config?: LintConfig;
     /** oxlint JS plugins, each a path from the specification's folder or a package specifier. */
     plugins?: readonly string[];
-    /** `@jterrazz/typescript` presets whose laws run on the tree: the Architecture pass over their `layers`, the Names pass over their `names`. */
+    /** `@jterrazz/typescript` presets whose laws run on the tree, after the base preset, as `jterrazz.config.ts` lists them: `[]` holds the tree to the base preset alone. */
     presets?: readonly Preset[];
     /** Project root override — the plugins' specifiers and the checkers' commands resolve from its `node_modules`. */
     root?: string;
+    /** What the project adds beside its presets, written as `jterrazz.config.ts` writes it — `typescript: { names, architecture }`, `optOuts`. */
+    settings?: Readonly<Record<string, unknown>>;
 };
 
 /** What `specification.lint()` returns: `const { lint, cleanup } = …` (`no-runner-alias`). */
@@ -90,12 +92,11 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
     const root = resolveRoot(options.root, callerDir);
     const plugins = (options.plugins ?? []).map((plugin) => pluginPath(plugin, callerDir, root));
     const checkers = options.checkers ?? [];
-    const presets = options.presets ?? [];
-    if (plugins.length === 0 && checkers.length === 0 && presets.length === 0) {
+    if (plugins.length === 0 && checkers.length === 0 && options.presets === undefined) {
         throw new Error(
             refusal({
-                fix: 'name the plugins, the checkers or the presets the specification lints with',
-                found: 'specification.lint() with no plugin, no checker and no preset',
+                fix: 'name the plugins, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
+                found: 'specification.lint() with no plugin, no checker and no presets',
                 read: 'docs/21-lint.md#options',
                 why: 'A lint specification runs the linters it names, and one that names none judges nothing.',
             }),
@@ -118,8 +119,9 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
             config: options.config ?? {},
             oxlint,
             plugins,
-            presets,
+            presets: options.presets,
             root,
+            settings: options.settings ?? {},
         }),
         root,
     };

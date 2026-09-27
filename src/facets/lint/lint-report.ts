@@ -13,8 +13,6 @@ const COMPILER_LINE =
 
 const OXLINT_GRAPHICAL_HEAD = /^\s+[!x] [\w-]+\([^)]+\): /u;
 
-const POSITIONED = /:\d+:\d+$/u;
-
 const INDENT = '    ';
 
 export function diagnosticsOf(text: string): Diagnostic[] {
@@ -37,10 +35,10 @@ export function diagnosticsOf(text: string): Diagnostic[] {
     });
 }
 
-export function presetDiagnostic({ message, path, rule }: Finding): Diagnostic {
+export function presetDiagnostic({ column, line, message, path, rule }: Finding): Diagnostic {
     const [pass = '', ...name] = rule.split('/');
     return {
-        at: POSITIONED.test(path) ? path : `${path}:1:1`,
+        at: `${path}:${String(line ?? 1)}:${String(column ?? 1)}`,
         message,
         rule: `${pass}(${name.join('/')})`,
     };

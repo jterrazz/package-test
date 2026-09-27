@@ -76,8 +76,10 @@ describe('lintReport', () => {
         const diagnostics = [
             presetDiagnostic({ message: 'a stray folder', path: 'specs/stray', rule: 'names/x' }),
             presetDiagnostic({
+                column: 5,
+                line: 2,
                 message: 'a crossing',
-                path: 'src/a.ts:2:5',
+                path: 'src/a.ts',
                 rule: 'architecture/y',
             }),
         ];
