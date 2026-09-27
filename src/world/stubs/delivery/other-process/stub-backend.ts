@@ -1,6 +1,5 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
-/** A request matching no stub gets 501 and is recorded; once the chain declared a stub, the action throws naming every unmatched request. Every response carries permissive CORS headers. */
 
 import { refusal } from '../../../../../lint/index.refusal.js';
 import type { ChainConfig } from '../../../../kernel/chain/config.js';
@@ -32,6 +31,7 @@ type UnmatchedStubRequest = {
 const CORS_METHODS = 'GET,HEAD,POST,PUT,PATCH,DELETE,OPTIONS';
 const PREFLIGHT_MAX_AGE = '600';
 
+/** A request matching no stub gets 501 and is recorded; once the chain declared a stub, the action throws naming every unmatched request. Every response carries permissive CORS headers. */
 export class StubBackend {
     private guarded = false;
     private readonly options: StubBackendOptions;
