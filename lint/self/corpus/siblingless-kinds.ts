@@ -241,7 +241,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/kernel/database-option.ts',
             'src/world/services/startup/registry.ts',
             'src/kernel/pause.ts',
-            'src/vitest/project.ts',
         ),
         name: 'a chain or runner internal',
         why: 'it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to',
