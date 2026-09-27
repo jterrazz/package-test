@@ -35,7 +35,10 @@ export function typeAwareFindings(options: {
                 include: ['scratch.ts'],
             }),
         );
-        writeFileSync(join(dir, '.oxlintrc.json'), '{}');
+        writeFileSync(
+            join(dir, '.oxlintrc.json'),
+            JSON.stringify({ plugins: ['typescript', 'vitest'] }),
+        );
         const run = spawnSync(
             oxlintBinary(root),
             [

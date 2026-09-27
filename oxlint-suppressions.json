@@ -1361,9 +1361,6 @@
         }
     },
     "src/world/services/redis/redis.adapter.test.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
         "vitest/require-to-throw-message": {
             "count": 1
         }

@@ -21,10 +21,10 @@ ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAsse
             errors: [{ messageId: 'existenceOnly' }],
             filename: TEST_FILE,
         },
-        // A bare `toThrow` states only that something was raised.
         {
-            code: `test('refuses', () => {
-                expect(() => build(null)).toThrow();
+            code: `test('notifies', () => {
+                notify({ onSent });
+                expect(onSent).toHaveBeenCalled();
             });`,
             errors: [{ messageId: 'existenceOnly' }],
             filename: TEST_FILE,
@@ -40,7 +40,19 @@ ruleTester().run('no-existence-only-assertion', asOxlintRule(noExistenceOnlyAsse
             });`,
             filename: TEST_FILE,
         },
-        // A named refusal is an assertion about the message.
+        // `toBeTruthy` and a bare `toThrow` are vitest/prefer-strict-boolean-matchers' and vitest/require-to-throw-message's.
+        {
+            code: `test('builds', () => {
+                expect(build()).toBeTruthy();
+            });`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('refuses', () => {
+                expect(() => build(null)).toThrow();
+            });`,
+            filename: TEST_FILE,
+        },
         {
             code: `test('refuses', () => {
                 expect(() => build(null)).toThrow('name is required');

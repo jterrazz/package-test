@@ -463,7 +463,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/schema-documents.test.ts`  | schema-documents   | 9     |
 | `lint/self/corpus/siblings.test.ts`          | siblings           | 5     |
 | `lint/self/corpus/skill.test.ts`             | skill              | 6     |
-| `lint/self/corpus/type-aware.test.ts`        | typeAwareFindings  | 3     |
+| `lint/self/corpus/type-aware.test.ts`        | typeAwareFindings  | 4     |
 | `lint/self/corpus/type-channel.test.ts`      | type-channel       | 3     |
 | `specs/lint/meta/every-reach-proven.test.ts` | every-reach-proven | 7     |
 

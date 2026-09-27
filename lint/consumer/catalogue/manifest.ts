@@ -372,7 +372,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `toThrow` or a bare `toHaveBeenCalled`) is an error. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one.',
+            'A test whose ONE assertion is an existence check (`toBeDefined`, `not.toBeNull`, `not.toBeUndefined` or a bare `toHaveBeenCalled`) is an error. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one. `toBeTruthy` and a bare `toThrow` are refused wherever they stand, by `vitest/prefer-strict-boolean-matchers` and `vitest/require-to-throw-message`.',
         facet: 'model',
         family: 'expectations',
         fix: 'Assert the value, a golden, or a row.',

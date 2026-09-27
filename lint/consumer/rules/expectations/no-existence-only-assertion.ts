@@ -16,12 +16,12 @@ import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
-const EXISTENCE_MATCHERS = new Set(['toBeDefined', 'toBeTruthy']);
+const EXISTENCE_MATCHERS = new Set(['toBeDefined']);
 
 const NEGATED_EXISTENCE = new Set(['toBeNull', 'toBeUndefined']);
 
 /** Only affirmative: `expect(onClose).not.toHaveBeenCalled()` states that nothing happened, which nothing else can. */
-const BARE_ONLY = new Set(['toHaveBeenCalled', 'toThrow']);
+const BARE_ONLY = new Set(['toHaveBeenCalled']);
 
 /** Fires only when it is the whole proof: beside a real assertion it is a precondition. */
 export const noExistenceOnlyAssertion: LintRule = {

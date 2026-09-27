@@ -113,4 +113,56 @@ describe('typeAwareFindings', () => {
             refusedLines(source).map((line) => ({ line, rule: THENABLE })),
         );
     });
+
+    test('the upstream rules `no-existence-only-assertion` hands two of its shapes to (meta-test) — every profile refuses `toBeTruthy` and a bare `toThrow` in a test file, wherever they stand', () => {
+        // Given - the six profiles, and a test holding each shape beside the forms that state the value
+        const profiles = { astro, bun, expo, next, node, react };
+        const { findings, source } = linted('vitest/prefer-strict-boolean-matchers', [
+            'export function forms(ready: boolean, build: () => void): void {',
+            '    expect(ready).toBeTruthy(); // refused',
+            '    expect(ready).toBeFalsy(); // refused',
+            '    expect(ready).toBe(true);',
+            "    expect(build).toThrow('name is required');",
+            '}',
+        ]);
+        const bare = linted('vitest/require-to-throw-message', [
+            'export function forms(build: () => void): void {',
+            '    expect(build).toThrow(); // refused',
+            "    expect(build).toThrow('name is required');",
+            '}',
+        ]);
+
+        // Then - each profile arms both rules on test files, and each fires on its shape alone
+        const armed = Object.fromEntries(
+            Object.entries(profiles).map(([name, profile]) => {
+                const rules = (profile.overrides ?? []).find((layer) =>
+                    layer.files.includes('**/*.{test,spec,test-d,spec-d}.{ts,tsx,js,jsx}'),
+                )?.rules;
+                return [
+                    name,
+                    {
+                        boolean: rules?.['vitest/prefer-strict-boolean-matchers'],
+                        throw: rules?.['vitest/require-to-throw-message'],
+                    },
+                ];
+            }),
+        );
+        expect(armed).toStrictEqual(
+            Object.fromEntries(
+                Object.keys(profiles).map((name) => [name, { boolean: 'error', throw: 'error' }]),
+            ),
+        );
+        expect(findings).toStrictEqual(
+            refusedLines(source).map((line) => ({
+                line,
+                rule: 'vitest/prefer-strict-boolean-matchers',
+            })),
+        );
+        expect(bare.findings).toStrictEqual(
+            refusedLines(bare.source).map((line) => ({
+                line,
+                rule: 'vitest/require-to-throw-message',
+            })),
+        );
+    });
 });
