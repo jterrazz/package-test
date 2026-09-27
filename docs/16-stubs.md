@@ -252,17 +252,17 @@ await using _ = await intercept(posts, { origin: 'http://console.test' });
 
 **Around a `.render()` the chain's registration wins.** A rendered unit's network is declared on the chain — `component.intercept(c).render(…)` — because the render registers its stubs last and its strictness is total ([07](07-component.md)). A module-scope `intercept()` opened around a `.render()` is shadowed by it and proves nothing. In a `.test.tsx`, `intercept()` is for code the TEST calls itself, never for what the render fetches.
 
-## Three drivers, one queue
+## Three deliveries, one queue
 
-A stub reaches the subject by one of three deliveries, named for where the subject runs: the same process, a browser page, or another process.
+A stub reaches the subject by one of three deliveries, named for where the subject runs.
 
-| Facets                                                    | Driver                                            | Notes                                                                               |
-| --------------------------------------------------------- | ------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `api`, `job`, `integration`, and a module's `intercept()` | **msw server**, in-process                        | The subject runs here, so its outgoing requests pass through this process           |
-| `component`                                               | **msw worker**, in the page                       | The component runs in Chromium, so the service worker answers its requests there    |
-| `website`, `mobile`                                       | the **declared stub backend** (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
+| Facets                                                    | Delivery                                                          | Notes                                                                               |
+| --------------------------------------------------------- | ----------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| `api`, `job`, `integration`, and a module's `intercept()` | **same process** — msw server                                     | The subject runs here, so its outgoing requests pass through this process           |
+| `component`                                               | **browser page** — msw worker                                     | The component runs in Chromium, so the service worker answers its requests there    |
+| `website`, `mobile`                                       | **other process** — the declared stub backend (plain `node:http`) | Started by the runner, its URL injected/exposed; CORS and `OPTIONS` handled for you |
 
-All three consume the **same** selection queue, so a stub behaves identically whichever answers it: first match wins, `times` exhausts, `required` verifies at chain end. The old divergence — consume-once on MSW, sticky-last on the stub backend — is gone; "sticky" is now just the default (`times` omitted), written down.
+All three consume the **same** selection queue, so a stub behaves identically whichever answers it: first match wins, `times` exhausts, `required` verifies at chain end, and "sticky" is the default (`times` omitted).
 
 The stub backend resets between chains, the way databases do: one chain = one terminal action, and its stubs replace the previous chain's wholesale.
 
@@ -346,7 +346,7 @@ The point: your stub states the **business payload** (`{ category: 'TECH' }`) an
 
 ### Streamed replies
 
-A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three drivers honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile facets serve from.
+A subject that reads a reply AS IT LANDS — a token-by-token render, a progress bar, a client that reconnects on a half-read body — is specified by the chunks and their order, which a single serialised body cannot state. `http.stream()` and `http.sse()` say that, and all three deliveries honour them: msw's server, msw's worker, and the `node:http` stub backend the website and mobile facets serve from.
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';
