@@ -26,7 +26,7 @@ describe('no-unused-ground', () => {
             .fixture(directory('../../_shared/_fixtures/no-unused-ground-ok/'))
             .run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 

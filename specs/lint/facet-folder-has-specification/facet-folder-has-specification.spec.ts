@@ -26,7 +26,7 @@ describe('facet-folder-has-specification', () => {
             .fixture(directory('./_fixtures/facet-folder-has-specification-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

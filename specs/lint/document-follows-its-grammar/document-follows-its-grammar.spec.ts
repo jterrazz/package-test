@@ -54,7 +54,7 @@ describe('document-follows-its-grammar', () => {
             .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
             .run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

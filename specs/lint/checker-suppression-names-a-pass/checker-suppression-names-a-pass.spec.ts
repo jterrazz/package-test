@@ -31,7 +31,7 @@ describe('checker-suppression-names-a-pass', () => {
             .fixture(directory('./_fixtures/checker-suppression-names-a-pass-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

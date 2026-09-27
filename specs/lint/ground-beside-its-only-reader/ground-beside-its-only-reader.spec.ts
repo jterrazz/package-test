@@ -36,7 +36,7 @@ describe('ground-beside-its-only-reader', () => {
             .fixture(directory('./_fixtures/ground-beside-its-only-reader-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

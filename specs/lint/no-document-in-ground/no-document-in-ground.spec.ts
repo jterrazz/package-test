@@ -29,7 +29,7 @@ describe('no-document-in-ground', () => {
             .fixture(directory('../../_shared/_fixtures/spec-document-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

@@ -26,7 +26,7 @@ describe('http-first-line-follows-its-grammar', () => {
             .fixture(directory('./_fixtures/http-first-line-follows-its-grammar-ok/'))
             .run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

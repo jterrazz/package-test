@@ -26,7 +26,7 @@ describe('database-named-only-when-several', () => {
             .fixture(directory('./_fixtures/database-named-only-when-several-ok/'))
             .run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 

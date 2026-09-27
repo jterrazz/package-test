@@ -36,7 +36,7 @@ describe('facet-test-uses-its-runner', () => {
             .fixture(directory('./_fixtures/facet-test-uses-its-runner-ok/'))
             .run();
 
-        // Then - the clean summary: the import SOURCE is what reaches the runner, however it spells the extension
+        // Then - nothing is reported: the import SOURCE is what reaches the runner, however it spells the extension
         expect(result.report).toMatch('');
     });
 });

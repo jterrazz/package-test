@@ -36,7 +36,7 @@ describe('seeds-state-absolute-time', () => {
             .fixture(directory('./_fixtures/seeds-state-absolute-time-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

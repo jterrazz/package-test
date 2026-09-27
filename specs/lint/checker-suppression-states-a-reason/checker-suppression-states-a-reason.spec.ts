@@ -26,7 +26,7 @@ describe('checker-suppression-states-a-reason', () => {
             .fixture(directory('./_fixtures/checker-suppression-states-a-reason-ok/'))
             .run();
 
-        // Then - the clean summary
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

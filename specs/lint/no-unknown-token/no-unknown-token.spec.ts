@@ -36,7 +36,7 @@ describe('no-unknown-token', () => {
         // Given - the compliant twin ({{uuid#id}}, {{iso8601}}, {{workdir}})
         const result = await checker.fixture(directory('./_fixtures/no-unknown-token-ok/')).run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

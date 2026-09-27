@@ -26,7 +26,7 @@ describe('docker-exec-bound-with-await-using', () => {
             .fixture(directory('./_fixtures/docker-exec-bound-with-await-using-ok/'))
             .run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });

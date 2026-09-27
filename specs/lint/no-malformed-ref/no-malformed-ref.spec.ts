@@ -22,7 +22,7 @@ describe('no-malformed-ref', () => {
         // Given - the compliant twin ({{iso8601#when}})
         const result = await checker.fixture(directory('./_fixtures/no-malformed-ref-ok/')).run();
 
-        // Then - the clean summary (0 warnings) on stdout
+        // Then - nothing is reported
         expect(result.report).toMatch('');
     });
 });
