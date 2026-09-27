@@ -81,7 +81,6 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
     return found;
 }
 
-/** A non-literal path makes the reference set incomplete, so the feature is reported at warn: a false positive would be worse than a miss. */
 const DISK_ARG = /(?<![.\w])(?:file|directory)\s*\(\s*(?<arg>[^,)]*)/gu;
 
 const DISK_VERB_ARG = /\.(?:seed|request|fixture|run)\s*\(\s*(?<arg>[^,)]*)/gu;

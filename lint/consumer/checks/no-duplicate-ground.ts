@@ -118,7 +118,7 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
     return `keep one copy in ${where} — \`make fix\` moves it there and rewrites every path that named a copy`;
 }
 
-/** A warning, since two leaves may mean to diverge; `--fix` acts only when the copies share one name, the only name a fix could keep. */
+/** `--fix` acts only when the copies share one name, the only name a fix could keep. */
 export function checkNoDuplicateGround(rootDir: string): Finding[] {
     return copiedGround(rootDir).flatMap((group) => {
         const advice = copyAdvice(rootDir, group);
