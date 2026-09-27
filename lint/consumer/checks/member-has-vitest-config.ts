@@ -2,7 +2,7 @@ import { treeEntries, treeKind } from '@jterrazz/typescript/rules';
 import type { Manifest } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
-import { SKIPPED } from '../../engine/project/module-tests.js';
+import { PRUNED_WITH_OUTPUTS } from '../../engine/project/module-tests.js';
 import { isTestFileName } from '../../engine/project/role.js';
 import type { Spotted } from './checker.js';
 
@@ -27,7 +27,7 @@ function holdsTests(dir: string): boolean {
         }
         for (const entry of entries) {
             if (entry.isDirectory()) {
-                if (!SKIPPED.has(entry.name) && !entry.name.startsWith('.')) {
+                if (!PRUNED_WITH_OUTPUTS.has(entry.name) && !entry.name.startsWith('.')) {
                     stack.push(join(current, entry.name));
                 }
                 continue;

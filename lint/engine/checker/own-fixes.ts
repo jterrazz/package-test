@@ -4,7 +4,7 @@ import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
-import { SKIPPED } from '../project/module-tests.js';
+import { PRUNED_WITH_OUTPUTS } from '../project/module-tests.js';
 
 const CONFIG_NAMES: readonly string[] = configNames;
 
@@ -25,7 +25,7 @@ const NESTED_CONFIG_NAMES = [
     '.oxlintrc.jsonc',
 ] as const;
 
-const UNWALKED = new Set<string>([...SKIPPED, ...GROUND_FOLDERS]);
+const UNWALKED = new Set<string>([...PRUNED_WITH_OUTPUTS, ...GROUND_FOLDERS]);
 
 /** A config that fails to load exits 1 too, which alone reads as diagnostics left. */
 const CONFIG_FAILURES = [

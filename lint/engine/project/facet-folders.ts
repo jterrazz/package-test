@@ -5,7 +5,7 @@ import { join } from 'node:path';
 
 import { FACETS } from './facets.js';
 
-export const SKIPPED: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
+export const PRUNED_WITH_FIXTURES: ReadonlySet<string> = new Set([...PRUNED, GROUND_FIXTURES]);
 
 export function entriesOf(dir: string): TreeEntry[] {
     try {
@@ -33,7 +33,7 @@ export function* walkFiles(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) {
-            if (!SKIPPED.has(entry.name)) {
+            if (!PRUNED_WITH_FIXTURES.has(entry.name)) {
                 yield* walkFiles(path);
             }
             continue;

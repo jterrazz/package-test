@@ -1,7 +1,7 @@
 import { isGroundFolder, treeEntries, treeKind, treeNames } from '@jterrazz/typescript/rules';
 import { join, relative, sep } from 'node:path';
 
-import { SKIPPED } from '../../engine/project/module-tests.js';
+import { PRUNED_WITH_OUTPUTS } from '../../engine/project/module-tests.js';
 import type { Spotted } from './checker.js';
 
 /** `rootDir` anchors the reported paths, so a member's finding reads the same alone as inside a whole-workspace run. */
@@ -33,7 +33,7 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Spotted
         }
         for (const entry of entries) {
             const path = join(dir, entry.name);
-            if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundFolder(entry.name)) {
+            if (!entry.isDirectory() || PRUNED_WITH_OUTPUTS.has(entry.name) || isGroundFolder(entry.name)) {
                 continue;
             }
             if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {

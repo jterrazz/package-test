@@ -1,13 +1,13 @@
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import { entriesOf, SKIPPED, textOf, walkFiles } from '../../engine/project/facet-folders.js';
+import { entriesOf, PRUNED_WITH_FIXTURES, textOf, walkFiles } from '../../engine/project/facet-folders.js';
 import { isNodeTestFileName } from '../../engine/project/role.js';
 import type { Spotted } from './checker.js';
 
 function* walkDirectories(dir: string): Generator<string> {
     for (const entry of entriesOf(dir)) {
-        if (!entry.isDirectory() || SKIPPED.has(entry.name)) {
+        if (!entry.isDirectory() || PRUNED_WITH_FIXTURES.has(entry.name)) {
             continue;
         }
         const path = join(dir, entry.name);

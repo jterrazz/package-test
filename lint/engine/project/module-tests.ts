@@ -3,7 +3,7 @@ import { join } from 'node:path';
 
 import { isTestFileName } from './role.js';
 
-export const SKIPPED: ReadonlySet<string> = new Set([...PRUNED, '.artifacts', 'coverage']);
+export const PRUNED_WITH_OUTPUTS: ReadonlySet<string> = new Set([...PRUNED, '.artifacts', 'coverage']);
 
 /** Never ground (a fixture project's tests are an input) nor a nested package; `specs/` is the tree passes'. */
 export function moduleTestsOf(member: string): string[] {
@@ -21,7 +21,7 @@ export function moduleTestsOf(member: string): string[] {
                 found.push(path);
             } else if (
                 entry.isDirectory() &&
-                !SKIPPED.has(entry.name) &&
+                !PRUNED_WITH_OUTPUTS.has(entry.name) &&
                 !isGroundFolder(entry.name) &&
                 entry.name !== 'specs' &&
                 treeKind(join(path, 'package.json')) !== 'file'

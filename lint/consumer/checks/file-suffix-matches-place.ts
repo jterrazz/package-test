@@ -1,4 +1,6 @@
-import { isGroundFolder, moveKeepingHistory, treeEntries } from '@jterrazz/typescript/rules';
+/** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
+
+import { isGroundFolder, moveKeepingHistory, PRUNED, treeEntries } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
@@ -8,10 +10,6 @@ import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { DocumentFinding, Spotted } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
 import type { Rename } from './file-suffix-matches-place.stale-includes.js';
-
-/** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
-
-const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
 function* walk(dir: string): Generator<string> {
     let entries;
@@ -23,7 +21,7 @@ function* walk(dir: string): Generator<string> {
     for (const entry of entries) {
         const path = join(dir, entry.name);
         if (entry.isDirectory()) {
-            if (SKIPPED.has(entry.name)) {
+            if (PRUNED.has(entry.name)) {
                 continue;
             }
             yield* walk(path);

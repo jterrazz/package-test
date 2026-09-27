@@ -1,12 +1,12 @@
 import {
     GROUND_EXPECTED,
-    GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
     treeEntries,
 } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
+import { PRUNED_WITH_FIXTURES } from '../project/facet-folders.js';
 import { SPEC_EXTENSION } from '../project/spec-document.js';
 import { decodeText } from '../project/tree.js';
 import { runDocument } from './documents.js';
@@ -16,8 +16,6 @@ type Ground = typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SE
 
 const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
 
-/** `_fixtures/` trees are file state, not assertion fixtures: the token grammar has no meaning inside them. */
-const SKIPPED_DIRS = new Set<string>(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 
 function documentFindings(entry: GroundEntry, passes: GroundPasses): Spotted[] {
     const text = decodeText(entry.path);
@@ -61,7 +59,7 @@ export function walkGround(rootDir: string, passes: GroundPasses): Spotted[] {
             const path = join(dir, entry.name);
             const found = { name: entry.name, path, rel: relative(rootDir, path) };
             if (entry.isDirectory()) {
-                if (!SKIPPED_DIRS.has(entry.name)) {
+                if (!PRUNED_WITH_FIXTURES.has(entry.name)) {
                     visit(path, nextGround(entry.name, inside));
                 }
             } else if (entry.name.endsWith(SPEC_EXTENSION)) {

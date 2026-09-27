@@ -6,7 +6,7 @@ import {
 } from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
-import { SKIPPED } from './module-tests.js';
+import { PRUNED_WITH_OUTPUTS } from './module-tests.js';
 
 /** The root itself included: a single-package repository is its own member. */
 export function discoverMembers(rootDir: string): string[] {
@@ -39,7 +39,7 @@ export function discoverSpecRoots(rootDir: string): string[] {
                 return;
             }
             for (const entry of entries) {
-                if (!entry.isDirectory() || entry.name.startsWith('.') || SKIPPED.has(entry.name)) {
+                if (!entry.isDirectory() || entry.name.startsWith('.') || PRUNED_WITH_OUTPUTS.has(entry.name)) {
                     continue;
                 }
                 const child = join(dir, entry.name);
