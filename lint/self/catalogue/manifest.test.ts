@@ -41,6 +41,16 @@ import {
 const ROOT = resolve(import.meta.dirname, '../../..');
 const read = (path: string): string => readFileSync(resolve(ROOT, path), 'utf8');
 
+const withoutGenerated = (text: string): string =>
+    text.replaceAll(/<!-- GENERATED:[\s\S]*?<!-- \/GENERATED:[^>]*-->/gu, '');
+
+const humanWords = (entry: { audience?: string }): string =>
+    entry.audience === 'self'
+        ? withoutGenerated(read('docs/03-testing.md'))
+        : ((read('docs/18-conventions.md').split('## What stays human')[1] ?? '').split(
+              '\n## ',
+          )[0] ?? '');
+
 const allRules = { ...plugin.rules, ...selfPlugin.rules };
 
 function ruleFileOf(entry: { audience: string; family: string; name: string }): string {
@@ -608,7 +618,10 @@ describe('manifest', () => {
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — every channel answers for its rows the way the channel can', () => {
         // Given - the eight channels, each with the proof its rows owe
-        const proofs: [string, (entry: { name: string; upstream?: string }) => boolean][] = [
+        const proofs: [
+            string,
+            (entry: { audience?: string; name: string; upstream?: string }) => boolean,
+        ][] = [
             ['statique', (entry) => pluginRules.has(entry.name)],
             [
                 'toolchain',
@@ -635,7 +648,7 @@ describe('manifest', () => {
             ],
             ['runtime', (entry) => runtimeMarkers().has(entry.name)],
             ['meta', (entry) => metaProofs().has(entry.name)],
-            ['process', (entry) => entry.name.length > 0],
+            ['process', (entry) => humanWords(entry).includes(`\`${entry.name}\``)],
         ];
 
         // Then - no row of any channel is a sentence with nothing behind it
