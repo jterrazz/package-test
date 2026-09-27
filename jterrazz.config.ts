@@ -6,8 +6,6 @@ import { ARCHITECTURE, sourceRootHoldsKnownEntries } from './dist/self-oxlint.js
 
 export default defineConfig({
     optOuts: {
-        'typescript/catalogue-at-the-bottom':
-            'the self catalogue extends the consumer one — its families and rows are read beside the consumer rows — and its manifest meta-test audits every declaration it catalogues (docs/01-architecture.md)',
         'typescript/self-folders-apart':
             'the corpus audits the self checker and the self plugin by importing them, the self plugin hands on the layer map its checks compile, and one self check reads the capability matrix the corpus renders (docs/01-architecture.md)',
     },
