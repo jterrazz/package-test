@@ -4154,3 +4154,10 @@ This reverses §2: the folders under `specs/` that are no subject carry the `_` 
 - A marker on folders that live among content is the ecosystem's convention — Jest's `__tests__`/`__mocks__`, Next.js's `_components` private folders — so a reader meets it already knowing it means "not a route".
 
 One placement law now holds code and data alike: a shared thing sits in the reserved folder of the lowest folder its readers share, `_shared/` only across facets. No `package.json` `imports` alias is added by default: a relative import states the placement the law judges.
+
+## Rule review and adopted tools, vision/17 (2026-09-27): test
+
+### Raised by the package-test branch, vision/17
+
+143. `typescript/no-unsafe-type-assertion` stays at error. Its debt was paid down from 227 to 190 when every rule test moved to `ruleTester()` and `asOxlintRule()`. Paying off the remaining 190 is deferred to a change of its own. 68 of them are `as AstNode` or `as AstNode[]` in the consumer rules' sources, a node narrowed by hand. The lever is a typed accessor in `lint/engine/project/ast.ts` for each shape the rules narrow to, for example a call's callee or a declaration's declarators, so that the rules stop asserting. The rest are `JSON.parse` and computed-import results in `src/`, `specs/` and the self corpus, each narrowed by a named shape.
+144. Three checker clauses could be judged by ls-lint, and one self rule could be judged whole: the files a specs root holds, the `_` names outside the closed list, a `.spec.ts` outside every `specs/` tree, and `source-root-holds-known-entries`. They stay in the checker because `@jterrazz/typescript`'s Names pass offers no entry through which a package can add ls-lint rules, each with its id and four-part lesson ([19 — Linting](docs/19-linting.md) and [03 — Testing](docs/03-testing.md) state each verdict). Once the toolchain offers that entry, they move.
