@@ -202,7 +202,7 @@ On top of worker isolation, **every chain resets the databases** (rule `sequence
 
 ## Root auto-discovery
 
-The framework locates the project root by walking **up from the specification file** to the **nearest** directory carrying `package.json`, so in a workspace the member being tested wins over the repository root above it. Inside a git work tree it reads the tree git does not ignore — a `.gitignore`d `package.json` marks no root, a new one nobody added does — which is the tree `no-redundant-root` reads too, so the lint and the run derive one root. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant, and `no-redundant-root` warns.
+The framework locates the project root by walking **up from the specification file** to the **nearest** directory carrying `package.json`, so in a workspace the member being tested wins over the repository root above it. Inside a git work tree it reads the tree git does not ignore — a `.gitignore`d `package.json` marks no root, a new one nobody added does — which is the tree `no-redundant-root` reads too, so the lint and the run derive one root. The `root` option is an override for the cases where the convention cannot work (e.g. fixtures deliberately kept outside the package) — pointing `root` at the directory the walk would find anyway is redundant, and `no-redundant-root` refuses it.
 
 ## SQLite without Docker
 
