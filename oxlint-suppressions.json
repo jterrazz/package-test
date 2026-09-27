@@ -159,19 +159,6 @@
             "count": 3
         }
     },
-    "lint/consumer/rules/expectations/io-matcher-awaited.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/expectations/io-matcher-awaited.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 5
-        }
-    },
     "lint/consumer/rules/expectations/negative-golden-frozen.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
@@ -183,19 +170,6 @@
     "lint/consumer/rules/expectations/negative-golden-frozen.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 11
-        }
-    },
-    "lint/consumer/rules/expectations/no-await-on-sync-matcher.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "typescript/strict-void-return": {
-            "count": 1
-        }
-    },
-    "lint/consumer/rules/expectations/no-await-on-sync-matcher.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 5
         }
     },
     "lint/consumer/rules/expectations/no-raw-bypass.test.ts": {

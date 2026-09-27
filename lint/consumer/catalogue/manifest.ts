@@ -437,31 +437,6 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A `toMatch` that is IO — a table compared whole, `toMatch(<rows>)`, or a tree, `toMatch(directory(…))` — must be awaited or returned; otherwise the assertion never runs → error. `toBeEmpty` and `toBeRunning`, typed `Promise<void>` whatever their argument, are refused dropped by the type-aware `typescript/no-floating-promises` every profile of `@jterrazz/typescript` turns on.',
-        facet: 'model',
-        family: 'expectations',
-        fix: 'Put `await` in front of the `expect(...)`.',
-        name: 'io-matcher-awaited',
-        rationale:
-            'An un-awaited IO assertion passes silently — the worst failure mode a test has.',
-        reach: 'tests',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
-            '`await` on an always-synchronous matcher (`toBe`/`toEqual`/`toContain`/`toHaveLength`) is redundant → error.',
-        facet: 'model',
-        family: 'expectations',
-        fix: 'Drop the `await`.',
-        name: 'no-await-on-sync-matcher',
-        rationale: 'A pointless await hides the signal that marks the real IO matchers.',
-        reach: 'tests',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
             'A `transform` that only rewrites into equivalents of the standard tokens duplicates the grammar → error.',
         facet: 'model',
         family: 'expectations',

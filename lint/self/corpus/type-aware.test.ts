@@ -8,6 +8,7 @@ import { typeAwareFindings } from './type-aware.js';
 const ROOT = resolve(import.meta.dirname, '../../..');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 const FLOATING = 'typescript/no-floating-promises';
+const THENABLE = 'typescript/await-thenable';
 
 function refusedLines(source: string): number[] {
     return source
@@ -15,41 +16,66 @@ function refusedLines(source: string): number[] {
         .flatMap((text, index) => (text.endsWith('// refused') ? [index + 1] : []));
 }
 
+function linted(rule: string, body: readonly string[]): { findings: unknown; source: string } {
+    mkdirSync(CACHE, { recursive: true });
+    const source = [
+        "import { expect } from 'vitest';",
+        '',
+        `import { directory, file } from '${ROOT}/src/index.js';`,
+        `import type { ContainerAccessor, DirectoryAccessor, JsonAccessor, TableAccessor } from '${ROOT}/src/index.js';`,
+        '',
+        'declare const table: TableAccessor;',
+        'declare const container: ContainerAccessor;',
+        'declare const tree: DirectoryAccessor;',
+        'declare const json: JsonAccessor;',
+        '',
+        ...body,
+        '',
+    ].join('\n');
+    return {
+        findings: typeAwareFindings({ cacheDir: CACHE, root: ROOT, rules: [rule], source }),
+        source,
+    };
+}
+
 describe('typeAwareFindings', () => {
-    test('the type-aware rules `io-matcher-awaited` hands its promise matchers to (meta-test) — every profile of the toolchain runs no-floating-promises type-aware, as an error', () => {
+    test('the type-aware rules a missed or a needless `await` is judged by (meta-test) — every profile of the toolchain runs no-floating-promises and await-thenable type-aware, as errors', () => {
         // Given - the six profiles a consumer composes
         const profiles = { astro, bun, expo, next, node, react };
 
-        // Then - each lints type-aware and refuses a floating promise, so the two matchers need no rule of this plugin
+        // Then - each lints type-aware and holds both rules at error, so no rule of this plugin judges an `await` on a matcher
         const held = Object.fromEntries(
             Object.entries(profiles).map(([name, profile]) => [
                 name,
-                { rule: profile.rules?.[FLOATING], typeAware: profile.options?.typeAware },
+                {
+                    floating: profile.rules?.[FLOATING],
+                    thenable: profile.rules?.[THENABLE],
+                    typeAware: profile.options?.typeAware,
+                },
             ]),
         );
         expect(held).toStrictEqual(
             Object.fromEntries(
-                Object.keys(profiles).map((name) => [name, { rule: 'error', typeAware: true }]),
+                Object.keys(profiles).map((name) => [
+                    name,
+                    { floating: 'error', thenable: 'error', typeAware: true },
+                ]),
             ),
         );
     });
 
-    test('the type-aware rules `io-matcher-awaited` hands its promise matchers to (meta-test) — a bare toBeEmpty or toBeRunning is refused, and every form that handles the promise is not', () => {
-        // Given - the two matchers in each form `io-matcher-awaited` once judged, typed by this package's augmentation
-        mkdirSync(CACHE, { recursive: true });
-        const source = [
-            "import { expect } from 'vitest';",
-            '',
-            `import type { ContainerAccessor } from '${ROOT}/src/index.js';`,
-            `import type { TableAccessor } from '${ROOT}/src/expectations/table/table.js';`,
-            '',
-            'declare const table: TableAccessor;',
-            'declare const container: ContainerAccessor;',
-            '',
+    test('the type-aware rules a missed or a needless `await` is judged by (meta-test) — an IO matcher dropped is refused, and every form that handles its promise is not', () => {
+        // Given - each IO matcher, typed by this package's augmentation, dropped and handled
+        const { findings, source } = linted(FLOATING, [
             'export async function forms(): Promise<void> {',
+            "    expect(table).toMatch([[1, 'Ada']]); // refused",
+            "    expect(table).toMatch(''); // refused",
+            "    expect(tree).toMatch(directory('./_expected/tree/')); // refused",
             '    expect(table).toBeEmpty(); // refused',
             '    expect(table).not.toBeEmpty(); // refused',
             '    expect(container).toBeRunning(); // refused',
+            "    await expect(table).toMatch([[1, 'Ada']]);",
+            "    await expect(tree).toMatch(directory('./_expected/tree/'));",
             '    await expect(table).toBeEmpty();',
             '    await expect(expect(container).toBeRunning()).rejects.toThrow();',
             '    const pending = expect(table).toBeEmpty();',
@@ -57,20 +83,34 @@ describe('typeAwareFindings', () => {
             '}',
             '',
             'export async function returned(): Promise<void> {',
-            '    return expect(container).toBeRunning();',
+            "    return expect(tree).toMatch(directory('./_expected/tree/'));",
             '}',
-            '',
-        ].join('\n');
+        ]);
 
-        // Then - the rule fires on each bare statement, and on nothing else
-        const findings = typeAwareFindings({
-            cacheDir: CACHE,
-            root: ROOT,
-            rules: [FLOATING],
-            source,
-        });
+        // Then - no-floating-promises fires on each bare statement, and on nothing else
         expect(findings).toStrictEqual(
             refusedLines(source).map((line) => ({ line, rule: FLOATING })),
+        );
+    });
+
+    test('the type-aware rules a missed or a needless `await` is judged by (meta-test) — an await on a synchronous matcher is refused, and one on an IO matcher or a promise is not', () => {
+        // Given - the synchronous matchers awaited, beside the awaits that hold a promise
+        const { findings, source } = linted(THENABLE, [
+            'export async function forms(): Promise<void> {',
+            '    await expect(1).toBe(1); // refused',
+            '    await expect({ id: 1 }).toEqual({ id: 1 }); // refused',
+            '    await expect([1]).toContain(1); // refused',
+            '    await expect([1]).toHaveLength(1); // refused',
+            "    await expect(json).toMatch(file('./_expected/body.json')); // refused",
+            "    await expect(table).toMatch([[1, 'Ada']]);",
+            '    await expect(container).toBeRunning();',
+            '    await expect(Promise.resolve(1)).resolves.toBe(1);',
+            '}',
+        ]);
+
+        // Then - await-thenable fires on each synchronous one, and on nothing else
+        expect(findings).toStrictEqual(
+            refusedLines(source).map((line) => ({ line, rule: THENABLE })),
         );
     });
 });

@@ -11,9 +11,7 @@ import { noExpectInScenario } from './elements/no-expect-in-scenario.js';
 import { scenarioEndsSettled } from './elements/scenario-ends-settled.js';
 import { testIdStatesWhatIsMissing } from './elements/test-id-states-what-is-missing.js';
 import { expectedConstantShared } from './expectations/expected-constant-shared.js';
-import { ioMatcherAwaited } from './expectations/io-matcher-awaited.js';
 import { negativeGoldenFrozen } from './expectations/negative-golden-frozen.js';
-import { noAwaitOnSyncMatcher } from './expectations/no-await-on-sync-matcher.js';
 import { noDoubleOnlyAssertion } from './expectations/no-double-only-assertion.js';
 import { noExistenceOnlyAssertion } from './expectations/no-existence-only-assertion.js';
 import { noImportedExpectation } from './expectations/no-imported-expectation.js';
@@ -97,8 +95,6 @@ const plugin: LintPlugin = {
         'result-compared-whole': resultComparedWhole,
         'expected-constant-shared': expectedConstantShared,
         'no-imported-expectation': noImportedExpectation,
-        'io-matcher-awaited': ioMatcherAwaited,
-        'no-await-on-sync-matcher': noAwaitOnSyncMatcher,
         'no-transform-duplicating-tokens': noTransformDuplicatingTokens,
         'no-raw-bypass': noRawBypass,
         'no-single-use-ref': noSingleUseRef,

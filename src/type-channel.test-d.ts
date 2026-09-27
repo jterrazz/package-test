@@ -1,4 +1,4 @@
-/* oxlint-disable jterrazz/runner-in-specification-file, jterrazz/io-matcher-awaited, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
+/* oxlint-disable jterrazz/runner-in-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
 import { expect } from 'vitest';
 
 import type { ComponentChain, ComponentVisitor } from './facets/component/index.js';

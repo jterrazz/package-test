@@ -17,7 +17,7 @@ This chapter is the exhaustive matrix: every matcher, for every valid subject, w
 | container subjects                                                     | Talks to the Docker daemon           |
 | every accessor of a COMPONENT result (`tree`, `html`, `content`, …)    | The capture crosses the browser seam |
 
-A missed `await` has two judges. `toBeEmpty` and `toBeRunning` are typed `Promise<void>` whatever they are handed, so the type-aware `typescript/no-floating-promises` refuses one dropped; a `toMatch` is IO by its subject or its argument, so `io-matcher-awaited` reads the shape — a `.table(…)` read, rows written in place, `directory(…)` — and refuses it dropped.
+An `await` is judged by the types, not by a rule of this package. Every IO matcher is typed `Promise<void>` — `toBeEmpty` and `toBeRunning` whatever they are handed, a `toMatch` by its subject: a table's rows, a tree's `directory(…)` — so the type-aware `typescript/no-floating-promises` every profile of `@jterrazz/typescript` turns on refuses one dropped. A synchronous matcher returns no promise, so `typescript/await-thenable` refuses an `await` in front of it.
 
 Everything else is synchronous, and that includes the subjects it is easiest to get wrong: `result.value`, `result.error`, `result.response`, `result.stdout`, `result.stderr`, `result.json` — and `result.tree` on a WEBSITE page, which is captured on the node side and is a plain text subject there. Only a component's accessors are read inside the page.
 
@@ -237,7 +237,7 @@ The runner handle itself also exposes a `docker(containerId)` reader (returned b
 
 `container.exec()` resolves to a result whose `stdout`/`stderr` are ordinary stream subjects — the same matchers as host streams. `.not.toBeRunning()` asserts a stopped (but existing) container; for a _removed_ container assert `exists` instead.
 
-**The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to the "await only IO matchers" rule (`io-matcher-awaited`): only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
+**The sync container-read exception (as implemented):** container property reads — `exists`, `running`, `status`, `file(path).exists`, `file(path).content`, log streams — are synchronous, backed by one-shot `docker inspect` / `docker exec` shell-outs captured lazily on first access. This is the documented exception to "await only IO matchers": only the _matchers_ (`toBeRunning`) are async; property reads stay sync so container assertions read exactly like host-side ones.
 
 ## `result.tree` — the accessibility outline (website, component)
 
@@ -329,8 +329,8 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 ## Common mistakes
 
 - **Calling assertion methods on accessors** — `result.stdout.toContain('x')` does not compile; accessors are read-only (rule `result-accessor-read-only`). Write `expect(result.stdout.text).toContain('x')`.
-- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (rule `io-matcher-awaited`).
-- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is the toolchain error [above](#sync-vs-async). The sync/async split is the contract `io-matcher-awaited` states and the types carry.
+- **Missing `await` on IO matchers.** `expect(result.table('users')).toMatch([…])` without `await` never queries the database and the test passes vacuously (`typescript/no-floating-promises` refuses it).
+- **Putting `await` in front of a sync matcher.** A `toMatch(file(…))` on a stream, a JSON body, a response or a call's value runs either way, and then the toolchain refuses the file: the matcher is typed as returning a value, so awaiting it is the toolchain error [above](#sync-vs-async). The sync/async split is the contract the types carry, and `typescript/await-thenable` refuses the needless `await`.
 - **`file('./_expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./_expected/help/')`.
 - **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./_expected/help.txt')` (rule `one-verb-per-meaning`).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rules `disk-named-by-relative-path`, `disk-named-by-relative-path-at-runtime`).

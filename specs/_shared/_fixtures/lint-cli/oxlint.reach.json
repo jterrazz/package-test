@@ -47,8 +47,6 @@
         "jterrazz/no-double-only-assertion": "error",
         "jterrazz/no-existence-only-assertion": "error",
         "jterrazz/no-probe-cluster": "error",
-        "jterrazz/io-matcher-awaited": "error",
-        "jterrazz/no-await-on-sync-matcher": "error",
         "jterrazz/no-transform-duplicating-tokens": "error",
         "jterrazz/no-raw-bypass": "error",
         "jterrazz/no-single-use-ref": "error",
