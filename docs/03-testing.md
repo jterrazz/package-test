@@ -521,6 +521,8 @@ A rule that is both is two: its consumer half ships, its self half stays home. `
 
 <!-- /GENERATED:self-rules -->
 
+Two of these rules were measured against ls-lint, which `@jterrazz/typescript`'s Names pass runs, as [19 — Linting](19-linting.md) measures the consumer checks. `source-root-holds-known-entries` is a closed list that ls-lint could express whole. It stays here only because the toolchain offers no entry through which a package can add ls-lint rules, and it is the first to move once one exists. `folder-named-for-a-concept` stays: it is a deny-list of role words, which RE2 cannot write without a negative lookahead, and it counts the entries a folder holds.
+
 ### Retro-propagation
 
 Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its row joins `lint/consumer/catalogue/manifest.ts` — `lint/self/catalogue/manifest.ts` for a rule only this package is held to — and the catalogue regenerates.
