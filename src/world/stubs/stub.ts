@@ -28,17 +28,13 @@ export function defineStub(stub: Stub): Stub {
     return stub;
 }
 
-export function isStubs(value: unknown): value is Stubs {
+function isStubs(value: unknown): value is Stubs {
     return (
         typeof value === 'object' &&
         value !== null &&
         Array.isArray((value as Stubs).stubs) &&
         typeof (value as Stubs).with === 'function'
     );
-}
-
-export function isStub(value: unknown): value is Stub {
-    return typeof value === 'object' && value !== null && 'request' in value && 'response' in value;
 }
 
 function flatten(items: readonly StubInput[]): Stub[] {
