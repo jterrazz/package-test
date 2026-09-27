@@ -1,4 +1,4 @@
-import type { Markers } from '../../engine/catalogue/chapter.js';
+import type { Markers } from '@jterrazz/typescript/rules';
 
 export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
 

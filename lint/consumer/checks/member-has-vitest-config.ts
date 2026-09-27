@@ -1,7 +1,7 @@
+import { treeEntries, treeKind } from '@jterrazz/typescript/rules';
+import type { Manifest } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
-import { treeEntries, treeKind } from '../../engine/project/git-tree.js';
-import type { Manifest } from '../../engine/project/member-manifest.js';
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import { isTestFileName } from '../../engine/project/role.js';
 import type { Finding } from './checker.js';

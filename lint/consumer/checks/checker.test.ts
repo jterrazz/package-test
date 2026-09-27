@@ -1,3 +1,4 @@
+import { readManifest } from '@jterrazz/typescript/rules';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
@@ -6,7 +7,6 @@ import { describe, expect, test } from 'vitest';
 
 import { runMember, runMembers } from '../../engine/checker/member-run.js';
 import { runTree } from '../../engine/checker/tree-run.js';
-import { readManifest } from '../../engine/project/member-manifest.js';
 import { checkoutUnder } from '../../engine/testing/package-tree.fixtures.js';
 import { CHECKER } from './checker.js';
 

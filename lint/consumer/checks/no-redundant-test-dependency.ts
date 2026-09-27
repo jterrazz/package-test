@@ -1,13 +1,14 @@
-import { existsSync, readFileSync } from 'node:fs';
-import { dirname, join, resolve } from 'node:path';
-
-import { treeEntries, treeKind } from '../../engine/project/git-tree.js';
 import {
     MEMBER_DEPTH,
     readManifest,
+    treeEntries,
+    treeKind,
     workspacePatterns,
-} from '../../engine/project/member-manifest.js';
-import type { Manifest } from '../../engine/project/member-manifest.js';
+} from '@jterrazz/typescript/rules';
+import type { Manifest } from '@jterrazz/typescript/rules';
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join, resolve } from 'node:path';
+
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import type { Finding } from './checker.js';
 

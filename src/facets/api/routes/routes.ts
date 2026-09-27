@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { testSectionAt } from '../../../../lint/engine/project/test-section.js';
+import { testSectionAt } from '../../../../lint/engine/project/test-settings.js';
 import { parseYamlSource } from '../../../../lint/engine/project/yaml-document.js';
 
 /** Measured against the app's own route table (Hono's `app.routes`) or a declared OpenAPI document. */

@@ -1,14 +1,13 @@
+import { GROUND_FOLDERS, treeEntries } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { join, posix, resolve } from 'node:path';
 
 import type { Finding } from '../checker/finding.js';
 import { child, childList, isNode, nodeStart, stringValue, walk } from './ast.js';
 import type { AstNode } from './ast.js';
-import { treeEntries } from './git-tree.js';
-import { GROUND_DIRS } from './ground.js';
 import { parseProgram } from './module-parser.js';
 
-const GROUND = new Set<string>(GROUND_DIRS);
+const GROUND = new Set<string>(GROUND_FOLDERS);
 
 export type Listed = { directory: boolean; path: string };
 

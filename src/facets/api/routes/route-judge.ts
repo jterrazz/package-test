@@ -1,6 +1,9 @@
-import { ROUTES_KEY } from '../../../../lint/engine/baseline/ratchet.js';
+import {
+    heldUnreached,
+    recordUnreached,
+    ROUTES_KEY,
+} from '../../../../lint/engine/baseline/ratchet.js';
 import type { ChapterLesson } from '../../../../lint/index.refusal.js';
-import { heldUnreached, recordUnreached } from './baseline.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';

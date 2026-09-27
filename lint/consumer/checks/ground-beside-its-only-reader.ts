@@ -1,7 +1,7 @@
+import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
 import { entriesOf, SKIPPED, textOf, walkFiles } from '../../engine/project/facet-folders.js';
-import { GROUND_DIRS } from '../../engine/project/ground.js';
 import { isNodeTestFileName } from '../../engine/project/role.js';
 import type { Finding } from './checker.js';
 
@@ -18,7 +18,7 @@ function* walkDirectories(dir: string): Generator<string> {
 
 const SUBJECT_FOLDER_FACETS = new Set(['api', 'cli', 'job']);
 
-const GROUND = new Set<string>(GROUND_DIRS);
+const GROUND = new Set<string>(GROUND_FOLDERS);
 
 /** Such a test reads every golden of its leaf though its source names none. */
 const COMPUTED_GOLDEN = /\.toMatch\(\s*(?:file|directory)\(\s*(?:`|[A-Za-z_$])/u;

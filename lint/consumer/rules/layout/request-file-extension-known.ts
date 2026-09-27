@@ -1,10 +1,14 @@
+import {
+    GROUND_REQUESTS,
+    isDirectory,
+    lessonsAt,
+    listDirectory,
+    rowNamed,
+} from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, extname, join } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { isDirectory, listDirectory } from '../../../engine/project/fs-cache.js';
-import { GROUND_REQUESTS } from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';

@@ -1,9 +1,14 @@
+import {
+    isFile,
+    isGroundFolder,
+    lessonsAt,
+    rowNamed,
+    SETUP_FOLDER,
+    SHARED_FOLDER,
+} from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { isFile } from '../../../engine/project/fs-cache.js';
-import { isGroundName, SETUP_FOLDER, SHARED_FOLDER } from '../../../engine/project/ground.js';
 import { specsAnchorOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { declaresTests } from '../../../engine/project/specs-modules.js';
@@ -67,7 +72,7 @@ export const specsAtDeclaredDepth: LintRule = {
                 if (isNodeTest(base) || base.endsWith(SPECIFICATION_SUFFIX)) {
                     const folder = anchor.relative
                         .slice(0, -1)
-                        .find((segment) => isGroundName(segment) || segment === SETUP_FOLDER);
+                        .find((segment) => isGroundFolder(segment) || segment === SETUP_FOLDER);
                     if (folder !== undefined) {
                         if (!testsItsNeighbour(context.filename)) {
                             context.report({ data: { folder }, messageId: 'specInReserved', node });

@@ -1,5 +1,6 @@
+import type { Markers } from '@jterrazz/typescript/rules';
+
 import { rowTable } from '../../engine/catalogue/chapter.js';
-import type { Markers } from '../../engine/catalogue/chapter.js';
 import { selfRows } from './manifest.js';
 
 export const SELF_CHAPTER_MARKERS: Markers = {
@@ -8,5 +9,5 @@ export const SELF_CHAPTER_MARKERS: Markers = {
 };
 
 export function selfChapterTable(): string {
-    return rowTable(selfRows).join('\n');
+    return rowTable(selfRows);
 }

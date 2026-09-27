@@ -1,8 +1,8 @@
+import { treeKind } from '@jterrazz/typescript/rules';
+import type { Teaching } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
-import type { Teaching } from '../../engine/catalogue/lesson.js';
-import { treeKind } from '../../engine/project/git-tree.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import {

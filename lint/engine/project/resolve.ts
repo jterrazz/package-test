@@ -1,7 +1,6 @@
+import { treeKind } from '@jterrazz/typescript/rules';
 import { realpathSync } from 'node:fs';
 import { dirname, isAbsolute, resolve } from 'node:path';
-
-import { treeKind } from './git-tree.js';
 
 const ROOT_MARKER = 'package.json';
 

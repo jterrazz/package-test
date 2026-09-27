@@ -1,8 +1,7 @@
+import { isGroundFolder, SETUP_FOLDER, treeEntries } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
 import { specsAnchor } from '../../engine/project/ast.js';
-import { treeEntries } from '../../engine/project/git-tree.js';
-import { isGroundName, SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     documentPaths,
     parseSpecDocument,
@@ -156,7 +155,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
             .filter(
                 (entry) =>
                     entry.isDirectory() &&
-                    isGroundName(entry.name) &&
+                    isGroundFolder(entry.name) &&
                     isConventionalSubdir(join(dir, entry.name)),
             )
             .map((entry) => entry.name);

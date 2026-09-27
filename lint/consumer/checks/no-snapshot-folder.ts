@@ -1,7 +1,6 @@
+import { isGroundFolder, treeEntries, treeKind, treeNames } from '@jterrazz/typescript/rules';
 import { join, relative, sep } from 'node:path';
 
-import { treeEntries, treeKind, treeNames } from '../../engine/project/git-tree.js';
-import { isGroundName } from '../../engine/project/ground.js';
 import { SKIPPED } from '../../engine/project/module-tests.js';
 import type { Finding } from './checker.js';
 
@@ -34,7 +33,7 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Finding
         }
         for (const entry of entries) {
             const path = join(dir, entry.name);
-            if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundName(entry.name)) {
+            if (!entry.isDirectory() || SKIPPED.has(entry.name) || isGroundFolder(entry.name)) {
                 continue;
             }
             if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {

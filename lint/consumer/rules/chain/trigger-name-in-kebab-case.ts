@@ -1,6 +1,6 @@
+import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { memberPropertyName, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { toKebabCase } from '../../../engine/project/record-key.js';

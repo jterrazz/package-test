@@ -1,7 +1,7 @@
+import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, relative } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { Visitor } from '../../../engine/project/ast.js';
 import { isProductionFile } from '../../../engine/project/linted-file.js';
 import { mergeVisitors, pathReferenceVisitor } from '../../../engine/project/path-references.js';

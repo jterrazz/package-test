@@ -1,10 +1,8 @@
+import { GROUND_SEEDS, lessonsAt, listDirectory, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { listDirectory } from '../../../engine/project/fs-cache.js';
-import { GROUND_SEEDS } from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';

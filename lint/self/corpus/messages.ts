@@ -1,3 +1,4 @@
+import type { Chapter } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
@@ -14,7 +15,7 @@ export function rowNamed(name: string): (typeof allRows)[number] {
     return row;
 }
 
-export function chapterOf(name: string): string {
+export function chapterOf(name: string): Chapter {
     return rowNamed(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
 }
 

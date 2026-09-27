@@ -1,15 +1,15 @@
-import { basename, dirname, join } from 'node:path';
-
-import { importSourceVisitor, isNode } from './ast.js';
-import { treeEntries } from './git-tree.js';
 import {
-    isGroundName,
-    isReservedName,
+    isGroundFolder,
+    isReservedFolder,
     PRUNED,
     SETUP_FOLDER,
     SHARED_FOLDER,
+    treeEntries,
     UNMARKED_RESERVED,
-} from './ground.js';
+} from '@jterrazz/typescript/rules';
+import { basename, dirname, join } from 'node:path';
+
+import { importSourceVisitor, isNode } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import { visitProgram } from './path-references.js';
 import { resolveSpecifier } from './production.js';
@@ -51,7 +51,7 @@ export function modulesUnder(specsRoot: string): string[] {
         for (const entry of entries) {
             const path = join(dir, entry.name);
             if (entry.isDirectory()) {
-                if (!PRUNED.has(entry.name) && !isGroundName(entry.name)) {
+                if (!PRUNED.has(entry.name) && !isGroundFolder(entry.name)) {
                     visit(path);
                 }
             } else if (isModuleName(entry.name)) {
@@ -141,7 +141,7 @@ export function holdsASpec(folder: string): boolean {
     return entries.some((entry) =>
         entry.isDirectory()
             ? !PRUNED.has(entry.name) &&
-              !isReservedName(entry.name) &&
+              !isReservedFolder(entry.name) &&
               holdsASpec(join(folder, entry.name))
             : declaresTests(entry.name),
     );
@@ -157,7 +157,7 @@ export function isUnmarkedReserved(specsRoot: string, folder: string): boolean {
 function isRefusedReserved(specsRoot: string, folder: string): boolean {
     const name = basename(folder);
     return (
-        (name.startsWith('_') && !isReservedName(name)) ||
+        (name.startsWith('_') && !isReservedFolder(name)) ||
         (name === SHARED_FOLDER && dirname(folder) !== specsRoot) ||
         isUnmarkedReserved(specsRoot, folder)
     );

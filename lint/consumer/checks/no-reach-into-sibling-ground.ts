@@ -1,3 +1,9 @@
+import {
+    GROUND_FOLDERS,
+    moveKeepingHistory,
+    SHARED_FOLDER,
+    treeEntries,
+} from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
@@ -7,8 +13,6 @@ import {
     repointModuleTests,
     repointSource,
 } from '../../engine/checker/repoint.js';
-import { moveKeepingHistory, treeEntries } from '../../engine/project/git-tree.js';
-import { GROUND_DIRS, SHARED_FOLDER } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import {
     collectFixtureReferences,
@@ -24,14 +28,14 @@ import {
 import type { Finding } from './checker.js';
 
 export function poolsOf(specsRoot: string): string[] {
-    return GROUND_DIRS.map((ground) => join(specsRoot, SHARED_FOLDER, ground));
+    return GROUND_FOLDERS.map((ground) => join(specsRoot, SHARED_FOLDER, ground));
 }
 
 /** `map/pois/` holds the ground `map/pois/detail/` shares with it. */
 function enclosingGround(specsRoot: string, leaf: string): string[] {
     const ground: string[] = [];
     for (let folder = dirname(leaf); isWithin(specsRoot, folder) && folder !== specsRoot;) {
-        ground.push(...GROUND_DIRS.map((role) => join(folder, role)));
+        ground.push(...GROUND_FOLDERS.map((role) => join(folder, role)));
         const parent = dirname(folder);
         if (parent === folder) {
             break;
@@ -42,7 +46,7 @@ function enclosingGround(specsRoot: string, leaf: string): string[] {
 }
 
 function rootGroundOf(specsRoot: string): string[] {
-    return GROUND_DIRS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
+    return GROUND_FOLDERS.map((role) => join(specsRoot, role)).filter((folder) => isDir(folder));
 }
 
 export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {

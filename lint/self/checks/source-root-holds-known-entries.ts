@@ -1,6 +1,6 @@
 import type { NamesRule } from '@jterrazz/typescript/config';
+import { firstSentence, readAt, rowNamed } from '@jterrazz/typescript/rules';
 
-import { readAt, rowNamed, whyOf } from '../../engine/catalogue/lesson.js';
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 
 const TREES = ['elements', 'expectations', 'facets', 'kernel', 'vitest', 'world'];
@@ -30,5 +30,5 @@ export const sourceRootHoldsKnownEntries: NamesRule = {
     },
     name: 'source-root-holds-known-entries',
     read: readAt(row, SELF_CHAPTER),
-    why: whyOf(row.convention),
+    why: firstSentence(row.sentence),
 };

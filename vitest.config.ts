@@ -63,8 +63,8 @@ const config = defineSpecConfig({
                 timezone: 'Europe/Paris',
                 viewport: { height: 640, width: 1024 },
                 vite: {
-                    // The one dependency the seam does not pre-bundle for the app.
-                    optimizeDeps: { include: ['react-router'] },
+                    // The dependencies the seam does not pre-bundle: the app's router, and the rules kit the source reaches before the build bundles it.
+                    optimizeDeps: { include: ['react-router', '@jterrazz/typescript/rules'] },
                     resolve: {
                         // The public specifier resolves to the browser entry's source; `tsconfig`'s `paths` mirrors it.
                         alias: {

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { testSettingsAt } from './test-settings.js';
+import { testSectionAt, testSettingsAt } from './test-settings.js';
 
 function unit(config?: string): string {
     const root = mkdtempSync(join(tmpdir(), 'test-settings-'));
@@ -13,7 +13,7 @@ function unit(config?: string): string {
     return root;
 }
 
-describe('testSettingsAt', () => {
+describe('test-settings', () => {
     test('the test section of jterrazz.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
         // Given - a config typed as a repository writes it
         const root = unit(
@@ -65,5 +65,26 @@ describe('testSettingsAt', () => {
 
         // Then - each reads as no settings at all
         expect(roots.map((root) => testSettingsAt(root))).toStrictEqual([{}, {}, {}, {}]);
+    });
+
+    test('the test section of jterrazz.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
+        // Given - a member declaring an OpenAPI document and one method-less route
+        const root = unit(
+            "const routes: string = './openapi.yaml';\nexport default { test: { methodless: ['/mcp'], routes } };\n",
+        );
+
+        // Then - both reach the run as declared
+        await expect(testSectionAt(root)).resolves.toStrictEqual({
+            methodless: ['/mcp'],
+            routes: './openapi.yaml',
+        });
+    });
+
+    test('the test section of jterrazz.config.ts, as the run reads it — no file, and a key of the wrong shape, are no settings', async () => {
+        // Given - a unit with no config, and one whose routes is not a path
+        const roots = [unit(), unit('export default { test: { routes: 42 } };\n')];
+
+        // Then - neither declares anything the run would half-use
+        await expect(Promise.all(roots.map(testSectionAt))).resolves.toStrictEqual([{}, {}]);
     });
 });

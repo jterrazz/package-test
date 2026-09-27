@@ -1,8 +1,7 @@
+import { forgetTree } from '@jterrazz/typescript/rules';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
-
-import { forgetTree } from '../project/git-tree.js';
 
 /** Outside every work tree: the walk reads the disk. */
 export function specsTree(files: Record<string, string>): string {

@@ -1,10 +1,9 @@
+import { isFile, lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { findProperty, specificationMember, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { isFile } from '../../../engine/project/fs-cache.js';
 import { findRoot } from '../../../engine/project/resolve.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';

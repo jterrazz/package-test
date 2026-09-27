@@ -1,8 +1,8 @@
+import { GROUND_GLOB } from '@jterrazz/typescript/rules';
 import { configDefaults, mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { ATTACHMENTS_DIR, VITEST_ARTIFACTS_DIR } from '../../lint/engine/project/artifacts.js';
-import { GROUND_GLOB } from '../../lint/engine/project/ground.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import { tempRootSetup } from '../kernel/files/temp-root.js';
 

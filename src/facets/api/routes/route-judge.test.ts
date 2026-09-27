@@ -3,8 +3,8 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { heldUnreached } from '../../../../lint/engine/baseline/ratchet.js';
 import type { ChapterLesson } from '../../../../lint/index.refusal.js';
-import { heldUnreached } from './baseline.js';
 import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
 

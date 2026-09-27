@@ -41,6 +41,9 @@ function loadedBy(path: string): string[] {
     return loaded;
 }
 
+/** The rules kit serves a page the half that reads no disk, under its `browser` condition, and the browser build bundles it. */
+const LOADS_IN_A_PAGE: ReadonlySet<string> = new Set(['@jterrazz/typescript/rules']);
+
 export function outsideLoadsReached(root: string, starts: string[]): string[] {
     const seen = new Set<string>();
     const pending = starts.map((path) => resolve(root, path));
@@ -54,7 +57,7 @@ export function outsideLoadsReached(root: string, starts: string[]): string[] {
                 } else if (specifier.startsWith('.')) {
                     const target = resolve(dirname(path), specifier.replace(/\.js$/u, '.ts'));
                     pending.push(existsSync(target) ? target : `${target}x`);
-                } else {
+                } else if (!LOADS_IN_A_PAGE.has(specifier)) {
                     found.push(`${relative(root, path)} imports ${specifier}, a package`);
                 }
             }

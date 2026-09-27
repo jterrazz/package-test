@@ -1,6 +1,6 @@
+import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context, FixFn } from '@oxlint/plugins';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
     calleeOf,
     childList,

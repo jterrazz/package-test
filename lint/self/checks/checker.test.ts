@@ -1,3 +1,4 @@
+import { forgetTree } from '@jterrazz/typescript/rules';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
@@ -5,7 +6,6 @@ import { describe, expect, test } from 'vitest';
 
 import { CHECKER } from '../../consumer/checks/checker.js';
 import { runTree } from '../../engine/checker/tree-run.js';
-import { forgetTree } from '../../engine/project/git-tree.js';
 import { SELF_CHECKER, SELF_CHECKER_PASS_IDS } from './checker.js';
 
 function specsTree(files: Record<string, string>): string {

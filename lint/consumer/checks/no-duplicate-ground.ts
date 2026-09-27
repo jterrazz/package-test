@@ -1,3 +1,9 @@
+import {
+    GROUND_FOLDERS,
+    moveKeepingHistory,
+    treeEntries,
+    treeKind,
+} from '@jterrazz/typescript/rules';
 import { createHash } from 'node:crypto';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
@@ -8,8 +14,6 @@ import {
     repointModuleTests,
     repointSource,
 } from '../../engine/checker/repoint.js';
-import { moveKeepingHistory, treeEntries, treeKind } from '../../engine/project/git-tree.js';
-import { GROUND_DIRS } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import {
     findSpecsRoots,
@@ -63,7 +67,7 @@ function leafGroundOf(
         if (dir === specsRoot || isSharedFolder(dir)) {
             continue;
         }
-        for (const role of GROUND_DIRS) {
+        for (const role of GROUND_FOLDERS) {
             const ground = join(dir, role);
             if (!isConventionalSubdir(ground)) {
                 continue;

@@ -1,9 +1,8 @@
 import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
+import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
-
-import { GROUND_DIRS } from '../project/ground.js';
 
 const CONFIG_NAMES: readonly string[] = configNames;
 
@@ -33,7 +32,7 @@ const UNWALKED = new Set<string>([
     'coverage',
     'dist',
     'node_modules',
-    ...GROUND_DIRS,
+    ...GROUND_FOLDERS,
 ]);
 
 /** A config that fails to load exits 1 too, which alone reads as diagnostics left. */

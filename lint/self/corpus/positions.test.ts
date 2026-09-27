@@ -13,7 +13,7 @@ function row(name: string, channel: Row['channel']): Row {
     return {
         audience: 'consumer',
         channel,
-        convention: '',
+        sentence: '',
         facet: 'model',
         family: 'expectations',
         fix: '',

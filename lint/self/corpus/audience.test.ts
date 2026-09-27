@@ -1,3 +1,4 @@
+import { filesUnder } from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
 import { mkdtempSync, readdirSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
@@ -8,7 +9,6 @@ import { describe, expect, test } from 'vitest';
 import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
 import { RUNTIME_RULES } from '../../consumer/catalogue/manifest.js';
 import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
-import { filesUnder } from '../../engine/project/files-under.js';
 import { allRows, SELF_CHECKER_PASSES, selfRows } from '../catalogue/manifest.js';
 import {
     danglingImports,

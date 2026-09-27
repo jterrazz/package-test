@@ -1,11 +1,16 @@
+import {
+    forgetTree,
+    GROUND_EXPECTED,
+    GROUND_REQUESTS,
+    isGroundFolder,
+    treeKind,
+} from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, extname, isAbsolute, join, relative, resolve } from 'node:path';
 import { runInNewContext } from 'node:vm';
 
 import { withEntryImport, withoutEntryImport } from '../../engine/checker/entry-import.js';
 import { dedent } from '../../engine/project/dedent.js';
-import { forgetTree, treeKind } from '../../engine/project/git-tree.js';
-import { GROUND_EXPECTED, GROUND_REQUESTS, isGroundName } from '../../engine/project/ground.js';
 import { isRelativePath } from '../../engine/project/relative-path.js';
 import { isInside, literalSpans, nameAround } from '../../engine/project/spec-values.js';
 import type { Span } from '../../engine/project/spec-values.js';
@@ -86,7 +91,7 @@ function positionOf(text: string, index: number): { column: number; line: number
 
 /** `verb-reads-its-ground-folder`'s reading. */
 function roleOf(path: string): string | undefined {
-    return path.split('/').find((segment) => isGroundName(segment));
+    return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
 function referencesIn(file: string): Reference[] {

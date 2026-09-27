@@ -1,11 +1,10 @@
+import { lessonOf, readAt, rowNamed, stop } from '@jterrazz/typescript/rules';
 import { relative, resolve } from 'node:path';
 
-import { lessonAt, rowNamed } from '../catalogue/lesson.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { reportLine } from './finding.js';
 import type { Finding } from './finding.js';
 import type { AtZeroRegistry } from './registry.js';
-import { stop } from './stop.js';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 
@@ -28,7 +27,8 @@ export function runAtZero(registry: AtZeroRegistry, cliArguments: readonly strin
     const root = resolve(cliArguments[0] ?? '.');
     const findings = findingsUnder(root, registry);
     for (const finding of findings) {
-        const lesson = lessonAt(rowNamed(registry.rows, finding.rule), finding, registry.chapter);
+        const row = rowNamed(registry.rows, finding.rule);
+        const lesson = lessonOf(row, readAt(row, registry.chapter), finding);
         console.error(reportLine(finding, lesson));
     }
     if (findings.length > 0) {

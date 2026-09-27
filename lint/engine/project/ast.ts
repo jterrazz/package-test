@@ -1,7 +1,6 @@
+import { isFile, isOnDisk } from '@jterrazz/typescript/rules';
 import type { AfterHook, BeforeHook, Comment, Node } from '@oxlint/plugins';
 import { basename, dirname, join } from 'node:path';
-
-import { isFile, isOnDisk } from './fs-cache.js';
 
 /** A rule reads a node by its `type` and span and every other field defensively, decoupled from the generated ESTree union. The published declarations import `@oxlint/plugins`, so it is a dependency. */
 

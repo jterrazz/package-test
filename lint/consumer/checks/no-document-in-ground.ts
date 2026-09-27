@@ -1,8 +1,9 @@
-import { GROUND_DIRS } from '../../engine/project/ground.js';
+import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
+
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { Finding } from './checker.js';
 
-const GROUND_NAMES = new Set<string>(GROUND_DIRS);
+const GROUND_NAMES = new Set<string>(GROUND_FOLDERS);
 
 export function noDocumentInGroundFindings(file: string, name: string): Finding[] {
     return file.split(/[/\\]/u).some((segment) => GROUND_NAMES.has(segment))

@@ -1,8 +1,8 @@
+import { isFile, readFileCached } from '@jterrazz/typescript/rules';
 import { basename, dirname, join } from 'node:path';
 
 import { childList, isNode } from './ast.js';
 import type { AstNode } from './ast.js';
-import { isFile, readFileCached } from './fs-cache.js';
 import { parseProgram } from './module-parser.js';
 import type { FileRole } from './role.js';
 

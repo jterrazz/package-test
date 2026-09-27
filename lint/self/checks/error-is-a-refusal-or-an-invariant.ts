@@ -1,7 +1,7 @@
+import { anchorsOf } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
-import { anchorsOf } from '../../engine/catalogue/anchors.js';
 import type { Finding } from '../../engine/checker/finding.js';
 import {
     child,

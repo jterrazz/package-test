@@ -22,6 +22,8 @@ export const FRAMEWORK_LAYERS = {
             refusals: [],
         },
         imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
+        // The four-part lesson a refusal prints is the toolchain's rules kit.
+        packages: ['@jterrazz/typescript/rules'],
     },
     world: {
         folders: {
@@ -91,7 +93,8 @@ export const FRAMEWORK_LAYERS = {
             'expectations/in-place/in-place-setup',
             'lint/engine/',
         ],
-        packages: ['vitest'],
+        // The ground folders every project skips are the toolchain's rules kit.
+        packages: ['vitest', '@jterrazz/typescript/rules'],
     },
     lint: {
         imports: ['lint/'],

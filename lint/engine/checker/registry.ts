@@ -1,6 +1,7 @@
+import type { Chapter, Manifest } from '@jterrazz/typescript/rules';
+
 import type { Row } from '../catalogue/row.js';
 import type { DocumentFinding } from '../project/document-model.js';
-import type { Manifest } from '../project/member-manifest.js';
 import type { SpecFile } from '../project/spec-document.js';
 import type { Finding } from './finding.js';
 
@@ -37,7 +38,7 @@ export type GroundPasses = {
 };
 
 export type CheckerRegistry = {
-    chapter: string;
+    chapter: Chapter;
     fixes: readonly ((root: string) => string[])[];
     member: Judge<MemberRead>;
     memberPassIds: readonly string[];
@@ -47,7 +48,7 @@ export type CheckerRegistry = {
 };
 
 export type AtZeroRegistry = {
-    chapter: string;
+    chapter: Chapter;
     label: string;
     passIds: readonly string[];
     rows: readonly Row[];

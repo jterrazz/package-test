@@ -1,14 +1,13 @@
+import { isDirectory, lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import {
     collectsAFile,
     projectLiterals,
     staticPrefix,
 } from '../../../engine/project/config-shape.js';
-import { isDirectory } from '../../../engine/project/fs-cache.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';

@@ -1,21 +1,6 @@
+import { anchor, cell, markdownTable } from '@jterrazz/typescript/rules';
+
 import type { Row } from './row.js';
-
-export type Markers = { end: string; start: string };
-
-export function cell(text: string): string {
-    return text.replaceAll('|', String.raw`\|`);
-}
-
-/** Padded the way oxfmt canonicalizes a table, so the generated chapter is format-clean; every cell character is BMP width-1, so `String.length` is the display width. */
-export function table(headers: string[], rows: string[][]): string[] {
-    const widths = headers.map((header, index) =>
-        Math.max(header.length, 3, ...rows.map((row) => (row[index] ?? '').length)),
-    );
-    const line = (cells: string[]): string =>
-        `| ${cells.map((text, index) => text.padEnd(widths[index] ?? 0)).join(' | ')} |`;
-    const separator = `| ${widths.map((width) => '-'.repeat(width)).join(' | ')} |`;
-    return [line(headers), separator, ...rows.map(line)];
-}
 
 const CHANNEL_ORDER: Record<Row['channel'], number> = {
     statique: 0,
@@ -27,10 +12,6 @@ const CHANNEL_ORDER: Record<Row['channel'], number> = {
     meta: 6,
     process: 7,
 };
-
-export function anchor(name: string): string {
-    return `<a id="${name}"></a>`;
-}
 
 function counts(published: Row[]): Record<Row['channel'], number> {
     const tally: Record<Row['channel'], number> = {
@@ -51,15 +32,15 @@ function counts(published: Row[]): Record<Row['channel'], number> {
 
 const COLUMNS = ['Rule', 'Facet', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
-export function rowTable(rows: Row[]): string[] {
-    return table(
+export function rowTable(rows: Row[]): string {
+    return markdownTable(
         COLUMNS,
         rows.map((entry) => [
             `${anchor(entry.name)}\`${entry.name}\``,
             entry.facet,
             entry.channel,
             entry.reach,
-            cell(entry.convention),
+            cell(entry.sentence),
             cell(entry.fix),
             cell(entry.rationale),
         ]),
@@ -73,7 +54,7 @@ function catalogueSections(published: Row[], families: Record<string, string>): 
             .sort((a, b) => CHANNEL_ORDER[a.channel] - CHANNEL_ORDER[b.channel]);
         return rows.length === 0
             ? []
-            : [[`## ${family} — ${title}`, '', ...rowTable(rows)].join('\n')];
+            : [[`## ${family} — ${title}`, '', rowTable(rows)].join('\n')];
     });
 }
 
@@ -96,18 +77,4 @@ export function catalogueBody(published: Row[], families: Record<string, string>
         .join(', ');
     const intro = `Every rule a project using the framework meets, across its enforcement channels — ${channels} — sourced from one manifest so the code and the catalogue can never drift.`;
     return [intro, ...catalogueSections(published, families)].join('\n\n');
-}
-
-export function spliceBetween(
-    existing: string,
-    markers: Markers,
-    body: string,
-    page: string,
-): string {
-    const start = existing.indexOf(markers.start);
-    const end = existing.indexOf(markers.end);
-    if (start === -1 || end === -1) {
-        throw new Error(`${page} is missing its markers (${markers.start} … ${markers.end})`);
-    }
-    return `${existing.slice(0, start)}${markers.start}\n\n${body}\n\n${existing.slice(end)}`;
 }

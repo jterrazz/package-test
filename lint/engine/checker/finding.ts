@@ -1,4 +1,5 @@
-import type { Teaching } from '../catalogue/lesson.js';
+import { reportLine as compilerLine } from '@jterrazz/typescript/rules';
+import type { Teaching } from '@jterrazz/typescript/rules';
 
 export const CHECKER_NAMESPACE = 'jterrazz-check';
 
@@ -12,8 +13,6 @@ export type Finding<PassId extends string = string> = Teaching & {
     token?: string;
 };
 
-/** The compiler convention every editor's problem matcher parses, and oxlint's findings normalise to. */
 export function reportLine(violation: Finding, message: string): string {
-    const { column, file, line, rule } = violation;
-    return `${file}:${line}:${column ?? 1}: error ${CHECKER_NAMESPACE}(${rule}): ${message}`;
+    return compilerLine(CHECKER_NAMESPACE, { ...violation, path: violation.file }, message);
 }

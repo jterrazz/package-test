@@ -1,6 +1,6 @@
+import { lessonParts } from '@jterrazz/typescript/rules';
 import { describe, expect, test } from 'vitest';
 
-import { lessonParts } from './engine/catalogue/lesson-parts.js';
 import { invariant, refusal, REFUSAL_WHY } from './index.refusal.js';
 
 describe('index.refusal', () => {

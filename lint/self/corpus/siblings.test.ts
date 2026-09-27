@@ -1,10 +1,10 @@
+import { spliceBetween } from '@jterrazz/typescript/rules';
 import { execFileSync } from 'node:child_process';
 import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { spliceBetween } from '../../engine/catalogue/chapter.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import { classified, renderSiblings, siblingless, SIBLINGS_MARKERS } from './siblings.js';
 

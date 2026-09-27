@@ -1,7 +1,6 @@
+import { isGroundFolder, treeEntries, treeKind } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
-import { treeEntries, treeKind } from './git-tree.js';
-import { isGroundName } from './ground.js';
 import { isTestFileName } from './role.js';
 
 export const SKIPPED = new Set(['.git', '.artifacts', 'coverage', 'dist', 'node_modules']);
@@ -23,7 +22,7 @@ export function moduleTestsOf(member: string): string[] {
             } else if (
                 entry.isDirectory() &&
                 !SKIPPED.has(entry.name) &&
-                !isGroundName(entry.name) &&
+                !isGroundFolder(entry.name) &&
                 entry.name !== 'specs' &&
                 treeKind(join(path, 'package.json')) !== 'file'
             ) {

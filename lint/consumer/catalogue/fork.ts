@@ -1,5 +1,5 @@
-import { cell, table } from '../../engine/catalogue/chapter.js';
-import type { Markers } from '../../engine/catalogue/chapter.js';
+import { cell, markdownTable } from '@jterrazz/typescript/rules';
+import type { Markers } from '@jterrazz/typescript/rules';
 
 export const FORK_CHAPTER = 'docs/18-conventions.md';
 
@@ -83,8 +83,8 @@ export const FORK: ForkRow[] = [
     },
 ];
 
-export function forkTable(): string[] {
-    return table(
+export function forkTable(): string {
+    return markdownTable(
         ['Question', 'Kind', 'Lives at', 'Constructor', 'Project'],
         FORK.map((row) => [
             cell(row.question),

@@ -1,8 +1,7 @@
+import { cell, markdownTable } from '@jterrazz/typescript/rules';
+import type { Markers } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-
-import { cell, table } from '../../engine/catalogue/chapter.js';
-import type { Markers } from '../../engine/catalogue/chapter.js';
 
 /** A row says what the file's own top-level `describe` titles say, never a second description kept beside them. */
 
@@ -57,6 +56,6 @@ export function renderMetaTests(root: string): string {
     return [
         `**${total} files** are the channel — every \`*.test.ts\` directly under ${META_TESTS_LAYER_ROOTS.map((folder) => `\`${folder}/\``).join(' or ')}, plus the suite that needs the real binary. What each one holds is its own \`describe\` titles, read from the file:`,
         '',
-        ...table(['Meta-test', 'Holds', 'Tests'], rows),
+        markdownTable(['Meta-test', 'Holds', 'Tests'], rows),
     ].join('\n');
 }

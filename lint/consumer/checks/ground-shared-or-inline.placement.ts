@@ -1,9 +1,13 @@
+import {
+    isGroundFolder,
+    moveKeepingHistory,
+    SHARED_FOLDER,
+    treeKind,
+} from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { relativeLiterals } from '../../engine/checker/repoint.js';
-import { moveKeepingHistory, treeKind } from '../../engine/project/git-tree.js';
-import { isGroundName, SHARED_FOLDER } from '../../engine/project/ground.js';
 import { moduleTestsOf } from '../../engine/project/module-tests.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import { literalSpans } from '../../engine/project/spec-values.js';
@@ -31,7 +35,7 @@ type Misplaced = Entry & { lowest: string; referrers: string[]; spread: boolean 
 
 function entryOf(specsRoot: string, target: string): Entry | undefined {
     const segments = relative(specsRoot, target).split(sep);
-    const at = segments.findIndex((segment) => isGroundName(segment));
+    const at = segments.findIndex((segment) => isGroundFolder(segment));
     const entry = segments[at + 1];
     if (at === -1 || entry === undefined || entry === '' || segments[0] === '..') {
         return undefined;

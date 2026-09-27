@@ -1,10 +1,10 @@
+import { GROUND_GLOB } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { VITEST_ARTIFACTS_DIR } from '../lint/engine/project/artifacts.js';
-import { GROUND_GLOB } from '../lint/engine/project/ground.js';
 import { api, cli, defineSpecConfig, integration, job, mobile } from './index.vitest.js';
 import { servicesSetup } from './world/services/containers/run-setup.js';
 

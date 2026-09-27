@@ -1,7 +1,3 @@
-import { existsSync } from 'node:fs';
-import { join } from 'node:path';
-import { pathToFileURL } from 'node:url';
-
 import type { TestSettings } from './settings.js';
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -29,9 +25,7 @@ function reasonsOf(value: unknown): Record<string, string> | undefined {
 }
 
 /** A key of the wrong shape is read as absent, never half-used. */
-export function testSettingsOf(loaded: unknown): TestSettings {
-    const config = isRecord(loaded) ? loaded.default : undefined;
-    const test = isRecord(config) ? config.test : undefined;
+export function testSettingsOf(test: unknown): TestSettings {
     if (!isRecord(test)) {
         return {};
     }
@@ -45,13 +39,4 @@ export function testSettingsOf(loaded: unknown): TestSettings {
         ...(allow === undefined ? {} : { production: { allow } }),
         ...(routes === undefined ? {} : { routes }),
     };
-}
-
-export async function testSectionAt(root: string): Promise<TestSettings> {
-    const path = join(root, 'jterrazz.config.ts');
-    if (!existsSync(path)) {
-        return {};
-    }
-    const loaded: unknown = await import(pathToFileURL(path).href);
-    return testSettingsOf(loaded);
 }

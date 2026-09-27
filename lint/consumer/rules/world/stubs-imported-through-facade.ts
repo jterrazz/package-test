@@ -1,6 +1,6 @@
+import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import { importSourceVisitor } from '../../../engine/project/ast.js';
 import type { Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';

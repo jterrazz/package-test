@@ -7,7 +7,7 @@ export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'statique',
-        convention:
+        sentence:
             'A facet file — `src/facets/<facet>/<facet>.facet.ts` — is a composition and nothing else: its imports, one `const composition = { … }` listing the setups, the actions and the constructor options it composes, the chain type it names as an interface, and one exported `defineFacet<…>()({ … })` — the definer handed nothing — whose `adapters` is an arrow, each parameter a bare name with no default nor pattern, handing back the object of the adapters it wires; any other statement — a function, a class, a variable, a call — is an error. Nothing in them is written inline either: the composition lists by name setups and actions imported from a `*.capability.ts` or `*.action.ts` module, and states each option as a matrix row of string literals; each adapter that arrow hands back is a name, a read of the config, or a constructor an adapter module (`*.adapter.ts`) exports — under `world/`, or in a concept folder of the facet — called on those; and every other member of the facet is a reference imported from its module. Every key of the composition, of its options and their rows, of the facet and of the adapters is a name written as it is, never a computed `[…]`. The constructor beside it, `<facet>.handle.ts`, starts the infrastructure and opens the facet: it never calls a step (`reduce`, `arm`, `perform`) of a definition imported from a `*.capability.ts` or `*.action.ts` module — read off it by a written or a string key, through a namespace import, a cast or a `const` alias of it or of the step, destructured (a default included), off the facet’s composition, or through `call`/`apply`, wherever in the file the alias is declared — nor builds with `new` a result imported from a `*.result.ts` module or `expectations/`, by name or through a namespace import. A step reaching the constructor any other way — a function parameter, a `bind`, a value it computes — is beyond the rule’s reach.',
         facet: 'model',
         family: 'architecture',
@@ -23,7 +23,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'The chain kernel and every setup load in a page: no module of the chain kernel (`src/kernel/chain/`) or a setup module (`src/**/*.capability.ts`) reaches — through its value imports, its re-exports and every `import()` of a string literal, at any depth — imports a node builtin, or a package at all: the walk cannot follow a package into its own imports, so none is reached. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.',
         facet: 'model',
         family: 'architecture',
@@ -36,7 +36,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'A definition is its module. Every setup a `<name>.capability.ts` exports is named `<name>`, and every action an `*.action.ts` exports is one that file is listed for; the setups and the actions found under `src/` are exactly the ones the meta-test lists. Each is tested beside its module, or claimed by a kind of `lint/self/corpus/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` beside it exactly when it arms an adapter.',
         facet: 'model',
         family: 'architecture',
@@ -52,7 +52,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
-        convention:
+        sentence:
             'A folder under `src/` is named for a concept, never a role (`ports/`, `adapters/`, `capabilities/`, `actions/`, `results/`, `types/`, `utils/`, `helpers/`, `common/`, `lib/`, `core/`, `shared/`, `misc/`): the role rides on the file suffix (`*.port.ts`, `*.adapter.ts`, `*.capability.ts` …). It holds two entries or more — a lone file sits at its parent — and a facet with concept folders holds at its root its face alone: `index.ts` (and the component\u2019s `index.browser.ts`), `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts` and their tests. Ground (`_fixtures/`, `_expected/`, `_requests/`, `_seeds/`) is exempt. An error at the folder, or at the stray file.',
         facet: 'model',
         family: 'architecture',
@@ -65,7 +65,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
-        convention:
+        sentence:
             'The stubs are entered by what they publish: from outside `src/world/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts` or `intercept/intercept.capability.ts` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a facet the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` (the delivery port `intercept.port.ts` among it) and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
         facet: 'model',
         family: 'architecture',
@@ -78,7 +78,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
-        convention:
+        sentence:
             'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`). Implementing is read off the module: a class whose `implements` names a `*Port` imported from a `*.port.ts`, or an object literal annotated with one or `satisfies` one; a delegate choosing between adapters implements the port too, and is one. Such an implementation outside a `*.adapter.ts` is an error at it; a module whose name carries `.driver` before its extension — the module, its test, type test, fixtures or browser entry, `.ts` or `.tsx` — is an error at its first line.',
         facet: 'model',
         family: 'architecture',
@@ -91,7 +91,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
-        convention:
+        sentence:
             "An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: `new Error(refusal(…))`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (`docs/05-module-tests.md#time`) or a catalogue row. An error only the framework can cause, a broken internal invariant, is `invariant('<what broke>')`, whose message says the bug is the framework\u2019s. Any other construction of an error under `src/` — `new` on a built-in error class or on a class of `src/` that extends one, or a built-in called bare (`Error(…)`) — is an error at the construction, a stack read (`new Error().stack`) and tests excepted; a refusal reading a heading no chapter has, an error at its read.",
         facet: 'model',
         family: 'architecture',
@@ -107,7 +107,7 @@ export const ARCHITECTURE_TOOLCHAIN_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'toolchain',
-        convention:
+        sentence:
             'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, the entries\u2019 tests `index.test.ts` and `index.vitest.test.ts`, the type channel `type-channel.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
         facet: 'model',
         family: 'architecture',

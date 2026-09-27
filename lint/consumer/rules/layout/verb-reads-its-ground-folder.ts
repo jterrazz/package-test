@@ -1,6 +1,14 @@
+import {
+    GROUND_EXPECTED,
+    GROUND_FIXTURES,
+    GROUND_REQUESTS,
+    GROUND_SEEDS,
+    isGroundFolder,
+    lessonsAt,
+    rowNamed,
+} from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import {
     child,
     childList,
@@ -9,13 +17,6 @@ import {
     memberPropertyName,
 } from '../../../engine/project/ast.js';
 import type { AstNode, DiskCall, Visitor } from '../../../engine/project/ast.js';
-import {
-    GROUND_EXPECTED,
-    GROUND_FIXTURES,
-    GROUND_REQUESTS,
-    GROUND_SEEDS,
-    isGroundName,
-} from '../../../engine/project/ground.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
 import type { LintRule } from '../../../engine/project/rule.js';
@@ -62,7 +63,7 @@ function diskArgument(
 }
 
 function groundOf(path: string): string | undefined {
-    return path.split('/').find((segment) => isGroundName(segment));
+    return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
 /** Judged by the first ground folder the literal path passes through; a computed path is out of reach. */

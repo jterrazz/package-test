@@ -1,3 +1,4 @@
+import { isDirectory, listDirectory } from '@jterrazz/typescript/rules';
 import { join } from 'node:path';
 
 import {
@@ -11,7 +12,6 @@ import {
 } from './ast.js';
 import type { AstNode } from './ast.js';
 import { FACETS } from './facets.js';
-import { isDirectory, listDirectory } from './fs-cache.js';
 
 /** Only the literal form is read: a project a helper builds carries the framework's canonical name and include, with nothing to disagree with. */
 

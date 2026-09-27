@@ -1,3 +1,4 @@
+import { isGroundFolder } from '@jterrazz/typescript/rules';
 import { relative } from 'node:path';
 
 import {
@@ -7,12 +8,11 @@ import {
     walkFiles,
 } from '../../engine/project/facet-folders.js';
 import { reachesRunner } from '../../engine/project/facets.js';
-import { isGroundName } from '../../engine/project/ground.js';
 import { isTestFileName } from '../../engine/project/role.js';
 import type { Finding } from './checker.js';
 
 function isUnderGround(relativePath: string): boolean {
-    return relativePath.split(/[/\\]/u).some((segment) => isGroundName(segment));
+    return relativePath.split(/[/\\]/u).some((segment) => isGroundFolder(segment));
 }
 
 export function checkFacetTestUsesItsRunner(specsRoot: string): Finding[] {

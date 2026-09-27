@@ -1,5 +1,6 @@
+import { byName } from '@jterrazz/typescript/rules';
+
 import { consumerRows } from '../../consumer/catalogue/manifest.js';
-import { ordered } from '../../engine/catalogue/row.js';
 import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
 import {
     ARCHITECTURE_META_ROWS,
@@ -24,7 +25,7 @@ export const SELF_CHECKER_PASSES: Row[] = [
     {
         audience: 'self',
         channel: 'checker',
-        convention:
+        sentence:
             'A spec of a SPECIMEN, and every file of the component tree, is filed by the capability it specifies. A `.spec.ts` whose runner drives an app under a `_fixtures/`, its facet’s or the pool’s — a specification module it imports a runner from, one that module imports a runner from, or the spec itself when it builds its runner inline, names it in a literal: a file inside a specimen’s folder — the app module, the binary, the script a command runs — or the folder itself as the root a `server: { command }` of the runner it feeds runs from, whether the literal is written in the call or in a `const` the call names (a root alone is where the services read their ground, and no app) — or an integration spec importing the fixtures module its chains call, specifies the framework, not that app, and sits one folder below its facet, in a folder the capability matrix names for that facet’s column (`<specs>/api/seed/<aspect>.spec.ts`), one file per aspect of the capability. The vocabulary is closed: each capability the matrix declares for the column, the words before its first parenthesis kebab-cased (`.seed()` → `seed`, `toMatch(file())` → `to-match`, `.exitCode` → `exit-code`); a capability of another column is no folder of this facet (`appium` is mobile’s, never `cli/appium/`). A first-level folder that is no facet has no column, and takes a capability of any. `one-subject-per-spec` and `spec-in-subject-folder` leave such a spec alone. The component facet’s own tree is the fixture app its tests render, and it is filed the same way: every `.ts` and `.tsx` under `<specs>/component/` — a rendered unit, the hook or DOM function a test hosts, the `.test.tsx` beside it, the project’s frame — sits one folder below it, in a folder the matrix names for the `component` column, the capability its test specifies (`<specs>/component/intercept/post-table.tsx`). An error at the file’s first line of code, where a reasoned `checker-disable-next-line specimen-filed-by-capability` above it silences it.',
         facet: 'model',
         family: 'layout',
@@ -42,7 +43,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every environment variable the framework reads is on the allow-list, and a dynamic read carries its sanction comment.',
         facet: 'model',
         family: 'setup',
@@ -55,7 +56,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every rule id cited in `docs/**`, `skills/**`, `README.md` or a rule message resolves to a catalogue row.',
         facet: 'model',
         family: 'catalogue',
@@ -68,7 +69,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             "Every diagnostic's `read:` part is its own row's heading, generated from the row, and the heading exists in the generated chapter.",
         facet: 'model',
         family: 'catalogue',
@@ -81,7 +82,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every message a static rule, a checker pass or a runtime refusal of the catalogue prints teaches in four parts, in this order — `found:` the finding located, `why:` the convention in one sentence, `fix:` the gesture for this case, `read:` the chapter anchor; a message that lacks a part, leaves one empty or garbles their order is refused.',
         facet: 'model',
         family: 'catalogue',
@@ -94,7 +95,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every REACH a row can state is proven on one fixture project laid out with every path role, by at least one rule of that reach, judged by a single oxlint run.',
         facet: 'model',
         family: 'catalogue',
@@ -107,7 +108,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a golden of its `specs/lint/<rule>/` folder or its `specs/lint/checker/<rule>.test.ts` naming the rule at a `line:col`, or a RuleTester case of its unit test stating the `line`. A row with none cannot enter the catalogue.',
         facet: 'model',
         family: 'catalogue',
@@ -120,7 +121,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'No catalogue sentence has gone back to French — a deny-list of the tokens the manifest actually carried.',
         facet: 'model',
         family: 'catalogue',
@@ -133,7 +134,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'A source module with no `<file>.test.ts` beside it falls into one declared kind, and the kind states where its proof is instead.',
         facet: 'model',
         family: 'layout',
@@ -146,7 +147,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every capability a facet DECLARES — a constructor option, a setup, a terminal action, a verb, a result accessor, a golden kind, a `{{token}}` family — is exercised by at least one of the package\u2019s own test files in that facet, or its row names the reason it is not.',
         facet: 'model',
         family: 'catalogue',
@@ -159,7 +160,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every coordinate the corpus writes resolves: a relative link lands on a file and its anchor on a heading of that file, and every `docs/NN` a source comment cites names a chapter that exists.',
         facet: 'model',
         family: 'catalogue',
@@ -172,7 +173,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             "No spec, module test or fixture server of this package reads a port it was handed (`process.env.PORT`, `$PORT`): a server a spec starts binds port 0 and announces the port it got, which the process reads through its `ready` banner. A server a container image runs (a folder holding a `Dockerfile`) owns its container's ports and is out of reach, and so is `src/world/services/process/serve.test.ts`, the proof of the framework's PORT form, whose children report the port they were handed and never bind it.",
         facet: 'model',
         family: 'world',
@@ -185,7 +186,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'A lint-rule document — under `specs/lint/`, less the fixtures another document feeds a violation through — that asserts a failing `exit:` also goldens `stdout:` or `stderr:`: the report that says WHICH rule fired, not only that one did.',
         facet: 'model',
         family: 'expectations',
@@ -198,7 +199,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every catalogue row declares its audience — `consumer`, what a project using the package meets, or `self`, this package’s own suite discipline — and lives in the manifest of its audience, and the tarball exposes no `self` rule, read as `npm pack` writes it and extracted: no byte of it — bundle, chunk, type, page, manifest — names a self row by its name or its code, nor the `jterrazz-self` plugin; every target the `exports` map publishes but a type and a JSON file is a `.js`, `.cjs` or `.mjs` module, so none is left unloaded; no module the `exports` map publishes, loaded under each condition node loads, carries at any depth a rule object whose `meta.docs` says `self` or a key or string naming a self row; no bin it publishes prints a self pass’s finding over that pass’s fixtures; no packed chunk is one only an unpacked bundle loads, no packed bundle imports a module the tarball lacks, and none cites a page the tarball leaves out; no row of the runtime, type or upstream channel is `self`, and no row of the meta channel is `consumer`, every refusal the runtime raises being a consumer row read at a heading of the catalogue.',
         facet: 'model',
         family: 'catalogue',
@@ -212,7 +213,7 @@ export const META_ROWS: Row[] = [
     {
         audience: 'self',
         channel: 'meta',
-        convention:
+        sentence:
             'Every constructor has a `specs/<facet>/` tree in this package. Two subjects are proven differently, each with its reason stated: `component` is a CHAIN, not a constructor, and is proven beside its fixture app under `specs/component/`; `mobile` is proven against a double of the Appium protocol in every run, because CI provisions no simulator, and the same specs against a real one by `make test-mobile`.',
         facet: 'model',
         family: 'setup',
@@ -228,7 +229,7 @@ export const SELF_PROCESS_RULES: Row[] = [
     {
         audience: 'self',
         channel: 'process',
-        convention:
+        sentence:
             'Every defect class discovered produces, in the same change, the guard that stops it coming back (a static rule, a meta-test or a runtime error) — or documents why no channel can hold it.',
         facet: 'model',
         family: 'catalogue',
@@ -239,7 +240,7 @@ export const SELF_PROCESS_RULES: Row[] = [
     },
 ];
 
-export const selfRows: Row[] = ordered([
+export const selfRows: Row[] = byName([
     ...SELF_STATIQUE_RULES,
     ...SELF_TOOLCHAIN_RULES,
     ...SELF_CHECKER_PASSES,
@@ -247,4 +248,4 @@ export const selfRows: Row[] = ordered([
     ...SELF_PROCESS_RULES,
 ]);
 
-export const allRows: Row[] = ordered([...consumerRows, ...selfRows]);
+export const allRows: Row[] = byName([...consumerRows, ...selfRows]);

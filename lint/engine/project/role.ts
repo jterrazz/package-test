@@ -1,8 +1,7 @@
+import { folderChanged, GROUND_FOLDERS, isFile } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { isProjectRoot, isUnderSpecs, segments } from './ast.js';
-import { folderChanged, isFile } from './fs-cache.js';
-import { GROUND_DIRS } from './ground.js';
 
 /** The suffix decides the kind, and folders are read below the project root: a checkout under `_fixtures/` or `__tests__/` is the machine's business. */
 
@@ -25,7 +24,7 @@ export type FileIdentity = {
     role: FileRole;
 };
 
-const GROUND = new Set<string>(GROUND_DIRS);
+const GROUND = new Set<string>(GROUND_FOLDERS);
 
 const CONFIG = /^vitest\.config\.[cm]?[jt]s$/u;
 

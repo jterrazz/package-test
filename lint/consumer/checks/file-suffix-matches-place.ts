@@ -1,10 +1,9 @@
+import { isGroundFolder, moveKeepingHistory, treeEntries } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
 import { finding } from '../../engine/project/document-model.js';
 import { FACETS, reachesRunner } from '../../engine/project/facets.js';
-import { moveKeepingHistory, treeEntries } from '../../engine/project/git-tree.js';
-import { isGroundName } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { DocumentFinding, Finding } from './checker.js';
 import { staleIncludes } from './file-suffix-matches-place.stale-includes.js';
@@ -108,7 +107,7 @@ function movesUnderFacet(specsRoot: string): PlacementMove[] {
             continue;
         }
         // A `<module>.test.ts` beside its `<module>.ts` is `test-beside-its-module`'s pairing, legal anywhere.
-        if (parts.some((part) => isGroundName(part))) {
+        if (parts.some((part) => isGroundFolder(part))) {
             continue;
         }
         if (!reachesRunner(textOf(path))) {

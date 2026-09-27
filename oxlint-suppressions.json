@@ -203,16 +203,6 @@
             "count": 1
         }
     },
-    "lint/engine/catalogue/lesson-parts.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "lint/engine/catalogue/lesson.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "lint/engine/checker/cli.ts": {
         "max-lines": {
             "count": 1
@@ -248,17 +238,6 @@
         },
         "typescript/no-unsafe-type-assertion": {
             "count": 2
-        }
-    },
-    "lint/engine/project/package-exports.ts": {
-        "no-unused-vars": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
-        "unicorn/no-array-sort": {
-            "count": 1
         }
     },
     "lint/engine/project/production.ts": {
@@ -308,11 +287,6 @@
     },
     "lint/engine/project/subject.ts": {
         "max-lines": {
-            "count": 1
-        }
-    },
-    "lint/engine/project/suppression.ts": {
-        "complexity": {
             "count": 1
         }
     },

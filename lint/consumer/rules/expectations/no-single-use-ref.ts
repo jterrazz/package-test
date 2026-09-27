@@ -1,15 +1,16 @@
-import type { Context } from '@oxlint/plugins';
-import { dirname, join, resolve } from 'node:path';
-
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
-import { goldenOf, memberPropertyName, stringValue, walk } from '../../../engine/project/ast.js';
-import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import {
     isDirectory,
     isFile,
+    lessonsAt,
     listDirectory,
     readFileCached,
-} from '../../../engine/project/fs-cache.js';
+    rowNamed,
+} from '@jterrazz/typescript/rules';
+import type { Context } from '@oxlint/plugins';
+import { dirname, join, resolve } from 'node:path';
+
+import { goldenOf, memberPropertyName, stringValue, walk } from '../../../engine/project/ast.js';
+import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isRelativePath } from '../../../engine/project/relative-path.js';
 import { isTestRole } from '../../../engine/project/role.js';

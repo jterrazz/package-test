@@ -1,7 +1,6 @@
+import { treeEntries } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
-
-import { treeEntries } from '../../engine/project/git-tree.js';
 
 /** Meta-test `server-binds-port-zero`: a picked-then-bound port is a window another server can take, so a server binds 0 and announces; nothing on the host reads `PORT`. A folder holding a `Dockerfile` is a container's, whose ports are its own. */
 

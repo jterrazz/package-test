@@ -1,3 +1,4 @@
+import { forgetTree, GROUND_SEEDS } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { runInNewContext } from 'node:vm';
@@ -8,8 +9,6 @@ import {
     withoutEntryImport,
 } from '../../engine/checker/entry-import.js';
 import { dedent } from '../../engine/project/dedent.js';
-import { forgetTree } from '../../engine/project/git-tree.js';
-import { GROUND_SEEDS } from '../../engine/project/ground.js';
 import {
     isInside,
     kebabName,

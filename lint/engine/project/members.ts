@@ -1,60 +1,15 @@
+import { readManifest, treeEntries, workspaceMembers } from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
-import { basename, join, relative, sep } from 'node:path';
+import { basename, join, relative } from 'node:path';
 
-import { treeEntries } from './git-tree.js';
-import { MEMBER_DEPTH, readManifest, workspacePatterns } from './member-manifest.js';
 import { SKIPPED } from './module-tests.js';
-
-/** The translation `@jterrazz/typescript`'s `lib/workspace-members.js` makes: the two member lists must be one list, or the ratchet can neither record nor clear a finding. */
-function toPattern(glob: string): RegExp {
-    const escaped = glob
-        .replaceAll(/[.+^${}()|[\]\\]/gu, String.raw`\$&`)
-        .replaceAll('**', ' ')
-        .replaceAll('*', '[^/]*')
-        .replaceAll(' ', '.*');
-    return new RegExp(`^${escaped}$`, 'u');
-}
 
 /** The root itself included: a single-package repository is its own member. */
 export function discoverMembers(rootDir: string): string[] {
-    const manifest = readManifest(rootDir);
-    if (manifest === null) {
+    if (readManifest(rootDir) === null) {
         return [];
     }
-    const patterns = workspacePatterns(manifest)
-        .filter((glob) => typeof glob === 'string' && !glob.startsWith('!'))
-        .map((glob) => toPattern(glob.replace(/\/+$/u, '')));
-    const members = new Set<string>([rootDir]);
-    if (patterns.length === 0) {
-        return [...members];
-    }
-
-    const walk = (dir: string, depth: number): void => {
-        if (depth > MEMBER_DEPTH) {
-            return;
-        }
-        let entries;
-        try {
-            entries = treeEntries(dir);
-        } catch {
-            return;
-        }
-        for (const entry of entries) {
-            if (!entry.isDirectory() || entry.name.startsWith('.') || SKIPPED.has(entry.name)) {
-                continue;
-            }
-            const child = join(dir, entry.name);
-            const path = relative(rootDir, child).split(sep).join('/');
-            // A member is never walked into: what it contains is its own workspace.
-            if (patterns.some((pattern) => pattern.test(path)) && readManifest(child) !== null) {
-                members.add(child);
-                continue;
-            }
-            walk(child, depth + 1);
-        }
-    };
-    walk(rootDir, 0);
-    return [...members];
+    return [rootDir, ...workspaceMembers(rootDir).map((member) => join(rootDir, member))];
 }
 
 /** The toolchain skips them too, so the two lists agree. */

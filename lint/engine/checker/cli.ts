@@ -1,18 +1,17 @@
+import { BASELINE, readCommandLine, refusal, stop, tightened } from '@jterrazz/typescript/rules';
 import { existsSync, statSync } from 'node:fs';
 import { join, relative, resolve } from 'node:path';
 
-import { tightened } from '../baseline/fix.js';
 import {
-    BASELINE_FILE,
     BASELINE_LABEL,
     BASELINE_SECTION,
     countsOf,
     judge,
     keepsBaseline,
+    ownsKey,
     readBaseline,
     writeBaseline,
 } from '../baseline/ratchet.js';
-import { lessonLine } from '../catalogue/lesson-parts.js';
 import { discoverSpecRoots } from '../project/members.js';
 import { projectRootOf } from '../project/role.js';
 import { unformattedSpecFiles } from './documents.js';
@@ -21,8 +20,9 @@ import type { Finding } from './finding.js';
 import { runMember, runMembers } from './member-run.js';
 import { applyOwnFixes } from './own-fixes.js';
 import type { CheckerRegistry } from './registry.js';
-import { stop } from './stop.js';
 import { checkerLine, checkerMessage, runTree } from './tree-run.js';
+
+const PLUGIN_PREFIX = 'jterrazz/';
 
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a reporter that wrote anywhere else would be reporting to nobody. */
 /**
@@ -42,19 +42,6 @@ type Run = {
     unformatted: number;
     verbose: boolean;
 };
-
-const VALUED_FLAGS = new Set(['--format', '--member']);
-
-const PLUGIN_PREFIX = 'jterrazz/';
-
-function valueOf(argv: readonly string[], flag: string): string | undefined {
-    const inline = argv.find((argument) => argument.startsWith(`${flag}=`));
-    if (inline !== undefined) {
-        return inline.slice(flag.length + 1);
-    }
-    const index = argv.indexOf(flag);
-    return index === -1 ? undefined : argv[index + 1];
-}
 
 /** Where `typescript check` starts every run it makes, when that project keeps a `test` section in `jterrazz.baseline.json`; a run started anywhere else judges itself. */
 function judgingProject(): string | undefined {
@@ -89,9 +76,9 @@ const NOTHING_HELD = `${BASELINE_LABEL}: nothing held`;
 
 const RATCHET_READ = 'docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson';
 
-const UNRECORDED = lessonLine({
+const UNRECORDED = refusal({
     fix: "fix them, or run 'jterrazz-test-check baseline' to record where the project stands",
-    found: `every finding above, and ${BASELINE_FILE} keeps no \`${BASELINE_SECTION}\` section to hold one`,
+    found: `every finding above, and ${BASELINE} keeps no \`${BASELINE_SECTION}\` section to hold one`,
     read: RATCHET_READ,
     why: 'a project that recorded no debt is held at zero, so each finding fails the run as new debt',
 });
@@ -119,7 +106,7 @@ function verdict(
     if (deferredTo !== undefined && violations.length > 0) {
         say(
             run,
-            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${relative(process.cwd(), join(deferredTo, BASELINE_FILE)) || BASELINE_FILE} › test`,
+            `conventions checker: ${violations.length} finding(s) ${what}, judged by ${relative(process.cwd(), join(deferredTo, BASELINE)) || BASELINE} › test`,
         );
         settle(run);
     }
@@ -219,7 +206,7 @@ function reRecorded(
     counts: Record<string, number>,
 ): Record<string, number> {
     const held = readBaseline(root);
-    const next = tightened(counts, held);
+    const next = tightened(counts, held, ownsKey);
     if (next === undefined) {
         return held;
     }
@@ -254,7 +241,7 @@ function requireDirectory(path: string, what: string): string {
     const resolved = resolve(path);
     if (!existsSync(resolved) || !statSync(resolved).isDirectory()) {
         console.error(
-            lessonLine({
+            refusal({
                 fix: `name an existing ${what}, or run from inside one`,
                 found: `no such ${what}: ${resolved}`,
                 read: 'docs/19-linting.md#the-conventions-checker',
@@ -339,7 +326,7 @@ function checkProject(run: Run, positional: string | undefined): never {
         positional === undefined ? resolve('.') : requireDirectory(positional, 'directory');
     if (positional !== undefined && discoverSpecRoots(root).length === 0) {
         console.error(
-            lessonLine({
+            refusal({
                 fix: 'name a specs tree, or a project root that holds one',
                 found: `no \`specs/\` tree under ${root}`,
                 read: 'docs/19-linting.md#the-conventions-checker',
@@ -364,17 +351,16 @@ function checkProject(run: Run, positional: string | undefined): never {
 export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly string[]): never {
     const recording = cliArguments[0] === 'baseline';
     const argv = recording ? cliArguments.slice(1) : cliArguments;
+    const commandLine = readCommandLine(argv, ['--member']);
     const run: Run = {
-        fix: argv.includes('--fix'),
-        json: valueOf(argv, '--format') === 'json',
+        fix: commandLine.has('--fix'),
+        json: commandLine.value('--format') === 'json',
         registry,
         unformatted: 0,
-        verbose: argv.includes('--verbose'),
+        verbose: commandLine.has('--verbose'),
     };
-    const member = valueOf(argv, '--member');
-    const positional = argv.find(
-        (argument, index) => !argument.startsWith('--') && !VALUED_FLAGS.has(argv[index - 1] ?? ''),
-    );
+    const member = commandLine.value('--member');
+    const [positional] = commandLine.positionals;
 
     if (recording) {
         recordBaseline(run, positional);

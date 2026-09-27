@@ -1,10 +1,9 @@
+import { GROUND_FIXTURES, treeEntries } from '@jterrazz/typescript/rules';
+import type { TreeEntry } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 
 import { FACETS } from './facets.js';
-import { treeEntries } from './git-tree.js';
-import type { TreeEntry } from './git-tree.js';
-import { GROUND_FIXTURES } from './ground.js';
 
 export const SKIPPED = new Set(['.git', 'dist', GROUND_FIXTURES, 'node_modules']);
 

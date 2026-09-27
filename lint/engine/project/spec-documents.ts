@@ -1,7 +1,6 @@
+import { GROUND_FIXTURES, treeEntries } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import { treeEntries } from './git-tree.js';
-import { GROUND_FIXTURES } from './ground.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import { parseYamlSource } from './yaml-document.js';
 

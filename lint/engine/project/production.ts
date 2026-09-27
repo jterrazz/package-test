@@ -1,3 +1,10 @@
+import {
+    folderChanged,
+    isFile,
+    isGroundFolder,
+    listDirectory,
+    readFileCached,
+} from '@jterrazz/typescript/rules';
 import { basename, dirname, join, resolve } from 'node:path';
 
 import {
@@ -10,8 +17,6 @@ import {
     stringValue,
 } from './ast.js';
 import type { AstNode, ImportSource } from './ast.js';
-import { folderChanged, isFile, listDirectory, readFileCached } from './fs-cache.js';
-import { isGroundName } from './ground.js';
 import { parseProgram } from './module-parser.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
@@ -69,7 +74,7 @@ export function materialAt(path: string, directory = false): MaterialKind | unde
     if (folders.includes('specs')) {
         return 'the specs tree';
     }
-    if (folders.some((folder) => isGroundName(folder))) {
+    if (folders.some((folder) => isGroundFolder(folder))) {
         return 'ground';
     }
     if (STUBS_FACADE.test(base)) {

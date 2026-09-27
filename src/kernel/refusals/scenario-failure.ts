@@ -1,17 +1,22 @@
-import { lessonBlock, lessonParts } from '../../../lint/engine/catalogue/lesson-parts.js';
-import type { Lesson } from '../../../lint/engine/catalogue/lesson-parts.js';
+import { lessonParts, refusalBlock } from '@jterrazz/typescript/rules';
+import type { ChapterAnchor, Lesson } from '@jterrazz/typescript/rules';
+
 import { refusal } from '../../../lint/index.refusal.js';
 
 export type ScenarioVerb = 'open' | 'visit';
 
 const SURFACE_OF: Record<ScenarioVerb, string> = { open: 'screen', visit: 'page' };
 
+const isAnchor = (read: string): read is ChapterAnchor => /^docs\/[^#]+\.md#.+$/u.test(read);
+
 function finishedLesson(error: unknown): Lesson | undefined {
     if (!(error instanceof Error)) {
         return undefined;
     }
     const { fix = '', found = '', read = '', why = '' } = lessonParts(error.message) ?? {};
-    return [fix, found, read, why].includes('') ? undefined : { fix, found, read, why };
+    return [fix, found, why].includes('') || !isAnchor(read)
+        ? undefined
+        : { fix, found, read, why };
 }
 
 export function scenarioFailure(
@@ -22,7 +27,7 @@ export function scenarioFailure(
     const suffix = evidence === null ? '' : `\nEvidence: ${evidence}`;
     const lesson = finishedLesson(error);
     if (error instanceof Error && lesson !== undefined) {
-        error.message = lessonBlock({ ...lesson, found: `${lesson.found}${suffix}` });
+        error.message = refusalBlock({ ...lesson, found: `${lesson.found}${suffix}` });
         return error;
     }
     const message = error instanceof Error ? error.message : String(error);

@@ -1,4 +1,5 @@
-import { GROUND_DIRS, GROUND_FIXTURES, isGroundName } from './ground.js';
+import { GROUND_FIXTURES, GROUND_FOLDERS, isGroundFolder } from '@jterrazz/typescript/rules';
+
 import { isRelativePath } from './relative-path.js';
 import {
     blockScalar,
@@ -465,7 +466,7 @@ function readRun(context: Context, node: Node | null, isLast: boolean): SpecRun 
 }
 
 function groundOf(path: string): string | undefined {
-    return path.split('/').find((segment) => isGroundName(segment));
+    return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
 type PathRole = {
@@ -655,7 +656,7 @@ const STRING_OR_LIST = {
     oneOf: [{ type: 'string' }, { items: { type: 'string' }, minItems: 1, type: 'array' }],
 };
 
-const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_DIRS.join('|')})/)[^/]+/`;
+const NOT_GROUND_SEGMENT = String.raw`(?!(?:${GROUND_FOLDERS.join('|')})/)[^/]+/`;
 
 function fixturePath(): SchemaNode {
     return {

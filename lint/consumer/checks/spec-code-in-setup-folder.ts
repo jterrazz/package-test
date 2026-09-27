@@ -1,7 +1,6 @@
+import { SETUP_FOLDER, treeKind, treeNames } from '@jterrazz/typescript/rules';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { treeKind, treeNames } from '../../engine/project/git-tree.js';
-import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     declaresTests,
     isRunnerName,

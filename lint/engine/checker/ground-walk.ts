@@ -1,12 +1,12 @@
-import { join, relative } from 'node:path';
-
-import { treeEntries } from '../project/git-tree.js';
 import {
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-} from '../project/ground.js';
+    treeEntries,
+} from '@jterrazz/typescript/rules';
+import { join, relative } from 'node:path';
+
 import { SPEC_EXTENSION } from '../project/spec-document.js';
 import { decodeText } from '../project/tree.js';
 import { runDocument } from './documents.js';

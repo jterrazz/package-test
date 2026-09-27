@@ -1,19 +1,19 @@
-import { basename, dirname, join, relative } from 'node:path';
-
-import { treeEntries } from '../../engine/project/git-tree.js';
 import {
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
-    isGroundName,
-    isReservedName,
+    isGroundFolder,
+    isReservedFolder,
     PRUNED,
     RESERVED_FOLDERS,
     SETUP_FOLDER,
     SHARED_FOLDER,
+    treeEntries,
     UNMARKED_RESERVED,
-} from '../../engine/project/ground.js';
+} from '@jterrazz/typescript/rules';
+import { basename, dirname, join, relative } from 'node:path';
+
 import { isModuleName, isUnmarkedReserved } from '../../engine/project/specs-modules.js';
 import { findSpecsRoots, isDir } from '../../engine/project/tree.js';
 import type { Finding } from './checker.js';
@@ -94,7 +94,7 @@ function refusedInSetup(
 ): Finding | undefined {
     const name = basename(path);
     const owner = ownerShown(specsRoot, setup);
-    if (isDirectory && isGroundName(name)) {
+    if (isDirectory && isGroundFolder(name)) {
         return finding(
             rootDir,
             path,
@@ -147,7 +147,7 @@ function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
     const visit = (dir: string, inShared: boolean): void => {
         for (const entry of entriesOf(dir)) {
             const path = join(dir, entry.name);
-            if (inShared && !isReservedName(entry.name)) {
+            if (inShared && !isReservedFolder(entry.name)) {
                 found.push(
                     finding(
                         rootDir,
@@ -158,7 +158,7 @@ function refusedUnder(rootDir: string, specsRoot: string): Finding[] {
                 );
                 continue;
             }
-            if (!entry.isDirectory() || PRUNED.has(entry.name) || isGroundName(entry.name)) {
+            if (!entry.isDirectory() || PRUNED.has(entry.name) || isGroundFolder(entry.name)) {
                 continue;
             }
             const refused = judged(rootDir, specsRoot, path, entry.name);

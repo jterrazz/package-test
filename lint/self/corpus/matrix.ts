@@ -1,11 +1,10 @@
+import { cell, filesUnder, markdownTable } from '@jterrazz/typescript/rules';
+import type { Markers } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
-import { cell, table } from '../../engine/catalogue/chapter.js';
-import type { Markers } from '../../engine/catalogue/chapter.js';
 import type { AstNode } from '../../engine/project/ast.js';
 import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
-import { filesUnder } from '../../engine/project/files-under.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import { FACET_MATRIX_CAPABILITIES, FACET_MATRIX_COLUMNS } from './facet-matrix.js';
@@ -308,7 +307,7 @@ export function renderMatrixBody(root: string): string {
     const rows = matrixRows(root);
     const groups = [...new Set(rows.map((row) => row.capability.group))];
     const sections = groups.map((group) => {
-        const body = table(
+        const body = markdownTable(
             ['Capability', ...FACET_MATRIX_COLUMNS],
             rows
                 .filter((row) => row.capability.group === group)
@@ -317,7 +316,7 @@ export function renderMatrixBody(root: string): string {
                     counts.unshift(cell(`\`${row.capability.name}\``));
                     return counts;
                 }),
-        ).join('\n');
+        );
         return `### ${group}\n\n${body}`;
     });
     const byReason = new Map<string, string[]>();
@@ -414,5 +413,5 @@ export function renderMatrixLayers(root: string): string {
         cell(layer.judges),
         String(layer.count),
     ]);
-    return table(['Layer', 'Where', 'What it judges', 'Files'], rows).join('\n');
+    return markdownTable(['Layer', 'Where', 'What it judges', 'Files'], rows);
 }

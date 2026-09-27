@@ -1,8 +1,7 @@
+import { cell, markdownTable, treeEntries } from '@jterrazz/typescript/rules';
+import type { Markers } from '@jterrazz/typescript/rules';
 import { join, resolve } from 'node:path';
 
-import { cell, table } from '../../engine/catalogue/chapter.js';
-import type { Markers } from '../../engine/catalogue/chapter.js';
-import { treeEntries } from '../../engine/project/git-tree.js';
 import { SIBLINGLESS_KINDS } from './siblingless-kinds.js';
 import type { SiblinglessKind } from './siblingless-kinds.js';
 
@@ -64,6 +63,6 @@ export function renderSiblings(root: string): string {
     return [
         `Today **${total} modules** have no sibling test, and every one of them is claimed:`,
         '',
-        ...table(['Kind', 'Proven instead by'], body),
+        markdownTable(['Kind', 'Proven instead by'], body),
     ].join('\n');
 }

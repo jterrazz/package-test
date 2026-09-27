@@ -1,8 +1,13 @@
+import {
+    GROUND_FIXTURES,
+    PRUNED,
+    treeEntries,
+    treeKind,
+    treeNames,
+} from '@jterrazz/typescript/rules';
+import type { Teaching } from '@jterrazz/typescript/rules';
 import { join, resolve } from 'node:path';
 
-import type { Teaching } from '../catalogue/lesson.js';
-import { treeEntries, treeKind, treeNames } from './git-tree.js';
-import { GROUND_FIXTURES, PRUNED } from './ground.js';
 import { isRelativePath } from './relative-path.js';
 import { SPEC_EXTENSION } from './spec-document.js';
 import type { SpecDocument, SpecFile } from './spec-document.js';

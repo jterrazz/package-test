@@ -1,8 +1,8 @@
+import { spliceBetween } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { spliceBetween } from '../../engine/catalogue/chapter.js';
 import { META_TESTS_MARKERS, metaTests, renderMetaTests } from './meta-tests.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');

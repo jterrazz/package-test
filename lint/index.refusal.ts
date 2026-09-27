@@ -1,8 +1,9 @@
+import { refusalBlock } from '@jterrazz/typescript/rules';
+import type { Lesson } from '@jterrazz/typescript/rules';
+
 import { CATALOGUE_CHAPTER } from './consumer/catalogue/chapter.js';
 import { REFUSAL_WHY } from './consumer/catalogue/refusals.js';
 import type { RefusalRow } from './consumer/catalogue/refusals.js';
-import { lessonBlock } from './engine/catalogue/lesson-parts.js';
-import type { Lesson } from './engine/catalogue/lesson-parts.js';
 
 export { REFUSAL_WHY } from './consumer/catalogue/refusals.js';
 export type { RefusalRow } from './consumer/catalogue/refusals.js';
@@ -24,12 +25,12 @@ export function refusal(
     teaching?: { fix: string; found: string },
 ): string {
     if (typeof rowOrLesson !== 'string') {
-        return lessonBlock(rowOrLesson);
+        return refusalBlock(rowOrLesson);
     }
     if (teaching === undefined) {
         throw invariant(`refusal('${rowOrLesson}') was handed no found and no fix for its case`);
     }
-    return lessonBlock({
+    return refusalBlock({
         fix: teaching.fix,
         found: teaching.found,
         read: `${CATALOGUE_CHAPTER}#${rowOrLesson}`,

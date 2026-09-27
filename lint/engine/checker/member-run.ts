@@ -1,7 +1,6 @@
+import { readManifest, treeKind } from '@jterrazz/typescript/rules';
 import { basename, join, relative } from 'node:path';
 
-import { treeKind } from '../project/git-tree.js';
-import { readManifest } from '../project/member-manifest.js';
 import { discoverMembers } from '../project/members.js';
 import type { Finding } from './finding.js';
 import type { CheckerRegistry } from './registry.js';

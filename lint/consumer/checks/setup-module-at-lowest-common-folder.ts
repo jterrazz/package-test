@@ -1,9 +1,8 @@
+import { moveKeepingHistory, SETUP_FOLDER } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
 import { repointSource } from '../../engine/checker/repoint.js';
-import { moveKeepingHistory } from '../../engine/project/git-tree.js';
-import { SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     importsThroughAlias,
     isTestOrSpecName,

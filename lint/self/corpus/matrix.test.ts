@@ -1,9 +1,9 @@
+import { spliceBetween } from '@jterrazz/typescript/rules';
 import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { spliceBetween } from '../../engine/catalogue/chapter.js';
 import { FACET_MATRIX_COLUMNS } from './facet-matrix.js';
 import {
     capabilityFolder,

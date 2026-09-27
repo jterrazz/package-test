@@ -1,3 +1,10 @@
+import {
+    firstSentence,
+    lessonOf,
+    lessonParts,
+    missingParts,
+    readAt,
+} from '@jterrazz/typescript/rules';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
@@ -6,8 +13,6 @@ import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
 import type { RefusalRow } from '../../consumer/catalogue/refusals.js';
 import { CHECKER_PASS_IDS } from '../../consumer/checks/checker.js';
 import plugin from '../../consumer/rules/plugin.js';
-import { lessonParts, missingParts } from '../../engine/catalogue/lesson-parts.js';
-import { lessonAt, readAt, whyOf } from '../../engine/catalogue/lesson.js';
 import { refusal } from '../../index.refusal.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import selfPlugin from '../rules/plugin.js';
@@ -17,11 +22,11 @@ describe('messages', () => {
     test('`message-has-four-parts` — every message of a static rule states the four parts, its why and read its row’s', () => {
         // Given - every message the shipped plugin can print, before oxlint fills its data
         for (const [name, rule] of Object.entries({ ...plugin.rules, ...selfPlugin.rules })) {
-            const convention = rule.meta?.docs?.convention ?? '';
+            const convention = rule.meta?.docs?.sentence ?? '';
             for (const [key, message] of Object.entries(rule.meta?.messages ?? {})) {
                 // Then - no part is missing, and the row's own sentence and heading are the ones it states
                 expect(missingParts(message), `${name}.${key}`).toStrictEqual([]);
-                expect(lessonParts(message)?.why, `${name}.${key}`).toBe(whyOf(convention));
+                expect(lessonParts(message)?.why, `${name}.${key}`).toBe(firstSentence(convention));
                 expect(lessonParts(message)?.read, `${name}.${key}`).toBe(
                     readAt(rowNamed(name), chapterOf(name)),
                 );
@@ -32,15 +37,14 @@ describe('messages', () => {
     test('`message-has-four-parts` — every checker pass renders a whole lesson from its row', () => {
         // Given - one finding of each pass a checker runs, the published one and this package's own
         for (const pass of [...CHECKER_PASS_IDS, ...SELF_CHECKER_PASS_IDS]) {
-            const message = lessonAt(
-                rowNamed(pass),
-                { fix: 'the gesture', found: 'the finding' },
-                chapterOf(pass),
-            );
+            const message = lessonOf(rowNamed(pass), readAt(rowNamed(pass), chapterOf(pass)), {
+                fix: 'the gesture',
+                found: 'the finding',
+            });
 
             // Then - the row's sentence and heading fill the two parts a finding does not write
             expect(missingParts(message)).toStrictEqual([]);
-            expect(lessonParts(message)?.why).toBe(whyOf(rowNamed(pass).convention));
+            expect(lessonParts(message)?.why).toBe(firstSentence(rowNamed(pass).sentence));
         }
     });
 
@@ -63,7 +67,7 @@ describe('messages', () => {
 
             // Then - the row exists, opens on the refusal's why, and a module throws it
             expect(entry?.channel).toBe('runtime');
-            expect(whyOf(entry?.convention ?? '')).toBe(why);
+            expect(firstSentence(entry?.sentence ?? '')).toBe(why);
             expect(source).toContain(`refusal('${row}'`);
             expect(
                 missingParts(refusal(row as RefusalRow, { fix: 'the gesture', found: 'the case' })),

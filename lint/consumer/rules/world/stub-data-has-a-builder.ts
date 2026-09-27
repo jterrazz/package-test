@@ -1,9 +1,8 @@
+import { isFile, lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, join } from 'node:path';
 
-import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import { isFile } from '../../../engine/project/fs-cache.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import type { LintRule } from '../../../engine/project/rule.js';
 import { isStubKind } from '../../../engine/project/stub-kinds.js';

@@ -1,7 +1,6 @@
+import { treeKind } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { dirname, join, relative, sep } from 'node:path';
-
-import { treeKind } from '../project/git-tree.js';
 
 export function pathFrom(from: string, to: string): string {
     const path = relative(from, to).split(sep).join('/');

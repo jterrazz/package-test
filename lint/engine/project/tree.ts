@@ -1,9 +1,14 @@
+import {
+    isGroundFolder,
+    PRUNED,
+    SHARED_FOLDER,
+    treeEntries,
+    treeKind,
+} from '@jterrazz/typescript/rules';
 import { existsSync, readdirSync, readFileSync, rmSync } from 'node:fs';
 import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 import { isNode, nodeStart } from './ast.js';
-import { treeEntries, treeKind } from './git-tree.js';
-import { isGroundName, PRUNED, SHARED_FOLDER } from './ground.js';
 import { parseProgram } from './module-parser.js';
 import { literalPathVisitor, visitProgram } from './path-references.js';
 import { isRelativePath } from './relative-path.js';
@@ -15,7 +20,7 @@ export function isSharedFolder(dir: string): boolean {
 }
 
 function isPool(dir: string): boolean {
-    return isGroundName(basename(dir)) && isSharedFolder(dirname(dir));
+    return isGroundFolder(basename(dir)) && isSharedFolder(dirname(dir));
 }
 
 export function specsRootOfPool(pool: string): string {
@@ -24,7 +29,7 @@ export function specsRootOfPool(pool: string): string {
 
 /** A fixture project with a `specs/` tree of its own is an input, judged where a spec runs the checker over it. */
 function isPruned(dir: string): boolean {
-    return PRUNED.has(basename(dir)) || isGroundName(basename(dir));
+    return PRUNED.has(basename(dir)) || isGroundFolder(basename(dir));
 }
 
 export function listFiles(dir: string, predicate: (path: string) => boolean): string[] {
@@ -111,7 +116,7 @@ export function findPools(dir: string): string[] {
             const path = join(current, entry.name);
             if (isPool(path)) {
                 pools.push(path);
-            } else if (!isGroundName(entry.name)) {
+            } else if (!isGroundFolder(entry.name)) {
                 visit(path);
             }
         }
@@ -214,7 +219,7 @@ export function isConventionalSubdir(path: string): boolean {
     } catch {
         return false;
     }
-    return !children.some((child) => child.isDirectory() && isGroundName(child.name));
+    return !children.some((child) => child.isDirectory() && isGroundFolder(child.name));
 }
 
 type FixtureReference = {

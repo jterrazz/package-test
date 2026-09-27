@@ -1,14 +1,15 @@
+import {
+    forgetTree,
+    GROUND_FOLDERS,
+    moveKeepingHistory,
+    SETUP_FOLDER,
+    treeEntries,
+    treeKind,
+} from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
 import { repointModuleTests } from '../../engine/checker/repoint.js';
-import {
-    forgetTree,
-    moveKeepingHistory,
-    treeEntries,
-    treeKind,
-} from '../../engine/project/git-tree.js';
-import { GROUND_DIRS, SETUP_FOLDER } from '../../engine/project/ground.js';
 import {
     aspectOf,
     lineEnd,
@@ -305,7 +306,7 @@ function isAtOrBelow(entry: string, path: string): boolean {
 function liftGround(specsRoot: string, leaf: string): string[] {
     const lifted: string[] = [];
     const references = diskReferences(specsRoot);
-    for (const role of GROUND_DIRS) {
+    for (const role of GROUND_FOLDERS) {
         const folder = join(leaf, role);
         if (treeKind(folder) !== 'directory') {
             continue;
