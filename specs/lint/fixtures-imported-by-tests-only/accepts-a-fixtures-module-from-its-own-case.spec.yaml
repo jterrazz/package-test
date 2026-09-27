@@ -1,5 +1,5 @@
 description: a module test importing its sibling fixtures module passes
 fixture: ./_fixtures/compliant/
 runs:
-    - command: .
+    - command: toolchain
       exit: 0

@@ -37,14 +37,6 @@ function judged(
     name: string,
 ): Finding | undefined {
     const atRoot = relative(specsRoot, folder) === name;
-    if (name.startsWith('_') && !isReservedName(name)) {
-        return finding(
-            rootDir,
-            folder,
-            `\`${name}/\`, a \`_\` name outside the closed list`,
-            `rename it to the reserved folder that says what it holds — ${CLOSED_LIST} — or drop the \`_\` if it is a subject`,
-        );
-    }
     if ((name === SHARED_FOLDER || name === 'shared') && !atRoot) {
         if (name === SHARED_FOLDER || isUnmarkedReserved(specsRoot, folder)) {
             return finding(

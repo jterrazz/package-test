@@ -9,6 +9,7 @@ export { materialAt, testPackageOf } from './engine/project/production.js';
 export type { MaterialKind } from './engine/project/production.js';
 
 export { default, recommendedRules } from './consumer/rules/plugin.js';
+export { testingPreset } from './consumer/rulebook/preset.js';
 
 /* Typed as oxlint's own config, so `compose(<profile>, testing)` type-checks: an inferred `rules` widens every severity to `string`. */
 export const testing: OxlintConfig = {

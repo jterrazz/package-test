@@ -1,10 +1,10 @@
 description: rejects a second renderer imported by a test
 fixture: ./_fixtures/violation/
 runs:
-    - command: .
+    - command: toolchain
       exit: 1
       stdout: |
-          src/widget.test.ts:1:22  jterrazz(no-second-test-runtime)
-          src/widget.test.ts:2:29  jterrazz(no-second-test-runtime)
-          src/widget.test.ts:3:38  jterrazz(no-second-test-runtime)
-          src/widget.test.ts:5:26  jterrazz(no-second-test-runtime)
+          src/widget.test.ts:1:22  architecture(no-second-test-runtime-clock)
+          src/widget.test.ts:2:29  architecture(no-second-test-runtime-network)
+          src/widget.test.ts:3:38  architecture(no-second-test-runtime-string-renderer)
+          src/widget.test.ts:5:26  architecture(no-second-test-runtime-doubles)

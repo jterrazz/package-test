@@ -145,11 +145,6 @@
             "count": 8
         }
     },
-    "lint/consumer/rules/imports/no-unpublished-subpath.ts": {
-        "unicorn/no-array-sort": {
-            "count": 1
-        }
-    },
     "lint/consumer/rules/layout/specs-at-declared-depth.ts": {
         "complexity": {
             "count": 1

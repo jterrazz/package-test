@@ -11,6 +11,7 @@ import {
     PROCESS_RULES,
     RUNTIME_RULES,
     STATIQUE_RULES,
+    TOOLCHAIN_RULES,
     TYPE_ROWS,
     UPSTREAM_RULES,
 } from '../../consumer/catalogue/manifest.js';
@@ -19,8 +20,9 @@ import { anchorsOf } from '../../engine/catalogue/anchors.js';
 import { anchor, spliceBetween } from '../../engine/catalogue/chapter.js';
 import { lessonParts } from '../../engine/catalogue/lesson-parts.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
-import plugin, { recommendedRules } from '../../index.js';
+import plugin, { recommendedRules, testingPreset } from '../../index.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
+import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 import { chapterAt } from '../index.js';
 import selfPlugin, { selfPluginRules } from '../rules/plugin.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
@@ -32,6 +34,7 @@ import {
     SELF_CHECKER_PASSES,
     SELF_PROCESS_RULES,
     SELF_STATIQUE_RULES,
+    SELF_TOOLCHAIN_RULES,
     selfRows,
 } from './manifest.js';
 
@@ -108,6 +111,16 @@ function metaProofs(): Set<string> {
 }
 
 const CHECKER_PASS_IDS = new Set<string>(CHECKER_PASS_REGISTRY);
+
+const TOOLCHAIN_ROWS = new Set(
+    [...TOOLCHAIN_RULES, ...SELF_TOOLCHAIN_RULES].map((row) => row.name),
+);
+
+const handedToTheToolchain = new Set([
+    ...(testingPreset.architecture?.layers ?? []).map(({ name }) => name),
+    ...(testingPreset.names ?? []).map(({ name }) => name),
+    sourceRootHoldsKnownEntries.name,
+]);
 
 const SELF_PASSES = new Set<string>(SELF_CHECKER_PASS_IDS);
 
@@ -456,13 +469,14 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — completeness (meta-test) — every catalogue row names exactly ONE channel', () => {
-        // Given - the seven-channel vocabulary
+        // Given - the eight-channel vocabulary
         const CHANNELS = new Set([
             'checker',
             'meta',
             'process',
             'runtime',
             'statique',
+            'toolchain',
             'type',
             'upstream',
         ]);
@@ -587,9 +601,16 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — every channel answers for its rows the way the channel can', () => {
-        // Given - the seven channels, each with the proof its rows owe
+        // Given - the eight channels, each with the proof its rows owe
         const proofs: [string, (entry: { name: string; upstream?: string }) => boolean][] = [
             ['statique', (entry) => pluginRules.has(entry.name)],
+            [
+                'toolchain',
+                (entry) =>
+                    [...handedToTheToolchain].some(
+                        (name) => name === entry.name || name.startsWith(`${entry.name}-`),
+                    ),
+            ],
             ['checker', (entry) => CHECKER_PASS_IDS.has(entry.name) || SELF_PASSES.has(entry.name)],
             [
                 'upstream',
@@ -677,14 +698,15 @@ describe('manifest', () => {
         // Given - each E2E spec id, and the meta rows that have a spec of their own
         const metaRows = new Set(META_ROWS.map((row) => row.name));
         for (const id of e2eSpecIds) {
-            // Then - it is a shipped rule, a known checker pass, a meta row, or A CLI-contract probe
+            // Then - it is a shipped rule, a known checker pass, a rule handed to the toolchain, a meta row, or A CLI-contract probe
             expect(
                 pluginRules.has(id) ||
                     CHECKER_PASS_IDS.has(id) ||
                     SELF_PASSES.has(id) ||
+                    TOOLCHAIN_ROWS.has(id) ||
                     CLI_CONTRACT_SPECS.has(id) ||
                     metaRows.has(id),
-                `${id} maps to no rule, pass, meta row, or CLI-contract spec`,
+                `${id} maps to no rule, pass, toolchain row, meta row, or CLI-contract spec`,
             ).toBe(true);
         }
     });

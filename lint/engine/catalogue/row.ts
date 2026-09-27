@@ -2,7 +2,15 @@ export type RowDocs<Family extends string = string> = {
     /** `consumer` ships and is in the public catalogue; `self` is this package's own discipline, run only here. A rule that is both is two rules. */
     audience: 'consumer' | 'self';
     /** One per row: a convention enforced two ways is two rows, so a reader knows which pass a finding comes from. */
-    channel: 'checker' | 'meta' | 'process' | 'runtime' | 'statique' | 'type' | 'upstream';
+    channel:
+        | 'checker'
+        | 'meta'
+        | 'process'
+        | 'runtime'
+        | 'statique'
+        | 'toolchain'
+        | 'type'
+        | 'upstream';
     convention: string;
     /** A ban with no destination is an argument, not a rule. */
     fix: string;

@@ -24,11 +24,7 @@ import { noSingleUseRef } from './expectations/no-single-use-ref.js';
 import { noStatusOnlyTest } from './expectations/no-status-only-test.js';
 import { noTransformDuplicatingTokens } from './expectations/no-transform-duplicating-tokens.js';
 import { resultComparedWhole } from './expectations/result-compared-whole.js';
-import { fixturesImportedByTestsOnly } from './imports/fixtures-imported-by-tests-only.js';
-import { noSecondTestRuntime } from './imports/no-second-test-runtime.js';
 import { noTestCodeInProduction } from './imports/no-test-code-in-production.js';
-import { noTestToTestImport } from './imports/no-test-to-test-import.js';
-import { noUnpublishedSubpath } from './imports/no-unpublished-subpath.js';
 import { goldenPathHasExtension } from './layout/golden-path-has-extension.js';
 import { oneDescribePerFile } from './layout/one-describe-per-file.js';
 import { pathsNamedInTheTest } from './layout/paths-named-in-the-test.js';
@@ -111,11 +107,7 @@ const plugin: LintPlugin = {
         'include-points-at-a-folder': includePointsAtAFolder,
         'literate-specification-exists': literateSpecificationExists,
         'no-raw-env-write': noRawEnvWrite,
-        'no-unpublished-subpath': noUnpublishedSubpath,
         'no-test-code-in-production': noTestCodeInProduction,
-        'no-test-to-test-import': noTestToTestImport,
-        'fixtures-imported-by-tests-only': fixturesImportedByTestsOnly,
-        'no-second-test-runtime': noSecondTestRuntime,
         'no-dom-in-module-test': noDomInModuleTest,
         'test-beside-its-module': testBesideItsModule,
         'no-module-mock': noModuleMock,

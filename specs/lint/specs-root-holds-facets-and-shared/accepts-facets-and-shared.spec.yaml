@@ -1,5 +1,5 @@
 description: a specs root of facets and _shared/ passes
 fixture: ./_fixtures/facets-and-shared/
 runs:
-    - command: checker .
+    - command: toolchain
       exit: 0

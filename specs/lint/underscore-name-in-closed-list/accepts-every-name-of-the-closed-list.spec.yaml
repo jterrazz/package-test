@@ -1,0 +1,5 @@
+description: accepts a _setup/ under a facet and _shared/_setup/ at the root
+fixture: ./_fixtures/reserved/
+runs:
+    - command: toolchain
+      exit: 0

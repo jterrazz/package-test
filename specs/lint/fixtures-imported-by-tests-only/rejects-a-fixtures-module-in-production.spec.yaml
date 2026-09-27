@@ -1,8 +1,7 @@
 description: production code importing a fixtures module is refused
 fixture: ./_fixtures/violation/
 runs:
-    - command: .
+    - command: toolchain
       exit: 1
       stdout: |
-          src/widget/widget.ts:1:28  jterrazz(fixtures-imported-by-tests-only)
-          src/widget/widget.ts:1:28  jterrazz(no-test-code-in-production)
+          src/widget/widget.ts:1:28  architecture(fixtures-imported-by-tests-only)

@@ -9,7 +9,6 @@ import { runTree } from '../../engine/checker/tree-run.js';
 import { readManifest } from '../../engine/project/member-manifest.js';
 import { checkoutUnder } from '../../engine/testing/package-tree.fixtures.js';
 import { CHECKER } from './checker.js';
-import { checkFileSuffixMatchesPlaceInMember } from './file-suffix-matches-place.js';
 
 const REPEATED_NAME = [
     'description: names its directory again instead of naming the case',
@@ -115,21 +114,6 @@ describe('checker', () => {
         // Then - only the new one declares a package
         expect(readManifest(join(root, 'fresh'))).not.toBeNull();
         expect(readManifest(join(root, 'local'))).toBeNull();
-    });
-
-    test('the single paths the checker probes — through the same tree — a nested manifest `.gitignore` names bounds no walk (the member pass)', () => {
-        // Given - a spec outside `specs/` under a folder whose own manifest is ignored
-        const root = repository(
-            ['tools/package.json', 'tools/boot.spec.ts'],
-            [],
-            'tools/package.json\n',
-        );
-        writeFileSync(join(root, 'tools', 'package.json'), '{}\n');
-
-        // Then - the folder is the member's, and its spec is reported
-        expect(checkFileSuffixMatchesPlaceInMember(root).map(({ file }) => file)).toStrictEqual([
-            join('tools', 'boot.spec.ts'),
-        ]);
     });
 
     test('the single paths the checker probes — through the same tree — an ignored fixture fixes no value for the document beside it (`no-volatile-literal`)', () => {

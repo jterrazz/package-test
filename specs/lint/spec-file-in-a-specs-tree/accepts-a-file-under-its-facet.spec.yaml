@@ -1,0 +1,5 @@
+description: accepts a .spec.ts under its facet
+fixture: ./_fixtures/placed/
+runs:
+    - command: toolchain
+      exit: 0

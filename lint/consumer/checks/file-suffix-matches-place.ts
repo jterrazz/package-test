@@ -1,10 +1,9 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 
-import { isUnderSpecs } from '../../engine/project/ast.js';
 import { finding } from '../../engine/project/document-model.js';
 import { FACETS, reachesRunner } from '../../engine/project/facets.js';
-import { moveKeepingHistory, treeEntries, treeKind } from '../../engine/project/git-tree.js';
+import { moveKeepingHistory, treeEntries } from '../../engine/project/git-tree.js';
 import { isGroundName } from '../../engine/project/ground.js';
 import { SPEC_EXTENSION } from '../../engine/project/spec-document.js';
 import type { DocumentFinding, Finding } from './checker.js';
@@ -15,8 +14,7 @@ import type { Rename } from './file-suffix-matches-place.stale-includes.js';
 
 const SKIPPED = new Set(['.git', 'dist', 'node_modules']);
 
-// `stopAtPackages` bounds the walk at the next `package.json`: a nested member is judged by its own run, never named twice.
-function* walk(dir: string, stopAtPackages = false): Generator<string> {
+function* walk(dir: string): Generator<string> {
     let entries;
     try {
         entries = treeEntries(dir);
@@ -29,10 +27,7 @@ function* walk(dir: string, stopAtPackages = false): Generator<string> {
             if (SKIPPED.has(entry.name)) {
                 continue;
             }
-            if (stopAtPackages && treeKind(join(path, 'package.json')) === 'file') {
-                continue;
-            }
-            yield* walk(path, stopAtPackages);
+            yield* walk(path);
             continue;
         }
         yield path;
@@ -54,26 +49,23 @@ export type PlacementMove = {
     to?: string;
 };
 
-/** Only the author knows whether the file meets the product through HTTP or through a binary, so the mover leaves it. */
+/** ls-lint never judges a file at the root it runs from, so a project's own root stays this rule's: every folder below it is `spec-file-in-a-specs-tree`'s. */
 export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[] {
-    const violations: Finding[] = [];
-    for (const path of walk(memberDir, true)) {
-        if (!path.endsWith('.spec.ts')) {
-            continue;
-        }
-        if (isUnderSpecs(path)) {
-            continue;
-        }
-        const rel = relative(memberDir, path);
-        violations.push({
-            file: rel,
-            line: 1,
-            fix: `move it under \`specs/<facet>/\`, or rename it \`${rel.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
-            found: 'a `.spec.ts` outside every `specs/` tree',
-            rule: 'file-suffix-matches-place',
-        });
+    let entries;
+    try {
+        entries = treeEntries(memberDir);
+    } catch {
+        return [];
     }
-    return violations;
+    return entries
+        .filter((entry) => entry.isFile() && entry.name.endsWith('.spec.ts'))
+        .map(({ name }) => ({
+            file: name,
+            line: 1,
+            fix: `move it under \`specs/<facet>/\`, or rename it \`${name.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
+            found: "a `.spec.ts` at the project's root, outside every `specs/` tree",
+            rule: 'file-suffix-matches-place',
+        }));
 }
 
 /** A file reaching no runner is `facet-test-uses-its-runner`'s, whose fix is the opposite move: `--fix` never renames a module test into a spec. */

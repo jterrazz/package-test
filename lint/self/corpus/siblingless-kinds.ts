@@ -226,11 +226,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/consumer/checks/reserved-folder-in-closed-list.ts',
             'lint/consumer/checks/setup-module-at-lowest-common-folder.ts',
             'lint/consumer/checks/spec-code-in-setup-folder.ts',
-            'lint/consumer/checks/specs-root-holds-facets-and-shared.ts',
+            'lint/consumer/rulebook/preset.ts',
+            'lint/self/checks/source-root-holds-known-entries.ts',
             'lint/engine/project/specs-modules.ts',
         ),
         name: 'a lint-layer module',
-        why: 'the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary and the real checker over fixture projects',
+        why: 'the lint layer is proven by the rule tests beside each rule and by `specs/lint/`, which runs the real oxlint binary, the real checker and the toolchain’s Architecture and Names passes over fixture projects',
     },
     {
         claims: oneOf(

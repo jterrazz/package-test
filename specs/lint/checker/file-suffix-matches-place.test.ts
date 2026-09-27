@@ -91,12 +91,14 @@ describe('file-suffix-matches-place', () => {
         `);
     });
 
-    test('names a `.spec.ts` that never reached a specs tree', async () => {
-        // Given - a member holding `src/creation.spec.ts`
+    test("names a `.spec.ts` at a member's own root, the one place ls-lint never judges", async () => {
+        // Given - a member holding `creation.spec.ts` at its root
         const result = await cli.exec(`--member ${WORKSPACE}/packages/stray-spec ${WORKSPACE}`);
 
         // Then - the member pass is the only run that sees outside a specs tree
         expect(result.exitCode).toBe(1);
-        expect(result.stderr.text).toContain('found: a `.spec.ts` outside every `specs/` tree');
+        expect(result.stderr.text).toContain(
+            "found: a `.spec.ts` at the project's root, outside every `specs/` tree",
+        );
     });
 });

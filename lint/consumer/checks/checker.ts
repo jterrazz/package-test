@@ -54,11 +54,9 @@ import {
 import { checkSpecCodeInSetupFolder } from './spec-code-in-setup-folder.js';
 import { checkSpecInSubjectFolder } from './spec-in-subject-folder.js';
 import { fixSpecInSubjectFolder } from './spec-in-subject-folder.moves.js';
-import { checkSpecsRootHoldsFacetsAndShared } from './specs-root-holds-facets-and-shared.js';
 
 /** The CLI prints this list when a run is clean, so what the reader is told ran is the registry itself. */
 export const TREE_PASS_IDS = [
-    'specs-root-holds-facets-and-shared',
     'reserved-folder-in-closed-list',
     'spec-code-in-setup-folder',
     'setup-module-at-lowest-common-folder',
@@ -198,7 +196,6 @@ export const CHECKER: CheckerRegistry = {
     memberPassIds: MEMBER_PASS_IDS,
     rows: consumerRows,
     tree: [
-        checkSpecsRootHoldsFacetsAndShared,
         checkReservedFolderInClosedList,
         checkSpecCodeInSetupFolder,
         checkSetupModuleAtLowestCommonFolder,

@@ -1,8 +1,9 @@
 description: a module and a _setup/ directly under the specs root are refused
 fixture: ./_fixtures/strays/
 runs:
-    - command: checker .
+    - command: toolchain
       exit: 1
-      stderr: |
-          specs/_setup/:1:1  jterrazz-check(specs-root-holds-facets-and-shared)
-          specs/helpers.ts:1:1  jterrazz-check(specs-root-holds-facets-and-shared)
+      stdout: |
+          specs/_setup/:1:1  names(specs-root-holds-facets-and-shared)
+          specs/helpers.ts:1:1  names(no-grab-bag-name)
+          specs/helpers.ts:1:1  names(specs-root-holds-facets-and-shared)

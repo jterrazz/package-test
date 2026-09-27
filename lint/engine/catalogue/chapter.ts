@@ -20,11 +20,12 @@ export function table(headers: string[], rows: string[][]): string[] {
 const CHANNEL_ORDER: Record<Row['channel'], number> = {
     statique: 0,
     upstream: 1,
-    checker: 2,
-    runtime: 3,
-    type: 4,
-    meta: 5,
-    process: 6,
+    toolchain: 2,
+    checker: 3,
+    runtime: 4,
+    type: 5,
+    meta: 6,
+    process: 7,
 };
 
 export function anchor(name: string): string {
@@ -38,6 +39,7 @@ function counts(published: Row[]): Record<Row['channel'], number> {
         process: 0,
         runtime: 0,
         statique: 0,
+        toolchain: 0,
         type: 0,
         upstream: 0,
     };
@@ -81,6 +83,7 @@ export function catalogueBody(published: Row[], families: Record<string, string>
     const named = [
         [c.statique, '**statique** (oxlint rules)'],
         [c.upstream, '**upstream** (options set on an upstream rule)'],
+        [c.toolchain, '**toolchain** (the preset @jterrazz/typescript runs)'],
         [c.checker, '**checker** (bundled passes)'],
         [c.runtime, '**runtime** (execution-time refusals)'],
         [c.type, '**type** (what the compiler refuses)'],

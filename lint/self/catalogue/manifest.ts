@@ -5,6 +5,7 @@ import {
     ARCHITECTURE_META_ROWS,
     ARCHITECTURE_PASSES,
     ARCHITECTURE_STATIQUE_RULES,
+    ARCHITECTURE_TOOLCHAIN_RULES,
 } from './architecture.js';
 import type { SelfFamily } from './families.js';
 
@@ -16,6 +17,8 @@ type Row = CatalogueRow<SelfFamily>;
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
 export const SELF_STATIQUE_RULES: Row[] = [...ARCHITECTURE_STATIQUE_RULES];
+
+export const SELF_TOOLCHAIN_RULES: Row[] = [...ARCHITECTURE_TOOLCHAIN_RULES];
 
 export const SELF_CHECKER_PASSES: Row[] = [
     {
@@ -238,6 +241,7 @@ export const SELF_PROCESS_RULES: Row[] = [
 
 export const selfRows: Row[] = ordered([
     ...SELF_STATIQUE_RULES,
+    ...SELF_TOOLCHAIN_RULES,
     ...SELF_CHECKER_PASSES,
     ...META_ROWS,
     ...SELF_PROCESS_RULES,

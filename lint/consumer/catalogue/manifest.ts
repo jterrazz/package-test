@@ -619,19 +619,6 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "Everything is imported from `@jterrazz/test`; an import of `@jterrazz/test/<subpath>` is an error, except the subpaths the package's `exports` map publishes — the entries are `.`, `./vitest`, `./oxlint` and `./schema`, and the three named ones are exempt everywhere. The list is READ from the manifest, never copied into the rule, so a published entry is exempt the day it ships.",
-        facet: 'model',
-        family: 'imports',
-        fix: 'Import the name from `@jterrazz/test`; it is re-exported there by design.',
-        name: 'no-unpublished-subpath',
-        rationale:
-            'A single entry point keeps the public API explicit and the internal subpaths invisible.',
-        reach: 'all',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
             "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a separate test root (`__tests__/`, a root `test/` or `tests/`, `test-beside-its-module`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
         facet: 'model',
         family: 'imports',
@@ -640,42 +627,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "Keeping test artefacts out of production protects the consumer's application bundle.",
         reach: 'all',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention: 'A test file never imports another test file.',
-        facet: 'model',
-        family: 'imports',
-        fix: 'Under `specs/`, move what the two read into the `_setup/` of the lowest folder they share; for a module test under `src/`, into a sibling `<file>.fixtures.ts` for typed input data.',
-        name: 'no-test-to-test-import',
-        rationale:
-            'Sharing between tests goes through a module that prepares them — a `_setup/` module under `specs/`, a sibling `<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.',
-        reach: 'tests',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention: 'A `*.fixtures.ts` is importable only from a test file.',
-        facet: 'model',
-        family: 'imports',
-        fix: 'Move the value into production code if production needs it; otherwise import it from a test.',
-        name: 'fixtures-imported-by-tests-only',
-        rationale: 'Confining fixtures to tests stops test data leaking into production code.',
-        reach: 'all',
-    },
-    {
-        audience: 'consumer',
-        channel: 'statique',
-        convention:
-            'A test file imports no second test runtime: `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*`, `@vitest/browser*`, `msw`, `msw/*`, `nock`, `sinon`, `vitest-mock-extended`, `jest`, `@jest/*`, `mockdate`, `playwright`, `playwright-core`, `@playwright/test`, `webdriverio` and `appium` are errors, each named with what replaces it; `react-dom/server` is one too, in the `module` role alone. Reach: the roles that RUN a test (`module`, `component`, `spec`, `specification`) — a fixture project’s config and a providers module under `specs/` legitimately name the adapter.',
-        facet: 'model',
-        family: 'imports',
-        fix: 'Go through what replaces the seam: a facet, the element vocabulary, `intercept()`, `clock` or `mockOf`.',
-        name: 'no-second-test-runtime',
-        rationale:
-            "A test importing the adapter speaks the adapter's dialect: a repository ends up with as many vocabularies as it has seams. Every group names the seam this vocabulary already owns — the runner, the browser, the simulator, the network, the clock and the doubles.",
-        reach: 'tests',
     },
     {
         audience: 'consumer',
@@ -783,13 +734,61 @@ export const STATIQUE_RULES: Row[] = [
     },
 ];
 
-/** Oxlint never visits data fixtures nor reads two files at once. */
-export const CHECKER_PASSES: Row[] = [
+export const TOOLCHAIN_RULES: Row[] = [
     {
         audience: 'consumer',
-        channel: 'checker',
+        channel: 'toolchain',
+        convention: 'A test file never imports another test file.',
+        facet: 'model',
+        family: 'imports',
+        fix: 'Under `specs/`, move what the two read into the `_setup/` of the lowest folder they share; for a module test under `src/`, into a sibling `<file>.fixtures.ts` for typed input data.',
+        name: 'no-test-to-test-import',
+        rationale:
+            'Sharing between tests goes through a module that prepares them — a `_setup/` module under `specs/`, a sibling `<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.',
+        reach: 'tests',
+    },
+    {
+        audience: 'consumer',
+        channel: 'toolchain',
+        convention: 'A `*.fixtures.ts` is importable only from a test file.',
+        facet: 'model',
+        family: 'imports',
+        fix: 'Move the value into production code if production needs it; otherwise import it from a test.',
+        name: 'fixtures-imported-by-tests-only',
+        rationale: 'Confining fixtures to tests stops test data leaking into production code.',
+        reach: 'all',
+    },
+    {
+        audience: 'consumer',
+        channel: 'toolchain',
         convention:
-            'The specs root holds its facet folders and `_shared/` alone — a repository suite is a first-level folder too. A file directly under it is an error, and so is a `_setup/` there: code every facet shares is `<specs>/_shared/_setup/`. A spec or a runner at the root is `specs-at-declared-depth`’s, and a ground folder there `no-reach-into-sibling-ground`’s.',
+            'A test file imports no second test runtime: `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*`, `@vitest/browser*`, `msw`, `msw/*`, `nock`, `sinon`, `vitest-mock-extended`, `jest`, `@jest/*`, `mockdate`, `playwright`, `playwright-core`, `@playwright/test`, `webdriverio` and `appium` are errors, one layer per seam — `no-second-test-runtime-<seam>` — each named with what replaces it; `react-dom/server` is one too, in the `module` role alone. Reach: the roles that RUN a test (`module`, `component`, `spec`, `specification`) — a fixture project’s config and a providers module under `specs/` legitimately name the adapter.',
+        facet: 'model',
+        family: 'imports',
+        fix: 'Go through what replaces the seam: a facet, the element vocabulary, `intercept()`, `clock` or `mockOf`.',
+        name: 'no-second-test-runtime',
+        rationale:
+            "A test importing the adapter speaks the adapter's dialect: a repository ends up with as many vocabularies as it has seams. Every group names the seam this vocabulary already owns — the runner, the browser, the simulator, the network, the clock and the doubles.",
+        reach: 'tests',
+    },
+    {
+        audience: 'consumer',
+        channel: 'toolchain',
+        convention:
+            "Everything is imported from `@jterrazz/test`; an import of `@jterrazz/test/<subpath>` is an error, except the subpaths the package's `exports` map publishes — the entries are `.`, `./vitest`, `./oxlint` and `./schema`, and the three named ones are exempt everywhere. The list is READ from the manifest, never copied into the rule, so a published entry is exempt the day it ships; an unpublished subpath is the import the cruise cannot resolve through the `exports` map.",
+        facet: 'model',
+        family: 'imports',
+        fix: 'Import the name from `@jterrazz/test`; it is re-exported there by design.',
+        name: 'no-unpublished-subpath',
+        rationale:
+            'A single entry point keeps the public API explicit and the internal subpaths invisible.',
+        reach: 'all',
+    },
+    {
+        audience: 'consumer',
+        channel: 'toolchain',
+        convention:
+            'The specs root holds its facet folders and `_shared/` alone — a repository suite is a first-level folder too. A file directly under it that is no test, no spec, no document and no runner is an error, and so is a `_setup/` there: code every facet shares is `<specs>/_shared/_setup/`. A spec or a runner at the root is `specs-at-declared-depth`’s, and a ground folder there `no-reach-into-sibling-ground`’s.',
         facet: 'model',
         family: 'layout',
         fix: 'Move code into `<specs>/_shared/_setup/` — or the `_setup/` of the one facet that reads it — and data into the ground folder of its role.',
@@ -800,9 +799,39 @@ export const CHECKER_PASSES: Row[] = [
     },
     {
         audience: 'consumer',
+        channel: 'toolchain',
+        convention:
+            'A folder under a specs tree whose name starts with `_` is one of the closed list — `_setup/`, `_fixtures/`, `_expected/`, `_requests/`, `_seeds/`, `_shared/` — and any other `_` name is an error at the folder. What sits inside a `_setup/` or directly in `specs/_shared/` is `reserved-folder-in-closed-list`’s, and ground is never entered.',
+        facet: 'model',
+        family: 'layout',
+        fix: 'Rename the folder to the reserved name that says what it holds, and the paths that name it; drop the `_` from a subject.',
+        name: 'underscore-name-in-closed-list',
+        rationale:
+            'A route, a command or a job names its subject folder, so a subject can take any word: only a marker keeps the folders that are no subject from colliding with one, and only a closed list keeps the marker meaning something.',
+        reach: 'specs',
+    },
+    {
+        audience: 'consumer',
+        channel: 'toolchain',
+        convention:
+            'A `.spec.ts` — the ASSEMBLED product — sits under a `specs/` tree; one in any other folder is an error at the file. One at a project’s own root is `file-suffix-matches-place`’s.',
+        facet: 'model',
+        family: 'layout',
+        fix: 'Move it under `specs/<facet>/`, or rename it `.test.ts` beside the module it covers.',
+        name: 'spec-file-in-a-specs-tree',
+        rationale:
+            'The suffix says the kind: a `.spec.ts` outside the specs tree is a spec nobody running the facets finds, or a unit test wearing the wrong name.',
+        reach: 'all',
+    },
+];
+
+/** Oxlint never visits data fixtures nor reads two files at once. */
+export const CHECKER_PASSES: Row[] = [
+    {
+        audience: 'consumer',
         channel: 'checker',
         convention:
-            'A folder under a specs tree whose name starts with `_` is never a subject, and the `_` names form a closed list: `_setup/` (the TypeScript that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (the ground), and `_shared/` directly under the specs root. Any other `_` name is an error, a `_shared/` anywhere deeper too, and so is an entry of `specs/_shared/` that is none of the other five. A folder with a reserved name but no `_` — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, `shared/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its `_` spelling (`doubles/` → `_setup/`) — a `shared/` below the root excepted, whose fix is a `_shared/` there’s: the reserved folders of the folder that encloses it; one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Inside a `_setup/` the names are the code’s own and no bare reserved name is judged, but `_setup/` holds code alone: a ground folder in it is an error, and so is any file that is no module (`.ts`, `.tsx`, `.js`, `.mjs`, a `.d.ts` and their kin), the fix naming the ground folder of its role beside that `_setup/` — `_seeds/` for a `.sql`, `_requests/` for a `.http`, `_expected/` for what a test compares against, `_fixtures/` for any other input. Ground is never entered: what a fixture holds is its own.',
+            'A folder under a specs tree whose name starts with `_` is never a subject, and the `_` names form a closed list: `_setup/` (the TypeScript that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (the ground), and `_shared/` directly under the specs root. Any other `_` name is `underscore-name-in-closed-list`’s; a `_shared/` anywhere deeper is an error, and so is an entry of `specs/_shared/` that is none of the other five. A folder with a reserved name but no `_` — `setup/`, `seeds/`, `requests/`, `expected/`, `fixtures/`, `shared/`, and `doubles/` for test adapters — is an error wherever it holds no spec, the fix naming its `_` spelling (`doubles/` → `_setup/`) — a `shared/` below the root excepted, whose fix is a `_shared/` there’s: the reserved folders of the folder that encloses it; one holding a spec is a subject (`GET /requests` files under `api/requests/list/`) and passes, except directly under the specs root, which holds no subject. Inside a `_setup/` the names are the code’s own and no bare reserved name is judged, but `_setup/` holds code alone: a ground folder in it is an error, and so is any file that is no module (`.ts`, `.tsx`, `.js`, `.mjs`, a `.d.ts` and their kin), the fix naming the ground folder of its role beside that `_setup/` — `_seeds/` for a `.sql`, `_requests/` for a `.http`, `_expected/` for what a test compares against, `_fixtures/` for any other input. Ground is never entered: what a fixture holds is its own.',
         facet: 'model',
         family: 'layout',
         fix: 'Rename the folder to the reserved name that says what it holds, and the paths that name it; drop the `_` from a subject.',
@@ -1022,7 +1051,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`; anywhere else is an error. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
+            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`: one at a project’s own root is an error here, one in any folder `spec-file-in-a-specs-tree`’s. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
         facet: 'model',
         family: 'layout',
         fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `jterrazz-test-check <root> --fix` does it with `git mv`, and names every `include`/`exclude` entry of the member the rename broke.',
@@ -1651,6 +1680,7 @@ export const PROCESS_RULES: Row[] = [
 export const consumerRows: Row[] = ordered([
     ...STATIQUE_RULES,
     ...UPSTREAM_RULES,
+    ...TOOLCHAIN_RULES,
     ...TYPE_ROWS,
     ...CHECKER_PASSES,
     ...RUNTIME_RULES,
