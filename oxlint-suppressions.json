@@ -203,11 +203,6 @@
             "count": 1
         }
     },
-    "lint/engine/checker/cli.ts": {
-        "max-lines": {
-            "count": 1
-        }
-    },
     "lint/engine/checker/documents.ts": {
         "typescript/no-non-null-assertion": {
             "count": 2
@@ -297,12 +292,9 @@
     },
     "lint/engine/project/tree.ts": {
         "complexity": {
-            "count": 2
-        },
-        "max-lines": {
             "count": 1
         },
-        "typescript/no-misused-spread": {
+        "max-lines": {
             "count": 1
         }
     },
