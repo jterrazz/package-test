@@ -51,4 +51,20 @@ describe('localLinters', () => {
             'found: the presets’ checks failed and reported no diagnostic: writes a single value at `typescript.spine`, where its presets set a list — a setting adds to a default, never replaces its shape',
         );
     });
+
+    test('localLinters — rules stated for a run with no oxlint — are refused, never dropped', async () => {
+        // Given - the base preset alone, and a rule stated through `.rules()`
+        const tree = scratchDirectory('local-linters-tree-');
+
+        // When - the tree is linted
+        const linted = localLinters(lintersWith({ presets: [] })).lint(tree, {
+            ...RUN,
+            rules: { 'acme/no-sleep': 'error' },
+        });
+
+        // Then - the refusal names the rules no linter would read
+        await expect(linted).rejects.toThrow(
+            'found: .rules() states acme/no-sleep, and the specification runs no oxlint',
+        );
+    });
 });

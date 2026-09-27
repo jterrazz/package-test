@@ -16,11 +16,11 @@ import type { LintConfig } from './local-linters.adapter.js';
 
 export type LintFacetConfig = ChainConfig & { linters?: LintPort | undefined };
 
-/** Options for {@link startLint | specification.lint}; at least one linter — a plugin, a checker or a preset. */
+/** Options for {@link startLint | specification.lint}; at least one linter — a plugin, a config, a checker or a preset. */
 export type LintSpecificationOptions = {
     /** Cross-file checkers, each a command printing a finding a line as `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree as its last argument. */
     checkers?: readonly string[];
-    /** The oxlint config the plugins run under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states. */
+    /** The oxlint config oxlint runs under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states; naming it alone runs oxlint's built-in rules. */
     config?: LintConfig;
     /** oxlint JS plugins, each a path from the specification's folder or a package specifier. */
     plugins?: readonly string[];
@@ -75,15 +75,25 @@ function binOf(manifest: string): null | string {
         : null;
 }
 
-function oxlintBinary(root: string): null | string {
-    for (const from of [join(root, 'package.json'), import.meta.filename]) {
+export function oxlintBinary(anchors: readonly string[]): string {
+    for (const from of anchors) {
         try {
-            return binOf(createRequire(from).resolve('oxlint/package.json'));
+            const bin = binOf(createRequire(from).resolve('oxlint/package.json'));
+            if (bin !== null) {
+                return bin;
+            }
         } catch {
             continue;
         }
     }
-    return null;
+    throw new Error(
+        refusal({
+            fix: 'install oxlint — an optional peer of @jterrazz/test — beside the project',
+            found: `specification.lint() runs oxlint, and none resolves from ${anchors.join(', ')}`,
+            read: 'docs/21-lint.md#options',
+            why: 'A plugin and a config are run by the real oxlint, the one a project lints with.',
+        }),
+    );
 }
 
 export async function startLint(options: LintSpecificationOptions): Promise<LintHandle> {
@@ -92,27 +102,20 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
     const root = resolveRoot(options.root, callerDir);
     const plugins = (options.plugins ?? []).map((plugin) => pluginPath(plugin, callerDir, root));
     const checkers = options.checkers ?? [];
-    if (plugins.length === 0 && checkers.length === 0 && options.presets === undefined) {
+    const runsOxlint = plugins.length > 0 || options.config !== undefined;
+    if (!runsOxlint && checkers.length === 0 && options.presets === undefined) {
         throw new Error(
             refusal({
-                fix: 'name the plugins, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
-                found: 'specification.lint() with no plugin, no checker and no presets',
+                fix: 'name the plugins, the config, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
+                found: 'specification.lint() with no plugin, no config, no checker and no presets',
                 read: 'docs/21-lint.md#options',
                 why: 'A lint specification runs the linters it names, and one that names none judges nothing.',
             }),
         );
     }
-    const oxlint = plugins.length === 0 ? null : oxlintBinary(root);
-    if (plugins.length > 0 && oxlint === null) {
-        throw new Error(
-            refusal({
-                fix: 'install oxlint — an optional peer of @jterrazz/test — beside the project',
-                found: `specification.lint() with plugins, and no oxlint resolves from ${root}`,
-                read: 'docs/21-lint.md#options',
-                why: 'A plugin is run by the real oxlint, the one a project lints with.',
-            }),
-        );
-    }
+    const oxlint = runsOxlint
+        ? oxlintBinary([join(root, 'package.json'), import.meta.filename])
+        : null;
     const config: Started<LintFacetConfig, 'linters'> = {
         linters: localLinters({
             checkers,

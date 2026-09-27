@@ -43,12 +43,12 @@ afterAll(cleanup);
 
 ### Options
 
-At least one linter — a plugin, a checker or presets, `presets: []` holding the tree to the base preset alone; a specification naming none is refused.
+At least one linter — a plugin, a config, a checker or presets, `presets: []` holding the tree to the base preset alone; a specification naming none is refused.
 
 | Option     | Description                                                                                                                                                                                                                               |
 | ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `plugins`  | oxlint JS plugins, each a path from the specification's folder or a package specifier. They run in the real oxlint, `oxlint` being an optional peer the project installs                                                                  |
-| `config`   | The oxlint config the plugins run under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states                                                                                                       |
+| `config`   | The oxlint config oxlint runs under — `rules`, `settings`, `categories`, `overrides` — less `jsPlugins`, which `plugins` states; named alone, it runs oxlint's built-in rules                                                             |
 | `presets`  | `@jterrazz/typescript` presets whose laws run on the tree — the Architecture pass over every `layers`, each declared `names` rule — resolved after the always-on base preset as `jterrazz.config.ts` would; `[]` is the base preset alone |
 | `checkers` | Cross-file checkers, each a command printing one finding a line in the compiler's convention — `<file>:<line>:<column>: error <plugin>(<rule>): <message>`; `.run()` hands it the tree last                                               |
 | `root`     | Root-resolution override (rule `no-redundant-root`); the plugins' specifiers and the checkers' commands resolve from its `node_modules`                                                                                                   |
@@ -58,7 +58,7 @@ There is nothing to start and nothing to stop: `cleanup` is handed to `afterAll`
 
 ## The chain
 
-Setups: `.fixture(directory('./_fixtures/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([12 § Fixtures](12-cli.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
+Setups: `.fixture(directory('./_fixtures/<tree>/'))` — or a `file()`, copied by name — lays the tree in a fresh working directory ([12 § Fixtures](12-cli.md#the-chain)); `.rules({ … })` states rules and their options for this chain, over the specification's `config`, a later call winning; on a specification that runs no oxlint — no plugin, no config — it is refused, since no linter would read it. Terminal action: `.run()` (rule `one-terminal-action-per-chain`).
 
 ```typescript
 // specs/lint/no-module-mock/no-module-mock.spec.ts
@@ -89,10 +89,10 @@ describe('no-module-mock', () => {
 
 `.run()` takes two options:
 
-| Option | Description                                                                                                                              |
-| ------ | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `fix`  | Apply the linters' fixes, then lint the fixed tree: the report is what a run after the fix says, and `result.file()` reads what it wrote |
-| `args` | Handed to every checker before the tree, as a checker takes a flag (`--member packages/web`)                                             |
+| Option | Description                                                                                                                                                                                                             |
+| ------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `fix`  | Apply oxlint's and the checkers' fixes, then lint the fixed tree: the report is what a run after the fix says, and `result.file()` reads what it wrote; the presets' laws have no fix, and are judged on the fixed tree |
+| `args` | Handed to every checker before the tree, as a checker takes a flag (`--member packages/web`)                                                                                                                            |
 
 ## The result
 
@@ -124,9 +124,11 @@ oxlint's graphical rendering is refused, never read as a clean run: the facet st
 
 Each linter the specification names, over the working directory:
 
-1. **oxlint**, when `plugins` is not empty: the real binary, with a config the facet writes outside the tree — `jsPlugins` the plugins, `rules` the specification's `config.rules` and the chain's `.rules()` over them — at `--format=unix`.
+1. **oxlint**, when `plugins` or `config` is named: the real binary, with a config the facet writes outside the tree — `jsPlugins` the plugins, `rules` the specification's `config.rules` and the chain's `.rules()` over them — at `--format=unix`.
 2. **each checker**, as `<command> <args> .`, from the tree, its first word resolved from the project's `node_modules/.bin` when it is installed there.
 3. **the presets' laws**, in process, through `presetChecks` of `@jterrazz/typescript/rules`, handed the `presets` and the `settings` as one settings object: each finding at its position, one about a whole file or folder at `:1:1`. Settings the kit cannot resolve are refused like a linter that fails with no diagnostic.
+
+A preset's own `oxlint` — its plugin, its rulebook — is not run by `presets`: the presets hand the facet their laws alone. A preset's rules are proven as any plugin's are, the plugin under `plugins` and its rules under `config`, so a report holds only the rules the specification names.
 
 A linter that fails and reports no diagnostic is refused in four parts rather than read as a clean tree — a plugin that does not load, a config oxlint cannot build, a checker that cannot start.
 

@@ -41,7 +41,12 @@ function unreported(linter: string, output: string): Error {
     );
 }
 
-function runOxlint(tree: string, linters: Linters, run: LintRun, fix: boolean): Diagnostic[] {
+function runOxlint(
+    tree: string,
+    linters: Linters & { oxlint: string },
+    run: LintRun,
+    fix: boolean,
+): Diagnostic[] {
     const config = join(scratchDirectory('spec-lint-config-'), 'oxlint.json');
     writeFileSync(
         config,
@@ -53,7 +58,7 @@ function runOxlint(tree: string, linters: Linters, run: LintRun, fix: boolean): 
     );
     const ran = spawnSync(
         process.execPath,
-        [linters.oxlint ?? '', '--format=unix', '-c', config, ...(fix ? ['--fix'] : []), '.'],
+        [linters.oxlint, '--format=unix', '-c', config, ...(fix ? ['--fix'] : []), '.'],
         { cwd: tree, encoding: 'utf8', env: environment() },
     );
     const output = `${ran.stdout ?? ''}${ran.stderr ?? ''}`;
@@ -87,7 +92,9 @@ function runChecker(
 
 function linted(tree: string, linters: Linters, run: LintRun, fix: boolean): Diagnostic[] {
     return [
-        ...(linters.plugins.length === 0 ? [] : runOxlint(tree, linters, run, fix)),
+        ...(linters.oxlint === null
+            ? []
+            : runOxlint(tree, { ...linters, oxlint: linters.oxlint }, run, fix)),
         ...linters.checkers.flatMap((checker) =>
             runChecker(tree, { checker, root: linters.root }, run, fix),
         ),
@@ -111,6 +118,16 @@ async function presetDiagnostics(tree: string, linters: Linters): Promise<Diagno
 export function localLinters(linters: Linters): LintPort {
     return {
         lint: async (tree, run) => {
+            if (linters.oxlint === null && Object.keys(run.rules).length > 0) {
+                throw new Error(
+                    refusal({
+                        fix: 'name the plugins, or the `config`, the rules run under — or drop the `.rules()` call',
+                        found: `.rules() states ${Object.keys(run.rules).join(', ')}, and the specification runs no oxlint`,
+                        read: 'docs/21-lint.md#the-chain',
+                        why: 'Rules are run by oxlint alone, and rules no linter reads would judge nothing and say nothing.',
+                    }),
+                );
+            }
             if (run.fix) {
                 linted(tree, linters, run, true);
             }
