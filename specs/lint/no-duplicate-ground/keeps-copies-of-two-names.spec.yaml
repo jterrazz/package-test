@@ -2,7 +2,7 @@ description: --fix moves nothing when the copies' names disagree, since no name 
 fixture: ./_fixtures/renamed/
 runs:
     - command: checker . --fix
-      exit: 0
+      exit: 1
       stderr: |
           specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
           specs/api/users/_seeds/pair.sql:1:1  jterrazz-check(no-duplicate-ground)

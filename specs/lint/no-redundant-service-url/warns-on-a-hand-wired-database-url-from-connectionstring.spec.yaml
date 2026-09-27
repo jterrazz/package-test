@@ -2,6 +2,6 @@ description: warns on a hand-wired DATABASE_URL from connectionString
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           specs/app/widget/widget.test.ts:8:36  jterrazz(no-redundant-service-url)

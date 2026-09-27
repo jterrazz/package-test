@@ -2,6 +2,6 @@ description: warns when a transform only rewrites output into known tokens
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           specs/cli/tf.specification.ts:6:5  jterrazz(no-transform-duplicating-tokens)

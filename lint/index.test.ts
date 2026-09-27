@@ -58,16 +58,16 @@ describe('index', () => {
         }
     });
 
-    test("the ./oxlint entry — testing fragment — standalone oxlint config — each rule is enabled at its row's severity, and the warn tier is the redundancy heuristics alone", () => {
+    test("the ./oxlint entry — testing fragment — standalone oxlint config — each rule is enabled at its row's severity, and every rule errors", () => {
         // Given - each rule the fragment enables (its `rules` IS this map, above), and the row each rule carries
         const levels = Object.entries(plugin.rules).map(([name, rule]) => [
             recommendedRules[`jterrazz/${name}`],
             rule.meta.docs.severity,
         ]);
 
-        // Then - the level oxlint runs is the row's, and the estate's one warn tier is not empty: a rule whose level is read off anything else would run every heuristic as an error
+        // Then - the level oxlint runs is the row's, and it is `error`: oxlint's suppressions hold errors alone, so a warning would be debt no ratchet holds
         expect(levels.filter(([level, severity]) => level !== severity)).toStrictEqual([]);
-        expect(levels.filter(([level]) => level === 'warn').length).toBeGreaterThan(0);
+        expect(levels.filter(([level]) => level !== 'error')).toStrictEqual([]);
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — its overrides add a layer instead of replacing one', () => {

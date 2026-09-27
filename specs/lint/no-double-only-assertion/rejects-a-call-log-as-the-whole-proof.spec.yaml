@@ -2,6 +2,6 @@ description: rejects a module test whose whole proof is a call log
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           scenario.test.ts:6:1  jterrazz(no-double-only-assertion)

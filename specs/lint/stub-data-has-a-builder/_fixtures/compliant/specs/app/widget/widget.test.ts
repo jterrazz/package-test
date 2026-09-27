@@ -4,7 +4,7 @@ import { api } from '../../setup/api.specification.js';
 import world from './_setup/stubs/newsroom.stubs.js';
 
 describe('widget', () => {
-test('serves the newsroom world', async () => {
+test('serves the newsroom world', async () => { // oxlint-disable-line jterrazz/no-status-only-test -- an input tree of the stub-data-has-a-builder spec: this rule is incidental to the one it feeds
     // Given - the feature's stub facade
     const result = await api.intercept(world).get('/events');
 

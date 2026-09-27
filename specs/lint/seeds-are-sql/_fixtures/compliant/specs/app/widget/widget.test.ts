@@ -4,7 +4,7 @@ import { file } from '@jterrazz/test';
 import { api } from '../../setup/api.specification.js';
 
 describe('widget', () => {
-test('lists seeded users', async () => {
+test('lists seeded users', async () => { // oxlint-disable-line jterrazz/no-status-only-test -- an input tree of the seeds-are-sql spec: this rule is incidental to the one it feeds
     // Given - one seeded user
     const result = await api.seed(file('./_seeds/one-user.sql')).get('/users'); // checker-disable-line ground-shared-or-inline -- an input tree of the seeds-are-sql spec: its file form is what the rule reads
 

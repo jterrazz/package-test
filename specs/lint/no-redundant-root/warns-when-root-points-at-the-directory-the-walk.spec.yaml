@@ -2,6 +2,6 @@ description: warns when root points at the directory the walk-up already finds
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           specs/cli/rooted.specification.ts:6:5  jterrazz(no-redundant-root)

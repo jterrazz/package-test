@@ -5,16 +5,18 @@ import { cli } from '../checker.specification.js';
 
 describe('pinned-value-from-the-input', () => {
     // The checker's diagnostics are this package's product, so the whole stream is goldened.
-    test('warns about a timestamp no fixture fixed', async () => {
+    test('refuses a timestamp no fixture fixed', async () => {
         // Given - a golden spelling an ISO-8601 instant out
         const result = await cli
             .fixture(directory('./_fixtures/lint-violations/pinned-value-from-the-input/'))
             .exec('.');
 
         // Then - the pass names the document, the line and what to write instead
-        expect(result.exitCode).toBe(0);
+        expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/stamps.spec.yaml:6:1: warning jterrazz-check(pinned-value-from-the-input): found: "2026-07-17T10:00:00.000Z", which no \`fixture:\` or \`stdin:\` of this document pins · why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` → warning, unless the same value appears in a \`fixture:\`, the document's sibling \`_fixtures/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile). · fix: write {{string}} where "2026-07-17T10:00:00.000Z" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document · read: docs/19-linting.md#pinned-value-from-the-input
+            specs/widget/stamps.spec.yaml:6:1: error jterrazz-check(pinned-value-from-the-input): found: "2026-07-17T10:00:00.000Z", which no \`fixture:\` or \`stdin:\` of this document pins · why: A literal ISO-8601 timestamp or uuid in an expected stream of a \`<case>.spec.yaml\` → error, unless the same value appears in a \`fixture:\`, the document's sibling \`_fixtures/\`, a \`stdin:\`, a command argument or an \`env:\`/\`serve:\` value of the same document (it is then pinned, not volatile). · fix: write {{string}} where "2026-07-17T10:00:00.000Z" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document · read: docs/19-linting.md#pinned-value-from-the-input
+
+            conventions checker: 1 error(s) found under {{workdir}}
         `);
     });
 

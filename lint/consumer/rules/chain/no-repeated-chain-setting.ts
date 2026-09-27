@@ -196,7 +196,6 @@ function declareOnce(
     return edits;
 }
 
-/** A warning: two chains alike may be a coincidence the next test breaks. */
 export const noRepeatedChainSetting: LintRule = {
     createOnce(context: Context): Visitor {
         return {

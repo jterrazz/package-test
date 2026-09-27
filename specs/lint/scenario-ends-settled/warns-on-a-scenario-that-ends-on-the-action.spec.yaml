@@ -2,6 +2,6 @@ description: warns on a scenario that ends on the action
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           specs/website/posts/table.spec.ts:9:15  jterrazz(scenario-ends-settled)

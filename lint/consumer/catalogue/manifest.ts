@@ -67,7 +67,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A `root` pointing at the directory the automatic walk would have found is redundant → warning.',
+            'A `root` pointing at the directory the automatic walk would have found is redundant → error.',
         facet: 'model',
         family: 'setup',
         fix: 'Drop the option: the walk finds the nearest `package.json` by itself.',
@@ -75,7 +75,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Detection by convention has to stay the default; an explicit `root` is only justified where it fails.',
         reach: 'all',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -109,7 +109,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → warning at the first chain. A file of one chain is not judged; a seed and a stub are a test’s Given, never a setting.",
+            "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → error at the first chain. A file of one chain is not judged; a seed and a stub are a test’s Given, never a setting.",
         facet: 'model',
         family: 'chain',
         fix: 'Declare the view once after the imports, `const <view> = <handle>.with({ … })`, and start every chain from it — `make fix` writes it, named for the file’s subject so every file of one folder names it alike (`events/list/` → `events`, a job → its name, a command → its first word; `<subject>View` when the file already holds the name, `<handle>InFile` for no named subject), and drops the setting from each chain.',
@@ -117,7 +117,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A setting repeated on every chain reads as a choice each test made; stated once, it reads as what it is — the condition of the whole file — and the next test cannot forget it.',
         reach: 'spec',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -137,7 +137,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "`.env({ <SERVICE>_URL: ….connectionString })` repeats the framework's own injection → warning.",
+            "`.env({ <SERVICE>_URL: ….connectionString })` repeats the framework's own injection → error.",
         facet: 'cli',
         family: 'chain',
         fix: 'Drop the line: the record key already injects `<KEY>_URL` into the child process.',
@@ -145,7 +145,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The injection already covers service URLs; rewriting them by hand invites drift.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -165,7 +165,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → warning (a suppression with a reason is accepted). Reach: a specification file — a runner created anywhere else is `runner-in-specification-file`'s.",
+            "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → error (a suppression with a reason is accepted). Reach: a specification file — a runner created anywhere else is `runner-in-specification-file`'s.",
         facet: 'cli',
         family: 'chain',
         fix: "Point the runner at the product's own binary; assert on a tool's output through `result.grep`.",
@@ -173,7 +173,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
         reach: 'specification',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -372,7 +372,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A sampled value anywhere in a test callback is a warning — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses and on a name built in a template literal. A `*.specification.ts(x)` is out of reach.',
+            'A sampled value anywhere in a test callback is an error — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses and on a name built in a template literal. A `*.specification.ts(x)` is out of reach.',
         facet: 'model',
         family: 'world',
         fix: 'Reach for `clock.at()`, `clock.advance()`, or a token in the golden.',
@@ -380,13 +380,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A value sampled into the Given travels into the subject, and the assertion that reads it back is the same tautology one step removed.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is a warning. The reach is the `module` role: on a component a callback prop IS the contract with its parent. It is a warning, and not an error, because one subject answers this way honestly — one whose PRODUCT is a call it was handed (a listener, an output port) — and the shape is the same one either way.',
+            'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is an error. The reach is the `module` role: on a component a callback prop IS the contract with its parent. It is an error, and not an error, because one subject answers this way honestly — one whose PRODUCT is a call it was handed (a listener, an output port) — and the shape is the same one either way.',
         facet: 'model',
         family: 'expectations',
         fix: 'Assert the returned value or the resulting state — or say in a line that the call IS the product.',
@@ -394,13 +394,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The subject can return anything, raise anything, or return nothing at all, and every assertion still passes.',
         reach: 'module',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `toThrow` or a bare `toHaveBeenCalled`) is a warning. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one.',
+            'A test whose ONE assertion is an existence check (`toBeDefined`, `toBeTruthy`, `not.toBeNull`, `not.toBeUndefined`, a bare `toThrow` or a bare `toHaveBeenCalled`) is an error. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one.',
         facet: 'model',
         family: 'expectations',
         fix: 'Assert the value, a golden, or a row.',
@@ -408,13 +408,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`toBeDefined()` passes for `0`, `[]`, the wrong object and the right one: as a whole proof it records that the call returned, not what it answered.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch(file(…))` on it is a warning. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.',
+            'Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch(file(…))` on it is an error. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.',
         facet: 'model',
         family: 'expectations',
         fix: "Golden the subject: `expect(result.stdout).toMatch(file('./_expected/<case>.txt'))`, tokens for what moves.",
@@ -422,7 +422,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -484,20 +484,20 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            '`await` on an always-synchronous matcher (`toBe`/`toEqual`/`toContain`/`toHaveLength`) is redundant → warning.',
+            '`await` on an always-synchronous matcher (`toBe`/`toEqual`/`toContain`/`toHaveLength`) is redundant → error.',
         facet: 'model',
         family: 'expectations',
         fix: 'Drop the `await`.',
         name: 'no-await-on-sync-matcher',
         rationale: 'A pointless await hides the signal that marks the real IO matchers.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A `transform` that only rewrites into equivalents of the standard tokens duplicates the grammar → warning.',
+            'A `transform` that only rewrites into equivalents of the standard tokens duplicates the grammar → error.',
         facet: 'model',
         family: 'expectations',
         fix: 'Delete the transform and write the token the grammar already has.',
@@ -505,13 +505,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`transform` is the escape hatch for noise the tokens do not cover — not a second copy of them.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "`expect(x.raw).toContain` compares the stream as it was captured → warning. A stream compared as a value reads `x.text` — ANSI stripped, the runner's `transform` applied, the text a golden compares. A RegExp argument is exempt: a pattern carries no token grammar to lose.",
+            "`expect(x.raw).toContain` compares the stream as it was captured → error. A stream compared as a value reads `x.text` — ANSI stripped, the runner's `transform` applied, the text a golden compares. A RegExp argument is exempt: a pattern carries no token grammar to lose.",
         facet: 'model',
         family: 'expectations',
         fix: 'Compare `x.text`; keep `.raw` for a test that proves what the comparison strips, with the suppression saying so.',
@@ -519,13 +519,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "`.raw` keeps the colour codes and skips the runner's transform, so a substring found there is not the text any golden of the same stream would be compared against.",
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → warning.',
+            'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → error.',
         facet: 'model',
         family: 'expectations',
         fix: 'Drop the ref name and keep the bare token.',
@@ -533,13 +533,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A ref only earns its name when it asserts equality across at least two occurrences.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A golden `toMatch(file(…))`/`toMatch(directory(…))`, or a `toMatch(<value>)` on a result (the value written in place, rewritten in the test), whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong expectation instead of throwing → warning. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
+            'A golden `toMatch(file(…))`/`toMatch(directory(…))`, or a `toMatch(<value>)` on a result (the value written in place, rewritten in the test), whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong expectation instead of throwing → error. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
         facet: 'model',
         family: 'expectations',
         fix: 'Pass `{ frozen: true }` so update mode never overwrites the fixture the test is about.',
@@ -547,13 +547,13 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'In update mode an unfrozen matcher writes instead of throwing: the negative fixture is corrupted by its own real output and the assertion stops testing anything. `frozen` pins it.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → warning: this case wants a full golden (`expect(result.response).toMatch(file('./_expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
+            "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → error: this case wants a full golden (`expect(result.response).toMatch(file('./_expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
         facet: 'api',
         family: 'expectations',
         fix: 'Assert what the response carries, not only the code it came back with.',
@@ -561,7 +561,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes `result-compared-whole`, which reads the response the probe stands beside).',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -589,7 +589,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`--project component` has to mean the same thing in every repository: it is the one word a CI job, a Makefile target and an agent all type.',
         reach: 'config',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -623,7 +623,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'An `include` glob of a PROJECT — an object under `test` or in `projects`, never `optimizeDeps.include` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is a warning.',
+            'An `include` glob of a PROJECT — an object under `test` or in `projects`, never `optimizeDeps.include` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is an error.',
         facet: 'model',
         family: 'setup',
         fix: 'Point the glob at the folder that exists, or delete the project that collects nothing.',
@@ -631,7 +631,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A project that collects nothing passes: the suite never ran, and the only trace is a zero nobody reads.',
         reach: 'config',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -651,7 +651,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'A test writes the process environment through `vi.stubEnv` alone: a raw assignment onto a variable of it (named or computed), a replacement of `process.env` itself, and a `delete` of one of its variables are each a warning; a `*.specification.ts(x)` is out of reach by role.',
+            'A test writes the process environment through `vi.stubEnv` alone: a raw assignment onto a variable of it (named or computed), a replacement of `process.env` itself, and a `delete` of one of its variables are each an error; a `*.specification.ts(x)` is out of reach by role.',
         facet: 'model',
         family: 'setup',
         fix: "Use `vi.stubEnv('X', 'y')`, which restores itself; a CLI default belongs to `specification.cli({ defaults })`.",
@@ -659,7 +659,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The assignment outlasts the test: the next file in the same worker inherits it, and the failure lands somewhere else.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -788,7 +788,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "A `beforeEach`/`beforeAll` in a test file is a warning, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`) — handed over by name (`afterEach(vi.restoreAllMocks)`) or called in the body. `afterAll(cleanup)` in a `*.specification.ts` is `cleanup-passed-to-after-all`'s own idiom and out of reach by role.",
+            "A `beforeEach`/`beforeAll` in a test file is an error, and so is an `afterEach`/`afterAll` whose body does more than restore (`cleanup`, `vi.useRealTimers`, `vi.restoreAllMocks`, `vi.resetAllMocks`, `vi.unstubAllGlobals`, `vi.unstubAllEnvs`) — handed over by name (`afterEach(vi.restoreAllMocks)`) or called in the body. `afterAll(cleanup)` in a `*.specification.ts` is `cleanup-passed-to-after-all`'s own idiom and out of reach by role.",
         facet: 'model',
         family: 'chain',
         fix: 'Call a function from each test instead of a hook; `clock.at()` and `intercept()` restore themselves.',
@@ -796,7 +796,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A hook moves the setup out of the only place a reader looks, shares it with every test in the file, and half of them come to depend on it quietly.',
         reach: 'tests',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -838,7 +838,7 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The capture is taken when the callback returns: a scenario ending on a click hands the golden whatever was on the screen at that instant, and the failure reads as flakiness rather than as a missing wait.',
         reach: 'specs',
-        severity: 'warn',
+        severity: 'error',
     },
 ];
 
@@ -974,7 +974,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is a warning. A `.test.tsx` tree is out of reach, as it is for `specs-at-declared-depth`, and so are the api, cli and job facets: there a leaf is its subject’s standard name (`spec-in-subject-folder`), its aspect files share it by design, and a folder of one spec’s own is one `spec-in-subject-folder` moves the spec back out of.',
+            'Ground in a leaf holding ≥ 2 node tests (`.test.ts`, `.spec.ts`) that a single one of them reads is an error. A `.test.tsx` tree is out of reach, as it is for `specs-at-declared-depth`, and so are the api, cli and job facets: there a leaf is its subject’s standard name (`spec-in-subject-folder`), its aspect files share it by design, and a folder of one spec’s own is one `spec-in-subject-folder` moves the spec back out of.',
         facet: 'model',
         family: 'layout',
         fix: 'Give that spec its own domain folder, with the ground beside it.',
@@ -982,7 +982,7 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Ground one spec reads, parked where several sit, reads as shared: everyone assumes someone else depends on it and nobody dares touch it.',
         reach: 'ground',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1182,20 +1182,20 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → warning, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 18 carries.",
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 18 carries.",
         facet: 'cli',
         family: 'expectations',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
         name: 'pinned-value-from-the-input',
         rationale: 'The defect is not the literal: it is the literal nothing pinned.',
         reach: 'document',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'An expected stream whose whole content is `{{any}}` → warning: the run executes and proves nothing.',
+            'An expected stream whose whole content is `{{any}}` → error: the run executes and proves nothing.',
         facet: 'cli',
         family: 'expectations',
         fix: 'Regenerate with `TEST_UPDATE=1` and keep tokens only for the parts that move.',
@@ -1203,13 +1203,13 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The `vitest/expect-expect` mirror for documents — an assertion that accepts anything is an absent assertion.',
         reach: 'document',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A run whose `exit:` is non-zero with neither `stdout:` nor `stderr:` → warning: the document does not say why the command refused.',
+            'A run whose `exit:` is non-zero with neither `stdout:` nor `stderr:` → error: the document does not say why the command refused.',
         facet: 'cli',
         family: 'expectations',
         fix: 'Write the refusal the command prints — that is what the case proves.',
@@ -1217,7 +1217,7 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A silent refusal is either a defect in the product, or a golden that forgot the words went to stderr.',
         reach: 'document',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1237,7 +1237,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            'A known token in a file under `_requests/` → warning: requests are inputs, never matched.',
+            'A known token in a file under `_requests/` → error: requests are inputs, never matched.',
         facet: 'api',
         family: 'expectations',
         fix: 'Write the literal value the request actually sends.',
@@ -1245,13 +1245,13 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A token in an input is neither validated nor substituted — it is almost always a mistake.',
         reach: 'ground',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under `<specs>/_shared/`; a folder holding ground with no test file and no `*.spec.yaml` at or below it is an orphan (a warning when the argument is not a literal). A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./_seeds/x.sql` in a leaf vouches for that leaf's `_seeds/x.sql`, and not for `<specs>/_shared/_seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
+            "No dead fixtures: every file under `_seeds/`/`_requests/`/`_fixtures/` and every top-level entry of `_expected/` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under `<specs>/_shared/`; a folder holding ground with no test file and no `*.spec.yaml` at or below it is an orphan. A reference is a path RESOLVED to the entry, never a name: a document's keys and a `file()`/`directory()` argument from the file that writes them, the words of any other literal from that file and from the project root, a template literal's table from the folders written before its hole — so `./_seeds/x.sql` in a leaf vouches for that leaf's `_seeds/x.sql`, and not for `<specs>/_shared/_seeds/x.sql`. A `<case>.spec.yaml` references the files every path key of it names.",
         facet: 'model',
         family: 'layout',
         fix: 'Reference it from the spec it stands under, or delete it.',
@@ -1307,7 +1307,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         convention:
-            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is a warning on every copy; it belongs once, in the ground of the lowest folder the leaves share (`events/_seeds/<name>` for `events/list/` and `events/get/`, `<specs>/_shared/_seeds/<name>` across facets), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a ground already holding the name with other content, are left to the author.",
+            "Ground several leaves share lives once: an entry of a leaf's ground — a file, or a tree compared file by file — that another leaf holds byte for byte under the same role, whatever either is called, is an error on every copy; it belongs once, in the ground of the lowest folder the leaves share (`events/_seeds/<name>` for `events/list/` and `events/get/`, `<specs>/_shared/_seeds/<name>` across facets), named by the path that climbs to it. Fixed by `--fix` when the copies share one name: one copy is moved there — a `git mv` in a work tree — the others deleted, and every whole relative literal that named a copy rewritten — a literal of the specs tree's sources, a key of its documents, a literal of the member's module tests; a path built from pieces, or spelled into a command, is the author's to rewrite — `named-path-exists` names one built from literal pieces once the copy has moved. Copies of several names, and a ground already holding the name with other content, are left to the author.",
         facet: 'model',
         family: 'layout',
         fix: 'Run `jterrazz-test-check <root> --fix`, or keep the copies apart on purpose and record them in the ratchet.',
@@ -1315,7 +1315,7 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "Copies drift: one leaf's seed gains a column, the other's does not, and the reader of either cannot tell a difference meant from one forgotten.",
         reach: 'ground',
-        severity: 'warn',
+        severity: 'error',
     },
     {
         audience: 'consumer',

@@ -6,7 +6,7 @@ import { describe, expect, test } from 'vitest';
 import { createApp } from '../../../src/app.js';
 
 describe('widget', () => {
-test('builds the app', () => {
+test('builds the app', () => { // oxlint-disable-line jterrazz/no-existence-only-assertion -- an input tree of the no-framework-internals spec: this rule is incidental to the one it feeds
     // Given - the consumer's own app factory
     const app = createApp();
 

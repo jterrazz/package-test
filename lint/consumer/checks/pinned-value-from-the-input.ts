@@ -32,15 +32,10 @@ export function checkPinnedValueFromTheInput(
                     continue;
                 }
                 findings.push(
-                    finding(
-                        'pinned-value-from-the-input',
-                        stream.line + index,
-                        {
-                            fix: `write ${token} where "${found[0]}" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document`,
-                            found: `"${found[0]}", which no \`fixture:\` or \`stdin:\` of this document pins`,
-                        },
-                        'warn',
-                    ),
+                    finding('pinned-value-from-the-input', stream.line + index, {
+                        fix: `write ${token} where "${found[0]}" stands, or pin the value in a \`fixture:\` or \`stdin:\` of this document`,
+                        found: `"${found[0]}", which no \`fixture:\` or \`stdin:\` of this document pins`,
+                    }),
                 );
             }
         }

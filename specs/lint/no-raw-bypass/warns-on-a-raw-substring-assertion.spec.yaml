@@ -2,6 +2,6 @@ description: warns on a .raw substring assertion
 fixture: ./_fixtures/violation/
 runs:
     - command: .
-      exit: 0
+      exit: 1
       stdout: |
           scenario.test.ts:9:5  jterrazz(no-raw-bypass)

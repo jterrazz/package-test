@@ -11,15 +11,10 @@ export function checkNoEmptyExpectedStream(document: SpecDocument): DocumentFind
             stream.text.includes('{{any}}')
         ) {
             findings.push(
-                finding(
-                    'no-empty-expected-stream',
-                    stream.line,
-                    {
-                        fix: 'write what the command actually printed, tokens for what moves',
-                        found: 'a stream that is only {{any}}',
-                    },
-                    'warn',
-                ),
+                finding('no-empty-expected-stream', stream.line, {
+                    fix: 'write what the command actually printed, tokens for what moves',
+                    found: 'a stream that is only {{any}}',
+                }),
             );
         }
     }

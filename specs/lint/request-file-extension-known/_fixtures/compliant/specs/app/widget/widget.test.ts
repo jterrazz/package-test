@@ -4,7 +4,7 @@ import { file } from '@jterrazz/test';
 import { api } from '../../setup/api.specification.js';
 
 describe('widget', () => {
-test('creates a user', async () => {
+test('creates a user', async () => { // oxlint-disable-line jterrazz/no-status-only-test -- an input tree of the request-file-extension-known spec: this rule is incidental to the one it feeds
     // Given - a complete request file
     const result = await api.request(file('./_requests/create-user.http')); // checker-disable-line ground-shared-or-inline -- an input tree of the request-file-extension-known spec: its file form is what the rule reads
 

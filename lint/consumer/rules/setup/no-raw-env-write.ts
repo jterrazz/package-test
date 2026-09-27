@@ -20,7 +20,6 @@ function isEnvTarget(node: AstNode | undefined): boolean {
     return memberPath(child(node, 'object')) === 'process.env';
 }
 
-/** A warning: a test whose subject is the process environment writes to it, and says so in a line. */
 export const noRawEnvWrite: LintRule = {
     createOnce(context: Context): Visitor {
         return {

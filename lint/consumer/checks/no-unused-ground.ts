@@ -1,6 +1,5 @@
 import { basename, dirname, join, relative, resolve } from 'node:path';
 
-import type { Severity } from '../../engine/checker/finding.js';
 import { specsAnchor } from '../../engine/project/ast.js';
 import { treeEntries } from '../../engine/project/git-tree.js';
 import { isGroundName, SETUP_FOLDER } from '../../engine/project/ground.js';
@@ -70,7 +69,6 @@ function collectLiteralPatterns(text: string, from: string): LiteralPattern[] {
         const cut = before.lastIndexOf('/');
         const prefix = before.slice(cut + 1);
         const suffix = body.slice(closes + 1);
-        // An all-hole template vouches for nothing; `no-unused-ground` already downgrades that file to warn through `hasNonLiteralFixtureArg`.
         if (prefix.length > 0 || suffix.length > 0) {
             const folders = before.slice(0, Math.max(cut, 0));
             found.push({
@@ -94,13 +92,6 @@ function argumentsOf(text: string, pattern: RegExp): string[] {
     return [...text.matchAll(pattern)]
         .map((match) => (match.groups?.arg ?? '').trim())
         .filter((arg) => arg.length > 0);
-}
-
-function hasNonLiteralFixtureArg(text: string): boolean {
-    const verbTakesABinding = argumentsOf(text, DISK_VERB_ARG).some(
-        (arg) => !/^(?:file|directory)\s*\(/u.test(arg),
-    );
-    return verbTakesABinding || argumentsOf(text, DISK_ARG).some((arg) => !PLAIN_STRING.test(arg));
 }
 
 /** An entry is referenced by the path that reaches it, never by a literal that merely spells its name. */
@@ -194,14 +185,9 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
         for (const reader of listFiles(dir, (path) => isModuleName(basename(path)))) {
             referencesOf(reader, references);
         }
-        let downgrade = false;
         for (const testFile of testFiles) {
             referencesOf(testFile, references);
-            if (!testFile.endsWith(SPEC_EXTENSION)) {
-                downgrade ||= hasNonLiteralFixtureArg(readSource(testFile));
-            }
         }
-        const severity: Severity = downgrade ? 'warn' : 'error';
 
         for (const sub of groundSubdirs) {
             const subPath = join(dir, sub);
@@ -216,7 +202,7 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
                     fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
                     found: `${sub}/${entry.name}, which no test of ${feature} names`,
                     rule: 'no-unused-ground',
-                    severity,
+                    severity: 'error',
                 });
             }
         }
