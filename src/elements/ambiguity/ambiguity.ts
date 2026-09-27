@@ -32,10 +32,11 @@ function landmarkOf(match: ElementMatch): string | undefined {
 
 function formatMatch(match: ElementMatch, index: number): string {
     const attribute = match.detail ? ` ${quoteDetail(match)}` : '';
-    // The accessible name is what a role descriptor matched on: when it is an `aria-label`, the text alone names the wrong thing.
-    const named = match.accessibleName ? `  named ${JSON.stringify(match.accessibleName)}` : '';
+    const matchedOnLabel = match.accessibleName
+        ? `  named ${JSON.stringify(match.accessibleName)}`
+        : '';
     const context = match.context ? `  in <${match.context}>` : '';
-    return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${named}${context}`;
+    return `  ${index + 1}. <${match.tag}${attribute}>${match.text}</${match.tag}>${matchedOnLabel}${context}`;
 }
 
 function quoteDetail(match: ElementMatch): string {
@@ -57,10 +58,11 @@ function landmarkCounts(matches: ElementMatch[]): [string, number][] {
 function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
-    // A landmark holding every candidate narrows nothing: only the ones that cut the set are offered.
-    const narrowing = landmarkCounts(matches).filter(([, count]) => count < matches.length);
+    const landmarksThatCutTheSet = landmarkCounts(matches).filter(
+        ([, count]) => count < matches.length,
+    );
     if (!element.scope) {
-        const [first, ...rest] = narrowing;
+        const [first, ...rest] = landmarksThatCutTheSet;
         const alsoHere =
             rest.length > 0 ? `   [also here: ${rest.map(([name]) => name).join(', ')}]` : '';
         fixes.push(
@@ -70,8 +72,8 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
         );
     }
 
-    // Only for a descriptor that opted out: exact is the default.
-    if (element.exact === false && element.name !== undefined) {
+    const optedOutOfExact = element.exact === false && element.name !== undefined;
+    if (optedOutOfExact) {
         const remaining = matches.filter((match) => match.text === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
@@ -92,19 +94,32 @@ export class AmbiguousElementError extends Error {
     override readonly name = 'AmbiguousElementError';
 }
 
+export function ambiguityRefusal(options: {
+    candidates: string[];
+    element: ElementRef;
+    fixes: string[];
+    where: string;
+}): string {
+    const { candidates, element, fixes, where } = options;
+    return refusal('descriptor-matches-one-element', {
+        fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
+        found: [
+            `Ambiguous element: ${asWritten(element)} matched ${candidates.length} elements on ${where} —`,
+            ...candidates,
+        ].join('\n'),
+    });
+}
+
 export function describeAmbiguity(options: {
     element: ElementRef;
     matches: ElementMatch[];
     url: string;
 }): string {
     const { element, matches, url } = options;
-    const fixes = formatFixes(element, matches).map((fix) => `  • ${fix}`);
-
-    return refusal('descriptor-matches-one-element', {
-        fix: ['designate one of them:', ...fixes].join('\n'),
-        found: [
-            `Ambiguous element: ${asWritten(element)} matched ${matches.length} elements on ${url} —`,
-            ...matches.map((match, index) => formatMatch(match, index)),
-        ].join('\n'),
+    return ambiguityRefusal({
+        candidates: matches.map((match, index) => formatMatch(match, index)),
+        element,
+        fixes: formatFixes(element, matches),
+        where: url,
     });
 }

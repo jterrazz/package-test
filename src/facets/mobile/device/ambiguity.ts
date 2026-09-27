@@ -1,5 +1,5 @@
-import { refusal } from '../../../../lint/index.refusal.js';
-import { asWritten } from '../../../elements/descriptors/as-written.js';
+import { ambiguityRefusal } from '../../../elements/ambiguity/ambiguity.js';
+import { asWrittenUnscoped } from '../../../elements/descriptors/as-written.js';
 import type { MobileElementMatch, MobileElementRef } from './device.port.js';
 
 function formatMatch(match: MobileElementMatch, index: number): string {
@@ -15,7 +15,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
 
     if (!element.scope) {
         fixes.push(
-            `scope it       within(testId('…'), ${asWritten(element)}) — a screen has no landmarks; any descriptor works as the scope`,
+            `scope it       within(testId('…'), ${asWrittenUnscoped(element)}) — a screen has no landmarks; any descriptor works as the scope`,
         );
     }
 
@@ -23,7 +23,7 @@ function formatFixes(element: MobileElementRef, matches: MobileElementMatch[]): 
         const remaining = matches.filter((match) => match.label === element.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
-                `exact name     ${asWritten({ exact: true, kind: element.kind, name: element.name })}` +
+                `exact name     ${asWrittenUnscoped({ ...element, exact: true })}` +
                     `   [leaves ${remaining} of ${matches.length}]`,
             );
         }
@@ -53,13 +53,10 @@ export function describeMobileAmbiguity(options: {
     matches: MobileElementMatch[];
 }): string {
     const { element, matches } = options;
-    const fixes = formatFixes(element, matches).map((fix) => `  • ${fix}`);
-
-    return refusal('descriptor-matches-one-element', {
-        fix: ['designate one of them:', ...fixes].join('\n'),
-        found: [
-            `Ambiguous element: ${asWritten(element)} matched ${matches.length} elements on the screen —`,
-            ...matches.map((match, index) => formatMatch(match, index)),
-        ].join('\n'),
+    return ambiguityRefusal({
+        candidates: matches.map((match, index) => formatMatch(match, index)),
+        element,
+        fixes: formatFixes(element, matches),
+        where: 'the screen',
     });
 }
