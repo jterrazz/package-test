@@ -1,8 +1,8 @@
-import { GROUND_FIXTURES, treeKind } from '@jterrazz/typescript/rules';
+import { blankComments, GROUND_FIXTURES, treeKind } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 
-import { closingOf, literalEnd, withoutComments } from './subject.js';
+import { closingOf, literalEnd } from './subject.js';
 
 /** Read from the modules that build the spec's runners. A literal naming a file inside a specimen names the app; one naming the folder is a root, and names the app only when it feeds a server command, since a root alone is where services read their ground. */
 
@@ -80,7 +80,7 @@ function rootOfAServer(blank: string, at: number): boolean {
 }
 
 function specimenNamedIn(text: string): string | undefined {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     for (const { at, literal } of literalsOf(blank)) {
         const groups = INTO_FIXTURES.exec(literal)?.groups;
         if (
@@ -94,7 +94,7 @@ function specimenNamedIn(text: string): string | undefined {
 }
 
 function doorsOf(file: string, text: string): string[] {
-    return [...withoutComments(text).matchAll(SPECIFICATION_FROM)].map(({ groups }) =>
+    return [...blankComments(text).matchAll(SPECIFICATION_FROM)].map(({ groups }) =>
         resolve(dirname(file), (groups?.from ?? '').replace(/\.js$/u, '.ts')),
     );
 }
@@ -119,7 +119,7 @@ function specimenOfDoor(door: string, seen: Set<string>): string | undefined {
 }
 
 function importedSpecimen(text: string): string | undefined {
-    for (const { groups } of withoutComments(text).matchAll(IMPORT_FROM)) {
+    for (const { groups } of blankComments(text).matchAll(IMPORT_FROM)) {
         const name = INTO_FIXTURES.exec(groups?.from ?? '')?.groups?.name;
         if (name !== undefined) {
             return name;
@@ -136,7 +136,7 @@ export function specimenOf(file: string, text: string, facet: string): string | 
             return called;
         }
     }
-    if (runnerCalls(withoutComments(text)).length > 0) {
+    if (runnerCalls(blankComments(text)).length > 0) {
         const inline = specimenNamedIn(text);
         if (inline !== undefined) {
             return inline;

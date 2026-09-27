@@ -1,5 +1,7 @@
 /** The standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `PUT|PATCH` update, `DELETE` delete; a route under an item takes its literal segments; a job is its name, a cli command its first word. `jterrazz.config.ts` corrects the irregular collections and the method-less routes, a cli runner its command words. */
 
+import { blankComments } from '@jterrazz/typescript/rules';
+
 export type SubjectReading = {
     collections: readonly string[];
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
@@ -381,7 +383,7 @@ function constantWords(text: string, name: string): string[] | undefined {
 
 /** Written as an array or bound to a `const` of the same file (`commands: COMMANDS`, `{ commands }`). */
 export function declaredCommands(door: string): string[] | undefined {
-    const text = withoutComments(door);
+    const text = blankComments(door);
     const call = CLI_CONSTRUCTOR.exec(text);
     if (call === null) {
         return undefined;
@@ -510,46 +512,13 @@ export function subjectsOfChain(
     return reached.map((subject) => declaredMethod(subject, reading.methodless));
 }
 
-function commentEnd(text: string, index: number): number {
-    if (text[index] !== '/') {
-        return index;
-    }
-    if (text[index + 1] === '/') {
-        const end = text.indexOf('\n', index);
-        return end === -1 ? text.length : end;
-    }
-    if (text[index + 1] === '*') {
-        const end = text.indexOf('*/', index);
-        return end === -1 ? text.length : end + 2;
-    }
-    return index;
-}
-
-/** Blanked unit for unit so every offset holds: a chain written in a comment is prose. */
-export function withoutComments(text: string): string {
-    let out = '';
-    let index = 0;
-    while (index < text.length) {
-        const character = text[index] ?? '';
-        const comment = commentEnd(text, index);
-        if (comment !== index) {
-            out += text.slice(index, comment).replaceAll(/[^\n]/gu, ' ');
-            index = comment;
-            continue;
-        }
-        const end = literalEnd(text, index);
-        out += end === index ? character : text.slice(index, end);
-        index = end === index ? index + 1 : end;
-    }
-    return out;
-}
 
 export function subjectsOf(
     source: string,
     readRequest?: RequestReader,
     reading: SubjectReading = NO_READING,
 ): SubjectAt[] {
-    const text = withoutComments(source);
+    const text = blankComments(source);
     return chainsOf(text, handlesOf(text)).flatMap((chain) =>
         subjectsOfChain(chain, readRequest, reading).map((subject) => ({
             index: chain.index,

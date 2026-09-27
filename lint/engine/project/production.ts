@@ -1,4 +1,5 @@
 import {
+    blankComments,
     folderChanged,
     isFile,
     isGroundFolder,
@@ -20,7 +21,6 @@ import type { AstNode, ImportSource } from './ast.js';
 import { parseProgram } from './module-parser.js';
 import { mergeVisitors, pathReferenceVisitor, visitProgram } from './path-references.js';
 import { packageRootOf, projectRootOf, projectSegments, roleOf } from './role.js';
-import { withoutComments } from './subject.js';
 import { testSettingsAt } from './test-settings.js';
 
 const SOURCE = /\.[cm]?[jt]sx?$/u;
@@ -150,7 +150,7 @@ function readJsonc(path: string): unknown {
         return undefined;
     }
     try {
-        return JSON.parse(withoutComments(text).replaceAll(/,(?=\s*[\]}])/gu, '')) as unknown;
+        return JSON.parse(blankComments(text).replaceAll(/,(?=\s*[\]}])/gu, '')) as unknown;
     } catch {
         return undefined;
     }

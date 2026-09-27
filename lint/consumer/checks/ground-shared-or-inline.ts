@@ -1,4 +1,5 @@
 import {
+    blankComments,
     forgetTree,
     GROUND_EXPECTED,
     GROUND_REQUESTS,
@@ -14,9 +15,9 @@ import { dedent } from '../../engine/project/dedent.js';
 import { isRelativePath } from '../../engine/project/relative-path.js';
 import { isInside, literalSpans, nameAround } from '../../engine/project/spec-values.js';
 import type { Span } from '../../engine/project/spec-values.js';
-import { closingOf, literalEnd, withoutComments } from '../../engine/project/subject.js';
+import { closingOf, literalEnd } from '../../engine/project/subject.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
-import { blankComments, findSpecsRoots, listFiles } from '../../engine/project/tree.js';
+import { findSpecsRoots, listFiles } from '../../engine/project/tree.js';
 import type { Spotted } from './checker.js';
 import {
     checkGroundPlacement,
@@ -314,7 +315,7 @@ function candidateAt(
 
 function oversizedIn(file: string): Oversized[] {
     const source = readFileSync(file, 'utf8');
-    const text = withoutComments(source);
+    const text = blankComments(source);
     const literals = literalSpans(text);
     const suppressed = suppressedLines(source, 'ground-shared-or-inline');
     return [...text.matchAll(VALUE_CALL)].flatMap((call) => {

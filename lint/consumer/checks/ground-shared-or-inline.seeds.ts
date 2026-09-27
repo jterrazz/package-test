@@ -1,4 +1,4 @@
-import { forgetTree, GROUND_SEEDS } from '@jterrazz/typescript/rules';
+import { blankComments, forgetTree, GROUND_SEEDS } from '@jterrazz/typescript/rules';
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join, relative } from 'node:path';
 import { runInNewContext } from 'node:vm';
@@ -15,7 +15,7 @@ import {
     literalSpans,
     titleAround,
 } from '../../engine/project/spec-values.js';
-import { skipString, withoutComments } from '../../engine/project/subject.js';
+import { skipString } from '../../engine/project/subject.js';
 import { suppressedLines } from '../../engine/project/suppression.js';
 import { findSpecsRoots, listFiles } from '../../engine/project/tree.js';
 import type { Spotted } from './checker.js';
@@ -93,7 +93,7 @@ function inlineSeedsIn(file: string): InlineSeed[] {
     if (!importsFromEntry(source, 'sql')) {
         return [];
     }
-    const text = withoutComments(source);
+    const text = blankComments(source);
     const literals = literalSpans(text);
     const seeds: InlineSeed[] = [];
     for (const found of text.matchAll(SQL_TAG)) {
@@ -168,7 +168,7 @@ export function fixInlineSeeds(rootDir: string): string[] {
         const named = withEntryImport(text, file, 'file');
         writeFileSync(
             file,
-            /(?<![.\w$])sql\s*`/u.test(withoutComments(named))
+            /(?<![.\w$])sql\s*`/u.test(blankComments(named))
                 ? named
                 : withoutEntryImport(named, 'sql'),
         );

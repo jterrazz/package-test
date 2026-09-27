@@ -1,4 +1,5 @@
 import {
+    blankComments,
     forgetTree,
     GROUND_FOLDERS,
     moveKeepingHistory,
@@ -23,7 +24,7 @@ import {
     withLeadingComments,
 } from '../../engine/project/spec-subjects.js';
 import type { Span, SpecRead } from '../../engine/project/spec-subjects.js';
-import { closingOf, literalEnd, withoutComments } from '../../engine/project/subject.js';
+import { closingOf, literalEnd } from '../../engine/project/subject.js';
 import { listFiles, lowestCommonFolder, reservedFolderOf } from '../../engine/project/tree.js';
 
 type ImportClause = Span & {
@@ -70,7 +71,7 @@ function importText(clause: ImportClause, keeps: (local: string) => boolean): st
 
 /** A name written in a message is no read of it; a template stays whole, since its holes hold code. */
 function codeOnly(text: string): string {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     let out = '';
     for (let index = 0; index < blank.length;) {
         const end = literalEnd(blank, index);
@@ -131,7 +132,7 @@ function statementEnd(blank: string, start: number, isFunction: boolean): number
 
 /** An export is read elsewhere, and kept. */
 function declarationsOf(text: string): Declaration[] {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     return [...blank.matchAll(DECLARATION)].flatMap((match) => {
         const { alias, fn, shape, variable } = match.groups ?? {};
         const name = variable ?? fn ?? alias ?? shape;
@@ -195,7 +196,7 @@ const RELATIVE_LITERAL =
     /(?<lead>(?<![.\w])(?:file|directory)\(\s*|\bfrom\s+|\bimport\(\s*|import\.meta\.dirname,\s*)(?<quote>['"])(?<path>\.\.?\/[^'"]*)\k<quote>/gu;
 
 function literalSpans(text: string): Span[] {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     const spans: Span[] = [];
     for (let index = 0; index < blank.length;) {
         const end = literalEnd(blank, index);
@@ -233,7 +234,7 @@ function rebased(text: string, from: string, to: string): string {
 const DESCRIBE_CALL = /^describe(?:\.\w+(?:\([^()]*\))?)*\s*\(/gmu;
 
 function describesOf(text: string): (Span & { holdsTests: boolean; open: number })[] {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     return [...blank.matchAll(DESCRIBE_CALL)].map((found) => {
         const open = found.index + found[0].length - 1;
         const close = closingOf(blank, open);
@@ -402,7 +403,7 @@ function movedDeclarations(spec: SpecRead, drafts: readonly Draft[]): Declaratio
 }
 
 function exported(code: string): string {
-    const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(withoutComments(code));
+    const head = /^(?:const|let|async\s|function|type\s|interface\s)/mu.exec(blankComments(code));
     return head === null ? code : `${code.slice(0, head.index)}export ${code.slice(head.index)}`;
 }
 
@@ -513,7 +514,7 @@ function namesRead(code: string): Set<string> {
 
 /** A hook reading nothing but the runner's names is every test's, and stays. */
 function withoutIdleHooks(text: string): string {
-    const blank = withoutComments(text);
+    const blank = blankComments(text);
     const hooks = [...blank.matchAll(HOOK_CALL)].map((found) => {
         const open = found.index + found[0].length - 1;
         return {

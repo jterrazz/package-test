@@ -1,3 +1,4 @@
+import { blankComments } from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, join, relative, resolve } from 'node:path';
 
@@ -17,45 +18,6 @@ const CONFIG_NAMES = [
 const COLLECTION = /\b(?:include|exclude)\s*:\s*\[(?<entries>[^\]]*)\]/gu;
 
 const ENTRY = /['"`](?<entry>[^'"`\n]*)['"`]/gu;
-
-const QUOTES = new Set(["'", '"', '`']);
-
-function endOfLineComment(text: string, index: number): number {
-    const newline = text.indexOf('\n', index);
-    return newline === -1 ? text.length : newline;
-}
-
-function endOfBlockComment(text: string, index: number): number {
-    const close = text.indexOf('*/', index + 2);
-    return close === -1 ? text.length : close + 2;
-}
-
-/** Scanned character by character: a regex cannot tell `specs/api/**` + `/*.test.ts` in a string from a block comment, nor a `://` from a line comment. */
-function withoutComments(text: string): string {
-    let out = '';
-    let quote: null | string = null;
-    let index = 0;
-    while (index < text.length) {
-        const char = text[index] ?? '';
-        const pair = text.slice(index, index + 2);
-        if (quote !== null) {
-            const escaped = char === '\\';
-            out += escaped ? pair : char;
-            quote = char === quote ? null : quote;
-            index += escaped ? 2 : 1;
-        } else if (pair === '//') {
-            out += '\n';
-            index = endOfLineComment(text, index);
-        } else if (pair === '/*') {
-            index = endOfBlockComment(text, index);
-        } else {
-            quote = QUOTES.has(char) ? char : null;
-            out += char;
-            index += 1;
-        }
-    }
-    return out;
-}
 
 /** A glob reaches what its literal prefix (everything before the first `*`) contains, resolved against the config's own directory, as vitest does. */
 function reaches(dir: string, entry: string, file: string): boolean {
@@ -85,7 +47,7 @@ function noticeFor(where: string, entry: string): string {
 
 function staleEntriesIn(path: string, owner: string, renamed: Rename[]): string[] {
     const directory = dirname(path);
-    return collectedEntries(withoutComments(readFileSync(path, 'utf8')))
+    return collectedEntries(blankComments(readFileSync(path, 'utf8')))
         .filter((entry) => entry.endsWith('.test.ts'))
         .filter((entry) => renamed.some(({ from }) => reaches(directory, entry, from)))
         .map((entry) => noticeFor(relative(owner, path), entry));

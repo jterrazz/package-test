@@ -1,4 +1,4 @@
-import { treeKind } from '@jterrazz/typescript/rules';
+import { blankComments, treeKind } from '@jterrazz/typescript/rules';
 import { readFileSync } from 'node:fs';
 import { basename, dirname, join, relative, resolve, sep } from 'node:path';
 
@@ -12,7 +12,6 @@ import {
     subjectFolder,
     subjectName,
     subjectsOf,
-    withoutComments,
 } from './subject.js';
 import type { Subject, SubjectReading } from './subject.js';
 import { suppressedLines } from './suppression.js';
@@ -69,7 +68,7 @@ export function withLeadingComments(text: string, start: number): number {
 }
 
 function testsOf(source: string): Omit<TestOf, 'subjects'>[] {
-    const text = withoutComments(source);
+    const text = blankComments(source);
     const tests: Omit<TestOf, 'subjects'>[] = [];
     for (const found of text.matchAll(TEST_CALL)) {
         if (tests.some((test) => found.index >= test.start && found.index < test.end)) {
@@ -100,7 +99,7 @@ function readingOf(specsRoot: string, file: string, text: string): SubjectReadin
         projectRootOf(specsRoot) ?? dirname(specsRoot),
     );
     const commands: Record<string, readonly string[]> = {};
-    for (const [handle, door] of Object.entries(doorsOf(withoutComments(text), 'cli'))) {
+    for (const [handle, door] of Object.entries(doorsOf(blankComments(text), 'cli'))) {
         const source = readBeside(file, door.replace(/\.js$/u, '.ts'));
         const declared = source === undefined ? undefined : declaredCommands(source);
         if (declared !== undefined) {

@@ -1,6 +1,8 @@
 import {
+    blankComments,
     isGroundFolder,
     PRUNED,
+    quotedMask,
     SHARED_FOLDER,
     treeEntries,
     treeKind,
@@ -133,47 +135,6 @@ export function readText(path: string): string {
     }
 }
 
-/** Newlines survive and strings stay untouched, so offsets and line numbers still hold. */
-export function blankComments(text: string): string {
-    const out = [...text];
-    let state: "'" | '"' | '' | '`' | 'block' | 'line' = '';
-    for (let i = 0; i < text.length; i += 1) {
-        const char = text[i];
-        const next = text[i + 1];
-        if (state === 'line') {
-            if (char === '\n') {
-                state = '';
-            } else {
-                out[i] = ' ';
-            }
-        } else if (state === 'block') {
-            if (char === '*' && next === '/') {
-                out[i] = ' ';
-                out[i + 1] = ' ';
-                i += 1;
-                state = '';
-            } else if (char !== '\n') {
-                out[i] = ' ';
-            }
-        } else if (state === '"' || state === "'" || state === '`') {
-            if (char === '\\') {
-                i += 1;
-            } else if (char === state) {
-                state = '';
-            }
-        } else if (char === '/' && next === '/') {
-            out[i] = ' ';
-            state = 'line';
-        } else if (char === '/' && next === '*') {
-            out[i] = ' ';
-            state = 'block';
-        } else if (char === '"' || char === "'" || char === '`') {
-            state = char;
-        }
-    }
-    return out.join('');
-}
-
 export function readSource(path: string): string {
     return blankComments(readText(path));
 }
@@ -249,7 +210,7 @@ export function collectFixtureReferences(
         }
     }
     const text = readSource(file);
-    const quoted = codeOnly ? stringMask(text) : [];
+    const quoted = codeOnly ? quotedMask(text) : [];
     const references: FixtureReference[] = [];
     for (const match of text.matchAll(pattern)) {
         if (quoted[match.index] === true) {
@@ -268,28 +229,6 @@ export function collectFixtureReferences(
         }
     }
     return references;
-}
-
-/** A template is read whole as a string: a call inside `${…}` is out of reach. */
-function stringMask(text: string): boolean[] {
-    const mask: boolean[] = [];
-    let quote = '';
-    for (let index = 0; index < text.length; index += 1) {
-        const char = text[index] ?? '';
-        if (quote === '') {
-            quote = char === '"' || char === "'" || char === '`' ? char : '';
-            mask[index] = quote !== '';
-        } else {
-            mask[index] = true;
-            if (char === '\\') {
-                index += 1;
-                mask[index] = true;
-            } else if (char === quote) {
-                quote = '';
-            }
-        }
-    }
-    return mask;
 }
 
 export function listReaders(specsRoot: string): string[] {

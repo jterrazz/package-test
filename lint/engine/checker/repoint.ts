@@ -1,3 +1,4 @@
+import { blankComments } from '@jterrazz/typescript/rules';
 import { writeFileSync } from 'node:fs';
 import { dirname, join, relative, resolve, sep } from 'node:path';
 
@@ -5,7 +6,7 @@ import { moduleTestsOf } from '../project/module-tests.js';
 import { isRelativePath } from '../project/relative-path.js';
 import { documentPaths, parseSpecDocument } from '../project/spec-document.js';
 import { literalSpans } from '../project/spec-values.js';
-import { blankComments, isWithin, readText } from '../project/tree.js';
+import { isWithin, readText } from '../project/tree.js';
 
 function pathFrom(from: string, to: string): string {
     const rest = relative(from, to).split(sep).join('/');

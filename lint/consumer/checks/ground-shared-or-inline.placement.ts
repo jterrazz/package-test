@@ -1,4 +1,5 @@
 import {
+    blankComments,
     isGroundFolder,
     moveKeepingHistory,
     SHARED_FOLDER,
@@ -14,7 +15,6 @@ import { literalSpans } from '../../engine/project/spec-values.js';
 import { placeOf } from '../../engine/project/specs-modules.js';
 import {
     anchoredPaths,
-    blankComments,
     collectFixtureReferences,
     DISK_CALL,
     findSpecsRoots,
