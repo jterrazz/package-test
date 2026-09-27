@@ -1,9 +1,9 @@
-import { cpSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { copyPlan } from './fs-fixtures.adapter.js';
+import { copyPlan, fsFixtures } from './fs-fixtures.adapter.js';
 
 let base: string;
 let specsRoot: string;
@@ -39,7 +39,7 @@ describe('fsFixtures', () => {
         rmSync(copyBase, { force: true, recursive: true });
     });
 
-    test('fixtures — source resolution — a path beside the spec resolves from the spec directory', () => {
+    test('copyPlan — source resolution — a path beside the spec resolves from the spec directory', () => {
         // Given - a feature-local file, named from the spec
         // Then - it resolves against the spec's own directory
         expect(copyPlan('./_fixtures/local.txt', testDir, '/work').src).toBe(
@@ -47,7 +47,7 @@ describe('fsFixtures', () => {
         );
     });
 
-    test('fixtures — source resolution — the shared pool is reached by the path that climbs to it', () => {
+    test('copyPlan — source resolution — the shared pool is reached by the path that climbs to it', () => {
         // Given - a pool directory, named from two levels down
         // Then - the trailing slash does not affect where the source is read
         expect(copyPlan('../../_fixtures/cli-app/', testDir, '/work').src).toBe(
@@ -66,7 +66,7 @@ describe('fsFixtures', () => {
         },
     );
 
-    test('fixtures — source resolution — a path that names nothing is refused with the path it resolved to', () => {
+    test('copyPlan — source resolution — a path that names nothing is refused with the path it resolved to', () => {
         // Given - a file the leaf does not carry
         // Then - the refusal carries the absolute path it looked at
         expect(() => copyPlan('./_fixtures/absent.txt', testDir, '/work')).toThrow(
@@ -74,17 +74,15 @@ describe('fsFixtures', () => {
         );
     });
 
-    test('fixtures — copy semantics (the trailing slash says which) — a plain file is copied as <cwd>/<basename>', () => {
+    test('fsFixtures — copy semantics (the trailing slash says which) — a plain file is copied as <cwd>/<basename>', () => {
         // Given - a single file fixture
-        const { dest, src } = copyPlan('./_fixtures/single.txt', copyDir, freshWorkDir());
-        cpSync(src, dest, { recursive: true });
+        fsFixtures.layer('./_fixtures/single.txt', copyDir, freshWorkDir());
 
         // Then - it lands at the working dir under its basename
-        expect(dest).toBe(resolve(workDir, 'single.txt'));
         expect(readFileSync(resolve(workDir, 'single.txt'), 'utf8')).toBe('single\n');
     });
 
-    test('fixtures — copy semantics (the trailing slash says which) — a directory named without its trailing slash is refused, naming the form to write', () => {
+    test('copyPlan — copy semantics (the trailing slash says which) — a directory named without its trailing slash is refused, naming the form to write', () => {
         // Given - a directory fixture, no trailing slash
         // Then - the path says one kind and the disk the other
         expect(() => copyPlan('./_fixtures/proj', copyDir, freshWorkDir())).toThrow(
@@ -92,7 +90,7 @@ describe('fsFixtures', () => {
         );
     });
 
-    test('fixtures — copy semantics (the trailing slash says which) — a file named with a trailing slash is refused', () => {
+    test('copyPlan — copy semantics (the trailing slash says which) — a file named with a trailing slash is refused', () => {
         // Given - a file fixture in spread form
         // Then - the refusal names file()
         expect(() => copyPlan('./_fixtures/single.txt/', copyDir, freshWorkDir())).toThrow(
@@ -100,13 +98,12 @@ describe('fsFixtures', () => {
         );
     });
 
-    test('fixtures — copy semantics (the trailing slash says which) — a directory with a trailing slash spreads its contents into the cwd', () => {
+    test('fsFixtures — copy semantics (the trailing slash says which) — a directory with a trailing slash spreads its contents into the cwd', () => {
         // Given - a directory fixture in spread form
-        const { dest, src } = copyPlan('./_fixtures/proj/', copyDir, freshWorkDir());
-        cpSync(src, dest, { recursive: true });
+        fsFixtures.layer('./_fixtures/proj/', copyDir, freshWorkDir());
 
         // Then - the contents land directly in the cwd, not under proj/
-        expect(dest).toBe(workDir);
+        expect(existsSync(resolve(workDir, 'proj'))).toBe(false);
         expect(readFileSync(resolve(workDir, 'a.txt'), 'utf8')).toBe('a\n');
         expect(readFileSync(resolve(workDir, 'nested/b.txt'), 'utf8')).toBe('b\n');
     });
