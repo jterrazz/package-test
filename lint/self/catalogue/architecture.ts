@@ -138,7 +138,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`); a `*.driver.ts`, or its test, type test or fixtures, is an error at its first line.',
+            'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`); a module whose name carries `.driver` before its extension — the module, its test, type test, fixtures or browser entry, `.ts` or `.tsx` — is an error at its first line.',
         facet: 'model',
         family: 'architecture',
         fix: 'Rename the file `<what it adapts>.adapter.ts`, and the paths that import it.',
