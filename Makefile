@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test test-merge test-changed check test-mobile
+.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -51,3 +51,8 @@ check: node_modules/.install
 # Needs Xcode and a simulator: no CI job runs it, and `check` never calls it.
 test-mobile: build
 	node specs/_shared/_fixtures/specimen-mobile/on-simulator.mjs
+
+# Needs the network and a lychee on the machine: `check` never calls it.
+check-links:
+	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
+	lychee --no-progress README.md docs skills
