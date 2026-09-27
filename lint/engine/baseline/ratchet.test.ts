@@ -50,9 +50,9 @@ describe('ratchet', () => {
 
         // Then - three reasons, in the order a reader scans them
         expect(broken).toStrictEqual([
-            'jterrazz-check/no-unused-ground is at 3, above its baseline of 2',
-            'jterrazz/test-beside-its-module has 1 finding(s) and no entry — it is new debt',
-            'jterrazz-check/no-reach-into-sibling-ground is at zero — the ratchet moved, delete its entry',
+            "found: jterrazz-check/no-unused-ground is at 3, above its baseline of 2 · why: the count is held exactly, so no finding arrives unseen, and slack left in an entry would let one arrive · fix: fix the findings, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
+            "found: jterrazz/test-beside-its-module has 1 finding(s) and no entry · why: the section holds the debt the project recorded, rule by rule, and a rule it never recorded is new debt · fix: fix the findings, or run 'jterrazz-test-check baseline' to record where the project stands · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
+            "found: jterrazz-check/no-reach-into-sibling-ground is at zero, and its entry is still held · why: the count is held exactly, so no finding arrives unseen, and slack left in an entry would let one arrive · fix: run 'jterrazz-test-check --fix' (make fix), which drops the entry · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
         ]);
     });
 
@@ -65,7 +65,7 @@ describe('ratchet', () => {
                 { 'jterrazz-check/no-unused-ground': 2, 'jterrazz/given-in-the-test': 4 },
             ),
         ).toStrictEqual([
-            'jterrazz-check/no-unused-ground is at 1, below its baseline of 2 — the debt fell, `--fix` re-records it',
+            "found: jterrazz-check/no-unused-ground is at 1, below its baseline of 2 · why: the count is held exactly, so no finding arrives unseen, and slack left in an entry would let one arrive · fix: run 'jterrazz-test-check --fix' (make fix), which re-records the fall · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson",
         ]);
     });
 

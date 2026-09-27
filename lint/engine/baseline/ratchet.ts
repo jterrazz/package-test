@@ -1,6 +1,8 @@
 import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 
+import { lessonLine } from '../catalogue/lesson-parts.js';
+
 export const BASELINE_FILE = 'jterrazz.baseline.json';
 
 export const ROUTES_KEY = 'routes/unreached';
@@ -27,6 +29,16 @@ export function countsOf(printedRules: readonly string[]): Record<string, number
     return counts;
 }
 
+const RATCHET_READ = 'docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson';
+
+const RECORD =
+    "fix the findings, or run 'jterrazz-test-check baseline' to record where the project stands";
+
+const RE_RECORD = "run 'jterrazz-test-check --fix' (make fix), which re-records the fall";
+
+const EXACT =
+    'the count is held exactly, so no finding arrives unseen, and slack left in an entry would let one arrive';
+
 export function judge(
     counts: Readonly<Record<string, number>>,
     baseline: Readonly<Record<string, number>>,
@@ -35,12 +47,31 @@ export function judge(
     for (const [key, count] of Object.entries(counts).toSorted(([a], [b]) => (a < b ? -1 : 1))) {
         const allowed = baseline[key];
         if (allowed === undefined) {
-            broken.push(`${key} has ${count} finding(s) and no entry — it is new debt`);
+            broken.push(
+                lessonLine({
+                    fix: RECORD,
+                    found: `${key} has ${count} finding(s) and no entry`,
+                    read: RATCHET_READ,
+                    why: 'the section holds the debt the project recorded, rule by rule, and a rule it never recorded is new debt',
+                }),
+            );
         } else if (count > allowed) {
-            broken.push(`${key} is at ${count}, above its baseline of ${allowed}`);
+            broken.push(
+                lessonLine({
+                    fix: RECORD,
+                    found: `${key} is at ${count}, above its baseline of ${allowed}`,
+                    read: RATCHET_READ,
+                    why: EXACT,
+                }),
+            );
         } else if (count < allowed) {
             broken.push(
-                `${key} is at ${count}, below its baseline of ${allowed} — the debt fell, \`--fix\` re-records it`,
+                lessonLine({
+                    fix: RE_RECORD,
+                    found: `${key} is at ${count}, below its baseline of ${allowed}`,
+                    read: RATCHET_READ,
+                    why: EXACT,
+                }),
             );
         }
     }
@@ -50,7 +81,14 @@ export function judge(
             continue;
         }
         if ((counts[key] ?? 0) === 0) {
-            broken.push(`${key} is at zero — the ratchet moved, delete its entry`);
+            broken.push(
+                lessonLine({
+                    fix: "run 'jterrazz-test-check --fix' (make fix), which drops the entry",
+                    found: `${key} is at zero, and its entry is still held`,
+                    read: RATCHET_READ,
+                    why: EXACT,
+                }),
+            );
         }
     }
     return broken;

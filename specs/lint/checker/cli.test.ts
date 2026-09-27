@@ -146,7 +146,6 @@ describe('cli', () => {
         expect(result.stderr).toMatch(`
             specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             baseline-ratchet  jterrazz.baseline.json › test  found: \`jterrazz/test-beside-its-module\` is held in the test section · why: the plugin's rules are oxlint's own, held file by file in oxlint-suppressions.json — one finding, one judge · fix: run 'typescript baseline', then 'jterrazz-test-check baseline' · read: docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson
-            Run 'jterrazz-test-check baseline' to record where the project stands.
         `);
     });
 

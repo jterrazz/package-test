@@ -176,7 +176,6 @@ function judgeHeld(run: Run, ratchetRun: RatchetRun): never {
         say(run, `baseline-ratchet  ${BASELINE_LABEL}  ${reason}`);
     }
     if (broken.length > 0) {
-        say(run, "Run 'jterrazz-test-check baseline' to record where the project stands.");
         stop(1);
     }
     if (!run.json) {
@@ -254,7 +253,14 @@ function heldSummary(
 function requireDirectory(path: string, what: string): string {
     const resolved = resolve(path);
     if (!existsSync(resolved) || !statSync(resolved).isDirectory()) {
-        console.error(`conventions checker: no such ${what}: ${resolved}`);
+        console.error(
+            lessonLine({
+                fix: `name an existing ${what}, or run from inside one`,
+                found: `no such ${what}: ${resolved}`,
+                read: 'docs/19-linting.md#the-conventions-checker',
+                why: 'a path that names nothing holds no spec to judge, and a run over it would read as a clean tree',
+            }),
+        );
         stop(1);
     }
     return resolved;
@@ -333,7 +339,12 @@ function checkProject(run: Run, positional: string | undefined): never {
         positional === undefined ? resolve('.') : requireDirectory(positional, 'directory');
     if (positional !== undefined && discoverSpecRoots(root).length === 0) {
         console.error(
-            `conventions checker: no \`specs/\` tree under ${root} — name a specs tree, or a project root that holds one`,
+            lessonLine({
+                fix: 'name a specs tree, or a project root that holds one',
+                found: `no \`specs/\` tree under ${root}`,
+                read: 'docs/19-linting.md#the-conventions-checker',
+                why: 'the checker judges specs trees, and a directory holding none would read as a clean tree',
+            }),
         );
         stop(1);
     }
