@@ -11,7 +11,7 @@ import {
     whyOf,
 } from '@jterrazz/typescript/rules';
 
-import type { TestSettings } from '../../engine/project/settings.js';
+import { TEST_DEFAULTS } from '../../engine/project/test-section.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
 import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
@@ -217,12 +217,6 @@ export const TESTING_PRESET_OXLINT: OxlintConfig = {
     rules: recommendedRules,
 };
 
-const DEFAULTS: Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>> = {
-    collections: [],
-    methodless: [],
-    production: { allow: {} },
-};
-
 export function testPreset(): Preset {
     return {
         baseline: ['test'],
@@ -231,6 +225,6 @@ export function testPreset(): Preset {
         names: NAMES,
         oxlint: TESTING_PRESET_OXLINT,
         package: '@jterrazz/test',
-        settings: DEFAULTS,
+        settings: TEST_DEFAULTS,
     };
 }

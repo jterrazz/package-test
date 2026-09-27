@@ -1,10 +1,12 @@
 /** The standard name is derived, never listed: `GET /events` → `events/list/`, `GET /events/:id` → `events/get/`, `POST` create, `PUT|PATCH` update, `DELETE` delete; a route under an item takes its literal segments; a job is its name, a cli command its first word. `jterrazz.config.ts` corrects the irregular collections and the method-less routes, a cli runner its command words. */
 
 export type SubjectReading = {
-    collections?: readonly string[] | undefined;
+    collections: readonly string[];
     commands?: Readonly<Record<string, readonly string[]>> | undefined;
-    methodless?: readonly string[] | undefined;
+    methodless: readonly string[];
 };
+
+export const NO_READING: SubjectReading = Object.freeze({ collections: [], methodless: [] });
 
 export type Method = 'ALL' | 'DELETE' | 'GET' | 'HEAD' | 'OPTIONS' | 'PATCH' | 'POST' | 'PUT';
 
@@ -66,7 +68,7 @@ function actionOf(
 /** `btc` in `/indicators/btc/chart`. The last segment is read as the route's: after a collection it names a sub-route far more often than an item. */
 export function ambiguousSegment(
     subject: Subject,
-    reading: SubjectReading = {},
+    reading: SubjectReading = NO_READING,
 ): string | undefined {
     if (subject.facet !== 'api' || subject.template === true) {
         return undefined;
@@ -74,7 +76,7 @@ export function ambiguousSegment(
     const segments = (subject.path.split(/[?#]/u)[0] ?? '')
         .split('/')
         .filter((segment) => segment !== '');
-    const collections = reading.collections ?? [];
+    const { collections } = reading;
     return segments.find(
         (segment, index) =>
             index > 0 &&
@@ -103,10 +105,13 @@ function routeFolder(
 }
 
 /** Nothing for a subject with no standard name: the root route, a cli run with no command word, a page, a journey. */
-export function subjectFolder(subject: Subject, reading: SubjectReading = {}): string | undefined {
+export function subjectFolder(
+    subject: Subject,
+    reading: SubjectReading = NO_READING,
+): string | undefined {
     if (subject.facet === 'api') {
         return ambiguousSegment(subject, reading) === undefined
-            ? routeFolder(subject.method, subject.path, reading.collections ?? [])
+            ? routeFolder(subject.method, subject.path, reading.collections)
             : undefined;
     }
     if (subject.facet === 'cli') {
@@ -488,7 +493,7 @@ function declaredMethod(subject: Subject, methodless: readonly string[]): Subjec
 export function subjectsOfChain(
     chain: Chain,
     readRequest: RequestReader = () => '',
-    reading: SubjectReading = {},
+    reading: SubjectReading = NO_READING,
 ): Subject[] {
     const terminal = chain.calls.at(-1);
     if (terminal === undefined) {
@@ -502,7 +507,7 @@ export function subjectsOfChain(
             ? (TERMINALS[terminal.name]?.(first, readRequest, reading.commands?.[chain.handle]) ??
               [])
             : routeOf(method, args);
-    return reached.map((subject) => declaredMethod(subject, reading.methodless ?? []));
+    return reached.map((subject) => declaredMethod(subject, reading.methodless));
 }
 
 function commentEnd(text: string, index: number): number {
@@ -542,7 +547,7 @@ export function withoutComments(text: string): string {
 export function subjectsOf(
     source: string,
     readRequest?: RequestReader,
-    reading: SubjectReading = {},
+    reading: SubjectReading = NO_READING,
 ): SubjectAt[] {
     const text = withoutComments(source);
     return chainsOf(text, handlesOf(text)).flatMap((chain) =>

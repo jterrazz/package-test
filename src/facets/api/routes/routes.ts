@@ -90,5 +90,5 @@ export async function declaredRoutes(root: string): Promise<Route[] | undefined>
 
 export async function declaredMethodless(root: string): Promise<string[]> {
     const { methodless } = await testSectionAt(root);
-    return [...(methodless ?? [])];
+    return [...methodless];
 }

@@ -391,7 +391,7 @@ function reachFrom(
 
 export function allowedTestPackagesAt(filename: string): ReadonlySet<string> {
     const root = packageRootOf(dirname(filename));
-    const allow = root === undefined ? undefined : testSettingsAt(root).production?.allow;
+    const allow = root === undefined ? undefined : testSettingsAt(root).production.allow;
     return new Set(Object.keys(allow ?? {}));
 }
 

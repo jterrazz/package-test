@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import {
+    NO_READING,
     ambiguousSegment,
     commandWords,
     declaredCommands,
@@ -164,7 +165,9 @@ describe('subject', () => {
             const subject = { facet: 'api' as const, method: 'GET' as const, path };
 
             // Then - the word that may be a value, if any
-            expect(ambiguousSegment(subject, { collections: ['data'] })).toBe(segment);
+            expect(ambiguousSegment(subject, { ...NO_READING, collections: ['data'] })).toBe(
+                segment,
+            );
         },
     );
 
@@ -244,7 +247,10 @@ describe('subject', () => {
         ].join('\n');
 
         // Then - both words name the command, and the folder
-        const [at] = subjectsOf(source, undefined, { commands: { cli: ['db', 'migrate'] } });
+        const [at] = subjectsOf(source, undefined, {
+            ...NO_READING,
+            commands: { cli: ['db', 'migrate'] },
+        });
         expect(at === undefined ? undefined : subjectFolder(at.subject)).toBe('db/migrate');
     });
 
@@ -261,6 +267,7 @@ describe('subject', () => {
 
         // When - each chain is read
         const folders = subjectsOf(source, undefined, {
+            ...NO_READING,
             commands: { db: ['db', 'migrate'], dbCli: ['db', 'migrate'] },
         }).map(({ subject }) => subjectFolder(subject));
 
@@ -335,7 +342,7 @@ describe('subject', () => {
             const subject: Subject = { facet: 'api', method: 'GET', path };
 
             // Then - a declared collection is listed, the plural test holding for the rest
-            expect(subjectFolder(subject, { collections })).toBe(folder);
+            expect(subjectFolder(subject, { ...NO_READING, collections })).toBe(folder);
         },
     );
 
@@ -347,7 +354,7 @@ describe('subject', () => {
             "await api.put('/mcp', {});",
             "await api.get('/events');",
         ].join('\n');
-        const reached = subjectsOf(source, undefined, { methodless: ['/mcp'] }).map(
+        const reached = subjectsOf(source, undefined, { ...NO_READING, methodless: ['/mcp'] }).map(
             ({ subject }) => [subjectName(subject), subjectFolder(subject)],
         );
 

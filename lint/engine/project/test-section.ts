@@ -1,5 +1,16 @@
 import type { TestSettings } from './settings.js';
 
+export type ReadTestSettings = Required<
+    Pick<TestSettings, 'collections' | 'methodless' | 'production'>
+> &
+    Pick<TestSettings, 'routes'>;
+
+export const TEST_DEFAULTS: Readonly<Omit<ReadTestSettings, 'routes'>> = Object.freeze({
+    collections: [],
+    methodless: [],
+    production: { allow: {} },
+});
+
 function isRecord(value: unknown): value is Record<string, unknown> {
     return value !== null && typeof value === 'object' && !Array.isArray(value);
 }
@@ -24,19 +35,14 @@ function reasonsOf(value: unknown): Record<string, string> | undefined {
     return reasons;
 }
 
-/** A key of the wrong shape is read as absent, never half-used. */
-export function testSettingsOf(test: unknown): TestSettings {
-    if (!isRecord(test)) {
-        return {};
-    }
-    const collections = wordsOf(test.collections);
-    const methodless = wordsOf(test.methodless);
-    const allow = isRecord(test.production) ? reasonsOf(test.production.allow) : undefined;
-    const routes = typeof test.routes === 'string' ? test.routes : undefined;
+/** A key of the wrong shape is read as its default, never half-used. */
+export function testSettingsOf(test: unknown): ReadTestSettings {
+    const section = isRecord(test) ? test : {};
+    const allow = isRecord(section.production) ? reasonsOf(section.production.allow) : undefined;
     return {
-        ...(collections === undefined ? {} : { collections }),
-        ...(methodless === undefined ? {} : { methodless }),
-        ...(allow === undefined ? {} : { production: { allow } }),
-        ...(routes === undefined ? {} : { routes }),
+        collections: wordsOf(section.collections) ?? TEST_DEFAULTS.collections,
+        methodless: wordsOf(section.methodless) ?? TEST_DEFAULTS.methodless,
+        production: allow === undefined ? TEST_DEFAULTS.production : { allow },
+        ...(typeof section.routes === 'string' ? { routes: section.routes } : {}),
     };
 }

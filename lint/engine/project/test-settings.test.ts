@@ -13,6 +13,8 @@ function unit(config?: string): string {
     return root;
 }
 
+const DEFAULTS = { collections: [], methodless: [], production: { allow: {} } };
+
 describe('test-settings', () => {
     test('the test section of jterrazz.config.ts, as the checker reads it — the collections a unit declares are read, types stripped', () => {
         // Given - a config typed as a repository writes it
@@ -21,7 +23,11 @@ describe('test-settings', () => {
         );
 
         // Then - the section, as declared
-        expect(testSettingsAt(root)).toStrictEqual({ collections: ['data', 'people'] });
+        expect(testSettingsAt(root)).toStrictEqual({
+            collections: ['data', 'people'],
+            methodless: [],
+            production: { allow: {} },
+        });
     });
 
     test('the test section of jterrazz.config.ts, as the checker reads it — the method-less routes a unit declares are read', () => {
@@ -29,7 +35,11 @@ describe('test-settings', () => {
         const root = unit("export default { test: { methodless: ['/mcp'] } };\n");
 
         // Then - the paths, as declared
-        expect(testSettingsAt(root)).toStrictEqual({ methodless: ['/mcp'] });
+        expect(testSettingsAt(root)).toStrictEqual({
+            collections: [],
+            methodless: ['/mcp'],
+            production: { allow: {} },
+        });
     });
 
     test('the test section of jterrazz.config.ts, as the checker reads it — the test packages production runs are read with their reasons', () => {
@@ -40,6 +50,8 @@ describe('test-settings', () => {
 
         // Then - the allow list, reasons and all
         expect(testSettingsAt(root)).toStrictEqual({
+            collections: [],
+            methodless: [],
             production: { allow: { playwright: 'the gate drives a browser in production' } },
         });
     });
@@ -51,7 +63,7 @@ describe('test-settings', () => {
         );
 
         // Then - nothing is allowed
-        expect(testSettingsAt(root)).toStrictEqual({});
+        expect(testSettingsAt(root)).toStrictEqual(DEFAULTS);
     });
 
     test('the test section of jterrazz.config.ts, as the checker reads it — no file, no section, a key of the wrong shape and a file that does not load are no settings', () => {
@@ -63,8 +75,13 @@ describe('test-settings', () => {
             unit("throw new Error('broken');\n"),
         ];
 
-        // Then - each reads as no settings at all
-        expect(roots.map((root) => testSettingsAt(root))).toStrictEqual([{}, {}, {}, {}]);
+        // Then - each reads as the defaults
+        expect(roots.map((root) => testSettingsAt(root))).toStrictEqual([
+            DEFAULTS,
+            DEFAULTS,
+            DEFAULTS,
+            DEFAULTS,
+        ]);
     });
 
     test('the test section of jterrazz.config.ts, as the run reads it — the routes document and the method-less paths a member declares are read, types stripped', async () => {
@@ -75,7 +92,9 @@ describe('test-settings', () => {
 
         // Then - both reach the run as declared
         await expect(testSectionAt(root)).resolves.toStrictEqual({
+            collections: [],
             methodless: ['/mcp'],
+            production: { allow: {} },
             routes: './openapi.yaml',
         });
     });
@@ -85,6 +104,28 @@ describe('test-settings', () => {
         const roots = [unit(), unit('export default { test: { routes: 42 } };\n')];
 
         // Then - neither declares anything the run would half-use
-        await expect(Promise.all(roots.map(testSectionAt))).resolves.toStrictEqual([{}, {}]);
+        await expect(Promise.all(roots.map(testSectionAt))).resolves.toStrictEqual([
+            DEFAULTS,
+            DEFAULTS,
+        ]);
+    });
+
+    test('the test section of jterrazz.config.ts, as the checker reads it — a unit declaring a preset reads its settings under its own', () => {
+        // Given - a preset of the `test` section setting a default, and the unit adding to it
+        const preset = {
+            name: 'test',
+            package: '@jterrazz/test',
+            settings: { collections: ['data'], methodless: [], production: { allow: {} } },
+        };
+        const root = unit(
+            `export default { presets: [${JSON.stringify(preset)}], test: { collections: ['people'] } };\n`,
+        );
+
+        // Then - the preset's default and the unit's own addition, merged
+        expect(testSettingsAt(root)).toStrictEqual({
+            collections: ['data', 'people'],
+            methodless: [],
+            production: { allow: {} },
+        });
     });
 });
