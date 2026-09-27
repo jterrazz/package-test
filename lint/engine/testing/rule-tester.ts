@@ -26,15 +26,25 @@ const isPositioned = (entry: unknown): boolean =>
     'column' in entry &&
     typeof entry.column === 'number';
 
+function unplacedOf(errors: unknown): null | string {
+    if (!Array.isArray(errors)) {
+        return 'whose errors are a count';
+    }
+    if (errors.length === 0) {
+        return 'which states no error';
+    }
+    const unplaced = errors.findIndex((entry) => !isPositioned(entry));
+    return unplaced === -1 ? null : `whose error ${String(unplaced)} states no line and column`;
+}
+
 function refuseUnpositioned(name: string, cases: PositionedCases): void {
     for (const [index, invalid] of cases.invalid.entries()) {
-        const errors: readonly unknown[] = Array.isArray(invalid.errors) ? invalid.errors : [];
-        const unplaced = errors.findIndex((entry) => !isPositioned(entry));
-        if (errors.length === 0 || unplaced !== -1) {
+        const unplaced = unplacedOf(invalid.errors);
+        if (unplaced !== null) {
             throw new Error(
                 refusalBlock({
                     fix: 'state each error as an object carrying its `line` and `column`',
-                    found: `${name}: invalid case ${String(index)}, whose ${errors.length === 0 ? 'errors are a count' : `error ${String(unplaced)} states no line and column`}`,
+                    found: `${name}: invalid case ${String(index)}, ${unplaced}`,
                     read: 'docs/21-lint.md#a-rule-alone-ruletester',
                     why: 'A rule proves where it reports, not only that it did: an error with no position passes for a report on any node.',
                 }),
