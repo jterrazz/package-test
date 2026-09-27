@@ -115,7 +115,7 @@ function copyAdvice(rootDir: string, { fingerprint, target }: CopiedGround): str
     if (treeKind(target) !== undefined && fingerprintOf(target) !== fingerprint) {
         return `keep one copy in ${where} — it holds another ${basename(target)}, so rename one of the two first`;
     }
-    return `keep one copy in ${where} — \`make fix\` moves it there and rewrites every path that named a copy`;
+    return `keep one copy in ${where} — \`make fix\` moves it there and rewrites every whole relative path that named a copy`;
 }
 
 /** `--fix` acts only when the copies share one name, the only name a fix could keep. */
