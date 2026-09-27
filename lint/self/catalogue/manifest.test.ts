@@ -90,6 +90,7 @@ function metaProofs(): Set<string> {
         read('lint/self/corpus/messages.test.ts'),
         read('lint/self/corpus/matrix.test.ts'),
         read('lint/self/corpus/port-readers.test.ts'),
+        read('lint/self/corpus/positions.test.ts'),
         read('lint/self/corpus/siblings.test.ts'),
     ];
     for (const entry of readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true })) {

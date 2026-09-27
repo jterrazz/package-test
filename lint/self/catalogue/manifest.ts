@@ -120,6 +120,19 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         convention:
+            'Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a golden of its `specs/lint/<rule>/` folder or its `specs/lint/checker/<rule>.test.ts` naming the rule at a `line:col`, or a RuleTester case of its unit test stating the `line`. A row with none cannot enter the catalogue.',
+        facet: 'model',
+        family: 'catalogue',
+        fix: 'Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.',
+        name: 'every-position-proven',
+        rationale:
+            'A finding at the wrong place sends the reader to a line that holds nothing wrong; an exit code proves a rule fires, never that it points at the fault.',
+        reach: 'all',
+    },
+    {
+        audience: 'self',
+        channel: 'meta',
+        convention:
             'No catalogue sentence has gone back to French — a deny-list of the tokens the manifest actually carried.',
         facet: 'model',
         family: 'catalogue',
