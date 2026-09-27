@@ -18,7 +18,7 @@ export function chapterOf(name: string): string {
     return rowNamed(name).audience === 'self' ? SELF_CHAPTER : CATALOGUE_CHAPTER;
 }
 
-const CHECKER_LINE = /^\S+:\d+:\d+: (?:error|warning) jterrazz-check\([\w-]+\): (?<message>.*)$/u;
+const CHECKER_LINE = /^\S+:\d+:\d+: error jterrazz-check\([\w-]+\): (?<message>.*)$/u;
 
 export function goldenCheckerLines(dir: string): string[] {
     const lines: string[] = [];

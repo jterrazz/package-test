@@ -40,15 +40,15 @@ describe('lintReport', () => {
     });
 
     test("lintReport — a report as a golden keeps it — keeps the checker's report line the same way, and drops its summary", () => {
-        // Given - two checker findings, an error and a warning, and the summary line
+        // Given - two checker findings and the summary line
         const report = [
             'specs/api/orders/create.spec.ts:7:5: error jterrazz-check(no-reach-into-sibling-ground): a path may leave its leaf only into specs/_fixtures/',
-            'specs/api/_requests/x.http:3:1: warning jterrazz-check(no-token-in-request): a token in a request',
+            'specs/api/_requests/x.http:3:1: error jterrazz-check(no-token-in-request): a token in a request',
             '',
             'conventions checker: 1 error(s) found under /tmp/x',
         ].join('\n');
 
-        // Then - both channels golden alike
+        // Then - both golden alike
         expect(lintReport(report)).toBe(
             'specs/api/_requests/x.http:3:1  jterrazz-check(no-token-in-request)\nspecs/api/orders/create.spec.ts:7:5  jterrazz-check(no-reach-into-sibling-ground)\n',
         );
@@ -60,13 +60,18 @@ describe('lintReport', () => {
         expect(lintReport('Found 0 warnings and 0 errors.\n')).toBe('');
     });
 
-    test("lintReport — a report as a golden keeps it — keeps oxlint's agent line, which is the checker's", () => {
-        // Given - the rendering oxlint picks in a shell that advertises an agent
-        const report =
-            'src/util.test.ts:1:1: error jterrazz(test-beside-its-module): a module test has a sibling module\n';
+    test("lintReport — a report as a golden keeps it — keeps oxlint's agent line, which is the checker's, an upstream rule's warning included", () => {
+        // Given - the rendering oxlint picks in a shell that advertises an agent, and a project's upstream rule set to warn
+        const report = [
+            'src/util.test.ts:1:1: error jterrazz(test-beside-its-module): a module test has a sibling module',
+            'src/util.ts:3:1: warning eslint(no-console): Unexpected console statement.',
+            '',
+        ].join('\n');
 
-        // Then - the same golden line as the unix rendering
-        expect(lintReport(report)).toBe('src/util.test.ts:1:1  jterrazz(test-beside-its-module)\n');
+        // Then - the same golden lines as the unix rendering
+        expect(lintReport(report)).toBe(
+            'src/util.test.ts:1:1  jterrazz(test-beside-its-module)\nsrc/util.ts:3:1  eslint(no-console)\n',
+        );
     });
 
     test("lintReport — a report as a golden keeps it — refuses oxlint's graphical rendering instead of reading it as a clean run", () => {
