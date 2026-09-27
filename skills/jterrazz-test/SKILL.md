@@ -49,10 +49,8 @@ import { api } from '../../api.specification.js';
 
 describe('shape', () => {
     test('creates a user', async () => {
-        // Given - one existing user
-        const result = await api
-            .seed(file('./_seeds/one-user.sql'))
-            .request(file('./_requests/create-user.http'));
+        // Given - an empty users table
+        const result = await api.request(file('./_requests/create-user.http'));
 
         // Then - the response and the row it wrote
         expect(result.response).toMatch(file('./_expected/user-created.http'));

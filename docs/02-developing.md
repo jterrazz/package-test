@@ -148,7 +148,7 @@ describe('shape', () => {
 
         // Then - response matches the fixture; row landed in the database
         expect(result.response).toMatch(file('./_expected/user-created.http'));
-        await expect(result.table('users')).toMatch([[1, 'Alice']]);
+        await expect(result.table('users')).toMatch([['{{uuid}}', 'Alice']]);
     });
 });
 ```
