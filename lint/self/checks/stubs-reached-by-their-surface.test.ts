@@ -5,7 +5,7 @@ import { checkStubsReachedByTheirSurface } from './stubs-reached-by-their-surfac
 
 describe('checkStubsReachedByTheirSurface', () => {
     test('stubs-reached-by-their-surface — the stubs are entered by what they publish, a delivery by the facet that wires it', () => {
-        // Given - the package's own tree, and one where a facet reaches the matching, another facet a delivery it does not wire, a third the intercept's input normaliser, and the kernel an entry's channel pick
+        // Given - the package's own tree, and one where a facet reaches the matching, another facet a delivery it does not wire, a third the intercept's input normaliser and the delivery port, and the kernel an entry's channel pick
         const reaching = treeOf({
             'src/facets/api/api.facet.ts': [
                 "import { http } from '../../world/stubs/kinds/http.js';",
@@ -18,6 +18,7 @@ describe('checkStubsReachedByTheirSurface', () => {
             'src/facets/job/job.facet.ts': [
                 "import { interceptCapability } from '../../world/stubs/intercept/intercept.capability.js';",
                 "import { declared } from '../../world/stubs/intercept/declared.js';",
+                "import type { InterceptPort } from '../../world/stubs/intercept/intercept.port.js';",
                 '',
             ].join('\n'),
             'src/index.ts':
@@ -40,6 +41,7 @@ describe('checkStubsReachedByTheirSurface', () => {
             'src/facets/api/api.facet.ts:3:1 stubs-reached-by-their-surface: `src/world/stubs/matching/stub-queue.ts` is reached from outside the stubs, below their surface',
             'src/facets/cli/cli.facet.ts:1:1 stubs-reached-by-their-surface: `src/world/stubs/delivery/same-process/msw-node.adapter.ts` is reached from outside the stubs, below their surface',
             'src/facets/job/job.facet.ts:2:1 stubs-reached-by-their-surface: `src/world/stubs/intercept/declared.ts` is reached from outside the stubs, below their surface',
+            'src/facets/job/job.facet.ts:3:1 stubs-reached-by-their-surface: `src/world/stubs/intercept/intercept.port.ts` is reached from outside the stubs, below their surface',
             'src/kernel/chain/arm.ts:1:1 stubs-reached-by-their-surface: `src/world/stubs/delivery/same-process/intercept.ts` is reached from outside the stubs, below their surface',
         ]);
     });

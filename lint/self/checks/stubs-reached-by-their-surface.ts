@@ -18,7 +18,7 @@ const SURFACE = [
     /^stub\.ts$/u,
     /^exchange\.ts$/u,
     /^kinds\//u,
-    /^intercept\/intercept(?:\.capability|\.port)?\.ts$/u,
+    /^intercept\/intercept(?:\.capability)?\.ts$/u,
 ];
 
 const CHANNEL_PICK = /^delivery\/[a-z-]+\/intercept\.ts$/u;
@@ -69,7 +69,7 @@ function reachesBelowTheSurface(
                 'stubs-reached-by-their-surface',
                 from,
                 {
-                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\`, \`intercept/intercept.port.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
+                    fix: `import what the stubs publish — \`stub.ts\`, \`exchange.ts\`, \`kinds/\`, \`intercept/intercept.ts\`, \`intercept/intercept.capability.ts\` — or, for a facet wiring a delivery, declare the edge in \`DELIVERY_READERS\` (\`${LOCK}\`)`,
                     found: `\`${target}\` is reached from outside the stubs, below their surface`,
                 },
                 reference,

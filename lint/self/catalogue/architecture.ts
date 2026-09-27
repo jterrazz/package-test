@@ -124,7 +124,7 @@ export const ARCHITECTURE_PASSES: Row[] = [
         audience: 'self',
         channel: 'checker',
         convention:
-            'The stubs are entered by what they publish: from outside `src/world/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts`, `intercept/intercept.capability.ts` or `intercept/intercept.port.ts` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a facet the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
+            'The stubs are entered by what they publish: from outside `src/world/stubs/`, a production module imports `stub.ts`, `exchange.ts`, a module of `kinds/`, or `intercept/intercept.ts` or `intercept/intercept.capability.ts` — the entries (`index.ts`, `index.browser.ts`) also the `delivery/<channel>/intercept.ts` their channel picks, and a facet the delivery module it wires, each edge declared in `DELIVERY_READERS`. `matching/`, the rest of `intercept/` (the delivery port `intercept.port.ts` among it) and the rest of `delivery/` are reached from inside the stubs alone. An error at the import; a `DELIVERY_READERS` row whose reader no longer takes its edge, an error at the lock.',
         facet: 'model',
         family: 'architecture',
         fix: 'Import what the stubs publish; a facet that wires a delivery adapter declares the edge in `DELIVERY_READERS`, beside the pass.',
