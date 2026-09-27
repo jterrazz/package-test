@@ -1,7 +1,13 @@
-import type { StubRegistration } from '../delivery/msw-handlers.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
+
+export type StubRegistration = {
+    /** Remove the chain's handlers from the shared msw server. */
+    cleanup: () => void;
+    /** The strict-stub violation observed during the chain, if any. */
+    violation: () => Error | null;
+};
 
 /** Disposed at the end of the declaring scope: handlers dropped, an unmatched request thrown. */
 export type InterceptScope = AsyncDisposable;

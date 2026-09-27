@@ -1,6 +1,6 @@
+import type { StubRegistration } from '../../intercept/intercept.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers, NO_STUBS } from '../msw-handlers.js';
-import type { StubRegistration } from '../msw-handlers.js';
 import { owningBodies } from './owned-body.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import */

@@ -1,6 +1,7 @@
 import { pause } from '../../../kernel/pause.js';
 import { isStreamBody } from '../exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange.js';
+import type { StubRegistration } from '../intercept/intercept.js';
 import { toReadableStream } from '../matching/stream.js';
 import { StubQueue } from '../matching/stub-queue.js';
 import type { Stub } from '../stub.js';
@@ -8,13 +9,6 @@ import type { Stub } from '../stub.js';
 /** msw runs one handler shape in node and in a page: what a stub becomes is stated once here. Typed loosely: msw is reached through a lazy import. */
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
-
-export type StubRegistration = {
-    /** Remove the chain's handlers from the shared msw server. */
-    cleanup: () => void;
-    /** The strict-stub violation observed during the chain, if any. */
-    violation: () => Error | null;
-};
 
 /** Zero stubs under node: nothing is guarded, the process has traffic of its own (`network-strict-after-first-stub`, known scope). */
 export const NO_STUBS: StubRegistration = {

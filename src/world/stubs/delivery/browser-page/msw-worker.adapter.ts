@@ -1,8 +1,8 @@
 /** Runner traffic is recognised by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through. */
+import type { StubRegistration } from '../../intercept/intercept.js';
 import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
-import type { StubRegistration } from '../msw-handlers.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
