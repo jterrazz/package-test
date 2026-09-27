@@ -1,64 +1,52 @@
 import { spawnSync } from 'node:child_process';
-import { existsSync, mkdirSync, readFileSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
+import { copyFileSync, mkdirSync, rmSync, symlinkSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { ROOT, treeOf } from '../../engine/testing/source.fixtures.js';
 import { ARCHITECTURE } from './architecture.js';
 
+const CHECKER = join(ROOT, 'node_modules/@jterrazz/typescript/dist/checker.js');
+
 const DEPCRUISE = join(ROOT, 'node_modules/.bin/depcruise');
 
-type Violation = { from: string; rule: { name: string }; to: string };
+type Diagnostic = { code: string; filename: string; message: string };
 
-/** Each import's target is written too, so dependency-cruiser resolves every edge as it resolves the package's own. */
+function writeTargets(tree: string, files: Record<string, string>): void {
+    for (const [from, text] of Object.entries(files)) {
+        for (const { groups } of text.matchAll(/['"](?<target>\.{1,2}\/[^'"]+)['"]/gu)) {
+            const path = join(tree, dirname(from), (groups?.target ?? '').replace(/\.js$/u, '.ts'));
+            mkdirSync(dirname(path), { recursive: true });
+            writeFileSync(path, path.endsWith('.json') ? '{}\n' : 'export {};\n', {
+                flag: path.endsWith('.json') ? 'w' : 'a',
+            });
+        }
+    }
+}
+
 function violationsIn(files: Record<string, string>): string[] {
     const tree = treeOf(files);
     try {
-        for (const [from, text] of Object.entries(files)) {
-            for (const { groups } of text.matchAll(/['"](?<target>\.{1,2}\/[^'"]+)['"]/gu)) {
-                const path = join(
-                    tree,
-                    dirname(from),
-                    (groups?.target ?? '').replace(/\.js$/u, '.ts'),
-                );
-                mkdirSync(dirname(path), { recursive: true });
-                writeFileSync(path, 'export {};\n', { flag: 'a' });
-            }
-        }
+        writeTargets(tree, files);
         symlinkSync(join(ROOT, 'node_modules'), join(tree, 'node_modules'));
+        copyFileSync(join(ROOT, 'tsconfig.json'), join(tree, 'tsconfig.json'));
         writeFileSync(
-            join(tree, 'depcruise.json'),
-            JSON.stringify({
-                forbidden: ARCHITECTURE.map(({ from, name, to }) => ({
-                    from,
-                    name,
-                    to,
-                })),
-                options: { doNotFollow: { path: 'node_modules' }, tsPreCompilationDeps: true },
-            }),
+            join(tree, 'jterrazz.config.ts'),
+            `export default ${JSON.stringify({ typescript: { architecture: { layers: ARCHITECTURE } } })};\n`,
         );
-        spawnSync(
-            DEPCRUISE,
-            [
-                '--config',
-                'depcruise.json',
-                '--output-type',
-                'json',
-                '--output-to',
-                'cruise.json',
-                ...['src', 'lint'].filter((root) => existsSync(join(tree, root))),
-            ],
+        const { stdout } = spawnSync(
+            process.execPath,
+            [CHECKER, 'architecture', '.', '--depcruise', DEPCRUISE, '--format', 'json'],
             { cwd: tree, encoding: 'utf8' },
         );
-        const { summary } = JSON.parse(readFileSync(join(tree, 'cruise.json'), 'utf8')) as {
-            summary: { violations: Violation[] };
-        };
+        const { diagnostics } = JSON.parse(stdout) as { diagnostics: Diagnostic[] };
 
-        return summary.violations
-            .map(
-                ({ from, rule, to }) =>
-                    `${from} → ${to.replace(/^.*node_modules\//u, 'node_modules/')}  ${rule.name}`,
-            )
+        return diagnostics
+            .map(({ code, filename, message }) => {
+                const to = /imports `(?<to>[^`]+)`/u.exec(message)?.groups?.to ?? '';
+
+                return `${filename.replace(/:\d+:\d+$/u, '')} → ${to.replace(/^.*node_modules\//u, 'node_modules/')}  ${code.replace(/^architecture\((?<rule>.+)\)$/u, '$<rule>')}`;
+            })
             .toSorted();
     } finally {
         rmSync(tree, { force: true, recursive: true });
@@ -88,8 +76,8 @@ describe('ARCHITECTURE', () => {
             'src/expectations/result.ts → src/world/services/services.ts  layer-src-expectations-imports-within-its-map',
             'src/facets/api/request/route.ts → src/vitest/project.ts  layer-src-facets-api-imports-within-its-map',
             'src/kernel/chain/chain.ts → src/world/clock/clock.ts  layer-src-kernel-chain-imports-within-its-map',
-            'src/kernel/chain/perform.ts → node_modules/pg/lib/index.js  layer-src-kernel-chain-uses-its-declared-packages',
-            'src/kernel/chain/perform.ts → node_modules/pg/lib/index.js  library-pg-has-one-owner',
+            'src/kernel/chain/perform.ts → node_modules/pg/esm/index.mjs  layer-src-kernel-chain-uses-its-declared-packages',
+            'src/kernel/chain/perform.ts → node_modules/pg/esm/index.mjs  library-pg-has-one-owner',
             'src/vitest/preset.ts → src/facets/cli/cli.project.ts  facet-entered-by-its-face',
             'src/vitest/preset.ts → src/facets/cli/cli.project.ts  layer-src-vitest-imports-within-its-map',
             'src/world/clock/clock.ts → src/elements/descriptors/roles.ts  layer-src-world-clock-imports-within-its-map',
@@ -112,8 +100,8 @@ describe('ARCHITECTURE', () => {
 
         // Then - each crossing is named, the runner-config entry reaching a project and the owner reaching its library pass
         expect(violations).toStrictEqual([
-            'src/facets/api/api.handle.ts → node_modules/playwright/index.js  layer-src-facets-api-uses-its-declared-packages',
-            'src/facets/api/api.handle.ts → node_modules/playwright/index.js  library-playwright-has-one-owner',
+            'src/facets/api/api.handle.ts → node_modules/playwright/index.d.ts  layer-src-facets-api-uses-its-declared-packages',
+            'src/facets/api/api.handle.ts → node_modules/playwright/index.d.ts  library-playwright-has-one-owner',
             'src/facets/api/api.handle.ts → src/facets/cli/cli.handle.ts  facet-imports-no-other-facet',
             'src/facets/api/api.handle.ts → src/facets/cli/cli.handle.ts  layer-src-facets-api-imports-within-its-map',
             'src/index.ts → src/facets/cli/cli.handle.ts  facet-entered-by-its-face',
@@ -149,6 +137,29 @@ describe('ARCHITECTURE', () => {
             'lint/index.ts → lint/self/rules/plugin.ts  lint-direction-index',
             'src/kernel/files/scratch.ts → lint/consumer/rules/world/no-sleep.ts  layer-src-kernel-files-imports-within-its-map',
             'src/kernel/files/scratch.ts → lint/consumer/rules/world/no-sleep.ts  lint-direction-src',
+        ]);
+    });
+
+    test('a package is judged as the pass resolves it: a type-only import, a subpath and the package itself', () => {
+        // Given - vitest/browser in and out of its owner, playwright's types in the kernel, and the package's own name in a layer
+        const violations = violationsIn({
+            'src/facets/component/page/page.ts':
+                "import { page } from 'vitest/browser';\nexport { page };\n",
+            'src/index.browser.ts': 'export {};\n',
+            'src/kernel/chain/browser.ts':
+                "import { page } from 'vitest/browser';\nexport { page };\n",
+            'src/kernel/chain/shot.ts':
+                "import type { Browser } from 'playwright';\nexport type Shot = Browser;\n",
+            'src/world/clock/self.ts': "import '@jterrazz/test';\n",
+        });
+
+        // Then - the subpath outside its owner, the type-only import and the self-reference are each named; the owner passes
+        expect(violations).toStrictEqual([
+            'src/kernel/chain/browser.ts → node_modules/vitest/browser/context.d.ts  layer-src-kernel-chain-uses-its-declared-packages',
+            'src/kernel/chain/browser.ts → node_modules/vitest/browser/context.d.ts  library-vitest-browser-has-one-owner',
+            'src/kernel/chain/shot.ts → node_modules/playwright/index.d.ts  layer-src-kernel-chain-uses-its-declared-packages',
+            'src/kernel/chain/shot.ts → node_modules/playwright/index.d.ts  library-playwright-has-one-owner',
+            'src/world/clock/self.ts → src/index.browser.ts  layer-src-world-clock-imports-within-its-map',
         ]);
     });
 });
