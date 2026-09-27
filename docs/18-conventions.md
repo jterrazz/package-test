@@ -322,6 +322,8 @@ That form works, and it is the migration shape rather than the destination: `usi
 
 A facet pins the same instant for the chain it is stated on — `.clock(iso)` on api, job, integration, component, and on a website visit (the PAGE's calendar, through the browser). A cli spec is another process: its instant travels through the product's own env (`TZ`) or is absorbed by a `{{iso8601}}` token in the golden.
 
+A chain whose clock is refused — a stated value that is no instant — leaves nothing armed: the stubs it armed before the clock are released with the refusal, so no later chain meets them.
+
 ## The backlog — the criterion written, coded on its first occurrence
 
 A rule is written when its defect class has been SEEN once and its criterion is decidable. A class nobody has seen yet is not a rule: it is a line here, with the criterion it would be written against, so the day it appears the guard is a translation rather than a design. The estate dry run — the whole catalogue run over every repository of the workbench — is what moves a line either way.
