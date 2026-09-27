@@ -119,8 +119,4 @@ const plugin: LintPlugin = {
     },
 };
 
-export const recommendedRules: Record<string, 'error'> = Object.fromEntries(
-    Object.keys(plugin.rules).map((name) => [`jterrazz/${name}`, 'error']),
-);
-
 export default plugin;

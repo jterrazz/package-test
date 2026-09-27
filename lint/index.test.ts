@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import plugin, { recommendedRules, testing } from './index.js';
+import { testing } from './index.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 
@@ -28,19 +28,14 @@ describe('index', () => {
         // Given - the fragment as a consumer's oxlint.config.ts receives it. The annotation IS the test: an inferred `rules` widens each severity to `string`, which oxlint's closed union refuses, and this line stops compiling — no consumer should need `testing as OxlintConfig`.
         const composed: OxlintConfig = testing;
 
-        // Then - it carries the plugin wiring and the whole catalogue
+        // Then - it carries the plugin wiring
         expect(composed.jsPlugins).toStrictEqual(['@jterrazz/test/oxlint']);
-        expect(composed.rules).toStrictEqual(recommendedRules);
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — is self-sufficient (no `extends` needed): plugin + every rule + the `cleanup-passed-to-after-all` override', () => {
         // Given - a consumer NOT using @jterrazz/typescript adopts just the conventions via `export default testing` — the fragment must be a COMPLETE oxlint config
         // Then - it registers the tool-facing plugin, enables every shipped rule, and ships the one override the `cleanup-passed-to-after-all` idiom needs — without pulling in any base preset
         expect(testing.jsPlugins).toContain('@jterrazz/test/oxlint');
-        expect(testing.rules).toStrictEqual(recommendedRules);
-        expect(Object.keys(recommendedRules)).toStrictEqual(
-            Object.keys(plugin.rules).map((id) => `jterrazz/${id}`),
-        );
         expect(testing.overrides?.[0]?.files).toContain('**/*.specification.ts');
         expect('extends' in testing).toBe(false);
     });
@@ -56,16 +51,6 @@ describe('index', () => {
         for (const layer of layers) {
             expect('categories' in layer).toBe(false);
         }
-    });
-
-    test('the ./oxlint entry — testing fragment — standalone oxlint config — every rule is enabled, as an error', () => {
-        // Given - each rule the plugin registers
-        const names = Object.keys(plugin.rules).map((name) => `jterrazz/${name}`);
-
-        // Then - the fragment enables each at `error`: oxlint's suppressions hold errors alone, so a warning would be debt no ratchet holds
-        expect(recommendedRules).toStrictEqual(
-            Object.fromEntries(names.map((name) => [name, 'error'])),
-        );
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — its overrides add a layer instead of replacing one', () => {

@@ -13,7 +13,7 @@ import {
 
 import type { TestSettings } from '../../engine/project/settings.js';
 import { CATALOGUE_CHAPTER } from '../catalogue/chapter.js';
-import { consumerRows } from '../catalogue/manifest.js';
+import { consumerRows, recommendedRules } from '../catalogue/manifest.js';
 import { importRulesForSpecifications } from './import.js';
 import { vitestOnTests } from './vitest.js';
 
@@ -211,15 +211,10 @@ const NAMES: NamesRule[] = [
     },
 ];
 
-/** Every static rule of the catalogue, armed: the plugin registers exactly the rules the `statique` rows name. Typed as oxlint's own config, so an inferred `rules` does not widen each severity to `string`. */
 export const TESTING_PRESET_OXLINT: OxlintConfig = {
     jsPlugins: ['@jterrazz/test/oxlint'],
     overrides: [importRulesForSpecifications, vitestOnTests],
-    rules: Object.fromEntries(
-        consumerRows
-            .filter(({ channel }) => channel === 'statique')
-            .map(({ name }) => [`jterrazz/${name}`, 'error']),
-    ),
+    rules: recommendedRules,
 };
 
 const DEFAULTS: Required<Pick<TestSettings, 'collections' | 'methodless' | 'production'>> = {

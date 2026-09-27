@@ -1700,3 +1700,9 @@ export const consumerRows: Row[] = byName([
     ...RUNTIME_RULES,
     ...PROCESS_RULES,
 ]);
+
+export const recommendedRules: Readonly<Record<string, 'error'>> = Object.fromEntries(
+    consumerRows
+        .filter(({ channel }) => channel === 'statique')
+        .map(({ name }) => [`jterrazz/${name}`, 'error']),
+);

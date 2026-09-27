@@ -6,7 +6,8 @@ import { TESTING_PRESET_OXLINT } from './consumer/rulebook/preset.js';
 export { materialAt, testPackageOf } from './engine/project/production.js';
 export type { MaterialKind } from './engine/project/production.js';
 
-export { default, recommendedRules } from './consumer/rules/plugin.js';
+export { recommendedRules } from './consumer/catalogue/manifest.js';
+export { default } from './consumer/rules/plugin.js';
 
 /** The oxlint half of the `test()` preset, for a config that composes by hand: `compose(<profile>, testing)`. */
 export const testing: OxlintConfig = TESTING_PRESET_OXLINT;
