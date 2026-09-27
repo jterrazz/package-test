@@ -32,8 +32,38 @@ expect(cli).toBeDefined();`,
             errors: [{ line: 3, messageId: 'expectOutsideATest' }],
             filename: '/repo/specs/cli/cli.specification.ts',
         },
+        {
+            code: `import * as vitest from 'vitest';
+export function expectBuilt(stdout: string): void {
+    vitest.expect(stdout).toContain('Built.');
+    vitest.expect.soft(stdout).toContain('Done.');
+}`,
+            errors: [
+                { line: 3, messageId: 'expectOutsideATest' },
+                { line: 4, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
+        {
+            code: `export async function expectBuilt(stdout: string): Promise<void> {
+    const { expect } = await import('vitest');
+    const runner = await import('vitest');
+    expect(stdout).toContain('Built.');
+    runner.expect(stdout).toContain('Done.');
+}`,
+            errors: [
+                { line: 4, messageId: 'expectOutsideATest' },
+                { line: 5, messageId: 'expectOutsideATest' },
+            ],
+            filename: SETUP_MODULE,
+        },
     ],
     valid: [
+        {
+            code: `import * as vitest from 'vitest';
+vitest.expectTypeOf(build).returns.toBeString();`,
+            filename: SETUP_MODULE,
+        },
         {
             code: `import { expect, test } from 'vitest';
 test('builds', () => {

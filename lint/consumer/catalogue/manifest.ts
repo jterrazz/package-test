@@ -385,7 +385,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest`, under any local name, and `expect.soft`, `expect.poll` on it — so a method or a local of that name is not.",
+            "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest` under any local name, statically or by `await import('vitest')`, `<namespace>.expect` on a namespace of `vitest`, and `expect.soft`, `expect.poll` on either — so a method or a local of that name is not.",
         facet: 'model',
         family: 'expectations',
         fix: 'Return what the module reads, and assert it in the test that calls it.',

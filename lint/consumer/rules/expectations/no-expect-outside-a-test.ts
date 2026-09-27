@@ -1,7 +1,13 @@
 import type { Context } from '@oxlint/plugins';
 
 import { lessonsAt, rowNamed } from '../../../engine/catalogue/lesson.js';
-import { child, childList, identifierName, stringValue } from '../../../engine/project/ast.js';
+import {
+    child,
+    childList,
+    identifierName,
+    memberPath,
+    stringValue,
+} from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
@@ -21,40 +27,77 @@ function assertsHere(context: Context): boolean {
     );
 }
 
-function vitestExpectNames(node: AstNode): string[] {
+type Bindings = { expects: Set<string>; namespaces: Set<string> };
+
+function bindImport(node: AstNode, into: Bindings): void {
     if (stringValue(child(node, 'source')) !== 'vitest') {
-        return [];
+        return;
     }
-    return childList(node, 'specifiers').flatMap((specifier) =>
-        specifier.type === 'ImportSpecifier' &&
-        identifierName(child(specifier, 'imported')) === 'expect'
-            ? [identifierName(child(specifier, 'local')) ?? 'expect']
-            : [],
+    for (const specifier of childList(node, 'specifiers')) {
+        const local = identifierName(child(specifier, 'local'));
+        if (local === undefined) {
+            continue;
+        }
+        if (specifier.type === 'ImportNamespaceSpecifier') {
+            into.namespaces.add(local);
+        } else if (
+            specifier.type === 'ImportSpecifier' &&
+            identifierName(child(specifier, 'imported')) === 'expect'
+        ) {
+            into.expects.add(local);
+        }
+    }
+}
+
+function isVitestImport(init: AstNode | undefined): boolean {
+    const imported = init?.type === 'AwaitExpression' ? child(init, 'argument') : init;
+    return (
+        imported?.type === 'ImportExpression' && stringValue(child(imported, 'source')) === 'vitest'
     );
 }
 
-function calleeRoot(callee: AstNode | undefined): string | undefined {
-    return callee?.type === 'MemberExpression'
-        ? identifierName(child(callee, 'object'))
-        : identifierName(callee);
+function bindDynamicImport(declarator: AstNode, into: Bindings): void {
+    if (!isVitestImport(child(declarator, 'init'))) {
+        return;
+    }
+    const id = child(declarator, 'id');
+    if (id?.type === 'Identifier') {
+        into.namespaces.add(identifierName(id) ?? '');
+        return;
+    }
+    for (const property of childList(id, 'properties')) {
+        if (identifierName(child(property, 'key')) === 'expect') {
+            into.expects.add(identifierName(child(property, 'value')) ?? 'expect');
+        }
+    }
+}
+
+function isBoundExpect(callee: AstNode | undefined, bound: Bindings): boolean {
+    const [root = '', member, ...rest] = (memberPath(callee) ?? identifierName(callee) ?? '').split(
+        '.',
+    );
+    return bound.expects.has(root)
+        ? member === undefined || rest.length === 0
+        : bound.namespaces.has(root) && member === 'expect';
 }
 
 export const noExpectOutsideATest: LintRule = {
     createOnce(context: Context): Visitor {
-        const bound = new Set<string>();
+        const bound: Bindings = { expects: new Set(), namespaces: new Set() };
         return {
             before: () => {
-                bound.clear();
+                bound.expects.clear();
+                bound.namespaces.clear();
                 return assertsHere(context);
             },
             ImportDeclaration(node: AstNode) {
-                for (const name of vitestExpectNames(node)) {
-                    bound.add(name);
-                }
+                bindImport(node, bound);
+            },
+            VariableDeclarator(node: AstNode) {
+                bindDynamicImport(node, bound);
             },
             CallExpression(node: AstNode) {
-                const root = calleeRoot(child(node, 'callee'));
-                if (root !== undefined && bound.has(root)) {
+                if (isBoundExpect(child(node, 'callee'), bound)) {
                     context.report({ messageId: 'expectOutsideATest', node });
                 }
             },
