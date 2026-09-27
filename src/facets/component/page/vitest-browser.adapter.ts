@@ -4,7 +4,7 @@ import type { Locator, LocatorSelectors } from 'vitest/browser';
 
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
 import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
-import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
+import { candidateOf, MAX_REPORTED_MATCHES } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
@@ -12,8 +12,6 @@ import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
 /** The playwright adapter's translation table, descriptor for descriptor; here the test is in the page, so candidates are read from live elements. */
-
-const MAX_REPORTED_MATCHES = 10;
 
 /** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
 const FIELD_ROLES = [
@@ -87,38 +85,8 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     );
 }
 
-function nameOf(landmark: Element | null | undefined): string | undefined {
-    const labelledBy = (landmark?.getAttribute('aria-labelledby') ?? '')
-        .split(/\s+/u)
-        .filter((id) => id !== '')
-        .map((id) => document.querySelector(`#${CSS.escape(id)}`)?.textContent ?? '')
-        .join(' ');
-    const name = (landmark?.getAttribute('aria-label') ?? labelledBy)
-        .replaceAll(/\s+/gu, ' ')
-        .trim();
-    return name === '' ? undefined : name;
-}
-
 function candidates(locator: Locator): ElementMatch[] {
-    return locator
-        .elements()
-        .slice(0, MAX_REPORTED_MATCHES)
-        .map((node) => {
-            const landmark = node.parentElement?.closest(LANDMARK_SELECTOR);
-            const context = landmark?.getAttribute('role') ?? landmark?.tagName.toLowerCase();
-            const detail = node.getAttribute('href') ?? node.getAttribute('name');
-            const text = (node.textContent ?? '').replaceAll(/\s+/gu, ' ').trim().slice(0, 80);
-            const label = node.getAttribute('aria-label')?.trim();
-            return {
-                // A role descriptor matches on the accessible name: a candidate whose label differs from its text must say the label.
-                accessibleName: label !== undefined && label !== text ? label : undefined,
-                context: context ?? undefined,
-                contextName: nameOf(landmark),
-                detail: detail ?? undefined,
-                tag: node.tagName.toLowerCase(),
-                text,
-            };
-        });
+    return locator.elements().slice(0, MAX_REPORTED_MATCHES).map(candidateOf);
 }
 
 function ambiguousLevel(element: ElementRef): ElementRef {

@@ -6,6 +6,7 @@ import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwr
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
 import type { ElementMatch } from '../../../elements/ambiguity/ambiguity.js';
+import { MATCH_TEXT_LENGTH, MAX_REPORTED_MATCHES } from '../../../elements/ambiguity/candidate.js';
 import { LANDMARK_SELECTOR } from '../../../elements/ambiguity/landmark-of-tag.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
@@ -30,8 +31,6 @@ type PageExtraction = {
     text: string;
     title: string;
 };
-
-const MAX_REPORTED_MATCHES = 10;
 
 /* Playwright's actionability default, so `see(valued(…))` waits as long as `see()`. */
 const VALUE_TIMEOUT_MS = 30_000;
@@ -82,7 +81,7 @@ function isStrictViolation(error: unknown): boolean {
 
 async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
     return await locator.evaluateAll(
-        (nodes, { landmarks, limit }) => {
+        (nodes, { landmarks, limit, textLength }) => {
             // Its label, else the text of what its `aria-labelledby` names.
             // oxlint-disable-next-line unicorn/consistent-function-scoping -- this function is serialized into the page: a helper at module scope never reaches it
             const nameOf = (landmark: Element | null | undefined): string | undefined => {
@@ -106,7 +105,7 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
                 const text = (element.textContent ?? '')
                     .replaceAll(/\s+/gu, ' ')
                     .trim()
-                    .slice(0, 80);
+                    .slice(0, textLength);
                 const label = element.getAttribute('aria-label')?.trim();
                 return {
                     accessibleName: label && label !== text ? label : undefined,
@@ -118,7 +117,11 @@ async function captureMatches(locator: Locator): Promise<ElementMatch[]> {
                 };
             });
         },
-        { landmarks: LANDMARK_SELECTOR, limit: MAX_REPORTED_MATCHES },
+        {
+            landmarks: LANDMARK_SELECTOR,
+            limit: MAX_REPORTED_MATCHES,
+            textLength: MATCH_TEXT_LENGTH,
+        },
     );
 }
 

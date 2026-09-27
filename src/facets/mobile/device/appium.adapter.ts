@@ -4,6 +4,7 @@ import { resolve } from 'node:path';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
+import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { openSession } from '../session/driver-session.js';
@@ -31,7 +32,6 @@ type MatchScope = Driver | DriverElement;
 /* 30s absorbs a cold app boot, as playwright's actionability default; a slower app raises `timeouts`. */
 const DEFAULT_ACTION_TIMEOUT_MS = 30_000;
 const POLL_INTERVAL_MS = 500;
-const MAX_REPORTED_MATCHES = 10;
 /** WebDriverAgent builds once per simulator: the first session is the slow one. */
 const DEFAULT_WDA_LAUNCH_TIMEOUT_MS = 240_000;
 
@@ -101,7 +101,7 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
         element.getAttribute('value'),
         element.getAttribute('name'),
     ]);
-    const shortLabel = label ? label.replaceAll(/\s+/gu, ' ').trim().slice(0, 80) : undefined;
+    const shortLabel = label ? shortened(label) : undefined;
     return {
         type: (type ?? 'Unknown').replace(/^XCUIElementType/u, ''),
         ...(shortLabel === undefined ? {} : { label: shortLabel }),
