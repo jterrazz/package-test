@@ -1,6 +1,6 @@
 {
     "typescript": {
-        "comments/comment-lines-held-by-the-baseline": 2493,
+        "comments/comment-lines-held-by-the-baseline": 2491,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 26,
         "eslint/max-classes-per-file": 1,
@@ -40,7 +40,7 @@
         "typescript/prefer-nullish-coalescing": 5,
         "typescript/require-await": 11,
         "typescript/restrict-template-expressions": 1,
-        "typescript/strict-boolean-expressions": 68,
+        "typescript/strict-boolean-expressions": 66,
         "typescript/strict-void-return": 38,
         "typescript/switch-exhaustiveness-check": 2,
         "typescript/use-unknown-in-catch-callback-variable": 1,
