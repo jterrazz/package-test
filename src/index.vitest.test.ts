@@ -3,6 +3,8 @@ import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
+import { VITEST_ARTIFACTS_DIR } from '../lint/engine/project/artifacts.js';
+import { GROUND_GLOB } from '../lint/engine/project/ground.js';
 import { api, cli, defineSpecConfig, integration, job, mobile } from './index.vitest.js';
 import { servicesSetup } from './world/services/containers/run-setup.js';
 
@@ -131,5 +133,33 @@ describe('index.vitest', () => {
 
         // Then - no plugin was invented
         expect(config.plugins).toBeUndefined();
+    });
+
+    test('defineSpecConfig() — the preset — a config stating nothing receives the defaults of the preset', () => {
+        // Given - the published function, called with nothing
+        const config = defineSpecConfig();
+
+        // Then - the budgets, the ground exclude and the artefact cache are the preset's
+        expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
+        expect(config.test?.testTimeout).toBe(30_000);
+        expect(config.test?.hookTimeout).toBe(30_000);
+        expect(config.test?.exclude).toContain(GROUND_GLOB);
+        expect(config.test?.retry).toBe(0);
+    });
+
+    test('defineSpecConfig() — the preset — projects keep their defaults beside a literate config', () => {
+        // Given - a literate config that also states its projects
+        const config = defineSpecConfig({
+            literate: { specification: './specs/cli/cli.specification.ts' },
+            test: { projects: [{ test: { name: 'stated' } }] },
+        });
+
+        // Then - the stated project still receives the project defaults
+        const [project] = config.test?.projects ?? [];
+        expect(project).toMatchObject({
+            cacheDir: VITEST_ARTIFACTS_DIR,
+            test: { name: 'stated', testTimeout: 30_000 },
+        });
+        expect(config.plugins).toHaveLength(1);
     });
 });
