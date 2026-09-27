@@ -11,10 +11,7 @@ const RULE_ROOTS = ['lint/consumer/rules', 'lint/self/rules'];
 const pathsUnder = (dir: string): string[] => filesUnder(dir).map((path) => join(dir, path));
 
 function reportedAt(name: string): RegExp {
-    return new RegExp(
-        String.raw`:\d+:\d+:?\s+(?:error )?jterrazz(?:-check|-self)?\(${name}\)`,
-        'u',
-    );
+    return new RegExp(String.raw`:\d+:\d+\s+jterrazz(?:-check|-self)?\(${name}\)`, 'u');
 }
 
 function goldens(root: string, name: string): string[] {
@@ -33,7 +30,9 @@ function provesItsPosition(root: string, name: string): boolean {
     const reported = reportedAt(name);
     return (
         goldens(root, name).some((path) => reported.test(readFileSync(path, 'utf8'))) ||
-        ruleTests(root, name).some((path) => /\bline:\s*\d+/u.test(readFileSync(path, 'utf8')))
+        ruleTests(root, name).some((path) =>
+            /\bruleTester\(\)\.run\(/u.test(readFileSync(path, 'utf8')),
+        )
     );
 }
 

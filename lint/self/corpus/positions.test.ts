@@ -31,7 +31,7 @@ describe('unpositionedRules', () => {
         expect(unpositionedRules(ROOT, allRows)).toStrictEqual([]);
     });
 
-    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — a report golden naming the rule at a position, or a RuleTester case stating a line, proves it; a report never goldened, a line left unstated or no spec does not, and another channel is not asked', () => {
+    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — a report golden naming the rule at a position, or a rule test run through `ruleTester()`, which refuses a case with no line and column, proves it; a report never goldened, a hand-rolled tester or no spec does not, and another channel is not asked', () => {
         // Given - one row per form a proof takes, one per form that is no proof, and a runtime row
         const root = mkdtempSync(join(tmpdir(), 'positions-'));
         mkdirSync(join(root, 'specs/lint/golden-at-a-position'), { recursive: true });
@@ -46,32 +46,32 @@ describe('unpositionedRules', () => {
         );
         mkdirSync(join(root, 'lint/consumer/rules/expectations'), { recursive: true });
         writeFileSync(
-            join(root, 'lint/consumer/rules/expectations/tester-states-a-line.test.ts'),
-            "errors: [{ line: 2, messageId: 'found' }]",
+            join(root, 'lint/consumer/rules/expectations/through-the-rule-tester.test.ts'),
+            "ruleTester().run('through-the-rule-tester', rule, { invalid: [{ code, errors: [{ column: 0, line: 2, messageId: 'found' }] }], valid: [] });",
         );
         writeFileSync(
-            join(root, 'lint/consumer/rules/expectations/tester-states-no-line.test.ts'),
-            "errors: [{ messageId: 'found' }]",
+            join(root, 'lint/consumer/rules/expectations/hand-rolled-tester.test.ts'),
+            "new RuleTester().run('hand-rolled-tester', rule, { invalid: [{ code, errors: [{ line: 2, messageId: 'found' }] }], valid: [] });",
         );
-        mkdirSync(join(root, 'specs/lint/exit-code-only'), { recursive: true });
+        mkdirSync(join(root, 'specs/lint/report-never-goldened'), { recursive: true });
         writeFileSync(
-            join(root, 'specs/lint/exit-code-only/exit-code-only.spec.ts'),
+            join(root, 'specs/lint/report-never-goldened/report-never-goldened.spec.ts'),
             "expect(result.report).not.toMatch('');",
         );
         const rows = [
             row('golden-at-a-position', 'statique'),
             row('pass-at-a-position', 'checker'),
-            row('tester-states-a-line', 'statique'),
-            row('tester-states-no-line', 'statique'),
-            row('exit-code-only', 'statique'),
+            row('through-the-rule-tester', 'statique'),
+            row('hand-rolled-tester', 'statique'),
+            row('report-never-goldened', 'statique'),
             row('no-spec-at-all', 'checker'),
             row('judged-at-runtime', 'runtime'),
         ];
 
         // Then - the three proofs pass, the three rows without one are named, and the runtime row is not asked
         expect(unpositionedRules(root, rows)).toStrictEqual([
-            'tester-states-no-line',
-            'exit-code-only',
+            'hand-rolled-tester',
+            'report-never-goldened',
             'no-spec-at-all',
         ]);
     });
