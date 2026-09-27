@@ -1,4 +1,4 @@
-import { cell, filesUnder, markdownTable } from '@jterrazz/typescript/rules';
+import { cell, filesUnder, isGroundFolder, markdownTable } from '@jterrazz/typescript/rules';
 import type { Markers } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
@@ -7,7 +7,11 @@ import type { AstNode } from '../../engine/project/ast.js';
 import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
-import { FACET_MATRIX_CAPABILITIES, FACET_MATRIX_COLUMNS } from './facet-matrix.js';
+import {
+    FACET_EXEMPTIONS,
+    FACET_MATRIX_CAPABILITIES,
+    FACET_MATRIX_COLUMNS,
+} from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
 
@@ -32,6 +36,7 @@ const COLUMN_TREES: Record<Column, { extensions: string[]; files?: string[]; roo
 
 function sourcesUnder(dir: string, extensions: string[]): string[] {
     return filesUnder(dir)
+        .filter((path) => !path.split('/').some((segment) => isGroundFolder(segment)))
         .filter((path) => extensions.some((extension) => path.endsWith(extension)))
         .map((path) => join(dir, path));
 }
@@ -191,7 +196,12 @@ function declaredCapabilities(): Capability[] {
                 (capability) => capability.group === row.group && capability.name === row.name,
             );
             if (at === undefined) {
-                rows.push({ ...row, columns: [column] });
+                const exempt = FACET_EXEMPTIONS[`${row.group} · ${row.name}`];
+                rows.push({
+                    ...row,
+                    columns: [column],
+                    ...(exempt === undefined ? {} : { exempt }),
+                });
             } else if (at.probe !== row.probe || at.member !== row.member) {
                 throw new Error(
                     `${column} states the row ${row.group} · ${row.name} read as ${row.probe}, where another column reads it as ${at.probe}`,

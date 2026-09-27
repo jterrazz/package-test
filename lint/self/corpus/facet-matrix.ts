@@ -45,6 +45,12 @@ export function facetMatrixMember(capability: Pick<Capability, 'member' | 'name'
 const IN_PLACE =
     "every golden of this facet's tree is read by one test, so it is written in place (`ground-shared-or-inline`); the file form is proven where goldens are shared";
 
+export const FACET_EXEMPTIONS: Readonly<Record<string, Partial<Record<Column, string>>>> = {
+    'Constructor option · root': {
+        lint: 'a lint specification resolves its plugins and checkers from the project it sits in, and `no-redundant-root` refuses a `root` the walk already finds; the option is proven where a facet runs a product of its own (api, integration)',
+    },
+};
+
 export const FACET_MATRIX_CAPABILITIES: Capability[] = [
     {
         columns: ['api', 'cli', 'integration', 'website', 'component', 'module'],
@@ -54,7 +60,7 @@ export const FACET_MATRIX_CAPABILITIES: Capability[] = [
         probe: '.toMatch(file(',
     },
     {
-        columns: ['api', 'cli', 'integration', 'module'],
+        columns: ['api', 'cli', 'lint', 'integration', 'module'],
         group: 'Golden',
         name: 'toMatch(directory())',
         probe: '.toMatch(directory(',
