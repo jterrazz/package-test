@@ -3,13 +3,13 @@ import {
     recordUnreached,
     ROUTES_KEY,
 } from '../../../../lint/engine/baseline/test-baseline.js';
-import type { ChapterLesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/index.refusal.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';
 import type { Route } from './routes.js';
 
-export const UNKNOWN_TABLE: ChapterLesson = {
+export const UNKNOWN_TABLE: Lesson = {
     fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in jterrazz.config.ts",
     found: 'api routes: an app specification.api() started exposes no route table',
     read: 'docs/10-api.md#an-app-that-is-not-hono',
@@ -60,7 +60,7 @@ function methodlessDrift(table: readonly Route[], methodless: readonly string[])
     return [...missed, ...stale];
 }
 
-export type RouteVerdict = { failure?: ChapterLesson; line?: string };
+export type RouteVerdict = { failure?: Lesson; line?: string };
 
 export async function judgeRoutes(
     root: string,
@@ -93,7 +93,7 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
         : { line: `api routes: not judged — ${why}` };
 }
 
-function methodlessDrifted(drift: string[]): ChapterLesson {
+function methodlessDrifted(drift: string[]): Lesson {
     return {
         fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
         found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
@@ -102,7 +102,7 @@ function methodlessDrifted(drift: string[]): ChapterLesson {
     };
 }
 
-function ratchetMoved(missing: number, held: number, named: string): ChapterLesson {
+function ratchetMoved(missing: number, held: number, named: string): Lesson {
     return missing > held
         ? {
               fix: 'send each from a spec, or record them with TEST_UPDATE=1',

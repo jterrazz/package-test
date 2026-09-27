@@ -1,4 +1,4 @@
-import { refusalBlock } from '@jterrazz/typescript/rules';
+import { defineInvariant, refusalBlock } from '@jterrazz/typescript/rules';
 import type { Lesson } from '@jterrazz/typescript/rules';
 
 import { CATALOGUE_CHAPTER } from './consumer/catalogue/chapter.js';
@@ -7,21 +7,18 @@ import type { RefusalRow } from './consumer/catalogue/refusals.js';
 
 export { REFUSAL_WHY } from './consumer/catalogue/refusals.js';
 export type { RefusalRow } from './consumer/catalogue/refusals.js';
+export type { Lesson } from '@jterrazz/typescript/rules';
 
-export type ChapterAnchor = `docs/${string}.md#${string}`;
-
-export type ChapterLesson = Lesson & { read: ChapterAnchor };
-
-export function invariant(broken: string): Error {
-    return new Error(
-        `@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: ${broken}`,
-    );
-}
+export const invariant: (broken: string) => Error = defineInvariant({
+    bugOf: 'the framework',
+    notOf: 'the test',
+    package: '@jterrazz/test',
+});
 
 export function refusal(row: RefusalRow, teaching: { fix: string; found: string }): string;
-export function refusal(lesson: ChapterLesson): string;
+export function refusal(lesson: Lesson): string;
 export function refusal(
-    rowOrLesson: ChapterLesson | RefusalRow,
+    rowOrLesson: Lesson | RefusalRow,
     teaching?: { fix: string; found: string },
 ): string {
     if (typeof rowOrLesson !== 'string') {

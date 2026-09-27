@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { heldUnreached } from '../../../../lint/engine/baseline/test-baseline.js';
-import type { ChapterLesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/index.refusal.js';
 import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
 
@@ -12,7 +12,7 @@ const GREEN = { failed: 0, scope: 'whole', update: false } as const;
 
 const RECORDING = { failed: 0, scope: 'whole', update: true } as const;
 
-function methodlessDrift(...drift: string[]): { failure: ChapterLesson } {
+function methodlessDrift(...drift: string[]): { failure: Lesson } {
     return {
         failure: {
             fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',

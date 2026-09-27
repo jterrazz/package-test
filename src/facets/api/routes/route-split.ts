@@ -1,11 +1,11 @@
 import { join } from 'node:path';
 
-import type { ChapterLesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/index.refusal.js';
 import { partialShards, readShardLedgers, ROUTES_DIR } from './ledger.js';
 import { judgeLedgers } from './route-judge.js';
 import type { RouteRun, RouteVerdict } from './route-judge.js';
 
-export const NO_SHARD_LEDGERS: ChapterLesson = {
+export const NO_SHARD_LEDGERS: Lesson = {
     fix: 'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders',
     found: `api routes: not judged — no shard's ledgers under ${ROUTES_DIR}/shard-*/`,
     read: 'docs/10-api.md#when-a-run-is-not-judged',
