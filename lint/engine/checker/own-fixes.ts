@@ -1,12 +1,20 @@
 import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
 import { spawnSync } from 'node:child_process';
-import { existsSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { GROUND_DIRS } from '../project/ground.js';
-import { oxlintOf } from './oxlint-run.js';
 
 const CONFIG_NAMES: readonly string[] = configNames;
+
+/** oxlint rewrites its suppressions file on every `--fix` run, dropping every rule the run did not arm: the wrapper arms this plugin's alone. */
+const OXLINT_SUPPRESSIONS = 'oxlint-suppressions.json';
+
+/** Never one found above the root: a fixture project inside another repository would be linted with that repository's config. */
+function oxlintOf(root: string): string | undefined {
+    const candidate = join(root, 'node_modules', '.bin', 'oxlint');
+    return existsSync(candidate) ? candidate : undefined;
+}
 
 /** The plugin's autofixes run before the ratchet counts, so a diagnostic a fix settles is never counted as debt. The wrapper arms this plugin's rules alone, so no other rulebook's fixer writes a byte; it sits beside the config it wraps, since oxlint resolves `jsPlugins` and globs against that directory. `-c` turns nested discovery off, so each nested config's subtree gets a run of its own. */
 export const OWN_FIXES_WRAPPER = 'oxlint.test-fix.config.mjs';
@@ -196,17 +204,27 @@ export function applyOwnFixes(root: string): void {
     if (oxlint === undefined || config === undefined) {
         return;
     }
-    const pending = [{ config, directory: root }];
-    for (let next = pending.shift(); next !== undefined; next = pending.shift()) {
-        const { directory } = next;
-        const nested = nestedConfigDirectories(directory);
-        fixUnder(oxlint, directory, next.config, nested);
-        for (const dir of nested) {
-            const inner = join(directory, dir);
-            const own = configIn(inner, NESTED_CONFIG_NAMES);
-            if (own !== undefined) {
-                pending.push({ config: own, directory: inner });
+    const suppressions = join(root, OXLINT_SUPPRESSIONS);
+    const held = existsSync(suppressions) ? readFileSync(suppressions, 'utf8') : undefined;
+    try {
+        const pending = [{ config, directory: root }];
+        for (let next = pending.shift(); next !== undefined; next = pending.shift()) {
+            const { directory } = next;
+            const nested = nestedConfigDirectories(directory);
+            fixUnder(oxlint, directory, next.config, nested);
+            for (const dir of nested) {
+                const inner = join(directory, dir);
+                const own = configIn(inner, NESTED_CONFIG_NAMES);
+                if (own !== undefined) {
+                    pending.push({ config: own, directory: inner });
+                }
             }
+        }
+    } finally {
+        if (held === undefined) {
+            rmSync(suppressions, { force: true });
+        } else {
+            writeFileSync(suppressions, held);
         }
     }
 }

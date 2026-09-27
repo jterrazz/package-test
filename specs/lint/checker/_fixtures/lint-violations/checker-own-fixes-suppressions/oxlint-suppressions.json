@@ -1,0 +1,7 @@
+{
+    "specs/api/events/list/pagination.spec.ts": {
+        "eslint/no-console": {
+            "count": 2
+        }
+    }
+}

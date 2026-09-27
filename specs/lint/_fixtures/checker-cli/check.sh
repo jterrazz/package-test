@@ -10,5 +10,8 @@ REPO_ROOT="$(cd "$SCRIPT_DIR/../../../.." && pwd)"
 # A fixture project whose own oxlint is a stub runs this repository's oxlint
 # And plugin through it, named here.
 export JTERRAZZ_TEST_REPO="$REPO_ROOT"
+# A stub oxlint lays its project's configs down on its first call, which the
+# Checker's own fixes read before they call it.
+if [ -x node_modules/.bin/oxlint ]; then node_modules/.bin/oxlint --version > /dev/null; fi
 # Forward every argument, so a spec can exercise the fixer (`. --fix`) too.
 exec node "$REPO_ROOT/dist/checker.js" "${@:-.}"

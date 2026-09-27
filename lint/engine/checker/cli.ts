@@ -17,8 +17,6 @@ import { CHECKER_NAMESPACE } from './finding.js';
 import type { Finding } from './finding.js';
 import { runMember, runMembers } from './member-run.js';
 import { applyOwnFixes } from './own-fixes.js';
-import { pluginDiagnostics } from './oxlint-run.js';
-import type { PluginDiagnostic } from './oxlint-run.js';
 import type { CheckerRegistry } from './registry.js';
 import { stop } from './stop.js';
 import { checkerLine, checkerMessage, runTree } from './tree-run.js';
@@ -29,7 +27,6 @@ import { checkerLine, checkerMessage, runTree } from './tree-run.js';
  *     node dist/checker.js --format json              # every root, every member
  *     node dist/checker.js --member <dir>             # one workspace member
  *     node dist/checker.js baseline [root]            # record jterrazz.baseline.json › test
- *     node dist/checker.js … --oxlint-report <file>   # read the plugin's diagnostics from a report
  *     node dist/checker.js … --verbose                # a green ratchet run also names where it stood and what ran
  *
  * The run over the whole project owns the ratchet verdict; every other run under a project keeping a baseline reports and defers to it. Every move goes through `git mv` in a work tree, so history follows the file.
@@ -38,12 +35,14 @@ import { checkerLine, checkerMessage, runTree } from './tree-run.js';
 type Run = {
     fix: boolean;
     json: boolean;
-    oxlintReport: string | undefined;
     registry: CheckerRegistry;
     verbose: boolean;
 };
 
-const VALUED_FLAGS = new Set(['--format', '--member', '--oxlint-report']);
+const VALUED_FLAGS = new Set(['--format', '--member']);
+
+/** The plugin's rules are oxlint's own, held in oxlint-suppressions.json; the section holds the checker's passes alone. */
+const PLUGIN_PREFIX = 'jterrazz/';
 
 function valueOf(argv: readonly string[], flag: string): string | undefined {
     const inline = argv.find((argument) => argument.startsWith(`${flag}=`));
@@ -63,30 +62,7 @@ function printedRuleOf(violation: Finding): string {
     return `${CHECKER_NAMESPACE}(${violation.rule})`;
 }
 
-function formatDiagnostic({
-    code,
-    column,
-    file,
-    line,
-    message,
-    severity,
-}: PluginDiagnostic): string {
-    return `${file}:${line}:${column}: ${severity === 'error' ? 'error' : 'warning'} ${code}: ${message}`;
-}
-
-/** From a `--oxlint-report` they are one count, since the pass that wrote the report prints each; from an oxlint run here, no other pass saw them, so each prints in full. */
-function pluginLines(run: Run, plugin: PluginDiagnostic[]): string[] {
-    if (run.oxlintReport === undefined) {
-        return plugin.map(formatDiagnostic);
-    }
-    return plugin.length > 0
-        ? [
-              `conventions checker: ${plugin.length} plugin diagnostic(s) judged, printed by oxlint's own pass`,
-          ]
-        : [];
-}
-
-function printFindings(run: Run, violations: Finding[], plugin: PluginDiagnostic[] = []): void {
+function printFindings(run: Run, violations: Finding[]): void {
     if (run.json) {
         console.log(
             JSON.stringify(
@@ -101,14 +77,9 @@ function printFindings(run: Run, violations: Finding[], plugin: PluginDiagnostic
         );
         return;
     }
-    const lines = [
-        ...violations.map((violation) => checkerLine(run.registry, violation)),
-        ...pluginLines(run, plugin),
-    ];
+    const lines = violations.map((violation) => checkerLine(run.registry, violation));
     if (lines.length > 0) {
-        const failing =
-            violations.some(({ severity }) => severity === 'error') ||
-            plugin.some(({ severity }) => severity === 'error');
+        const failing = violations.some(({ severity }) => severity === 'error');
         (failing ? console.error : console.warn)(lines.join('\n'));
     }
 }
@@ -160,21 +131,36 @@ function verdict(
 type RatchetRun = Verdict & {
     counted: () => Finding[];
     own: Finding[];
-    plugin: PluginDiagnostic[];
     root: string;
 };
 
+function pluginKeysLeft(baseline: Readonly<Record<string, number>>): string[] {
+    return Object.keys(baseline)
+        .filter((key) => key.startsWith(PLUGIN_PREFIX))
+        .toSorted()
+        .map(
+            (key) =>
+                `${key} is the plugin's rule, which oxlint-suppressions.json holds now — run 'typescript baseline', then 'jterrazz-test-check baseline'`,
+        );
+}
+
 function judgeHeld(run: Run, ratchetRun: RatchetRun): never {
-    const { counted, passes, plugin, root, what } = ratchetRun;
+    const { counted, passes, root, what } = ratchetRun;
     const findings = counted();
-    const counts = countsOf([
-        ...findings.map(printedRuleOf),
-        ...plugin.map((diagnostic) => diagnostic.code),
-    ]);
+    const counts = countsOf(findings.map(printedRuleOf));
     const baseline = run.fix ? reRecorded(run, root, counts) : readBaseline(root);
-    const broken = judge(counts, baseline);
+    const left = pluginKeysLeft(baseline);
+    const broken = [
+        ...left,
+        ...judge(
+            counts,
+            Object.fromEntries(
+                Object.entries(baseline).filter(([key]) => !key.startsWith(PLUGIN_PREFIX)),
+            ),
+        ),
+    ];
     if (run.json || broken.length > 0) {
-        printFindings(run, findings, plugin);
+        printFindings(run, findings);
     }
     for (const reason of broken) {
         say(run, `baseline-ratchet  ${BASELINE_LABEL}  ${reason}`);
@@ -193,22 +179,8 @@ function ratchet(run: Run, ratchetRun: RatchetRun): never {
     if (keepsBaseline(ratchetRun.root)) {
         judgeHeld(run, ratchetRun);
     }
-    const { own, plugin } = ratchetRun;
-    printFindings(run, own, plugin);
-    const unrecorded = countsOf(plugin.map((diagnostic) => diagnostic.code));
-    for (const [key, count] of Object.entries(unrecorded).toSorted(([a], [b]) =>
-        a < b ? -1 : 1,
-    )) {
-        say(run, `${key}  ${count} diagnostic(s), and the project keeps no ${BASELINE_LABEL}`);
-    }
-    if (plugin.length > 0) {
-        say(
-            run,
-            "Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.",
-        );
-        stop(1);
-    }
-    verdict(run, own, ratchetRun);
+    printFindings(run, ratchetRun.own);
+    verdict(run, ratchetRun.own, ratchetRun);
 }
 
 /** Records only counts that fell (lowered, or dropped at zero); one that rose is left for the verdict. */
@@ -266,7 +238,7 @@ function applyFixes(run: Run, root: string): void {
     }
 }
 
-/** Every rewrite lands before anything is counted, so the checker's findings and the plugin's diagnostics are counted over one tree. */
+/** Every rewrite lands before anything is counted, so the findings are counted over the tree the fixes left. */
 function fixProject(run: Run, root: string): void {
     if (!run.fix) {
         return;
@@ -296,35 +268,18 @@ function isSpecsTree(dir: string): boolean {
     return (owner === undefined ? dir : relative(owner, dir)).split(/[/\\]/u).includes('specs');
 }
 
-/** A typo'd path would count nothing. */
-function requireReport(path: string | undefined): string | undefined {
-    if (path === undefined) {
-        return undefined;
-    }
-    const resolved = resolve(path);
-    if (!existsSync(resolved) || !statSync(resolved).isFile()) {
-        console.error(`conventions checker: no such oxlint report: ${resolved}`);
-        stop(1);
-    }
-    return resolved;
-}
-
-function recordBaseline(run: Run, positional: string | undefined, reportFile?: string): never {
+function recordBaseline(run: Run, positional: string | undefined): never {
     const root = requireDirectory(positional ?? '.', 'project root');
     const findings = projectFindings(run, root);
-    const plugin = pluginDiagnostics(root, reportFile);
-    const counts = countsOf([
-        ...findings.map(printedRuleOf),
-        ...plugin.map((diagnostic) => diagnostic.code),
-    ]);
+    const counts = countsOf(findings.map(printedRuleOf));
     writeBaseline(root, counts);
     console.log(
-        `${BASELINE_LABEL} written — ${findings.length + plugin.length} finding(s) across ${Object.keys(counts).length} rule(s)`,
+        `${BASELINE_LABEL} written — ${findings.length} finding(s) across ${Object.keys(counts).length} rule(s)`,
     );
     stop(0);
 }
 
-function checkMemberRun(run: Run, member: string, positional?: string, reportFile?: string): never {
+function checkMemberRun(run: Run, member: string, positional?: string): never {
     const root = resolve(positional ?? '.');
     const dir = requireDirectory(member, 'member directory');
     const what = `for member ${relative(root, dir) || '.'}`;
@@ -336,7 +291,6 @@ function checkMemberRun(run: Run, member: string, positional?: string, reportFil
             counted: () => projectFindings(run, root),
             own: runMember(dir, root, run.registry),
             passes,
-            plugin: pluginDiagnostics(root, reportFile),
             root,
             what,
         });
@@ -344,7 +298,7 @@ function checkMemberRun(run: Run, member: string, positional?: string, reportFil
     report(run, runMember(dir, root, run.registry), { passes, what }, judgingProject());
 }
 
-function checkProject(run: Run, positional: string | undefined, reportFile?: string): never {
+function checkProject(run: Run, positional: string | undefined): never {
     const root =
         positional === undefined ? resolve('.') : requireDirectory(positional, 'directory');
     if (positional !== undefined && discoverSpecRoots(root).length === 0) {
@@ -361,7 +315,6 @@ function checkProject(run: Run, positional: string | undefined, reportFile?: str
         passes: [...new Set([...run.registry.treePassIds, ...run.registry.memberPassIds])].join(
             ', ',
         ),
-        plugin: pluginDiagnostics(root, reportFile),
         root,
         what: `under ${root}`,
     });
@@ -373,7 +326,6 @@ export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly 
     const run: Run = {
         fix: argv.includes('--fix'),
         json: valueOf(argv, '--format') === 'json',
-        oxlintReport: valueOf(argv, '--oxlint-report'),
         registry,
         verbose: argv.includes('--verbose'),
     };
@@ -382,18 +334,11 @@ export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly 
         (argument, index) => !argument.startsWith('--') && !VALUED_FLAGS.has(argv[index - 1] ?? ''),
     );
 
-    const reportFile = requireReport(run.oxlintReport);
-    if (run.fix && reportFile !== undefined) {
-        console.error(
-            'conventions checker: `--fix` counts what its own fixes leave, and a report written before them counts the tree they changed — drop `--oxlint-report`',
-        );
-        stop(1);
-    }
     if (recording) {
-        recordBaseline(run, positional, reportFile);
+        recordBaseline(run, positional);
     }
     if (member !== undefined) {
-        checkMemberRun(run, member, positional, reportFile);
+        checkMemberRun(run, member, positional);
     }
     if (positional !== undefined && isSpecsTree(requireDirectory(positional, 'directory'))) {
         const root = requireDirectory(positional, 'directory');
@@ -407,5 +352,5 @@ export function runCheckerCli(registry: CheckerRegistry, cliArguments: readonly 
             judgingProject(),
         );
     }
-    checkProject(run, positional, reportFile);
+    checkProject(run, positional);
 }

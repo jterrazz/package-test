@@ -133,21 +133,17 @@ describe('cli', () => {
         expect(result.stderr).toMatch(file('./_expected/new-debt-and-a-cleared-entry.txt'));
     });
 
-    test("lint — checker CLI contract — a broken ratchet prints its own findings, and counts the plugin's in one line", async () => {
-        // Given - the broken ratchet, and a report holding a diagnostic of the plugin and one of another
+    test("lint — checker CLI contract — a section still holding a plugin rule names the move to oxlint's own file", async () => {
+        // Given - a section recorded when the checker still counted the plugin's rules
         const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-ratchet/'))
-            .fixture(file('./_fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
-            .exec('. --oxlint-report oxlint-report.json');
+            .fixture(directory('./_fixtures/lint-violations/checker-plugin-key-left/'))
+            .exec('.');
 
-        // Then - the tree's finding in full, the plugin's counted: oxlint's own pass is the one that prints it
+        // Then - the plugin's key is refused with the two gestures that move it, beside the ratchet's own verdict
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
-            conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/no-unused-ground has 1 finding(s) and no entry — it is new debt
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz/test-beside-its-module has 1 finding(s) and no entry — it is new debt
-            baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/ground-shared-or-inline is at zero — the ratchet moved, delete its entry
+            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
+            baseline-ratchet  jterrazz.baseline.json › test  jterrazz/test-beside-its-module is the plugin's rule, which oxlint-suppressions.json holds now — run 'typescript baseline', then 'jterrazz-test-check baseline'
             Run 'jterrazz-test-check baseline' to record where the project stands.
         `);
     });
@@ -174,48 +170,6 @@ describe('cli', () => {
         expect(result.stderr.text).toBe('');
     });
 
-    test('lint — checker CLI contract — the plugin diagnostics are read from the report typescript check hands over', async () => {
-        // Given - no oxlint installed, and a report holding one diagnostic of the plugin
-        const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-oxlint-report/'))
-            .exec('--oxlint-report oxlint-report.json');
-
-        // Then - the value of the flag is no project root, and the one diagnostic is counted, not printed again
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            conventions checker: 1 plugin diagnostic(s) judged, printed by oxlint's own pass
-            jterrazz/test-beside-its-module  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
-            Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
-        `);
-    });
-
-    test('lint — checker CLI contract — a checker that ran oxlint itself prints the plugin diagnostics it saw', async () => {
-        // Given - no report handed in, and a project oxlint reporting one diagnostic of the plugin
-        const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-oxlint-run/'))
-            .exec('.');
-
-        // Then - the checker is the one printer of the diagnostic, in full, and counts it nowhere else
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            src/orphan.test.ts:1:1: error jterrazz(test-beside-its-module): a module test has a sibling module
-            jterrazz/test-beside-its-module  1 diagnostic(s), and the project keeps no jterrazz.baseline.json › test
-            Fix them, or run 'jterrazz-test-check baseline' to record where the project stands.
-        `);
-    });
-
-    // Scalpel (\`output-asserted-as-a-golden\`): a golden here would couple the CLI boundary to the diagnostic formatting.
-    test('lint — checker CLI contract — a report path that names no file fails loudly instead of counting nothing', async () => {
-        // Given - a report that was never written
-        const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-oxlint-report/'))
-            .exec('--oxlint-report missing.json');
-
-        // Then - the checker refuses it rather than judging an empty report
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr.text).toContain('no such oxlint report');
-    });
-
     test('lint — checker CLI, the logs a ratchet run prints — a run another run judges prints its findings, names the judge, and exits 0', async () => {
         // Given - one specs tree of a project keeping jterrazz.baseline.json › test, the tree holding a finding the section does not
         const result = await cli
@@ -225,7 +179,7 @@ describe('cli', () => {
         // Then - the finding and the file that judges it, and no verdict of its own
         expect(result.exitCode).toBe(0);
         expect(result.stderr).toMatch(`
-            widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
+            widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             conventions checker: 1 finding(s) under {{workdir}}/specs, judged by jterrazz.baseline.json › test
         `);
     });
@@ -239,37 +193,19 @@ describe('cli', () => {
         // Then - the record, then the held finding as JSON: the machine format carries the findings whatever the verdict
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(no-unused-ground)","file":"specs/widget/_seeds/dead.sql","line":1,"message":"found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground","severity":"error"}]
-        `);
-    });
-
-    test("lint — checker CLI, the logs a ratchet run prints — `--format json` carries the checker's own findings, never the plugin's it judges", async () => {
-        // Given - a broken ratchet, and a report holding a diagnostic of the plugin and one of another
-        const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-ratchet/'))
-            .fixture(file('./_fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
-            .exec('. --format json --oxlint-report oxlint-report.json');
-
-        // Then - the verdict fails on both, and the JSON holds the tree's finding alone
-        expect(result.exitCode).toBe(1);
-        expect(result.stdout).toMatch(`
-            [{"code":"jterrazz-check(no-unused-ground)","file":"specs/widget/_seeds/dead.sql","line":1,"message":"found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground","severity":"error"}]
+            [{"code":"jterrazz-check(no-unused-ground)","file":"specs/widget/_seeds/dead.sql","line":1,"message":"found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground","severity":"error"}]
         `);
     });
 
     test('lint — checker CLI, the logs a ratchet run prints — a green root member run prints exactly the held line', async () => {
-        // Given - a project whose checker finding and plugin diagnostic are both recorded
+        // Given - a project whose checker finding is recorded
         const result = await cli
             .fixture(directory('./_fixtures/lint-violations/checker-ratchet/'))
-            .fixture(file('./_fixtures/lint-violations/checker-oxlint-report/oxlint-report.json'))
-            .exec([
-                'baseline . --oxlint-report oxlint-report.json',
-                '--member . --oxlint-report oxlint-report.json',
-            ]);
+            .exec(['baseline .', '--member .']);
 
         // Then - one line and nothing after it: what typescript check shows on a green run
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 2 held across 2 rules\n');
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: 1 held across 1 rule\n');
         expect(result.stderr.text).toBe('');
     });
 });

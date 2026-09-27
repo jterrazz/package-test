@@ -14,7 +14,7 @@ describe('ratchet', () => {
         // Then - both falls, each naming its gesture; the run's own key is never the checker's
         expect(result.exitCode).toBe(1);
         expect(result.stderr).toMatch(`
-            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
+            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/no-unused-ground is at 1, below its baseline of 3 — the debt fell, \`--fix\` re-records it
             baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/no-reach-into-sibling-ground is at zero — the ratchet moved, delete its entry
             Run 'jterrazz-test-check baseline' to record where the project stands.
@@ -55,7 +55,7 @@ describe('ratchet', () => {
             'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz-check/ground-shared-or-inline 1 → 0\n',
         );
         expect(result.stderr).toMatch(`
-            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan (a warning when the argument is not a literal). · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
+            specs/widget/_seeds/dead.sql:1:1: error jterrazz-check(no-unused-ground): found: _seeds/dead.sql, which no test of widget names · why: No dead fixtures: every file under \`_seeds/\`/\`_requests/\`/\`_fixtures/\` and every top-level entry of \`_expected/\` must be referenced — a folder's, by the tests at or below it, and the specs root's shared four under \`<specs>/_shared/\`; a folder holding ground with no test file and no \`*.spec.yaml\` at or below it is an orphan. · fix: delete _seeds/dead.sql, or name it from the test that stands on it · read: docs/19-linting.md#no-unused-ground
             baseline-ratchet  jterrazz.baseline.json › test  jterrazz-check/no-unused-ground has 1 finding(s) and no entry — it is new debt
             Run 'jterrazz-test-check baseline' to record where the project stands.
         `);
@@ -126,25 +126,32 @@ describe('ratchet', () => {
     });
 
     test('lint — checker CLI, the ratchet is exact — `--fix` settles a JSON root that extends a commented JSON, and a `.jsonc` subtree, in one run', async () => {
-        // Given - recorded debt in two trees: the root's `.oxlintrc.json` extends a commented JSON, and a commented `.oxlintrc.jsonc` governs web/
+        // Given - two trees the plugin's fixes rewrite: the root's `.oxlintrc.json` extends a commented JSON, and a commented `.oxlintrc.jsonc` governs web/
         const result = await cli
             .fixture(directory('./_fixtures/lint-violations/checker-own-fixes-json/'))
             .exec(['baseline .', '. --fix']);
 
-        // Then - both views written, the debt paid, nothing held
+        // Then - both views written, and the section — the checker's passes alone — holds nothing
         expect(result.exitCode).toBe(0);
-        expect(result.stdout.text).toBe(
-            [
-                'conventions checker: re-recorded jterrazz.baseline.json › test › jterrazz/no-repeated-chain-setting 2 → 0',
-                'jterrazz.baseline.json › test: nothing held',
-                '',
-            ].join('\n'),
-        );
+        expect(result.stdout.text).toBe('jterrazz.baseline.json › test: nothing held\n');
         for (const tree of ['', 'web/']) {
             expect(
                 result.file(`${tree}specs/api/events/list/pagination.spec.ts`).content,
             ).toContain("const events = api.with({ clock: '2026-03-04T09:30:00Z' });");
         }
+    });
+
+    test("lint — checker CLI, the ratchet is exact — `--fix` leaves oxlint's suppressions as the project recorded them", async () => {
+        // Given - the fixable project, and an oxlint suppressions file holding a rule the plugin's fixes do not arm
+        const result = await cli
+            .fixture(directory('./_fixtures/lint-violations/checker-own-fixes/'))
+            .fixture(directory('./_fixtures/lint-violations/checker-own-fixes-suppressions/'))
+            .exec('. --fix');
+
+        // Then - oxlint's own rewrite of the file under a run arming the plugin alone is undone: the entry stands
+        expect(result.file('oxlint-suppressions.json').content).toBe(
+            '{\n    "specs/api/events/list/pagination.spec.ts": {\n        "eslint/no-console": {\n            "count": 2\n        }\n    }\n}\n',
+        );
     });
 
     test("lint — checker CLI, the ratchet is exact — `--fix` renames before the plugin's own fixes, so the check after it counts the same tree", async () => {
@@ -186,19 +193,6 @@ describe('ratchet', () => {
                 '',
             ].join('\n'),
         );
-    });
-
-    test('lint — checker CLI, the ratchet is exact — `--fix` refuses a report written before its fixes', async () => {
-        // Given - the fixable project, and a report handed in beside the fixer
-        const result = await cli
-            .fixture(directory('./_fixtures/lint-violations/checker-own-fixes/'))
-            .exec('. --fix --oxlint-report package.json');
-
-        // Then - the run stops before it writes, naming the flag to drop
-        expect(result.exitCode).toBe(1);
-        expect(result.stderr).toMatch(`
-            conventions checker: \`--fix\` counts what its own fixes leave, and a report written before them counts the tree they changed — drop \`--oxlint-report\`
-        `);
     });
 
     test('lint — checker CLI, the ratchet is exact — a green run over a section that holds nothing prints `nothing held`', async () => {

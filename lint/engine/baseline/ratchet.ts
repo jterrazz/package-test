@@ -5,7 +5,7 @@ export const BASELINE_FILE = 'jterrazz.baseline.json';
 
 export const ROUTES_KEY = 'routes/unreached';
 
-/** The `test` section of the family's `jterrazz.baseline.json`; every other section is kept byte for byte. Exact both ways: a rise, a new rule, a fall and an entry at zero all break it. Severity is not read: a warning is the debt a ratchet holds down. */
+/** The `test` section of the family's `jterrazz.baseline.json`; every other section is kept byte for byte. Exact both ways: a rise, a new rule, a fall and an entry at zero all break it. The plugin's rules are oxlint's to hold, in oxlint-suppressions.json. */
 export const BASELINE_SECTION = 'test';
 
 export const BASELINE_LABEL = `${BASELINE_FILE} › ${BASELINE_SECTION}`;
