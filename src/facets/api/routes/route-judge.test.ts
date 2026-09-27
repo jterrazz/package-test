@@ -227,6 +227,24 @@ describe('route-judge', () => {
         );
     });
 
+    test('route judge — the api run judged — the method-less list is held to the app’s own table, even when an OpenAPI document measures the coverage', async () => {
+        // Given - the app takes /mcp on any method, and the member declares a document that knows only its POST
+        const { directory, root } = methodlessRun(['/mcp']);
+        writeFileSync(
+            join(root, 'openapi.json'),
+            '{"paths": {"/mcp": {"post": {}}, "/health": {"get": {}}}}',
+        );
+        writeFileSync(
+            join(root, 'jterrazz.config.ts'),
+            "export default { test: { methodless: ['/mcp'], routes: './openapi.json' } };\n",
+        );
+
+        // Then - the list agrees with the app, and the document's routes are reached
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
+            line: 'api routes: all 2 declared routes reached',
+        });
+    });
+
     test('route judge — the api run judged — a method-less route is the app’s whatever its parameters are named', async () => {
         // Given - the app takes /mcp/:id on any method, the list naming /mcp/:session, then /mcp/:id/x
         const agreeing = methodlessRun(['/mcp/:session'], '/mcp/:id');
