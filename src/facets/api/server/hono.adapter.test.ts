@@ -77,7 +77,7 @@ describe('HonoAdapter', () => {
         ]);
     });
 
-    test('the hono adapter — the body it read — a type named neither text nor binary is read, and only a binary type drops its body', async () => {
+    test('the hono adapter — the body it read — a named text type and a type named neither text nor binary are read, and only a binary type drops its body', async () => {
         // Given - a YAML document, a GraphQL query, and an archive
         const app = new Hono();
         app.get('/schema', (context) =>

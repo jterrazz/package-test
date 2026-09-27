@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { parseResponseFile, readBody, serializeResponseFile } from './http-file.js';
+import { bodyKind, parseResponseFile, readBody, serializeResponseFile } from './http-file.js';
 
 describe('http-file', () => {
     test('http-files — responses — parses status, header subset, and JSON body', () => {
@@ -107,6 +107,30 @@ describe('http-file', () => {
 
         // Then - each is its text
         expect(read).toStrictEqual(['42', 'true', 'null']);
+    });
+
+    test('http-files — a body read by its content-type — a type is read by its essence alone, whatever its case or parameters', () => {
+        // Given - one type of every kind, spelled as servers send them: capitals, a charset, a suffix
+        const types = [
+            'Application/Vnd.Api+Json',
+            'TEXT/CSV; charset=utf-8',
+            'image/svg+xml',
+            'application/x-ndjson',
+            'IMAGE/PNG',
+            'application/octet-stream',
+            'application/x-unknown',
+        ];
+
+        // Then - each is the kind its essence names, and an unknown one is sniffed
+        expect(types.map((type) => bodyKind(type))).toStrictEqual([
+            'json',
+            'text',
+            'text',
+            'text',
+            'binary',
+            'binary',
+            'sniffed',
+        ]);
     });
 
     test('http-files — a body read by its content-type — a JSON type, or no type, is the value its text parses to, or the text when it does not parse', () => {
