@@ -147,6 +147,25 @@ describe('ARCHITECTURE', () => {
         ]);
     });
 
+    test('a spec reaches the framework by its entry, never by its internals', () => {
+        // Given - specs reaching two internals, the entry, and their own app's source
+        const violations = violationsIn({
+            'specs/api/seed/seed.spec.ts': [
+                "import '../../../src/world/clock/clock.js';",
+                "import '../../../src/index.js';",
+                '',
+            ].join('\n'),
+            'specs/cli/run/run.test.ts':
+                "import '../../../src/expectations/tokens/match.js';\nimport './app/main.js';\n",
+        });
+
+        // Then - each internal is named at the spec, and the entry and the app pass
+        expect(violations).toStrictEqual([
+            'specs/api/seed/seed.spec.ts → src/world/clock/clock.ts  no-framework-internals',
+            'specs/cli/run/run.test.ts → src/expectations/tokens/match.ts  no-framework-internals',
+        ]);
+    });
+
     test('a package is judged as the pass resolves it: a type-only import, a subpath and the package itself', () => {
         // Given - vitest/browser in and out of its owner, playwright's types in the kernel, and the package's own name in a layer
         const violations = violationsIn({

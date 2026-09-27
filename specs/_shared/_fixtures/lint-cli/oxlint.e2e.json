@@ -67,7 +67,6 @@
         "jterrazz/no-expect-in-scenario": "error",
         "jterrazz/test-id-states-what-is-missing": "error",
         "jterrazz/scenario-ends-settled": "error",
-        "jterrazz-self/no-framework-internals": "error",
         "jterrazz-self/facet-is-a-composition": "error"
     }
 }

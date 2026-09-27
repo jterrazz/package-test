@@ -5,6 +5,7 @@ import { TEST_SUFFIX } from '../../engine/project/source.js';
 import { FRAMEWORK_LAYERS } from './layers.js';
 import type { LayerOptions } from './layers.js';
 import { OWNERS_OF_LIBRARIES } from './libraries.js';
+import { LINT_DIRECTION } from './lint-direction.js';
 
 const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 
@@ -232,33 +233,6 @@ function facetRules(): ArchitectureRule[] {
     ];
 }
 
-const CONSUMER = ['consumer/catalogue', 'consumer/rulebook', 'consumer/rules', 'consumer/checks'];
-
-const SELF_READS = [
-    'self/rules',
-    'self/checks',
-    'self/corpus',
-    'self/catalogue',
-    ...CONSUMER,
-    'engine',
-    'src',
-];
-
-const LINT_DIRECTION: Readonly<Record<string, readonly string[]>> = {
-    'consumer/catalogue': ['consumer/catalogue', 'engine'],
-    'consumer/checks': ['consumer/checks', 'consumer/catalogue', 'engine'],
-    'consumer/rulebook': ['consumer/rulebook', 'consumer/catalogue', 'engine'],
-    'consumer/rules': ['consumer/rules', 'consumer/catalogue', 'engine'],
-    engine: ['engine'],
-    index: [...CONSUMER, 'engine'],
-    'self/catalogue': ['self/catalogue', ...CONSUMER, 'engine'],
-    'self/checks': SELF_READS,
-    'self/corpus': SELF_READS,
-    'self/index': SELF_READS,
-    'self/rules': SELF_READS,
-    src: ['src', 'engine', 'index'],
-};
-
 function placeOf(place: string): string {
     if (place === 'src') {
         return '^src/';
@@ -295,4 +269,16 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
     ...ownerRules(),
     ...facetRules(),
     ...directionRules(),
+    {
+        fix: 'reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers, as a module test',
+        from: { path: '(^|/)specs/' },
+        name: 'no-framework-internals',
+        read: 'docs/03-testing.md#a-spec-reaches-the-framework-by-its-entry',
+        to: {
+            path: `^src/(${Object.keys(FRAMEWORK_LAYERS)
+                .filter((layer) => layer !== 'lint')
+                .join('|')})/`,
+        },
+        why: "a spec of the framework specifies it through its public entry, as a consumer does, and those folders are this repository's layers alone",
+    },
 ]);

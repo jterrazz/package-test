@@ -30,7 +30,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
         fix: 'Put what needs the builtin or the package behind the port of the adapter that owns it — an adapter a world area or the facet\u2019s own concept folder exports, handed in by the facet — or import only its type.',
         name: 'kernel-loads-in-a-page',
         rationale:
-            'The component facet composes the same kernel and setups inside a browser page, and the layer map cannot see a builtin: it judges declared edges between trees and lets a builtin through, so one reached at any depth — directly, or inside a package — is a component chain that stops bundling.',
+            'The component facet composes the same kernel and setups inside a browser page, and a builtin reached at any depth — directly, or inside a package — is a component chain that stops bundling. The layer map judges one edge at a time and lets a builtin through by choice: its package rules name the npm dependency types alone.',
         reach: 'module',
     },
     {

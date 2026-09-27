@@ -15,22 +15,7 @@ type Row = CatalogueRow<SelfFamily>;
 /** A self rule has no row in the public catalogue, so its message routes here. */
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
-export const SELF_STATIQUE_RULES: Row[] = [
-    {
-        audience: 'self',
-        channel: 'statique',
-        convention:
-            "From `specs/`, a relative import resolving into the framework's INTERNALS — this repository's `src/{kernel,world,elements,expectations,facets,vitest}/` — is an error: a spec of the framework reaches it through `@jterrazz/test`, as a consumer does. A spec importing its own app's source is allowed (the documented pattern), and a `@jterrazz/test/<subpath>` import is `no-unpublished-subpath`'s. No folder exception: a probe that cannot reach its subject through the public entry is a module test beside its module, not a spec.",
-        facet: 'model',
-        family: 'imports',
-        fix: 'Reach the framework through `@jterrazz/test` (`src/index.js`), or move the probe beside the module it covers.',
-        name: 'no-framework-internals',
-        rationale:
-            'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; those folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
-        reach: 'specs',
-    },
-    ...ARCHITECTURE_STATIQUE_RULES,
-];
+export const SELF_STATIQUE_RULES: Row[] = [...ARCHITECTURE_STATIQUE_RULES];
 
 export const SELF_CHECKER_PASSES: Row[] = [
     {
@@ -217,7 +202,7 @@ export const META_ROWS: Row[] = [
         fix: 'State the audience on the row, and wire a self rule in `lint/self/rules/plugin.ts` or `lint/self/checks/checker.ts` — never in `lint/consumer/rules/plugin.ts` or `lint/consumer/checks/checker.ts`.',
         name: 'rule-declares-its-audience',
         rationale:
-            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` would file their specs by a capability matrix they do not have, and `no-framework-internals` would refuse a consumer’s own `src/model/`.',
+            'A rule only this package is held to, once shipped, runs in every consumer’s tree: `specimen-filed-by-capability` would file their specs by a capability matrix they do not have, and `source-root-holds-known-entries` would refuse every entry a consumer’s own `src/` holds.',
         reach: 'all',
     },
     ...ARCHITECTURE_META_ROWS,
