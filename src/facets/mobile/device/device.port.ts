@@ -1,3 +1,4 @@
+import type { ElementRef } from '../../../elements/descriptors/element.js';
 import type { PageVerbs } from '../../../elements/verbs.js';
 
 export type MobileDevice = {
@@ -11,6 +12,9 @@ export type MobileDevice = {
 
 /** The element kinds a mobile screen designates, each compiled to an iOS predicate; every other kind is refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
+
+/** The shared element descriptor, under the mobile surface's name. */
+export type MobileElementRef = ElementRef;
 
 /** One candidate of an ambiguous descriptor, as the refusal lists it. */
 export type MobileElementMatch = {
