@@ -1,4 +1,3 @@
-/** Runner traffic is recognised by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through. */
 import type { StubRegistration } from '../../intercept/intercept.js';
 import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { Stub } from '../../stub.js';
@@ -6,7 +5,7 @@ import { buildStubHandlers } from '../msw-handlers.js';
 
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import: this module IS the boundary that gives it a shape */
 
-/** What the runner itself fetches; everything else is the subject's traffic (`network-strict-after-first-stub`). */
+/** What the runner itself fetches, everything else being the subject's traffic (`network-strict-after-first-stub`); matched by prefix, never by extension: msw bypasses a "common asset" path before `onUnhandledRequest`, which would let `/api/posts.json` through. */
 const RUNNER_PREFIXES = ['/.artifacts/', '/@fs/', '/@id/', '/@vite', '/node_modules/', '/__vitest'];
 
 let workerInstance: any = null;
