@@ -30,7 +30,7 @@ export default defineStub({
 
 ### Selection
 
-One driver-agnostic queue serves every facet. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
+One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
 
 **The first stub in list order that matches AND is not exhausted wins.** That single rule covers the two shapes you need:
 
