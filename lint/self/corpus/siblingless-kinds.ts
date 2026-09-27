@@ -77,6 +77,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/consumer/catalogue/families.ts',
             'lint/consumer/catalogue/chapter.ts',
             'lint/consumer/catalogue/refusals.ts',
+            'lint/self/catalogue/preset.ts',
             'lint/consumer/rulebook/import.ts',
             'lint/self/checks/layers.ts',
             'lint/self/checks/libraries.ts',

@@ -14,6 +14,7 @@ export const selfPluginRules: Record<string, 'error'> = Object.fromEntries(
 );
 
 export { ARCHITECTURE } from '../checks/architecture.js';
+export { coveragePreset } from '../catalogue/preset.js';
 export { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 export { FRAMEWORK_LAYERS } from '../checks/layers.js';
 

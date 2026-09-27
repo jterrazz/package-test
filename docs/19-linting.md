@@ -66,7 +66,7 @@ A rule that takes options is declared, not suppressed — an `off` loses the che
 
 ### Declaring the preset
 
-Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, the `testing` fragment of oxlint rules, those import and naming rules, and the two sections of `jterrazz.baseline.json` it owns — `test`, the checker's debt, and `test.coverage`, a floor. A project lists it in `jterrazz.config.ts`, after the base preset, and its `oxlint.config.ts` composes the same presets:
+Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, the `testing` fragment of oxlint rules, those import and naming rules, and the section of `jterrazz.baseline.json` it owns — `test`, the checker's debt. A project lists it in `jterrazz.config.ts`, after the base preset, and its `oxlint.config.ts` composes the same presets:
 
 ```typescript
 // jterrazz.config.ts
@@ -427,7 +427,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
-This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns two: `test`, this section, and `test.coverage`, the floor this repository's own suite is held to ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)). Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
+This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. `test.coverage`, the floor this repository's own suite is held to, is a preset of its own this repository alone declares ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate that writes and judges it is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
 
 #### The section
 

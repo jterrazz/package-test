@@ -225,8 +225,7 @@ const DEFAULTS: Required<Pick<TestSettings, 'collections' | 'methodless' | 'prod
 
 export function testPreset(): Preset {
     return {
-        baseline: ['test', 'test.coverage'],
-        floors: ['test.coverage'],
+        baseline: ['test'],
         layers: LAYERS,
         name: 'test',
         names: NAMES,

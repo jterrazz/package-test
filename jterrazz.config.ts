@@ -2,14 +2,14 @@ import { defineConfig, typescript } from '@jterrazz/typescript/config';
 
 // Node's type-stripping does not resolve `.js` specifiers to `.ts` sources: `npm run build` precedes lint.
 import { test } from './dist/config.js';
-import { ARCHITECTURE, sourceRootHoldsKnownEntries } from './dist/self-oxlint.js';
+import { ARCHITECTURE, coveragePreset, sourceRootHoldsKnownEntries } from './dist/self-oxlint.js';
 
 export default defineConfig({
     optOuts: {
         'typescript/self-folders-apart':
             'the corpus audits the self checker and the self plugin by importing them, the self plugin hands on the layer map its checks compile, and one self check reads the capability matrix the corpus renders (docs/01-architecture.md)',
     },
-    presets: [typescript({ profile: 'node' }), test()],
+    presets: [typescript({ profile: 'node' }), test(), coveragePreset()],
     typescript: {
         architecture: { layers: ARCHITECTURE },
         names: [sourceRootHoldsKnownEntries],
