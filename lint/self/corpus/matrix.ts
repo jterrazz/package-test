@@ -8,9 +8,9 @@ import { callShapeOf, callsOf, isCallOf } from '../../engine/project/call-shapes
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import {
-    FACET_EXEMPTIONS,
     FACET_MATRIX_CAPABILITIES,
     FACET_MATRIX_COLUMNS,
+    FACET_MATRIX_EXEMPTIONS,
 } from './facet-matrix.js';
 import type { Capability, CapabilityGroup, Column } from './facet-matrix.js';
 import { META_TESTS_LAYER_ROOTS } from './meta-tests.js';
@@ -196,7 +196,7 @@ function declaredCapabilities(): Capability[] {
                 (capability) => capability.group === row.group && capability.name === row.name,
             );
             if (at === undefined) {
-                const exempt = FACET_EXEMPTIONS[`${row.group} · ${row.name}`];
+                const exempt = FACET_MATRIX_EXEMPTIONS[`${row.group} · ${row.name}`];
                 rows.push({
                     ...row,
                     columns: [column],

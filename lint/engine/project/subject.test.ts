@@ -1,11 +1,11 @@
 import { describe, expect, test } from 'vitest';
 
 import {
-    NO_READING,
     ambiguousSegment,
     commandWords,
     declaredCommands,
     doorsOf,
+    NO_READING,
     pathTemplate,
     subjectFolder,
     subjectName,
