@@ -1,7 +1,7 @@
 import type { PagePort } from '../render/page.port.js';
 import type { ComponentUi } from '../render/scenario.js';
 import { afterThisTest, projectWrapper } from './page-runtime.js';
-import type { ariaTree, componentVerbs, mountDom, mountReact } from './vitest-browser.adapter.js';
+import type { ariaTree, componentVerbs, mountDom, mountReact } from './vitest-browser-dom.js';
 
 type Adapter = {
     readonly ariaTree: typeof ariaTree;
@@ -11,7 +11,7 @@ type Adapter = {
 };
 
 async function adapter(): Promise<Adapter> {
-    return await import('./vitest-browser.adapter.js');
+    return await import('./vitest-browser-dom.js');
 }
 
 export const vitestBrowserPage: PagePort = {

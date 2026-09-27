@@ -11,8 +11,6 @@ import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
-/** The playwright adapter's translation table, descriptor for descriptor; here the test is in the page, so candidates are read from live elements. */
-
 /** By accessible name, not the wrapping label's text, which carries every option of a select. The label locator stays for controls ARIA gives no role (date, colour). */
 const FIELD_ROLES = [
     'checkbox',
