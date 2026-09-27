@@ -20,9 +20,14 @@ export function refusal(
     if (typeof rowOrLesson !== 'string') {
         return lessonBlock(rowOrLesson);
     }
+    if (teaching === undefined) {
+        throw new TypeError(
+            `refusal('${rowOrLesson}') was handed no found and no fix for its case`,
+        );
+    }
     return lessonBlock({
-        fix: teaching?.fix ?? '',
-        found: teaching?.found ?? '',
+        fix: teaching.fix,
+        found: teaching.found,
         read: `${CATALOGUE_CHAPTER}#${rowOrLesson}`,
         why: REFUSAL_WHY[rowOrLesson],
     });

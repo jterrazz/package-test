@@ -44,4 +44,16 @@ describe('index.refusal', () => {
             ].join('\n'),
         );
     });
+
+    test('refusal — a refusal of a row handed no case — throws rather than print an empty found and fix', () => {
+        // Given - an untyped caller naming a row and nothing else
+        const row = ['disk-named-by-relative-path-at-runtime'];
+
+        // Then - refused, naming the row it was handed
+        expect(() => {
+            Reflect.apply(refusal, undefined, row);
+        }).toThrow(
+            "refusal('disk-named-by-relative-path-at-runtime') was handed no found and no fix for its case",
+        );
+    });
 });
