@@ -1,5 +1,0 @@
-description: stays silent without a root override
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

@@ -9,13 +9,12 @@ import type { LintRule } from '../../engine/project/rule.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
-export function e2eOptions(configPath: string): Map<string, unknown[]> {
-    const config: unknown = JSON.parse(readFileSync(configPath, 'utf8'));
-    const rules =
-        typeof config === 'object' && config !== null && 'rules' in config ? config.rules : {};
-    const settings = typeof rules === 'object' && rules !== null ? Object.entries(rules) : [];
+export function optionsOf(rules: Readonly<Record<string, unknown>>): Map<string, unknown[]> {
     return new Map(
-        settings.map(([id, setting]) => [id, Array.isArray(setting) ? setting.slice(1) : []]),
+        Object.entries(rules).map(([id, setting]) => [
+            id,
+            Array.isArray(setting) ? setting.slice(1) : [],
+        ]),
     );
 }
 

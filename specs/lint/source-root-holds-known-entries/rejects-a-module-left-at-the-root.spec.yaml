@@ -1,8 +1,0 @@
-description: a module and a folder left at the source root are each refused at the entry
-fixture: ./_fixtures/stray/
-runs:
-    - command: toolchain self
-      exit: 1
-      stdout: |
-          src/model/:1:1  names(source-root-holds-known-entries)
-          src/settings.ts:1:1  names(source-root-holds-known-entries)

@@ -1,5 +1,0 @@
-description: stays silent for a transform covering real applicative noise
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

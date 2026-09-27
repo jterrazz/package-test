@@ -1,7 +1,0 @@
-description: a member config drawing a browser with a simulated DOM is refused
-fixture: ../../_shared/_fixtures/member-workspace/
-runs:
-    - command: checker --member packages/simulated-dom .
-      exit: 1
-      stderr: |
-          packages/simulated-dom/vitest.config.ts:5:1  jterrazz-check(no-simulated-dom-in-config)

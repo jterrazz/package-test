@@ -1,5 +1,0 @@
-description: accepts a When between Given and Then, and a test without one
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

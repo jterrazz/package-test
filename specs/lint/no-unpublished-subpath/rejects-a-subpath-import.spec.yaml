@@ -1,7 +1,0 @@
-description: rejects an @jterrazz/test subpath import
-fixture: ./_fixtures/violation/
-runs:
-    - command: toolchain
-      exit: 1
-      stdout: |
-          specs/app/widget/widget.test.ts:3:24  architecture(no-unpublished-subpath)

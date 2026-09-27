@@ -1,5 +1,0 @@
-description: a typed helper the test calls builds the test's own expectation
-fixture: ./_fixtures/built/
-runs:
-    - command: .
-      exit: 0

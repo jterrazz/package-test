@@ -337,9 +337,6 @@
         "max-lines": {
             "count": 1
         },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        },
         "unicorn/no-array-sort": {
             "count": 2
         }
@@ -537,11 +534,6 @@
     },
     "specs/component/intercept/token-feed.tsx": {
         "no-await-in-loop": {
-            "count": 1
-        }
-    },
-    "specs/lint/checker/ratchet.test.ts": {
-        "jterrazz/no-expect-in-a-loop": {
             "count": 1
         }
     },
@@ -822,16 +814,6 @@
             "count": 1
         }
     },
-    "src/kernel/files/fixture.capability.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "src/kernel/files/fs-fixtures.adapter.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
     "src/facets/cli/process/exec.adapter.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
@@ -984,6 +966,16 @@
     "src/kernel/database-option.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 2
+        }
+    },
+    "src/kernel/files/fixture.capability.test.ts": {
+        "typescript/no-unsafe-type-assertion": {
+            "count": 1
+        }
+    },
+    "src/kernel/files/fs-fixtures.adapter.test.ts": {
+        "jterrazz/given-in-the-test": {
+            "count": 1
         }
     },
     "src/kernel/files/spec-path.test.ts": {

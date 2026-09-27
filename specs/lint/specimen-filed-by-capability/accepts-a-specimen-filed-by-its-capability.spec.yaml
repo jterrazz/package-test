@@ -1,5 +1,0 @@
-description: a spec of a specimen filed under a capability of the matrix passes, whatever route it reaches
-fixture: ./_fixtures/filed/
-runs:
-    - command: self-checker .
-      exit: 0

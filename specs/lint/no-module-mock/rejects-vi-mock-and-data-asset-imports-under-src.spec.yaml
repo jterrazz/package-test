@@ -1,9 +1,0 @@
-description: rejects vi.mock and data-asset imports under src/
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          src/util.test.ts:3:21  jterrazz(no-module-mock)
-          src/util.test.ts:5:1  jterrazz(no-module-mock)
-          src/util.test.ts:8:1  jterrazz(no-existence-only-assertion)

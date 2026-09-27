@@ -1,7 +1,0 @@
-description: a path a `_shared/_setup/` module names is read, and refused when it names nothing
-fixture: ./_fixtures/shared-setup/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/_shared/_setup/rows.ts:5:29  jterrazz-check(named-path-exists)

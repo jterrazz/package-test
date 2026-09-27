@@ -7,7 +7,7 @@ import { resolve } from 'node:path';
 
 export type MetaTest = { file: string; holds: string[]; tests: number };
 
-/** `specs/lint/meta/` runs the real binary, so it sits with the end-to-end suite. */
+/** `specs/lint/meta/` runs the real linters, so it sits with the lint facet's specs. */
 export const META_TESTS_LAYER_ROOTS = ['lint/self/catalogue', 'lint/self/corpus'];
 
 const ROOTS = [...META_TESTS_LAYER_ROOTS, 'specs/lint/meta'];
@@ -15,7 +15,7 @@ const ROOTS = [...META_TESTS_LAYER_ROOTS, 'specs/lint/meta'];
 function testFilesIn(root: string, relative: string): string[] {
     try {
         return readdirSync(resolve(root, relative), { withFileTypes: true })
-            .filter((entry) => entry.isFile() && entry.name.endsWith('.test.ts'))
+            .filter((entry) => entry.isFile() && /\.(?:test|spec)\.ts$/u.test(entry.name))
             .map((entry) => `${relative}/${entry.name}`)
             .toSorted();
     } catch {

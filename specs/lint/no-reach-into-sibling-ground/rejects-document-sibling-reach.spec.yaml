@@ -1,7 +1,0 @@
-description: a document whose fixture key reaches a sibling leaf's ground is refused on that key
-fixture: ./_fixtures/document-reach/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/widget/case.spec.yaml:2:1  jterrazz-check(no-reach-into-sibling-ground)

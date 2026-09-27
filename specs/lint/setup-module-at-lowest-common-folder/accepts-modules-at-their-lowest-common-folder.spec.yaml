@@ -1,5 +1,0 @@
-description: modules at their readers' lowest folder pass, and one no module imports is left to knip
-fixture: ./_fixtures/lowest/
-runs:
-    - command: checker .
-      exit: 0

@@ -1,5 +1,0 @@
-description: accepts a specification file calling afterAll(cleanup)
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

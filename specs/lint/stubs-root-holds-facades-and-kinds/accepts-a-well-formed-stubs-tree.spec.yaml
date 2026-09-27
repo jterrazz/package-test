@@ -1,5 +1,0 @@
-description: accepts a well-formed stubs/ tree
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

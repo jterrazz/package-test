@@ -1,7 +1,0 @@
-description: rejects a raw process.env assignment in a test
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          scenario.test.ts:8:5  jterrazz(no-raw-env-write)

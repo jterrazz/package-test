@@ -1,5 +1,0 @@
-description: a file-level expectation two tests read is shared, and stays
-fixture: ./_fixtures/two-readers/
-runs:
-    - command: .
-      exit: 0

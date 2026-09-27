@@ -1,5 +1,0 @@
-description: accepts a kebab-case job name
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

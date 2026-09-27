@@ -1,7 +1,0 @@
-description: a key no document reads is refused on its line
-fixture: ./_fixtures/unknown-key/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/widget/case.spec.yaml:5:1  jterrazz-check(document-follows-its-grammar)

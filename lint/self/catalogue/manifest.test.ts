@@ -19,11 +19,11 @@ import {
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
 import { testPreset } from '../../consumer/rulebook/preset.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
-import plugin, { recommendedRules } from '../../index.js';
+import plugin from '../../index.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 import { chapterAt } from '../index.js';
-import selfPlugin, { selfPluginRules } from '../rules/plugin.js';
+import selfPlugin from '../rules/plugin.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { SELF_FAMILIES } from './families.js';
 import {
@@ -97,7 +97,6 @@ function metaProofs(): Set<string> {
         read('lint/self/catalogue/manifest.test.ts'),
         read('lint/self/corpus/architecture.test.ts'),
         read('lint/self/corpus/audience.test.ts'),
-        read('lint/self/corpus/document-report.test.ts'),
         read('lint/self/corpus/env-allowlist.test.ts'),
         read('lint/self/corpus/messages.test.ts'),
         read('lint/self/corpus/matrix.test.ts'),
@@ -145,13 +144,7 @@ function checkerRowsOf(audience: string): string[] {
 }
 
 /** Files probing the CLI boundary, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
-const CLI_CONTRACT_SPECS = new Set([
-    'cli',
-    'document-format',
-    'kitchen-sink',
-    'member-pass',
-    'ratchet',
-]);
+const CLI_CONTRACT_SPECS = new Set(['kitchen-sink']);
 
 /** Whole words only: `qui` is inside "required", `est` inside "test". */
 function carries(text: string, token: string): boolean {
@@ -176,7 +169,7 @@ const citingFiles = (): string[] => {
 };
 
 const DEAD_ID_INPUT =
-    'specs/lint/checker/_fixtures/lint-violations/checker-suppression-names-a-pass/';
+    'specs/lint/checker-suppression-names-a-pass/_fixtures/checker-suppression-names-a-pass/';
 
 /** Comments cite too. */
 const citingSources = (): string[] => {
@@ -229,30 +222,25 @@ const idsCitedIn = (line: string): string[] =>
         ),
     );
 
-const rulesOf = (path: string): string[] => {
-    const parsed: unknown = JSON.parse(read(path));
-    const rules =
-        typeof parsed === 'object' && parsed !== null && 'rules' in parsed ? parsed.rules : {};
-    return typeof rules === 'object' && rules !== null ? Object.keys(rules) : [];
-};
-
-// Documents in `specs/lint/<id>/`, or a `specs/lint/<group>/<id>.test.ts` over a pool fixture pair.
+// A rule's specs in `specs/lint/<id>/`, on the lint facet; `meta/` holds the specs named for the meta row they prove.
 const entries = readdirSync(resolve(ROOT, 'specs/lint'), { recursive: true }).map((entry) =>
     String(entry).replaceAll('\\', '/'),
 );
 
-const withDocuments = new Set(
+const specsOf = (id: string): string[] =>
+    entries.filter(
+        (entry) => entry.startsWith(`${id}/`) && /^[^/]+\/[^/]+\.spec\.ts$/u.test(entry),
+    );
+
+const withSpecs = new Set(
     entries
-        .filter((entry) => /^[a-z0-9-]+\/[^/]+\.spec\.yaml$/u.test(entry))
+        .filter((entry) => /^[a-z0-9-]+\/[^/]+\.spec\.ts$/u.test(entry))
         .map((entry) => entry.slice(0, entry.indexOf('/'))),
 );
 
 const e2eSpecIds = new Set([
-    ...withDocuments,
-    ...entries
-        // A spec's own ground is named for what it is, not for a rule.
-        .filter((entry) => entry.endsWith('.test.ts') && !entry.includes('_fixtures/'))
-        .map((entry) => entry.slice(entry.lastIndexOf('/') + 1, -'.test.ts'.length)),
+    ...[...withSpecs].filter((id) => id !== 'meta'),
+    ...specsOf('meta').map((entry) => entry.slice('meta/'.length, -'.spec.ts'.length)),
 ]);
 
 /** Meta-test `links-resolve` — every relative link and heading anchor of the corpus resolves, generated pages included. */
@@ -577,7 +565,7 @@ describe('manifest', () => {
             Object.entries(plugin.rules).map(([id, rule]) => [id, rule.meta?.docs?.reach]),
         );
         const named = [
-            ...read('specs/lint/meta/every-reach-proven.test.ts')
+            ...read('specs/lint/meta/every-reach-proven.spec.ts')
                 .replaceAll(/\.not\.toContain\(\s*'[^']*',?\s*\)/gu, '')
                 .matchAll(/'(?<id>[a-z][a-z0-9-]+)'/gu),
         ]
@@ -591,8 +579,8 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — the channels answer for themselves (meta-test) — `every-constructor-has-specs` — every constructor has a specs tree in this package', () => {
-        // Given - the six constructors, and the trees this package specifies itself on
-        const constructors = ['api', 'cli', 'integration', 'job', 'mobile', 'website'];
+        // Given - the seven constructors, and the trees this package specifies itself on
+        const constructors = ['api', 'cli', 'integration', 'job', 'lint', 'mobile', 'website'];
         const trees = new Set(readdirSync(resolve(ROOT, 'specs')));
 
         // Then - each has one, mobile included: its specs run against the Appium protocol double (docs/03)
@@ -600,7 +588,7 @@ describe('manifest', () => {
             expect(trees.has(facet), `${facet} has no specs tree`).toBe(true);
         }
 
-        // Then - the seventh subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
+        // Then - the eighth subject is held too: `component` is a chain rather than a constructor, so its tree is the fixture app its colocated `.test.tsx` files sit in
         expect(trees.has('component'), 'component has no fixture app tree').toBe(true);
         expect(
             readdirSync(resolve(ROOT, 'specs/component'), { recursive: true }).some((entry) =>
@@ -667,11 +655,11 @@ describe('manifest', () => {
         expect(families.filter((title) => title.includes('names no family'))).toStrictEqual([]);
     });
 
-    test('conventions catalogue — E2E inventory (meta-test) — every plugin rule is specified by documents over trees of its own', () => {
+    test('conventions catalogue — E2E inventory (meta-test) — every plugin rule is specified on the lint facet over trees of its own', () => {
         // Given - each shipped rule
         for (const id of pluginRules) {
-            // Then - its documents in specs/lint/<id>/, and the trees they lint beside them
-            expect(withDocuments.has(id), `${id} has no documents in specs/lint/${id}/`).toBe(true);
+            // Then - its specs in specs/lint/<id>/, and the trees they lint beside them
+            expect(withSpecs.has(id), `${id} has no spec in specs/lint/${id}/`).toBe(true);
             expect(
                 existsSync(resolve(ROOT, 'specs/lint', id, '_fixtures')),
                 `${id} has no _fixtures/`,
@@ -679,31 +667,25 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — E2E inventory (meta-test) — every plugin rule has a document proving the line and column it fires on', () => {
-        // Given - each shipped rule, and the report lines its documents golden
+    test('conventions catalogue — E2E inventory (meta-test) — every plugin rule has a spec proving the line and column it fires on', () => {
+        // Given - each shipped rule, and the reports its specs golden
         for (const id of pluginRules) {
             const position = new RegExp(
                 String.raw`^\s+\S+:\d+:\d+  ${namespaceOf(id)}\(${id}\)$`,
                 'mu',
             );
-            const proven = readdirSync(resolve(ROOT, 'specs/lint', id))
-                .filter((entry) => entry.endsWith('.spec.yaml'))
-                .some((entry) => position.test(read(`specs/lint/${id}/${entry}`)));
+            const proven = specsOf(id).some((entry) => position.test(read(`specs/lint/${entry}`)));
 
             // Then - one golden at least says WHERE the rule fired, not only that it did
-            expect(proven, `${id} has no document whose golden names file:line:column`).toBe(true);
+            expect(proven, `${id} has no spec whose report names file:line:column`).toBe(true);
         }
     });
 
     test('conventions catalogue — E2E inventory (meta-test) — every checker pass has a specs/lint E2E spec that runs the built checker', () => {
         // Given - each pass dist/checker.js runs, tree and member alike, and each `dist/self.js check` runs
         for (const id of [...CHECKER_PASS_IDS, ...SELF_PASSES]) {
-            // Then - its documents in specs/lint/<id>/, or its own test under specs/lint/checker/: a pass the registry names and no spec runs is a sentence with nothing behind it
-            expect(
-                withDocuments.has(id) ||
-                    existsSync(resolve(ROOT, 'specs/lint/checker', `${id}.test.ts`)),
-                `${id} has no E2E spec`,
-            ).toBe(true);
+            // Then - its specs in specs/lint/<id>/: a pass the registry names and no spec runs is a sentence with nothing behind it
+            expect(withSpecs.has(id), `${id} has no E2E spec`).toBe(true);
         }
     });
 
@@ -722,27 +704,6 @@ describe('manifest', () => {
                 `${id} maps to no rule, pass, toolchain row, meta row, or CLI-contract spec`,
             ).toBe(true);
         }
-    });
-
-    test('conventions catalogue — E2E inventory (meta-test) — the reach config enables exactly the rules the standard one does', () => {
-        // Given - the two standalone configs the lint E2E specs run with
-
-        // Then - the reach fixture is judged by the SAME catalogue; only `specs-at-declared-depth`'s declared depth differs, which is what the fixture is there to state
-        expect(
-            rulesOf('specs/_shared/_fixtures/lint-cli/oxlint.reach.json').toSorted(),
-        ).toStrictEqual(rulesOf('specs/_shared/_fixtures/lint-cli/oxlint.e2e.json').toSorted());
-    });
-
-    test('conventions catalogue — E2E inventory (meta-test) — the E2E lint config (oxlint.e2e.json) enables exactly the shipped rule set', () => {
-        // Given - the standalone oxlint config the checker E2E specs lint their violation fixtures with
-        const config = JSON.parse(read('specs/_shared/_fixtures/lint-cli/oxlint.e2e.json')) as {
-            rules: Record<string, unknown>;
-        };
-
-        // Then - its rule keys match recommendedRules and the self rules exactly: no rule runs without an E2E lint pass, and no stale rule lingers in the fixture config
-        expect(Object.keys(config.rules).toSorted()).toStrictEqual(
-            Object.keys({ ...recommendedRules, ...selfPluginRules }).toSorted(),
-        );
     });
 
     test('conventions catalogue — E2E inventory (meta-test) — the docs/15 token table matches TOKEN_KINDS exactly', () => {

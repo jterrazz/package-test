@@ -1,0 +1,16 @@
+import { describe, expect, test } from 'vitest';
+
+import { api } from '../../api.specification.js';
+
+const ORDER = { item: 'book' };
+
+describe('orders', () => {
+
+    test('creates an order', async () => {
+        // Given - an empty table
+        const result = await api.post('/orders', ORDER);
+
+        // Then - the whole response
+        expect(result.response).toMatch(`HTTP/1.1 201 Created`);
+    });
+});

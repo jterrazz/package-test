@@ -1,9 +1,0 @@
-description: --fix lists a collection jterrazz.config.ts declares, where no plural names it
-fixture: ./_fixtures/declared-collection/
-runs:
-    - command: checker . --fix
-      exit: 0
-      files:
-          specs/api/data/get/listing.spec.ts: absent
-          specs/api/data/list/listing.spec.ts:
-              contains: import { api } from '../../api.specification.js';

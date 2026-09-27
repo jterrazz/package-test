@@ -109,7 +109,7 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a golden of its `specs/lint/<rule>/` folder or its `specs/lint/checker/<rule>.test.ts` naming the rule at a `line:col`, or a RuleTester case of its unit test stating the `line`. A row with none cannot enter the catalogue.',
+            'Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a report golden of its `specs/lint/<rule>/` folder naming the rule at a `line:col`, or a `ruleTester()` case of its unit test, which states the `line` and `column` of every error. A row with none cannot enter the catalogue.',
         facet: 'model',
         family: 'catalogue',
         fix: 'Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.',
@@ -181,19 +181,6 @@ export const META_ROWS: Row[] = [
         name: 'server-binds-port-zero',
         rationale:
             'A port picked, released, then bound is a window another server of the same run can take: `make check` failed twice on a spec reaching a stranger on the port it was handed, and passed on the rerun.',
-        reach: 'all',
-    },
-    {
-        audience: 'self',
-        channel: 'meta',
-        sentence:
-            'A lint-rule document — under `specs/lint/`, less the fixtures another document feeds a violation through — that asserts a failing `exit:` also goldens `stdout:` or `stderr:`: the report that says WHICH rule fired, not only that one did.',
-        facet: 'model',
-        family: 'expectations',
-        fix: 'Golden the run’s report beside its `exit:`.',
-        name: 'lint-document-goldens-the-report',
-        rationale:
-            'An exit code alone proves a rule ended the run, never which one: a document pinned to it keeps passing once the wrong rule starts firing for the wrong reason.',
         reach: 'all',
     },
     {

@@ -1,5 +1,0 @@
-description: accepts a Given that pins every instant
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

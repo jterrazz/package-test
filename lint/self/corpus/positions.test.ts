@@ -31,18 +31,18 @@ describe('unpositionedRules', () => {
         expect(unpositionedRules(ROOT, allRows)).toStrictEqual([]);
     });
 
-    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — a golden naming the rule at a position, or a RuleTester case stating a line, proves it; a bare exit code, a line left unstated or no spec does not, and another channel is not asked', () => {
+    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — a report golden naming the rule at a position, or a RuleTester case stating a line, proves it; a report never goldened, a line left unstated or no spec does not, and another channel is not asked', () => {
         // Given - one row per form a proof takes, one per form that is no proof, and a runtime row
         const root = mkdtempSync(join(tmpdir(), 'positions-'));
         mkdirSync(join(root, 'specs/lint/golden-at-a-position'), { recursive: true });
         writeFileSync(
-            join(root, 'specs/lint/golden-at-a-position/rejects.spec.yaml'),
-            'stdout: |\n    scenario.test.ts:9:5  jterrazz(golden-at-a-position)\n',
+            join(root, 'specs/lint/golden-at-a-position/golden-at-a-position.spec.ts'),
+            'expect(result.report).toMatch(`\n    scenario.test.ts:9:5  jterrazz(golden-at-a-position)\n`);',
         );
-        mkdirSync(join(root, 'specs/lint/checker'), { recursive: true });
+        mkdirSync(join(root, 'specs/lint/pass-at-a-position'), { recursive: true });
         writeFileSync(
-            join(root, 'specs/lint/checker/pass-at-a-position.test.ts'),
-            'specs/a.spec.yaml:1:1: error jterrazz-check(pass-at-a-position): found: …',
+            join(root, 'specs/lint/pass-at-a-position/pass-at-a-position.spec.ts'),
+            'expect(result.report).toMatch(`\n    specs/a.spec.yaml:1:1  jterrazz-check(pass-at-a-position)\n`);',
         );
         mkdirSync(join(root, 'lint/consumer/rules/expectations'), { recursive: true });
         writeFileSync(
@@ -55,8 +55,8 @@ describe('unpositionedRules', () => {
         );
         mkdirSync(join(root, 'specs/lint/exit-code-only'), { recursive: true });
         writeFileSync(
-            join(root, 'specs/lint/exit-code-only/rejects.spec.yaml'),
-            'runs:\n    - command: .\n      exit: 1\n',
+            join(root, 'specs/lint/exit-code-only/exit-code-only.spec.ts'),
+            "expect(result.report).not.toMatch('');",
         );
         const rows = [
             row('golden-at-a-position', 'statique'),

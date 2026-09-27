@@ -1,5 +1,0 @@
-description: a spec named for the question it asks passes
-fixture: ./_fixtures/named/
-runs:
-    - command: .
-      exit: 0

@@ -1,7 +1,0 @@
-description: a pool fixture only one spec directory reaches for is refused
-fixture: ./_fixtures/lonely/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/_shared/_fixtures/lonely-stub:1:1  jterrazz-check(ground-shared-or-inline)

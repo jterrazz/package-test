@@ -1,7 +1,0 @@
-description: a spec named for what fit nowhere else is refused at its first line
-fixture: ./_fixtures/generic/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/misc.spec.ts:1:1  jterrazz(spec-named-for-its-aspect)

@@ -1,5 +1,0 @@
-description: two leaves each reading their own ground pass
-fixture: ./_fixtures/own-ground/
-runs:
-    - command: checker .
-      exit: 0

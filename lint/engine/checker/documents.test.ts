@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { fixSpecDocument } from './documents.js';
 
-/** The passes themselves are proven end to end in `specs/lint/checker/`, against the real binary. */
+/** The passes themselves are proven end to end in `specs/lint/<pass>/`, against the real binary. */
 
 describe('documents', () => {
     test('documents — fixSpecDocument — key order and block scalars — moves the keys back into the canonical order, each with its comment', () => {

@@ -1,5 +1,0 @@
-description: a module test's golden and resolved paths pass; a lone bare piece, a string, a command go unread
-fixture: ./_fixtures/module-present/
-runs:
-    - command: checker --member .
-      exit: 0

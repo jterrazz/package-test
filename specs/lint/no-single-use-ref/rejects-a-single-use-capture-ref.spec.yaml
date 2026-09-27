@@ -1,7 +1,0 @@
-description: rejects a single-use capture ref
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/app/widget/widget.test.ts:11:40  jterrazz(no-single-use-ref)

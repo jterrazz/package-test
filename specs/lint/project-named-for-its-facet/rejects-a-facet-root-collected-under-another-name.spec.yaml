@@ -1,8 +1,0 @@
-description: rejects a facet root collected under another name
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          vitest.config.ts:5:32  jterrazz(include-points-at-a-folder)
-          vitest.config.ts:5:59  jterrazz(project-named-for-its-facet)

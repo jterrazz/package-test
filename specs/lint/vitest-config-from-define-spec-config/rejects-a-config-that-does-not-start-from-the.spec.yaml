@@ -1,8 +1,0 @@
-description: rejects a config that does not start from the preset
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          vitest.config.ts:3:1  jterrazz(vitest-config-from-define-spec-config)
-          vitest.config.ts:5:19  jterrazz(include-points-at-a-folder)

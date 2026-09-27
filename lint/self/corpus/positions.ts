@@ -24,10 +24,9 @@ function reportedAt(name: string): RegExp {
 }
 
 function goldens(root: string, name: string): string[] {
-    return [
-        ...filesUnder(join(root, 'specs/lint', name)),
-        join(root, 'specs/lint/checker', `${name}.test.ts`),
-    ].filter((path) => existsSync(path) && !path.includes('/_fixtures/'));
+    return filesUnder(join(root, 'specs/lint', name)).filter(
+        (path) => !path.includes('/_fixtures/'),
+    );
 }
 
 function ruleTests(root: string, name: string): string[] {

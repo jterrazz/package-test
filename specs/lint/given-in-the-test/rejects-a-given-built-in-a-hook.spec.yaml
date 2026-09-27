@@ -1,7 +1,0 @@
-description: rejects a Given built in a hook
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          scenario.test.ts:7:1  jterrazz(given-in-the-test)

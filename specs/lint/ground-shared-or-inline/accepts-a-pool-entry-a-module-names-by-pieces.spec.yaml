@@ -1,5 +1,0 @@
-description: a pool fixture one leaf reads and a module test names piece by piece is shared, and passes
-fixture: ./_fixtures/module-read-pieces/
-runs:
-    - command: checker .
-      exit: 0

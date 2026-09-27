@@ -1,5 +1,0 @@
-description: a pool fixture two leaves share passes
-fixture: ./_fixtures/shared/
-runs:
-    - command: checker .
-      exit: 0

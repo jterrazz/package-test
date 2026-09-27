@@ -21,14 +21,39 @@ export function chapterOf(name: string): Chapter {
 
 const CHECKER_LINE = /^\S+:\d+:\d+: error jterrazz-check\([\w-]+\): (?<message>.*)$/u;
 
+const REPORT_HEAD = /^\s*\S+:\d+:\d+ {2}jterrazz-check\([\w-]+\)$/u;
+
+const REPORT_PART = /^\s+(?:found|why|fix|read): /u;
+
+/** A lint facet's report states a finding on its head line, then its lesson a part per line: the parts are read back into one message. */
+function reportMessages(lines: readonly string[]): string[] {
+    const messages: string[] = [];
+    for (const [index, line] of lines.entries()) {
+        if (!REPORT_HEAD.test(line)) {
+            continue;
+        }
+        const parts: string[] = [];
+        for (const next of lines.slice(index + 1)) {
+            if (!REPORT_PART.test(next)) {
+                break;
+            }
+            parts.push(next.trim());
+        }
+        messages.push(parts.join(' · '));
+    }
+    return messages;
+}
+
 export function goldenCheckerLines(dir: string): string[] {
     const lines: string[] = [];
     for (const entry of readdirSync(dir, { recursive: true })) {
         const path = String(entry);
-        if (path.includes('_fixtures') || !/\.(?:test\.ts|txt)$/u.test(path)) {
+        if (path.includes('_fixtures') || !/\.(?:spec\.ts|txt)$/u.test(path)) {
             continue;
         }
-        for (const line of readFileSync(resolve(dir, path), 'utf8').split('\n')) {
+        const text = readFileSync(resolve(dir, path), 'utf8').split('\n');
+        lines.push(...reportMessages(text));
+        for (const line of text) {
             const message = CHECKER_LINE.exec(line.trim())?.groups?.message;
             if (message !== undefined) {
                 lines.push(message);

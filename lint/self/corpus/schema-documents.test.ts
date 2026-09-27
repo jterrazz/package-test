@@ -113,7 +113,7 @@ describe('schema-documents', () => {
         );
 
         // Then - none carries a schema error: an editor never flags what the runner runs
-        expect(read.length).toBeGreaterThan(150);
+        expect(read.length).toBeGreaterThan(30);
         expect(read.filter(({ schema }) => schema.length > 0)).toStrictEqual([]);
     });
 

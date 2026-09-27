@@ -2,12 +2,13 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import plugin from '../../consumer/rules/plugin.js';
-import selfPlugin from '../rules/plugin.js';
-import { corpusOf, e2eOptions, ROOT, ruleSources, session, unresetState } from './rule-state.js';
+import { recommendedRules } from '../../index.js';
+import selfPlugin, { selfPluginRules } from '../rules/plugin.js';
+import { corpusOf, optionsOf, ROOT, ruleSources, session, unresetState } from './rule-state.js';
 
 const LINT_SPECS = join(ROOT, 'specs/lint');
 
-const OPTIONS = e2eOptions(join(ROOT, 'specs/_shared/_fixtures/lint-cli/oxlint.e2e.json'));
+const OPTIONS = optionsOf({ ...recommendedRules, ...selfPluginRules });
 
 describe('rule-state', () => {
     test('a rule built once judges each file as if it were the only one — what a rule keeps for one file is reset when the next one opens', () => {

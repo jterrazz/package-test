@@ -1,5 +1,0 @@
-description: tests at facet/domain depth and a ground module beside its test pass
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

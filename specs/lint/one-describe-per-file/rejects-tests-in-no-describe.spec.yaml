@@ -1,7 +1,0 @@
-description: a spec whose tests stand in no describe is refused at its first test
-fixture: ./_fixtures/no-describe/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:5:1  jterrazz(one-describe-per-file)

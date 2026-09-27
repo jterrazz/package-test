@@ -1,8 +1,0 @@
-description: a unit and its test at the component tree's root, outside every capability, are refused
-fixture: ./_fixtures/unfiled-component/
-runs:
-    - command: self-checker .
-      exit: 1
-      stderr: |
-          specs/component/order-card.test.tsx:1:1  jterrazz-check(specimen-filed-by-capability)
-          specs/component/order-card.tsx:2:1  jterrazz-check(specimen-filed-by-capability)

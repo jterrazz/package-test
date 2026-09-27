@@ -1,7 +1,0 @@
-description: a golden of blank lines alone is refused where its one test reads it, like any other single-use file
-fixture: ./_fixtures/blank-golden/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/widget/widget.test.ts:6:36  jterrazz-check(ground-shared-or-inline)

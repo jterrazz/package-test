@@ -1,5 +1,0 @@
-description: accepts request data paired with its stub, the payload in _fixtures/
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

@@ -1,11 +1,16 @@
-import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
 
+import { recommendedRules } from '../../dist/oxlint.js';
+import { selfPluginRules } from '../../dist/self-oxlint.js';
 import { specification } from '../../src/index.js';
 
-/** Registers `dist/oxlint.js` as a JS plugin of the real oxlint: `npm run build` first. */
-const LINT_BIN = resolve(import.meta.dirname, '../_shared/_fixtures/lint-cli/lint.sh');
-
-export const { cleanup, cli } = await specification.cli(LINT_BIN);
+/** The two plugins as they ship, every rule on: `npm run build` first. */
+export const { cleanup, lint } = await specification.lint({
+    config: {
+        categories: { correctness: 'off' },
+        rules: { ...recommendedRules, ...selfPluginRules },
+    },
+    plugins: ['../../dist/oxlint.js', '../../dist/self-oxlint.js'],
+});
 
 afterAll(cleanup);

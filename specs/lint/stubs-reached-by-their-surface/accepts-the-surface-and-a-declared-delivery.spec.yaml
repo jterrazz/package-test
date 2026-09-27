@@ -1,5 +1,0 @@
-description: a facet importing a kind and the delivery it wires, and an entry its channel pick, passes
-fixture: ./_fixtures/surfaced/
-runs:
-    - command: self-checker .
-      exit: 0

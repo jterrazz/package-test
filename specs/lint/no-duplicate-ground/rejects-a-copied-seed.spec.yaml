@@ -1,8 +1,0 @@
-description: a seed two leaves hold byte for byte is refused on each copy
-fixture: ./_fixtures/copied/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/api/orders/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)
-          specs/api/users/_seeds/two-users.sql:1:1  jterrazz-check(no-duplicate-ground)

@@ -1,5 +1,0 @@
-description: accepts the single public entry point and every published subpath
-fixture: ./_fixtures/compliant/
-runs:
-    - command: toolchain
-      exit: 0

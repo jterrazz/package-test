@@ -1,7 +1,0 @@
-description: a clock every chain of a file pins alike is refused at the first chain
-fixture: ./_fixtures/repeated/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:8:30  jterrazz(no-repeated-chain-setting)

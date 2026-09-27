@@ -1,5 +1,0 @@
-description: a precise assertion beside the whole comparison passes
-fixture: ./_fixtures/whole-and-probe/
-runs:
-    - command: .
-      exit: 0

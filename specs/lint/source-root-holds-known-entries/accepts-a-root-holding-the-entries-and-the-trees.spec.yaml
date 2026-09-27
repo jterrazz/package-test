@@ -1,5 +1,0 @@
-description: the source root holding the entry and a tree passes
-fixture: ./_fixtures/rooted/
-runs:
-    - command: toolchain self
-      exit: 0

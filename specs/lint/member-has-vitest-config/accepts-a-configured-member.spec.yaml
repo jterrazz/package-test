@@ -1,7 +1,0 @@
-description: a member whose tests run on a config of its own passes, and so does a root delegating its tests
-fixture: ../../_shared/_fixtures/member-workspace/
-runs:
-    - command: checker --member packages/clean .
-      exit: 0
-    - command: checker --member . .
-      exit: 0

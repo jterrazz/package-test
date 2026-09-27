@@ -1,7 +1,0 @@
-description: a pool fixture one facet's runner alone reads is refused where it sits
-fixture: ./_fixtures/runner-read/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/_shared/_fixtures/shop:1:1  jterrazz-check(ground-shared-or-inline)

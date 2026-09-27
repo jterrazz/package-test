@@ -1,7 +1,0 @@
-description: rejects an assertion in a setup module
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/cli/_setup/built.ts:4:5  jterrazz(no-expect-outside-a-test)

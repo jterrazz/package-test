@@ -1,7 +1,0 @@
-description: an expectation imported from another module is refused where the test hands it over
-fixture: ./_fixtures/imported/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:12:41  jterrazz(no-imported-expectation)

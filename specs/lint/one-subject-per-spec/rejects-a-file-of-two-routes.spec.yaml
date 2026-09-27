@@ -1,7 +1,0 @@
-description: a spec whose chains reach two routes is refused at the chain that reaches the second
-fixture: ./_fixtures/two-routes/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/api/orders/orders.spec.ts:19:30  jterrazz-check(one-subject-per-spec)

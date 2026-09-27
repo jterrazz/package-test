@@ -1,8 +1,0 @@
-description: refuses a .spec.ts in a folder outside every specs tree, a sub-extension included
-fixture: ./_fixtures/stray/
-runs:
-    - command: toolchain
-      exit: 1
-      stdout: |
-          src/orders/listing.daily.spec.ts:1:1  names(spec-file-in-a-specs-tree)
-          src/orders/listing.spec.ts:1:1  names(spec-file-in-a-specs-tree)

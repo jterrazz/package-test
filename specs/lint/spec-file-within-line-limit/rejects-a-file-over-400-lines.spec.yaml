@@ -1,7 +1,0 @@
-description: a spec file over 400 lines is refused at its first line
-fixture: ./_fixtures/long/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/events/list/pagination.spec.ts:1:1  jterrazz(spec-file-within-line-limit)

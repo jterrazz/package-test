@@ -1,8 +1,0 @@
-description: refuses a _ name off the closed list, and leaves what a _setup/ holds to the checker
-fixture: ./_fixtures/unlisted/
-runs:
-    - command: toolchain
-      exit: 1
-      stdout: |
-          specs/_drafts/:1:1  names(underscore-name-in-closed-list)
-          specs/cli/orders/_archive/:1:1  names(underscore-name-in-closed-list)

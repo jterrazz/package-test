@@ -1,8 +1,0 @@
-description: rejects request data in a kind folder with no stub beside it
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/app/widget/_setup/stubs/http/articles.request.ts:1:1  jterrazz(stub-data-has-a-builder)
-          specs/app/widget/widget.test.ts:7:1  jterrazz(no-status-only-test)

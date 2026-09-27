@@ -5,10 +5,7 @@ import type { Finding } from '../../engine/checker/finding.js';
 import { checkerLine, runTree } from '../../engine/checker/tree-run.js';
 import { CHECKER } from './checker.js';
 
-const FIXTURES = resolve(
-    import.meta.dirname,
-    '../../../specs/lint/checker/_fixtures/lint-violations',
-);
+const FIXTURES = resolve(import.meta.dirname, '../../../specs/lint/no-unknown-token/_fixtures');
 
 function groundFindings(root: string): Finding[] {
     return runTree(root, CHECKER).filter(({ rule }) => rule === 'no-unknown-token');

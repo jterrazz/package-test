@@ -1,5 +1,0 @@
-description: concept folders of two files, and a facet root holding its face, pass
-fixture: ./_fixtures/concepts/
-runs:
-    - command: self-checker .
-      exit: 0

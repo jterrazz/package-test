@@ -49,8 +49,11 @@ describe('messages', () => {
     });
 
     test('`message-has-four-parts` — every checker finding a spec goldens is a whole lesson', () => {
-        // Given - the full-output goldens of the checker's own specs
-        const lines = goldenCheckerLines(resolve(ROOT, 'specs/lint/checker'));
+        // Given - the reports the lint facet goldens, and the full-output goldens of the checker's own command line
+        const lines = [
+            ...goldenCheckerLines(resolve(ROOT, 'specs/lint')),
+            ...goldenCheckerLines(resolve(ROOT, 'specs/cli')),
+        ];
 
         // Then - each line the checker printed states the four parts
         expect(lines.length).toBeGreaterThan(20);

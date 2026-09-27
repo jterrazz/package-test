@@ -1,5 +1,0 @@
-description: a spec file under the cap passes
-fixture: ./_fixtures/short/
-runs:
-    - command: .
-      exit: 0

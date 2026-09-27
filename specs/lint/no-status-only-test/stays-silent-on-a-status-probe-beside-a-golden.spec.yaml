@@ -1,5 +1,0 @@
-description: stays silent on a status probe beside a golden
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

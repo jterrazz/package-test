@@ -1,5 +1,0 @@
-description: accepts an assertion that says what came back
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

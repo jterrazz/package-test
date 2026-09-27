@@ -46,7 +46,7 @@ describe('index', () => {
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — declares no `categories` — every rule it ships is decided by name', () => {
-        // Given - the fragment, top level and every override entry (the `categories` block in specs/_shared/_fixtures/lint-cli/oxlint.e2e.json is a test harness muting oxlint's own defaults, not a config this package ships)
+        // Given - the fragment, top level and every override entry (the `categories` block of specs/lint/lint.specification.ts is a test harness muting oxlint's own defaults, not a config this package ships)
         const layers: Record<string, unknown>[] = [
             testing as unknown as Record<string, unknown>,
             ...((testing.overrides ?? []) as unknown as Record<string, unknown>[]),

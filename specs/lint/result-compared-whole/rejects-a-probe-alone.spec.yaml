@@ -1,7 +1,0 @@
-description: a test probing its response and never comparing it whole is refused at the read
-fixture: ./_fixtures/probe-alone/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/users/listed.spec.ts:11:12  jterrazz(result-compared-whole)

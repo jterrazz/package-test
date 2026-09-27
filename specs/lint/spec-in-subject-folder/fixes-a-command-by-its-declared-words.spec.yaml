@@ -1,9 +1,0 @@
-description: --fix files a command under every leading word its runner declares
-fixture: ./_fixtures/declared-commands/
-runs:
-    - command: checker . --fix
-      exit: 0
-      files:
-          specs/cli/db/migrating.spec.ts: absent
-          specs/cli/db/migrate/migrating.spec.ts:
-              contains: import { cli } from '../../cli.specification.js';

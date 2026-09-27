@@ -1,5 +1,0 @@
-description: stays silent on the product command wrapper
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

@@ -1,5 +1,0 @@
-description: accepts a pure scenario asserting on the result
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

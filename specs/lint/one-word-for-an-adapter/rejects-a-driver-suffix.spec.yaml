@@ -1,7 +1,0 @@
-description: a module adapting the clock named `*.driver.ts` is refused at its first line
-fixture: ./_fixtures/drivers/
-runs:
-    - command: self-checker .
-      exit: 1
-      stderr: |
-          src/world/clock/clock.driver.ts:1:1  jterrazz-check(one-word-for-an-adapter)

@@ -8,7 +8,7 @@ import {
     defineSpecConfig,
     integration,
     job,
-    literate,
+    lint,
     mobile,
     unit,
     website,
@@ -17,19 +17,9 @@ import {
 const config = defineSpecConfig({
     test: {
         projects: [
-            // `specs/lint/` lints fixture projects through the real oxlint binary, so it runs here, after `npm run build`.
-            {
-                ...unit({
-                    exclude: [],
-                    include: ['src/**/*.test.ts', 'lint/**/*.test.ts', 'specs/lint/**/*.test.ts'],
-                }),
-                plugins: [
-                    literate({
-                        include: ['specs/lint/*/*.spec.yaml'],
-                        specification: './specs/lint/report.specification.ts',
-                    }),
-                ],
-            },
+            unit({ exclude: [], include: ['src/**/*.test.ts', 'lint/**/*.test.ts'] }),
+            // The plugins and the checkers are loaded from the build: it runs after `npm run build`.
+            lint(),
             // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs.
             cli({
                 literate: {

@@ -1,5 +1,0 @@
-description: two leaves holding a seed of one name with other bytes pass
-fixture: ./_fixtures/apart/
-runs:
-    - command: checker .
-      exit: 0

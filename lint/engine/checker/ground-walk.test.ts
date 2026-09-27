@@ -7,7 +7,7 @@ import type { GroundPasses } from './registry.js';
 
 const TREE = resolve(
     import.meta.dirname,
-    '../../../specs/lint/checker/_fixtures/lint-violations/no-unknown-token',
+    '../../../specs/lint/no-unknown-token/_fixtures/no-unknown-token',
 );
 
 function visited(kind: string, rel: string): Finding {

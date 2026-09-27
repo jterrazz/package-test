@@ -1,5 +1,0 @@
-description: two chains pinning two instants state two conditions, not the file's
-fixture: ./_fixtures/apart/
-runs:
-    - command: .
-      exit: 0

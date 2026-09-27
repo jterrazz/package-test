@@ -1,8 +1,0 @@
-description: rejects an expect() inside a visit scenario
-fixture: ./_fixtures/violation/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/website/home/subscribe.test.ts:12:9  jterrazz(no-expect-in-scenario)
-          specs/website/home/subscribe.test.ts:12:9  jterrazz(scenario-ends-settled)

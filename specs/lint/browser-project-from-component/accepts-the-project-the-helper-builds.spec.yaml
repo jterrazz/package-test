@@ -1,5 +1,0 @@
-description: accepts the project the helper builds
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0

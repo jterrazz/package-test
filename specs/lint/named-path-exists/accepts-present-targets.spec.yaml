@@ -1,5 +1,0 @@
-description: every path naming an entry of the kind its wrapper says passes
-fixture: ./_fixtures/present/
-runs:
-    - command: checker .
-      exit: 0

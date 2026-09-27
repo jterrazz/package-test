@@ -1,6 +1,0 @@
-description: accepts an allow-listed module with its reason
-fixture: ./_fixtures/allow-listed/
-env: LINT_CONFIG=oxlint.module-mock-reasoned.json
-runs:
-    - command: .
-      exit: 0

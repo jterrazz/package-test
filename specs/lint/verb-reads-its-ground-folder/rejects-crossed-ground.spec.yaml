@@ -1,8 +1,0 @@
-description: a file handed to a verb that reads another ground folder is refused where it is named
-fixture: ./_fixtures/crossed/
-runs:
-    - command: .
-      exit: 1
-      stdout: |
-          specs/api/orders/orders.spec.ts:7:40  jterrazz(verb-reads-its-ground-folder)
-          specs/api/orders/orders.spec.ts:10:42  jterrazz(verb-reads-its-ground-folder)

@@ -1,5 +1,0 @@
-description: accepts the framework's own chain
-fixture: ./_fixtures/compliant/
-runs:
-    - command: toolchain
-      exit: 0

@@ -1,7 +1,0 @@
-description: a seed of the specs root only one leaf reaches for, from two tests, is refused where it sits
-fixture: ./_fixtures/lonely-seed/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/_shared/_seeds/one-user.sql:1:1  jterrazz-check(ground-shared-or-inline)

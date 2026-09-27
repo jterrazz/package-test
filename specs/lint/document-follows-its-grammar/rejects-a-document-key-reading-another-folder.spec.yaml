@@ -1,7 +1,0 @@
-description: a document key naming a file outside the folder it reads is refused on that key
-fixture: ./_fixtures/crossed-ground/
-runs:
-    - command: checker .
-      exit: 1
-      stderr: |
-          specs/widget/case.spec.yaml:2:1  jterrazz-check(document-follows-its-grammar)

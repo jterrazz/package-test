@@ -1,5 +1,0 @@
-description: accepts an include rooted in a folder that exists
-fixture: ./_fixtures/compliant/
-runs:
-    - command: .
-      exit: 0
