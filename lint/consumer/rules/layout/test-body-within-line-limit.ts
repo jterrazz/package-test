@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -13,7 +13,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -52,42 +51,43 @@ function bodyOf(call: AstNode): AstNode | undefined {
         : undefined;
 }
 
+const row = rowNamed(consumerRows, 'test-body-within-line-limit');
+
 /** Counted as the toolchain's `max-lines-per-function` counts, which cannot reach a test inside `one-describe-per-file`'s one `describe`. */
-export const testBodyWithinLineLimit: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role),
-            CallExpression(node: AstNode) {
-                if (!isTestCallee(child(node, 'callee'))) {
-                    return;
-                }
-                const body = bodyOf(node);
-                if (body === undefined) {
-                    return;
-                }
-                const lines = gestureLines(context.sourceCode.text, body);
-                if (lines > MAX_TEST_LINES) {
-                    context.report({
-                        data: { lines, max: MAX_TEST_LINES },
-                        messageId: 'tooLong',
-                        node: body,
-                    });
-                }
+export const testBodyWithinLineLimit = defineRule(
+    {
+        docs: row,
+        messages: {
+            tooLong: {
+                found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch(<value>)` argument are not counted',
+                fix: 'split it into one test per behaviour, or move a long Given into a function the test calls',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'test-body-within-line-limit'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'test-body-within-line-limit'),
-            {
-                tooLong: {
-                    found: 'a test body of {{lines}} lines of gestures, over {{max}} — the lines of a `toMatch(<value>)` argument are not counted',
-                    fix: 'split it into one test per behaviour, or move a long Given into a function the test calls',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role),
+                CallExpression(node: AstNode) {
+                    if (!isTestCallee(child(node, 'callee'))) {
+                        return;
+                    }
+                    const body = bodyOf(node);
+                    if (body === undefined) {
+                        return;
+                    }
+                    const lines = gestureLines(context.sourceCode.text, body);
+                    if (lines > MAX_TEST_LINES) {
+                        context.report({
+                            data: { lines, max: MAX_TEST_LINES },
+                            messageId: 'tooLong',
+                            node: body,
+                        });
+                    }
+                },
+            };
+        },
+    },
+);

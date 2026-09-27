@@ -1,9 +1,8 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { propertyKeyName, specificationMember } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -15,51 +14,52 @@ function unwrapAwaitedCall(node: AstNode | undefined): AstNode | undefined {
     return current?.type === 'CallExpression' ? current : undefined;
 }
 
+const row = rowNamed(consumerRows, 'no-runner-alias');
+
 /** Renaming at the import site stays legal: the canonical name is enforced where the record is destructured. */
-export const noRunnerAlias: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            VariableDeclarator(node: AstNode) {
-                const call = unwrapAwaitedCall(node.init as AstNode | undefined);
-                if (call === undefined || specificationMember(call) === undefined) {
-                    return;
-                }
-                const id = node.id as AstNode | undefined;
-                if (id?.type !== 'ObjectPattern') {
-                    return;
-                }
-                for (const property of (id.properties as AstNode[] | undefined) ?? []) {
-                    const key = propertyKeyName(property);
-                    if (key === undefined) {
-                        continue;
-                    }
-                    let value = property.value as AstNode | undefined;
-                    if (value?.type === 'AssignmentPattern') {
-                        value = value.left as AstNode | undefined;
-                    }
-                    if (value?.type === 'Identifier' && value.name !== key) {
-                        context.report({
-                            data: { alias: value.name as string, key },
-                            messageId: 'aliased',
-                            node: property,
-                        });
-                    }
-                }
+export const noRunnerAlias = defineRule(
+    {
+        docs: row,
+        messages: {
+            aliased: {
+                found: '`{ {{key}}: {{alias}} }` renames the handle',
+                fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-runner-alias'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-runner-alias'),
-            {
-                aliased: {
-                    found: '`{ {{key}}: {{alias}} }` renames the handle',
-                    fix: 'destructure `{ {{key}} }`, and rename at the import site if a local name must differ',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                VariableDeclarator(node: AstNode) {
+                    const call = unwrapAwaitedCall(node.init as AstNode | undefined);
+                    if (call === undefined || specificationMember(call) === undefined) {
+                        return;
+                    }
+                    const id = node.id as AstNode | undefined;
+                    if (id?.type !== 'ObjectPattern') {
+                        return;
+                    }
+                    for (const property of (id.properties as AstNode[] | undefined) ?? []) {
+                        const key = propertyKeyName(property);
+                        if (key === undefined) {
+                            continue;
+                        }
+                        let value = property.value as AstNode | undefined;
+                        if (value?.type === 'AssignmentPattern') {
+                            value = value.left as AstNode | undefined;
+                        }
+                        if (value?.type === 'Identifier' && value.name !== key) {
+                            context.report({
+                                data: { alias: value.name as string, key },
+                                messageId: 'aliased',
+                                node: property,
+                            });
+                        }
+                    }
+                },
+            };
+        },
+    },
+);

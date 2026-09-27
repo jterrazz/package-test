@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -14,7 +14,6 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -52,61 +51,65 @@ function doubleBindings(root: AstNode): Set<string> {
     return names;
 }
 
+const row = rowNamed(consumerRows, 'no-double-only-assertion');
+
 /** Module tests only: on a component a callback prop is the contract with the parent, and reading it is honest. */
-export const noDoubleOnlyAssertion: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before() {
-                const identity = identityOf(context);
-                return identity.role === 'module' && !identity.inSpecs;
+export const noDoubleOnlyAssertion = defineRule(
+    {
+        docs: row,
+        messages: {
+            doubleOnly: {
+                found: 'every assertion reads a double this test built',
+                fix: 'assert the value the subject returned, or the state it left',
             },
-            Program(program: AstNode) {
-                const doubles = doubleBindings(program);
-                walk(program, (node) => {
-                    if (node.type !== 'CallExpression' || !isTestCallee(child(node, 'callee'))) {
-                        return;
-                    }
-                    const callback = findTestCallback(childList(node, 'arguments'));
-                    if (callback === undefined) {
-                        return;
-                    }
-                    const local = new Set([...doubles, ...doubleBindings(callback)]);
-                    let assertions = 0;
-                    let onDoubles = 0;
-                    walk(callback, (inner) => {
-                        const assertion = assertionOf(inner);
-                        if (assertion === undefined) {
-                            return;
-                        }
-                        assertions += 1;
-                        const root = chainRootName(assertion.subject);
-                        if (
-                            root !== undefined &&
-                            local.has(root) &&
-                            readsTheCallLog(assertion.matcher)
-                        ) {
-                            onDoubles += 1;
-                        }
-                    });
-                    if (assertions >= 1 && assertions === onDoubles) {
-                        context.report({ messageId: 'doubleOnly', node });
-                    }
-                });
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-double-only-assertion'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-double-only-assertion'),
-            {
-                doubleOnly: {
-                    found: 'every assertion reads a double this test built',
-                    fix: 'assert the value the subject returned, or the state it left',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before() {
+                    const identity = identityOf(context);
+                    return identity.role === 'module' && !identity.inSpecs;
+                },
+                Program(program: AstNode) {
+                    const doubles = doubleBindings(program);
+                    walk(program, (node) => {
+                        if (
+                            node.type !== 'CallExpression' ||
+                            !isTestCallee(child(node, 'callee'))
+                        ) {
+                            return;
+                        }
+                        const callback = findTestCallback(childList(node, 'arguments'));
+                        if (callback === undefined) {
+                            return;
+                        }
+                        const local = new Set([...doubles, ...doubleBindings(callback)]);
+                        let assertions = 0;
+                        let onDoubles = 0;
+                        walk(callback, (inner) => {
+                            const assertion = assertionOf(inner);
+                            if (assertion === undefined) {
+                                return;
+                            }
+                            assertions += 1;
+                            const root = chainRootName(assertion.subject);
+                            if (
+                                root !== undefined &&
+                                local.has(root) &&
+                                readsTheCallLog(assertion.matcher)
+                            ) {
+                                onDoubles += 1;
+                            }
+                        });
+                        if (assertions >= 1 && assertions === onDoubles) {
+                            context.report({ messageId: 'doubleOnly', node });
+                        }
+                    });
+                },
+            };
+        },
+    },
+);

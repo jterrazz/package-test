@@ -1,10 +1,9 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { memberPropertyName, stringValue } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { toKebabCase } from '../../../engine/project/record-key.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -16,39 +15,40 @@ function kebabOf(name: string): string {
         .replaceAll(/^-|-$/gu, '');
 }
 
+const row = rowNamed(consumerRows, 'trigger-name-in-kebab-case');
+
 /** Only string literals are checked: a dynamic name is out of static reach. */
-export const triggerNameInKebabCase: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                if (callee === undefined || memberPropertyName(callee) !== 'trigger') {
-                    return;
-                }
-                const [first] = (node.arguments as AstNode[] | undefined) ?? [];
-                const name = stringValue(first);
-                if (first !== undefined && name !== undefined && !KEBAB_CASE.test(name)) {
-                    context.report({
-                        data: { kebab: kebabOf(name), name },
-                        messageId: 'notKebab',
-                        node: first,
-                    });
-                }
+export const triggerNameInKebabCase = defineRule(
+    {
+        docs: row,
+        messages: {
+            notKebab: {
+                found: 'the job name "{{name}}" is not kebab-case',
+                fix: 'rename the job "{{kebab}}", in the app and in its tests alike',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'trigger-name-in-kebab-case'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'trigger-name-in-kebab-case'),
-            {
-                notKebab: {
-                    found: 'the job name "{{name}}" is not kebab-case',
-                    fix: 'rename the job "{{kebab}}", in the app and in its tests alike',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                CallExpression(node: AstNode) {
+                    const callee = node.callee as AstNode | undefined;
+                    if (callee === undefined || memberPropertyName(callee) !== 'trigger') {
+                        return;
+                    }
+                    const [first] = (node.arguments as AstNode[] | undefined) ?? [];
+                    const name = stringValue(first);
+                    if (first !== undefined && name !== undefined && !KEBAB_CASE.test(name)) {
+                        context.report({
+                            data: { kebab: kebabOf(name), name },
+                            messageId: 'notKebab',
+                            node: first,
+                        });
+                    }
+                },
+            };
+        },
+    },
+);

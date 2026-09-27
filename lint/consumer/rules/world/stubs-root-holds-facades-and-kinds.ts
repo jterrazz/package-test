@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -11,7 +11,6 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { isStubKind, STUB_KINDS } from '../../../engine/project/stub-kinds.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
@@ -290,64 +289,65 @@ function checkOf(context: Context): Check | undefined {
     };
 }
 
+const row = rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds');
+
 /** The folder carries the kind, so a unit calling another kind's builder is an error. */
-export const stubsRootHoldsFacadesAndKinds: LintRule = {
-    createOnce(context: Context): Visitor {
-        let check: Check | undefined;
-        return {
-            before() {
-                check = checkOf(context);
-                return check !== undefined;
+export const stubsRootHoldsFacadesAndKinds = defineRule(
+    {
+        docs: row,
+        messages: {
+            badKindDir: {
+                found: '`_setup/stubs/{{entry}}/` is no stub kind',
+                fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
             },
-            Program(node: AstNode) {
-                check?.(node);
+            badName: {
+                found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
+                fix: 'rename it in kebab-case, without the kind — the folder carries it',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'stubs-root-holds-facades-and-kinds'),
-            {
-                badKindDir: {
-                    found: '`_setup/stubs/{{entry}}/` is no stub kind',
-                    fix: 'move its units into the folder of the builder they call — one of {{kinds}}',
-                },
-                badName: {
-                    found: 'the stub unit "{{base}}" is not named `<kebab-name>.ts`',
-                    fix: 'rename it in kebab-case, without the kind — the folder carries it',
-                },
-                exportsNothing: {
-                    found: 'the stub facade "{{base}}" exports nothing',
-                    fix: 'export its builders and sets by name',
-                },
-                missingDefault: {
-                    found: 'the stub unit "{{base}}" has no default export',
-                    fix: 'default-export `defineStub(…)`, or a factory returning one',
-                },
-                notDefineStub: {
-                    found: "a stub unit's default export is not a stub",
-                    fix: 'default-export `defineStub(…)`, or a factory returning one',
-                },
-                notDefineStubs: {
-                    found: 'the default export of "{{base}}" is not built from stubs',
-                    fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
-                },
-                foreignBuilder: {
-                    found: 'a stub under `_setup/stubs/{{kind}}/` calls the `{{used}}` builder',
-                    fix: 'move it to `_setup/stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
-                },
-                rootFile: {
-                    found: 'the stub unit "{{base}}" sits at the `_setup/stubs/` root',
-                    fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
-                },
-                tooDeep: {
-                    found: 'the stub file "{{base}}" is nested below `_setup/stubs/<kind>/`',
-                    fix: 'move it up into its kind folder',
-                },
+            exportsNothing: {
+                found: 'the stub facade "{{base}}" exports nothing',
+                fix: 'export its builders and sets by name',
             },
-            CATALOGUE_CHAPTER,
-        ),
+            missingDefault: {
+                found: 'the stub unit "{{base}}" has no default export',
+                fix: 'default-export `defineStub(…)`, or a factory returning one',
+            },
+            notDefineStub: {
+                found: "a stub unit's default export is not a stub",
+                fix: 'default-export `defineStub(…)`, or a factory returning one',
+            },
+            notDefineStubs: {
+                found: 'the default export of "{{base}}" is not built from stubs',
+                fix: 'build it from `defineStubs(…)`, a composition re-export, a scenario of a sibling facade, or a builder declared to return `Stubs`',
+            },
+            foreignBuilder: {
+                found: 'a stub under `_setup/stubs/{{kind}}/` calls the `{{used}}` builder',
+                fix: 'move it to `_setup/stubs/{{used}}/`, or build it with `{{kind}}.*` alone',
+            },
+            rootFile: {
+                found: 'the stub unit "{{base}}" sits at the `_setup/stubs/` root',
+                fix: 'move it into the folder of its kind — one of {{kinds}}; the root holds only `*.stubs.ts` facades',
+            },
+            tooDeep: {
+                found: 'the stub file "{{base}}" is nested below `_setup/stubs/<kind>/`',
+                fix: 'move it up into its kind folder',
+            },
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            let check: Check | undefined;
+            return {
+                before() {
+                    check = checkOf(context);
+                    return check !== undefined;
+                },
+                Program(node: AstNode) {
+                    check?.(node);
+                },
+            };
+        },
+    },
+);

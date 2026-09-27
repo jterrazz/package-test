@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -11,7 +11,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -81,40 +80,41 @@ function isBoundExpect(callee: AstNode | undefined, bound: Bindings): boolean {
         : bound.namespaces.has(root) && member === 'expect';
 }
 
-export const noExpectOutsideATest: LintRule = {
-    createOnce(context: Context): Visitor {
-        const bound: Bindings = { expects: new Set(), namespaces: new Set() };
-        return {
-            before: () => {
-                bound.expects.clear();
-                bound.namespaces.clear();
-                return assertsHere(context);
+const row = rowNamed(consumerRows, 'no-expect-outside-a-test');
+
+export const noExpectOutsideATest = defineRule(
+    {
+        docs: row,
+        messages: {
+            expectOutsideATest: {
+                found: "vitest's `expect()` called in a file under `specs/` that is no test",
+                fix: 'return what the module reads, and assert it in the test that calls it',
             },
-            ImportDeclaration(node: AstNode) {
-                bindImport(node, bound);
-            },
-            VariableDeclarator(node: AstNode) {
-                bindDynamicImport(node, bound);
-            },
-            CallExpression(node: AstNode) {
-                if (isBoundExpect(child(node, 'callee'), bound)) {
-                    context.report({ messageId: 'expectOutsideATest', node });
-                }
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-expect-outside-a-test'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-expect-outside-a-test'),
-            {
-                expectOutsideATest: {
-                    found: "vitest's `expect()` called in a file under `specs/` that is no test",
-                    fix: 'return what the module reads, and assert it in the test that calls it',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            const bound: Bindings = { expects: new Set(), namespaces: new Set() };
+            return {
+                before: () => {
+                    bound.expects.clear();
+                    bound.namespaces.clear();
+                    return assertsHere(context);
+                },
+                ImportDeclaration(node: AstNode) {
+                    bindImport(node, bound);
+                },
+                VariableDeclarator(node: AstNode) {
+                    bindDynamicImport(node, bound);
+                },
+                CallExpression(node: AstNode) {
+                    if (isBoundExpect(child(node, 'callee'), bound)) {
+                        context.report({ messageId: 'expectOutsideATest', node });
+                    }
+                },
+            };
+        },
+    },
+);

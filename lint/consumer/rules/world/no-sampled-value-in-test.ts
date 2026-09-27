@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -17,7 +17,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -74,74 +73,75 @@ function pinnedSpans(body: AstNode): Span[] {
     return spans;
 }
 
+const row = rowNamed(consumerRows, 'no-sampled-value-in-test');
+
 /** Silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal — a per-run directory name is the one sampled value the framework cannot mint — and on a `Date` reading after a `using` that pins the clock to an instant in the same block. */
-export const noSampledValueInTest: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role),
-            CallExpression(node: AstNode) {
-                if (!isTestCallee(child(node, 'callee'))) {
-                    return;
-                }
-                const callback = findTestCallback(childList(node, 'arguments'));
-                if (callback === undefined) {
-                    return;
-                }
-                const covered = new Set<number>();
-                walk(callback, (inner) => {
-                    if (inner.type === 'TemplateLiteral') {
-                        for (const expression of childList(inner, 'expressions')) {
-                            sampledOffsets(expression, covered);
-                        }
+export const noSampledValueInTest = defineRule(
+    {
+        docs: row,
+        messages: {
+            ambientValue: {
+                found: 'time or randomness sampled in the test',
+                fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+            },
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
+        type: 'suggestion',
+    },
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role),
+                CallExpression(node: AstNode) {
+                    if (!isTestCallee(child(node, 'callee'))) {
                         return;
                     }
-                    if (isExpectCall(inner)) {
+                    const callback = findTestCallback(childList(node, 'arguments'));
+                    if (callback === undefined) {
+                        return;
+                    }
+                    const covered = new Set<number>();
+                    walk(callback, (inner) => {
+                        if (inner.type === 'TemplateLiteral') {
+                            for (const expression of childList(inner, 'expressions')) {
+                                sampledOffsets(expression, covered);
+                            }
+                            return;
+                        }
+                        if (isExpectCall(inner)) {
+                            for (const argument of childList(inner, 'arguments')) {
+                                if (isSampledValue(argument)) {
+                                    covered.add(nodeStart(argument));
+                                }
+                            }
+                            return;
+                        }
+                        const assertion = assertionOf(inner);
+                        if (assertion === undefined) {
+                            return;
+                        }
                         for (const argument of childList(inner, 'arguments')) {
-                            if (isSampledValue(argument)) {
+                            if (STRUCTURAL_MATCHERS.has(assertion.matcher)) {
+                                sampledOffsets(argument, covered);
+                            } else if (isSampledValue(argument)) {
                                 covered.add(nodeStart(argument));
                             }
                         }
-                        return;
-                    }
-                    const assertion = assertionOf(inner);
-                    if (assertion === undefined) {
-                        return;
-                    }
-                    for (const argument of childList(inner, 'arguments')) {
-                        if (STRUCTURAL_MATCHERS.has(assertion.matcher)) {
-                            sampledOffsets(argument, covered);
-                        } else if (isSampledValue(argument)) {
-                            covered.add(nodeStart(argument));
+                    });
+                    const pinned = pinnedSpans(callback);
+                    const isPinned = (at: number): boolean =>
+                        pinned.some(([start, end]) => at >= start && at < end);
+                    walk(callback, (inner) => {
+                        if (
+                            isSampledValue(inner) &&
+                            !covered.has(nodeStart(inner)) &&
+                            !(isDateReading(inner) && isPinned(nodeStart(inner)))
+                        ) {
+                            context.report({ messageId: 'ambientValue', node: inner });
                         }
-                    }
-                });
-                const pinned = pinnedSpans(callback);
-                const isPinned = (at: number): boolean =>
-                    pinned.some(([start, end]) => at >= start && at < end);
-                walk(callback, (inner) => {
-                    if (
-                        isSampledValue(inner) &&
-                        !covered.has(nodeStart(inner)) &&
-                        !(isDateReading(inner) && isPinned(nodeStart(inner)))
-                    ) {
-                        context.report({ messageId: 'ambientValue', node: inner });
-                    }
-                });
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-sampled-value-in-test'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-sampled-value-in-test'),
-            {
-                ambientValue: {
-                    found: 'time or randomness sampled in the test',
-                    fix: 'pin the time with `clock.at(…)`/`clock.advance(…)`, or absorb the value with a token in the expectation',
+                    });
                 },
-            },
-            CATALOGUE_CHAPTER,
-        ),
-        type: 'suggestion',
+            };
+        },
     },
-};
+);

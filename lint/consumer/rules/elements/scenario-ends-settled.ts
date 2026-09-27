@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -12,7 +12,6 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -85,54 +84,57 @@ function settles(node: AstNode, visitor: string): boolean {
     return terminalsOf(body).some((terminal) => settles(terminal, visitor));
 }
 
+const row = rowNamed(consumerRows, 'scenario-ends-settled');
+
 /** Only the visitor's calls count: the callback's own parameter is the receiver. A component's scenario is out of reach: its action often produces a call rather than a screen. */
-export const scenarioEndsSettled: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before() {
-                const identity = identityOf(context);
-                // A `.test.ts` under `specs/` not yet renamed counts; a `.test.tsx` is the component's.
-                return identity.role === 'spec' || (identity.role === 'module' && identity.inSpecs);
+export const scenarioEndsSettled = defineRule(
+    {
+        docs: row,
+        messages: {
+            unsettled: {
+                found: 'a scenario that acts and ends without reading the screen',
+                fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',
             },
-            CallExpression(node: AstNode) {
-                const scenario = scenarioCallbackOf(node);
-                if (scenario === undefined) {
-                    return;
-                }
-                const visitor = identifierName(childList(scenario, 'params')[0]);
-                if (visitor === undefined) {
-                    return;
-                }
-                let acts = false;
-                walk(scenario, (inner) => {
-                    const verb = verbOn(inner, visitor);
-                    if (verb !== undefined && ACTIONS.has(verb)) {
-                        acts = true;
-                    }
-                });
-                if (!acts) {
-                    return;
-                }
-                const ends = terminalsOf(child(scenario, 'body'));
-                if (ends.some((end) => settles(end, visitor))) {
-                    return;
-                }
-                context.report({ messageId: 'unsettled', node: ends[0] ?? scenario });
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'scenario-ends-settled'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'scenario-ends-settled'),
-            {
-                unsettled: {
-                    found: 'a scenario that acts and ends without reading the screen',
-                    fix: 'end it on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before() {
+                    const identity = identityOf(context);
+                    // A `.test.ts` under `specs/` not yet renamed counts; a `.test.tsx` is the component's.
+                    return (
+                        identity.role === 'spec' || (identity.role === 'module' && identity.inSpecs)
+                    );
+                },
+                CallExpression(node: AstNode) {
+                    const scenario = scenarioCallbackOf(node);
+                    if (scenario === undefined) {
+                        return;
+                    }
+                    const visitor = identifierName(childList(scenario, 'params')[0]);
+                    if (visitor === undefined) {
+                        return;
+                    }
+                    let acts = false;
+                    walk(scenario, (inner) => {
+                        const verb = verbOn(inner, visitor);
+                        if (verb !== undefined && ACTIONS.has(verb)) {
+                            acts = true;
+                        }
+                    });
+                    if (!acts) {
+                        return;
+                    }
+                    const ends = terminalsOf(child(scenario, 'body'));
+                    if (ends.some((end) => settles(end, visitor))) {
+                        return;
+                    }
+                    context.report({ messageId: 'unsettled', node: ends[0] ?? scenario });
+                },
+            };
+        },
+    },
+);

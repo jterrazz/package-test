@@ -1,8 +1,9 @@
 import {
+    defineRule,
     isDirectory,
     isFile,
-    lessonsAt,
     listDirectory,
+    readAt,
     readFileCached,
     rowNamed,
 } from '@jterrazz/typescript/rules';
@@ -14,7 +15,6 @@ import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isRelativePath } from '../../../engine/project/relative-path.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -56,71 +56,72 @@ function refsInFixture(target: string): string[] {
     return refs;
 }
 
+const row = rowNamed(consumerRows, 'no-single-use-ref');
+
 /** Counted per file: code `match.ref` literals plus the `{{kind#ref}}` tokens of the goldens it names. */
-export const noSingleUseRef: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before() {
-                const { inSpecs, role } = identityOf(context);
-                return isTestRole(role) && inSpecs;
+export const noSingleUseRef = defineRule(
+    {
+        docs: row,
+        messages: {
+            singleUse: {
+                found: 'the capture ref "{{ref}}" is used once in this spec',
+                fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',
             },
-            Program(program: AstNode) {
-                const featureDir = dirname(context.physicalFilename);
-                const counts = new Map<string, number>();
-                const codeNodes = new Map<string, AstNode>();
-                // A ref living only in a golden has no code site: it is reported on the matcher that pulled the golden in.
-                const fixtureNodes = new Map<string, AstNode>();
-                const bump = (ref: string): void => {
-                    counts.set(ref, (counts.get(ref) ?? 0) + 1);
-                };
-
-                walk(program, (node) => {
-                    if (node.type !== 'CallExpression') {
-                        return;
-                    }
-                    if (isMatchRef(node)) {
-                        const ref = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
-                        if (ref !== undefined) {
-                            bump(ref);
-                            if (!codeNodes.has(ref)) {
-                                codeNodes.set(ref, node);
-                            }
-                        }
-                        return;
-                    }
-                    const name = goldenPathOf(node);
-                    if (name !== undefined) {
-                        const target = resolve(featureDir, name.replace(/\/+$/u, ''));
-                        for (const ref of refsInFixture(target)) {
-                            bump(ref);
-                            if (!fixtureNodes.has(ref)) {
-                                fixtureNodes.set(ref, node);
-                            }
-                        }
-                    }
-                });
-
-                for (const [ref, count] of counts) {
-                    const node = codeNodes.get(ref) ?? fixtureNodes.get(ref);
-                    if (count === 1 && node !== undefined) {
-                        context.report({ data: { ref }, messageId: 'singleUse', node });
-                    }
-                }
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-single-use-ref'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-single-use-ref'),
-            {
-                singleUse: {
-                    found: 'the capture ref "{{ref}}" is used once in this spec',
-                    fix: 'use the plain token or matcher; a ref earns its name by asserting equality across two places',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before() {
+                    const { inSpecs, role } = identityOf(context);
+                    return isTestRole(role) && inSpecs;
+                },
+                Program(program: AstNode) {
+                    const featureDir = dirname(context.physicalFilename);
+                    const counts = new Map<string, number>();
+                    const codeNodes = new Map<string, AstNode>();
+                    // A ref living only in a golden has no code site: it is reported on the matcher that pulled the golden in.
+                    const fixtureNodes = new Map<string, AstNode>();
+                    const bump = (ref: string): void => {
+                        counts.set(ref, (counts.get(ref) ?? 0) + 1);
+                    };
+
+                    walk(program, (node) => {
+                        if (node.type !== 'CallExpression') {
+                            return;
+                        }
+                        if (isMatchRef(node)) {
+                            const ref = stringValue((node.arguments as AstNode[] | undefined)?.[0]);
+                            if (ref !== undefined) {
+                                bump(ref);
+                                if (!codeNodes.has(ref)) {
+                                    codeNodes.set(ref, node);
+                                }
+                            }
+                            return;
+                        }
+                        const name = goldenPathOf(node);
+                        if (name !== undefined) {
+                            const target = resolve(featureDir, name.replace(/\/+$/u, ''));
+                            for (const ref of refsInFixture(target)) {
+                                bump(ref);
+                                if (!fixtureNodes.has(ref)) {
+                                    fixtureNodes.set(ref, node);
+                                }
+                            }
+                        }
+                    });
+
+                    for (const [ref, count] of counts) {
+                        const node = codeNodes.get(ref) ?? fixtureNodes.get(ref);
+                        if (count === 1 && node !== undefined) {
+                            context.report({ data: { ref }, messageId: 'singleUse', node });
+                        }
+                    }
+                },
+            };
+        },
+    },
+);

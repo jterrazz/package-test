@@ -1,10 +1,11 @@
 import {
+    defineRule,
     GROUND_EXPECTED,
     GROUND_FIXTURES,
     GROUND_REQUESTS,
     GROUND_SEEDS,
     isGroundFolder,
-    lessonsAt,
+    readAt,
     rowNamed,
 } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
@@ -19,7 +20,6 @@ import {
 import type { AstNode, DiskCall, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -66,70 +66,71 @@ function groundOf(path: string): string | undefined {
     return path.split('/').find((segment) => isGroundFolder(segment));
 }
 
+const row = rowNamed(consumerRows, 'verb-reads-its-ground-folder');
+
 /** Judged by the first ground folder the literal path passes through; a computed path is out of reach. */
-export const verbReadsItsGroundFolder: LintRule = {
-    createOnce(context: Context): Visitor {
-        let bindings = new Map<string, AstNode[]>();
-        return {
-            before() {
-                bindings = new Map();
-                return isTestRole(identityOf(context).role);
+export const verbReadsItsGroundFolder = defineRule(
+    {
+        docs: row,
+        messages: {
+            crossed: {
+                found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
+                fix: 'move the file to {{where}}, and name it from there',
             },
-            CallExpression(node: AstNode) {
-                const callee = child(node, 'callee');
-                const verb = callee === undefined ? undefined : memberPropertyName(callee);
-                const role = verb === undefined ? undefined : ROLES[verb];
-                if (verb === undefined || role === undefined) {
-                    return;
-                }
-                const argument = childList(node, 'arguments')[role.argument];
-                const disk = diskArgument(argument, bindings);
-                if (disk?.path === undefined) {
-                    return;
-                }
-                const found = groundOf(disk.path);
-                if (role.grounds.includes(found)) {
-                    return;
-                }
-                const [reads] = role.grounds;
-                context.report({
-                    data: {
-                        found: found === undefined ? 'no ground folder' : `${found}/`,
-                        kind: disk.kind,
-                        path: disk.path,
-                        reads: reads === undefined ? 'a document beside the test' : `${reads}/`,
-                        verb,
-                        where:
-                            reads === undefined
-                                ? 'the folder its verb reads'
-                                : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
-                    },
-                    messageId: 'crossed',
-                    node: argument?.type === 'Identifier' ? argument : disk.node,
-                });
-            },
-            VariableDeclarator(node: AstNode) {
-                const declaration = node.parent as AstNode | undefined;
-                const name = identifierName(child(node, 'id'));
-                if (declaration?.kind !== 'const' || name === undefined) {
-                    return;
-                }
-                bindings.set(name, [...(bindings.get(name) ?? []), node]);
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'verb-reads-its-ground-folder'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'verb-reads-its-ground-folder'),
-            {
-                crossed: {
-                    found: "`{{verb}}()` reads {{reads}}, and `{{kind}}('{{path}}')` names {{found}}",
-                    fix: 'move the file to {{where}}, and name it from there',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            let bindings = new Map<string, AstNode[]>();
+            return {
+                before() {
+                    bindings = new Map();
+                    return isTestRole(identityOf(context).role);
+                },
+                CallExpression(node: AstNode) {
+                    const callee = child(node, 'callee');
+                    const verb = callee === undefined ? undefined : memberPropertyName(callee);
+                    const role = verb === undefined ? undefined : ROLES[verb];
+                    if (verb === undefined || role === undefined) {
+                        return;
+                    }
+                    const argument = childList(node, 'arguments')[role.argument];
+                    const disk = diskArgument(argument, bindings);
+                    if (disk?.path === undefined) {
+                        return;
+                    }
+                    const found = groundOf(disk.path);
+                    if (role.grounds.includes(found)) {
+                        return;
+                    }
+                    const [reads] = role.grounds;
+                    context.report({
+                        data: {
+                            found: found === undefined ? 'no ground folder' : `${found}/`,
+                            kind: disk.kind,
+                            path: disk.path,
+                            reads: reads === undefined ? 'a document beside the test' : `${reads}/`,
+                            verb,
+                            where:
+                                reads === undefined
+                                    ? 'the folder its verb reads'
+                                    : `./${reads}/ beside the test, or in the ${reads}/ of the lowest folder the leaves share (specs/_shared/${reads}/ across facets)`,
+                        },
+                        messageId: 'crossed',
+                        node: argument?.type === 'Identifier' ? argument : disk.node,
+                    });
+                },
+                VariableDeclarator(node: AstNode) {
+                    const declaration = node.parent as AstNode | undefined;
+                    const name = identifierName(child(node, 'id'));
+                    if (declaration?.kind !== 'const' || name === undefined) {
+                        return;
+                    }
+                    bindings.set(name, [...(bindings.get(name) ?? []), node]);
+                },
+            };
+        },
+    },
+);

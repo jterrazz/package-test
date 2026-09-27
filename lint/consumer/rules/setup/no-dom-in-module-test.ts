@@ -1,10 +1,9 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { child, identifierName, isNode, walk } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -74,44 +73,45 @@ function isValueReference(node: AstNode): boolean {
     return true;
 }
 
+const row = rowNamed(consumerRows, 'no-dom-in-module-test');
+
 /** Reach is the `module` role outside `specs/`: under `specs/` an api or cli spec is a `.test.ts` too. */
-export const noDomInModuleTest: LintRule = {
-    createOnce(context: Context): Visitor {
-        let declared = new Set<string>();
-        return {
-            before() {
-                const identity = identityOf(context);
-                return identity.role === 'module' && !identity.inSpecs;
+export const noDomInModuleTest = defineRule(
+    {
+        docs: row,
+        messages: {
+            domGlobal: {
+                found: '`{{name}}` in a module test, where no DOM exists',
+                fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
             },
-            Identifier(node: AstNode) {
-                const name = identifierName(node);
-                if (
-                    name === undefined ||
-                    !DOM_GLOBALS.has(name) ||
-                    declared.has(name) ||
-                    !isValueReference(node)
-                ) {
-                    return;
-                }
-                context.report({ data: { name }, messageId: 'domGlobal', node });
-            },
-            Program(node: AstNode) {
-                declared = declaredNames(node);
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-dom-in-module-test'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-dom-in-module-test'),
-            {
-                domGlobal: {
-                    found: '`{{name}}` in a module test, where no DOM exists',
-                    fix: 'move what renders into a `.test.tsx` beside its component, collected by the `component()` project',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            let declared = new Set<string>();
+            return {
+                before() {
+                    const identity = identityOf(context);
+                    return identity.role === 'module' && !identity.inSpecs;
+                },
+                Identifier(node: AstNode) {
+                    const name = identifierName(node);
+                    if (
+                        name === undefined ||
+                        !DOM_GLOBALS.has(name) ||
+                        declared.has(name) ||
+                        !isValueReference(node)
+                    ) {
+                        return;
+                    }
+                    context.report({ data: { name }, messageId: 'domGlobal', node });
+                },
+                Program(node: AstNode) {
+                    declared = declaredNames(node);
+                },
+            };
+        },
+    },
+);

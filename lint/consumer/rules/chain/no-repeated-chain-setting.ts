@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context, Fix, Fixer } from '@oxlint/plugins';
 
 import {
@@ -13,7 +13,6 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { subjectFolder, subjectsOf } from '../../../engine/project/subject.js';
 import type { Subject } from '../../../engine/project/subject.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
@@ -196,54 +195,56 @@ function declareOnce(
     return edits;
 }
 
-export const noRepeatedChainSetting: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => identityOf(context).role === 'spec',
-            Program(program: AstNode) {
-                const handles = handlesOf(program);
-                const { text } = context.sourceCode;
-                for (const handle of handles) {
-                    const chains = chainsOf(program, handles, text).filter(
-                        (chain) => chain.handle === handle,
-                    );
-                    const shared = sharedSettings(chains);
-                    const [first] = shared;
-                    if (first === undefined) {
-                        continue;
-                    }
-                    const view = viewName(handle, text, program);
-                    context.report({
-                        data: {
-                            context: shared
-                                .map((setting) => `${setting.name}: ${setting.argument}`)
-                                .join(', '),
-                            count: chains.length,
-                            handle,
-                            setting: `.${first.name}(${first.argument})`,
-                            view,
-                        },
-                        fix: (fixer) => declareOnce(fixer, { chains, program, shared, text, view }),
-                        messageId: 'repeated',
-                        node: chains[0]?.root ?? program,
-                    });
-                }
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-repeated-chain-setting'),
+const row = rowNamed(consumerRows, 'no-repeated-chain-setting');
+
+export const noRepeatedChainSetting = defineRule(
+    {
+        docs: row,
         fixable: 'code',
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-repeated-chain-setting'),
-            {
-                repeated: {
-                    found: 'all {{count}} chains of this file state `{{setting}}` alike',
-                    fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `make fix` writes it',
-                },
+        messages: {
+            repeated: {
+                found: 'all {{count}} chains of this file state `{{setting}}` alike',
+                fix: 'state it once for the file — `const {{view}} = {{handle}}.with({ {{context}} })` — and start every chain from `{{view}}`; `make fix` writes it',
             },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => identityOf(context).role === 'spec',
+                Program(program: AstNode) {
+                    const handles = handlesOf(program);
+                    const { text } = context.sourceCode;
+                    for (const handle of handles) {
+                        const chains = chainsOf(program, handles, text).filter(
+                            (chain) => chain.handle === handle,
+                        );
+                        const shared = sharedSettings(chains);
+                        const [first] = shared;
+                        if (first === undefined) {
+                            continue;
+                        }
+                        const view = viewName(handle, text, program);
+                        context.report({
+                            data: {
+                                context: shared
+                                    .map((setting) => `${setting.name}: ${setting.argument}`)
+                                    .join(', '),
+                                count: chains.length,
+                                handle,
+                                setting: `.${first.name}(${first.argument})`,
+                                view,
+                            },
+                            fix: (fixer) =>
+                                declareOnce(fixer, { chains, program, shared, text, view }),
+                            messageId: 'repeated',
+                            node: chains[0]?.root ?? program,
+                        });
+                    }
+                },
+            };
+        },
+    },
+);

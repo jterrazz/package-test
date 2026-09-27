@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -13,7 +13,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -154,36 +153,37 @@ function inPlaceOf(node: AstNode): boolean {
     );
 }
 
-export const negativeGoldenFrozen: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role),
-            CallExpression(node: AstNode) {
-                if (goldenOf(node) === undefined && !inPlaceOf(node)) {
-                    return;
-                }
-                if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
-                    return;
-                }
-                if (hasFrozenOption((node.arguments as AstNode[] | undefined) ?? [])) {
-                    return;
-                }
-                context.report({ messageId: 'unfrozenNegativeFixture', node });
+const row = rowNamed(consumerRows, 'negative-golden-frozen');
+
+export const negativeGoldenFrozen = defineRule(
+    {
+        docs: row,
+        messages: {
+            unfrozenNegativeFixture: {
+                found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
+                fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'negative-golden-frozen'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'negative-golden-frozen'),
-            {
-                unfrozenNegativeFixture: {
-                    found: 'a golden matcher whose mismatch is the subject, with no `{ frozen: true }`',
-                    fix: 'pass `{ frozen: true }` as its last argument, so `TEST_UPDATE=1` never rewrites the deliberately wrong expectation',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role),
+                CallExpression(node: AstNode) {
+                    if (goldenOf(node) === undefined && !inPlaceOf(node)) {
+                        return;
+                    }
+                    if (!isWrappedInExpect(node) && !inAThrowingHelper(node)) {
+                        return;
+                    }
+                    if (hasFrozenOption((node.arguments as AstNode[] | undefined) ?? [])) {
+                        return;
+                    }
+                    context.report({ messageId: 'unfrozenNegativeFixture', node });
+                },
+            };
+        },
+    },
+);

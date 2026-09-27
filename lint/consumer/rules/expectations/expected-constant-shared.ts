@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -14,7 +14,6 @@ import {
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -99,73 +98,74 @@ function fileConstants(program: AstNode): { declarator: AstNode; statement: AstN
     });
 }
 
+const row = rowNamed(consumerRows, 'expected-constant-shared');
+
 /** A constant a helper reads counts as shared: no scan can tell how many tests call the helper. */
-export const expectedConstantShared: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => identityOf(context).role === 'spec',
-            Program(program: AstNode) {
-                const expected = expectedNames(program);
-                const tests = testSpans(program);
-                for (const { declarator, statement } of fileConstants(program)) {
-                    if (statement.type === 'ExportNamedDeclaration') {
-                        continue;
-                    }
-                    const name = identifierName(child(declarator, 'id'));
-                    const init = child(declarator, 'init');
-                    if (name === undefined || init === undefined || !expected.has(name)) {
-                        continue;
-                    }
-                    const reads = readsOf(program, name);
-                    const owners = new Set(reads.map((read) => testOf(read, tests)));
-                    const [owner] = owners;
-                    if (owners.size !== 1 || owner === undefined) {
-                        continue;
-                    }
-                    const [only] = reads;
-                    const inlinable =
-                        reads.length === 1 &&
-                        only !== undefined &&
-                        statement.type === 'VariableDeclaration' &&
-                        childList(statement, 'declarations').length === 1;
-                    const { text } = context.sourceCode;
-                    context.report({
-                        data: { name },
-                        ...(inlinable && {
-                            fix: (fixer) => {
-                                const end =
-                                    text[nodeEnd(statement)] === '\n'
-                                        ? nodeEnd(statement) + 1
-                                        : nodeEnd(statement);
-                                return [
-                                    fixer.replaceTextRange(
-                                        [nodeStart(only), nodeEnd(only)],
-                                        text.slice(nodeStart(init), nodeEnd(init)),
-                                    ),
-                                    fixer.removeRange([nodeStart(statement), end]),
-                                ];
-                            },
-                        }),
-                        messageId: 'singleReader',
-                        node: declarator,
-                    });
-                }
-            },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'expected-constant-shared'),
+export const expectedConstantShared = defineRule(
+    {
+        docs: row,
         fixable: 'code',
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'expected-constant-shared'),
-            {
-                singleReader: {
-                    found: 'the expectation `{{name}}`, declared for the file and read by one test',
-                    fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',
-                },
+        messages: {
+            singleReader: {
+                found: 'the expectation `{{name}}`, declared for the file and read by one test',
+                fix: 'write its value in place, in the matcher the test hands it to, and delete `{{name}}` — `make fix` inlines it',
             },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => identityOf(context).role === 'spec',
+                Program(program: AstNode) {
+                    const expected = expectedNames(program);
+                    const tests = testSpans(program);
+                    for (const { declarator, statement } of fileConstants(program)) {
+                        if (statement.type === 'ExportNamedDeclaration') {
+                            continue;
+                        }
+                        const name = identifierName(child(declarator, 'id'));
+                        const init = child(declarator, 'init');
+                        if (name === undefined || init === undefined || !expected.has(name)) {
+                            continue;
+                        }
+                        const reads = readsOf(program, name);
+                        const owners = new Set(reads.map((read) => testOf(read, tests)));
+                        const [owner] = owners;
+                        if (owners.size !== 1 || owner === undefined) {
+                            continue;
+                        }
+                        const [only] = reads;
+                        const inlinable =
+                            reads.length === 1 &&
+                            only !== undefined &&
+                            statement.type === 'VariableDeclaration' &&
+                            childList(statement, 'declarations').length === 1;
+                        const { text } = context.sourceCode;
+                        context.report({
+                            data: { name },
+                            ...(inlinable && {
+                                fix: (fixer) => {
+                                    const end =
+                                        text[nodeEnd(statement)] === '\n'
+                                            ? nodeEnd(statement) + 1
+                                            : nodeEnd(statement);
+                                    return [
+                                        fixer.replaceTextRange(
+                                            [nodeStart(only), nodeEnd(only)],
+                                            text.slice(nodeStart(init), nodeEnd(init)),
+                                        ),
+                                        fixer.removeRange([nodeStart(statement), end]),
+                                    ];
+                                },
+                            }),
+                            messageId: 'singleReader',
+                            node: declarator,
+                        });
+                    }
+                },
+            };
+        },
+    },
+);

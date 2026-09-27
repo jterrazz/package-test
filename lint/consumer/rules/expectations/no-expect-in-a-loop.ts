@@ -1,11 +1,10 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { child, identifierName, memberPropertyName } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -64,33 +63,34 @@ function loopAround(node: AstNode): string | undefined {
     return undefined;
 }
 
-export const noExpectInALoop: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role),
-            CallExpression(node: AstNode) {
-                if (!isExpectCall(node)) {
-                    return;
-                }
-                const loop = loopAround(node);
-                if (loop !== undefined) {
-                    context.report({ data: { loop }, messageId: 'expectInALoop', node });
-                }
+const row = rowNamed(consumerRows, 'no-expect-in-a-loop');
+
+export const noExpectInALoop = defineRule(
+    {
+        docs: row,
+        messages: {
+            expectInALoop: {
+                found: '`expect()` inside a {{loop}}, which runs it once per element — and not at all over none',
+                fix: 'compare the whole collection in one assertion — `expect(rows.map(…)).toStrictEqual([…])` — or state each case with `test.each`',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-expect-in-a-loop'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-expect-in-a-loop'),
-            {
-                expectInALoop: {
-                    found: '`expect()` inside a {{loop}}, which runs it once per element — and not at all over none',
-                    fix: 'compare the whole collection in one assertion — `expect(rows.map(…)).toStrictEqual([…])` — or state each case with `test.each`',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role),
+                CallExpression(node: AstNode) {
+                    if (!isExpectCall(node)) {
+                        return;
+                    }
+                    const loop = loopAround(node);
+                    if (loop !== undefined) {
+                        context.report({ data: { loop }, messageId: 'expectInALoop', node });
+                    }
+                },
+            };
+        },
+    },
+);

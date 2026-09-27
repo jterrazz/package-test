@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -11,7 +11,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf, segmentsOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -141,62 +140,31 @@ function scopeOf(context: Context): Scope | undefined {
     };
 }
 
+const row = rowNamed(consumerRows, 'no-module-mock');
+
 /** A native module a consumer cannot inject is the one case the ladder cannot reach: `modules` allows it, each entry stating its reason. `vi.stubGlobal` is an upstream option (`no-vitest-time-or-global-stub`, ADR-005). */
-export const noModuleMock: LintRule = {
-    createOnce(context: Context): Visitor {
-        let scope: Scope | undefined;
-        return {
-            ...importSourceVisitor(({ node, source }) => {
-                if (scope?.isTest === true && DATA_ASSET.test(withoutSuffix(source))) {
-                    context.report({ data: { source }, messageId: 'assetImport', node });
-                }
-            }),
-            before() {
-                scope = scopeOf(context);
-                return scope !== undefined;
+export const noModuleMock = defineRule(
+    {
+        docs: row,
+        messages: {
+            assetImport: {
+                found: 'a module test imports the data asset "{{source}}"',
+                fix: 'write the data as code in a sibling `<file>.fixtures.ts`, or move the test under `specs/` as a `.spec.ts`',
             },
-            CallExpression(node: AstNode) {
-                if (!isModuleDouble(node)) {
-                    return;
-                }
-                const named = mockedSpecifier(childList(node, 'arguments')[0]);
-                if (named !== undefined && scope?.unreasoned.has(named) === true) {
-                    context.report({ data: { source: named }, messageId: 'unreasoned', node });
-                } else if (named === undefined || scope?.allowed.has(named) !== true) {
-                    context.report({ messageId: 'viMock', node });
-                }
+            bannedDir: {
+                found: 'a `{{dir}}/` directory',
+                fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a sibling `<file>.fixtures.ts`, a spec's in `_fixtures/` — and delete the directory",
             },
-            Program(node: AstNode) {
-                if (scope?.banned !== undefined) {
-                    context.report({ data: { dir: scope.banned }, messageId: 'bannedDir', node });
-                }
+            unreasoned: {
+                found: '"{{source}}" is on the `modules` allow-list with no reason',
+                fix: "state why no consumer can inject it: `{ module: '{{source}}', reason: '<why>' }`",
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-module-mock'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-module-mock'),
-            {
-                assetImport: {
-                    found: 'a module test imports the data asset "{{source}}"',
-                    fix: 'write the data as code in a sibling `<file>.fixtures.ts`, or move the test under `specs/` as a `.spec.ts`',
-                },
-                bannedDir: {
-                    found: 'a `{{dir}}/` directory',
-                    fix: "write the doubles as code — `mockOf<Port>()` inline, a module test's payloads in a sibling `<file>.fixtures.ts`, a spec's in `_fixtures/` — and delete the directory",
-                },
-                unreasoned: {
-                    found: '"{{source}}" is on the `modules` allow-list with no reason',
-                    fix: "state why no consumer can inject it: `{ module: '{{source}}', reason: '<why>' }`",
-                },
-                viMock: {
-                    found: '`vi.mock` doubles a module for every importer',
-                    fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list: `{ module, reason }`',
-                },
+            viMock: {
+                found: '`vi.mock` doubles a module for every importer',
+                fix: 'double the port instead — `mockOf<Port>()`, `vi.fn()`, `vi.spyOn` — or put a native module no consumer can inject on the `modules` allow-list: `{ module, reason }`',
             },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         schema: [
             {
                 additionalProperties: false,
@@ -215,4 +183,40 @@ export const noModuleMock: LintRule = {
         ],
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            let scope: Scope | undefined;
+            return {
+                ...importSourceVisitor(({ node, source }) => {
+                    if (scope?.isTest === true && DATA_ASSET.test(withoutSuffix(source))) {
+                        context.report({ data: { source }, messageId: 'assetImport', node });
+                    }
+                }),
+                before() {
+                    scope = scopeOf(context);
+                    return scope !== undefined;
+                },
+                CallExpression(node: AstNode) {
+                    if (!isModuleDouble(node)) {
+                        return;
+                    }
+                    const named = mockedSpecifier(childList(node, 'arguments')[0]);
+                    if (named !== undefined && scope?.unreasoned.has(named) === true) {
+                        context.report({ data: { source: named }, messageId: 'unreasoned', node });
+                    } else if (named === undefined || scope?.allowed.has(named) !== true) {
+                        context.report({ messageId: 'viMock', node });
+                    }
+                },
+                Program(node: AstNode) {
+                    if (scope?.banned !== undefined) {
+                        context.report({
+                            data: { dir: scope.banned },
+                            messageId: 'bannedDir',
+                            node,
+                        });
+                    }
+                },
+            };
+        },
+    },
+);

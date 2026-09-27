@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -8,7 +8,6 @@ import {
     stringValue,
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { TOKEN_KINDS } from '../../../engine/project/tokens.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
@@ -48,35 +47,39 @@ function isTokenEquivalentTransform(fn: AstNode): boolean {
     return sawReplace && expression?.type === 'Identifier';
 }
 
-export const noTransformDuplicatingTokens: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            CallExpression(node: AstNode) {
-                if (specificationMember(node) === undefined) {
-                    return;
-                }
-                for (const argument of (node.arguments as AstNode[] | undefined) ?? []) {
-                    const transform = findProperty(argument, 'transform');
-                    const fn = transform?.value as AstNode | undefined;
-                    if (fn !== undefined && isTokenEquivalentTransform(fn)) {
-                        context.report({ messageId: 'tokenEquivalent', node: transform ?? node });
-                    }
-                }
+const row = rowNamed(consumerRows, 'no-transform-duplicating-tokens');
+
+export const noTransformDuplicatingTokens = defineRule(
+    {
+        docs: row,
+        messages: {
+            tokenEquivalent: {
+                found: 'a `transform` that only rewrites output into token literals',
+                fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-transform-duplicating-tokens'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-transform-duplicating-tokens'),
-            {
-                tokenEquivalent: {
-                    found: 'a `transform` that only rewrites output into token literals',
-                    fix: 'delete the transform and write the tokens in the expectation; `transform` is for noise no token covers',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                CallExpression(node: AstNode) {
+                    if (specificationMember(node) === undefined) {
+                        return;
+                    }
+                    for (const argument of (node.arguments as AstNode[] | undefined) ?? []) {
+                        const transform = findProperty(argument, 'transform');
+                        const fn = transform?.value as AstNode | undefined;
+                        if (fn !== undefined && isTokenEquivalentTransform(fn)) {
+                            context.report({
+                                messageId: 'tokenEquivalent',
+                                node: transform ?? node,
+                            });
+                        }
+                    }
+                },
+            };
+        },
+    },
+);

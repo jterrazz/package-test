@@ -1,10 +1,9 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { propertyKeyName, specificationMember, walk } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -47,39 +46,40 @@ function isAfterAllWithCleanup(node: AstNode): boolean {
     return found;
 }
 
-export const cleanupPassedToAfterAll: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => identityOf(context).role === 'specification',
-            Program(node: AstNode) {
-                let cleanupDeclarator: AstNode | undefined;
-                let registered = false;
-                walk(node, (child) => {
-                    if (cleanupDeclarator === undefined && destructuresCleanup(child)) {
-                        cleanupDeclarator = child;
-                    }
-                    if (!registered && isAfterAllWithCleanup(child)) {
-                        registered = true;
-                    }
-                });
-                if (cleanupDeclarator !== undefined && !registered) {
-                    context.report({ messageId: 'unregistered', node: cleanupDeclarator });
-                }
+const row = rowNamed(consumerRows, 'cleanup-passed-to-after-all');
+
+export const cleanupPassedToAfterAll = defineRule(
+    {
+        docs: row,
+        messages: {
+            unregistered: {
+                found: '`cleanup` is destructured and never handed to `afterAll`',
+                fix: 'add `afterAll(cleanup);` at the end of the specification file',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'cleanup-passed-to-after-all'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'cleanup-passed-to-after-all'),
-            {
-                unregistered: {
-                    found: '`cleanup` is destructured and never handed to `afterAll`',
-                    fix: 'add `afterAll(cleanup);` at the end of the specification file',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => identityOf(context).role === 'specification',
+                Program(node: AstNode) {
+                    let cleanupDeclarator: AstNode | undefined;
+                    let registered = false;
+                    walk(node, (child) => {
+                        if (cleanupDeclarator === undefined && destructuresCleanup(child)) {
+                            cleanupDeclarator = child;
+                        }
+                        if (!registered && isAfterAllWithCleanup(child)) {
+                            registered = true;
+                        }
+                    });
+                    if (cleanupDeclarator !== undefined && !registered) {
+                        context.report({ messageId: 'unregistered', node: cleanupDeclarator });
+                    }
+                },
+            };
+        },
+    },
+);

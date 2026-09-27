@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -15,7 +15,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 import { isCarried } from './result-compared-whole.carried.js';
@@ -96,57 +95,62 @@ function wholeComparisonOf(node: AstNode, results: ReadonlySet<string>): string 
     return whole ? subjectOf(assertion.subject, results) : undefined;
 }
 
+const row = rowNamed(consumerRows, 'result-compared-whole');
+
 /** Static and exact within one test: a result read through a helper or a computed table name is out of reach, and the rule stays silent rather than guess. A carried read (`carried.ts`) owes no comparison. */
-export const resultComparedWhole: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role) && identityOf(context).inSpecs,
-            CallExpression(node: AstNode) {
-                if (!isTestCallee(child(node, 'callee'))) {
-                    return;
-                }
-                const callback = findTestCallback(childList(node, 'arguments'));
-                if (callback === undefined) {
-                    return;
-                }
-                const results = resultNames(callback);
-                const read = new Map<string, AstNode>();
-                const compared = new Set<string>();
-                walk(callback, (inner) => {
-                    const subject = subjectOf(inner, results);
-                    if (
-                        subject !== undefined &&
-                        !read.has(subject) &&
-                        !inRefusal(inner) &&
-                        !isCarried(inner, callback, results)
-                    ) {
-                        read.set(subject, inner);
-                    }
-                    const whole = wholeComparisonOf(inner, results);
-                    if (whole !== undefined) {
-                        compared.add(whole);
-                    }
-                });
-                for (const [subject, at] of read) {
-                    if (!compared.has(subject)) {
-                        context.report({ data: { subject }, messageId: 'partialOracle', node: at });
-                    }
-                }
+export const resultComparedWhole = defineRule(
+    {
+        docs: row,
+        messages: {
+            partialOracle: {
+                found: 'the test reads {{subject}} and never compares it whole',
+                fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'result-compared-whole'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'result-compared-whole'),
-            {
-                partialOracle: {
-                    found: 'the test reads {{subject}} and never compares it whole',
-                    fix: 'add ``expect({{subject}}).toMatch(`…`)`` with the whole result in place (`TEST_UPDATE=1` fills an empty one); a precise assertion stays beside it',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role) && identityOf(context).inSpecs,
+                CallExpression(node: AstNode) {
+                    if (!isTestCallee(child(node, 'callee'))) {
+                        return;
+                    }
+                    const callback = findTestCallback(childList(node, 'arguments'));
+                    if (callback === undefined) {
+                        return;
+                    }
+                    const results = resultNames(callback);
+                    const read = new Map<string, AstNode>();
+                    const compared = new Set<string>();
+                    walk(callback, (inner) => {
+                        const subject = subjectOf(inner, results);
+                        if (
+                            subject !== undefined &&
+                            !read.has(subject) &&
+                            !inRefusal(inner) &&
+                            !isCarried(inner, callback, results)
+                        ) {
+                            read.set(subject, inner);
+                        }
+                        const whole = wholeComparisonOf(inner, results);
+                        if (whole !== undefined) {
+                            compared.add(whole);
+                        }
+                    });
+                    for (const [subject, at] of read) {
+                        if (!compared.has(subject)) {
+                            context.report({
+                                data: { subject },
+                                messageId: 'partialOracle',
+                                node: at,
+                            });
+                        }
+                    }
+                },
+            };
+        },
+    },
+);

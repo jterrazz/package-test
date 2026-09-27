@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Comment, Context } from '@oxlint/plugins';
 
 import {
@@ -13,7 +13,6 @@ import {
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
 import { isTestRole } from '../../../engine/project/role.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -34,64 +33,65 @@ function lineEndAt(text: string, offset: number): number {
     return newline === -1 ? text.length : newline;
 }
 
+const row = rowNamed(consumerRows, 'marker-on-one-line');
+
 /** The criterion is a marker comment with another `//` comment directly below it at the same indentation. */
-export const markerOnOneLine: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => isTestRole(identityOf(context).role),
-            CallExpression(node: AstNode) {
-                if (!isTestCallee(child(node, 'callee'))) {
-                    return;
-                }
-                const callback = findTestCallback(childList(node, 'arguments'));
-                if (callback === undefined) {
-                    return;
-                }
-                const { text } = context.sourceCode;
-                const comments = context.sourceCode
-                    .getCommentsInside(callback)
-                    .filter((comment) => comment.type === 'Line' && nodeStart(comment) >= 0)
-                    .toSorted((a, b) => nodeStart(a) - nodeStart(b));
-                for (const found of markerComments(comments)) {
-                    const { start } = found;
-                    if (start < 0) {
-                        continue;
-                    }
-                    const indent = text.slice(lineStartAt(text, start), start);
-                    // A marker trailing code is out of this rule's reach.
-                    if (indent.trim() !== '') {
-                        continue;
-                    }
-                    const nextLineStart = lineEndAt(text, start) + 1;
-                    const continuation = comments.find((comment: Comment) => {
-                        const at = nodeStart(comment);
-                        return (
-                            at >= nextLineStart &&
-                            at <= lineEndAt(text, nextLineStart) &&
-                            text.slice(lineStartAt(text, at), at) === indent &&
-                            markerOf(comment) === undefined &&
-                            !isDirective(comment)
-                        );
-                    });
-                    if (continuation !== undefined) {
-                        context.report({ messageId: 'wrapped', node: found.comment });
-                    }
-                }
+export const markerOnOneLine = defineRule(
+    {
+        docs: row,
+        messages: {
+            wrapped: {
+                found: 'a marker continued on the comment line under it',
+                fix: "fold the continuation into the marker's one line, or separate the two with a blank line",
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'marker-on-one-line'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'marker-on-one-line'),
-            {
-                wrapped: {
-                    found: 'a marker continued on the comment line under it',
-                    fix: "fold the continuation into the marker's one line, or separate the two with a blank line",
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => isTestRole(identityOf(context).role),
+                CallExpression(node: AstNode) {
+                    if (!isTestCallee(child(node, 'callee'))) {
+                        return;
+                    }
+                    const callback = findTestCallback(childList(node, 'arguments'));
+                    if (callback === undefined) {
+                        return;
+                    }
+                    const { text } = context.sourceCode;
+                    const comments = context.sourceCode
+                        .getCommentsInside(callback)
+                        .filter((comment) => comment.type === 'Line' && nodeStart(comment) >= 0)
+                        .toSorted((a, b) => nodeStart(a) - nodeStart(b));
+                    for (const found of markerComments(comments)) {
+                        const { start } = found;
+                        if (start < 0) {
+                            continue;
+                        }
+                        const indent = text.slice(lineStartAt(text, start), start);
+                        // A marker trailing code is out of this rule's reach.
+                        if (indent.trim() !== '') {
+                            continue;
+                        }
+                        const nextLineStart = lineEndAt(text, start) + 1;
+                        const continuation = comments.find((comment: Comment) => {
+                            const at = nodeStart(comment);
+                            return (
+                                at >= nextLineStart &&
+                                at <= lineEndAt(text, nextLineStart) &&
+                                text.slice(lineStartAt(text, at), at) === indent &&
+                                markerOf(comment) === undefined &&
+                                !isDirective(comment)
+                            );
+                        });
+                        if (continuation !== undefined) {
+                            context.report({ messageId: 'wrapped', node: found.comment });
+                        }
+                    }
+                },
+            };
+        },
+    },
+);

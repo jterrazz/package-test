@@ -5,7 +5,7 @@ import { join, resolve } from 'node:path';
 import { child, childList, identifierName, isNode, walk } from '../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../engine/project/ast.js';
 import { parsedModule } from '../../engine/project/module-parser.js';
-import type { LintRule } from '../../engine/project/rule.js';
+import type { PluginRule } from '../../engine/project/rule.js';
 
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
@@ -60,7 +60,7 @@ function visit(node: AstNode, parent: AstNode | null, handlers: Visitor): void {
 
 /** One visitor per rule, handed file after file, as oxlint does with a `createOnce` rule. */
 export function session(
-    rule: LintRule,
+    rule: PluginRule,
     id: string,
     options: ReadonlyMap<string, unknown[]>,
 ): (file: string) => Verdict[] {

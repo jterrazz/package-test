@@ -1,10 +1,9 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import { child, childList, identifierName, walk } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
 import { identityOf } from '../../../engine/project/linted-file.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -53,41 +52,42 @@ function startsFromThePreset(node: AstNode | undefined): boolean {
     );
 }
 
+const row = rowNamed(consumerRows, 'vitest-config-from-define-spec-config');
+
 /** `export default <Identifier>` and a `satisfies`/`as` annotation both resolve. */
-export const vitestConfigFromDefineSpecConfig: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            before: () => identityOf(context).role === 'config',
-            Program(program: AstNode) {
-                walk(program, (node) => {
-                    if (node.type !== 'ExportDefaultDeclaration') {
-                        return;
-                    }
-                    let exported = unwrap(child(node, 'declaration'));
-                    const name = identifierName(exported);
-                    if (name !== undefined) {
-                        exported = initialiserOf(program, name);
-                    }
-                    if (startsFromThePreset(exported)) {
-                        return;
-                    }
-                    context.report({ messageId: 'offPreset', node });
-                });
+export const vitestConfigFromDefineSpecConfig = defineRule(
+    {
+        docs: row,
+        messages: {
+            offPreset: {
+                found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
+                fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'vitest-config-from-define-spec-config'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'vitest-config-from-define-spec-config'),
-            {
-                offPreset: {
-                    found: 'a vitest config that does not default-export `defineSpecConfig(…)`',
-                    fix: "wrap it: `export default defineSpecConfig({ … })`, from `@jterrazz/test/vitest` — the budgets, the artefact directory and the ground exclusion are the preset's",
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'problem',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                before: () => identityOf(context).role === 'config',
+                Program(program: AstNode) {
+                    walk(program, (node) => {
+                        if (node.type !== 'ExportDefaultDeclaration') {
+                            return;
+                        }
+                        let exported = unwrap(child(node, 'declaration'));
+                        const name = identifierName(exported);
+                        if (name !== undefined) {
+                            exported = initialiserOf(program, name);
+                        }
+                        if (startsFromThePreset(exported)) {
+                            return;
+                        }
+                        context.report({ messageId: 'offPreset', node });
+                    });
+                },
+            };
+        },
+    },
+);

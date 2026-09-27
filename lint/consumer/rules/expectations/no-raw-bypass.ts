@@ -1,4 +1,4 @@
-import { lessonsAt, rowNamed } from '@jterrazz/typescript/rules';
+import { defineRule, readAt, rowNamed } from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 
 import {
@@ -8,7 +8,6 @@ import {
     memberPropertyName,
 } from '../../../engine/project/ast.js';
 import type { AstNode, Visitor } from '../../../engine/project/ast.js';
-import type { LintRule } from '../../../engine/project/rule.js';
 import { CATALOGUE_CHAPTER } from '../../catalogue/chapter.js';
 import { consumerRows } from '../../catalogue/manifest.js';
 
@@ -29,45 +28,46 @@ function unnegated(node: AstNode | undefined): AstNode | undefined {
     return node !== undefined && memberPropertyName(node) === 'not' ? child(node, 'object') : node;
 }
 
-export const noRawBypass: LintRule = {
-    createOnce(context: Context): Visitor {
-        return {
-            CallExpression(node: AstNode) {
-                const callee = node.callee as AstNode | undefined;
-                const matcher = callee === undefined ? undefined : memberPropertyName(callee);
-                if (matcher === undefined || !TEXT_MATCHERS.has(matcher)) {
-                    return;
-                }
-                const expectCall = unnegated(callee?.object as AstNode | undefined);
-                if (expectCall?.type !== 'CallExpression') {
-                    return;
-                }
-                const expectCallee = expectCall.callee as AstNode | undefined;
-                if (expectCallee?.type !== 'Identifier' || expectCallee.name !== 'expect') {
-                    return;
-                }
-                if (isRegExp(childList(node, 'arguments')[0])) {
-                    return;
-                }
-                const subject = (expectCall.arguments as AstNode[] | undefined)?.[0];
-                if (subject !== undefined && memberPropertyName(subject) === 'raw') {
-                    context.report({ data: { matcher }, messageId: 'rawBypass', node });
-                }
+const row = rowNamed(consumerRows, 'no-raw-bypass');
+
+export const noRawBypass = defineRule(
+    {
+        docs: row,
+        messages: {
+            rawBypass: {
+                found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
+                fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
             },
-        };
-    },
-    meta: {
-        docs: rowNamed(consumerRows, 'no-raw-bypass'),
-        messages: lessonsAt(
-            rowNamed(consumerRows, 'no-raw-bypass'),
-            {
-                rawBypass: {
-                    found: '`expect(x.raw).{{matcher}}(…)` asserts on the stream as captured',
-                    fix: 'compare `x.text` — ANSI stripped, `transform` applied, the text an expectation compares',
-                },
-            },
-            CATALOGUE_CHAPTER,
-        ),
+        },
+        read: readAt(row, CATALOGUE_CHAPTER),
         type: 'suggestion',
     },
-};
+    {
+        createOnce(context: Context): Visitor {
+            return {
+                CallExpression(node: AstNode) {
+                    const callee = node.callee as AstNode | undefined;
+                    const matcher = callee === undefined ? undefined : memberPropertyName(callee);
+                    if (matcher === undefined || !TEXT_MATCHERS.has(matcher)) {
+                        return;
+                    }
+                    const expectCall = unnegated(callee?.object as AstNode | undefined);
+                    if (expectCall?.type !== 'CallExpression') {
+                        return;
+                    }
+                    const expectCallee = expectCall.callee as AstNode | undefined;
+                    if (expectCallee?.type !== 'Identifier' || expectCallee.name !== 'expect') {
+                        return;
+                    }
+                    if (isRegExp(childList(node, 'arguments')[0])) {
+                        return;
+                    }
+                    const subject = (expectCall.arguments as AstNode[] | undefined)?.[0];
+                    if (subject !== undefined && memberPropertyName(subject) === 'raw') {
+                        context.report({ data: { matcher }, messageId: 'rawBypass', node });
+                    }
+                },
+            };
+        },
+    },
+);
