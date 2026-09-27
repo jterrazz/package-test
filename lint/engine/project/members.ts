@@ -39,7 +39,11 @@ export function discoverSpecRoots(rootDir: string): string[] {
                 return;
             }
             for (const entry of entries) {
-                if (!entry.isDirectory() || entry.name.startsWith('.') || PRUNED_WITH_OUTPUTS.has(entry.name)) {
+                if (
+                    !entry.isDirectory() ||
+                    entry.name.startsWith('.') ||
+                    PRUNED_WITH_OUTPUTS.has(entry.name)
+                ) {
                     continue;
                 }
                 const child = join(dir, entry.name);

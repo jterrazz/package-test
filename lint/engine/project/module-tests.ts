@@ -3,7 +3,11 @@ import { join } from 'node:path';
 
 import { isTestFileName } from './role.js';
 
-export const PRUNED_WITH_OUTPUTS: ReadonlySet<string> = new Set([...PRUNED, '.artifacts', 'coverage']);
+export const PRUNED_WITH_OUTPUTS: ReadonlySet<string> = new Set([
+    ...PRUNED,
+    '.artifacts',
+    'coverage',
+]);
 
 /** Never ground (a fixture project's tests are an input) nor a nested package; `specs/` is the tree passes'. */
 export function moduleTestsOf(member: string): string[] {

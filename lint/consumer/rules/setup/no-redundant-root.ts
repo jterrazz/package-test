@@ -1,4 +1,10 @@
-import { defineRule, holdsManifest, nearestRoot, readAt, rowNamed } from '@jterrazz/typescript/rules';
+import {
+    defineRule,
+    holdsManifest,
+    nearestRoot,
+    readAt,
+    rowNamed,
+} from '@jterrazz/typescript/rules';
 import type { Context } from '@oxlint/plugins';
 import { dirname, resolve } from 'node:path';
 

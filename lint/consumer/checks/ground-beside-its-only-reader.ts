@@ -1,7 +1,12 @@
 import { GROUND_FOLDERS } from '@jterrazz/typescript/rules';
 import { join, relative } from 'node:path';
 
-import { entriesOf, PRUNED_WITH_FIXTURES, textOf, walkFiles } from '../../engine/project/facet-folders.js';
+import {
+    entriesOf,
+    PRUNED_WITH_FIXTURES,
+    textOf,
+    walkFiles,
+} from '../../engine/project/facet-folders.js';
 import { isNodeTestFileName } from '../../engine/project/role.js';
 import type { Spotted } from './checker.js';
 

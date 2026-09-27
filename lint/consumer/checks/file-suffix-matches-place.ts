@@ -1,6 +1,11 @@
 /** A tree with a `*.specification.ts` at its root is one facet's whole (`depth: 'mirror'`): every `.test.ts` below it specifies the assembled product. */
 
-import { isGroundFolder, moveKeepingHistory, PRUNED, treeEntries } from '@jterrazz/typescript/rules';
+import {
+    isGroundFolder,
+    moveKeepingHistory,
+    PRUNED,
+    treeEntries,
+} from '@jterrazz/typescript/rules';
 import { existsSync, readFileSync } from 'node:fs';
 import { basename, dirname, join, relative } from 'node:path';
 

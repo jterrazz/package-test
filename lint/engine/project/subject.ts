@@ -512,7 +512,6 @@ export function subjectsOfChain(
     return reached.map((subject) => declaredMethod(subject, reading.methodless));
 }
 
-
 export function subjectsOf(
     source: string,
     readRequest?: RequestReader,

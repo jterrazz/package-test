@@ -16,7 +16,6 @@ type Ground = typeof GROUND_EXPECTED | typeof GROUND_REQUESTS | typeof GROUND_SE
 
 const GROUND_DIRS = new Set<string>([GROUND_EXPECTED, GROUND_REQUESTS, GROUND_SEEDS]);
 
-
 function documentFindings(entry: GroundEntry, passes: GroundPasses): Spotted[] {
     const text = decodeText(entry.path);
     return [

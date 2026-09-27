@@ -33,7 +33,11 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Spotted
         }
         for (const entry of entries) {
             const path = join(dir, entry.name);
-            if (!entry.isDirectory() || PRUNED_WITH_OUTPUTS.has(entry.name) || isGroundFolder(entry.name)) {
+            if (
+                !entry.isDirectory() ||
+                PRUNED_WITH_OUTPUTS.has(entry.name) ||
+                isGroundFolder(entry.name)
+            ) {
                 continue;
             }
             if (GROUND_SYNONYMS.has(entry.name) && holdsGround(path, memberDir)) {
