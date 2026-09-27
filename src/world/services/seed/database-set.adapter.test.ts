@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { DatabasePort } from '../database.port.js';
-import { databaseSet } from './database-set.driver.js';
+import { databaseSet } from './database-set.adapter.js';
 
 function idle(): DatabasePort {
     return {

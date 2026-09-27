@@ -27,7 +27,7 @@ describe('facet-is-a-composition.values', () => {
     test("facet-values — facet values — an adapter is a plain value or a driver's constructor called on plain values", () => {
         // Given - a driver's constructor and a definition
         const imports = new Map([
-            ['databaseSet', '../../world/services/seed/database-set.driver.js'],
+            ['databaseSet', '../../world/services/seed/database-set.adapter.js'],
             ['seed', '../../world/services/seed/seed.capability.js'],
         ]);
 

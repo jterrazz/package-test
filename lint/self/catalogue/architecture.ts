@@ -8,10 +8,10 @@ export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
         audience: 'self',
         channel: 'statique',
         convention:
-            'A facet file — `src/facets/<facet>/<facet>.facet.ts` — is a composition and nothing else: its imports, one `const composition = { … }` listing the setups, the actions and the constructor options it composes, the chain type it names as an interface, and one exported `defineFacet<…>()({ … })` — the definer handed nothing — whose `drivers` is an arrow, each parameter a bare name with no default nor pattern, handing back the object of the adapters it wires; any other statement — a function, a class, a variable, a call — is an error. Nothing in them is written inline either: the composition lists by name setups and actions imported from a `*.capability.ts` or `*.action.ts` module, and states each option as a matrix row of string literals; each adapter `drivers` hands back is a name, a read of the config, or a constructor a driver module exports — under `world/`, or in a concept folder of the facet — called on those; and every other member of the facet is a reference imported from its module. Every key of the composition, of its options and their rows, of the facet and of the adapters is a name written as it is, never a computed `[…]`. The constructor beside it, `<facet>.handle.ts`, starts the infrastructure and opens the facet: it never calls a step (`reduce`, `arm`, `perform`) of a definition imported from a `*.capability.ts` or `*.action.ts` module — read off it by a written or a string key, through a namespace import, a cast or a `const` alias of it or of the step, destructured (a default included), off the facet’s composition, or through `call`/`apply`, wherever in the file the alias is declared — nor builds with `new` a result imported from a `*.result.ts` module or `expectations/`, by name or through a namespace import. A step reaching the constructor any other way — a function parameter, a `bind`, a value it computes — is beyond the rule’s reach.',
+            'A facet file — `src/facets/<facet>/<facet>.facet.ts` — is a composition and nothing else: its imports, one `const composition = { … }` listing the setups, the actions and the constructor options it composes, the chain type it names as an interface, and one exported `defineFacet<…>()({ … })` — the definer handed nothing — whose `drivers` is an arrow, each parameter a bare name with no default nor pattern, handing back the object of the adapters it wires; any other statement — a function, a class, a variable, a call — is an error. Nothing in them is written inline either: the composition lists by name setups and actions imported from a `*.capability.ts` or `*.action.ts` module, and states each option as a matrix row of string literals; each adapter `drivers` hands back is a name, a read of the config, or a constructor an adapter module (`*.adapter.ts`) exports — under `world/`, or in a concept folder of the facet — called on those; and every other member of the facet is a reference imported from its module. Every key of the composition, of its options and their rows, of the facet and of the adapters is a name written as it is, never a computed `[…]`. The constructor beside it, `<facet>.handle.ts`, starts the infrastructure and opens the facet: it never calls a step (`reduce`, `arm`, `perform`) of a definition imported from a `*.capability.ts` or `*.action.ts` module — read off it by a written or a string key, through a namespace import, a cast or a `const` alias of it or of the step, destructured (a default included), off the facet’s composition, or through `call`/`apply`, wherever in the file the alias is declared — nor builds with `new` a result imported from a `*.result.ts` module or `expectations/`, by name or through a namespace import. A step reaching the constructor any other way — a function parameter, a `bind`, a value it computes — is beyond the rule’s reach.',
         facet: 'model',
         family: 'architecture',
-        fix: 'Move the logic to the capability, the action or the driver that owns it; the facet file lists definitions and wires drivers, the constructor opens it.',
+        fix: 'Move the logic to the capability, the action or the adapter that owns it; the facet file lists definitions and wires adapters, the constructor opens it.',
         name: 'facet-is-a-composition',
         rationale:
             'A setup is defined once and composed by every facet that offers it; logic written in one facet file is a second definition of it, which the next facet does not share and the matrix cannot see.',
@@ -28,7 +28,7 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
             'The chain kernel and every setup load in a page: no module of the chain kernel (`src/kernel/chain/`) or a setup module (`src/**/*.capability.ts`) reaches — through its value imports, its re-exports and every `import()` of a string literal, at any depth — imports a node builtin, or a package at all: the walk cannot follow a package into its own imports, so none is reached. An `import type` is erased and loads nothing; an import whose every name is inline-typed (`import { type X }`) still loads its module under `verbatimModuleSyntax`.',
         facet: 'model',
         family: 'architecture',
-        fix: 'Put what needs the builtin or the package behind the port of the driver that owns it — an adapter a world area or the facet\u2019s own concept folder exports, handed in by the facet — or import only its type.',
+        fix: 'Put what needs the builtin or the package behind the port of the adapter that owns it — an adapter a world area or the facet\u2019s own concept folder exports, handed in by the facet — or import only its type.',
         name: 'kernel-loads-in-a-page',
         rationale:
             'The component facet composes the same kernel and setups inside a browser page, and `import-within-declared-layers` cannot see a builtin: it judges declared edges between trees and skips `node:*`, so one reached at any depth — directly, or inside a package — is a component chain that stops bundling.',
@@ -38,13 +38,13 @@ export const ARCHITECTURE_META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         convention:
-            'A definition is its module. Every setup a `<name>.capability.ts` exports is named `<name>`, and every action an `*.action.ts` exports is one that file is listed for; the setups and the actions found under `src/` are exactly the ones the meta-test lists. Each is tested beside its module, or claimed by a kind of `lint/self/corpus/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` beside it exactly when it arms a driver.',
+            'A definition is its module. Every setup a `<name>.capability.ts` exports is named `<name>`, and every action an `*.action.ts` exports is one that file is listed for; the setups and the actions found under `src/` are exactly the ones the meta-test lists. Each is tested beside its module, or claimed by a kind of `lint/self/corpus/siblingless-kinds.ts` that says what proves it instead, and a setup has a `<name>.port.ts` beside it exactly when it arms an adapter.',
         facet: 'model',
         family: 'architecture',
         fix: 'Name the definition for its module, write its test beside it (or declare its kind in `lint/self/corpus/siblingless-kinds.ts` when no test can run it where it lives), and declare the port its `arm` goes through (or drop the port it does not use).',
         name: 'definition-is-its-module',
         rationale:
-            'A facet composes a setup by its definition and the chain calls it by its name: a module and a name that disagree are two places to look for one setup, and a driver reached without a port is an adapter the definition knows.',
+            'A facet composes a setup by its definition and the chain calls it by its name: a module and a name that disagree are two places to look for one setup, and an adapter reached without a port is an adapter the definition knows.',
         reach: 'module',
     },
 ];
@@ -131,6 +131,20 @@ export const ARCHITECTURE_PASSES: Row[] = [
         name: 'stubs-reached-by-their-surface',
         rationale:
             '`import-within-declared-layers` lets every facet reach all of `world/`, so the queue that matches a request and the msw server that serves it were one relative import away from any module: an internal reached from outside is one that can no longer move, and a delivery wired by a facet that never declared it is a second channel nobody chose.',
+        reach: 'module',
+        severity: 'error',
+    },
+    {
+        audience: 'self',
+        channel: 'checker',
+        convention:
+            'A module of `src/` that implements a port — the clock of a process or of a page, a page, a device, the disk — is an adapter, and carries the one suffix `*.adapter.ts`, named for what it adapts (`process-clock.adapter.ts`, `page-clock.adapter.ts`); a `*.driver.ts`, or its test, is an error at its first line.',
+        facet: 'model',
+        family: 'architecture',
+        fix: 'Rename the file `<what it adapts>.adapter.ts`, and the paths that import it.',
+        name: 'one-word-for-an-adapter',
+        rationale:
+            'Two suffixes for one role split every search in two: the reader looking for what implements a port opens the `*.adapter.ts` files and misses the half named `*.driver.ts`.',
         reach: 'module',
         severity: 'error',
     },

@@ -1,0 +1,5 @@
+description: a module adapting the clock, named `*.adapter.ts` for what it adapts, passes
+fixture: ./_fixtures/adapters/
+runs:
+    - command: self-checker .
+      exit: 0

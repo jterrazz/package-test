@@ -25,7 +25,7 @@ import {
 } from '../../../expectations/tokens/structural.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
-import { fsFixtures } from '../fixture/fixtures.driver.js';
+import { fsFixtures } from '../fixture/fs-fixtures.adapter.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
 

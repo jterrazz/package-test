@@ -4,8 +4,8 @@ import { defineAction } from '../../kernel/chain/action.js';
 import { defineFacet } from '../../kernel/chain/define-facet.js';
 import { clock } from './clock.capability.js';
 import type { ClockMethod } from './clock.capability.js';
-import { processClock } from './clock.driver.js';
 import type { ClockPort } from './clock.port.js';
+import { processClock } from './process-clock.adapter.js';
 
 type Chain = { clock: ClockMethod<Chain>; now: () => Promise<string> };
 

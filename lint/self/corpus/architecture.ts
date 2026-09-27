@@ -114,7 +114,7 @@ export function straysOf(
     const ported = existsSync(resolve(root, dirname(path), `${module}.port.ts`));
     if (definition.kind === 'setup' && ported !== (definition.arm !== undefined)) {
         found.push(
-            `${path}: ${definition.name} ${ported ? 'arms no driver, yet has' : 'arms a driver, yet has no'} ${module}.port.ts`,
+            `${path}: ${definition.name} ${ported ? 'arms no adapter, yet has' : 'arms an adapter, yet has no'} ${module}.port.ts`,
         );
     }
     return found;

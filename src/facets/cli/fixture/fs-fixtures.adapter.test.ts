@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { afterAll, beforeAll, describe, expect, test } from 'vitest';
 
-import { copyPlan } from './fixtures.driver.js';
+import { copyPlan } from './fs-fixtures.adapter.js';
 
 let base: string;
 let specsRoot: string;
@@ -17,7 +17,7 @@ function freshWorkDir(): string {
     return workDir;
 }
 
-describe('fixtures.driver', () => {
+describe('fsFixtures', () => {
     beforeAll(() => {
         // Given - a specs/ tree with a shared pool and a feature-local fixtures dir
         base = mkdtempSync(resolve(tmpdir(), 'fixtures-'));

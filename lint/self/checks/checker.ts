@@ -4,6 +4,7 @@ import { checkFolderNamedForAConcept } from './folder-named-for-a-concept.js';
 import { checkLintImportsFollowTheDirection } from './lint-imports-follow-the-direction.js';
 import { checkNoCrossFacetImport } from './no-cross-facet-import.js';
 import { checkOneOwnerPerLibrary } from './one-owner-per-library.js';
+import { checkOneWordForAnAdapter } from './one-word-for-an-adapter.js';
 import { checkSourceRootHoldsKnownEntries } from './source-root-holds-known-entries.js';
 import { checkSpecimenFiledByCapability } from './specimen-filed-by-capability.js';
 import { checkStubsReachedByTheirSurface } from './stubs-reached-by-their-surface.js';
@@ -17,6 +18,7 @@ export const SELF_CHECKER_PASS_IDS = [
     'folder-named-for-a-concept',
     'lint-imports-follow-the-direction',
     'stubs-reached-by-their-surface',
+    'one-word-for-an-adapter',
 ] as const;
 
 export type SelfPassId = (typeof SELF_CHECKER_PASS_IDS)[number];
@@ -33,6 +35,7 @@ export const SELF_CHECKER: AtZeroRegistry = {
         checkFolderNamedForAConcept,
         checkLintImportsFollowTheDirection,
         checkStubsReachedByTheirSurface,
+        checkOneWordForAnAdapter,
     ],
     specs: [checkSpecimenFiledByCapability],
 };

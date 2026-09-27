@@ -6,14 +6,14 @@ import { clock } from '../../world/clock/clock.capability.js';
 import { mswWorker } from '../../world/stubs/delivery/browser-page/msw-worker.adapter.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import type { ComponentOptions } from './component.project.js';
-import { pageClock } from './page/clock.driver.js';
+import { pageClock } from './page/page-clock.adapter.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';
-import { vitestBrowserPage } from './page/page.driver.js';
+import { vitestBrowserPage } from './page/vitest-browser-page.adapter.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { render } from './render/render.action.js';
 import { wrap } from './render/wrap.capability.js';
+import { pageViewport } from './viewport/page-viewport.adapter.js';
 import { viewport } from './viewport/viewport.capability.js';
-import { pageViewport } from './viewport/viewport.driver.js';
 
 const composition = {
     actions: [render],

@@ -98,7 +98,7 @@ describe('architecture', () => {
             ...modulesOf(ROOT, '', '.action.ts'),
         ]);
 
-        // Then - each answers to its module, has its test, and names a port exactly when it arms a driver
+        // Then - each answers to its module, has its test, and names a port exactly when it arms an adapter
         expect(definitions.flatMap((found) => straysOf(ROOT, found, ACTION_MODULES))).toStrictEqual(
             [],
         );

@@ -23,7 +23,7 @@ function facetWiring(drivers: string): string {
     return `
 import { seed } from '../../../../world/services/seed/seed.capability.js';
 import { getCallerDir } from '../../../../kernel/files/caller.js';
-import { databaseSet } from '../../../../world/services/seed/database-set.driver.js';
+import { databaseSet } from '../../../../world/services/seed/database-set.adapter.js';
 import { defineFacet } from '../../../define-facet.js';
 
 const composition = {

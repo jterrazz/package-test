@@ -6,7 +6,7 @@ import { getCallerDir } from '../../kernel/files/caller.js';
 import { stubBackend } from '../../world/stubs/delivery/other-process/stub-backend.adapter.js';
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import type { MobileConfig, MobileSpecificationOptions } from './mobile.handle.js';
-import { appiumApp } from './screen/app.driver.js';
+import { appiumApp } from './screen/appium-app.adapter.js';
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { open } from './screen/open.action.js';
 

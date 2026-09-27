@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import type { DeviceOpenOptions, DevicePort, MobileScenario } from '../device/device.port.js';
-import { appiumApp } from './app.driver.js';
+import { appiumApp } from './appium-app.adapter.js';
 
 const scenario: MobileScenario = async () => {
     await Promise.resolve();
