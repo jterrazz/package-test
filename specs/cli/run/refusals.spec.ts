@@ -153,7 +153,15 @@ describe('refusals', () => {
         // Given - a document carrying a key outside the closed set (line 2)
         const error = await errorOf(cli.run(file('./_fixtures/unknown-key.spec.yaml')));
 
-        // Then - the frame is that line, not a parser frame
+        // Then - a refusal naming the line and the key, whose frame is that line, not a parser frame
+        expect(error.message).toBe(
+            [
+                'found: specs/cli/run/_fixtures/unknown-key.spec.yaml:2: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs',
+                'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
+                'fix: write the key the grammar names; the reason prints the accepted set',
+                'read: docs/19-linting.md#document-follows-its-grammar',
+            ].join('\n'),
+        );
         expect(frames(error)).toStrictEqual([
             `at ${resolve(import.meta.dirname, '_fixtures/unknown-key.spec.yaml')}:2:1`,
         ]);

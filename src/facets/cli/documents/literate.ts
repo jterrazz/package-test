@@ -30,6 +30,7 @@ import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fs-fixtures.adapter.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';
+import { grammarRefusal } from './literate-plugin.js';
 
 /** Runs a `<case>.spec.yaml`: several commands in one working directory, each judged the moment it ends. */
 
@@ -316,8 +317,9 @@ export async function runSpecDocument(options: LiterateRunOptions): Promise<CliR
     try {
         file = readSpecFile(readFileSync(filePath, 'utf8'), displayPath);
     } catch (error) {
-        // A grammar refusal is about the file: the stack names the line the message does.
-        throw error instanceof SpecSyntaxError ? atLine(error, filePath, error.line) : error;
+        throw error instanceof SpecSyntaxError
+            ? atLine(grammarRefusal(error, displayPath), filePath, error.line)
+            : error;
     }
     const { document } = file;
     const fileDir = filePath.replace(/[/\\][^/\\]*$/u, '');

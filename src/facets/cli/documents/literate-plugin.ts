@@ -1,7 +1,9 @@
 import { readFileSync } from 'node:fs';
 import { basename, isAbsolute, resolve } from 'node:path';
 
-import { readSpecFile } from '../../../../lint/engine/project/spec-document.js';
+import { readSpecFile, SpecSyntaxError } from '../../../../lint/engine/project/spec-document.js';
+import type { SpecFile } from '../../../../lint/engine/project/spec-document.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { DISK_KEY } from '../../../kernel/files/spec-path.js';
 
 /** Makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`. */
@@ -25,13 +27,33 @@ export type LiteratePlugin = {
     name: string;
 };
 
+export function grammarRefusal(error: SpecSyntaxError, displayPath: string): Error {
+    return new Error(
+        refusal({
+            fix: 'write the key the grammar names; the reason prints the accepted set',
+            found: `${displayPath}:${error.line}: ${error.reason}`,
+            read: 'docs/19-linting.md#document-follows-its-grammar',
+            why: 'A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
+        }),
+        { cause: error },
+    );
+}
+
+function readDocument(content: string, displayPath: string): SpecFile {
+    try {
+        return readSpecFile(content, displayPath);
+    } catch (error) {
+        throw error instanceof SpecSyntaxError ? grammarRefusal(error, displayPath) : error;
+    }
+}
+
 /** The document is handed to `cli.run()` spelled by its brand, so the module imports the runner alone. */
 export function literateModule(
     content: string,
     filePath: string,
     specificationPath: string,
 ): string {
-    const { description } = readSpecFile(content, filePath).document;
+    const { description } = readDocument(content, filePath).document;
     return [
         "import { test } from 'vitest';",
         `import { cli } from ${JSON.stringify(specificationPath)};`,

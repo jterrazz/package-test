@@ -30,6 +30,28 @@ describe('literate-plugin', () => {
         );
     });
 
+    test('literate() — the vite plugin door — a document breaking its grammar is refused, its line and key named', () => {
+        // Given - a document carrying a key outside the closed set (line 2)
+        const malformed = [
+            'description: a stray key',
+            'when: something happens',
+            'runs: []',
+            '',
+        ].join('\n');
+
+        // Then - the refusal, not the parser's bare line
+        expect(() =>
+            literateModule(malformed, 'specs/cli/stray.spec.yaml', '/specs/cli/x.spec.ts'),
+        ).toThrow(
+            [
+                'found: specs/cli/stray.spec.yaml:2: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs',
+                'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
+                'fix: write the key the grammar names; the reason prints the accepted set',
+                'read: docs/19-linting.md#document-follows-its-grammar',
+            ].join('\n'),
+        );
+    });
+
     test('literate() — the vite plugin door — the plugin adds the .spec.yaml glob to the project test include', () => {
         // Given - a plugin with the default include
         const plugin = literate({ specification: './specs/cli/cli.specification.ts' });
