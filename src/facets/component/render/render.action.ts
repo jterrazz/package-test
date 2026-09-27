@@ -2,8 +2,8 @@ import {
     BROWSER_DESCRIPTORS,
     BROWSER_STATES,
     BROWSER_VERBS,
-    DRAWN_DESCRIPTORS,
-    DRAWN_VERBS,
+    EVERY_SURFACE_DESCRIPTORS,
+    EVERY_SURFACE_VERBS,
     WITHIN,
 } from '../../../elements/matrix.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
@@ -89,7 +89,7 @@ export const render = defineAction<
         { group: 'Result accessor', name: '.errors', probe: 'result.errors' },
         { group: 'Result accessor', name: '.html', probe: 'result.html' },
     ],
-    descriptors: [...DRAWN_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
+    descriptors: [...EVERY_SURFACE_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
     name: 'render',
     perform: async ([subject, scenario], read, { page }) => {
         const recorder = recordConsole();
@@ -124,5 +124,5 @@ export const render = defineAction<
         return { workDir: null };
     },
     row: { group: 'Terminal action', name: '.render()', probe: '.render(' },
-    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, ...PARENT_VERBS],
+    verbs: [...EVERY_SURFACE_VERBS, ...BROWSER_VERBS, ...PARENT_VERBS],
 });

@@ -2,8 +2,8 @@ import {
     BROWSER_DESCRIPTORS,
     BROWSER_STATES,
     BROWSER_VERBS,
-    DRAWN_DESCRIPTORS,
-    DRAWN_VERBS,
+    EVERY_SURFACE_DESCRIPTORS,
+    EVERY_SURFACE_VERBS,
     WITHIN,
 } from '../../../elements/matrix.js';
 import { defineAction } from '../../../kernel/chain/action.js';
@@ -49,7 +49,7 @@ export const visit = defineAction<
         { group: 'Result accessor', name: '.links', probe: 'result.links' },
         { group: 'Result accessor', member: 'meta', name: '.meta()', probe: 'result.meta' },
     ],
-    descriptors: [...DRAWN_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
+    descriptors: [...EVERY_SURFACE_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
     name: 'visit',
     perform: async ([path, scenario], read, { browser }, { config, testDir }) => {
         const { backendUrl, baseUrl } = config;
@@ -70,5 +70,5 @@ export const visit = defineAction<
         return new PageResult({ config, page, testDir });
     },
     row: { group: 'Terminal action', name: '.visit()', probe: ".visit('" },
-    verbs: [...DRAWN_VERBS, ...BROWSER_VERBS, GOTO],
+    verbs: [...EVERY_SURFACE_VERBS, ...BROWSER_VERBS, GOTO],
 });

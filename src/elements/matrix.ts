@@ -1,6 +1,6 @@
 import type { MatrixRow } from '../kernel/chain/capability.js';
 
-export const DRAWN_VERBS: readonly MatrixRow[] = [
+export const EVERY_SURFACE_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'see', probe: '.see(' },
     { group: 'Verb', name: 'fill', probe: '.fill(' },
 ];
@@ -14,7 +14,7 @@ export const BROWSER_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'select', probe: '.select(' },
 ];
 
-export const DRAWN_DESCRIPTORS: readonly MatrixRow[] = [
+export const EVERY_SURFACE_DESCRIPTORS: readonly MatrixRow[] = [
     { group: 'Descriptor', name: 'button', probe: 'button(' },
     { group: 'Descriptor', name: 'field', probe: 'field(' },
     { group: 'Descriptor', member: 'content', name: 'content', probe: 'content(' },

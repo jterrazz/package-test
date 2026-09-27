@@ -1,4 +1,8 @@
-import { DRAWN_DESCRIPTORS, DRAWN_VERBS, WITHIN } from '../../../elements/matrix.js';
+import {
+    EVERY_SURFACE_DESCRIPTORS,
+    EVERY_SURFACE_VERBS,
+    WITHIN,
+} from '../../../elements/matrix.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import type { MobileScenario } from '../device/device.port.js';
@@ -25,10 +29,10 @@ export const open = defineAction<
         { group: 'Result accessor', name: '.content', probe: 'result.content' },
         { group: 'Result accessor', name: '.screen', probe: 'result.screen' },
     ],
-    descriptors: [...DRAWN_DESCRIPTORS, WITHIN],
+    descriptors: [...EVERY_SURFACE_DESCRIPTORS, WITHIN],
     name: 'open',
     perform: async ([deepLink, scenario], _read, { app }, { config, testDir }) =>
         new ScreenResult({ config, screen: await app.open(deepLink, scenario), testDir }),
     row: { group: 'Terminal action', name: '.open()', probe: '.open(' },
-    verbs: [...DRAWN_VERBS, TAP],
+    verbs: [...EVERY_SURFACE_VERBS, TAP],
 });
