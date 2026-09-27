@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noImportedExpectation } from './no-imported-expectation.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

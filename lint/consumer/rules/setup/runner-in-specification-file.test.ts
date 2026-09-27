@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { runnerInSpecificationFile } from './runner-in-specification-file.js';
 
 ruleTester().run('runner-in-specification-file', runnerInSpecificationFile, {

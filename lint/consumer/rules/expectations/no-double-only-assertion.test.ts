@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noDoubleOnlyAssertion } from './no-double-only-assertion.js';
 
 const MODULE_FILE = '/repo/src/domain/order.test.ts';

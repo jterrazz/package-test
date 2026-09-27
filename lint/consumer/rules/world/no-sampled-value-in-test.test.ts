@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noSampledValueInTest } from './no-sampled-value-in-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';

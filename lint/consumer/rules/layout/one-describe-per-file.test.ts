@@ -1,7 +1,7 @@
+import { ruleTester } from '@jterrazz/test';
 import { join } from 'node:path';
 
 import { packageWith } from '../../../engine/testing/package-tree.fixtures.js';
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { oneDescribePerFile } from './one-describe-per-file.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

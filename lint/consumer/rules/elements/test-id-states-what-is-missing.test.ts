@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { testIdStatesWhatIsMissing } from './test-id-states-what-is-missing.js';
 
 const SPEC = '/repo/specs/website/home/subscribe.spec.ts';

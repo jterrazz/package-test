@@ -1,9 +1,9 @@
+import { ruleTester } from '@jterrazz/test';
 import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { afterAll } from 'vitest';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { noSingleUseRef } from './no-single-use-ref.js';
 
 // Built at module load: the rule reads the fixtures on disk before the cases run.

@@ -23,7 +23,7 @@ const config: OxlintConfig = defineConfig(
                     'src/facets/mobile/server/appium-server.ts',
                     'src/facets/component/page/**',
                     'src/facets/component/golden/**',
-                    'lint/engine/testing/rule-tester.ts',
+                    'src/facets/lint/rule-tester.ts',
                     'src/facets/website/browser/playwright.adapter.ts',
                     'src/world/stubs/delivery/**',
                     'src/world/clock/**',

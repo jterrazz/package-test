@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { facetIsAComposition } from './facet-is-a-composition.js';
 
 const COMPOSED = `

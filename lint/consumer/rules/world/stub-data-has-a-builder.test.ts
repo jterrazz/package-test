@@ -1,6 +1,6 @@
+import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { stubDataHasABuilder } from './stub-data-has-a-builder.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');

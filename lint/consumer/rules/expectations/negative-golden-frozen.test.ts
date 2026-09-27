@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { negativeGoldenFrozen } from './negative-golden-frozen.js';
 
 const SPEC = '/repo/specs/api/session/session.test.ts';

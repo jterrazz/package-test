@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noRunnerAlias } from './no-runner-alias.js';
 
 ruleTester().run('no-runner-alias', noRunnerAlias, {

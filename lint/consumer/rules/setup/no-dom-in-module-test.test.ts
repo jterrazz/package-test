@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noDomInModuleTest } from './no-dom-in-module-test.js';
 
 const tester = ruleTester();

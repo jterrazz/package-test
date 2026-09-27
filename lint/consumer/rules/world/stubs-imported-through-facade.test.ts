@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { stubsImportedThroughFacade } from './stubs-imported-through-facade.js';
 
 const TEST_FILE = '/repo/specs/api/feature/feature.test.ts';

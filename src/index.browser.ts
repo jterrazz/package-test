@@ -1,6 +1,6 @@
 /** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
 
-import type { ruleTester as ruleTesterFn } from '../lint/engine/testing/rule-tester.js';
+import type { ruleTester as ruleTesterFn } from './facets/lint/index.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';

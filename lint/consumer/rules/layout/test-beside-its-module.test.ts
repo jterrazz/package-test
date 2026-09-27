@@ -1,9 +1,9 @@
+import { ruleTester } from '@jterrazz/test';
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { testBesideItsModule } from './test-beside-its-module.js';
 
 // Each fixture tree carries its own package.json, which puts its `src/` outside a specs tree.

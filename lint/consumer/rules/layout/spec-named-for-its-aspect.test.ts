@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { specNamedForItsAspect } from './spec-named-for-its-aspect.js';
 
 ruleTester().run('spec-named-for-its-aspect', specNamedForItsAspect, {

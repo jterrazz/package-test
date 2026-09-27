@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { whenBetweenGivenAndThen } from './when-between-given-and-then.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';

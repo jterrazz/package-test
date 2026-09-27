@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { MAX_TEST_LINES, testBodyWithinLineLimit } from './test-body-within-line-limit.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

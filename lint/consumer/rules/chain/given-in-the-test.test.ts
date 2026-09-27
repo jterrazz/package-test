@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { givenInTheTest } from './given-in-the-test.js';
 
 const TEST_FILE = '/repo/src/domain/order.test.ts';

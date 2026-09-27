@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noSimulatedDom } from './no-simulated-dom.js';
 /* Joined at runtime: vitest scans a test file's SOURCE for the pragma, and a literal here would switch this file's own environment. */
 const PRAGMA = ['@vitest', 'environment'].join('-');

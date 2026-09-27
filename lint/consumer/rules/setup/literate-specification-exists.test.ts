@@ -1,6 +1,6 @@
+import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { literateSpecificationExists } from './literate-specification-exists.js';
 
 // The config sits at this package's root: the rule answers against its real specification files.

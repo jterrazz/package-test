@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { goldenPathHasExtension } from './golden-path-has-extension.js';
 
 const VIOLATION = '/repo/specs/app/widget/widget.test.ts';

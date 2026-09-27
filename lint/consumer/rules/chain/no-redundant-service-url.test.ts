@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noRedundantServiceUrl } from './no-redundant-service-url.js';
 
 ruleTester().run('no-redundant-service-url', noRedundantServiceUrl, {

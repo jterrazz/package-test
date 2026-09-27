@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { resultComparedWhole } from './result-compared-whole.js';
 
 const SPEC = '/repo/specs/api/users/users.spec.ts';

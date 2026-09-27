@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noStatusOnlyTest } from './no-status-only-test.js';
 
 const SPEC = '/repo/specs/api/events/create-event.test.ts';

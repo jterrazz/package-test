@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noExpectInScenario } from './no-expect-in-scenario.js';
 
 ruleTester().run('no-expect-in-scenario', noExpectInScenario, {

@@ -1,8 +1,8 @@
+import { ruleTester } from '@jterrazz/test';
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { requestFileExtensionKnown } from './request-file-extension-known.js';
 
 const SPECS_LINT = resolve(import.meta.dirname, '../../../../specs/lint');

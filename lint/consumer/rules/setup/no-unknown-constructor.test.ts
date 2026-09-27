@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noUnknownConstructor } from './no-unknown-constructor.js';
 
 ruleTester().run('no-unknown-constructor', noUnknownConstructor, {

@@ -1,8 +1,8 @@
+import { ruleTester } from '@jterrazz/test';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { specsAtDeclaredDepth } from './specs-at-declared-depth.js';
 
 const SUITES = groundTree({ 'posts/add/add.test.ts': '', 'tree/row-names.test.ts': '' });

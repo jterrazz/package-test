@@ -1,3 +1,4 @@
+import { ruleTester } from '@jterrazz/test';
 import type { Context } from '@oxlint/plugins';
 import { execFileSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
@@ -6,7 +7,6 @@ import { describe, expect, test } from 'vitest';
 
 import type { AstNode } from '../../../engine/project/ast.js';
 import { checkoutUnder } from '../../../engine/testing/package-tree.fixtures.js';
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { seedsAreSql } from './seeds-are-sql.js';
 
 // The fs-anchored cases run against the shared E2E fixture trees.

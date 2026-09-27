@@ -1,6 +1,6 @@
+import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { projectNamedForItsFacet } from './project-named-for-its-facet.js';
 
 const CONFIG = '/repo/vitest.config.ts';

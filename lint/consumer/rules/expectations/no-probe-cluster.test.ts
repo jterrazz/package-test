@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noProbeCluster } from './no-probe-cluster.js';
 
 const SPEC_FILE = '/repo/specs/cli/build/build.spec.ts';

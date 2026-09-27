@@ -6,11 +6,7 @@ export * from './facets/component/index.js';
 export type * from './facets/integration/index.js';
 export type * from './facets/job/index.js';
 export type * from './facets/lint/index.js';
-export {
-    type PositionedCases,
-    type PositionedRuleTester,
-    ruleTester,
-} from '../lint/engine/testing/rule-tester.js';
+export { ruleTester } from './facets/lint/index.js';
 export type * from './facets/mobile/index.js';
 export type * from './facets/website/index.js';
 

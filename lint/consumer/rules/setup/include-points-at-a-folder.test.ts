@@ -1,6 +1,6 @@
+import { ruleTester } from '@jterrazz/test';
 import { resolve } from 'node:path';
 
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
 import { includePointsAtAFolder } from './include-points-at-a-folder.js';
 
 // Placed at this package's own root: `specs/api` exists here and `specs/lint2`

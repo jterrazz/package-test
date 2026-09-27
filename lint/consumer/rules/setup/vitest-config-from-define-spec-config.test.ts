@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { vitestConfigFromDefineSpecConfig } from './vitest-config-from-define-spec-config.js';
 
 const CONFIG = '/repo/vitest.config.ts';

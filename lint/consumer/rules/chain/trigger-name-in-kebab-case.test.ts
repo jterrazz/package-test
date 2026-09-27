@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { triggerNameInKebabCase } from './trigger-name-in-kebab-case.js';
 
 ruleTester().run('trigger-name-in-kebab-case', triggerNameInKebabCase, {

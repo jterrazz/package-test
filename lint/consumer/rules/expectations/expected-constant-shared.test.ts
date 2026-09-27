@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { expectedConstantShared } from './expected-constant-shared.js';
 
 const SPEC = '/repo/specs/api/events/list/pagination.spec.ts';

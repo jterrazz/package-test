@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { pathsNamedInTheTest } from './paths-named-in-the-test.js';
 
 const HELPER = '/repo/specs/api/orders/seeded.ts';

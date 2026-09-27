@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { scenarioEndsSettled } from './scenario-ends-settled.js';
 
 const SPEC = '/repo/specs/website/posts/table.spec.ts';

@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { cliRunsTheProductBinary } from './cli-runs-the-product-binary.js';
 
 ruleTester().run('cli-runs-the-product-binary', cliRunsTheProductBinary, {

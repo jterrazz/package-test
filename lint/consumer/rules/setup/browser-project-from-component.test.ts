@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { browserProjectFromComponent } from './browser-project-from-component.js';
 
 const tester = ruleTester();

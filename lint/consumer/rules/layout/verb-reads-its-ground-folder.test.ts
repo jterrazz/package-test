@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { verbReadsItsGroundFolder } from './verb-reads-its-ground-folder.js';
 
 const SPEC = '/repo/specs/api/orders/orders.spec.ts';

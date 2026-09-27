@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { cleanupPassedToAfterAll } from './cleanup-passed-to-after-all.js';
 
 const SPEC_FILE = '/repo/specs/cli/cli.specification.ts';

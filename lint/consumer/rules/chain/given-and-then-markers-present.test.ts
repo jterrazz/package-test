@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { givenAndThenMarkersPresent } from './given-and-then-markers-present.js';
 
 ruleTester().run('given-and-then-markers-present', givenAndThenMarkersPresent, {

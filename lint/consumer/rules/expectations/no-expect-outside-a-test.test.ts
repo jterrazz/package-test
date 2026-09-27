@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noExpectOutsideATest } from './no-expect-outside-a-test.js';
 
 const SETUP_MODULE = '/repo/specs/cli/_setup/built.ts';

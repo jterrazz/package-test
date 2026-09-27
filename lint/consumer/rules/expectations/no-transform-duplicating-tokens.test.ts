@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noTransformDuplicatingTokens } from './no-transform-duplicating-tokens.js';
 
 ruleTester().run('no-transform-duplicating-tokens', noTransformDuplicatingTokens, {

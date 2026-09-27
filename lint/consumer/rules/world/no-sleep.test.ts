@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noSleep } from './no-sleep.js';
 
 const SPEC_FILE = '/repo/specs/cli/exec/exec.test.ts';

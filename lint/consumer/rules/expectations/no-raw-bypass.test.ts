@@ -1,4 +1,5 @@
-import { ruleTester } from '../../../engine/testing/rule-tester.js';
+import { ruleTester } from '@jterrazz/test';
+
 import { noRawBypass } from './no-raw-bypass.js';
 
 ruleTester().run('no-raw-bypass', noRawBypass, {

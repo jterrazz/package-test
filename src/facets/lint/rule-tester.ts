@@ -1,8 +1,9 @@
 /* oxlint-disable vitest/expect-expect, vitest/valid-describe-callback, vitest/valid-title -- this module declares no suite of its own: it hands the runner's primitives to oxlint's RuleTester, which declares one per rule and a test per case, so the titles and the assertions are the tester's */
-import { refusalBlock } from '@jterrazz/typescript/rules';
 import { createRequire } from 'node:module';
 import type { RuleTester } from 'oxlint/plugins-dev';
 import { it as declareCase, describe as declareSuite } from 'vitest';
+
+import { refusal } from '../../../lint/index.refusal.js';
 
 type Tester = typeof RuleTester;
 
@@ -43,7 +44,7 @@ function refuseUnpositioned(name: string, cases: PositionedCases): void {
         const unplaced = unplacedOf(invalid.errors);
         if (unplaced !== null) {
             throw new Error(
-                refusalBlock({
+                refusal({
                     fix: 'state each error as an object carrying its `line` and `column`',
                     found: `${name}: invalid case ${String(index)}, ${unplaced}`,
                     read: 'docs/21-lint.md#a-rule-alone-ruletester',
