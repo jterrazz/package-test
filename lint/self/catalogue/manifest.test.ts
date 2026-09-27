@@ -501,7 +501,7 @@ describe('manifest', () => {
         // Then - no two entries share a name (each maps to a distinct implementation)
         const names = new Set<string>();
         for (const entry of allRows) {
-            expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBeFalsy();
+            expect(names.has(entry.name), `duplicate catalogue entry ${entry.name}`).toBe(false);
             names.add(entry.name);
         }
     });
@@ -690,7 +690,7 @@ describe('manifest', () => {
                     CLI_CONTRACT_SPECS.has(id) ||
                     metaRows.has(id),
                 `${id} maps to no rule, pass, meta row, or CLI-contract spec`,
-            ).toBeTruthy();
+            ).toBe(true);
         }
     });
 

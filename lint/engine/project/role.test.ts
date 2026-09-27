@@ -67,8 +67,8 @@ describe('role', () => {
     test('roleOf — the kind a path states — says whether the path sits under a specs tree, whatever its kind', () => {
         // Given - the same suffix inside and outside `specs/`
         // Then - `inSpecs` is the second field a rule reads, never the first
-        expect(roleOf('/repo/specs/api/users/create.test.ts').inSpecs).toBeTruthy();
-        expect(roleOf('/repo/src/matching/match.test.ts').inSpecs).toBeFalsy();
+        expect(roleOf('/repo/specs/api/users/create.test.ts').inSpecs).toBe(true);
+        expect(roleOf('/repo/src/matching/match.test.ts').inSpecs).toBe(false);
     });
 
     test('roleOf — the kind a path states — names the separate test roots, in both of their spellings', () => {
@@ -177,12 +177,12 @@ describe('role', () => {
         ];
 
         // Then - the conventions bind every test file of a repository
-        expect(covered.every((file) => isTestFile(file))).toBeTruthy();
+        expect(covered.every((file) => isTestFile(file))).toBe(true);
     });
 
     test('isTestFile — what the test conventions reach — leaves production source alone', () => {
         // Given - a module of the app
         // Then - nothing about it is a test
-        expect(isTestFile('/repo/src/matching/match.ts')).toBeFalsy();
+        expect(isTestFile('/repo/src/matching/match.ts')).toBe(false);
     });
 });

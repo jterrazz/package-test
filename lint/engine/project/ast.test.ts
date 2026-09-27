@@ -52,7 +52,7 @@ describe('ast', () => {
 
         // Then - no anchor
         expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBeFalsy();
+        expect(isUnderSpecs(file)).toBe(false);
     });
 
     test('specsAnchor — takes the NEAREST specs ancestor, not the outermost', () => {
@@ -71,7 +71,7 @@ describe('ast', () => {
 
         // Then - the search never climbs past the package's own package.json
         expect(specsAnchor(file)).toBeUndefined();
-        expect(isUnderSpecs(file)).toBeFalsy();
+        expect(isUnderSpecs(file)).toBe(false);
     });
 
     test('specsAnchor — anchors a specs tree that lives under that same outer directory', () => {

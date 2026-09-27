@@ -42,7 +42,7 @@ describe('index', () => {
             Object.keys(plugin.rules).map((id) => `jterrazz/${id}`),
         );
         expect(testing.overrides?.[0]?.files).toContain('**/*.specification.ts');
-        expect('extends' in testing).toBeFalsy();
+        expect('extends' in testing).toBe(false);
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — declares no `categories` — every rule it ships is decided by name', () => {
@@ -54,7 +54,7 @@ describe('index', () => {
 
         // Then - none of them opens a category: a category turns on rules nobody decided, and composing it over a base preset silently re-enables them
         for (const layer of layers) {
-            expect('categories' in layer).toBeFalsy();
+            expect('categories' in layer).toBe(false);
         }
     });
 

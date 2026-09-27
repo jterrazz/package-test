@@ -129,7 +129,7 @@ describe('assertions', () => {
             // Then - the file is pretty-printed with a trailing newline
             const written = readFileSync(fixturePath, 'utf8');
             expect(written).toMatch(/^\{\n {4}"name": "cli-app"/u);
-            expect(written.endsWith('\n')).toBeTruthy();
+            expect(written.endsWith('\n')).toBe(true);
 
             // Then - a second identical run matches
             const b = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('json');

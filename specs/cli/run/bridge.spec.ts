@@ -38,7 +38,7 @@ describe('bridge', () => {
         const result = await cli.run(file('./built-then-started.spec.yaml'));
 
         // Then - the document proved the sequence; the cwd is readable afterwards
-        expect(result.file('dist/index.js').exists).toBeTruthy();
+        expect(result.file('dist/index.js').exists).toBe(true);
     });
 
     test('an env set and an inline pair both reach the child', async () => {
@@ -117,7 +117,7 @@ describe('bridge', () => {
         const result = await cli.run(file('./absent-then-written.spec.yaml'));
 
         // Then - the absent passed although the session ends with the file there
-        expect(result.file('dist/index.js').exists).toBeTruthy();
+        expect(result.file('dist/index.js').exists).toBe(true);
     });
 
     test('an exists: holds against the cwd of ITS run, not of the last one', async () => {
@@ -125,6 +125,6 @@ describe('bridge', () => {
         const result = await cli.run(file('./written-then-removed.spec.yaml'));
 
         // Then - the exists passed although the session ends with the file gone
-        expect(result.file('dist/index.js').exists).toBeFalsy();
+        expect(result.file('dist/index.js').exists).toBe(false);
     });
 });

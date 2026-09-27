@@ -527,9 +527,6 @@
     "lint/engine/project/ast.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 2
         }
     },
     "lint/engine/project/ast.ts": {
@@ -577,14 +574,6 @@
             "count": 1
         }
     },
-    "lint/engine/project/role.test.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 4
-        }
-    },
     "lint/engine/project/spec-document.test.ts": {
         "max-lines": {
             "count": 1
@@ -594,9 +583,6 @@
         },
         "unicorn/no-array-sort": {
             "count": 4
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 2
         }
     },
     "lint/engine/project/spec-document.ts": {
@@ -663,15 +649,9 @@
         },
         "unicorn/no-array-sort": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 2
         }
     },
     "lint/self/catalogue/manifest.test.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
         "max-lines": {
             "count": 1
         },
@@ -680,19 +660,11 @@
         },
         "unicorn/no-array-sort": {
             "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 2
         }
     },
     "lint/self/checks/architecture.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
-        }
-    },
-    "lint/self/corpus/docs-typecheck.test.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 8
         }
     },
     "lint/self/corpus/docs-typecheck.ts": {
@@ -780,14 +752,6 @@
     "specs/cli/container/labels.spec.ts": {
         "vitest/max-expects": {
             "count": 8
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 4
-        }
-    },
-    "specs/cli/container/spawn.spec.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 1
         }
     },
     "specs/cli/directory/changed.spec.ts": {
@@ -800,22 +764,9 @@
             "count": 2
         }
     },
-    "specs/cli/exec/fresh-workdir.spec.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 3
-        }
-    },
-    "specs/cli/exec/sequences.spec.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 1
-        }
-    },
     "specs/cli/file/checks.spec.ts": {
         "vitest/max-expects": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 5
         }
     },
     "specs/cli/filesystem/tree.spec.ts": {
@@ -829,9 +780,6 @@
         },
         "typescript/no-unsafe-member-access": {
             "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 1
         }
     },
     "specs/cli/json/workdir.spec.ts": {
@@ -840,14 +788,8 @@
         }
     },
     "specs/cli/run/bridge.spec.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 2
-        },
         "typescript/no-unsafe-type-assertion": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 3
         }
     },
     "specs/cli/run/refusals.spec.ts": {
@@ -860,19 +802,11 @@
             "count": 2
         }
     },
-    "specs/cli/seed/service-database.spec.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 1
-        }
-    },
     "specs/cli/stdout/comparison.spec.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 2
         },
         "typescript/restrict-template-expressions": {
-            "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
             "count": 1
         }
     },
@@ -919,9 +853,6 @@
     "src/expectations/command/cli.result.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 3
         }
     },
     "src/expectations/command/cli.result.ts": {
@@ -1017,9 +948,6 @@
         "typescript/no-unsafe-type-assertion": {
             "count": 4
         },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 6
-        },
         "vitest/require-to-throw-message": {
             "count": 1
         }
@@ -1049,11 +977,6 @@
             "count": 2
         }
     },
-    "src/expectations/http/http-file.test.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 4
-        }
-    },
     "src/expectations/http/http-file.ts": {
         "typescript/strict-boolean-expressions": {
             "count": 1
@@ -1073,13 +996,7 @@
         "jterrazz/given-in-the-test": {
             "count": 2
         },
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
         "jterrazz/no-raw-env-write": {
-            "count": 5
-        },
-        "vitest/prefer-strict-boolean-matchers": {
             "count": 5
         }
     },
@@ -1104,9 +1021,6 @@
     "src/expectations/tokens/match.test.ts": {
         "vitest/max-expects": {
             "count": 31
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 78
         }
     },
     "src/expectations/tokens/match.ts": {
@@ -1121,14 +1035,8 @@
         }
     },
     "src/expectations/tokens/structural.test.ts": {
-        "max-lines": {
-            "count": 1
-        },
         "vitest/max-expects": {
             "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 53
         }
     },
     "src/expectations/tokens/structural.ts": {
@@ -1225,9 +1133,6 @@
         },
         "jterrazz/no-raw-env-write": {
             "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 1
         }
     },
     "src/facets/cli/process/exec.adapter.ts": {
@@ -1242,11 +1147,6 @@
         },
         "typescript/require-await": {
             "count": 1
-        }
-    },
-    "src/facets/component/component.project.test.ts": {
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 3
         }
     },
     "src/facets/component/component.project.ts": {
@@ -1379,20 +1279,11 @@
     "src/kernel/files/caller.test.ts": {
         "jterrazz/given-in-the-test": {
             "count": 1
-        },
-        "jterrazz/no-existence-only-assertion": {
-            "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 8
         }
     },
     "src/kernel/files/spec-path.test.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 6
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 5
         }
     },
     "src/kernel/files/spec-path.ts": {
@@ -1523,17 +1414,11 @@
         "jterrazz/given-in-the-test": {
             "count": 1
         },
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
         "jterrazz/no-sampled-value-in-test": {
             "count": 1
         },
         "max-lines": {
             "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 18
         }
     },
     "src/world/services/sqlite/sqlite.adapter.ts": {
@@ -1675,9 +1560,6 @@
         },
         "vitest/max-expects": {
             "count": 2
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 13
         }
     },
     "src/world/stubs/kinds/anthropic.ts": {
@@ -1707,17 +1589,11 @@
         }
     },
     "src/world/stubs/kinds/http.test.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
         "typescript/no-non-null-assertion": {
             "count": 19
         },
         "vitest/max-expects": {
             "count": 3
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 19
         }
     },
     "src/world/stubs/kinds/openai.ts": {
@@ -1744,14 +1620,6 @@
         },
         "typescript/strict-boolean-expressions": {
             "count": 3
-        }
-    },
-    "src/world/stubs/kinds/text-filter.test.ts": {
-        "jterrazz/no-existence-only-assertion": {
-            "count": 1
-        },
-        "vitest/prefer-strict-boolean-matchers": {
-            "count": 9
         }
     },
     "src/world/stubs/matching/stub-queue.test.ts": {

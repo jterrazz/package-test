@@ -19,15 +19,15 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - a JSON number without decimals still matches float (JSON does not distinguish 42 from 42.0)
-        expect(structuralEquals(match.float(), 42, scope)).toBeTruthy();
-        expect(structuralEquals(match.float(), 4.2, scope)).toBeTruthy();
-        expect(structuralEquals(match.float(), Number.NaN, scope)).toBeFalsy();
+        expect(structuralEquals(match.float(), 42, scope)).toBe(true);
+        expect(structuralEquals(match.float(), 4.2, scope)).toBe(true);
+        expect(structuralEquals(match.float(), Number.NaN, scope)).toBe(false);
 
         // Then - a text value must carry the decimal part
-        expect(structuralEquals('{{float}}', '42', scope)).toBeFalsy();
-        expect(structuralEquals('{{float}}', '4.2', scope)).toBeTruthy();
-        expect(structuralEquals('pi={{float}}', 'pi=3.14', scope)).toBeTruthy();
-        expect(structuralEquals('pi={{float}}', 'pi=3', scope)).toBeFalsy();
+        expect(structuralEquals('{{float}}', '42', scope)).toBe(false);
+        expect(structuralEquals('{{float}}', '4.2', scope)).toBe(true);
+        expect(structuralEquals('pi={{float}}', 'pi=3.14', scope)).toBe(true);
+        expect(structuralEquals('pi={{float}}', 'pi=3', scope)).toBe(false);
     });
 
     test('structural — duration token — accepts ms, s, m, and h units', () => {
@@ -35,11 +35,11 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - every documented unit matches, including hours
-        expect(structuralEquals(match.duration(), '90m', scope)).toBeTruthy();
-        expect(structuralEquals(match.duration(), '1.5s', scope)).toBeTruthy();
-        expect(structuralEquals(match.duration(), '3h', scope)).toBeTruthy();
-        expect(structuralEquals('took {{duration}}', 'took 3h', scope)).toBeTruthy();
-        expect(structuralEquals(match.duration(), '2 weeks', scope)).toBeFalsy();
+        expect(structuralEquals(match.duration(), '90m', scope)).toBe(true);
+        expect(structuralEquals(match.duration(), '1.5s', scope)).toBe(true);
+        expect(structuralEquals(match.duration(), '3h', scope)).toBe(true);
+        expect(structuralEquals('took {{duration}}', 'took 3h', scope)).toBe(true);
+        expect(structuralEquals(match.duration(), '2 weeks', scope)).toBe(false);
     });
 
     test('structural — port range (0-65535) — embedded {{port}} rejects out-of-range values', () => {
@@ -47,66 +47,62 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - in-range ports match embedded, 99999 is rejected
-        expect(
-            structuralEquals('listening on :{{port}}', 'listening on :8080', scope),
-        ).toBeTruthy();
-        expect(
-            structuralEquals('listening on :{{port}}', 'listening on :65535', scope),
-        ).toBeTruthy();
-        expect(
-            structuralEquals('listening on :{{port}}', 'listening on :99999', scope),
-        ).toBeFalsy();
+        expect(structuralEquals('listening on :{{port}}', 'listening on :8080', scope)).toBe(true);
+        expect(structuralEquals('listening on :{{port}}', 'listening on :65535', scope)).toBe(true);
+        expect(structuralEquals('listening on :{{port}}', 'listening on :99999', scope)).toBe(
+            false,
+        );
 
         // Then - whole-string and code-side forms agree
-        expect(structuralEquals('{{port}}', '99999', scope)).toBeFalsy();
-        expect(structuralEquals(match.port(), 99_999, scope)).toBeFalsy();
+        expect(structuralEquals('{{port}}', '99999', scope)).toBe(false);
+        expect(structuralEquals(match.port(), 99_999, scope)).toBe(false);
     });
 
     test('structural — capture equality — object captures compare by content, not key order', () => {
         // Given - the same object captured twice with different key orders
         const scope = new CaptureScope();
-        expect(structuralEquals(match.ref('obj'), { a: 2, b: 1 }, scope)).toBeTruthy();
+        expect(structuralEquals(match.ref('obj'), { a: 2, b: 1 }, scope)).toBe(true);
 
         // Then - a re-ordered but structurally identical object is equal
-        expect(structuralEquals(match.ref('obj'), { b: 1, a: 2 }, scope)).toBeTruthy();
-        expect(structuralEquals(match.ref('obj'), { a: 2, b: 99 }, scope)).toBeFalsy();
+        expect(structuralEquals(match.ref('obj'), { b: 1, a: 2 }, scope)).toBe(true);
+        expect(structuralEquals(match.ref('obj'), { a: 2, b: 99 }, scope)).toBe(false);
     });
 
     test('structural — capture equality — cross-context ref equality: 42 captured from JSON equals "42" from text', () => {
         // Given - a number captured from a JSON context
         const scope = new CaptureScope();
-        expect(structuralEquals(match.ref('n'), 42, scope)).toBeTruthy();
+        expect(structuralEquals(match.ref('n'), 42, scope)).toBe(true);
 
         // Then - the string form captured from a text context is equal
-        expect(structuralEquals('{{int#n}}', '42', scope)).toBeTruthy();
-        expect(structuralEquals('{{int#n}}', '43', scope)).toBeFalsy();
+        expect(structuralEquals('{{int#n}}', '42', scope)).toBe(true);
+        expect(structuralEquals('{{int#n}}', '43', scope)).toBe(false);
     });
 
     test('structural — capture equality — a ref is shared across textEquals and structuralEquals on one scope', () => {
         // Given - a uuid captured through a text snapshot comparison
         const scope = new CaptureScope();
-        expect(
-            textEquals(`session {{uuid#s}} opened`, `session ${UUID_A} opened`, scope),
-        ).toBeTruthy();
+        expect(textEquals(`session {{uuid#s}} opened`, `session ${UUID_A} opened`, scope)).toBe(
+            true,
+        );
 
         // Then - the same ref constrains a structural comparison on that scope
-        expect(structuralEquals({ id: match.ref('s') }, { id: UUID_A }, scope)).toBeTruthy();
-        expect(structuralEquals({ id: match.ref('s') }, { id: UUID_B }, scope)).toBeFalsy();
+        expect(structuralEquals({ id: match.ref('s') }, { id: UUID_A }, scope)).toBe(true);
+        expect(structuralEquals({ id: match.ref('s') }, { id: UUID_B }, scope)).toBe(false);
     });
 
     test('structural — capture equality — ref(b, { not: "a" }) works in both directions; a never-captured "a" passes (pinned)', () => {
         // Given - "a" captured first
         const scope = new CaptureScope();
-        expect(structuralEquals(match.ref('a'), UUID_A, scope)).toBeTruthy();
+        expect(structuralEquals(match.ref('a'), UUID_A, scope)).toBe(true);
 
         // Then - b must differ from a, and a-vs-b symmetric usage also holds
-        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_A, scope)).toBeFalsy();
-        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_B, scope)).toBeTruthy();
-        expect(structuralEquals(match.ref('c', { not: 'b' }), UUID_B, scope)).toBeFalsy();
+        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_A, scope)).toBe(false);
+        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_B, scope)).toBe(true);
+        expect(structuralEquals(match.ref('c', { not: 'b' }), UUID_B, scope)).toBe(false);
 
         // Then - pinned: { not } against a never-captured ref does not constrain
         const fresh = new CaptureScope();
-        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_A, fresh)).toBeTruthy();
+        expect(structuralEquals(match.ref('b', { not: 'a' }), UUID_A, fresh)).toBe(true);
     });
 
     test('structural — token grammar edges (pinned) — an unknown token is a literal; a literal "{{uuid}}" actual is unmatchable', () => {
@@ -114,11 +110,11 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - {{nope}} is not in the vocabulary: compared as a literal string
-        expect(structuralEquals('{{nope}}', '{{nope}}', scope)).toBeTruthy();
-        expect(structuralEquals('{{nope}}', UUID_A, scope)).toBeFalsy();
+        expect(structuralEquals('{{nope}}', '{{nope}}', scope)).toBe(true);
+        expect(structuralEquals('{{nope}}', UUID_A, scope)).toBe(false);
 
         // Then - pinned: an actual value that IS the literal text "{{uuid}}" cannot be matched by a {{uuid}} fixture (the token always parses)
-        expect(structuralEquals('{{uuid}}', '{{uuid}}', scope)).toBeFalsy();
+        expect(structuralEquals('{{uuid}}', '{{uuid}}', scope)).toBe(false);
     });
 
     test('structural — token grammar edges (pinned) — {{any}} crosses lines, {{string}} stays on one line', () => {
@@ -126,9 +122,9 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - embedded {{any}} spans a newline, {{string}} does not
-        expect(textEquals('A {{any}} Z', 'A x\ny Z', scope)).toBeTruthy();
-        expect(textEquals('A {{string}} Z', 'A x\ny Z', scope)).toBeFalsy();
-        expect(textEquals('A {{string}} Z', 'A xy Z', scope)).toBeTruthy();
+        expect(textEquals('A {{any}} Z', 'A x\ny Z', scope)).toBe(true);
+        expect(textEquals('A {{string}} Z', 'A x\ny Z', scope)).toBe(false);
+        expect(textEquals('A {{string}} Z', 'A xy Z', scope)).toBe(true);
     });
 
     test('structural — token grammar edges (pinned) — {{any}} is always-true only as a whole value; embedded, the frame still constrains', () => {
@@ -136,14 +132,14 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - as a WHOLE value {{any}} accepts any type (objects, numbers, null), the documented carve-out behind the "always-true" claim
-        expect(structuralEquals('{{any}}', { nested: true }, scope)).toBeTruthy();
-        expect(structuralEquals('{{any}}', 42, scope)).toBeTruthy();
-        expect(structuralEquals('{{any}}', null, scope)).toBeTruthy();
+        expect(structuralEquals('{{any}}', { nested: true }, scope)).toBe(true);
+        expect(structuralEquals('{{any}}', 42, scope)).toBe(true);
+        expect(structuralEquals('{{any}}', null, scope)).toBe(true);
 
         // Then - embedded, {{any}} only widens the middle: a mismatched frame fails
-        expect(textEquals('A {{any}} Z', 'A x\ny Q', scope)).toBeFalsy();
+        expect(textEquals('A {{any}} Z', 'A x\ny Q', scope)).toBe(false);
         // Then - embedded, a non-string/number actual cannot satisfy the frame
-        expect(structuralEquals('A {{any}} Z', { nested: true }, scope)).toBeFalsy();
+        expect(structuralEquals('A {{any}} Z', { nested: true }, scope)).toBe(false);
     });
 
     test('structural — token grammar edges (pinned) — iso8601 accepts Z and numeric offsets, rejects offset-less timestamps', () => {
@@ -151,12 +147,12 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - Z and numeric offsets pass, an offset-less timestamp fails
-        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00Z', scope)).toBeTruthy();
-        expect(
-            structuralEquals(match.iso8601(), '2026-07-17T10:00:00.123+02:00', scope),
-        ).toBeTruthy();
-        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00-05:00', scope)).toBeTruthy();
-        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00', scope)).toBeFalsy();
+        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00Z', scope)).toBe(true);
+        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00.123+02:00', scope)).toBe(
+            true,
+        );
+        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00-05:00', scope)).toBe(true);
+        expect(structuralEquals(match.iso8601(), '2026-07-17T10:00:00', scope)).toBe(false);
     });
 
     test('structural — token grammar edges (pinned) — base64 and hex overlap on ambiguous values (pinned)', () => {
@@ -164,12 +160,12 @@ describe('structural', () => {
         const scope = new CaptureScope();
 
         // Then - pinned: "deadbeef" satisfies both tokens
-        expect(structuralEquals(match.hex(), 'deadbeef', scope)).toBeTruthy();
-        expect(structuralEquals(match.base64(), 'deadbeef', scope)).toBeTruthy();
+        expect(structuralEquals(match.hex(), 'deadbeef', scope)).toBe(true);
+        expect(structuralEquals(match.base64(), 'deadbeef', scope)).toBe(true);
 
         // Then - each token still rejects a value outside its alphabet (the overlap is not an "accepts anything" escape hatch)
-        expect(structuralEquals(match.hex(), 'xyzt', scope)).toBeFalsy();
-        expect(structuralEquals(match.base64(), 'not base64!', scope)).toBeFalsy();
+        expect(structuralEquals(match.hex(), 'xyzt', scope)).toBe(false);
+        expect(structuralEquals(match.base64(), 'not base64!', scope)).toBe(false);
     });
 
     test('structural — update-mode merges — mergeTextPreservingPlaceholders follows the actual line count (pinned)', () => {
@@ -237,8 +233,8 @@ describe('structural', () => {
         );
 
         // Then - the merged output matches the same actual on a normal run
-        expect(structuralEquals(mergedJson, actualJson, new CaptureScope())).toBeTruthy();
-        expect(textEquals(mergedText, `id ${UUID_B}\nfresh`, new CaptureScope())).toBeTruthy();
+        expect(structuralEquals(mergedJson, actualJson, new CaptureScope())).toBe(true);
+        expect(textEquals(mergedText, `id ${UUID_B}\nfresh`, new CaptureScope())).toBe(true);
     });
 
     test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — mergePreservingPlaceholders substitutes the known cwd in JSON string leaves', () => {
@@ -285,7 +281,7 @@ describe('structural', () => {
             log: 'wrote {{workdir}}/out.txt',
             name: 'Alice',
         });
-        expect(structuralEquals(merged, actual, new CaptureScope(WORKDIR))).toBeTruthy();
+        expect(structuralEquals(merged, actual, new CaptureScope(WORKDIR))).toBe(true);
     });
 
     test('structural — update-mode workdir substitution (rule `no-volatile-literal`, JSON/text parity) — parity: text and JSON paths emit the same {{workdir}} token from the same cwd', () => {

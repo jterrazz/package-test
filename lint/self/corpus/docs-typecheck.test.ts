@@ -40,8 +40,8 @@ describe('docs-typecheck', () => {
         const appCode = { code: "import { createApp } from '../src/app.js';\n", jsx: false };
 
         // Then - only the framework block is selected
-        expect(isFrameworkBlock(framework)).toBeTruthy();
-        expect(isFrameworkBlock(appCode)).toBeFalsy();
+        expect(isFrameworkBlock(framework)).toBe(true);
+        expect(isFrameworkBlock(appCode)).toBe(false);
     });
 
     test('docs-typecheck — block selection — rewrites the framework specifier to the repo entry', () => {
@@ -62,7 +62,7 @@ describe('docs-typecheck', () => {
         expect(blocks.length).toBeGreaterThan(0);
         // And - the rendered examples are among them: a chapter whose examples
         // are all JSX must not be the one this guard silently skips
-        expect(blocks.some((block) => block.jsx)).toBeTruthy();
+        expect(blocks.some((block) => block.jsx)).toBe(true);
         // And - so are the mobile samples: the facet no CI provisions is the
         // one whose samples nothing else would ever compile
         expect(blocks.some((block) => block.code.includes('specification.mobile'))).toBe(true);
@@ -76,7 +76,7 @@ describe('docs-typecheck', () => {
             tscBin: TSC_BIN,
         });
         expect(result.output).toBe('');
-        expect(result.ok).toBeTruthy();
+        expect(result.ok).toBe(true);
     }, 60_000);
 
     test('docs-typecheck — the published samples typecheck — a framework block that drifts from the API is rejected', () => {
@@ -94,7 +94,7 @@ describe('docs-typecheck', () => {
             indexModule: INDEX_MODULE,
             tscBin: TSC_BIN,
         });
-        expect(result.ok).toBeFalsy();
+        expect(result.ok).toBe(false);
         expect(result.output).not.toBe('');
     }, 60_000);
 
@@ -122,8 +122,8 @@ describe('docs-typecheck', () => {
     test('docs-typecheck — harness — the tsc binary and docs directory are present', () => {
         // Given - the repo layout
         // Then - the meta-test can actually run over every published surface
-        expect(existsSync(TSC_BIN)).toBeTruthy();
-        expect(existsSync(DOCS)).toBeTruthy();
-        expect(existsSync(README)).toBeTruthy();
+        expect(existsSync(TSC_BIN)).toBe(true);
+        expect(existsSync(DOCS)).toBe(true);
+        expect(existsSync(README)).toBe(true);
     });
 });

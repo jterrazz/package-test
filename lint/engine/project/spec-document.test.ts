@@ -468,7 +468,7 @@ describe('spec-document', () => {
         expect(Object.keys(SPEC_SCHEMA.$defs.run.properties).sort()).toStrictEqual(
             [...RUN_KEYS].sort(),
         );
-        expect(SPEC_SCHEMA.additionalProperties).toBeFalsy();
-        expect(SPEC_SCHEMA.$defs.run.additionalProperties).toBeFalsy();
+        expect(SPEC_SCHEMA.additionalProperties).toBe(false);
+        expect(SPEC_SCHEMA.$defs.run.additionalProperties).toBe(false);
     });
 });

@@ -80,8 +80,8 @@ describe('http', () => {
         // Then - a superset body matches, a diverging one does not
         expect(
             declared.match!(request({ body: { extra: 1, user: { id: 7, role: 'admin' } } })),
-        ).toBeTruthy();
-        expect(declared.match!(request({ body: { user: { role: 'guest' } } }))).toBeFalsy();
+        ).toBe(true);
+        expect(declared.match!(request({ body: { user: { role: 'guest' } } }))).toBe(false);
     });
 
     test('http — body filter — object body accepts match.* matchers as leaf values', () => {
@@ -91,8 +91,8 @@ describe('http', () => {
         // Then - only a well-formed UUID leaf passes
         expect(
             declared.match!(request({ body: { id: '3f2504e0-4f89-41d3-9a0c-0305e82c3301' } })),
-        ).toBeTruthy();
-        expect(declared.match!(request({ body: { id: 'not-a-uuid' } }))).toBeFalsy();
+        ).toBe(true);
+        expect(declared.match!(request({ body: { id: 'not-a-uuid' } }))).toBe(false);
     });
 
     test('http — body filter — string body is a containment test over the raw text body', () => {
@@ -100,8 +100,8 @@ describe('http', () => {
         const declared = http.post(URL, { body: 'needle' });
 
         // Then - raw text containing the needle passes
-        expect(declared.match!(request({ body: 'a haystack with a needle inside' }))).toBeTruthy();
-        expect(declared.match!(request({ body: 'nothing here' }))).toBeFalsy();
+        expect(declared.match!(request({ body: 'a haystack with a needle inside' }))).toBe(true);
+        expect(declared.match!(request({ body: 'nothing here' }))).toBe(false);
     });
 
     test('http — body filter — string body containment also spans a stringified JSON body', () => {
@@ -109,7 +109,7 @@ describe('http', () => {
         const declared = http.post(URL, { body: 'alice' });
 
         // Then - the JSON body is stringified before the containment test
-        expect(declared.match!(request({ body: { user: 'alice' } }))).toBeTruthy();
+        expect(declared.match!(request({ body: { user: 'alice' } }))).toBe(true);
     });
 
     test('http — body filter — a RegExp body tests the raw text body', () => {
@@ -117,8 +117,8 @@ describe('http', () => {
         const declared = http.post(URL, { body: /order-\d+/u });
 
         // Then - only a matching body passes
-        expect(declared.match!(request({ body: 'order-42 placed' }))).toBeTruthy();
-        expect(declared.match!(request({ body: 'order-none' }))).toBeFalsy();
+        expect(declared.match!(request({ body: 'order-42 placed' }))).toBe(true);
+        expect(declared.match!(request({ body: 'order-none' }))).toBe(false);
     });
 
     test('http — header filter — header names are case-insensitive; string is exact, RegExp tests', () => {
@@ -134,12 +134,12 @@ describe('http', () => {
                     headers: { authorization: 'Bearer abc', 'x-env': 'prod', 'x-extra': '1' },
                 }),
             ),
-        ).toBeTruthy();
+        ).toBe(true);
 
         expect(
             declared.match!(request({ headers: { authorization: 'Basic abc', 'x-env': 'prod' } })),
-        ).toBeFalsy();
-        expect(declared.match!(request({ headers: { 'x-env': 'prod' } }))).toBeFalsy();
+        ).toBe(false);
+        expect(declared.match!(request({ headers: { 'x-env': 'prod' } }))).toBe(false);
     });
 
     test('http — query filter — matches a subset of URL search params; string exact, RegExp tests', () => {
@@ -147,10 +147,10 @@ describe('http', () => {
         const declared = http.get(URL, { query: { page: /^\d+$/u, tag: 'news' } });
 
         // Then - a URL whose params satisfy the subset matches
-        expect(declared.match!(request({ url: `${URL}?tag=news&page=3&sort=desc` }))).toBeTruthy();
+        expect(declared.match!(request({ url: `${URL}?tag=news&page=3&sort=desc` }))).toBe(true);
 
-        expect(declared.match!(request({ url: `${URL}?tag=sports&page=3` }))).toBeFalsy();
-        expect(declared.match!(request({ url: `${URL}?page=3` }))).toBeFalsy();
+        expect(declared.match!(request({ url: `${URL}?tag=sports&page=3` }))).toBe(false);
+        expect(declared.match!(request({ url: `${URL}?page=3` }))).toBe(false);
     });
 
     test('http — query filter — a relative observed url still exposes its query params', () => {
@@ -158,8 +158,8 @@ describe('http', () => {
         const declared = http.get('/articles', { query: { locale: 'fr' } });
 
         // Then - the filter reads the params off the path form
-        expect(declared.match!(request({ url: '/articles?locale=fr' }))).toBeTruthy();
-        expect(declared.match!(request({ url: '/articles?locale=en' }))).toBeFalsy();
+        expect(declared.match!(request({ url: '/articles?locale=fr' }))).toBe(true);
+        expect(declared.match!(request({ url: '/articles?locale=en' }))).toBe(false);
     });
 
     test('http — combined filter — every provided facet must match', () => {
@@ -179,7 +179,7 @@ describe('http', () => {
                     url: `${URL}?v=2`,
                 }),
             ),
-        ).toBeTruthy();
+        ).toBe(true);
 
         expect(
             declared.match!(
@@ -189,7 +189,7 @@ describe('http', () => {
                     url: `${URL}?v=3`,
                 }),
             ),
-        ).toBeFalsy();
+        ).toBe(false);
     });
 
     test('http — responses — unreachable() is a transport failure, not a status', () => {

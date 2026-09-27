@@ -49,7 +49,7 @@ describe('CliResult', () => {
         const result = makeResult();
         expect(
             textEquals('{"sessionId":"{{uuid#sid}}"}', result.stdout.text, result.stdout.captures),
-        ).toBeTruthy();
+        ).toBe(true);
 
         // Then - the JSON accessor sees the same capture and enforces equality
         expect(
@@ -58,14 +58,14 @@ describe('CliResult', () => {
                 result.json.value,
                 result.json.captures,
             ),
-        ).toBeTruthy();
+        ).toBe(true);
         expect(
             structuralEquals(
                 { sessionId: '{{uuid#sid}}' },
                 { sessionId: 'aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee' },
                 result.json.captures,
             ),
-        ).toBeFalsy();
+        ).toBe(false);
     });
 
     test('command result — one capture scope per spec execution — two results never share a scope', () => {

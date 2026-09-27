@@ -19,8 +19,8 @@ describe('spec-path', () => {
 
             // Then - the value is a file, carries its path, and is not a directory
             expect(named.path).toBe(path);
-            expect(isDiskFile(named)).toBeTruthy();
-            expect(isDiskDirectory(named)).toBeFalsy();
+            expect(isDiskFile(named)).toBe(true);
+            expect(isDiskDirectory(named)).toBe(false);
         },
     );
 
@@ -30,8 +30,8 @@ describe('spec-path', () => {
         const named = directory('../../_fixtures/shop/');
 
         // Then - a directory, not a file
-        expect(isDiskDirectory(named)).toBeTruthy();
-        expect(isDiskFile(named)).toBeFalsy();
+        expect(isDiskDirectory(named)).toBe(true);
+        expect(isDiskFile(named)).toBe(false);
     });
 
     test.each(['out.txt', '_expected/out.txt', '$FIXTURES/shop/', '/abs/out.txt', ''])(
@@ -63,7 +63,7 @@ describe('spec-path', () => {
         const forged = { path: './_seeds/rows.sql' };
 
         // Then - neither kind, and a verb refuses it as a value
-        expect(isDiskFile(forged)).toBeFalsy();
+        expect(isDiskFile(forged)).toBe(false);
         expect(() => requireDiskFile('seed', forged, '.sql')).toThrow(
             /a value where a file is read/u,
         );

@@ -35,7 +35,7 @@ describe('sequences', () => {
 
         // Then - the sequence shares one working directory
         expect(result.exitCode).toBe(0);
-        expect(result.file('dist/index.js').exists).toBeTruthy();
+        expect(result.file('dist/index.js').exists).toBe(true);
     });
 
     test('long-running (exec with waitFor/timeout — rule `output-asserted-as-a-golden`(b)) — rejects waitFor options on a command sequence', async () => {

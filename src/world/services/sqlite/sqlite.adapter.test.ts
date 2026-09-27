@@ -139,8 +139,8 @@ describe('sqlite', () => {
         const missing = resolve(guardDir, 'missing.sqlite');
 
         // Then - it is not treated as a usable template
-        expect(existsSync(missing)).toBeFalsy();
-        expect(isValidSqliteTemplate(missing)).toBeFalsy();
+        expect(existsSync(missing)).toBe(false);
+        expect(isValidSqliteTemplate(missing)).toBe(false);
     });
 
     test('isValidSqliteTemplate (regression guard) — rejects a 0-byte file — the exact shape a crashed run leaves behind', () => {
@@ -149,7 +149,7 @@ describe('sqlite', () => {
         writeFileSync(stale, '');
 
         // Then - the guard refuses to treat it as a real template
-        expect(isValidSqliteTemplate(stale)).toBeFalsy();
+        expect(isValidSqliteTemplate(stale)).toBe(false);
     });
 
     test('isValidSqliteTemplate (regression guard) — rejects a short file that is not a SQLite database at all', () => {
@@ -158,7 +158,7 @@ describe('sqlite', () => {
         writeFileSync(garbage, 'not a database');
 
         // Then - the guard refuses it (fails the magic-header check)
-        expect(isValidSqliteTemplate(garbage)).toBeFalsy();
+        expect(isValidSqliteTemplate(garbage)).toBe(false);
     });
 
     test('isValidSqliteTemplate (regression guard) — accepts a real SQLite database file', () => {
@@ -169,7 +169,7 @@ describe('sqlite', () => {
         db.close();
 
         // Then - the header check passes
-        expect(isValidSqliteTemplate(real)).toBeTruthy();
+        expect(isValidSqliteTemplate(real)).toBe(true);
     });
 
     test('sqlite() initialize() — stale template recovery — rebuilds instead of reusing a pre-existing 0-byte template', async () => {
@@ -186,15 +186,15 @@ describe('sqlite', () => {
             sqliteTemplateName({ init: initSqlPath }),
         );
         writeFileSync(templatePath, '');
-        expect(isValidSqliteTemplate(templatePath)).toBeFalsy();
+        expect(isValidSqliteTemplate(templatePath)).toBe(false);
 
         // When - a fresh handle initializes against that poisoned path
         const db = sqlite({ init: initSqlPath });
         await db.initialize(root, root);
 
         // Then - the template was detected as invalid and rebuilt: the schema from init.sql is actually present (proving the file was NOT reused as-is) and the file now passes the validity guard.
-        expect(db.started).toBeTruthy();
-        expect(isValidSqliteTemplate(templatePath)).toBeTruthy();
+        expect(db.started).toBe(true);
+        expect(isValidSqliteTemplate(templatePath)).toBe(true);
 
         const check = new Database(templatePath, { readonly: true });
         try {
@@ -229,8 +229,8 @@ describe('sqlite', () => {
         // Then - each template sits inside its own project, and the two are different files that both exist
         for (const { root, templatePath } of templates) {
             const expected = resolve(root, '.artifacts/vitest/sqlite');
-            expect(templatePath.startsWith(`${expected}/`)).toBeTruthy();
-            expect(isValidSqliteTemplate(templatePath)).toBeTruthy();
+            expect(templatePath.startsWith(`${expected}/`)).toBe(true);
+            expect(isValidSqliteTemplate(templatePath)).toBe(true);
         }
         expect(templates[0]?.templatePath).not.toBe(templates[1]?.templatePath);
 
@@ -244,11 +244,11 @@ describe('sqlite', () => {
         const lockPath = resolve(lockDir, 'exclusive.lock');
 
         // Then - the exclusive create hands the lock to one caller only
-        expect(acquireTemplateLock(lockPath)).toBeTruthy();
-        expect(acquireTemplateLock(lockPath)).toBeFalsy();
+        expect(acquireTemplateLock(lockPath)).toBe(true);
+        expect(acquireTemplateLock(lockPath)).toBe(false);
 
         releaseTemplateLock(lockPath);
-        expect(acquireTemplateLock(lockPath)).toBeTruthy();
+        expect(acquireTemplateLock(lockPath)).toBe(true);
         releaseTemplateLock(lockPath);
     });
 
@@ -258,10 +258,10 @@ describe('sqlite', () => {
         acquireTemplateLock(lockPath);
 
         // Then - its holder is presumed alive, so a waiter waits
-        expect(isStaleTemplateLock(lockPath)).toBeFalsy();
+        expect(isStaleTemplateLock(lockPath)).toBe(false);
 
         // Long past the build budget the holder is presumed dead: a crashed worker must not wedge the suite.
-        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBeTruthy();
+        expect(isStaleTemplateLock(lockPath, Date.now() + 10 * 60 * 1000)).toBe(true);
         releaseTemplateLock(lockPath);
     });
 
@@ -270,8 +270,8 @@ describe('sqlite', () => {
         const lockPath = resolve(lockDir, 'absent.lock');
 
         // Then - nothing to break
-        expect(isStaleTemplateLock(lockPath)).toBeFalsy();
-        expect(existsSync(lockPath)).toBeFalsy();
+        expect(isStaleTemplateLock(lockPath)).toBe(false);
+        expect(existsSync(lockPath)).toBe(false);
     });
 
     test('the template build lock (regression guard) — concurrent handles on a cold cache all end up with the schema', async () => {
@@ -295,7 +295,7 @@ describe('sqlite', () => {
             sqliteTemplateName({ init: initSqlPath }),
         );
         for (const db of handles) {
-            expect(db.started).toBeTruthy();
+            expect(db.started).toBe(true);
             expect(db.connectionString).toBe(`file:${templatePath}`);
         }
 

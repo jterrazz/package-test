@@ -397,7 +397,7 @@ describe('matchers', () => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./_expected/frozen.json'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
-        expect(existsSync(fixturePath)).toBeFalsy();
+        expect(existsSync(fixturePath)).toBe(false);
     });
 
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — json: a frozen wrong fixture keeps its content and throws its diff', () => {
@@ -425,7 +425,7 @@ describe('matchers', () => {
         // Then - update mode writes it and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./_expected/written.json'));
-        expect(existsSync(fixturePath)).toBeTruthy();
+        expect(existsSync(fixturePath)).toBe(true);
     });
 
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — response: a frozen missing fixture throws instead of being written', () => {
@@ -442,7 +442,7 @@ describe('matchers', () => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(file('./_expected/frozen.http'), { frozen: true });
         }).toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
-        expect(existsSync(fixturePath)).toBeFalsy();
+        expect(existsSync(fixturePath)).toBe(false);
     });
 
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — response: without frozen, update mode writes the fixture (control)', () => {
@@ -457,7 +457,7 @@ describe('matchers', () => {
         // Then - update mode writes and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         expect(accessor).toMatch(file('./_expected/written.http'));
-        expect(existsSync(fixturePath)).toBeTruthy();
+        expect(existsSync(fixturePath)).toBe(true);
     });
 
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — tree: a frozen missing fixture throws instead of being written', async () => {
@@ -474,7 +474,7 @@ describe('matchers', () => {
             // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
             expect(accessor).toMatch(directory('./_expected/frozen-tree/'), { frozen: true }),
         ).rejects.toThrow(/does not exist[\s\S]*TEST_UPDATE=1/u);
-        expect(existsSync(fixtureDir)).toBeFalsy();
+        expect(existsSync(fixtureDir)).toBe(false);
     });
 
     test('frozen fixtures are never rewritten under TEST_UPDATE (per-subject write gate, `negative-golden-frozen`) — tree: without frozen, update mode writes the fixture tree (control)', async () => {
@@ -489,7 +489,7 @@ describe('matchers', () => {
         // Then - update mode copies the tree and passes
         // checker-disable-next-line named-path-exists -- the golden resolves against the hand-built accessor's scratch directory, not this file's
         await expect(accessor).toMatch(directory('./_expected/written-tree/'));
-        expect(existsSync(fixtureFile)).toBeTruthy();
+        expect(existsSync(fixtureFile)).toBe(true);
     });
 
     test.each([

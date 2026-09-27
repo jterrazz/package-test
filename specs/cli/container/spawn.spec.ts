@@ -29,7 +29,7 @@ describe('spawn', () => {
 
             // Then - the container's stdout accessor supports the stream matchers
             const shop = result.container('shop');
-            expect(shop.exists).toBeTruthy();
+            expect(shop.exists).toBe(true);
             expect(shop.stdout.text).toContain('booting-shop');
         },
         60_000,

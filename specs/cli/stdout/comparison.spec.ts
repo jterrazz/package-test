@@ -102,7 +102,7 @@ describe('comparison', () => {
             });
 
             // Then - the file landed at _expected/sub/<name> and matches on re-run
-            expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBeTruthy();
+            expect(existsSync(resolve(EXPECTED_DIR, fixtureName))).toBe(true);
             const b = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('help');
             expect(b.stdout).toMatch(file(`./_expected/${fixtureName}`));
         } finally {

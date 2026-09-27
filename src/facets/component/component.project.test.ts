@@ -27,8 +27,8 @@ describe('component', () => {
         const project = testOf(await component());
 
         // Then - one browser, no window, and a group of its own after website's
-        expect(project.browser?.enabled).toBeTruthy();
-        expect(project.browser?.headless).toBeTruthy();
+        expect(project.browser?.enabled).toBe(true);
+        expect(project.browser?.headless).toBe(true);
         expect(project.browser?.instances).toStrictEqual([{ browser: 'chromium' }]);
         expect(project.sequence).toStrictEqual({ groupOrder: 2 });
     });
@@ -165,7 +165,7 @@ describe('component', () => {
         const project = await component();
 
         // Then - never both: vite 8 warns for every esbuild option beside an oxc one
-        expect('esbuild' in project && 'oxc' in project).toBeFalsy();
+        expect('esbuild' in project && 'oxc' in project).toBe(false);
     });
 
     test('component() — the browser project — concatenates a consumer plugin after the worker the project serves', async () => {

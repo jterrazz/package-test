@@ -52,25 +52,25 @@ describe('labels', () => {
 
                 // Then - the container accessor reads state and files
                 const neo = result.container('test-a');
-                expect(neo.exists).toBeTruthy();
+                expect(neo.exists).toBe(true);
                 expect(neo.status).toBe('running');
                 await expect(neo).toBeRunning();
 
                 const file = neo.file('/workspace/out.txt');
-                expect(file.exists).toBeTruthy();
+                expect(file.exists).toBe(true);
                 expect(file.content.trim()).toBe('hello-from-test-a');
 
                 const inside = await neo.exec('ls /workspace');
                 expect(inside.exitCode).toBe(0);
                 expect(inside.stdout.text).toContain('out.txt');
 
-                expect(result.container('nope').exists).toBeFalsy();
+                expect(result.container('nope').exists).toBe(false);
                 await expect(expect(result.container('nope')).toBeRunning()).rejects.toThrow(
                     /does not exist/u,
                 );
 
                 trackedId = result.containerIds[0];
-                expect(trackedId).toBeTruthy();
+                expect(trackedId).toMatch(/^[\da-f]{12}$/u);
 
                 // While the scope is live the id really carries the run label, which makes the after-dispose assertion falsifiable.
                 expect(containersLabelled('fake.test.run', runId)).toContain(trackedId);

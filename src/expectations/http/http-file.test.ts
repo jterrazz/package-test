@@ -13,7 +13,7 @@ describe('http-file', () => {
         // Then - every section is extracted
         expect(parsed.status).toBe('201');
         expect(parsed.headers).toStrictEqual({ 'content-type': 'application/json' });
-        expect(parsed.hasBody).toBeTruthy();
+        expect(parsed.hasBody).toBe(true);
         expect(parsed.body).toStrictEqual({ id: 1 });
     });
 
@@ -23,7 +23,7 @@ describe('http-file', () => {
 
         // Then - no body is asserted
         expect(parsed.status).toBe('204');
-        expect(parsed.hasBody).toBeFalsy();
+        expect(parsed.hasBody).toBe(false);
     });
 
     test('http-files — responses — rejects a first line that is not HTTP/1.1 <status>', () => {
@@ -66,7 +66,7 @@ describe('http-file', () => {
         );
 
         // Then - the body is the raw string
-        expect(parsed.hasBody).toBeTruthy();
+        expect(parsed.hasBody).toBe(true);
         expect(parsed.body).toBe('plain text, not JSON');
     });
 
@@ -80,7 +80,7 @@ describe('http-file', () => {
         });
 
         // Then - no bogus reason text is invented and the token survives parsing
-        expect(text.startsWith('HTTP/1.1 {{number}}\n')).toBeTruthy();
+        expect(text.startsWith('HTTP/1.1 {{number}}\n')).toBe(true);
         expect(parseResponseFile(text, 'responses/roundtrip.http').status).toBe('{{number}}');
     });
 

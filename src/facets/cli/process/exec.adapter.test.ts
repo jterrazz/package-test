@@ -70,7 +70,7 @@ describe('ExecAdapter', () => {
 
             // Then - null deletes, additions land, INIT_CWD never leaks
             expect(env.ADDED).toBe('yes');
-            expect('EXEC_ADAPTER_TEST_VAR' in env).toBeFalsy();
+            expect('EXEC_ADAPTER_TEST_VAR' in env).toBe(false);
             expect(env.INIT_CWD).toBeUndefined();
         } finally {
             delete process.env.EXEC_ADAPTER_TEST_VAR;

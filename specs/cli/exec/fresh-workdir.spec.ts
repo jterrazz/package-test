@@ -11,7 +11,7 @@ describe('fresh-workdir', () => {
 
         // Then - the scaffold output exists in the temp workdir
         expect(result.exitCode).toBe(0);
-        expect(result.file('out/main.go').exists).toBeTruthy();
+        expect(result.file('out/main.go').exists).toBe(true);
     });
 
     test('fresh working dir — two bare runs get independent temp dirs', async () => {
@@ -20,7 +20,7 @@ describe('fresh-workdir', () => {
         const b = await cli.exec('scaffold-extra');
 
         // Then - a does NOT see b's UNEXPECTED.txt and vice versa
-        expect(a.file('out/UNEXPECTED.txt').exists).toBeFalsy();
-        expect(b.file('out/UNEXPECTED.txt').exists).toBeTruthy();
+        expect(a.file('out/UNEXPECTED.txt').exists).toBe(false);
+        expect(b.file('out/UNEXPECTED.txt').exists).toBe(true);
     });
 });

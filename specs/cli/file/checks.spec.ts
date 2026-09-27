@@ -11,8 +11,8 @@ describe('checks', () => {
         const result = await cli.fixture(directory('../_fixtures/specimen-cli/')).exec('build');
 
         // Then - file exists and absent file doesn't
-        expect(result.file('dist/index.js').exists).toBeTruthy();
-        expect(result.file('dist/nonexistent.js').exists).toBeFalsy();
+        expect(result.file('dist/index.js').exists).toBe(true);
+        expect(result.file('dist/nonexistent.js').exists).toBe(false);
     });
 
     test('content check', async () => {
@@ -30,9 +30,9 @@ describe('checks', () => {
         // Then - several read accessors on one result
         expect(result.exitCode).toBe(0);
         expect(result.stdout.text).toContain('Build completed');
-        expect(result.file('dist/index.js').exists).toBeTruthy();
-        expect(result.file('dist/manifest.json').exists).toBeTruthy();
-        expect(result.file('dist/index.cjs').exists).toBeFalsy();
+        expect(result.file('dist/index.js').exists).toBe(true);
+        expect(result.file('dist/manifest.json').exists).toBe(true);
+        expect(result.file('dist/index.cjs').exists).toBe(false);
         expect(result.file('dist/index.js').content).toContain('Hello from CLI app');
     });
 });
