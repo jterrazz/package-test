@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 
 import { clock } from '../../clock/clock.js';
 import { STREAM_BODY } from '../exchange.js';
-import { toReadableStream } from './stream.js';
+import { toReadableStream } from './stream-body.js';
 
 function streamOf(chunks: string[], delay: number): ReadableStreamDefaultReader<Uint8Array> {
     return toReadableStream({

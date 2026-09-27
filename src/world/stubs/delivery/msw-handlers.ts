@@ -2,9 +2,9 @@ import { pause } from '../../../kernel/pause.js';
 import { isStreamBody } from '../exchange.js';
 import type { MatchableRequest, StubResponse } from '../exchange.js';
 import type { StubRegistration } from '../intercept/intercept.js';
-import { toReadableStream } from '../matching/stream.js';
 import { StubQueue } from '../matching/stub-queue.js';
 import type { Stub } from '../stub.js';
+import { toReadableStream } from './stream-body.js';
 
 /** msw runs one handler shape in node and in a page: what a stub becomes is stated once here. Typed loosely: msw is reached through a lazy import. */
 

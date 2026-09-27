@@ -7,9 +7,9 @@ import type { ChainConfig } from '../../../../kernel/chain/config.js';
 import { pause } from '../../../../kernel/pause.js';
 import { isStreamBody } from '../../exchange.js';
 import type { MatchableRequest } from '../../exchange.js';
-import { toReadableStream } from '../../matching/stream.js';
 import { StubQueue } from '../../matching/stub-queue.js';
 import type { Stub } from '../../stub.js';
+import { toReadableStream } from '../stream-body.js';
 
 type StubBackendOptions = {
     /** Fixed port: a bundler inlining the URL at serve time survives warm. */
