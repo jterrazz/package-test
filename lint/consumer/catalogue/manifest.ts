@@ -372,7 +372,7 @@ export const STATIQUE_RULES: Row[] = [
         audience: 'consumer',
         channel: 'statique',
         convention:
-            'An `expect()` in a test is not called inside a loop — a `for`, a `for…of`, a `for…in`, a `while`, a `do…while` — nor inside a `forEach` callback, in the same function: a loop runs its assertion once per element, and not at all over an empty collection. `vitest/no-conditional-expect` holds the other assertion that may not run, one under a condition.',
+            'An `expect()` in a test is not called inside a loop — a `for`, a `for…of`, a `for…in`, a `while`, a `do…while` — nor inside the callback of an array iteration — `forEach`, `map`, `flatMap`, `filter`, `every`, `some`, `find`, `reduce` — in the same function: a loop runs its assertion once per element, and not at all over an empty collection. `vitest/no-conditional-expect` holds the other assertion that may not run, one under a condition.',
         facet: 'model',
         family: 'expectations',
         fix: 'Compare the whole collection in one assertion — `expect(rows.map(…)).toStrictEqual([…])` — or state each case with `test.each`.',

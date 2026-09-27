@@ -34,6 +34,24 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
             errors: [{ line: 3, messageId: 'expectInALoop' }],
             filename: TEST_FILE,
         },
+        {
+            code: `test('ids', () => {
+    rows.map((row) => expect(row.id).toBeTypeOf('string'));
+    rows.flatMap((row) => [expect(row.tags).toHaveLength(1)]);
+    rows.every((row) => {
+        expect(row.id).toBeDefined();
+        return true;
+    });
+    rows.some((row) => expect(row.id).toBe('a'));
+});`,
+            errors: [
+                { line: 2, messageId: 'expectInALoop' },
+                { line: 3, messageId: 'expectInALoop' },
+                { line: 5, messageId: 'expectInALoop' },
+                { line: 8, messageId: 'expectInALoop' },
+            ],
+            filename: TEST_FILE,
+        },
     ],
     valid: [
         {
@@ -58,6 +76,13 @@ ruleTester().run('no-expect-in-a-loop', asOxlintRule(noExpectInALoop), {
         record(value);
     }
     check(1);
+});`,
+            filename: TEST_FILE,
+        },
+        {
+            code: `test('ids', () => {
+    expect(rows.map((row) => row.id)).toStrictEqual(['a', 'b']);
+    expect(rows.every((row) => row.id !== '')).toBe(true);
 });`,
             filename: TEST_FILE,
         },

@@ -29,14 +29,25 @@ function isExpectCall(node: AstNode): boolean {
     return identifierName(root) === 'expect';
 }
 
-function isForEachCallback(fn: AstNode): boolean {
+const ITERATIONS: ReadonlySet<string> = new Set([
+    'every',
+    'filter',
+    'find',
+    'flatMap',
+    'forEach',
+    'map',
+    'reduce',
+    'some',
+]);
+
+function iterationOf(fn: AstNode): string | undefined {
     const call = child(fn, 'parent');
     const callee = child(call, 'callee');
-    return (
-        call?.type === 'CallExpression' &&
-        callee !== undefined &&
-        memberPropertyName(callee) === 'forEach'
-    );
+    const method =
+        call?.type === 'CallExpression' && callee !== undefined
+            ? memberPropertyName(callee)
+            : undefined;
+    return method !== undefined && ITERATIONS.has(method) ? `\`${method}\` callback` : undefined;
 }
 
 function loopAround(node: AstNode): string | undefined {
@@ -46,7 +57,7 @@ function loopAround(node: AstNode): string | undefined {
             return current.type === 'ForOfStatement' ? 'for…of' : 'loop';
         }
         if (FUNCTIONS.has(current.type)) {
-            return isForEachCallback(current) ? 'forEach' : undefined;
+            return iterationOf(current);
         }
         current = child(current, 'parent');
     }
