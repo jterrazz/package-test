@@ -22,7 +22,10 @@ ruleTester().run('no-unknown-constructor', noUnknownConstructor, {
         { code: 'await specification.api({ server });' },
         { code: 'await specification.job({ jobs });' },
         { code: 'await specification.cli("./bin");' },
+        { code: 'await specification.integration({ services });' },
+        { code: 'await specification.website({ server });' },
         { code: 'await specification.mobile({ app, device });' },
+        { code: 'await specification.lint({ presets: [] });' },
         // Other objects are untouched.
         { code: 'await other.app({});' },
     ],

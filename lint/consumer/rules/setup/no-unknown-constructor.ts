@@ -24,7 +24,7 @@ export const noUnknownConstructor = defineRule(
         messages: {
             unknownConstructor: {
                 found: '`specification.{{member}}` is no constructor',
-                fix: 'call `specification.api()`, `.job()`, `.cli(bin)`, `.integration()`, `.website()` or `.mobile()` — a rendered unit is the `component` chain',
+                fix: 'call `specification.api()`, `.job()`, `.cli(bin)`, `.integration()`, `.website()`, `.mobile()` or `.lint()` — a rendered unit is the `component` chain',
             },
         },
         read: readAt(row, CATALOGUE_CHAPTER),
