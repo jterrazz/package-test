@@ -427,7 +427,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
-This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. `test.coverage`, the floor this repository's own suite is held to, is a preset of its own this repository alone declares ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate that writes and judges it is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
+This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. A section of this package's is named `test`, then `.<part>` for a part only one preset writes: `test.coverage`, the floor this repository's own suite is held to, is written and judged by `self()`, the preset this repository alone declares ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
 
 #### The section
 
@@ -526,7 +526,7 @@ expect(() => api.seed(file('./_seeds/one-user.sql'))).toThrow(/* … */);
 
 ## Build-before-lint
 
-The plugin is loaded from the **built bundle**. In this repo `jsPlugins: ['./dist/oxlint.js', './dist/self-oxlint.js']` — the published plugin and the self plugin ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)) — means `npm run build` must precede `npm run lint` (Node's TS type-stripping cannot resolve `.js` specifiers to `.ts` sources). Consumers load `@jterrazz/test/oxlint` from `node_modules` — no ordering constraint.
+The plugin is loaded from the **built bundle**. In this repo the presets `oxlint.config.ts` composes name the built bundles — `test()` the published plugin, `self()` the self plugin ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)) — and `jterrazz.config.ts` imports both presets from `dist/`, so `npm run build` must precede `npm run lint` (Node's TS type-stripping cannot resolve `.js` specifiers to `.ts` sources). Consumers load `@jterrazz/test/oxlint` from `node_modules` — no ordering constraint.
 
 ## Stability
 

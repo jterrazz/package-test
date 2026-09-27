@@ -34,6 +34,7 @@ export default defineConfig([
         dts: true,
         entry: {
             self: 'lint/self/index.ts',
+            'self-config': 'lint/self/index.config.ts',
             'self-oxlint': 'lint/self/rules/plugin.ts',
         },
         format: ['esm'],

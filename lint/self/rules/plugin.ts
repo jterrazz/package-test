@@ -13,9 +13,4 @@ export const selfPluginRules: Record<string, 'error'> = Object.fromEntries(
     Object.keys(selfPlugin.rules).map((name) => [`jterrazz-self/${name}`, 'error']),
 );
 
-export { ARCHITECTURE } from '../checks/architecture.js';
-export { coveragePreset } from '../catalogue/preset.js';
-export { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
-export { FRAMEWORK_LAYERS } from '../checks/layers.js';
-
 export default selfPlugin;
