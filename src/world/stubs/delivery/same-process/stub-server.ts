@@ -28,7 +28,7 @@ let serverInstance: any = null;
 let installedFetch: null | typeof fetch = null;
 
 /** Once per process; reply bodies are handed over as owned streams, so a cancel settles. */
-export async function ensureStubServer(): Promise<void> {
+async function ensureStubServer(): Promise<void> {
     if (serverInstance !== null) {
         return;
     }

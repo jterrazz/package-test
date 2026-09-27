@@ -5,7 +5,7 @@ import type { MatchableRequest } from '../exchange.js';
 import type { Stub } from '../stub.js';
 import { describeRoute, routePatternOf, urlMatches } from './route.js';
 
-export function stubMatches(stub: Stub, request: MatchableRequest): boolean {
+function stubMatches(stub: Stub, request: MatchableRequest): boolean {
     const { match, method, url } = stub.request;
     if (method !== '*' && method.toUpperCase() !== request.method.toUpperCase()) {
         return false;
@@ -16,7 +16,7 @@ export function stubMatches(stub: Stub, request: MatchableRequest): boolean {
     return match ? match(request) : true;
 }
 
-export type StubRoute = {
+type StubRoute = {
     methods: string[];
     url: RegExp | string;
 };
@@ -39,10 +39,6 @@ export class StubQueue {
 
     constructor(stubs: readonly Stub[]) {
         this.entries = stubs.map((stub) => ({ stub, served: 0 }));
-    }
-
-    get size(): number {
-        return this.entries.length;
     }
 
     /** Deduped by pattern: two stubs on one URL share one handler and one queue. */

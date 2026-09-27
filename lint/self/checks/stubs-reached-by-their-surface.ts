@@ -15,7 +15,7 @@ const SURFACE = [/^stub\.ts$/u, /^exchange\.ts$/u, /^kinds\//u, /^intercept\//u]
 
 const CHANNEL_PICK = /^delivery\/[a-z-]+\/intercept\.ts$/u;
 
-export const DELIVERY_READERS: Readonly<Record<string, readonly string[]>> = {
+const DELIVERY_READERS: Readonly<Record<string, readonly string[]>> = {
     'delivery/browser-page/msw-worker.adapter.ts': ['src/facets/component/component.facet.ts'],
     'delivery/browser-page/worker-script.ts': ['src/facets/component/component.project.ts'],
     'delivery/other-process/stub-backend.adapter.ts': [

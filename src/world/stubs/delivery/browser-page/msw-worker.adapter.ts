@@ -17,7 +17,7 @@ export function isRunnerRequest(url: string): boolean {
 }
 
 /** Served at `/mockServiceWorker.js` by the plugin `component()` registers, from the package's own `msw`. */
-export async function ensureStubWorker(): Promise<void> {
+async function ensureStubWorker(): Promise<void> {
     if (workerInstance !== null) {
         return;
     }
@@ -49,7 +49,7 @@ export async function registerWorkerStubs(stubs: readonly Stub[]): Promise<StubR
 }
 
 /** Drop every handler the page still carries — the per-test reset. */
-export function resetWorkerStubs(): void {
+function resetWorkerStubs(): void {
     if (workerInstance !== null) {
         workerInstance.resetHandlers();
     }

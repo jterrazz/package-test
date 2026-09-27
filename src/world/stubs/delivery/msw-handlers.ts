@@ -12,7 +12,7 @@ import { toReadableStream } from './stream-body.js';
 /** In a page, a real service worker and HTTP cache could serve an earlier test's answer and never reach the queue. */
 const NEVER_CACHED = { 'cache-control': 'no-store' };
 
-export function toMswResponse(msw: any, response: StubResponse): unknown {
+function toMswResponse(msw: any, response: StubResponse): unknown {
     const { body, headers, status = 200 } = response;
     if (response.transport === 'network-error') {
         // Not a reply: the request fails in transport, as `fetch` sees when nothing listens.
