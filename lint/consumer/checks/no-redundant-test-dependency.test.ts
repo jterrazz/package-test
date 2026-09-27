@@ -1,9 +1,13 @@
+import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { runMember } from '../../engine/checker/member-run.js';
 import { checkerMessage } from '../../engine/checker/tree-run.js';
 import { CHECKER } from './checker.js';
+import { CARRIED, CARRIED_IN_DEV } from './no-redundant-test-dependency.js';
+
+const LINT_ENGINE = new Set(['@oxlint/plugins', 'oxc-parser']);
 
 const WORKSPACE = resolve(import.meta.dirname, '../../../specs/_shared/_fixtures/member-workspace');
 const memberAt = (name: string): string => resolve(WORKSPACE, 'packages', name);
@@ -12,7 +16,7 @@ function codes(dir: string, root = WORKSPACE): string[] {
     return runMember(dir, root, CHECKER).map((violation) => violation.rule);
 }
 
-describe('checkNoRedundantTestDependency', () => {
+describe('no-redundant-test-dependency', () => {
     test('members — members — the member pass — what a workspace member owes — a dependency the framework carries, and a seam it replaced (`no-redundant-test-dependency`)', () => {
         // Given - a member declaring msw, a testing-library package, and the optional peer a consumer declares on purpose
         const found = runMember(memberAt('seam-dependency'), WORKSPACE, CHECKER);
@@ -76,5 +80,25 @@ describe('checkNoRedundantTestDependency', () => {
             'no-redundant-test-dependency',
             'no-redundant-test-dependency',
         ]);
+    });
+
+    test('what the framework carries — the rule reads exactly the dependencies this package ships (ADR-008)', () => {
+        // Given - the dependencies of the published manifest, the lint engine's own aside
+        const manifest: unknown = JSON.parse(
+            readFileSync(resolve(import.meta.dirname, '../../../package.json'), 'utf8'),
+        );
+        const dependencies: unknown =
+            typeof manifest === 'object' && manifest !== null && 'dependencies' in manifest
+                ? manifest.dependencies
+                : undefined;
+        const shipped =
+            typeof dependencies === 'object' && dependencies !== null
+                ? Object.keys(dependencies)
+                : [];
+
+        // Then - a seam added to or dropped from `dependencies` moves the rule with it
+        expect([...CARRIED, ...CARRIED_IN_DEV].toSorted()).toStrictEqual(
+            shipped.filter((name) => !LINT_ENGINE.has(name)).toSorted(),
+        );
     });
 });

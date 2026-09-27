@@ -12,10 +12,10 @@ import { SKIPPED } from '../../engine/project/module-tests.js';
 import type { Finding } from './checker.js';
 
 /** Optional peers are not here: `playwright`, `vite`, `react`, `better-sqlite3` and their kin are declared by the consumer on purpose. */
-const CARRIED = new Set(['msw', 'vitest-mock-extended']);
+export const CARRIED = new Set(['msw', 'vitest-mock-extended']);
 
 /** Only as a dev dependency: a member parsing YAML at runtime declares `yaml` rightly, and the framework never ships it to a product. */
-const CARRIED_IN_DEV = new Set(['yaml']);
+export const CARRIED_IN_DEV = new Set(['yaml']);
 
 /** `no-redundant-test-dependency` never reads the manifest of the package that carries the dependencies. */
 const FRAMEWORK = '@jterrazz/test';
