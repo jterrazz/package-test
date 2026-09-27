@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { REFUSAL_WHY } from '../../../lint/index.refusal.js';
 import { navigation, within } from '../descriptors/landmarks.js';
 import { link } from '../descriptors/roles.js';
-import { describeAmbiguity } from './ambiguity.js';
+import { ambiguousElementError } from './ambiguity.js';
 import type { ElementMatch } from './candidate.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
@@ -13,9 +13,9 @@ const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
 });
 
 describe('ambiguity', () => {
-    test('describeAmbiguity — names the descriptor, the count and the page', () => {
+    test('ambiguousElementError — names the descriptor, the count and the page', () => {
         // Given - three candidates for one link
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' }), match()],
             url: 'http://site.test/',
@@ -25,9 +25,9 @@ describe('ambiguity', () => {
         expect(message).toContain('link("Articles") matched 3 elements on http://site.test/');
     });
 
-    test('describeAmbiguity — enumerates every candidate with its tag, detail and landmark', () => {
+    test('ambiguousElementError — enumerates every candidate with its tag, detail and landmark', () => {
         // Given - candidates sitting in different landmarks
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [
                 match({ context: 'nav', detail: '/articles' }),
@@ -41,9 +41,9 @@ describe('ambiguity', () => {
         expect(message).toContain('2. <a href="/articles">Articles</a>  in <footer>');
     });
 
-    test('describeAmbiguity — suggests scoping to a landmark the candidates actually sit in', () => {
+    test('ambiguousElementError — suggests scoping to a landmark the candidates actually sit in', () => {
         // Given - candidates in a nav and a footer
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match({ context: 'nav' }), match({ context: 'footer' })],
             url: 'http://site.test/',
@@ -55,9 +55,9 @@ describe('ambiguity', () => {
         expect(message).toContain('also here: contentinfo()');
     });
 
-    test('describeAmbiguity — offers a named section as the region it is, and an unnamed one as nothing', () => {
+    test('ambiguousElementError — offers a named section as the region it is, and an unnamed one as nothing', () => {
         // Given - candidates in two named sections, one reached by its role, and one in an unnamed section
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [
                 match({ context: 'section', contextName: 'Orders' }),
@@ -74,9 +74,9 @@ describe('ambiguity', () => {
         expect(message).not.toContain('region()');
     });
 
-    test('describeAmbiguity — does not offer a landmark that holds every candidate', () => {
+    test('ambiguousElementError — does not offer a landmark that holds every candidate', () => {
         // Given - two candidates in the same main
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match({ context: 'main' }), match({ context: 'main' })],
             url: 'http://site.test/',
@@ -87,9 +87,9 @@ describe('ambiguity', () => {
         expect(message).toContain('within(<a container holding only this one>');
     });
 
-    test('describeAmbiguity — names the accessible name when it is not the text that was matched', () => {
+    test('ambiguousElementError — names the accessible name when it is not the text that was matched', () => {
         // Given - a row button labelled by an aria-label, beside a dialog button
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Delete post'),
             matches: [
                 match({ accessibleName: 'Delete Post a', tag: 'button', text: 'Delete' }),
@@ -102,9 +102,9 @@ describe('ambiguity', () => {
         expect(message).toContain('named "Delete Post a"');
     });
 
-    test('describeAmbiguity — offers exact to a descriptor that opted OUT, with what it leaves', () => {
+    test('ambiguousElementError — offers exact to a descriptor that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles', { exact: false }),
             matches: [match(), match({ text: 'Read Articles' })],
             url: 'http://site.test/',
@@ -115,9 +115,9 @@ describe('ambiguity', () => {
         expect(message).toContain('leaves 1 of 2');
     });
 
-    test('describeAmbiguity — never offers exact to an ordinary descriptor — it is already exact', () => {
+    test('ambiguousElementError — never offers exact to an ordinary descriptor — it is already exact', () => {
         // Given - a descriptor stating nothing, which is the whole-name default
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' })],
             url: 'http://site.test/',
@@ -127,9 +127,9 @@ describe('ambiguity', () => {
         expect(message).not.toContain('exact name');
     });
 
-    test('describeAmbiguity — omits the exact suggestion when every candidate matches the name whole', () => {
+    test('ambiguousElementError — omits the exact suggestion when every candidate matches the name whole', () => {
         // Given - two identical names, where exact would change nothing
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match(), match()],
             url: 'http://site.test/',
@@ -139,9 +139,9 @@ describe('ambiguity', () => {
         expect(message).not.toContain('exact: true');
     });
 
-    test('describeAmbiguity — does not re-suggest scoping a descriptor that is already scoped', () => {
+    test('ambiguousElementError — does not re-suggest scoping a descriptor that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: within(navigation(), link('Articles')),
             matches: [match({ context: 'nav' }), match({ context: 'nav' })],
             url: 'http://site.test/',
@@ -152,9 +152,9 @@ describe('ambiguity', () => {
         expect(message).toContain('other element');
     });
 
-    test('describeAmbiguity — states the rule and where it is documented', () => {
+    test('ambiguousElementError — states the rule and where it is documented', () => {
         // Given - any refusal
-        const message = describeAmbiguity({
+        const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match(), match()],
             url: 'http://site.test/',

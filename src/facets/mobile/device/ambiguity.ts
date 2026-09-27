@@ -1,4 +1,4 @@
-import { ambiguityRefusal } from '../../../elements/ambiguity/ambiguity.js';
+import { ambiguityError } from '../../../elements/ambiguity/ambiguity.js';
 import { asWrittenUnscoped } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
 import type { MobileElementMatch } from './device.port.js';
@@ -49,12 +49,12 @@ function formatFixes(element: ElementRef, matches: MobileElementMatch[]): string
     return fixes;
 }
 
-export function describeMobileAmbiguity(options: {
+export function ambiguousScreenElementError(options: {
     element: ElementRef;
     matches: MobileElementMatch[];
-}): string {
+}): Error {
     const { element, matches } = options;
-    return ambiguityRefusal({
+    return ambiguityError({
         element,
         fixes: formatFixes(element, matches),
         lines: matches.map((match, index) => formatMatch(match, index)),

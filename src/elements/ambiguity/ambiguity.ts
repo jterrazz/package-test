@@ -74,34 +74,31 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     return fixes;
 }
 
-/** Its message is the `descriptor-matches-one-element` refusal; its name is what a report prints before it. */
-export class AmbiguousElementError extends Error {
-    override readonly name = 'AmbiguousElementError';
-}
-
-export function ambiguityRefusal(options: {
+export function ambiguityError(options: {
     element: ElementRef;
     fixes: string[];
     lines: string[];
     where: string;
-}): string {
+}): Error {
     const { element, fixes, lines, where } = options;
-    return refusal('descriptor-matches-one-element', {
-        fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
-        found: [
-            `Ambiguous element: ${asWritten(element)} matched ${lines.length} elements on ${where} —`,
-            ...lines,
-        ].join('\n'),
-    });
+    return new Error(
+        refusal('descriptor-matches-one-element', {
+            fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
+            found: [
+                `Ambiguous element: ${asWritten(element)} matched ${lines.length} elements on ${where} —`,
+                ...lines,
+            ].join('\n'),
+        }),
+    );
 }
 
-export function describeAmbiguity(options: {
+export function ambiguousElementError(options: {
     element: ElementRef;
     matches: ElementMatch[];
     url: string;
-}): string {
+}): Error {
     const { element, matches, url } = options;
-    return ambiguityRefusal({
+    return ambiguityError({
         element,
         fixes: formatFixes(element, matches),
         lines: matches.map((match, index) => formatMatch(match, index)),

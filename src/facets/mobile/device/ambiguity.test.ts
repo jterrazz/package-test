@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { REFUSAL_WHY } from '../../../../lint/index.refusal.js';
 import { within } from '../../../elements/descriptors/landmarks.js';
 import { button, content, testId } from '../../../elements/descriptors/roles.js';
-import { describeMobileAmbiguity } from './ambiguity.js';
+import { ambiguousScreenElementError } from './ambiguity.js';
 import type { MobileElementMatch } from './device.port.js';
 
 const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch => ({
@@ -12,10 +12,10 @@ const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch 
     ...overrides,
 });
 
-describe('describeMobileAmbiguity', () => {
+describe('ambiguousScreenElementError', () => {
     test('names the descriptor and the count', () => {
         // Given - three candidates for one button
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' }), match()],
         });
@@ -26,7 +26,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('enumerates every candidate with its type, label and identifier', () => {
         // Given - candidates carrying accessibility identifiers
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [
                 match({ identifier: 'event-1-bookmark' }),
@@ -41,7 +41,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('renders a value when the candidate carries one', () => {
         // Given - two text fields distinguished only by their content
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: content('a@b.test'),
             matches: [
                 match({ label: 'Email', type: 'TextField', value: 'a@b.test' }),
@@ -56,7 +56,7 @@ describe('describeMobileAmbiguity', () => {
     // RUNTIME no-landmark-on-mobile — the vocabulary is ONE across the facets, and the part with no iOS equivalent is refused rather than approximated: a screen has no ARIA landmarks, so the fix it offers is `within(testId(…), …)`.
     test('suggests scoping first — a screen has no landmarks to name', () => {
         // Given - an unscoped ambiguous descriptor
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match()],
         });
@@ -67,7 +67,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark', { exact: false }),
             matches: [match(), match({ label: 'Bookmark all' })],
         });
@@ -79,7 +79,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('never offers exact to an ordinary descriptor — it is already exact', () => {
         // Given - a descriptor stating nothing, which is the whole-label default
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' })],
         });
@@ -90,7 +90,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('omits the exact suggestion when every candidate matches the name whole', () => {
         // Given - two identical labels, where exact would change nothing
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match()],
         });
@@ -101,7 +101,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('offers the distinct identifiers as a concrete testId rewrite', () => {
         // Given - candidates whose identifiers differ
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [
                 match({ identifier: 'event-1-bookmark' }),
@@ -116,7 +116,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('does not re-suggest scoping a descriptor that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: within(testId('event-list'), button('Bookmark')),
             matches: [match(), match()],
         });
@@ -128,7 +128,7 @@ describe('describeMobileAmbiguity', () => {
 
     test('states the rule and where it is documented', () => {
         // Given - any refusal
-        const message = describeMobileAmbiguity({
+        const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match()],
         });

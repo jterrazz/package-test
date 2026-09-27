@@ -4,7 +4,6 @@ import { resolve } from 'node:path';
 import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
-import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
@@ -12,7 +11,7 @@ import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
-import { describeMobileAmbiguity } from './ambiguity.js';
+import { ambiguousScreenElementError } from './ambiguity.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -270,12 +269,10 @@ export class AppiumAdapter implements DevicePort {
             }
             const isTarget = index === chain.length - 1;
             if (count > 1 && (cardinality === 'one' || !isTarget)) {
-                throw new AmbiguousElementError(
-                    describeMobileAmbiguity({
-                        element: level,
-                        matches: await this.captureMatches(matches),
-                    }),
-                );
+                throw ambiguousScreenElementError({
+                    element: level,
+                    matches: await this.captureMatches(matches),
+                });
             }
             const next = matches[0];
             if (next === undefined) {

@@ -6,7 +6,7 @@ import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwr
 import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
-import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
+import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
@@ -93,9 +93,7 @@ async function act<T>(
         }
         const culprit = await findAmbiguousLevel(page, element);
         const matches = await locate(page, culprit).evaluateAll(candidatesOf, CANDIDATE_LIMITS);
-        throw new AmbiguousElementError(
-            describeAmbiguity({ element: culprit, matches, url: page.url() }),
-        );
+        throw ambiguousElementError({ element: culprit, matches, url: page.url() });
     }
 }
 

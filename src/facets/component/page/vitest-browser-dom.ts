@@ -3,7 +3,7 @@ import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
 import { refusal } from '../../../../lint/index.refusal.js';
-import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
+import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';
@@ -107,7 +107,7 @@ export async function act<T>(
         const culprit = ambiguousLevel(element);
         const matches = candidatesOf(locate(page, culprit).elements(), CANDIDATE_LIMITS);
         const url = globalThis.location.href;
-        throw new AmbiguousElementError(describeAmbiguity({ element: culprit, matches, url }));
+        throw ambiguousElementError({ element: culprit, matches, url });
     }
 }
 
