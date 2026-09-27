@@ -3,12 +3,6 @@ import type { Stub } from '../../stub.js';
 import { buildStubHandlers } from '../msw-handlers.js';
 import { owningBodies } from './owned-body.js';
 
-/** Zero stubs under node: nothing is guarded, the process has traffic of its own (`network-strict-after-first-stub`, known scope). */
-const NO_STUBS: StubRegistration = {
-    cleanup: () => {},
-    violation: () => null,
-};
-
 /* oxlint-disable typescript/no-explicit-any, typescript/no-unsafe-assignment, typescript/no-unsafe-call, typescript/no-unsafe-member-access -- the msw namespace crosses a lazy import */
 
 let mswModule: any = null;
@@ -41,10 +35,6 @@ async function ensureStubServer(): Promise<void> {
 
 /** The trailing catch-all records any request no stub accepted; the chain's pipeline rethrows it. */
 export async function registerStubs(stubs: readonly Stub[]): Promise<StubRegistration> {
-    if (stubs.length === 0) {
-        return NO_STUBS;
-    }
-
     await ensureStubServer();
     const { msw } = await loadMsw();
     const { handlers, violation } = buildStubHandlers(msw, stubs);
