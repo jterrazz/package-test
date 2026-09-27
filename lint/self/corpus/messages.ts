@@ -1,3 +1,4 @@
+import { rowNamed as rowOf } from '@jterrazz/typescript/rules';
 import type { Chapter } from '@jterrazz/typescript/rules';
 import { readdirSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -8,11 +9,7 @@ import { allRows, SELF_CHAPTER } from '../catalogue/manifest.js';
 export const ROOT = resolve(import.meta.dirname, '../../..');
 
 export function rowNamed(name: string): (typeof allRows)[number] {
-    const row = allRows.find((entry) => entry.name === name);
-    if (row === undefined) {
-        throw new Error(`no row is named ${name}`);
-    }
-    return row;
+    return rowOf(allRows, name);
 }
 
 export function chapterOf(name: string): Chapter {
