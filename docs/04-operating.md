@@ -65,7 +65,7 @@ The package refuses to guess at its environment, so several things it uses are t
 - **Node 24 or newer**, as `engines` states — the toolchain's floor, and vitest 5's.
 - **A chromium**, for a page or a component: `npx playwright install chromium`, once. The component facet drives the same browser the website facet does, through the same peer.
 - **The ARIA dialect a tree golden is written in is Playwright's**, produced by its `ariaSnapshot()` and therefore PINNED by the `playwright` peer: a major of that peer can reword a role line, and every committed `.aria.yaml` moves with it in one regeneration. It is the same dialect on a page and on a mounted unit ([07 — Component specs](07-component.md), [14 — Assertions](14-assertions.md)).
-- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8.1; the Vite 7 path is exercised by a consumer, not by this suite — see [07 — Component specs](07-component.md).
+- **A Vite the peer range names** — `^6.4 || ^7 || ^8`. `component()` reads the installed major and states the JSX default on the key that Vite transforms with (`oxc` from 8, `esbuild` before it), so a project that states no pipeline of its own gets the automatic runtime on every one of the three. This package's own suite runs on Vite 8; the Vite 7 path is exercised by a consumer, not by this suite — see [07 — Component specs](07-component.md).
 
 `msw` is a direct dependency, not a peer — outgoing interception is part of the framework rather than a choice a consumer makes.
 
@@ -77,13 +77,8 @@ Containers are the one resource that outlives a process badly, which is why `aft
 
 ## What the toolchain's flow meets
 
-Three things to know before they surprise a reader:
+Two things to know before they surprise a reader:
 
-- **A member whose ROOT is the specs tree** (`packages: ['specs']`) is judged by
-  `jterrazz-test-check .` or by a path-less run from that member. The
-  toolchain's own walk looks for a CHILD directory named `specs`, so until it
-  makes the same move its Test Conventions pass reports the member findings
-  alone — `TODO.md` carries the ask.
 - **An include entry that names `.test.ts`** stops collecting the moment `--fix`
   renames a facet spec. The fix names the ones it BROKE — a glob whose prefix
   covers a file it moved, a literal naming one, and never a comment — so a
@@ -91,7 +86,8 @@ Three things to know before they surprise a reader:
   and `include-points-at-a-folder` holds the class afterwards.
 - **`typescript baseline` in an npm-hoisted member** cannot resolve oxlint
   today, so the step the adopt flow prescribes "where red" has to be run from a
-  directory where `node_modules/.bin/oxlint` does resolve. Also in `TODO.md`.
+  directory where `node_modules/.bin/oxlint` does resolve. `@jterrazz/typescript`'s
+  own `TODO.md` carries the ask.
 
 ## Pitfalls
 
