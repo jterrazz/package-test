@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
 import type { Started } from '../../kernel/chain/config.js';
@@ -7,7 +8,6 @@ import { stubBackend } from '../../world/stubs/delivery/other-process/stub-backe
 import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
 import type { MobileConfig, MobileSpecificationOptions } from './mobile.handle.js';
 import { appiumApp } from './screen/appium-app.adapter.js';
-/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { open } from './screen/open.action.js';
 
 const composition = {

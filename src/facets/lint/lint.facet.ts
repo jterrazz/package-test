@@ -1,3 +1,4 @@
+/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import type { MatrixRow } from '../../kernel/chain/capability.js';
 import type { ChainOf } from '../../kernel/chain/chain.js';
 import type { Started } from '../../kernel/chain/config.js';
@@ -7,7 +8,6 @@ import { fixture } from '../../kernel/files/fixture.capability.js';
 import { fsFixtures } from '../../kernel/files/fs-fixtures.adapter.js';
 import type { LintFacetConfig, LintSpecificationOptions } from './lint.handle.js';
 import { rules } from './rules.capability.js';
-/* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
 import { run } from './run.action.js';
 
 const composition = {
