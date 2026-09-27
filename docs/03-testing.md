@@ -93,7 +93,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
 | The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 163   |
 | The lint suite          | `specs/lint/**`                                               | the built binary end to end, over fixture projects                       | 165   |
-| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
+| Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 24    |
 
 <!-- /GENERATED:layers -->
 
@@ -439,7 +439,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 <!-- GENERATED:meta-tests — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/meta-tests.ts -->
 
-**24 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
+**25 files** are the channel — every `*.test.ts` directly under `lint/self/catalogue/` or `lint/self/corpus/`, plus the suite that needs the real binary. What each one holds is its own `describe` titles, read from the file:
 
 | Meta-test                                    | Holds              | Tests |
 | -------------------------------------------- | ------------------ | ----- |
@@ -460,6 +460,7 @@ The table is GENERATED from the files, because the channel grows faster than a h
 | `lint/self/corpus/port-readers.test.ts`      | portReaders        | 2     |
 | `lint/self/corpus/positions.test.ts`         | unpositionedRules  | 2     |
 | `lint/self/corpus/published-names.test.ts`   | published-names    | 3     |
+| `lint/self/corpus/retired-spellings.test.ts` | retired-spellings  | 2     |
 | `lint/self/corpus/rule-state.test.ts`        | rule-state         | 2     |
 | `lint/self/corpus/schema-documents.test.ts`  | schema-documents   | 9     |
 | `lint/self/corpus/siblings.test.ts`          | siblings           | 5     |

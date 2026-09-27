@@ -18,7 +18,7 @@ export class FetchResult extends BaseResult {
         this.exchange = options.exchange;
     }
 
-    /** The response body as a text accessor (`toMatch('robots.txt')`, `.grep()`). */
+    /** The response body as a text accessor (`toMatch(file('./_expected/robots.txt'))`, `.grep()`). */
     get body(): TextAccessor {
         return new TextAccessor(this.exchange.body, 'body', this.testDir, {
             captures: this.captures,
