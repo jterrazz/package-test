@@ -225,6 +225,14 @@ describe('StubBackend', () => {
         expect(violation!.message).toContain('- GET /events');
     });
 
+    test('stub backend — transport failures — an unreachable stub drops the connection instead of answering', async () => {
+        // Given - a route declared unreachable
+        const url = await started([{ request: http.get('/down'), response: http.unreachable() }]);
+
+        // Then - the client's fetch fails in transport, with no status to read
+        await expect(fetch(`${url}/down`)).rejects.toThrow(TypeError);
+    });
+
     test('stub backend — strictness (the external-block analog) — violation() also reports a required stub that was never requested', async () => {
         // Given - a chain declaring a route it claims MUST be called
         const url = await started([

@@ -169,6 +169,11 @@ export class StubBackend {
             await pause(reply.delay);
         }
 
+        if (reply.transport === 'network-error') {
+            request.socket.destroy();
+            return;
+        }
+
         const status = reply.status ?? 200;
         const { body } = reply;
         if (isStreamBody(body)) {

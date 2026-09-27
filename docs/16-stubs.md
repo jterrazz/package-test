@@ -342,7 +342,7 @@ Exactness is the default because a substring filter silently cross-matches: two 
 
 The point: your stub states the **business payload** (`{ category: 'TECH' }`) and the builder produces the provider's full wire format around it.
 
-`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. Both drivers honour it: msw's node interceptor and its service worker share the response shape.
+`http.unreachable()` is the one that is not a reply. A subject usually has two failure branches — "the server said no" and "nothing answered" — and only a status can express the first. The second is what a caller meets when the service is not running, and it is the branch behind a message like _the server did not answer, check that it is running_; `http.error(503)` tests the other one. All three deliveries honour it: msw's server and msw's worker fail the request in transport, and the stub backend drops the connection.
 
 ### Streamed replies
 
