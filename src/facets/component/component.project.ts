@@ -8,7 +8,6 @@ import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/proj
 import { refusal } from '../../../lint/index.refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { callerFrames } from '../../kernel/files/caller.js';
-import { invariant } from '../../kernel/refusals/invariant.js';
 import type { FacetProjectOptions } from '../../vitest/project.js';
 import { onProjectDefaults, projectTest } from '../../vitest/project.js';
 import { mswWorkerScript } from '../../world/stubs/delivery/browser-page/worker-script.js';
@@ -183,7 +182,14 @@ function versionOf(specifier: string): string {
     if (typeof manifest === 'object' && manifest !== null && 'version' in manifest) {
         return String(manifest.version);
     }
-    throw invariant(`the installed ${specifier} manifest carries no version`);
+    throw new Error(
+        refusal({
+            fix: `reinstall ${specifier}: \`npm install ${specifier}\``,
+            found: `the installed ${specifier} manifest carries no version`,
+            read: 'docs/04-operating.md#what-a-consumer-must-bring',
+            why: 'The component project reads the version of the peers it configures from their installed manifests.',
+        }),
+    );
 }
 
 /** Vite 8 transforms with oxc and warns on every `esbuild` option; Vite 6 and 7 have no `oxc` key. */

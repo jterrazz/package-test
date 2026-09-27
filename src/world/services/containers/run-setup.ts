@@ -1,6 +1,5 @@
 import { refusal } from '../../../../lint/index.refusal.js';
 import { setupEntry } from '../../../kernel/files/setup-entry.js';
-import { invariant } from '../../../kernel/refusals/invariant.js';
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';
@@ -66,7 +65,14 @@ export default async function setup(
         } catch (error) {
             return error instanceof Error
                 ? error
-                : invariant(`preparing Docker threw ${String(error)}, which is no Error`);
+                : new Error(
+                      refusal({
+                          fix: 'restart the Docker runtime, or reinstall the `testcontainers` peer',
+                          found: `preparing Docker threw ${String(error)}, which is no Error`,
+                          read: 'docs/04-operating.md#what-a-consumer-must-bring',
+                          why: 'A service starts only on a Docker runtime that answers, through the peer that drives it.',
+                      }),
+                  );
         }
     })();
     const ready = async (): Promise<void> => {

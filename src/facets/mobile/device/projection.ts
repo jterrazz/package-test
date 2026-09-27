@@ -1,4 +1,4 @@
-import { invariant } from '../../../kernel/refusals/invariant.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import type { DeviceScreen, ScreenNode } from './device.port.js';
 
 /** React Native wraps views in unlabeled `Other` nodes and elements repeat as their own children: nodes with no label, value or identifier are dropped and their children hoisted. */
@@ -66,7 +66,14 @@ function parsePageSource(xml: string): RawNode {
     }
 
     if (!root) {
-        throw invariant('the page source Appium answered holds no XML element');
+        throw new Error(
+            refusal({
+                fix: 'restart the Appium server, or upgrade Appium and its XCUITest driver',
+                found: 'the page source Appium answered holds no XML element',
+                read: 'docs/09-mobile.md#requirements--what-the-machine-must-have',
+                why: 'A screen is read from the XML page source Appium answers.',
+            }),
+        );
     }
     return root;
 }
