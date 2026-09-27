@@ -1,8 +1,11 @@
 import { byName } from '@jterrazz/typescript/rules';
 
 import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
+import { FACETS } from '../../engine/project/facets.js';
 import type { Family } from './families.js';
 import { REFUSAL_WHY } from './refusals.js';
+
+const FACET_LIST = [...FACETS].map((facet) => `\`${facet}\``).join(', ');
 
 type Row = CatalogueRow<Family>;
 
@@ -1064,8 +1067,7 @@ export const CHECKER_PASSES: Row[] = [
     {
         audience: 'consumer',
         channel: 'checker',
-        sentence:
-            'The suffix says the kind, and the tree agrees with it. A `.spec.ts` — the ASSEMBLED product — lives under `specs/<facet>/`: one at a project’s own root is an error here, one in any folder `spec-file-in-a-specs-tree`’s. A `.test.ts` — the UNIT — lives beside its module; under a facet folder (`api`, `cli`, `integration`, `job`, `mobile`, `website`) it is an error, fixable by `--fix` (a `git mv`). A `.test.ts` that reaches no runner is `facet-test-uses-its-runner`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps `.test.ts`, and `specs-at-declared-depth`’s declared depth is what judges it — unless the tree carries its `*.specification.ts` at its own ROOT, which makes the whole tree one facet’s and every `.test.ts` below it a spec. A document is named `<case>.spec.yaml`: `<case>` in kebab-case, without the words `test`/`spec`/`cli` the suffix already carries, and never the bare name of its directory.',
+        sentence: `The suffix says the kind, and the tree agrees with it. A \`.spec.ts\` — the ASSEMBLED product — lives under \`specs/<facet>/\`: one at a project’s own root is an error here, one in any folder \`spec-file-in-a-specs-tree\`’s. A \`.test.ts\` — the UNIT — lives beside its module; under a facet folder (${FACET_LIST}) it is an error, fixable by \`--fix\` (a \`git mv\`). A \`.test.ts\` that reaches no runner is \`facet-test-uses-its-runner\`’s, whose fix is the opposite move, and this rule’s fix leaves it alone. A first level that is NOT a facet is a repository suite: it covers a tree, keeps \`.test.ts\`, and \`specs-at-declared-depth\`’s declared depth is what judges it — unless the tree carries its \`*.specification.ts\` at its own ROOT, which makes the whole tree one facet’s and every \`.test.ts\` below it a spec. A document is named \`<case>.spec.yaml\`: \`<case>\` in kebab-case, without the words \`test\`/\`spec\`/\`cli\` the suffix already carries, and never the bare name of its directory.`,
         facet: 'model',
         family: 'layout',
         fix: 'Move the `.spec.ts` under `specs/<facet>/` (or rename it `.test.ts` beside its module); rename the facet `.test.ts` to `.spec.ts` — `jterrazz-test-check <root> --fix` does it with `git mv`, and names every `include`/`exclude` entry of the member the rename broke.',
