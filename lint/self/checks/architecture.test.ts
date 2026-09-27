@@ -55,7 +55,7 @@ function violationsIn(files: Record<string, string>): string[] {
 
 describe('ARCHITECTURE', () => {
     test('the layer map refuses a reverse edge and a package the layer does not declare, and passes its seams', () => {
-        // Given - one reverse edge per layer, and the seams the map grants
+        // Given - one reverse edge per layer, edges leaving both trees, and the seams the map grants
         const violations = violationsIn({
             'src/elements/descriptors/roles.ts': "import '../../facets/website/index.js';\n",
             'src/expectations/result.ts': "import '../world/services/services.js';\n",
@@ -64,13 +64,17 @@ describe('ARCHITECTURE', () => {
             'src/facets/job/trigger.action.ts': "import '../../expectations/result.js';\n",
             'src/kernel/chain/chain.ts': "import '../../world/clock/clock.js';\n",
             'src/kernel/chain/perform.ts': "import 'pg';\n",
+            'src/kernel/files/manifest.ts':
+                "import manifest from '../../../package.json' with { type: 'json' };\nexport default manifest;\n",
             'src/vitest/preset.ts': "import '../facets/cli/cli.project.js';\n",
+            'src/vitest/reporter.ts':
+                "import '../../specs/_shared/helper.js';\nimport '../../dist/index.js';\n",
             'src/world/clock/clock.ts': "import '../../elements/descriptors/roles.js';\n",
             'src/world/stubs/kinds/http.ts': "import '../../../expectations/tokens/match.js';\n",
             'src/world/stubs/kinds/openai.ts': "import '../../../expectations/tokens/match.js';\n",
         });
 
-        // Then - each reverse edge is named by the layer it leaves, and no seam is
+        // Then - each reverse edge and each edge leaving both trees is named by the layer it leaves, and no seam is
         expect(violations).toStrictEqual([
             'src/elements/descriptors/roles.ts → src/facets/website/index.ts  layer-src-elements-imports-within-its-map',
             'src/expectations/result.ts → src/world/services/services.ts  layer-src-expectations-imports-within-its-map',
@@ -78,8 +82,11 @@ describe('ARCHITECTURE', () => {
             'src/kernel/chain/chain.ts → src/world/clock/clock.ts  layer-src-kernel-chain-imports-within-its-map',
             'src/kernel/chain/perform.ts → node_modules/pg/esm/index.mjs  layer-src-kernel-chain-uses-its-declared-packages',
             'src/kernel/chain/perform.ts → node_modules/pg/esm/index.mjs  library-pg-has-one-owner',
+            'src/kernel/files/manifest.ts → package.json  layer-src-kernel-files-imports-within-its-map',
             'src/vitest/preset.ts → src/facets/cli/cli.project.ts  facet-entered-by-its-face',
             'src/vitest/preset.ts → src/facets/cli/cli.project.ts  layer-src-vitest-imports-within-its-map',
+            'src/vitest/reporter.ts → dist/index.ts  layer-src-vitest-imports-within-its-map',
+            'src/vitest/reporter.ts → specs/_shared/helper.ts  layer-src-vitest-imports-within-its-map',
             'src/world/clock/clock.ts → src/elements/descriptors/roles.ts  layer-src-world-clock-imports-within-its-map',
             'src/world/stubs/kinds/openai.ts → src/expectations/tokens/match.ts  layer-src-world-stubs-imports-within-its-map',
         ]);

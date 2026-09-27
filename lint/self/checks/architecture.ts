@@ -10,6 +10,17 @@ const READ_LAYERS = 'docs/01-architecture.md#the-source-trees';
 
 const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_DIRS.join('|')})/`;
 
+const LOCAL_DEPENDENCY: NonNullable<ArchitectureRule['to']['dependencyTypes']> = [
+    'local',
+    'aliased',
+    'aliased-subpath-import',
+    'aliased-tsconfig',
+    'aliased-tsconfig-base-url',
+    'aliased-tsconfig-paths',
+    'aliased-workspace',
+    'undetermined',
+];
+
 const PACKAGE_DEPENDENCY: NonNullable<ArchitectureRule['to']['dependencyTypes']> = [
     'npm',
     'npm-dev',
@@ -103,7 +114,10 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
                 from,
                 name: ruleName('layer', reach, 'imports-within-its-map'),
                 read: READ_LAYERS,
-                to: { path: '^(src|lint)/', pathNot: either(imports.map((one) => targetOf(one))) },
+                to: {
+                    dependencyTypes: LOCAL_DEPENDENCY,
+                    pathNot: either(imports.map((one) => targetOf(one))),
+                },
                 why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: kernel ← world · elements · expectations ← vitest ← facets ← the entries`,
             },
             {
