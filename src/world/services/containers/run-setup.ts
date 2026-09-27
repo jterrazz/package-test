@@ -1,4 +1,6 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import { setupEntry } from '../../../kernel/files/setup-entry.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
 import { RunContainers, serveContainers } from './run-containers.js';
@@ -7,8 +9,7 @@ import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
 /** One per vitest project. Default images are pulled in the background, so the first file waits on a pull at most once; a project declaring no service needs no Docker. */
 
-export const DOCKER_ABSENT =
-    'declared services need Docker, and no Docker daemon answered — start Docker (Docker Desktop, OrbStack, colima…) and run again';
+export const DOCKER_ABSENT = 'no Docker daemon answered';
 
 export async function prepareDocker(): Promise<void> {
     const { getContainerRuntimeClient, ImageName } = await loadPeer(
@@ -21,7 +22,15 @@ export async function prepareDocker(): Promise<void> {
         client = await getContainerRuntimeClient();
     } catch (error) {
         const reason = error instanceof Error ? error.message : String(error);
-        throw new Error(`${DOCKER_ABSENT} (${reason})`, { cause: error });
+        throw new Error(
+            refusal({
+                fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
+                found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (${reason})`,
+                read: 'docs/17-services.md#one-container-per-project',
+                why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',
+            }),
+            { cause: error },
+        );
     }
     await Promise.all([
         sweepOrphans(client.container.dockerode).catch(() => []),
@@ -50,16 +59,18 @@ export default async function setup(
     prepare: () => Promise<void> = prepareDocker,
 ): Promise<() => Promise<void>> {
     // Settled here and rethrown on request: unasked, a refusal is nobody's.
-    const refusal = (async (): Promise<Error | null> => {
+    const prepared = (async (): Promise<Error | null> => {
         try {
             await prepare();
             return null;
         } catch (error) {
-            return error instanceof Error ? error : new Error(String(error));
+            return error instanceof Error
+                ? error
+                : invariant(`preparing Docker threw ${String(error)}, which is no Error`);
         }
     })();
     const ready = async (): Promise<void> => {
-        const refused = await refusal;
+        const refused = await prepared;
         if (refused !== null) {
             throw refused;
         }

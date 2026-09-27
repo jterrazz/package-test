@@ -74,7 +74,7 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
     return fixes;
 }
 
-/** A distinct class so the visit wrapper lets the complete message through instead of nesting it. */
+/** Its message is the `descriptor-matches-one-element` refusal; its name is what a report prints before it. */
 export class AmbiguousElementError extends Error {
     override readonly name = 'AmbiguousElementError';
 }

@@ -1,14 +1,12 @@
 import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { MobileDevice } from '../device/device.port.js';
 import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js';
 
 const APPIUM_READY_TIMEOUT_MS = 60_000;
-
-const APPIUM_INSTALL_HINT =
-    'specification.mobile() requires appium and webdriverio (optional peer dependencies): npm install -D appium webdriverio && npx appium driver install xcuitest';
 
 export type RunServer = { device: MobileDevice; udid: string; url: string };
 
@@ -21,7 +19,12 @@ export type AppiumServer = {
 export async function startAppiumServer(root: string): Promise<AppiumServer> {
     const bin = resolve(root, 'node_modules', '.bin', 'appium');
     if (!existsSync(bin)) {
-        throw new Error(APPIUM_INSTALL_HINT);
+        throw new Error(
+            refusal('seam-is-an-optional-peer', {
+                fix: 'npm install -D appium webdriverio && npx appium driver install xcuitest',
+                found: `specification.mobile() requires \`appium\`, and ${bin} does not exist`,
+            }),
+        );
     }
 
     const serve = new ServedProcess(
@@ -87,7 +90,12 @@ export function runDevice(device: MobileDevice | undefined, run: RunServer): Mob
         (device.udid === undefined || device.udid === run.udid);
     if (!agrees) {
         throw new Error(
-            `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares — name that device, or declare no device on mobile() so each file serves its own`,
+            refusal({
+                fix: 'name that device, or declare no device on mobile() so each file serves its own',
+                found: `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares`,
+                read: 'docs/09-mobile.md#one-session-per-run',
+                why: 'The run’s setup booted the project’s device alone.',
+            }),
         );
     }
     return { ...run.device, udid: run.udid };
@@ -101,7 +109,12 @@ export async function reachAppium(
     if (declared !== undefined) {
         if (device === undefined) {
             throw new Error(
-                `specification.mobile() names no device to ask the Appium server at ${declared.url} for — a declared server is handed its device by capabilities: name the simulator with \`device: { name }\``,
+                refusal({
+                    fix: 'name the simulator with `device: { name }`',
+                    found: `specification.mobile() names no device to ask the Appium server at ${declared.url} for`,
+                    read: 'docs/09-mobile.md#a-declared-appium-server',
+                    why: 'A declared server is handed its device by capabilities.',
+                }),
             );
         }
         return { appium: notOurs(declared.url), device, outlivesFile: true };
@@ -112,7 +125,12 @@ export async function reachAppium(
     }
     if (device === undefined) {
         throw new Error(
-            "specification.mobile() names no device, and no mobile({ device }) project serves one — name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
+            refusal({
+                fix: "name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
+                found: 'specification.mobile() names no device, and no mobile({ device }) project serves one',
+                read: 'docs/09-mobile.md#one-session-per-run',
+                why: 'A mobile spec drives one simulator, named by the runner or by its project.',
+            }),
         );
     }
     const { server, udid } = await serveAppium(device, root);

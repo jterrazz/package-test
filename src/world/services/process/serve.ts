@@ -3,7 +3,9 @@ import type { ChildProcess } from 'node:child_process';
 import { createServer } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { pause } from '../../../kernel/pause.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ProcessOptions } from './process.adapter.js';
 
 /** Grace period between SIGTERM and the SIGKILL escalation. */
@@ -22,7 +24,7 @@ async function findFreePort(): Promise<number> {
             const address = server.address();
             if (address === null || typeof address === 'string') {
                 server.close();
-                reject(new Error('could not determine a free port'));
+                reject(invariant('a server listening on port 0 answered no port'));
                 return;
             }
             const { port } = address;
@@ -90,7 +92,12 @@ export class ServedProcess {
         const deadline = Date.now() + timeout;
         const died = (): never => {
             throw new Error(
-                `specification.${this.facet}(): server command exited before it was ready.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                refusal({
+                    fix: 'run the command by hand and correct what its output names',
+                    found: `specification.${this.facet}(): the server command exited before it was ready.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                    read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                    why: 'A process is handed to the chain once it is ready, and one that exits never is.',
+                }),
             );
         };
 
@@ -104,7 +111,12 @@ export class ServedProcess {
                     if (!Number.isInteger(captured)) {
                         await this.stop();
                         throw new Error(
-                            `specification.${this.facet}(): the ready pattern ${String(banner)} matched but its capture group is not a port ("${found[1]}").\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                            refusal({
+                                fix: 'capture the port alone in the pattern’s one group, e.g. /listening on (\\d+)/',
+                                found: `specification.${this.facet}(): the ready pattern ${String(banner)} matched, and its capture group is not a port ("${found[1]}").\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                                read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                                why: 'A RegExp `ready` is read over the output, and its one capture group is the port.',
+                            }),
                         );
                     }
                     this.port = captured;
@@ -116,7 +128,12 @@ export class ServedProcess {
                 if (Date.now() >= deadline) {
                     await this.stop();
                     throw new Error(
-                        `specification.${this.facet}(): server did not print ${String(banner)} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                        refusal({
+                            fix: 'correct the pattern to what the server prints, or raise `timeout`',
+                            found: `specification.${this.facet}(): the server did not print ${String(banner)} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                            read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                            why: 'A process is ready once its output matches `ready`, within `timeout`.',
+                        }),
                     );
                 }
                 await pause(READY_POLL_INTERVAL_MS);
@@ -137,7 +154,12 @@ export class ServedProcess {
                 if (Date.now() >= deadline) {
                     await this.stop();
                     throw new Error(
-                        `specification.${this.facet}(): server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                        refusal({
+                            fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
+                            found: `specification.${this.facet}(): the server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
+                            read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                            why: 'A process is ready once its `ready` path answers, within `timeout`.',
+                        }),
                     );
                 }
                 await pause(READY_POLL_INTERVAL_MS);
@@ -164,8 +186,12 @@ export class ServedProcess {
         });
         if (outcome.status !== 0) {
             throw new Error(
-                `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\n` +
-                    `Command: ${before}\nOutput:\n${(outcome.stdout ?? '') + (outcome.stderr ?? '')}`,
+                refusal({
+                    fix: 'run the command by hand and correct what its output names',
+                    found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${(outcome.stdout ?? '') + (outcome.stderr ?? '')}`,
+                    read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                    why: 'A process’s `before` must exit 0 before the process starts.',
+                }),
             );
         }
     }

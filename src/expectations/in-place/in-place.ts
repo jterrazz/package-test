@@ -3,6 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { join, sep } from 'node:path';
 
 import { dedent } from '../../../lint/engine/project/dedent.js';
+import { refusal } from '../../../lint/index.refusal.js';
 import { isFrameworkFrame, stackFrames } from '../../kernel/files/caller.js';
 import type { StackFrame } from '../../kernel/files/caller.js';
 
@@ -218,7 +219,12 @@ export function writeInPlace(
     const span = locateArgument(ledger.original, site);
     if (span === undefined) {
         throw new Error(
-            `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column} — the value in place cannot be written.`,
+            refusal({
+                fix: 'call `.toMatch(` on the expect() written at that line, not through an alias',
+                found: `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column} — the value in place cannot be written`,
+                read: 'docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                why: 'A value written in place is rewritten where its `toMatch(` stands.',
+            }),
         );
     }
     ledger.edits.set(span.start, { end: span.end, text: render(span.indent) });

@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { findRoot } from '../../../lint/engine/project/resolve.js';
+import { refusal } from '../../../lint/index.refusal.js';
 
 /** The lockfile each package manager leaves, and the install command its user types. */
 const INSTALLERS = [
@@ -51,9 +52,9 @@ function buildNote(peer: string, manager: string): string {
         return '';
     }
     return (
-        ` Under pnpm the binding is not built unless the package is listed:` +
+        `; under pnpm the binding is not built unless the package is listed:` +
         ` add "${peer}" to \`onlyBuiltDependencies\` in package.json` +
-        ` (or \`only-built-dependencies\` in .npmrc) and reinstall.`
+        ` (or \`only-built-dependencies\` in .npmrc) and reinstall`
     );
 }
 
@@ -68,8 +69,12 @@ export function requireBuiltPeer(peer: string, what: string, use: () => void): v
         const { name } = installerAt(process.cwd());
         const build = (BUILDERS[name] ?? BUILDERS.npm)?.(peer) ?? `rebuild ${peer}`;
         throw new Error(
-            `${what} found \`${peer}\` but its native binding is not built —` +
-                ` ${name} does not run a dependency's install script unless it is told to: ${build}.`,
+            refusal({
+                fix: build,
+                found: `${what} found \`${peer}\`, and its native binding is not built`,
+                read: 'docs/04-operating.md#what-a-consumer-must-bring',
+                why: `A native peer is built by its install script, and ${name} runs a dependency's install script only once it is told to.`,
+            }),
             { cause: error },
         );
     }
@@ -82,8 +87,10 @@ export async function loadPeer<T>(peer: string, what: string, load: () => Promis
     } catch (error) {
         const { command, name } = installerAt(process.cwd());
         throw new Error(
-            `${what} requires \`${peer}\`, an optional peer dependency of @jterrazz/test:` +
-                ` ${command} ${peer}.${buildNote(peer, name)}`,
+            refusal('seam-is-an-optional-peer', {
+                fix: `${command} ${peer}${buildNote(peer, name)}`,
+                found: `${what} requires \`${peer}\`, and it is not installed`,
+            }),
             { cause: error },
         );
     }

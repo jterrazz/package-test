@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
+import { refusal } from '../../../lint/index.refusal.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';
@@ -172,7 +173,12 @@ export async function startWebsite<Services extends ServiceRecord>(
     // The type already forbids it; this covers untyped callers.
     if (options.backend && !options.server) {
         throw new Error(
-            'specification.website(): `backend` requires `server` mode — a deployed `url` cannot be pointed at a local stub.',
+            refusal({
+                fix: 'start the site with `server`, or drop `backend`',
+                found: 'specification.website({ url, backend }), a backend beside a deployed url',
+                read: 'docs/08-website.md#options',
+                why: '`backend` requires `server` mode: a deployed `url` cannot be pointed at a local stub.',
+            }),
         );
     }
 

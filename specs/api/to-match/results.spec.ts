@@ -211,7 +211,7 @@ describe('results', () => {
 
         // Then - table() with nonexistent service fails clearly
         expect(() => result.table('users', { database: 'nonexistent-db' })).toThrow(
-            'requires database "nonexistent-db" but it was not found',
+            'found: table("users") reads the database "nonexistent-db", and none is declared under that key',
         );
     });
 

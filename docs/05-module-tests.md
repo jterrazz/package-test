@@ -105,7 +105,7 @@ The two awaits, `{ origin }` for a subject that calls a RELATIVE url, the refusa
 
 ### Time
 
-`clock.at(iso)` pins `Date` and nothing else, so a subject that awaits, polls or renders keeps running. `clock.run(iso?)` takes the scheduler too — `setTimeout` and friends queue instead of firing — and `await clock.advance(ms)` is what makes them due; that is the one primitive for a subject whose behaviour IS elapsed time (a debounce, a retry backoff), where waiting for real would be the arbitrary sleep `no-sleep` forbids. One clock per test: a second scope taken inside the first is refused rather than nested, because ending the inner one would silently end the outer one too.
+`clock.at(iso)` pins `Date` and nothing else, so a subject that awaits, polls or renders keeps running. `clock.run(iso?)` takes the scheduler too — `setTimeout` and friends queue instead of firing — and `await clock.advance(ms)` is what makes them due; that is the one primitive for a subject whose behaviour IS elapsed time (a debounce, a retry backoff), where waiting for real would be the arbitrary sleep `no-sleep` forbids. One clock per test: a second scope taken inside the first is refused rather than nested, because ending the inner one would silently end the outer one too. An instant is an ISO-8601 string (`'2026-03-04T09:30:00Z'`), and one `Date` cannot read is refused; so is `clock.advance()` with no clock pinned, which holds no time of the test's to move.
 
 ### Fixtures
 

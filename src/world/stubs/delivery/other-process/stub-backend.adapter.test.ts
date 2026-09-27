@@ -18,7 +18,12 @@ describe('stubBackend', () => {
         expect(() => {
             network.accepts();
         }).toThrow(
-            ".intercept(): this runner has no declared backend — add `backend` to the specification options (specification.mobile({ …, backend: { … } })) so the chain's stubs have a backend to serve them.",
+            [
+                'found: .intercept(), and this runner has no declared backend',
+                'why: A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
+                "fix: add `backend` to the specification options: specification.mobile({ …, backend: { env: 'API_URL' } })",
+                'read: docs/09-mobile.md#declared-backend',
+            ].join('\n'),
         );
     });
 

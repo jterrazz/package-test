@@ -6,7 +6,7 @@ describe('node-only', () => {
     test('the page refuses what only node can do, where it was called — names the binding and says where it runs', () => {
         // Given - a service the page has no socket for
         // Then - the refusal names it and the runtime that has one
-        expect(() => refuse('postgres()')).toThrow(/^postgres\(\) runs under node/u);
+        expect(() => refuse('postgres()')).toThrow(/^found: postgres\(\) runs under node/u);
     });
 
     test('the page refuses what only node can do, where it was called — routes a rendered thing to the kind that renders', () => {
@@ -30,6 +30,6 @@ describe('node-only', () => {
 
         // Then - the name resolves, and `new` is what fails, saying which name
         expect(Stub).toBeTypeOf('function');
-        expect(() => new Stub()).toThrow(/^CliResult runs under node/u);
+        expect(() => new Stub()).toThrow(/^found: CliResult runs under node/u);
     });
 });

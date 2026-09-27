@@ -1,3 +1,4 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import { BaseResult } from '../../expectations/result.js';
 import { defineAction } from '../../kernel/chain/action.js';
 import type { ChainSignature } from '../../kernel/chain/capability.js';
@@ -22,13 +23,25 @@ export const trigger = defineAction<'trigger', [name: string], BaseResult, Trigg
         perform: async ([name], _read, { jobs }, { config, testDir }) => {
             if (jobs.length === 0) {
                 throw new Error(
-                    'Job actions require jobs registered via the jobs option of specification.job()',
+                    refusal({
+                        fix: 'register the jobs with the `jobs` option of specification.job()',
+                        found: `.trigger("${name}"), and no job is registered`,
+                        read: 'docs/11-job.md#options',
+                        why: 'A job is triggered by the name it is registered under.',
+                    }),
                 );
             }
             const job = jobs.find((candidate) => candidate.name === name);
             if (job === undefined) {
                 const available = jobs.map((candidate) => candidate.name).join(', ');
-                throw new Error(`trigger("${name}"): job not found. Available: ${available}`);
+                throw new Error(
+                    refusal({
+                        fix: `trigger a registered job: ${available}`,
+                        found: `.trigger("${name}"), and no job is registered under that name`,
+                        read: 'docs/11-job.md#options',
+                        why: 'A job is triggered by the name it is registered under.',
+                    }),
+                );
             }
             await job.execute();
             return new BaseResult({ config, testDir });

@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { safeRealpath } from '../../lint/engine/project/resolve.js';
+import { refusal } from '../../lint/index.refusal.js';
 import type { ChainConfig } from '../kernel/chain/config.js';
 import { validateDatabaseOption } from '../kernel/database-option.js';
 import { DirectoryAccessor } from './disk/directory.js';
@@ -65,14 +66,28 @@ export class BaseResult {
         return {
             get content(): string {
                 if (!exists) {
-                    throw new Error(`File not found: ${path}`);
+                    throw new Error(
+                        refusal({
+                            fix: 'assert `.exists` first, or name a file the run left',
+                            found: `file(${JSON.stringify(path)}), and the run left no such file`,
+                            read: 'docs/14-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+                            why: 'A file is read only where it exists.',
+                        }),
+                    );
                 }
                 return readFileSync(resolvedPath, 'utf8');
             },
             exists,
             grep(pattern: string): TextAccessor {
                 if (!exists) {
-                    throw new Error(`File not found: ${path}`);
+                    throw new Error(
+                        refusal({
+                            fix: 'assert `.exists` first, or name a file the run left',
+                            found: `file(${JSON.stringify(path)}), and the run left no such file`,
+                            read: 'docs/14-assertions.md#resultfilepath--single-files-in-the-cwd-cli',
+                            why: 'A file is read only where it exists.',
+                        }),
+                    );
                 }
                 return new TextAccessor(readFileSync(resolvedPath, 'utf8'), path, testDir, {
                     captures,
@@ -87,9 +102,21 @@ export class BaseResult {
         const db = this.resolveDatabase(options?.database);
         if (!db) {
             throw new Error(
-                options?.database
-                    ? `table("${tableName}") requires database "${options.database}" but it was not found`
-                    : `table("${tableName}") requires a database adapter`,
+                refusal(
+                    options?.database
+                        ? {
+                              fix: `name a declared database: ${(this.config.databaseKeys ?? []).join(', ')}`,
+                              found: `table("${tableName}") reads the database "${options.database}", and none is declared under that key`,
+                              read: 'docs/17-services.md#the-database-rule',
+                              why: '`database:` names a key of the services record.',
+                          }
+                        : {
+                              fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()`',
+                              found: `table("${tableName}"), and no database is declared`,
+                              read: 'docs/17-services.md#the-database-rule',
+                              why: 'A table is read from a declared database.',
+                          },
+                ),
             );
         }
         return new TableAccessor(tableName, db, this.captures);

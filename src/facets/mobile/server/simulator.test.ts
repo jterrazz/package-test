@@ -68,7 +68,7 @@ describe('simulator', () => {
         // Given - a name present on two runtimes, no os given
         // Then - the framework never guesses which one a spec meant
         expect(() => selectSimulator(LISTING, { name: 'iPhone 16 Pro' })).toThrow(
-            /2 simulators match "iPhone 16 Pro" — add `os:` or `udid:`/u,
+            /2 simulators match "iPhone 16 Pro"\.\n[\s\S]*\nfix: add `os:` or `udid:` to pick one\n/u,
         );
     });
 });

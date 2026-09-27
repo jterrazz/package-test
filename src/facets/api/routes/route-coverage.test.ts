@@ -95,7 +95,7 @@ describe('setup', () => {
 
         // Then - the ratchet fails the run
         await expect(teardown()).rejects.toThrow(
-            'api routes: 2 declared route(s) no test reached, the ratchet holds 0',
+            'found: api routes: 2 declared route(s) no test reached, and the ratchet holds 0:',
         );
     });
 });

@@ -101,7 +101,7 @@ describe('assertions', () => {
             // checker-disable-next-line named-path-exists -- negative spec: the golden with no extension exists nowhere, and that IS the behaviour under test
             // oxlint-disable-next-line jterrazz/golden-path-has-extension -- negative spec: the missing extension IS the behaviour under test
             expect(result.stdout).toMatch(file('./_expected/no-extension'), { frozen: true });
-        }).toThrow(/extension is part of the path/u);
+        }).toThrow(/a golden path with no extension/u);
     });
 
     test('value exposes the parsed JSON', async () => {

@@ -1,3 +1,5 @@
+import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { field } from './run-containers.js';
 import type { RunAddress } from './run-containers.js';
@@ -14,6 +16,17 @@ function answered(value: unknown): RunAddress | { error: string } {
         return { host, key, port };
     }
     return { error: `the run answered no container: ${JSON.stringify(value)}` };
+}
+
+function relayed(message: string, image: string): Error {
+    return new Error(
+        refusal({
+            fix: 'fix what the reason names, and run again',
+            found: `the run's setup could not start ${image}:\n  ${message.replaceAll('\n', '\n  ')}`,
+            read: 'docs/17-services.md#one-container-per-project',
+            why: 'A container is started once per run, by the project’s setup, and a worker asks it for the address.',
+        }),
+    );
 }
 
 /** Started by asking the project's setup, never stopped by the worker. */
@@ -35,7 +48,7 @@ export class RunContainer implements ContainerPort {
         });
         const answer = answered(await response.json());
         if ('error' in answer) {
-            throw new Error(answer.error);
+            throw relayed(answer.error, this.request.image);
         }
         this.address = answer;
     }
@@ -48,8 +61,8 @@ export class RunContainer implements ContainerPort {
     getMappedPort(containerPort: number): number {
         const address = this.started();
         if (containerPort !== this.request.port) {
-            throw new Error(
-                `Container of the run exposes ${this.request.port}, not ${containerPort}`,
+            throw invariant(
+                `the container of the run exposes ${this.request.port}, and ${containerPort} was asked`,
             );
         }
         return address.port;
@@ -78,7 +91,7 @@ export class RunContainer implements ContainerPort {
 
     private started(): RunAddress {
         if (this.address === null) {
-            throw new Error('Container not started');
+            throw invariant('a container of the run was read before it started');
         }
         return this.address;
     }

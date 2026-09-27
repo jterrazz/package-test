@@ -1,3 +1,4 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import type { FileAccessor } from '../result.js';
 import { JsonAccessor } from '../text/json.js';
 import { TextAccessor } from '../text/text.js';
@@ -88,7 +89,14 @@ export class ContainerAccessor {
         const { testDir } = this;
         const readContent = (): string => {
             if (!exists) {
-                throw new Error(`File not found in container: ${path}`);
+                throw new Error(
+                    refusal({
+                        fix: 'assert `.exists` first, or name a file the container holds',
+                        found: `file(${JSON.stringify(path)}).content, and the container holds no such file`,
+                        read: 'docs/14-assertions.md#container-subjects-docker-aware-cli',
+                        why: 'A file is read only where it exists.',
+                    }),
+                );
             }
             return readContainerFile(id, path);
         };
@@ -120,7 +128,12 @@ export class ContainerAccessor {
     private requireExists(member: string): string {
         if (this.containerId === null) {
             throw new Error(
-                `ContainerAccessor.${member}: container does not exist (check .exists first)`,
+                refusal({
+                    fix: 'assert `.exists` first, or name a container the run spawned',
+                    found: `ContainerAccessor.${member}, and the container does not exist`,
+                    read: 'docs/14-assertions.md#container-subjects-docker-aware-cli',
+                    why: 'A container is read only once the run spawned it.',
+                }),
             );
         }
         return this.containerId;

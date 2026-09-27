@@ -16,7 +16,12 @@ describe('instantOf', () => {
         // Then - the refusal names run(), the value, and the shape it wanted
         expect(() => instantOf('run', 'soon')).toThrow(
             new TypeError(
-                `clock.run(): "soon" is not an instant — pass an ISO-8601 string (e.g. '2026-03-04T09:30:00Z').`,
+                [
+                    'found: clock.run("soon"), and "soon" is not an instant',
+                    'why: A clock is pinned at an instant, written as an ISO-8601 string.',
+                    `fix: pass an ISO-8601 string: clock.run('2026-03-04T09:30:00Z')`,
+                    'read: docs/05-module-tests.md#time',
+                ].join('\n'),
             ),
         );
     });

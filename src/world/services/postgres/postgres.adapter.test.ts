@@ -42,7 +42,7 @@ describe('postgres', () => {
         // Given - a fresh handle nothing ever wired
         // Then - the refusal says which half is absent
         await expect(postgres().healthcheck()).rejects.toThrow(
-            'postgres: cannot healthcheck — no connection string',
+            'postgres() was healthchecked before it had a connection string',
         );
     });
 
@@ -56,8 +56,9 @@ describe('postgres', () => {
             .healthcheck()
             .then(() => null)
             .catch((error: unknown) => (error instanceof Error ? error : null));
-        expect(failure?.message).toContain('postgres healthcheck failed: ');
-        expect(failure?.message).not.toBe('postgres healthcheck failed: ');
+        expect(failure?.message).toMatch(
+            /^found: postgres\(\) did not answer its healthcheck: \S/u,
+        );
         expect(failure?.cause).toBeDefined();
     });
 });

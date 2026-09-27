@@ -98,9 +98,12 @@ export class StubQueue {
             return null;
         }
         return new Error(
-            `Required stub(s) never satisfied during the chain:\n${unmet.join('\n')}\n` +
-                `A required stub states the call MUST happen — either the code no longer makes it, ` +
-                `or the stub no longer describes it.`,
+            refusal({
+                fix: 'the code no longer makes the call, or the stub no longer describes it: correct the one that drifted',
+                found: `required stub(s) never satisfied during the chain:\n${unmet.join('\n')}`,
+                read: 'docs/16-stubs.md#required-is-verified-per-terminal-action',
+                why: 'A required stub states the call MUST happen, within the terminal action it is declared for.',
+            }),
         );
     }
 

@@ -1,3 +1,4 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 /* oxlint-disable eslint/class-methods-use-this -- a `ServiceHandle` is an interface of eleven members and a process answers "nothing to do" to most of them: no image to pull, no database adapter, no per-worker namespace. Each stub states that answer where the contract asks for it. */
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
@@ -115,8 +116,12 @@ export class ProcessHandle implements ServiceHandle {
     get url(): string {
         if (!this.started) {
             throw new Error(
-                'process(): the URL is known once the process is ready — read it from the ' +
-                    'started services record, never at declaration time.',
+                refusal({
+                    fix: 'read it from the started services record — `env: (services) => …` or `server: (services) => …` — never at declaration time',
+                    found: 'process().url read before the process was ready',
+                    read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                    why: 'A process’s URL is known once it is ready.',
+                }),
             );
         }
         return this.connectionString;

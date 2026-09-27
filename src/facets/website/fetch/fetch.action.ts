@@ -1,6 +1,8 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { FetchResult } from './fetch.result.js';
@@ -32,7 +34,7 @@ export const rawFetch = defineAction<
     perform: async ([path], read, _drivers, { config, testDir }) => {
         const { baseUrl } = config;
         if (baseUrl === undefined || baseUrl === '') {
-            throw new Error('.fetch() requires a website under test (use specification.website())');
+            throw invariant('.fetch() reached a chain with no website under test');
         }
         const response = await fetch(`${baseUrl}${path}`, {
             headers: read(headers),
@@ -52,8 +54,12 @@ export const rawFetch = defineAction<
     prepare: (_args, read) => {
         if (read(clock) !== null) {
             throw new Error(
-                '.clock() pins the clock of a PAGE, and .fetch() opens none — it is one raw HTTP ' +
-                    'exchange. Assert the moment with a token ({{iso8601}}) in the golden, or visit the page.',
+                refusal({
+                    fix: 'assert the moment with a token ({{iso8601}}) in the golden, or visit the page',
+                    found: '.clock() on a chain ending in .fetch(), which opens no page',
+                    read: 'docs/08-website.md#setup-clock',
+                    why: '.clock() pins the clock of a page, and .fetch() is one raw HTTP exchange.',
+                }),
             );
         }
         return { workDir: null };

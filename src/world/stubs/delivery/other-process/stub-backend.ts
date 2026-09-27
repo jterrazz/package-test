@@ -1,10 +1,11 @@
-/** A request matching no stub gets 501 and is recorded; once the chain declared a stub, the action throws naming every unmatched request. Every response carries permissive CORS headers. */
-
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
+/** A request matching no stub gets 501 and is recorded; once the chain declared a stub, the action throws naming every unmatched request. Every response carries permissive CORS headers. */
 
+import { refusal } from '../../../../../lint/index.refusal.js';
 import type { ChainConfig } from '../../../../kernel/chain/config.js';
 import { pause } from '../../../../kernel/pause.js';
+import { invariant } from '../../../../kernel/refusals/invariant.js';
 import { isStreamBody } from '../../exchange.js';
 import type { MatchableRequest } from '../../exchange.js';
 import { StubQueue } from '../../matching/stub-queue.js';
@@ -58,7 +59,7 @@ export class StubBackend {
 
         const address = server.address();
         if (address === null || typeof address === 'string') {
-            throw new Error('stub backend: could not determine the listening port');
+            throw invariant('the stub backend listens on no port');
         }
         this.url = `http://127.0.0.1:${address.port}`;
         return this.url;
@@ -100,10 +101,10 @@ export class StubBackend {
             )
             .join('\n');
         return new Error(
-            `Unmatched request(s) hit the declared backend during the chain:\n${unmatched}\n` +
-                `Declared stubs:\n${this.describeRoutes()}\n` +
-                `Every backend request of a chain that declares stubs must match one — ` +
-                `add a stub for it to the chain's composite.`,
+            refusal('network-strict-after-first-stub', {
+                fix: "add a stub for each to the chain's composite",
+                found: `unmatched request(s) hit the declared backend during the chain:\n${unmatched}\ndeclared stubs:\n${this.describeRoutes()}`,
+            }),
         );
     }
 

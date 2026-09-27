@@ -30,6 +30,7 @@ describe('peer', () => {
         expect(loaded.parse()).toBe(42);
     });
 
+    // RUNTIME seam-is-an-optional-peer — a missing peer is refused where it was needed, naming the peer and the install command.
     test('loadPeer — an optional peer, or a message that fixes it — names the facet that asked, the peer, and the command', async () => {
         // Given - a peer that is not installed
         const failed = loadPeer(
@@ -40,7 +41,12 @@ describe('peer', () => {
 
         // Then - the reader has the line to add without leaving the message
         await expect(failed).rejects.toThrow(
-            'redis() requires `redis`, an optional peer dependency of @jterrazz/test: npm install -D redis.',
+            [
+                'found: redis() requires `redis`, and it is not installed',
+                'why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.',
+                'fix: npm install -D redis',
+                'read: docs/19-linting.md#seam-is-an-optional-peer',
+            ].join('\n'),
         );
     });
 
@@ -73,7 +79,7 @@ describe('peer', () => {
 
         // Then - the refusal says who asked, what is missing, and the line that fixes it
         expect(fail).toThrow(
-            /sqlite\(\) found `better-sqlite3` but its native binding is not built/u,
+            'found: sqlite() found `better-sqlite3`, and its native binding is not built',
         );
         expect(fail).toThrow(/rebuild better-sqlite3|bun pm trust|onlyBuiltDependencies/u);
     });

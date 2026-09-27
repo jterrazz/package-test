@@ -14,7 +14,12 @@ describe('trigger', () => {
         await expect(
             trigger.perform(['report-refresh'], unread, { jobs: [] }, RUN),
         ).rejects.toThrow(
-            'Job actions require jobs registered via the jobs option of specification.job()',
+            [
+                'found: .trigger("report-refresh"), and no job is registered',
+                'why: A job is triggered by the name it is registered under.',
+                'fix: register the jobs with the `jobs` option of specification.job()',
+                'read: docs/11-job.md#options',
+            ].join('\n'),
         );
     });
 });

@@ -81,6 +81,8 @@ export const { cleanup, website } = await specification.website({
 });
 ```
 
+**Its URL is known once it is ready.** `url` read at declaration time is refused: a process started beside others reads theirs from the started services record — `env: (services) => …`, `server: (services) => …`.
+
 **The framework ends what it started.** A process is spawned detached — its own process group on POSIX — and on teardown the whole group is sent `SIGTERM`, escalating to `SIGKILL` after a 2 s grace, so what the command forked (a watcher, a background server) dies with it instead of outliving the run. A website's server and a mobile run's Appium server are ended the same way, by the same code.
 
 `website()` and `mobile()` take a `services` record for exactly this: a site started beside the API it calls, a simulator started beside its Metro bundler (`process({ command: 'expo start', ready: /Metro waiting on .*:(\d+)/ })`). What used to be a bundler bootstrap the repository maintained is a declaration.
@@ -104,7 +106,7 @@ In CLI mode, the record additionally drives env injection into the child process
 
 ### The `database:` rule
 
-With **2 or more databases** in the record, `database:` is mandatory on every `.seed()` and `.table()`. With exactly **one**, it is forbidden (redundant). There is no in-between: the option is either always present or never present within a project.
+With **2 or more databases** in the record, `database:` is mandatory on every `.seed()` and `.table()`. With exactly **one**, it is forbidden (redundant). There is no in-between: the option is either always present or never present within a project. A `.seed()` or a `.table()` in a project that declares no database is refused, and so is a `database:` naming no key of the record.
 
 ```typescript
 // one database → no database: anywhere

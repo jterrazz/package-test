@@ -28,7 +28,12 @@ describe('databaseSet', () => {
 
         // Then - the refusal names the missing key and enumerates the record
         expect(() => databases.target('ghost')).toThrow(
-            'seed() targets database "ghost" but it was not found. Available: analytics, db',
+            [
+                'found: seed() targets the database "ghost", and none is declared under that key',
+                'why: `database:` names a key of the services record.',
+                'fix: name a declared database: analytics, db',
+                'read: docs/17-services.md#the-database-rule',
+            ].join('\n'),
         );
     });
 
@@ -39,7 +44,12 @@ describe('databaseSet', () => {
 
         // Then - the seed has nowhere to run, and says so
         expect(() => databases.target(options.database)).toThrow(
-            'seed() requires a database adapter',
+            [
+                'found: seed(), and no database is declared',
+                'why: A seed writes into a declared database.',
+                'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                'read: docs/17-services.md#the-database-rule',
+            ].join('\n'),
         );
     });
 });

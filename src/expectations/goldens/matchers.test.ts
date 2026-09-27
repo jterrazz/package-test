@@ -815,7 +815,12 @@ describe('matchers', () => {
 
         // Then - refused, before a SELECT with no columns reaches the driver
         await expect(expect(subject).toMatch([])).rejects.toThrow(
-            'table "ghost" has no columns: the database holds no such table.',
+            [
+                'found: table "ghost" has no columns: the database holds no such table',
+                'why: A table is read from the database that holds it.',
+                'fix: name a table the database holds, or create it in the init script or a seed',
+                'read: docs/14-assertions.md#resulttablename--database---database-tables-api-job-cli',
+            ].join('\n'),
         );
     });
 

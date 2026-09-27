@@ -263,7 +263,7 @@ describe('postgres', () => {
         });
 
         // Then - the message carries the script's path and the type error
-        expect(result.error.text).toContain('init script failed');
+        expect(result.error.text).toContain('found: the postgres init script ');
         expect(result.error.text).toContain('postgres/init.sql');
     });
 

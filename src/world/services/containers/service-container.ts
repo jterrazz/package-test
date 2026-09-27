@@ -1,3 +1,4 @@
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { RunContainer } from './run-container.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
@@ -44,7 +45,7 @@ export class ServiceContainer implements ContainerPort {
 
     private started(): ContainerPort {
         if (this.delegate === null) {
-            throw new Error('Container not started');
+            throw invariant('a service container was read before it started');
         }
         return this.delegate;
     }

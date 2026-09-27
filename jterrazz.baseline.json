@@ -1,11 +1,11 @@
 {
     "typescript": {
-        "comments/comment-lines-held-by-the-baseline": 2495,
+        "comments/comment-lines-held-by-the-baseline": 2493,
         "eslint/class-methods-use-this": 10,
         "eslint/complexity": 26,
         "eslint/max-classes-per-file": 1,
         "eslint/max-depth": 5,
-        "eslint/max-lines": 24,
+        "eslint/max-lines": 27,
         "eslint/max-lines-per-function": 19,
         "eslint/max-params": 2,
         "eslint/no-await-in-loop": 40,

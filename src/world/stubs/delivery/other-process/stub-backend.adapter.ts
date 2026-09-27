@@ -1,3 +1,4 @@
+import { refusal } from '../../../../../lint/index.refusal.js';
 import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { StubBackend } from './stub-backend.js';
 
@@ -10,8 +11,15 @@ export function stubBackend(
         accepts: () => {
             if (backend === undefined) {
                 throw new Error(
-                    `.intercept(): this runner has no declared backend — add \`backend\` to the specification options ` +
-                        `(specification.${facet}({ …, backend: { … } })) so the chain's stubs have a backend to serve them.`,
+                    refusal({
+                        fix: `add \`backend\` to the specification options: specification.${facet}({ …, backend: { env: 'API_URL' } })`,
+                        found: '.intercept(), and this runner has no declared backend',
+                        read:
+                            facet === 'mobile'
+                                ? 'docs/09-mobile.md#declared-backend'
+                                : 'docs/08-website.md#declared-backend',
+                        why: 'A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
+                    }),
                 );
             }
         },

@@ -367,7 +367,7 @@ takes of them anyway, so neither side is silently dropped.
 
 A finding is the only page of the catalogue most readers ever see, so it carries what the reader needs to act without opening another: **what was found** and where, **why** the convention holds, **the fix for this case** — its paths and names, and `make fix` when a fixer does it — and **where to read** the rule whole. A message that names the fault and stops sends its reader to the chapter for what the line could have said; one that states the rule and not the case sends them back to the code to find out what it saw.
 
-The four parts are the same everywhere a rule speaks — a static rule, a checker pass, a refusal the runtime throws — and none is optional. How each channel prints them is [19 — Linting](19-linting.md#what-a-finding-says)'s.
+The four parts are the same everywhere a rule speaks — a static rule, a checker pass, a refusal the runtime throws — and none is optional. How each channel prints them is [19 — Linting](19-linting.md#what-a-finding-says)'s. The runtime throws nothing else: an error only the framework can cause — a broken invariant of its own — says so, and that the bug is not the reader's to fix.
 
 ## Maintaining the constitution
 

@@ -1,4 +1,6 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import type { MatrixRow } from '../../kernel/chain/capability.js';
+import { invariant } from '../../kernel/refusals/invariant.js';
 import { FilesystemAccessor } from '../disk/filesystem.js';
 import { BaseResult } from '../result.js';
 import type { ResultConfig } from '../result.js';
@@ -102,7 +104,7 @@ export class CliResult extends BaseResult {
     /** Accessor for the temporary working directory the command ran in. */
     get filesystem(): FilesystemAccessor {
         if (!this.workDir) {
-            throw new Error('CliResult.filesystem requires a working directory');
+            throw invariant('a CLI result was built with no working directory');
         }
         return new FilesystemAccessor(this.workDir, this.testDir, this.captures);
     }
@@ -140,8 +142,12 @@ export class CliResult extends BaseResult {
     private ensureDockerAware(member: string): void {
         if (!this.dockerConfig || !this.testRunId) {
             throw new Error(
-                `CliResult.${member}: runner was not configured with a docker option. ` +
-                    `Pass \`docker: { envVar, nameLabel, testRunLabel }\` in the specification.cli() options.`,
+                refusal({
+                    fix: 'pass `docker: { envVar, nameLabel, testRunLabel }` in the specification.cli() options',
+                    found: `CliResult.${member}, and the runner was not configured with a docker option`,
+                    read: 'docs/12-cli.md#docker-aware-mode',
+                    why: 'A CLI result reads the containers its run spawned only under Docker-aware mode.',
+                }),
             );
         }
     }

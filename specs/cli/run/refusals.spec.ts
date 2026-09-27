@@ -63,9 +63,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, tokens covering the path and the run cwd
         expect(text(message)).toMatch(`
-            Spec mismatch
-
-            a run whose golden stdout is deliberately wrong
+            found: spec mismatch — a run whose golden stdout is deliberately wrong
 
             $ help
 
@@ -83,7 +81,9 @@ describe('refusals', () => {
               
 
             specs/cli/run/_fixtures/wrong-stdout.spec.yaml:3
-            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+            why: A spec document states what its runs produce: the exit code and the streams, whole.
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            read: docs/20-documents.md#failure-and-update`);
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
@@ -94,9 +94,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, stderr included
         expect(text(message)).toMatch(`
-            Spec mismatch
-
-            a run whose golden exit code is deliberately wrong
+            found: spec mismatch — a run whose golden exit code is deliberately wrong
 
             $ fail
 
@@ -109,7 +107,9 @@ describe('refusals', () => {
             Fatal: something went wrong
 
             specs/cli/run/_fixtures/wrong-exit.spec.yaml:3
-            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+            why: A spec document states what its runs produce: the exit code and the streams, whole.
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            read: docs/20-documents.md#failure-and-update`);
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
@@ -120,9 +120,7 @@ describe('refusals', () => {
 
         // Then - the whole rendering, one line per rejected assertion
         expect(text(message)).toMatch(`
-            Spec mismatch
-
-            a run whose files assertions are deliberately wrong
+            found: spec mismatch — a run whose files assertions are deliberately wrong
 
             $ scaffold
 
@@ -133,7 +131,9 @@ describe('refusals', () => {
               out/nothing.txt: expected to exist, got nothing at that path
 
             specs/cli/run/_fixtures/wrong-files.spec.yaml:3
-            Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.`);
+            why: A spec document states what its runs produce: the exit code and the streams, whole.
+            fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
+            read: docs/20-documents.md#failure-and-update`);
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {
@@ -191,6 +191,8 @@ describe('refusals', () => {
         const document = documentAt(path);
 
         // Then - the refusal lists what specification.cli() actually declares
-        await expect(failureOf(cli.run(document))).resolves.toContain('registered servers: echo');
+        await expect(failureOf(cli.run(document))).resolves.toContain(
+            'fix: serve a registered server: echo',
+        );
     });
 });

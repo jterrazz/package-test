@@ -113,7 +113,7 @@ describe('interceptThrough', () => {
         };
 
         // Then - the message says what an origin is
-        await expect(scope()).rejects.toThrow('is not an absolute URL');
+        await expect(scope()).rejects.toThrow('`origin` is `console.test`, not an absolute URL');
     });
 
     test('intercept — the network double in module scope — raises the undeclared call when the scope ends', async () => {

@@ -1,3 +1,4 @@
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { DeviceScreen, ScreenNode } from './device.port.js';
 
 /** React Native wraps views in unlabeled `Other` nodes and elements repeat as their own children: nodes with no label, value or identifier are dropped and their children hoisted. */
@@ -65,7 +66,7 @@ function parsePageSource(xml: string): RawNode {
     }
 
     if (!root) {
-        throw new Error('projectScreen(): the page source contains no XML element');
+        throw invariant('the page source Appium answered holds no XML element');
     }
     return root;
 }

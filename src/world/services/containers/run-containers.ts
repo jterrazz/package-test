@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { text } from 'node:stream/consumers';
 
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
 /** Two requests alike (image, port, environment, options) share one container; the run stops them all at teardown. */
@@ -109,7 +110,9 @@ async function respond(
         if (request.method === 'POST' && url.pathname === '/containers') {
             const asked: unknown = JSON.parse(await text(request));
             if (!isContainerRequest(asked)) {
-                throw new Error(`not a container request: ${JSON.stringify(asked)}`);
+                throw invariant(
+                    `a worker asked for ${JSON.stringify(asked)}, no container request`,
+                );
             }
             const address = await containers.acquire(asked);
             response.writeHead(200, { 'content-type': 'application/json' });
@@ -141,7 +144,7 @@ export async function serveContainers(containers: RunContainers): Promise<Served
     await once(server, 'listening');
     const address = server.address();
     if (address === null || typeof address === 'string') {
-        throw new Error('the run containers are served on no port');
+        throw invariant('the run containers are served on no port');
     }
     const { port } = address;
     return {

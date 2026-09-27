@@ -1,3 +1,4 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import { stubsOf } from '../stub.js';
 import type { Stub, StubInput } from '../stub.js';
@@ -17,8 +18,12 @@ export function declared(
     }
     if (maybeResponse === undefined) {
         throw new Error(
-            `${call}(): a bare request needs its response — pass a stub ` +
-                `(defineStub({ request, response })) or the inline pair ${call}(request, response).`,
+            refusal({
+                fix: `pass a stub — defineStub({ request, response }) — or the inline pair ${call}(request, response)`,
+                found: `${call}(request), a bare request with no response`,
+                read: 'docs/16-stubs.md#using-them-intercept',
+                why: 'A stub is a request and its response: a request alone answers nothing.',
+            }),
         );
     }
     return [{ request: requestOrStubs, response: maybeResponse }];

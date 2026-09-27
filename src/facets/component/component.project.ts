@@ -5,8 +5,10 @@ import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/project/artifacts.js';
+import { refusal } from '../../../lint/index.refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { callerFrames } from '../../kernel/files/caller.js';
+import { invariant } from '../../kernel/refusals/invariant.js';
 import type { FacetProjectOptions } from '../../vitest/project.js';
 import { onProjectDefaults, projectTest } from '../../vitest/project.js';
 import { mswWorkerScript } from '../../world/stubs/delivery/browser-page/worker-script.js';
@@ -139,7 +141,14 @@ async function reroot(
         loaded = await source;
     }
     if (loaded === undefined) {
-        throw new Error(`component({ vite }): no config at ${from}`);
+        throw new Error(
+            refusal({
+                fix: "point `vite` at the app's own vite.config.ts",
+                found: `component({ vite }): ${from} exports no config`,
+                read: 'docs/07-component.md#the-constructor-there-is-none',
+                why: 'A component renders through the Vite pipeline the app builds with, read from its config.',
+            }),
+        );
     }
 
     const inactive = transformKey() === 'oxc' ? 'esbuild' : 'oxc';
@@ -167,10 +176,6 @@ function optimizeDepsOf(declared: unknown): Record<string, unknown> & { include:
     };
 }
 
-const PROVIDER_MISSING =
-    'component(): @vitest/browser-playwright is an optional peer — install it beside the runner ' +
-    'it pins (npm i -D @vitest/browser-playwright@<the installed vitest version> playwright).';
-
 function versionOf(specifier: string): string {
     const manifest: unknown = JSON.parse(
         readFileSync(requireFrom.resolve(`${specifier}/package.json`), 'utf8'),
@@ -178,7 +183,7 @@ function versionOf(specifier: string): string {
     if (typeof manifest === 'object' && manifest !== null && 'version' in manifest) {
         return String(manifest.version);
     }
-    throw new Error(`component(): ${specifier} is installed without a version.`);
+    throw invariant(`the installed ${specifier} manifest carries no version`);
 }
 
 /** Vite 8 transforms with oxc and warns on every `esbuild` option; Vite 6 and 7 have no `oxc` key. */
@@ -203,12 +208,21 @@ function assertProviderPin(): void {
     try {
         provider = versionOf('@vitest/browser-playwright');
     } catch {
-        throw new Error(PROVIDER_MISSING);
+        throw new Error(
+            refusal('seam-is-an-optional-peer', {
+                fix: `npm i -D @vitest/browser-playwright@${runner} playwright`,
+                found: 'component() requires `@vitest/browser-playwright`, and it is not installed',
+            }),
+        );
     }
     if (runner !== provider) {
         throw new Error(
-            `component(): @vitest/browser-playwright@${provider} peers vitest on an exact version, and vitest is ${runner}. ` +
-                `Bump both to the same version in one change (npm i -D vitest@${provider} @vitest/browser-playwright@${provider}).`,
+            refusal({
+                fix: `bump both to the same version in one change: npm i -D vitest@${provider} @vitest/browser-playwright@${provider}`,
+                found: `component(): @vitest/browser-playwright is ${provider}, and vitest is ${runner}`,
+                read: 'docs/04-operating.md#what-a-consumer-must-bring',
+                why: '`@vitest/browser-playwright` peers vitest on an exact version.',
+            }),
         );
     }
 }

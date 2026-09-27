@@ -56,9 +56,7 @@ describe('COMPONENT_COMMANDS', () => {
             COMPONENT_COMMANDS.goldenRead(context, './_expected/card.aria.yaml');
 
         // Then - the refusal names what is missing
-        expect(read).toThrow(
-            'golden: the command carries no test path — a golden is read from a test file.',
-        );
+        expect(read).toThrow('a golden command reached the server with no test path');
     });
 
     test('inPlaceWrite — a stack no frame of which is the test file — refuses, and writes nothing', () => {
@@ -73,7 +71,12 @@ describe('COMPONENT_COMMANDS', () => {
 
         // Then - the refusal says the value has nowhere to be written, and no file appears
         expect(write).toThrow(
-            'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written.',
+            [
+                'found: update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written',
+                'why: A value written in place is rewritten in the test that states it.',
+                'fix: call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                'read: docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+            ].join('\n'),
         );
         expect(existsSync(testPath)).toBe(false);
     });

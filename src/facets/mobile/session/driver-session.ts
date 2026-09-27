@@ -1,5 +1,6 @@
 import type { attach, remote } from 'webdriverio';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import type { MobileDevice } from '../device/device.port.js';
 import type { SessionLedger } from './session-ledger.js';
 
@@ -35,7 +36,10 @@ async function loadWebdriverio(): Promise<{ attach: AttachFn; remote: RemoteFn }
         return { attach: attachFn, remote: remoteFn };
     } catch {
         throw new Error(
-            '.open() requires webdriverio (optional peer dependency): npm install -D appium webdriverio && npx appium driver install xcuitest',
+            refusal('seam-is-an-optional-peer', {
+                fix: 'npm install -D appium webdriverio && npx appium driver install xcuitest',
+                found: '.open() requires `webdriverio`, and it is not installed',
+            }),
         );
     }
 }

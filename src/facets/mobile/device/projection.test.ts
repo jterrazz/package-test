@@ -88,7 +88,7 @@ describe('projectScreen', () => {
         // Given - an empty capture
         // Then - the failure names the projection, not a downstream accessor
         expect(() => projectScreen('<?xml version="1.0"?>')).toThrow(
-            'the page source contains no XML element',
+            'the page source Appium answered holds no XML element',
         );
     });
 });

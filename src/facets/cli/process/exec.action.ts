@@ -1,4 +1,5 @@
 import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { CLI_RESULT_ROWS, CliResult } from '../../../expectations/command/cli.result.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';
@@ -57,11 +58,23 @@ export const exec = defineAction<
     },
     prepare: ([args = '', options]) => {
         if (Array.isArray(args) && args.length === 0) {
-            throw new Error('exec([]) requires at least one command');
+            throw new Error(
+                refusal({
+                    fix: "name at least one command: .exec(['build', 'test'])",
+                    found: '.exec([]), a sequence of no command',
+                    read: 'docs/12-cli.md#sequences-array-form',
+                    why: 'A sequence runs its commands in order, and runs at least one.',
+                }),
+            );
         }
         if (options && Array.isArray(args)) {
             throw new Error(
-                '.exec(): waitFor/timeout options are not supported with a command sequence',
+                refusal({
+                    fix: 'wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
+                    found: '.exec([…], { waitFor/timeout }), options on a command sequence',
+                    read: 'docs/12-cli.md#long-running-processes-waitfor--timeout',
+                    why: '`waitFor` and `timeout` wait on one long-running process.',
+                }),
             );
         }
         return { workDir: scratchDirectory('spec-command-') };

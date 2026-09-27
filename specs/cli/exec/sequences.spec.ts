@@ -45,6 +45,6 @@ describe('sequences', () => {
             cli
                 .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec(['build', 'start'], { waitFor: 'x' }),
-        ).rejects.toThrow('not supported with a command sequence');
+        ).rejects.toThrow('found: .exec([…], { waitFor/timeout }), options on a command sequence');
     });
 });

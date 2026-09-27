@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';
@@ -22,13 +23,25 @@ export function databaseSet(config: ServicesConfig): SeedPort {
                 const named = config.databases.get(database);
                 if (!named) {
                     throw new Error(
-                        `seed() targets database "${database}" but it was not found. Available: ${[...config.databases.keys()].join(', ')}`,
+                        refusal({
+                            fix: `name a declared database: ${[...config.databases.keys()].join(', ')}`,
+                            found: `seed() targets the database "${database}", and none is declared under that key`,
+                            read: 'docs/17-services.md#the-database-rule',
+                            why: '`database:` names a key of the services record.',
+                        }),
                     );
                 }
                 return named;
             }
             if (!config.database) {
-                throw new Error('seed() requires a database adapter');
+                throw new Error(
+                    refusal({
+                        fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                        found: 'seed(), and no database is declared',
+                        read: 'docs/17-services.md#the-database-rule',
+                        why: 'A seed writes into a declared database.',
+                    }),
+                );
             }
             return config.database;
         },

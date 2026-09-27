@@ -1,3 +1,4 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import { pause } from '../../kernel/pause.js';
 
 /** How long to wait, and how often to look. */
@@ -27,8 +28,12 @@ export async function waitUntil(
         }
         if (performance.now() >= deadline) {
             throw new Error(
-                `waitUntil(): ${options.why ?? 'the condition'} did not hold within ${timeout}ms. ` +
-                    'Raise the budget if the wait is legitimate, or wait on what actually changes.',
+                refusal({
+                    fix: 'raise the budget if the wait is legitimate, or wait on what actually changes',
+                    found: `waitUntil(): ${options.why ?? 'the condition'} did not hold within ${timeout}ms`,
+                    read: 'docs/14-assertions.md#two-helpers-that-are-not-matchers',
+                    why: '`waitUntil()` waits on a condition, within a budget.',
+                }),
             );
         }
         await pause(interval);

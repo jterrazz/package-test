@@ -1,5 +1,6 @@
 import { vi } from 'vitest';
 
+import { refusal } from '../../../lint/index.refusal.js';
 import { instantOf } from './instant.js';
 
 /** A pinned clock — released when the `using` scope that declared it ends. */
@@ -9,9 +10,12 @@ export type PinnedClock = Disposable;
 function take(method: string, options: Parameters<typeof vi.useFakeTimers>[0]): PinnedClock {
     if (vi.isFakeTimers()) {
         throw new Error(
-            `clock.${method}(): a clock is already pinned — one scope per test. ` +
-                'End the first scope before taking another, or state the instant on the ' +
-                'chain (`.clock(iso)`) rather than around it.',
+            refusal({
+                fix: 'end the first scope before taking another, or state the instant on the chain (`.clock(iso)`) rather than around it',
+                found: `clock.${method}(), and a clock is already pinned`,
+                read: 'docs/05-module-tests.md#time',
+                why: 'One clock per test: ending a nested scope would end the outer one too.',
+            }),
         );
     }
     vi.useFakeTimers(options);
@@ -28,8 +32,12 @@ export const clock = {
     async advance(ms: number): Promise<void> {
         if (!vi.isFakeTimers()) {
             throw new Error(
-                'clock.advance(): no clock is pinned — take one first with ' +
-                    "`using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler).",
+                refusal({
+                    fix: "take one first: `using _ = clock.at('<iso>')` (the calendar) or `using _ = clock.run()` (the scheduler)",
+                    found: 'clock.advance(), and no clock is pinned',
+                    read: 'docs/05-module-tests.md#time',
+                    why: 'Only a pinned clock moves: the real one holds no time of the test’s to advance.',
+                }),
             );
         }
         await vi.advanceTimersByTimeAsync(ms);

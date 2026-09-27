@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { Client } from 'pg';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { loadPeer } from '../peer.js';
 
 /** An optional peer: a repository that never connects never pays for the import. */
@@ -72,9 +73,15 @@ export async function buildTemplate(
                 });
             } catch (error: any) {
                 await admin.query(`DROP DATABASE IF EXISTS "${template}" WITH (FORCE)`);
-                throw new Error(`postgres init script failed (${initPath}):\n${error.message}`, {
-                    cause: error,
-                });
+                throw new Error(
+                    refusal({
+                        fix: `correct ${initPath}: the SQL fails as written`,
+                        found: `the postgres init script ${initPath} failed: ${error.message}`,
+                        read: 'docs/17-services.md#dockerserviceinitsql',
+                        why: 'A postgres service’s template database is built by its init script, run whole.',
+                    }),
+                    { cause: error },
+                );
             }
             await admin.query(`ALTER DATABASE "${template}" IS_TEMPLATE true`);
             return template;

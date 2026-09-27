@@ -49,7 +49,7 @@ describe('RunContainer', () => {
 
         // Then - asking for another port is refused
         expect(() => container.getMappedPort(6379)).toThrow(
-            'Container of the run exposes 5432, not 6379',
+            'the container of the run exposes 5432, and 6379 was asked',
         );
     });
 
@@ -68,7 +68,9 @@ describe('RunContainer', () => {
         const container = new RunContainer('http://127.0.0.1:1', POSTGRES);
 
         // Then - an address is refused, and the logs are empty
-        expect(() => container.getHost()).toThrow('Container not started');
+        expect(() => container.getHost()).toThrow(
+            'a container of the run was read before it started',
+        );
         await expect(container.getLogs()).resolves.toBe('');
     });
 });

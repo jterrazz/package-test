@@ -3,6 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import type { ChapterLesson } from '../../../../lint/index.refusal.js';
 import { heldUnreached } from './baseline.js';
 import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
@@ -10,6 +11,17 @@ import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './
 const GREEN = { failed: 0, scope: 'whole', update: false } as const;
 
 const RECORDING = { failed: 0, scope: 'whole', update: true } as const;
+
+function methodlessDrift(...drift: string[]): { failure: ChapterLesson } {
+    return {
+        failure: {
+            fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
+            found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
+            read: 'docs/10-api.md#a-route-taken-on-any-method',
+            why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
+        },
+    };
+}
 
 function runWithOneRouteReached(): { directory: string; root: string } {
     const root = mkdtempSync(join(tmpdir(), 'route-judge-'));
@@ -34,8 +46,12 @@ describe('route-judge', () => {
 
         // Then - the failure names the two
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                'api routes: 2 declared route(s) no test reached, the ratchet holds 0 — send each from a spec, or record them with TEST_UPDATE=1:\n  GET /users\n  DELETE /users/:id',
+            failure: {
+                fix: 'send each from a spec, or record them with TEST_UPDATE=1',
+                found: 'api routes: 2 declared route(s) no test reached, and the ratchet holds 0:\n  GET /users\n  DELETE /users/:id',
+                read: 'docs/10-api.md#the-ratchet',
+                why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
+            },
         });
     });
 
@@ -59,8 +75,12 @@ describe('route-judge', () => {
 
         // Then - the fall is a failure naming the gesture; recorded, the run passes
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds — the debt fell, record it with TEST_UPDATE=1',
+            failure: {
+                fix: 'the debt fell: record it with TEST_UPDATE=1',
+                found: 'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds',
+                read: 'docs/10-api.md#the-ratchet',
+                why: 'The ratchet is exact in both directions.',
+            },
         });
         await judgeRoutes(root, directory, RECORDING);
         expect(heldUnreached(root)).toBe(1);
@@ -76,8 +96,12 @@ describe('route-judge', () => {
         await expect(
             judgeRoutes(root, directory, { failed: 1, scope: 'whole', update: true }),
         ).resolves.toStrictEqual({
-            failure:
-                'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests; make the run green, then record with TEST_UPDATE=1',
+            failure: {
+                fix: 'make the run green, then record with TEST_UPDATE=1',
+                found: 'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests',
+                read: 'docs/10-api.md#when-a-run-is-not-judged',
+                why: 'The route ratchet is recorded only from a run that is green and whole.',
+            },
         });
         expect(heldUnreached(root)).toBe(2);
     });
@@ -183,10 +207,9 @@ describe('route-judge', () => {
         const { directory, root } = methodlessRun([]);
 
         // Then - the drift is named, whatever the mode
-        const failure = {
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp'",
-        };
+        const failure = methodlessDrift(
+            "  ALL /mcp — the app takes it on any method, and the list misses it: add '/mcp'",
+        );
         await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(failure);
         await expect(judgeRoutes(root, directory, RECORDING)).resolves.toStrictEqual(failure);
     });
@@ -196,10 +219,12 @@ describe('route-judge', () => {
         const { directory, root } = methodlessRun(['/mcp', '/health', '/gone']);
 
         // Then - each declaration that drifted is named
-        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  /health — the list names it, and the app takes it on its own methods only: remove '/health'\n  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
-        });
+        await expect(judgeRoutes(root, directory, GREEN)).resolves.toStrictEqual(
+            methodlessDrift(
+                "  /health — the list names it, and the app takes it on its own methods only: remove '/health'",
+                "  /gone — the list names it, and the app's table holds no such route: remove '/gone'",
+            ),
+        );
     });
 
     test('route judge — the api run judged — a method-less route is the app’s whatever its parameters are named', async () => {
@@ -211,10 +236,12 @@ describe('route-judge', () => {
         await expect(judgeRoutes(agreeing.root, agreeing.directory, GREEN)).resolves.toStrictEqual({
             line: 'api routes: all 2 declared routes reached',
         });
-        await expect(judgeRoutes(drifted.root, drifted.directory, GREEN)).resolves.toStrictEqual({
-            failure:
-                "api routes: `test: { methodless }` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'\n  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
-        });
+        await expect(judgeRoutes(drifted.root, drifted.directory, GREEN)).resolves.toStrictEqual(
+            methodlessDrift(
+                "  ALL /mcp/:id — the app takes it on any method, and the list misses it: add '/mcp/:id'",
+                "  /mcp/:id/x — the list names it, and the app's table holds no such route: remove '/mcp/:id/x'",
+            ),
+        );
     });
 
     test('route judge — a shard of a split run — a shard judges nothing, and records nothing, whatever its ledgers reached', async () => {

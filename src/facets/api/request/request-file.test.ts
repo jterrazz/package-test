@@ -35,7 +35,7 @@ describe('parseRequestFile', () => {
         // Given - a malformed request file
         // Then - the error names the file and the expected shape
         expect(() => parseRequestFile('not a request line\n', '_requests/bad.http')).toThrow(
-            '_requests/bad.http: first line must be "METHOD /path"',
+            'found: _requests/bad.http: the first line is "not a request line"',
         );
     });
 
@@ -43,7 +43,7 @@ describe('parseRequestFile', () => {
         // Given - an empty request file
         // Then - the first-line error fires (there is no request line)
         expect(() => parseRequestFile('', '_requests/empty.http')).toThrow(
-            '_requests/empty.http: first line must be "METHOD /path"',
+            'found: _requests/empty.http: the first line is ""',
         );
     });
 

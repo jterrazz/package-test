@@ -388,7 +388,12 @@ function writeAt(context: InPlace, render: (indent: string) => string): MatcherR
     const site = callSiteOf(context.stack);
     if (site === undefined) {
         throw new Error(
-            'update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written.',
+            refusal({
+                fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                found: 'update mode: no frame of this toMatch call is a test file — the value in place has nowhere to be written',
+                read: 'docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                why: 'A value written in place is rewritten in the test that states it.',
+            }),
         );
     }
     writeInPlace(site, render);
@@ -581,7 +586,12 @@ async function toBeEmpty(received: unknown): Promise<MatcherResult> {
 async function toBeRunning(received: unknown): Promise<MatcherResult> {
     if (!(received instanceof ContainerAccessor)) {
         throw new TypeError(
-            'toBeRunning: unsupported subject — expected a container accessor (result.container(...) or spec.docker(...)).',
+            refusal({
+                fix: 'assert it on a container accessor: result.container(…) or spec.docker(…)',
+                found: 'toBeRunning() on a subject that is no container accessor',
+                read: 'docs/14-assertions.md#container-subjects-docker-aware-cli',
+                why: '`toBeRunning()` judges a container.',
+            }),
         );
     }
 

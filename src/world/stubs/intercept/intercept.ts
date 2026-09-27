@@ -1,3 +1,4 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import type { Stub, StubInput } from '../stub.js';
 import { declared } from './declared.js';
@@ -42,7 +43,12 @@ function resolveRelativeAgainst(origin: string): () => () => void {
         base = new URL(origin);
     } catch {
         throw new Error(
-            `intercept(): \`origin\` states where a relative request resolves — \`${origin}\` is not an absolute URL (e.g. 'http://console.test').`,
+            refusal({
+                fix: "state an absolute URL: intercept(stubs, { origin: 'http://console.test' })",
+                found: `intercept(): \`origin\` is \`${origin}\`, not an absolute URL`,
+                read: 'docs/16-stubs.md#intercept--the-same-double-with-no-chain',
+                why: '`origin` states where a relative request resolves, so it is an absolute URL.',
+            }),
         );
     }
     return () => {
@@ -88,8 +94,12 @@ export function interceptThrough(
         );
         if (stubs.length === 0) {
             throw new Error(
-                'intercept(): declare at least one stub — an empty list guards nothing, ' +
-                    'and a subject with no network needs no intercept at all.',
+                refusal({
+                    fix: 'declare at least one stub, or drop the intercept: a subject with no network needs none',
+                    found: 'intercept(), and the list of stubs is empty',
+                    read: 'docs/16-stubs.md#intercept--the-same-double-with-no-chain',
+                    why: 'An empty list guards nothing.',
+                }),
             );
         }
         const installOrigin =

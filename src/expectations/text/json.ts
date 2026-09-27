@@ -1,3 +1,4 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import { CaptureScope } from '../tokens/match.js';
 import { stripAnsiCodes } from './ansi.js';
 
@@ -39,7 +40,14 @@ export class JsonAccessor<Value = unknown> {
             return JSON.parse(source) as Value;
         } catch {
             const preview = source.slice(0, 200);
-            throw new Error(`${this.streamName} is not valid JSON: ${preview}`);
+            throw new Error(
+                refusal({
+                    fix: `read ${this.streamName} as text, or have it hold JSON`,
+                    found: `${this.streamName} is not valid JSON: ${preview}`,
+                    read: 'docs/14-assertions.md#resultjson--parsed-stdout-cli',
+                    why: '`.json` parses a stream that holds one JSON document.',
+                }),
+            );
         }
     }
 }

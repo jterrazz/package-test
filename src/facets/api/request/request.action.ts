@@ -1,6 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import { dedent } from '../../../../lint/engine/project/dedent.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { SliceReader } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow, Run } from '../../../kernel/chain/capability.js';
@@ -45,7 +46,10 @@ async function send(
     let written: Record<string, string> | undefined;
     if (isDiskDirectory(body)) {
         throw new TypeError(
-            `.${method.toLowerCase()}(${JSON.stringify(path)}, directory(${JSON.stringify(body.path)})): a body is one file — name it with file().`,
+            refusal('disk-named-by-relative-path-at-runtime', {
+                fix: `name one file: .${method.toLowerCase()}(${JSON.stringify(path)}, file('./_requests/body.json'))`,
+                found: `.${method.toLowerCase()}(${JSON.stringify(path)}, directory(${JSON.stringify(body.path)})), a directory where the body is one file`,
+            }),
         );
     }
     if (isDiskFile(body)) {

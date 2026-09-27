@@ -10,12 +10,20 @@ describe('declared', () => {
 
         // Then - each refusal names both ways to give it its reply, spelled as its caller wrote the call
         expect(() => declared('.intercept', request)).toThrow(
-            '.intercept(): a bare request needs its response — pass a stub ' +
-                '(defineStub({ request, response })) or the inline pair .intercept(request, response).',
+            [
+                'found: .intercept(request), a bare request with no response',
+                'why: A stub is a request and its response: a request alone answers nothing.',
+                'fix: pass a stub — defineStub({ request, response }) — or the inline pair .intercept(request, response)',
+                'read: docs/16-stubs.md#using-them-intercept',
+            ].join('\n'),
         );
         expect(() => declared('intercept', request)).toThrow(
-            'intercept(): a bare request needs its response — pass a stub ' +
-                '(defineStub({ request, response })) or the inline pair intercept(request, response).',
+            [
+                'found: intercept(request), a bare request with no response',
+                'why: A stub is a request and its response: a request alone answers nothing.',
+                'fix: pass a stub — defineStub({ request, response }) — or the inline pair intercept(request, response)',
+                'read: docs/16-stubs.md#using-them-intercept',
+            ].join('\n'),
         );
     });
 });

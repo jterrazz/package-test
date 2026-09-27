@@ -69,6 +69,6 @@ describe('process.adapter', () => {
         const handle = processService({ command: SERVER, ready: READY });
 
         // Then - the refusal says where the url comes from
-        expect(() => handle.url).toThrow('known once the process is ready');
+        expect(() => handle.url).toThrow('found: process().url read before the process was ready');
     });
 });

@@ -260,7 +260,7 @@ describe('PlaywrightAdapter', () => {
         const visit = adapter.open('http://site.test/', { ...VISIT, scenario: failingScenario });
 
         // Then - the error names the one screenshot, taken under the evidence folder
-        await expect(visit).rejects.toThrow(/the button is gone\nEvidence: .*failure\.png$/u);
+        await expect(visit).rejects.toThrow(/the button is gone\nEvidence: .*failure\.png\n/u);
         const evidence = join(process.cwd(), EVIDENCE_DIR);
         expect(chromium.shots).toHaveLength(1);
         expect(chromium.shots[0]?.startsWith(`${evidence}${sep}website-`)).toBe(true);

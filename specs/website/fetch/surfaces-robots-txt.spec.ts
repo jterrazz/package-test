@@ -23,7 +23,7 @@ describe('surfaces-robots-txt', () => {
         const result = await website.fetch('/robots.txt');
 
         // Then - reading it as JSON names the stream it parsed and shows its start
-        expect(() => result.json.value).toThrow(/^body is not valid JSON: User-Agent: \*/u);
+        expect(() => result.json.value).toThrow(/^found: body is not valid JSON: User-Agent: \*/u);
     });
 
     test('sends chain headers on the raw exchange', async () => {

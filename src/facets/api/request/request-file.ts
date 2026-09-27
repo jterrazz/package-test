@@ -1,3 +1,4 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import { parseHeaders, splitSections } from '../../../expectations/http/http-file.js';
 
 export type ParsedRequestFile = {
@@ -15,7 +16,12 @@ export function parseRequestFile(content: string, fileName: string): ParsedReque
     const path = start?.groups?.path;
     if (method === undefined || path === undefined) {
         throw new Error(
-            `${fileName}: first line must be "METHOD /path" (e.g. "POST /users"), got "${startLine}"`,
+            refusal({
+                fix: 'start the request file with its request line: "POST /users"',
+                found: `${fileName}: the first line is "${startLine}"`,
+                read: 'docs/10-api.md#http-request-files--full-format',
+                why: 'A request file opens on `METHOD /path`.',
+            }),
         );
     }
 

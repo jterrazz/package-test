@@ -46,7 +46,7 @@ describe('exec', () => {
         const chain = chainOver(new RecordingCommand());
 
         // Then - an empty command sequence is a usage error, and `.exec()` answers it as a rejection
-        await expect(chain.exec([])).rejects.toThrow('exec([]) requires at least one command');
+        await expect(chain.exec([])).rejects.toThrow('found: .exec([]), a sequence of no command');
     });
 
     test('.exec() — the arguments a command runs with — refuses a sequence with waitFor/timeout', async () => {
@@ -55,7 +55,7 @@ describe('exec', () => {
 
         // Then - the combination is refused
         await expect(chain.exec(['a', 'b'], { waitFor: 'x' })).rejects.toThrow(
-            'not supported with a command sequence',
+            'found: .exec([…], { waitFor/timeout }), options on a command sequence',
         );
     });
 

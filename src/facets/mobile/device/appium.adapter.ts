@@ -1,6 +1,7 @@
 import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
@@ -115,6 +116,23 @@ async function captureMatch(element: DriverElement): Promise<MobileElementMatch>
     };
 }
 
+function scenarioFailure(error: unknown, suffix: string): Error {
+    if (error instanceof Error && missingParts(error.message).length === 0) {
+        error.message += suffix;
+        return error;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    return new Error(
+        refusal({
+            fix: 'correct the step that failed, or the screen it drives',
+            found: `the open scenario failed:\n  ${message.replaceAll('\n', '\n  ')}${suffix}`,
+            read: 'docs/09-mobile.md#open-scenarios--the-when',
+            why: 'An open scenario drives the screen step by step, and the first step that fails ends it.',
+        }),
+        { cause: error },
+    );
+}
+
 /** One driver session, opened lazily and reused: WebDriverAgent startup is the expensive part. Every `open()` relaunches the app. */
 export class AppiumAdapter implements DevicePort {
     private readonly actionTimeoutMs: number;
@@ -171,15 +189,7 @@ export class AppiumAdapter implements DevicePort {
             } catch (error) {
                 const evidence = await this.captureEvidence(driver);
                 const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                // A `descriptor-matches-one-element` refusal is already complete: re-wrapping would print it twice.
-                if (error instanceof AmbiguousElementError) {
-                    error.message += suffix;
-                    throw error;
-                }
-                throw new Error(
-                    `open scenario failed: ${error instanceof Error ? error.message : String(error)}${suffix}`,
-                    { cause: error },
-                );
+                throw scenarioFailure(error, suffix);
             }
         }
 
@@ -318,7 +328,12 @@ export class AppiumAdapter implements DevicePort {
             // The excerpt is best-effort evidence — never mask the timeout.
         }
         return new Error(
-            `${verb}(${asWritten(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
+            refusal({
+                fix: 'designate what this screen shows, or raise `timeouts.action` for a slow build',
+                found: `${verb}(${asWritten(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
+                read: 'docs/09-mobile.md#declared-timeouts',
+                why: 'A mobile verb waits for one visible match, within the declared action budget.',
+            }),
         );
     }
 

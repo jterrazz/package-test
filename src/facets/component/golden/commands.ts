@@ -2,8 +2,10 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { renderText, writeInPlace } from '../../../expectations/in-place/in-place.js';
 import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 
 /** `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root. */
 
@@ -15,9 +17,7 @@ type PlaywrightCommandContext = {
 
 function goldenPath(testPath: string | undefined, name: string): string {
     if (testPath === undefined) {
-        throw new Error(
-            'golden: the command carries no test path — a golden is read from a test file.',
-        );
+        throw invariant('a golden command reached the server with no test path');
     }
     return resolveSpecPath('toMatch', name, dirname(testPath));
 }
@@ -48,7 +48,12 @@ const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, 
         .find((candidate) => candidate.file === file);
     if (file === undefined || frame === undefined) {
         throw new Error(
-            'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written.',
+            refusal({
+                fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
+                found: 'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written',
+                read: 'docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                why: 'A value written in place is rewritten in the test that states it.',
+            }),
         );
     }
     writeInPlace(

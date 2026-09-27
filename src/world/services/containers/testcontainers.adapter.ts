@@ -1,5 +1,6 @@
 import { hostname } from 'node:os';
 
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import { loadPeer } from '../peer.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 
@@ -90,14 +91,14 @@ export class TestcontainersAdapter implements ContainerPort {
 
     getMappedPort(containerPort: number): number {
         if (!this.container) {
-            throw new Error('Container not started');
+            throw invariant('a container was read before it started');
         }
         return this.container.getMappedPort(containerPort);
     }
 
     getHost(): string {
         if (!this.container) {
-            throw new Error('Container not started');
+            throw invariant('a container was read before it started');
         }
         return this.container.getHost();
     }

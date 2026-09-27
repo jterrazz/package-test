@@ -102,7 +102,9 @@ describe('files', () => {
             untypedApi
                 .seed(file('../_seeds/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
-        ).rejects.toThrow('seed() targets database "nonexistent-db" but it was not found');
+        ).rejects.toThrow(
+            'found: seed() targets the database "nonexistent-db", and none is declared under that key',
+        );
     });
 
     test.runIf(process.env.TEST_MODE !== 'compose')(
@@ -117,7 +119,7 @@ describe('files', () => {
             try {
                 // Then - the chain fails because nothing can execute the SQL
                 await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
-                    'seed() requires a database adapter',
+                    'found: seed(), and no database is declared',
                 );
             } finally {
                 await stop();

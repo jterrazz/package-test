@@ -1,10 +1,14 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import type { ComponentChain } from './component.facet.js';
 
 function refuse(): never {
     throw new Error(
-        'component renders in a browser: collect `*.test.tsx` with the `component()` project ' +
-            "(import { component } from '@jterrazz/test/vitest' and add it to `test.projects`). " +
-            'Under node the page, the pointer and the accessibility tree do not exist.',
+        refusal({
+            fix: "collect `*.test.tsx` with the `component()` project: import { component } from '@jterrazz/test/vitest' and add it to `test.projects`",
+            found: 'component, called under node',
+            read: 'docs/07-component.md#the-constructor-there-is-none',
+            why: 'A component renders in a browser: under node the page, the pointer and the accessibility tree do not exist.',
+        }),
     );
 }
 

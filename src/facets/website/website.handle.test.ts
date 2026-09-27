@@ -10,7 +10,12 @@ describe('startWebsite', () => {
 
         // Then - refused in the words of the type it slipped past: the deployed site would never call the stub
         await expect(startWebsite(options)).rejects.toThrow(
-            'specification.website(): `backend` requires `server` mode — a deployed `url` cannot be pointed at a local stub.',
+            [
+                'found: specification.website({ url, backend }), a backend beside a deployed url',
+                'why: `backend` requires `server` mode: a deployed `url` cannot be pointed at a local stub.',
+                'fix: start the site with `server`, or drop `backend`',
+                'read: docs/08-website.md#options',
+            ].join('\n'),
         );
     });
 });

@@ -26,7 +26,9 @@ describe('ServiceContainer', () => {
         });
 
         // Then - an address is refused, and the logs are empty
-        expect(() => container.getConnectionString()).toThrow('Container not started');
+        expect(() => container.getConnectionString()).toThrow(
+            'a service container was read before it started',
+        );
         await expect(container.getLogs()).resolves.toBe('');
     });
 });

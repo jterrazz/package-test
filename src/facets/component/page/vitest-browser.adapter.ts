@@ -2,6 +2,7 @@ import { expect, TestRunner } from 'vitest';
 import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
+import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
@@ -263,8 +264,10 @@ export async function mountReact(ui: ComponentUi): Promise<MountedSurface> {
         ({ render } = await import('vitest-browser-react'));
     } catch (error) {
         throw new Error(
-            'component.render(<X />) needs vitest-browser-react and react (optional peers): ' +
-                `npm install -D vitest-browser-react react react-dom (${String(error)})`,
+            refusal('seam-is-an-optional-peer', {
+                fix: 'npm install -D vitest-browser-react react react-dom',
+                found: `component.render(<X />) requires \`vitest-browser-react\` and \`react\`, and they do not load (${String(error)})`,
+            }),
             { cause: error },
         );
     }
@@ -285,7 +288,12 @@ export function mountDom(mount: DomMount): MountedSurface {
         container,
         rerender: () => {
             throw new Error(
-                'rerender() replaces a React tree; a DOM function is re-rendered by calling it again in a new render().',
+                refusal({
+                    fix: 'render the DOM function again, in a new render()',
+                    found: 'rerender() on a DOM function',
+                    read: 'docs/07-component.md#the-chain',
+                    why: 'rerender() replaces a React tree, what a parent does with new props.',
+                }),
             );
         },
         unmount: async () => {

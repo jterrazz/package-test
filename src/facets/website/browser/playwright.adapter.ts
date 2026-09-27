@@ -3,7 +3,9 @@ import { resolve } from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
+import { missingParts } from '../../../../lint/engine/catalogue/lesson-parts.js';
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { AmbiguousElementError, describeAmbiguity } from '../../../elements/ambiguity/ambiguity.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
@@ -149,7 +151,12 @@ async function waitForValue(locator: Locator, element: ElementRef, wanted: boole
         }
         if (Date.now() >= deadline) {
             throw new Error(
-                `${asWritten(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
+                refusal({
+                    fix: 'correct the value the scenario states, or what the page puts in the field',
+                    found: `${asWritten(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
+                    read: 'docs/13-elements.md#see-and-gone-are-the-synchronization',
+                    why: 'A verb waits for what it states to hold, within its budget, and never sleeps.',
+                }),
             );
         }
         // oxlint-disable-next-line eslint/no-await-in-loop -- same round: the wait between two looks is what a poll IS
@@ -228,7 +235,10 @@ async function launchChromium(): Promise<Browser> {
         ({ chromium } = await import('playwright'));
     } catch {
         throw new Error(
-            '.visit() requires playwright (optional peer dependency): npm install -D playwright && npx playwright install chromium',
+            refusal('seam-is-an-optional-peer', {
+                fix: 'npm install -D playwright && npx playwright install chromium',
+                found: '.visit() requires `playwright`, and it is not installed',
+            }),
         );
     }
     return await chromium.launch(LAUNCH_OPTIONS);
@@ -269,6 +279,23 @@ function workerBrowser(launch: () => Promise<Browser>): () => Promise<Browser> {
         workerBrowsers.set(launch, shared);
     }
     return shared;
+}
+
+function scenarioFailure(error: unknown, suffix: string): Error {
+    if (error instanceof Error && missingParts(error.message).length === 0) {
+        error.message += suffix;
+        return error;
+    }
+    const message = error instanceof Error ? error.message : String(error);
+    return new Error(
+        refusal({
+            fix: 'correct the step that failed, or the page it drives',
+            found: `the visit scenario failed:\n  ${message.replaceAll('\n', '\n  ')}${suffix}`,
+            read: 'docs/08-website.md#visit-scenarios--the-when',
+            why: 'A visit scenario drives the page step by step, and the first step that fails ends it.',
+        }),
+        { cause: error },
+    );
 }
 
 /** One browser per worker, launched lazily; each visit gets a fresh `BrowserContext`. */
@@ -338,15 +365,7 @@ export class PlaywrightAdapter implements BrowserPort {
                 } catch (error) {
                     const evidence = await this.captureEvidence(page);
                     const suffix = evidence ? `\nEvidence: ${evidence}` : '';
-                    // A `descriptor-matches-one-element` refusal is already complete: re-wrapping would print it twice.
-                    if (error instanceof AmbiguousElementError) {
-                        error.message += suffix;
-                        throw error;
-                    }
-                    throw new Error(
-                        `visit scenario failed: ${error instanceof Error ? error.message : String(error)}${suffix}`,
-                        { cause: error },
-                    );
+                    throw scenarioFailure(error, suffix);
                 }
             }
 

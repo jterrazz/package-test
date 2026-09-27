@@ -1,3 +1,5 @@
+import { refusal } from '../../../../lint/index.refusal.js';
+
 /** Keeps `<file>:<line>:<column>  <plugin>(<rule>)` per diagnostic, sorted: oxlint prints files as its threads finish. A graphical frame is refused, since dropping it would read as a clean run. */
 
 /** oxlint's `unix` line. */
@@ -19,7 +21,12 @@ export function lintReport(text: string): string {
     const graphical = text.split('\n').find((line) => GRAPHICAL_LINE.test(line));
     if (graphical !== undefined) {
         throw new Error(
-            `lintReport reads one line per diagnostic, and this report is oxlint's graphical rendering (${graphical.trim()}) — run oxlint with --format=unix or --format=agent: without it, oxlint picks its renderer off the environment.`,
+            refusal({
+                fix: 'run oxlint with --format=unix or --format=agent: without it, oxlint picks its renderer off the environment',
+                found: `lintReport(), and this report is oxlint's graphical rendering (${graphical.trim()})`,
+                read: 'docs/19-linting.md#the-conventions-checker',
+                why: '`lintReport` reads one line per diagnostic.',
+            }),
         );
     }
     const lines = text

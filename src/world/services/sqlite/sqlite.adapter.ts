@@ -20,6 +20,7 @@ import { join, resolve } from 'node:path';
 import { SQLITE_TEMPLATE_DIR } from '../../../../lint/engine/project/artifacts.js';
 import { discoverRoot } from '../../../../lint/engine/project/resolve.js';
 import { pause } from '../../../kernel/pause.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { DatabasePort } from '../database.port.js';
 import type { IsolationStrategy } from '../isolation.port.js';
 import { loadPeer, requireBuiltPeer } from '../peer.js';
@@ -50,9 +51,7 @@ async function loadDatabase(): Promise<typeof Database> {
 /** The read accessors run only after `initialize()` opened a database, which keeps them sync. */
 function database(): typeof Database {
     if (databaseConstructor === null) {
-        throw new Error(
-            'sqlite(): the database is not open yet — `initialize()` loads the driver before any read.',
-        );
+        throw invariant('sqlite() was read before `initialize()` loaded its driver');
     }
     return databaseConstructor;
 }

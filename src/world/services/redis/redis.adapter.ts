@@ -1,3 +1,5 @@
+import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
 import type { DatabasePort } from '../database.port.js';
@@ -88,7 +90,7 @@ export class RedisHandle implements ServiceHandle {
 
     async healthcheck(): Promise<void> {
         if (!this.connectionString) {
-            throw new Error('redis: cannot healthcheck — no connection string');
+            throw invariant('redis() was healthchecked before it had a connection string');
         }
 
         try {
@@ -103,10 +105,13 @@ export class RedisHandle implements ServiceHandle {
             client.destroy();
         } catch (error: any) {
             throw new Error(
-                `redis healthcheck failed: ${error.message || error.code || String(error)}`,
-                {
-                    cause: error,
-                },
+                refusal({
+                    fix: 'check the container is running and reachable (`docker ps`), and run again',
+                    found: `redis() did not answer its healthcheck: ${error.message || error.code || String(error)}`,
+                    read: 'docs/17-services.md#service-factories',
+                    why: 'A declared service is handed to the chain once it answers its healthcheck.',
+                }),
+                { cause: error },
             );
         }
     }
@@ -140,9 +145,15 @@ export class RedisHandle implements ServiceHandle {
                 if (slot >= SERVICES_PER_WORKER || worker > WORKERS) {
                     freeSlot(workerId, service);
                     throw new Error(
-                        slot >= SERVICES_PER_WORKER
-                            ? `redis: worker ${workerId} has no database index for "${service}" — a worker holds ${SERVICES_PER_WORKER} redis services at once; declare fewer`
-                            : `redis: worker ${workerId} has no database index for "${service}" — a container serves ${WORKERS} workers; run with fewer (--maxWorkers)`,
+                        refusal({
+                            fix:
+                                slot >= SERVICES_PER_WORKER
+                                    ? `declare fewer redis services: a worker holds ${SERVICES_PER_WORKER} at once`
+                                    : `run with fewer workers (--maxWorkers): a container serves ${WORKERS}`,
+                            found: `redis: worker ${workerId} has no database index for "${service}"`,
+                            read: 'docs/17-services.md#per-worker-isolation',
+                            why: 'A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
+                        }),
                     );
                 }
                 this.pair = { service, worker: workerId };

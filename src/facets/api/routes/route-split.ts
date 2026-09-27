@@ -1,12 +1,16 @@
 import { join } from 'node:path';
 
+import type { ChapterLesson } from '../../../../lint/index.refusal.js';
 import { partialShards, readShardLedgers, ROUTES_DIR } from './ledger.js';
 import { judgeLedgers } from './route-judge.js';
 import type { RouteRun, RouteVerdict } from './route-judge.js';
 
-export const NO_SHARD_LEDGERS =
-    `api routes: not judged — no shard's ledgers under ${ROUTES_DIR}/shard-*/, so the merge has no run to judge: ` +
-    'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders';
+export const NO_SHARD_LEDGERS: ChapterLesson = {
+    fix: 'run every shard (`make test SHARD=<index>/<count>`) before the merge, since a whole run empties the shard folders',
+    found: `api routes: not judged — no shard's ledgers under ${ROUTES_DIR}/shard-*/`,
+    read: 'docs/10-api.md#when-a-run-is-not-judged',
+    why: 'The split judges the routes over every shard’s ledgers, so a merge with none has no run to judge.',
+};
 
 export function partialSplitUnjudged(shards: readonly string[]): string {
     return `api routes: not judged — ${shards.join(', ')} ran under a test name filter (-t), so the split reaches only some routes`;

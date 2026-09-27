@@ -1,3 +1,5 @@
+import { refusal } from '../../../lint/index.refusal.js';
+
 /** Responses hold the status, a subset of headers and the body; each supports `{{placeholder}}` forms. */
 
 export type ParsedResponseFile = {
@@ -44,7 +46,14 @@ export function parseHeaders(headerLines: string[], fileName: string): Record<st
     for (const line of headerLines) {
         const separator = line.indexOf(':');
         if (separator === -1) {
-            throw new Error(`${fileName}: invalid header line "${line}" (expected "Name: value")`);
+            throw new Error(
+                refusal({
+                    fix: 'write the header as `Name: value`',
+                    found: `${fileName}: the header line "${line}" has no colon`,
+                    read: 'docs/10-api.md#http-request-files--full-format',
+                    why: 'An `.http` file’s header is a `Name: value` line.',
+                }),
+            );
         }
         headers[line.slice(0, separator).trim()] = line.slice(separator + 1).trim();
     }
@@ -125,7 +134,12 @@ export function parseResponseFile(
     const status = start?.groups?.status;
     if (status === undefined) {
         throw new Error(
-            `${fileName}: first line must be "HTTP/1.1 <status>" (e.g. "HTTP/1.1 200 OK"), got "${startLine}"`,
+            refusal({
+                fix: 'start the response file with its status line: "HTTP/1.1 200 OK"',
+                found: `${fileName}: the first line is "${startLine}"`,
+                read: 'docs/10-api.md#http-request-files--full-format',
+                why: 'A response file opens on `HTTP/1.1 <status>`.',
+            }),
         );
     }
 

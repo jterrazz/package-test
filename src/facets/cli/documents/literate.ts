@@ -13,6 +13,7 @@ import type {
     SpecFileAssertion,
     SpecRun,
 } from '../../../../lint/engine/project/spec-document.js';
+import { refusal } from '../../../../lint/index.refusal.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
@@ -23,6 +24,7 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import { ServedProcess } from '../../../world/services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import { fsFixtures } from '../fixture/fs-fixtures.adapter.js';
@@ -75,7 +77,12 @@ function resolveUnderWorkDir(path: string, workDir: string, context: FailureCont
     const inside = relative(workDir, target);
     if (isAbsolute(path) || inside.startsWith('..') || isAbsolute(inside)) {
         throw new Error(
-            `${context.displayPath}: files: "${path}" leaves the working directory — a files: key is a relative path under the cwd`,
+            refusal({
+                fix: 'name a relative path under the working directory',
+                found: `${context.displayPath}: files: "${path}" leaves the working directory`,
+                read: 'docs/20-documents.md#files--what-the-run-left-behind',
+                why: 'A `files:` key is a relative path under the working directory.',
+            }),
         );
     }
     return target;
@@ -139,18 +146,20 @@ function failure(
     details: string[],
 ): Error {
     const error = new Error(
-        [
-            'Spec mismatch',
-            '',
-            document.description,
-            '',
-            `$ ${run.command}`,
-            '',
-            details.join('\n\n'),
-            '',
-            `${context.displayPath}:${run.commandLine}`,
-            'Run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else.',
-        ].join('\n'),
+        refusal({
+            fix: 'correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else',
+            found: [
+                `spec mismatch — ${document.description}`,
+                '',
+                `$ ${run.command}`,
+                '',
+                details.join('\n\n'),
+                '',
+                `${context.displayPath}:${run.commandLine}`,
+            ].join('\n'),
+            read: 'docs/20-documents.md#failure-and-update',
+            why: 'A spec document states what its runs produce: the exit code and the streams, whole.',
+        }),
     );
     return atLine(error, context.filePath, run.commandLine);
 }
@@ -238,11 +247,15 @@ async function startServers(
             await stop();
             const known = Object.keys(registry);
             throw new Error(
-                `${displayPath}:${entry.line}: serve: "${entry.name}" is not registered — ${
-                    known.length === 0
-                        ? 'specification.cli() declares no `serve` option.'
-                        : `registered servers: ${known.join(', ')}.`
-                }`,
+                refusal({
+                    fix:
+                        known.length === 0
+                            ? 'register it in the `serve` option of specification.cli()'
+                            : `serve a registered server: ${known.join(', ')}`,
+                    found: `${displayPath}:${entry.line}: serve: "${entry.name}" is not registered`,
+                    read: 'docs/12-cli.md#registration--once-per-app',
+                    why: 'A document serves what the app registered once, in the options of specification.cli().',
+                }),
             );
         }
         const adapter = new ServedProcess(
@@ -273,11 +286,15 @@ function documentEnv(document: SpecDocument, config: CliConfig, displayPath: str
             if (!declared) {
                 const known = Object.keys(sets);
                 throw new Error(
-                    `${displayPath}:${token.line}: env: "${token.name}" is not a registered env set — ${
-                        known.length === 0
-                            ? 'specification.cli() declares no `env` option.'
-                            : `registered sets: ${known.join(', ')}.`
-                    }`,
+                    refusal({
+                        fix:
+                            known.length === 0
+                                ? 'register it in the `env` option of specification.cli(), or write it inline: KEY=value'
+                                : `name a registered set: ${known.join(', ')}, or write it inline: KEY=value`,
+                        found: `${displayPath}:${token.line}: env: "${token.name}" is not a registered env set`,
+                        read: 'docs/12-cli.md#registration--once-per-app',
+                        why: 'A bare word under `env:` names a set the app registered once, in the options of specification.cli().',
+                    }),
                 );
             }
             Object.assign(env, declared);
@@ -292,9 +309,7 @@ function documentEnv(document: SpecDocument, config: CliConfig, displayPath: str
 export async function runSpecDocument(options: LiterateRunOptions): Promise<CliResult> {
     const { config, displayPath, filePath, testDir, workDir } = options;
     if (!config.command) {
-        throw new Error(
-            '.run(): spec documents require a command adapter (use specification.cli())',
-        );
+        throw invariant('.run() reached a chain with no command adapter');
     }
 
     let file: SpecFile;

@@ -30,7 +30,7 @@ describe('http-file', () => {
         // Given - a malformed response file
         // Then - the error names the file and the expected shape
         expect(() => parseResponseFile('200 OK\n', 'responses/bad.http')).toThrow(
-            'responses/bad.http: first line must be "HTTP/1.1 <status>"',
+            'found: responses/bad.http: the first line is "200 OK"',
         );
     });
 
@@ -38,7 +38,7 @@ describe('http-file', () => {
         // Given - an empty response file
         // Then - the first-line error fires (there is no status line)
         expect(() => parseResponseFile('', 'responses/empty.http')).toThrow(
-            'responses/empty.http: first line must be "HTTP/1.1 <status>"',
+            'found: responses/empty.http: the first line is ""',
         );
     });
 

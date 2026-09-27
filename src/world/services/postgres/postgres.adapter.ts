@@ -2,6 +2,8 @@ import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import type { Client } from 'pg';
 
+import { refusal } from '../../../../lint/index.refusal.js';
+import { invariant } from '../../../kernel/refusals/invariant.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
 import type { DatabasePort } from '../database.port.js';
@@ -79,7 +81,7 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
 
     async healthcheck(): Promise<void> {
         if (!this.connectionString) {
-            throw new Error('postgres: cannot healthcheck — no connection string');
+            throw invariant('postgres() was healthchecked before it had a connection string');
         }
 
         // Healthcheck uses a throwaway client (connection might not be established yet)
@@ -91,7 +93,12 @@ export class PostgresHandle implements DatabasePort, ServiceHandle {
             await client.end();
         } catch (error: any) {
             throw new Error(
-                `postgres healthcheck failed: ${error.message || error.code || String(error)}`,
+                refusal({
+                    fix: 'check the container is running and reachable (`docker ps`), and run again',
+                    found: `postgres() did not answer its healthcheck: ${error.message || error.code || String(error)}`,
+                    read: 'docs/17-services.md#service-factories',
+                    why: 'A declared service is handed to the chain once it answers its healthcheck.',
+                }),
                 { cause: error },
             );
         }

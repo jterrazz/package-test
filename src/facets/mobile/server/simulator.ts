@@ -1,6 +1,8 @@
 import { execFile } from 'node:child_process';
 import { promisify } from 'node:util';
 
+import { refusal } from '../../../../lint/index.refusal.js';
+
 /** Zero or several matches refuse with the full listing: the framework never guesses the simulator. */
 
 const run = promisify(execFile);
@@ -79,12 +81,22 @@ export function selectSimulator(
     const [only] = matches;
     if (only === undefined) {
         throw new Error(
-            `specification.mobile(): no simulator matches ${wanted}.\nAvailable devices:\n${formatListing(available)}`,
+            refusal({
+                fix: 'name one of the available devices, or create the simulator in Xcode',
+                found: `specification.mobile(): no simulator matches ${wanted}.\navailable devices:\n${formatListing(available)}`,
+                read: 'docs/09-mobile.md#options',
+                why: 'Resolution refuses rather than guesses: a device names exactly one simulator.',
+            }),
         );
     }
     if (matches.length > 1) {
         throw new Error(
-            `specification.mobile(): ${matches.length} simulators match ${wanted} — add \`os:\` or \`udid:\` to pick one.\nMatched:\n${formatListing(matches)}`,
+            refusal({
+                fix: 'add `os:` or `udid:` to pick one',
+                found: `specification.mobile(): ${matches.length} simulators match ${wanted}.\nmatched:\n${formatListing(matches)}`,
+                read: 'docs/09-mobile.md#options',
+                why: 'Resolution refuses rather than guesses: a device names exactly one simulator.',
+            }),
         );
     }
     return only;
@@ -109,7 +121,12 @@ export async function ensureBooted(udid: string): Promise<void> {
         // "Unable to boot device in current state: Booted" — already up.
         if (!message.includes('current state: Booted')) {
             throw new Error(
-                `specification.mobile(): could not boot simulator ${udid}.\n${message}`,
+                refusal({
+                    fix: 'boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names',
+                    found: `specification.mobile(): could not boot simulator ${udid}.\n${message}`,
+                    read: 'docs/09-mobile.md#requirements--what-the-machine-must-have',
+                    why: 'A mobile spec runs on a simulator the machine can boot.',
+                }),
                 { cause: error },
             );
         }

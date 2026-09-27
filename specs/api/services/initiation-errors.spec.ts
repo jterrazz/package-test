@@ -64,7 +64,7 @@ describe('initiation-errors', () => {
     test('postgres init script failure — throws with the init script path and the underlying SQL error', () => {
         // Given - the captured startup failure (init.sql declares a bogus TEXTTTT column type)
         // Then - the error names the failing init script by path AND surfaces the specific SQL error, not a generic "startup failed" wrapper
-        expect(brokenInit.failure?.message).toContain('init script failed');
+        expect(brokenInit.failure?.message).toContain('found: the postgres init script ');
         expect(brokenInit.failure?.message).toContain('postgres/init.sql');
         expect(brokenInit.failure?.message.toLowerCase()).toContain('textttt');
         expect(brokenInit.failure?.message.toLowerCase()).toContain('does not exist');
@@ -76,7 +76,7 @@ describe('initiation-errors', () => {
         expect(brokenInit.output).toContain('INFRA');
         expect(brokenInit.output).toContain('Starting infrastructure...');
         expect(brokenInit.output).toContain('postgres (db)');
-        expect(brokenInit.output).toContain('init script failed');
+        expect(brokenInit.output).toContain('found: the postgres init script ');
         expect(brokenInit.output.toLowerCase()).toContain('textttt');
         expect(brokenInit.output).toContain('app: in-process (Hono)');
     });
@@ -94,7 +94,7 @@ describe('initiation-errors', () => {
         // Then - report shows redis success, then postgres failure
         expect(multiService.output).toContain('redis (cache)');
         expect(multiService.output).toContain('postgres (db)');
-        expect(multiService.output).toContain('init script failed');
+        expect(multiService.output).toContain('found: the postgres init script ');
     });
 
     test('multi-service failure — redis succeeds, postgres fails — redis appears before postgres in report', () => {
@@ -110,13 +110,13 @@ describe('initiation-errors', () => {
         // Then - first postgres succeeded, second failed
         expect(multiPostgres.output).toContain('postgres (db)');
         expect(multiPostgres.output).toContain('postgres (broken-db)');
-        expect(multiPostgres.output).toContain('init script failed');
+        expect(multiPostgres.output).toContain('found: the postgres init script ');
     });
 
     test('multi-postgres failure — first succeeds, second fails — thrown error identifies the broken database', () => {
         // Given - the captured startup failure
         // Then - error includes the broken init path
-        expect(multiPostgres.failure?.message).toContain('init script failed');
+        expect(multiPostgres.failure?.message).toContain('found: the postgres init script ');
         expect(multiPostgres.failure?.message).toContain('broken-db/init.sql');
     });
 

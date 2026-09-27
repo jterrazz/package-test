@@ -1742,6 +1742,18 @@ export const RUNTIME_RULES: Row[] = [
             'One vocabulary keeps the API memorable; refusing the part with no iOS equivalent outright avoids a silent approximation.',
         reach: 'tests',
     },
+    {
+        audience: 'consumer',
+        channel: 'runtime',
+        convention: `${REFUSAL_WHY['seam-is-an-optional-peer']} A page, a screen, a component and each service load theirs lazily, the first time a spec needs it, and a missing one is refused where it was needed, naming the peer and the install command — the package manager the project's lockfile names, for a service ([04 — Operating](04-operating.md#what-a-consumer-must-bring)).`,
+        facet: 'model',
+        family: 'setup',
+        fix: 'Install the peer the refusal names, with the command it gives.',
+        name: 'seam-is-an-optional-peer',
+        rationale:
+            'A project that specifies no page, screen or database installs no browser, no simulator driver and no database client: the cost of a seam is paid by the project that uses it, and the refusal names it at the moment it is needed.',
+        reach: 'tests',
+    },
 ];
 
 /** Review-borne; listed so the catalogue is complete, the constitution keeps their rationale. */

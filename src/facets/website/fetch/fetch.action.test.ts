@@ -78,7 +78,9 @@ describe('rawFetch', () => {
         const fetched = chainOver(pinned).clock('2026-03-04T09:30:00Z').fetch('/clock');
 
         // Then - refused for opening no page, and nothing was pinned on the way
-        await expect(fetched).rejects.toThrow('.fetch() opens none');
+        await expect(fetched).rejects.toThrow(
+            'found: .clock() on a chain ending in .fetch(), which opens no page',
+        );
         expect(pinned).toStrictEqual([]);
     });
 });

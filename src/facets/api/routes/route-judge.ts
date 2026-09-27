@@ -1,14 +1,17 @@
 import { ROUTES_KEY } from '../../../../lint/engine/baseline/ratchet.js';
+import type { ChapterLesson } from '../../../../lint/index.refusal.js';
 import { heldUnreached, recordUnreached } from './baseline.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';
 import type { Route } from './routes.js';
 
-export const UNKNOWN_TABLE =
-    'api routes: an app specification.api() started exposes no route table, so no route can be judged reached — ' +
-    'hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: ' +
-    "`test: { routes: './openapi.yaml' }` in jterrazz.config.ts.";
+export const UNKNOWN_TABLE: ChapterLesson = {
+    fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in jterrazz.config.ts",
+    found: 'api routes: an app specification.api() started exposes no route table',
+    read: 'docs/10-api.md#an-app-that-is-not-hono',
+    why: 'A route is judged reached against the table the app declares.',
+};
 
 function spelled(route: Route): string {
     return `${route.method} ${route.path}`;
@@ -54,7 +57,7 @@ function methodlessDrift(table: readonly Route[], methodless: readonly string[])
     return [...missed, ...stale];
 }
 
-export type RouteVerdict = { failure?: string; line?: string };
+export type RouteVerdict = { failure?: ChapterLesson; line?: string };
 
 export async function judgeRoutes(
     root: string,
@@ -77,9 +80,39 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
     const why = `${failed} file(s) of the run failed, and a failed file may not have sent its requests`;
     return update
         ? {
-              failure: `api routes: not recorded — ${why}; make the run green, then record with TEST_UPDATE=1`,
+              failure: {
+                  fix: 'make the run green, then record with TEST_UPDATE=1',
+                  found: `api routes: not recorded — ${why}`,
+                  read: 'docs/10-api.md#when-a-run-is-not-judged',
+                  why: 'The route ratchet is recorded only from a run that is green and whole.',
+              },
           }
         : { line: `api routes: not judged — ${why}` };
+}
+
+function methodlessDrifted(drift: string[]): ChapterLesson {
+    return {
+        fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
+        found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
+        read: 'docs/10-api.md#a-route-taken-on-any-method',
+        why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
+    };
+}
+
+function ratchetMoved(missing: number, held: number, named: string): ChapterLesson {
+    return missing > held
+        ? {
+              fix: 'send each from a spec, or record them with TEST_UPDATE=1',
+              found: `api routes: ${missing} declared route(s) no test reached, and the ratchet holds ${held}:\n${named}`,
+              read: 'docs/10-api.md#the-ratchet',
+              why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
+          }
+        : {
+              fix: 'the debt fell: record it with TEST_UPDATE=1',
+              found: `api routes: ${missing} declared route(s) no test reached, below the ${held} the ratchet holds`,
+              read: 'docs/10-api.md#the-ratchet',
+              why: 'The ratchet is exact in both directions.',
+          };
 }
 
 export async function judgeLedgers(
@@ -104,9 +137,7 @@ export async function judgeLedgers(
             ? []
             : methodlessDrift(run.declared, await declaredMethodless(root));
     if (drift.length > 0) {
-        return {
-            failure: `api routes: \`test: { methodless }\` in jterrazz.config.ts names the routes the app takes on any method, and it drifted from the app's table — the checker files a spec of one by its path, whatever verb it sends:\n${drift.join('\n')}`,
-        };
+        return { failure: methodlessDrifted(drift) };
     }
     // Every specification of the run declares the same table: a route counts once.
     const declared = [...new Map(table.map((route) => [spelled(route), route])).values()];
@@ -119,15 +150,8 @@ export async function judgeLedgers(
         };
     }
     const held = heldUnreached(root);
-    if (missing.length > held) {
-        return {
-            failure: `api routes: ${missing.length} declared route(s) no test reached, the ratchet holds ${held} — send each from a spec, or record them with TEST_UPDATE=1:\n${named}`,
-        };
-    }
-    if (missing.length < held) {
-        return {
-            failure: `api routes: ${missing.length} declared route(s) no test reached, below the ${held} the ratchet holds — the debt fell, record it with TEST_UPDATE=1`,
-        };
+    if (missing.length !== held) {
+        return { failure: ratchetMoved(missing.length, held, named) };
     }
     return {
         line:

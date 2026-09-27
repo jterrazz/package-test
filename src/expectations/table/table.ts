@@ -1,3 +1,4 @@
+import { refusal } from '../../../lint/index.refusal.js';
 import { CaptureScope } from '../tokens/match.js';
 
 export type TableContent = { columns: string[]; rows: unknown[][] };
@@ -36,7 +37,12 @@ export class TableAccessor {
         const columns = await this.db.columns(this.name);
         if (columns.length === 0) {
             throw new Error(
-                `table "${this.name}" has no columns: the database holds no such table.`,
+                refusal({
+                    fix: 'name a table the database holds, or create it in the init script or a seed',
+                    found: `table "${this.name}" has no columns: the database holds no such table`,
+                    read: 'docs/14-assertions.md#resulttablename--database---database-tables-api-job-cli',
+                    why: 'A table is read from the database that holds it.',
+                }),
             );
         }
         const rows = await this.db.query(this.name, columns);

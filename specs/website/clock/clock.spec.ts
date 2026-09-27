@@ -26,7 +26,12 @@ describe('clock', () => {
 
         // Then - the visit is refused before the page opens, naming what an instant looks like
         await expect(stated.visit('/clock')).rejects.toThrow(
-            `clock.at(): "soon" is not an instant — pass an ISO-8601 string (e.g. '2026-03-04T09:30:00Z').`,
+            [
+                'found: clock.at("soon"), and "soon" is not an instant',
+                'why: A clock is pinned at an instant, written as an ISO-8601 string.',
+                "fix: pass an ISO-8601 string: clock.at('2026-03-04T09:30:00Z')",
+                'read: docs/05-module-tests.md#time',
+            ].join('\n'),
         );
     });
 
@@ -34,7 +39,7 @@ describe('clock', () => {
         // Given - a chain pinning a clock, then asking for one raw exchange
         // Then - the refusal says a fetch opens no page
         await expect(website.clock('2026-03-04T09:30:00Z').fetch('/clock')).rejects.toThrow(
-            'opens none',
+            'found: .clock() on a chain ending in .fetch(), which opens no page',
         );
     });
 
