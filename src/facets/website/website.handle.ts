@@ -182,6 +182,17 @@ export async function startWebsite<Services extends ServiceRecord>(
         );
     }
 
+    if (!options.server && (options.url ?? '').trim() === '') {
+        throw new Error(
+            refusal({
+                fix: 'pass the absolute URL of the site as `url`, or start it with `server`',
+                found: `specification.website({ url: ${JSON.stringify(options.url)} }), no site to specify`,
+                read: 'docs/08-website.md#options',
+                why: 'A website spec names the site it drives: a deployed `url`, or a `server` it starts.',
+            }),
+        );
+    }
+
     // Started before the server, so the child finds its URL from the first request.
     let backend: null | StubBackend = null;
     let backendUrl: string | undefined;

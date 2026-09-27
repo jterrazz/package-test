@@ -18,4 +18,19 @@ describe('startWebsite', () => {
             ].join('\n'),
         );
     });
+
+    test('specification.website() — what it refuses before starting anything — an empty url is refused, as an env var left unset hands it', async () => {
+        // Given - a url read from an environment variable nobody set
+        const options = { url: '' };
+
+        // Then - refused before any action reaches a site with no address
+        await expect(startWebsite(options)).rejects.toThrow(
+            [
+                'found: specification.website({ url: "" }), no site to specify',
+                'why: A website spec names the site it drives: a deployed `url`, or a `server` it starts.',
+                'fix: pass the absolute URL of the site as `url`, or start it with `server`',
+                'read: docs/08-website.md#options',
+            ].join('\n'),
+        );
+    });
 });
