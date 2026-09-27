@@ -1,7 +1,7 @@
 import { refusal } from '../../../lint/index.refusal.js';
 import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../descriptors/as-written.js';
 import type { ElementRef } from '../descriptors/element.js';
-import { CONTEXT_LANDMARKS } from './landmark-of-tag.js';
+import { landmarkOfTagOrRole } from './landmark-of-tag.js';
 
 /** One candidate of an ambiguous descriptor, as the refusal lists it. */
 export type ElementMatch = {
@@ -21,7 +21,7 @@ export type ElementMatch = {
 
 /** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
 function landmarkOf(match: ElementMatch): string | undefined {
-    const kind = match.context === undefined ? undefined : CONTEXT_LANDMARKS[match.context];
+    const kind = match.context === undefined ? undefined : landmarkOfTagOrRole(match.context);
     if (kind !== 'region') {
         return kind === undefined ? undefined : `${FUNCTION_NAME_OF_KIND[kind]}()`;
     }

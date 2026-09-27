@@ -154,6 +154,14 @@ const pages = {
         <section><button type="button">Remove</button></section>
     </main>
     </body></html>`,
+    // A "Home" link in a list the nav holds, the list carrying a role of its
+    // Own, and another "Home" in the footer.
+    '/listed': `<!doctype html><html lang="en"><head>${head('Fixture — Listed', '/listed')}
+    </head><body>
+    <nav><ul role="list"><li><a href="/">Home</a></li></ul></nav>
+    <main><h1>Listed</h1></main>
+    <footer><a href="/">Home</a></footer>
+    </body></html>`,
     // A page whose script throws, with nothing to catch it and nothing logged.
     '/thrown': `<!doctype html><html lang="en"><head><title>Fixture — Thrown</title></head>
     <body><h1>Thrown</h1><script>throw new Error('the page broke');</script></body></html>`,

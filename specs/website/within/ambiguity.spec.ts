@@ -63,6 +63,18 @@ describe('ambiguity', () => {
         );
     });
 
+    test('names the landmark a candidate sits in past a role that is not one', async () => {
+        // Given - a "Home" link in a `role="list"` inside the nav, and another in the footer
+        const message = await refusalOf('/listed', async (visitor) => {
+            await visitor.click(link('Home'));
+        });
+
+        // Then - the list is passed over: the nav is the evidence and the scope
+        expect(message).toContain('in <nav>');
+        expect(message).not.toContain('in <list>');
+        expect(message).toContain('within(navigation(), link("Home"))');
+    });
+
     test('resolves the ambiguity when the descriptor is scoped to a landmark', async () => {
         // Given - the same page, the link designated inside the nav
         const result = await website.visit('/ambiguous', async (visitor) => {

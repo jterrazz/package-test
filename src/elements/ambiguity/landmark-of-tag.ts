@@ -11,20 +11,15 @@ const LANDMARK_ELEMENTS: Record<LandmarkKind, string> = {
     search: 'search',
 };
 
-export const LANDMARK_SELECTOR = [...Object.values(LANDMARK_ELEMENTS), '[role]'].join(', ');
+export const LANDMARK_SELECTOR = Object.entries(LANDMARK_ELEMENTS)
+    .flatMap(([kind, tag]) => [tag, `[role="${kind}"]`])
+    .join(', ');
 
-export const CONTEXT_LANDMARKS: Record<string, LandmarkKind> = {
-    aside: 'complementary',
-    banner: 'banner',
-    complementary: 'complementary',
-    contentinfo: 'contentinfo',
-    footer: 'contentinfo',
-    form: 'form',
-    header: 'banner',
-    main: 'main',
-    nav: 'navigation',
-    navigation: 'navigation',
-    region: 'region',
-    search: 'search',
-    section: 'region',
-};
+function isLandmarkKind(value: string): value is LandmarkKind {
+    return Object.hasOwn(LANDMARK_ELEMENTS, value);
+}
+
+export function landmarkOfTagOrRole(value: string): LandmarkKind | undefined {
+    const kind = Object.entries(LANDMARK_ELEMENTS).find(([, tag]) => tag === value)?.[0] ?? value;
+    return isLandmarkKind(kind) ? kind : undefined;
+}
