@@ -473,11 +473,12 @@ The table is GENERATED from the files, because the channel grows faster than a h
 
 One proof of the channel declares no test: `src/type-channel.test-d.ts` states what the COMPILER refuses — each `type` row of the catalogue ([19 — Linting](19-linting.md)) — as an `@ts-expect-error` per row, and `typescript check` fails the day the line it marks starts compiling. An `@ts-expect-error` is satisfied by ANY error, so each marker ends on the words of the one it is written for, in brackets, and `lint/self/corpus/type-channel.test.ts` compiles the file with the markers taken out and fails a row the compiler refuses for another reason. It runs under the typechecker the whole repository already runs, never under a vitest project.
 
-`lint/self/catalogue/manifest.test.ts` also holds the seven-channel stub: every row of
+`lint/self/catalogue/manifest.test.ts` also holds the eight-channel stub: every row of
 every channel carries the proof that channel can give — a rule file and a
-fixture pair, an assertion on a resolved upstream option, a bundled checker
+fixture pair, a rule `testingPreset` hands the toolchain, an assertion on a resolved upstream option, a bundled checker
 pass, a `// RUNTIME <name>` marker above the spec that drives the refusal, a line
-of the type-channel file, a named meta-test. A row that loses its proof fails
+of the type-channel file, a named meta-test, a process row named where people
+read it. A row that loses its proof fails
 that test rather than going quietly stale.
 
 The freshness meta-test is the reason a documentation change can turn the suite red: edit the generated catalogue by hand and it fails, correctly. Regenerate instead — the gesture is [02 — Developing](02-developing.md)'s.
@@ -540,7 +541,7 @@ The consumer checks' verdicts are [19 — Linting § What the toolchain judges](
 
 ### Retro-propagation
 
-Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other six channels growing instead of decaying. When a defect class is mechanizable, its row joins `lint/consumer/catalogue/manifest.ts` — `lint/self/catalogue/manifest.ts` for a rule only this package is held to — and the catalogue regenerates.
+Every defect class discovered (review, bug, migration) grows, **in the same change**, the guard that stops it recurring — a static rule, a meta-test, or a runtime error — or an explicit note of why no channel is possible (e.g. "redundant test" is a human judgement). This is the rule that keeps the other seven channels growing instead of decaying. When a defect class is mechanizable, its row joins `lint/consumer/catalogue/manifest.ts` — `lint/self/catalogue/manifest.ts` for a rule only this package is held to — and the catalogue regenerates.
 
 Whether a defect is a CLASS is the one judgement here no channel settles: it is a reading of what will happen again. What the machine takes of it is the rest — `cited-rules-exist` to `catalogue-in-english` hold the catalogue complete and true once the row is written.
 

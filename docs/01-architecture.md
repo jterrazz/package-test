@@ -1,12 +1,12 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind six constructors, one chain that needs none, source trees with declared edges, and seven channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+What this package IS: one runner model behind six constructors, one chain that needs none, source trees with declared edges, and eight channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
 
 | The shape                  | Held below                                                                                                                        |
 | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
 | The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result                                                        |
 | The source trees           | [The source trees](#the-source-trees) — `kernel`, `world`, `elements`, `expectations`, `facets`, `vitest`, and `lint` at the root |
-| How a convention is held   | [The seven enforcement channels](#the-seven-enforcement-channels)                                                                 |
+| How a convention is held   | [The eight enforcement channels](#the-eight-enforcement-channels)                                                                 |
 | What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                                                                               |
 
 The rules themselves — what each family says, what a reviewer must judge — are the constitution, [18 — Conventions](18-conventions.md); their normative sentences are the generated catalogue, [19 — Linting](19-linting.md).
@@ -79,12 +79,13 @@ The table's May-import column is a reading of `FRAMEWORK_LAYERS`, never a second
 
 There are THREE composition roots and none names a layer. `src/index.ts` is node's: re-exports only — each facet's face (`src/facets/<facet>/index.ts`, the names that facet contributes) and the modules of the other layers by path. `src/index.browser.ts` is the page's: it publishes the node entry's types whole and every value a page can run, refusing the node-only ones — see [What the tree publishes](#what-the-tree-publishes). `src/index.vitest.ts` is the runner config's, `@jterrazz/test/vitest`: it publishes `unit()` and every facet's project beside the preset, and hands the preset the cli's literate plugin, so `vitest/` never reaches a facet.
 
-## The seven enforcement channels
+## The eight enforcement channels
 
-A convention this package states is held by a **channel**, and every row of the catalogue names exactly one of seven. The guiding aim is that most enforcement is programmatic, not review-borne.
+A convention this package states is held by a **channel**, and every row of the catalogue names exactly one of eight. The guiding aim is that most enforcement is programmatic, not review-borne.
 
 - **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `lint/consumer/rules/<family>/`, the folder of its catalogue family — AST analysis, one diagnostic per file.
 - **upstream** — a convention an oxlint vitest-plugin rule already holds, set as an OPTION from the `testing` fragment rather than duplicated as a rule of ours ([ADR-005](decisions/005-the-doubles-ladder-is-closed.md)).
+- **toolchain** — the import and naming rules `testingPreset` hands `@jterrazz/typescript`'s dependency-cruiser and ls-lint passes, printed as `architecture/<rule>` and `names/<rule>`: a project that declares the preset in its `jterrazz.config.ts` is held to them by `typescript check`.
 - **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.
 - **runtime** — the framework refuses incorrect usage as it executes, where static analysis abstains (a non-literal argument) or cannot reach (the network, a container lifecycle).
 - **type** — what the compiler refuses with no rule at all, proven by `src/type-channel.test-d.ts`.
