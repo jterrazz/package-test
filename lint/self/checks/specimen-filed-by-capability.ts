@@ -92,7 +92,6 @@ function checkComponentTree(specsRoot: string): Finding<SelfPassId>[] {
                 found: `a file of the component tree, filed under \`${shown}/\``,
                 line,
                 rule: 'specimen-filed-by-capability' as const,
-                severity: 'error' as const,
             },
         ];
     });
@@ -130,7 +129,6 @@ function checkSpecimenSpecs(specsRoot: string): Finding<SelfPassId>[] {
                 found: `a spec of the specimen \`${specimen}\`, filed under \`${shown}/\``,
                 line,
                 rule: 'specimen-filed-by-capability' as const,
-                severity: 'error' as const,
             },
         ];
     });

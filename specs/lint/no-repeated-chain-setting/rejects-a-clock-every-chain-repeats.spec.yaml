@@ -1,4 +1,4 @@
-description: a clock every chain of a file pins alike is a warning at the first chain
+description: a clock every chain of a file pins alike is refused at the first chain
 fixture: ./_fixtures/repeated/
 runs:
     - command: .

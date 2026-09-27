@@ -1,4 +1,4 @@
-description: warns on a single-use capture ref
+description: rejects a single-use capture ref
 fixture: ./_fixtures/violation/
 runs:
     - command: .

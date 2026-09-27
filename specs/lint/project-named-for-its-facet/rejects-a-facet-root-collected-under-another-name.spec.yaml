@@ -1,4 +1,4 @@
-description: warns on a facet root collected under another name
+description: rejects a facet root collected under another name
 fixture: ./_fixtures/violation/
 runs:
     - command: .

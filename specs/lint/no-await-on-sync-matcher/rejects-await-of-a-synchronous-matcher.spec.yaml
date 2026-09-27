@@ -1,4 +1,4 @@
-description: warns on await of a synchronous matcher
+description: rejects await of a synchronous matcher
 fixture: ./_fixtures/violation/
 runs:
     - command: .

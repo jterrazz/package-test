@@ -13,7 +13,6 @@ export function noDocumentInGroundFindings(file: string, name: string): Finding[
                   fix: `move ${name} out of the ground folder, beside the test that runs it`,
                   found: `a \`${SPEC_EXTENSION}\` document under a ground folder`,
                   rule: 'no-document-in-ground',
-                  severity: 'error',
               },
           ]
         : [];

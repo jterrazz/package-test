@@ -57,7 +57,6 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                 fix: `move it to ${relative(rootDir, join(specsRoot, SHARED_FOLDER, role))}/ — \`make fix\` moves it and rewrites every path that names it`,
                 found: `${role}/ at the specs root, shared ground outside ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/`,
                 rule: 'no-reach-into-sibling-ground',
-                severity: 'error',
             });
         }
         for (const file of listReaders(specsRoot)) {
@@ -79,7 +78,6 @@ export function checkNoReachIntoSiblingGround(rootDir: string): Finding[] {
                     fix: `move what it names beside ${relative(rootDir, leaf)}, or — when several leaves share it — into the ground of the lowest folder they share, which each reaches by climbing: ${relative(rootDir, join(specsRoot, SHARED_FOLDER))}/<role>/ when they span facets`,
                     found: `"${path}" leaves ${relative(rootDir, leaf)}`,
                     rule: 'no-reach-into-sibling-ground',
-                    severity: 'error',
                 });
             }
         }

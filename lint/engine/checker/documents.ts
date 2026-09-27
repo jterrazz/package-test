@@ -36,9 +36,13 @@ export function runDocument(
         const target = range ?? (isScalar(key) && Array.isArray(key.range) ? key.range : undefined);
         return target === undefined ? 1 : file.source.lineAt(target[0]);
     };
-    return read({ dir: dirname(path), file, lineAt, rel }).map(
-        ({ fix, found, line, rule, severity }) => ({ file: rel, fix, found, line, rule, severity }),
-    );
+    return read({ dir: dirname(path), file, lineAt, rel }).map(({ fix, found, line, rule }) => ({
+        file: rel,
+        fix,
+        found,
+        line,
+        rule,
+    }));
 }
 
 function reorder(map: YAMLMap, order: readonly string[]): void {

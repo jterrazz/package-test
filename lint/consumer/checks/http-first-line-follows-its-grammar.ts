@@ -44,7 +44,6 @@ export function checkHttpFirstLineFollowsItsGrammar(
                   line: 1,
                   ...teaching(name),
                   rule: 'http-first-line-follows-its-grammar',
-                  severity: 'error',
               },
           ];
 }

@@ -32,7 +32,6 @@ function violationsIn(files: Record<string, string>): string[] {
                 forbidden: ARCHITECTURE.map(({ from, name, to }) => ({
                     from,
                     name,
-                    severity: 'error',
                     to,
                 })),
                 options: { doNotFollow: { path: 'node_modules' }, tsPreCompilationDeps: true },

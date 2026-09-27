@@ -131,7 +131,6 @@ export function checkNoDuplicateGround(rootDir: string): Finding[] {
                 .map((other) => relative(rootDir, other))
                 .join(', ')}`,
             rule: 'no-duplicate-ground',
-            severity: 'error' as const,
         }));
     });
 }

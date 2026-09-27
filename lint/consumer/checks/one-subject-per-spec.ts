@@ -39,7 +39,6 @@ export function checkOneSubjectPerSpec(specsRoot: string): Finding[] {
                 fix: splitAdvice(specsRoot, spec),
                 found: `a spec reaching ${names.length} subjects — ${names.join(', ')}`,
                 rule: 'one-subject-per-spec' as const,
-                severity: 'error' as const,
             },
         ];
     });

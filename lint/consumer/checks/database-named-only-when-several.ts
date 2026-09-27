@@ -94,7 +94,6 @@ export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
                     fix: `pass \`.${verb}(…, { database: '<key>' })\`, naming one of the ${count} databases the services record declares`,
                     found: `\`.${verb}()\` with no \`{ database }\`, while ${count} SQL databases are declared`,
                     rule: 'database-named-only-when-several',
-                    severity: 'error',
                 });
             } else if (count === 1 && hasDatabase) {
                 violations.push({
@@ -103,7 +102,6 @@ export function checkDatabaseNamedOnlyWhenSeveral(rootDir: string): Finding[] {
                     fix: `delete the \`{ database }\` option of \`.${verb}()\``,
                     found: `\`.${verb}()\` passes \`{ database }\`, while a single SQL database is declared`,
                     rule: 'database-named-only-when-several',
-                    severity: 'error',
                 });
             }
         }

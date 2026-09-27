@@ -19,7 +19,6 @@ export function checkFacetFolderHasSpecification(specsRoot: string): Finding[] {
             fix: `create \`specs/${facet}/${facet}.specification.ts\` calling \`specification.${facet}()\`, or rename the folder`,
             found: `\`specs/${facet}/\`, a facet folder with no specification constructing \`specification.${facet}()\``,
             rule: 'facet-folder-has-specification',
-            severity: 'error',
         });
     }
     return violations;

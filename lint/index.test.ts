@@ -58,16 +58,14 @@ describe('index', () => {
         }
     });
 
-    test("the ./oxlint entry — testing fragment — standalone oxlint config — each rule is enabled at its row's severity, and every rule errors", () => {
-        // Given - each rule the fragment enables (its `rules` IS this map, above), and the row each rule carries
-        const levels = Object.entries(plugin.rules).map(([name, rule]) => [
-            recommendedRules[`jterrazz/${name}`],
-            rule.meta.docs.severity,
-        ]);
+    test('the ./oxlint entry — testing fragment — standalone oxlint config — every rule is enabled, as an error', () => {
+        // Given - each rule the plugin registers
+        const names = Object.keys(plugin.rules).map((name) => `jterrazz/${name}`);
 
-        // Then - the level oxlint runs is the row's, and it is `error`: oxlint's suppressions hold errors alone, so a warning would be debt no ratchet holds
-        expect(levels.filter(([level, severity]) => level !== severity)).toStrictEqual([]);
-        expect(levels.filter(([level]) => level !== 'error')).toStrictEqual([]);
+        // Then - the fragment enables each at `error`: oxlint's suppressions hold errors alone, so a warning would be debt no ratchet holds
+        expect(recommendedRules).toStrictEqual(
+            Object.fromEntries(names.map((name) => [name, 'error'])),
+        );
     });
 
     test('the ./oxlint entry — testing fragment — standalone oxlint config — its overrides add a layer instead of replacing one', () => {

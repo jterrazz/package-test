@@ -1,4 +1,4 @@
-description: warns on a wrapped negative toMatch without frozen
+description: rejects a wrapped negative toMatch without frozen
 fixture: ./_fixtures/violation/
 runs:
     - command: .

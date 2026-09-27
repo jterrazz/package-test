@@ -184,7 +184,6 @@ export function checkGroundPlacement(rootDir: string): Finding[] {
                 ? `ground only the leaves under ${relative(rootDir, lowest)} reach for, kept above them`
                 : `ground only ${relative(rootDir, lowest)} reaches for, kept above it`,
             rule: 'ground-shared-or-inline',
-            severity: 'error',
         };
     });
 }

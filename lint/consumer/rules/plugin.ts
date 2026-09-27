@@ -127,12 +127,8 @@ const plugin: LintPlugin = {
     },
 };
 
-/** Every rule at its intended severity: `rules: { ...recommendedRules }`. */
-export const recommendedRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
-    Object.entries(plugin.rules).map(([name, rule]) => [
-        `jterrazz/${name}`,
-        rule.meta.docs.severity ?? 'error',
-    ]),
+export const recommendedRules: Record<string, 'error'> = Object.fromEntries(
+    Object.keys(plugin.rules).map((name) => [`jterrazz/${name}`, 'error']),
 );
 
 export default plugin;

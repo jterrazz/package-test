@@ -20,7 +20,6 @@ export function checkNoSimulatedDomInConfig(config: string, rootDir: string): Fi
             fix: `delete \`environment: '${found.groups.dom}'\`, and write each rendered test as a \`.test.tsx\` beside its component, collected by \`component()\``,
             found: `\`environment: '${found.groups.dom}'\` gives every file of this project a drawing of a browser`,
             rule: 'no-simulated-dom-in-config',
-            severity: 'error',
         },
     ];
 }

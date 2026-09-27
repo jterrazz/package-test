@@ -1,7 +1,6 @@
 import { join, resolve } from 'node:path';
 
 import type { Teaching } from '../catalogue/lesson.js';
-import type { Severity } from '../checker/finding.js';
 import { treeEntries, treeKind, treeNames } from './git-tree.js';
 import { GROUND_FIXTURES, PRUNED } from './ground.js';
 import { isRelativePath } from './relative-path.js';
@@ -14,16 +13,14 @@ import type { Node, Pair, Scalar, YAMLMap } from './yaml-document.js';
 export type DocumentFinding<PassId extends string = string> = Teaching & {
     line: number;
     rule: PassId;
-    severity: Severity;
 };
 
 export function finding<PassId extends string>(
     rule: PassId,
     line: number,
     { fix, found }: Teaching,
-    severity: Severity = 'error',
 ): DocumentFinding<PassId> {
-    return { fix, found, line, rule, severity };
+    return { fix, found, line, rule };
 }
 
 /** `_fixtures/` holds inputs, never scenarios. */

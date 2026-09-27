@@ -23,7 +23,6 @@ export function checkDocumentFollowsItsGrammar(text: string, rel: string): Findi
                 fix: 'rewrite the document to its grammar — chapter 20 lists the keys, their order and what each run requires',
                 found: error.reason,
                 rule: 'document-follows-its-grammar',
-                severity: 'error',
             },
         ];
     }

@@ -36,7 +36,6 @@ export function checkSeedsStateAbsoluteTime(path: string, rel: string, name: str
             fix: `replace \`${found[0]}\` with the instant the case is about (\`'2026-01-01T00:00:00Z'\`), and pin the run's clock on the chain with \`.clock()\``,
             found: `\`${found[0]}\` reads the clock in a seed`,
             rule: 'seeds-state-absolute-time',
-            severity: 'error',
         });
     }
     return violations;

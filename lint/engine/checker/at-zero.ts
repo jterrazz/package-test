@@ -31,9 +31,8 @@ export function runAtZero(registry: AtZeroRegistry, cliArguments: readonly strin
         const lesson = lessonAt(rowNamed(registry.rows, finding.rule), finding, registry.chapter);
         console.error(reportLine(finding, lesson));
     }
-    const errors = findings.filter((finding) => finding.severity === 'error').length;
-    if (errors > 0) {
-        console.error(`\n${registry.label}: ${errors} error(s) found under ${root}`);
+    if (findings.length > 0) {
+        console.error(`\n${registry.label}: ${findings.length} error(s) found under ${root}`);
         stop(1);
     }
     console.log(`${registry.label}: no error under ${root} (${registry.passIds.join(', ')})`);

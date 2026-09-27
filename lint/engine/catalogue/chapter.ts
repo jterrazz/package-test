@@ -47,7 +47,7 @@ function counts(published: Row[]): Record<Row['channel'], number> {
     return tally;
 }
 
-const COLUMNS = ['Rule', 'Facet', 'Channel', 'Severity', 'Reach', 'Convention', 'Fix', 'Rationale'];
+const COLUMNS = ['Rule', 'Facet', 'Channel', 'Reach', 'Convention', 'Fix', 'Rationale'];
 
 export function rowTable(rows: Row[]): string[] {
     return table(
@@ -56,7 +56,6 @@ export function rowTable(rows: Row[]): string[] {
             `${anchor(entry.name)}\`${entry.name}\``,
             entry.facet,
             entry.channel,
-            entry.severity ?? '—',
             entry.reach,
             cell(entry.convention),
             cell(entry.fix),

@@ -68,7 +68,6 @@ export function checkGroundBesideItsOnlyReader(specsRoot: string): Finding[] {
                 fix: `give \`${relative(directory, reader)}\` a domain folder of its own, and move \`${ground}/\` into it`,
                 found: `\`${ground}/\`, read by \`${relative(directory, reader)}\` alone of the tests beside it`,
                 rule: 'ground-beside-its-only-reader',
-                severity: 'error',
             });
         }
     }

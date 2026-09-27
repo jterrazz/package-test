@@ -448,18 +448,6 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — a row that reports states its severity, and no other row does', () => {
-        // Given - the two channels whose findings carry a level: a plugin rule and a checker pass
-        const REPORTING = new Set(['checker', 'statique']);
-
-        // Then - each of their rows states `error` or `warn`, since the plugin enables a rule at its row's level, and a row of any other channel states none
-        for (const entry of allRows) {
-            expect(entry.severity !== undefined, `${entry.name} severity`).toBe(
-                REPORTING.has(entry.channel),
-            );
-        }
-    });
-
     test('conventions catalogue — completeness (meta-test) — every catalogue row names exactly ONE channel', () => {
         // Given - the seven-channel vocabulary
         const CHANNELS = new Set([

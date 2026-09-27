@@ -1,4 +1,4 @@
-description: warns on a hand-wired DATABASE_URL from connectionString
+description: rejects a hand-wired DATABASE_URL from connectionString
 fixture: ./_fixtures/violation/
 runs:
     - command: .

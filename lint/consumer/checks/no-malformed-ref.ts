@@ -12,7 +12,6 @@ export function noMalformedRefFindings(text: string, file: string, firstLine = 1
             found: `the malformed token ${token}`,
             line: firstLine + line - 1,
             rule: 'no-malformed-ref',
-            severity: 'error',
             token,
         };
     });

@@ -27,7 +27,6 @@ function finding(rootDir: string, path: string, found: string, fix: string): Fin
         fix,
         found,
         rule: 'reserved-folder-in-closed-list',
-        severity: 'error',
     };
 }
 

@@ -130,7 +130,6 @@ function misnamedAdapters(rootDir: string, specsRoot: string): Finding[] {
             fix: `name the file for the port it replaces: \`specs/${named}\` — the class keeps whatever name it has`,
             found: `\`${basename(file)}\`, whose \`${first.name}\` implements the port \`${first.port}\``,
             rule: 'adapter-named-for-its-port',
-            severity: 'error',
         });
     }
     return found;

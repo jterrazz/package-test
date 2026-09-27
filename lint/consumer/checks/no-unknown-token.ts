@@ -8,7 +8,6 @@ export function noUnknownTokenFindings(text: string, file: string, firstLine = 1
         found: `the unknown token ${token}`,
         line: firstLine + line - 1,
         rule: 'no-unknown-token',
-        severity: 'error',
         token,
     }));
 }

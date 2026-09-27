@@ -1,4 +1,4 @@
-description: warns on a .raw substring assertion
+description: rejects a .raw substring assertion
 fixture: ./_fixtures/violation/
 runs:
     - command: .

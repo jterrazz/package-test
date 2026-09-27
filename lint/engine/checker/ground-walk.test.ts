@@ -11,7 +11,7 @@ const TREE = resolve(
 );
 
 function visited(kind: string, rel: string): Finding {
-    return { file: rel, fix: '', found: kind, line: 1, rule: 'probe', severity: 'error' };
+    return { file: rel, fix: '', found: kind, line: 1, rule: 'probe' };
 }
 
 const RECORDING: GroundPasses = {

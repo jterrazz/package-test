@@ -8,7 +8,6 @@ export function noTokenInRequestFindings(file: string, text: string): Finding[] 
         fix: 'write the literal value the request sends — a request is sent, never matched',
         found: `the token ${token} in a _requests/ file`,
         rule: 'no-token-in-request',
-        severity: 'error',
         token,
     }));
 }

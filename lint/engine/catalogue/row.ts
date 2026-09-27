@@ -26,8 +26,6 @@ export type RowDocs<Family extends string = string> = {
         | 'specs'
         | 'stub'
         | 'tests';
-    /** A `statique` or `checker` row's level: `warn` is the redundancy heuristic, every hard convention is `error`. */
-    severity?: 'error' | 'warn';
 };
 
 export type Row<Family extends string = string> = RowDocs<Family> & {

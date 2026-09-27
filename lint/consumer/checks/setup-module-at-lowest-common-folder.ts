@@ -110,7 +110,6 @@ function findingOf(rootDir: string, misplaced: Misplaced): Finding {
             fix: `write what it holds in \`specs/${relative(specsRoot, misplaced.only)}\`, and delete the module — a \`${SETUP_FOLDER}/\` module exists only while several read it`,
             found: `\`specs/${rel}\`, read by \`${basename(misplaced.only)}\` alone`,
             rule: 'setup-module-at-lowest-common-folder',
-            severity: 'error',
         };
     }
     return {
@@ -121,7 +120,6 @@ function findingOf(rootDir: string, misplaced: Misplaced): Finding {
             : `move it to \`specs/${relative(specsRoot, misplaced.target)}\` — the \`${SETUP_FOLDER}/\` of the lowest folder its readers share — and the paths that import it; \`make fix\` does both`,
         found: `\`specs/${rel}\`, whose readers share \`${shown(specsRoot, misplaced.lowest)}\`, not \`${shown(specsRoot, ownerOfSetup(specsRoot, misplaced.setup))}\``,
         rule: 'setup-module-at-lowest-common-folder',
-        severity: 'error',
     };
 }
 

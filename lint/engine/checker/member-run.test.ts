@@ -18,7 +18,6 @@ function recording(): { registry: CheckerRegistry; seen: Seen[] } {
         found: '',
         line: 1,
         rule: 'probe',
-        severity: 'error',
     };
     const registry: CheckerRegistry = {
         chapter: 'docs/probe.md',

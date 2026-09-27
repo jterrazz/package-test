@@ -388,7 +388,6 @@ function capFinding(rootDir: string, oversized: Oversized): Finding {
         found: `${kind} of ${oversized.lines} lines written in the test, past the ${oversized.role}/ cap of ${INLINE_CAPS[oversized.role] ?? 0}`,
         line: oversized.line,
         rule: 'ground-shared-or-inline',
-        severity: 'error',
     };
 }
 
@@ -400,7 +399,6 @@ export function checkGroundSharedOrInline(rootDir: string): Finding[] {
         fix: `write it here, ${inPlaceForm(reference)}, and delete the file — \`make fix\` inlines it`,
         found: `${relative(rootDir, target)}, read by this test alone`,
         rule: 'ground-shared-or-inline' as const,
-        severity: 'error' as const,
     }));
     const inlined = new Set(singleUseFiles(rootDir).map(({ target }) => relative(rootDir, target)));
     return [

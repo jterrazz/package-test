@@ -71,7 +71,6 @@ function printFindings(run: Run, violations: Finding[]): void {
                     file: violation.file,
                     line: violation.line,
                     message: checkerMessage(run.registry, violation),
-                    severity: violation.severity,
                 })),
             ),
         );
@@ -79,8 +78,7 @@ function printFindings(run: Run, violations: Finding[]): void {
     }
     const lines = violations.map((violation) => checkerLine(run.registry, violation));
     if (lines.length > 0) {
-        const failing = violations.some(({ severity }) => severity === 'error');
-        (failing ? console.error : console.warn)(lines.join('\n'));
+        console.error(lines.join('\n'));
     }
 }
 
@@ -106,7 +104,6 @@ function verdict(
     { passes, what }: Verdict,
     deferredTo?: string,
 ): never {
-    const errors = violations.filter((violation) => violation.severity === 'error');
     if (deferredTo !== undefined && violations.length > 0) {
         say(
             run,
@@ -114,8 +111,8 @@ function verdict(
         );
         stop(0);
     }
-    if (errors.length > 0) {
-        say(run, `\nconventions checker: ${errors.length} error(s) found ${what}`);
+    if (violations.length > 0) {
+        say(run, `\nconventions checker: ${violations.length} error(s) found ${what}`);
         stop(1);
     }
     if (!run.json) {

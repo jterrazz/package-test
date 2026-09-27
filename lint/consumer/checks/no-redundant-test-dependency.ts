@@ -182,6 +182,5 @@ export function checkNoRedundantTestDependency(member: {
                 ? `${subject}: \`${seam.name}\` is a transitive of \`@jterrazz/test\``
                 : `${subject}: \`${seam.name}\` is a seam \`@jterrazz/test\` replaced`,
         rule: 'no-redundant-test-dependency' as const,
-        severity: 'error' as const,
     }));
 }

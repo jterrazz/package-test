@@ -176,7 +176,6 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
                 fix: `write the test that stands on ${groundSubdirs.join(', ')}, or delete the folder`,
                 found: `a domain folder holding ${groundSubdirs.join(', ')} and no test or document`,
                 rule: 'no-unused-ground',
-                severity: 'error',
             });
             continue;
         }
@@ -202,7 +201,6 @@ export function checkNoUnusedGround(rootDir: string): Finding[] {
                     fix: `delete ${sub}/${entry.name}, or name it from the test that stands on it`,
                     found: `${sub}/${entry.name}, which no test of ${feature} names`,
                     rule: 'no-unused-ground',
-                    severity: 'error',
                 });
             }
         }
@@ -229,7 +227,6 @@ function checkPoolFixtures(rootDir: string): Finding[] {
                     fix: `delete ${entry.name}, or name it from the specs that share it`,
                     found: `the pool entry ${entry.name}, which no spec under ${relative(rootDir, specsRoot) || basename(specsRoot)} names`,
                     rule: 'no-unused-ground',
-                    severity: 'error',
                 });
             }
         }

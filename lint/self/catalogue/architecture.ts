@@ -16,7 +16,6 @@ export const ARCHITECTURE_STATIQUE_RULES: Row[] = [
         rationale:
             'A setup is defined once and composed by every facet that offers it; logic written in one facet file is a second definition of it, which the next facet does not share and the matrix cannot see.',
         reach: 'all',
-        severity: 'error',
     },
 ];
 
@@ -62,7 +61,6 @@ export const ARCHITECTURE_PASSES: Row[] = [
         rationale:
             'A module left at the root belongs to every tree and to none: the grab-bag the restructure dissolved (`surface.ts`, `settings.ts`) starts again as one file nobody owns.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'self',
@@ -76,7 +74,6 @@ export const ARCHITECTURE_PASSES: Row[] = [
         rationale:
             'A role folder gathers files by what they are, so one change opens five of them; a one-file folder is a name with nothing to group; and a facet root that grows loose files stops reading as its face.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'self',
@@ -90,7 +87,6 @@ export const ARCHITECTURE_PASSES: Row[] = [
         rationale:
             'the layer map lets every facet reach all of `world/`, so the queue that matches a request and the msw server that serves it were one relative import away from any module: an internal reached from outside is one that can no longer move, and a delivery wired by a facet that never declared it is a second channel nobody chose.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'self',
@@ -104,7 +100,6 @@ export const ARCHITECTURE_PASSES: Row[] = [
         rationale:
             'Two suffixes for one role split every search in two: the reader looking for what implements a port opens the `*.adapter.ts` files and misses the half named `*.driver.ts`.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'self',
@@ -118,6 +113,5 @@ export const ARCHITECTURE_PASSES: Row[] = [
         rationale:
             'A message written by hand at the throw says what went wrong and stops: the reader is left to guess the law and the gesture, and a hundred of them drifted into a hundred shapes. Split in two declared forms, a refusal teaches its reader, and an invariant tells them the bug is not theirs to fix.',
         reach: 'module',
-        severity: 'error',
     },
 ];

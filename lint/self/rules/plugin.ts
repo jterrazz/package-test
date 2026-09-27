@@ -11,11 +11,8 @@ const selfPlugin: LintPlugin = {
     },
 };
 
-export const selfPluginRules: Record<string, 'error' | 'warn'> = Object.fromEntries(
-    Object.entries(selfPlugin.rules).map(([name, rule]) => [
-        `jterrazz-self/${name}`,
-        rule.meta.docs.severity ?? 'error',
-    ]),
+export const selfPluginRules: Record<string, 'error'> = Object.fromEntries(
+    Object.keys(selfPlugin.rules).map((name) => [`jterrazz-self/${name}`, 'error']),
 );
 
 export { ARCHITECTURE } from '../checks/architecture.js';

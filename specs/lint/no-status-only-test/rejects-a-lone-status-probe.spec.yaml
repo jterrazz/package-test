@@ -1,4 +1,4 @@
-description: warns on a test whose only assertion is a status probe
+description: rejects a test whose only assertion is a status probe
 fixture: ./_fixtures/violation/
 runs:
     - command: .

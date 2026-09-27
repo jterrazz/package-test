@@ -29,7 +29,6 @@ function ambiguityOf(specsRoot: string, spec: SpecRead, name: string): Finding |
         fix: `write the route's template: \`.${verb}('${template}', { params: { <name>: '${segment}' } })\` — or, if \`${segment}\` is the route's own segment, state that the path is the route: \`.${verb}('${bare}', { params: {} })\``,
         found: `\`${method} ${bare}\` names \`${segment}\` right after the collection \`${collection}\`: a value or a segment of the route, and the folder depends on which`,
         rule: 'spec-in-subject-folder' as const,
-        severity: 'error' as const,
     };
 }
 
@@ -58,7 +57,6 @@ export function checkSpecInSubjectFolder(specsRoot: string): Finding[] {
                 found: `a spec of ${only}, filed under ${shown(specsRoot, dirname(spec.file))}/`,
                 line: 1,
                 rule: 'spec-in-subject-folder' as const,
-                severity: 'error' as const,
             },
         ];
     });

@@ -41,7 +41,6 @@ export function checkFacetTestUsesItsRunner(specsRoot: string): Finding[] {
                 fix: `import \`{ ${facet} }\` from \`${facet}.specification.js\` and drive the product through it, or move the module test beside its module`,
                 found: `a test under the \`${facet}\` facet that reaches no runner`,
                 rule: 'facet-test-uses-its-runner',
-                severity: 'error',
             });
         }
     }

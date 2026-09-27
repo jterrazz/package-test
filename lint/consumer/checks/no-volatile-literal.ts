@@ -78,7 +78,6 @@ export function noVolatileLiteralsInGround(file: string, text: string): Finding[
                       fix: `write ${volatileLiteral.token} where "${volatileLiteral.found}" stands`,
                       found: `"${volatileLiteral.found}", a value the next run will not reproduce`,
                       rule: 'no-volatile-literal',
-                      severity: 'error',
                   },
               ];
     });

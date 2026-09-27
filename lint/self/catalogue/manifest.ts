@@ -28,7 +28,6 @@ export const SELF_STATIQUE_RULES: Row[] = [
         rationale:
             'Specifying the framework through its public surface keeps its specs decoupled from its internal paths; those folder names are its layers in this repository alone, so the rule holds this package and nobody else.',
         reach: 'specs',
-        severity: 'error',
     },
     ...ARCHITECTURE_STATIQUE_RULES,
 ];
@@ -46,7 +45,6 @@ export const SELF_CHECKER_PASSES: Row[] = [
         rationale:
             'A specimen exists to exercise the framework, and its routes are nobody’s product: filed by the route, the framework’s own specs read as an app’s, and the reader looking for what `.seed()` promises opens a folder named for a URL. The component tree is a specimen too, and flat it answers the same question only by opening every test.',
         reach: 'specs',
-        severity: 'error',
     },
     ...ARCHITECTURE_PASSES,
 ];

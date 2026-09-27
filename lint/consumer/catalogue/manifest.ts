@@ -7,7 +7,7 @@ type Row = CatalogueRow<Family>;
 
 /** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (the layer map). */
 
-/** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. The one warn tier is the row's `severity`. */
+/** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. */
 export const STATIQUE_RULES: Row[] = [
     {
         audience: 'consumer',
@@ -21,7 +21,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Anchoring runners to a recognisable filename makes the entry point discoverable and keeps tests declarative.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -35,7 +34,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A closed surface stops parallel constructors being invented and keeps the API memorable.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -48,7 +46,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'no-runner-alias',
         rationale: 'One instance name per facet makes every spec readable with no local context.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -61,7 +58,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'cleanup-passed-to-after-all',
         rationale: 'Guaranteeing teardown stops containers and connections leaking between files.',
         reach: 'specification',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -75,7 +71,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Detection by convention has to stay the default; an explicit `root` is only justified where it fails.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -89,7 +84,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The optional marker is the one the order slips on: a `When` above the Given or below the Then tells a story the code does not follow.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -103,7 +97,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The narration is a sentence about the subject; a paragraph hides its second half from every reader that only looks at the marker line.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -117,7 +110,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A setting repeated on every chain reads as a choice each test made; stated once, it reads as what it is — the condition of the whole file — and the next test cannot forget it.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -131,7 +123,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "Given/Then narration makes a test's intent readable without reading its assertions.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -145,7 +136,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The injection already covers service URLs; rewriting them by hand invites drift.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -159,7 +149,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The job name is a contract between the app and its tests — a stable identifier forbids divergent translations.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -173,7 +162,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "A spec has to exercise the product's real command; per-tool assertions go through `result.grep`.",
         reach: 'specification',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -186,7 +174,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'specs-at-declared-depth',
         rationale: "A fixed depth makes every file's place predictable and statically checkable.",
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -200,7 +187,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Unit stubs are composition details; going through the facade keeps each scenario named in the same place as the world it derives from.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -214,7 +200,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Data exists only as served by a stub — a file with no owner is dead weight no test ever loads.',
         reach: 'stub',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -228,7 +213,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The extension is how the file is sent — a `.http` whole, a `.json` parsed, anything else verbatim — so a file without one says nothing about what the app will receive.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -242,7 +226,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A fixed tree separates the public facade from the internal units and makes the FOLDER carry the kind — filenames go back to being domain words, and a unit reads as one kind of outside world. A test imports the builder it calls by name, so a required default no test reads would be dead code the unused-export pass reports.',
         reach: 'stub',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -256,7 +239,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "The extension is part of the golden's path — the path IS the file, and a file without its extension is another file.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -268,7 +250,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'seeds-are-sql',
         rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -282,7 +263,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Four reserved names are a vocabulary only if each means one thing: a seed parked in `_fixtures/` or a golden in `_requests/` makes the folder lie about what it holds, and the next reader trusts the folder.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -296,7 +276,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A path resolves against the spec that starts the chain, so one built in a helper resolves per caller: the same line names a different file for every spec that reaches it, and the file it names is visible on no line of the test that stands on it.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -310,7 +289,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The runner reports a failure under the describe it stands in, so a title that is the aspect or the subject names the file the failure came from; a second group, or a stray test, is a second question the file answers.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -324,7 +302,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The folder names the subject; the file name is the only place the question asked of it is written, and a catch-all name answers none — the next test lands there because it fits nowhere, and the file grows until it holds everything.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -338,7 +315,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A file past a few hundred lines asks several questions of its subject, and a reader looking for one scrolls through the others; a cap written as a number is the one a reviewer does not have to argue.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -352,7 +328,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "A test past a screen asks several things of its subject, and the one that fails is the one a reader has to find; the toolchain's function cap leaves a test file alone, because a file's one `describe` is a function as long as the file, so this cap is the test's own.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -366,7 +341,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'An assertion that reads the machine twice holds whatever the subject does, and the day it fails it fails for the clock.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -380,7 +354,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A value sampled into the Given travels into the subject, and the assertion that reads it back is the same tautology one step removed.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -394,7 +367,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The subject can return anything, raise anything, or return nothing at all, and every assertion still passes.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -408,7 +380,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`toBeDefined()` passes for `0`, `[]`, the wrong object and the right one: as a whole proof it records that the call returned, not what it answered.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -422,7 +393,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Three greps state three lines, leave everything between them unstated, and still have to be rewritten one by one the day the output changes.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -436,7 +406,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Probes are a partial oracle: what they do not name is free to regress unseen. The whole result, written where the test reads it, is the default oracle — approval testing — and a precise assertion states what the test is about on top of it.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -450,7 +419,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A test is read where it is written: an expectation parked at the top of the file makes its one reader scroll to know what it asserts, and buys no sharing for the price.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -464,7 +432,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'An expectation written in another module asserts what nobody reviewing the test reads, and a change to that module moves the assertions of every spec that imports it without one of them changing.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -478,7 +445,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'An un-awaited IO assertion passes silently — the worst failure mode a test has.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -491,7 +457,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'no-await-on-sync-matcher',
         rationale: 'A pointless await hides the signal that marks the real IO matchers.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -505,7 +470,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`transform` is the escape hatch for noise the tokens do not cover — not a second copy of them.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -519,7 +483,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "`.raw` keeps the colour codes and skips the runner's transform, so a substring found there is not the text any golden of the same stream would be compared against.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -533,7 +496,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A ref only earns its name when it asserts equality across at least two occurrences.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -547,7 +509,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'In update mode an unfrozen matcher writes instead of throwing: the negative fixture is corrupted by its own real output and the assertion stops testing anything. `frozen` pins it.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -561,7 +522,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A lone status pins the response code and throws away the whole payload; a full golden captures the shape and its token grammar (it completes `result-compared-whole`, which reads the response the probe stands beside).',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -575,7 +535,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "A config off the preset runs on vitest's five-second budget, writes artefacts at the repository root and collects `_fixtures/` as specs — none of it visible in the file that caused it.",
         reach: 'config',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -589,7 +548,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             '`--project component` has to mean the same thing in every repository: it is the one word a CI job, a Makefile target and an agent all type.',
         reach: 'config',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -603,7 +561,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A simulated DOM behaves ALMOST like a browser, and what ships is judged by a real one: the component facet renders in the Chromium the website facet already drives.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -617,7 +574,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "The provider pinned to the runner's exact version, the service worker served from the framework's own install, the JSX transform the current Vite uses, a cold cache's pre-bundling and the artefact directories are all runs that pass here and fail on the next machine.",
         reach: 'config',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -631,7 +587,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A project that collects nothing passes: the suite never ran, and the only trace is a zero nobody reads.',
         reach: 'config',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -645,7 +600,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A path that resolves to nothing fails at collection time with a message about an import, several layers from the line that caused it.',
         reach: 'config',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -659,7 +613,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The assignment outlasts the test: the next file in the same worker inherits it, and the failure lands somewhere else.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -673,7 +626,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A single entry point keeps the public API explicit and the internal subpaths invisible.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -687,7 +639,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "Keeping test artefacts out of production protects the consumer's application bundle.",
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -700,7 +651,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Sharing between tests goes through a module that prepares them — a `_setup/` module under `specs/`, a sibling `<file>.fixtures.ts` under `src/` — not through test-to-test imports that couple the files.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -712,7 +662,6 @@ export const STATIQUE_RULES: Row[] = [
         name: 'fixtures-imported-by-tests-only',
         rationale: 'Confining fixtures to tests stops test data leaking into production code.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -726,7 +675,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "A test importing the adapter speaks the adapter's dialect: a repository ends up with as many vocabularies as it has seams. Every group names the seam this vocabulary already owns — the runner, the browser, the simulator, the network, the clock and the doubles.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -740,7 +688,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A module test runs under node, where `document` does not exist: a test asking for one is not testing a module, it is rendering something — and it now has somewhere to go.',
         reach: 'module',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -754,7 +701,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             "Neighbouring tests (parity with Go's `foo_test.go`) keep a test and its code together and discoverable.",
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -768,7 +714,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -782,7 +727,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A fixed sleep makes tests slow and flaky; waiting on a condition is deterministic.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -796,7 +740,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'A hook moves the setup out of the only place a reader looks, shares it with every test in the file, and half of them come to depend on it quietly.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -810,7 +753,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Separating interaction from assertion keeps the setup → action → result grammar intact and the scenarios replayable.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -824,7 +766,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'Testing what the user sees (roles, labels) keeps specs robust to DOM rewrites; a test id sidesteps that guarantee, and without the invariant written down nobody can tell whether the hatch is still needed.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -838,7 +779,6 @@ export const STATIQUE_RULES: Row[] = [
         rationale:
             'The capture is taken when the callback returns: a scenario ending on a click hands the golden whatever was on the screen at that instant, and the failure reads as flakiness rather than as a missing wait.',
         reach: 'specs',
-        severity: 'error',
     },
 ];
 
@@ -856,7 +796,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The first listing a reader opens names the facets: a helper or a data file beside them is a second kind of thing at the one level where every entry is a constructor.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -870,7 +809,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A route, a command or a job names its subject folder, so a subject can take any word: only a marker keeps the folders that are no subject from colliding with one, and only a closed list keeps the marker meaning something.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -884,7 +822,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A spec folder holds specs, and a reader listing it expects questions asked of the subject: code beside them is a second kind of file mixed in, and a module called `fixtures` promises data it does not hold.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -898,7 +835,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Where shared code sits says who shares it: a helper parked above its readers reads as everyone’s and one parked beside one of them reads as that leaf’s, so the reader cannot trust the folder to tell them what a change reaches.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -912,7 +848,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A test adapter replaces one port of the application, and the port is the name the application gave the seam: named for it, the adapter is found from the port and the port from the adapter, whatever the class is called.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -926,7 +861,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A document IS the scenario; filed under ground it reads as material a scenario stands on, and the reader cannot tell which files are run.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -940,7 +874,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "A test reaching no runner under a facet is a module test paying the facet's budget and services to prove something that belongs beside its module.",
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -954,7 +887,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Folder = constructor is the law the fork rests on; a facet folder with no runner tells the reader something false before they open a file.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -968,7 +900,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "A seed that reads the clock makes the row's date the date the suite happened to run: a case about \"published yesterday\" proves something different every day, and under SQLite `datetime('now')` writes a space-separated text where an ORM writes ISO `T`, so the two misorder across a calendar day. The estate dry run — the whole catalogue over every repository of the workbench — counts 36, every one of them signews-api's.",
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -982,7 +913,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Ground one spec reads, parked where several sit, reads as shared: everyone assumes someone else depends on it and nobody dares touch it.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -996,7 +926,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "A suppression with no reason is a rule turned off by someone no longer here: the next reader cannot tell whether the pass was wrong or simply in the way, so the line survives every review. The toolchain's own gate reads `oxlint-disable*` and nothing else.",
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1010,7 +939,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "Without a config, vitest's 5 s budget and unexcluded ground folders are running the member's tests: the default is not chosen, it is inherited.",
         reach: 'member',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1024,7 +952,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "The static pass sees only what the repository's oxlint configuration hands it; the member pass starts from the root manifest and reaches every declared member.",
         reach: 'member',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1038,7 +965,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A duplicate declaration lets two versions of one seam coexist, and a retired seam keeps a vocabulary the framework has replaced.',
         reach: 'member',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1052,7 +978,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A closed grammar shared with the runtime matcher stops the two channels drifting.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1065,7 +990,6 @@ export const CHECKER_PASSES: Row[] = [
         name: 'no-malformed-ref',
         rationale: 'A malformed capture would fail silently — naming it makes it visible early.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1079,7 +1003,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The opening line is what tells a request from a response — constraining it catches misplaced files.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1093,7 +1016,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "The grammar is read by the runner's own parser: the document lint accepts is exactly the one the runner runs.",
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1107,7 +1029,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The setting before the session, the input before the output: one order makes documents comparable and removes the diffs that change nothing.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1121,7 +1042,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Expected output has to look like output — a golden on one line is unreadable and no diff can show it.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1135,7 +1055,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'With no agreement between the suffix and the tree, a reader cannot say what a test proves without opening it; and the filename is the first sentence they read — `rm/rm.spec.yaml` says nothing twice.',
         reach: 'specs',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1149,7 +1068,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "The description IS the vitest title — a title's rules apply to it, not a paragraph's.",
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1162,7 +1080,6 @@ export const CHECKER_PASSES: Row[] = [
         name: 'document-description-unique',
         rationale: 'The reporter names the title: two identical titles leave two files to open.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1176,7 +1093,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'This is exactly the shape a `TEST_UPDATE` run would have tokenised: finding one means a token was overwritten by hand.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1189,7 +1105,6 @@ export const CHECKER_PASSES: Row[] = [
         name: 'pinned-value-from-the-input',
         rationale: 'The defect is not the literal: it is the literal nothing pinned.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1203,7 +1118,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The `vitest/expect-expect` mirror for documents — an assertion that accepts anything is an absent assertion.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1217,7 +1131,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A silent refusal is either a defect in the product, or a golden that forgot the words went to stderr.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1231,7 +1144,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A typo (`serve: dashbord`) fails at run time today, a test file later; here it is one lint line.',
         reach: 'document',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1245,7 +1157,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A token in an input is neither validated nor substituted — it is almost always a mistake.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1259,7 +1170,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The `named-path-exists` mirror — a fixture nothing references is dead weight that misleads the reader.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1273,7 +1183,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "A file a test reads is read at a distance: the reader opens a second file to know what the test stands on or expects, and a file one test reads pays that price for nothing — until the value is too long to read in the test, where the file is the clearer page. SQL is the exception at any length: a seed is database state a reader opens as a file, and SQL in a TypeScript string is checked by nothing. A single scenario's file parked in the pool is worse still — it reads as shared, so nobody dares change it.",
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1287,7 +1196,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A file about one subject is found by its subject: the reader of `GET /events/:id` opens one folder and reads every question asked of it, and a change to that route touches one file.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1301,7 +1209,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A name derived from the subject is the same in every repository: nobody lists the folders, nobody argues them, and a reader who knows the route knows the path.',
         reach: 'spec',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1315,7 +1222,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "Copies drift: one leaf's seed gains a column, the other's does not, and the reader of either cannot tell a difference meant from one forgotten.",
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1329,7 +1235,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             "A leaf reaching into a neighbour's fixtures is the pool through another door, without the pool's visibility: the neighbour breaks a spec two folders away without knowing.",
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1343,7 +1248,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'A typo in a path fails a run, a test later, far from the line that made it; statically it is one report line at the path.',
         reach: 'ground',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1357,7 +1261,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Four reserved names are a vocabulary only while nobody adds a fifth: a second word for the goldens is a second place a reader has to look, and the rules that read `_expected/` never see it.',
         reach: 'all',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1371,7 +1274,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'Inferring the runners removes the hand-maintained list an oxlint rule would need.',
         reach: 'tests',
-        severity: 'error',
     },
     {
         audience: 'consumer',
@@ -1385,7 +1287,6 @@ export const CHECKER_PASSES: Row[] = [
         rationale:
             'The number of databases fixes the call API; the cross-file analysis catches the omission before run time.',
         reach: 'tests',
-        severity: 'error',
     },
 ];
 

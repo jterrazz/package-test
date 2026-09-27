@@ -1,4 +1,4 @@
-description: warns on an include whose folder does not exist
+description: rejects an include whose folder does not exist
 fixture: ./_fixtures/violation/
 runs:
     - command: .

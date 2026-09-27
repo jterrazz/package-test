@@ -19,7 +19,6 @@ describe('checkSpecInSubjectFolder', () => {
                 found: '`GET /indicators/btc/chart` names `btc` right after the collection `indicators`: a value or a segment of the route, and the folder depends on which',
                 line: 2,
                 rule: 'spec-in-subject-folder',
-                severity: 'error',
             },
             {
                 file: 'api/charts/templated.spec.ts',
@@ -27,7 +26,6 @@ describe('checkSpecInSubjectFolder', () => {
                 found: 'a spec of GET /indicators/:id/chart, filed under api/charts/',
                 line: 1,
                 rule: 'spec-in-subject-folder',
-                severity: 'error',
             },
         ]);
     });

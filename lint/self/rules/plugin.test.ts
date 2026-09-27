@@ -13,9 +13,9 @@ describe('selfPlugin', () => {
         }
     });
 
-    test('the self plugin — the static rules only this package runs — its rule set names every rule under its own namespace, at its severity', () => {
+    test('the self plugin — the static rules only this package runs — its rule set names every rule under its own namespace, as an error', () => {
         // Given - the rules this repository's config spreads
-        // Then - one entry per rule, `jterrazz-self/<rule>`, an error unless the id is advisory
+        // Then - one entry per rule, `jterrazz-self/<rule>`, an error
         expect(selfPluginRules).toStrictEqual({
             'jterrazz-self/no-framework-internals': 'error',
             'jterrazz-self/facet-is-a-composition': 'error',

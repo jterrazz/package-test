@@ -59,7 +59,6 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
                 line,
                 ...missingTarget(named, relative(rootDir, target), existsSync(target)),
                 rule: 'named-path-exists',
-                severity: 'error',
             });
         }
     }
@@ -82,7 +81,6 @@ export function checkNamedPathExistsIn(file: string, rootDir: string): Finding[]
                 ? missingTarget(named, relative(rootDir, target), existsSync(target))
                 : crossedTarget(named, { found, key, path })),
             rule: 'named-path-exists',
-            severity: 'error',
         });
     }
     return violations;

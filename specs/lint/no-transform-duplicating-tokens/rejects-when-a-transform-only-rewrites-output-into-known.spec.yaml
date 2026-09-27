@@ -1,4 +1,4 @@
-description: warns when a transform only rewrites output into known tokens
+description: rejects when a transform only rewrites output into known tokens
 fixture: ./_fixtures/violation/
 runs:
     - command: .

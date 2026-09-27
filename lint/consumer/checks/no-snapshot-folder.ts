@@ -44,7 +44,6 @@ export function checkNoSnapshotFolder(memberDir: string, label: string): Finding
                     fix: `rename \`${entry.name}/\` to \`_expected/\`, beside the test that reads it`,
                     found: `\`${entry.name}/\`, a synonym of \`_expected/\``,
                     rule: 'no-snapshot-folder',
-                    severity: 'error',
                 });
             } else if (dir === memberDir || treeKind(join(path, 'package.json')) !== 'file') {
                 walk(path);

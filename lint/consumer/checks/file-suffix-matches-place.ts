@@ -71,7 +71,6 @@ export function checkFileSuffixMatchesPlaceInMember(memberDir: string): Finding[
             fix: `move it under \`specs/<facet>/\`, or rename it \`${rel.replace(/\.spec\.ts$/u, '.test.ts')}\` beside the module it covers`,
             found: 'a `.spec.ts` outside every `specs/` tree',
             rule: 'file-suffix-matches-place',
-            severity: 'error',
         });
     }
     return violations;
@@ -89,7 +88,6 @@ export function checkFileSuffixMatchesPlace(specsRoot: string): Finding[] {
             fix: `rename it \`${rel.replace(/\.test\.ts$/u, '.spec.ts')}\` — \`make fix\` does it with \`git mv\``,
             found: `a \`.test.ts\` under \`${where}\`, where a file specifies the assembled product`,
             rule: 'file-suffix-matches-place',
-            severity: 'error' as const,
         };
     });
 }

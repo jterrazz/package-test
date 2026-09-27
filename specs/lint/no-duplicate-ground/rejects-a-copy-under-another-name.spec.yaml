@@ -1,4 +1,4 @@
-description: a seed two leaves hold byte for byte under two names is a warning on each copy
+description: a seed two leaves hold byte for byte under two names is refused on each copy
 fixture: ./_fixtures/renamed/
 runs:
     - command: checker .

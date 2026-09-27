@@ -1,4 +1,4 @@
-description: a seed two leaves hold byte for byte is a warning on each copy
+description: a seed two leaves hold byte for byte is refused on each copy
 fixture: ./_fixtures/copied/
 runs:
     - command: checker .

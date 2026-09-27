@@ -45,7 +45,6 @@ export function checkCheckerSuppressionStatesAReason(rootDir: string): Finding[]
                 fix: `end the directive with its reason: \`checker-disable-next-line ${idOf(match.groups?.rest)} -- <why this line is the exception>\``,
                 found: 'a checker suppression that does not say why',
                 rule: 'checker-suppression-states-a-reason',
-                severity: 'error',
             });
         }
     }

@@ -19,12 +19,11 @@ describe('noUnknownTokenFindings', () => {
         // Given - the violation fixture tree ({{userid}} in _expected/out.txt)
         const violations = groundFindings(resolve(FIXTURES, 'no-unknown-token'));
 
-        // Then - the finding names the relative file, line, token and severity
+        // Then - the finding names the relative file, line and token
         expect(violations).toStrictEqual([
             expect.objectContaining({
                 file: 'specs/widget/_expected/out.txt',
                 line: 1,
-                severity: 'error',
                 token: '{{userid}}',
             }),
         ]);

@@ -1,4 +1,4 @@
-description: warns on a scenario that ends on the action
+description: rejects a scenario that ends on the action
 fixture: ./_fixtures/violation/
 runs:
     - command: .

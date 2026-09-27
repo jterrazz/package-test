@@ -136,7 +136,6 @@ export function checkInlineSeeds(rootDir: string): Finding[] {
         found: 'SQL written in the test, tagged `sql`',
         line: seed.line,
         rule: 'ground-shared-or-inline' as const,
-        severity: 'error' as const,
     }));
 }
 

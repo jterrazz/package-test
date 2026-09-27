@@ -30,7 +30,6 @@ export function checkDocumentDescriptionUnique(rootDir: string): Finding[] {
             fix: `retitle one of the two for what it proves apart from the other`,
             found: `"${document.description}", already the description of ${first}`,
             rule: 'document-description-unique',
-            severity: 'error',
         });
     }
     return violations;

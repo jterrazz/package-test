@@ -23,7 +23,7 @@ describe('ratchet', () => {
         );
     });
 
-    test('baseline — baseline — the test ratchet — exact counts that a fix may lower and never raise — counts every finding under its key, whatever its severity', () => {
+    test('baseline — baseline — the test ratchet — exact counts that a fix may lower and never raise — counts every finding under its key', () => {
         // Given - two findings of one rule and one of another
         // Then - one line per key
         expect(

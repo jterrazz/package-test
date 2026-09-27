@@ -25,7 +25,6 @@ function strayAtRoot(rootDir: string, specsRoot: string): Finding[] {
                 fix: `move it to \`specs/${join(SHARED_FOLDER, SETUP_FOLDER)}/\`, and the paths that import it`,
                 found: `\`${SETUP_FOLDER}/\` at the specs root, which holds its facets and \`${SHARED_FOLDER}/\` alone`,
                 rule: 'specs-root-holds-facets-and-shared',
-                severity: 'error',
             });
         } else if (!entry.isDirectory()) {
             found.push({
@@ -34,7 +33,6 @@ function strayAtRoot(rootDir: string, specsRoot: string): Finding[] {
                 fix: `move it where it belongs: code into \`specs/${SHARED_FOLDER}/${SETUP_FOLDER}/\` — or the \`${SETUP_FOLDER}/\` of the one facet that reads it — and data into the ground folder of its role`,
                 found: `\`${entry.name}\`, a file at the specs root, which holds its facets and \`${SHARED_FOLDER}/\` alone`,
                 rule: 'specs-root-holds-facets-and-shared',
-                severity: 'error',
             });
         }
     }

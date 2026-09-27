@@ -45,7 +45,7 @@ export function finding<PassId extends string>(
     teaching: Pick<Finding, 'fix' | 'found'>,
     at: { column: number; line: number } = AT_ITS_TOP,
 ): Finding<PassId> {
-    return { ...teaching, ...at, file, rule, severity: 'error' };
+    return { ...teaching, ...at, file, rule };
 }
 
 export function byPosition(one: Finding, other: Finding): number {
