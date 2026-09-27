@@ -208,12 +208,8 @@ function jsxPipeline(pipeline: Record<string, unknown>): Record<string, unknown>
 }
 
 /** `@vitest/browser-playwright` peers vitest on an exact version; a mismatch fails deep in the tester naming neither. */
-function assertProviderPin(): void {
-    const runner = versionOf('vitest');
-    let provider: string;
-    try {
-        provider = versionOf('@vitest/browser-playwright');
-    } catch {
+export function assertProviderPin(runner: string, provider: null | string): void {
+    if (provider === null) {
         throw new Error(
             refusal('seam-is-an-optional-peer', {
                 fix: `npm i -D @vitest/browser-playwright@${runner} playwright`,
@@ -230,6 +226,14 @@ function assertProviderPin(): void {
                 why: '`@vitest/browser-playwright` peers vitest on an exact version.',
             }),
         );
+    }
+}
+
+function installedVersion(specifier: string): null | string {
+    try {
+        return versionOf(specifier);
+    } catch {
+        return null;
     }
 }
 
@@ -274,7 +278,7 @@ export async function component(
 ): Promise<TestProjectInlineConfiguration> {
     // Read before the first `await`: the caller's frame is on the stack only during the synchronous body.
     const root = options.root ?? callerDirectory();
-    assertProviderPin();
+    assertProviderPin(versionOf('vitest'), installedVersion('@vitest/browser-playwright'));
     const { playwright } = await import('@vitest/browser-playwright');
     const pipeline = options.vite === undefined ? {} : await reroot(options.vite, root);
     const consumerPlugins = Array.isArray(pipeline.plugins) ? pipeline.plugins : [];
