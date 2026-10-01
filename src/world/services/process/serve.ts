@@ -1,6 +1,6 @@
 import { execSync, spawn, spawnSync } from 'node:child_process';
 import type { ChildProcess } from 'node:child_process';
-import { createServer } from 'node:net';
+import { createServer, Socket } from 'node:net';
 import { resolve as resolvePath } from 'node:path';
 
 import { invariant, refusal } from '../../../../lint/index.refusal.js';
@@ -32,8 +32,9 @@ function watchGroup(groupId: number): ChildProcess {
         stdio: ['pipe', 'ignore', 'ignore'],
     });
     watchdog.unref();
-    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a piped stdin is a socket, and its handle alone would hold the run open
-    (watchdog.stdin as unknown as null | { unref: () => void })?.unref();
+    if (watchdog.stdin instanceof Socket) {
+        watchdog.stdin.unref();
+    }
     return watchdog;
 }
 
