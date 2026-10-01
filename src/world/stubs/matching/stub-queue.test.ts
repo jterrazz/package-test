@@ -213,7 +213,7 @@ describe('StubQueue', () => {
 
         // Then - the never stub took the call, and the chain end refuses it
         expect(served?.response).toStrictEqual({
-            status: 501,
+            status: 418,
             body: { error: `@jterrazz/test: GET ${URL_A} is declared never requested` },
         });
         expect(queue.requiredError()).toStrictEqual(

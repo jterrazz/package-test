@@ -227,7 +227,7 @@ describe('http', () => {
         expect(declared).toMatchObject({
             required: true,
             response: {
-                status: 501,
+                status: 418,
                 body: { error: `@jterrazz/test: POST ${URL} is declared never requested` },
             },
             times: 0,

@@ -85,7 +85,7 @@ test('a preview never places the order', async () => {
 });
 ```
 
-Unlike an exhausted stub, a never stub is never skipped: the first request it matches is taken by it, whatever stub follows on the same route, and the subject receives a `501` whose body names the route. The chain then fails at its end, naming the route and every call that reached it. `http.unreachable()` beside an empty error says the call FAILED; only `never` says it did not happen. `openai.never(request)` and `anthropic.never(request)` are the same stub, so a unit of `openai/` or `anthropic/` calls its own folder's builder. It is a stub like any other: it turns the chain's network strict, and in `.with()` it claims its route.
+Unlike an exhausted stub, a never stub is never skipped: the first request it matches is taken by it, whatever stub follows on the same route, and the subject receives a `418` whose body names the route — a status no HTTP client retries, so an SDK's backoff neither slows the failing spec nor repeats the call in the refusal. The chain then fails at its end, naming the route and every call that reached it. `http.unreachable()` beside an empty error says the call FAILED; only `never` says it did not happen. `openai.never(request)` and `anthropic.never(request)` are the same stub, so a unit of `openai/` or `anthropic/` calls its own folder's builder. It is a stub like any other: it turns the chain's network strict, and in `.with()` it claims its route.
 
 ## `defineStubs` — it's stubs all the way down
 

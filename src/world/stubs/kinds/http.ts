@@ -197,7 +197,7 @@ export const http = {
             request,
             required: true,
             response: {
-                status: 501,
+                status: 418,
                 body: {
                     error: `@jterrazz/test: ${describeRoute(request)} is declared never requested`,
                 },
