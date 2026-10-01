@@ -11,7 +11,7 @@ function stubMatches(stub: Stub, request: MatchableRequest): boolean {
     if (!urlMatches(url, request.url)) {
         return false;
     }
-    if (absentHeaders?.some((name) => request.headers[name] !== undefined) === true) {
+    if (absentHeaders?.some((name) => request.headers[name.toLowerCase()] !== undefined) === true) {
         return false;
     }
     return match ? match(request) : true;

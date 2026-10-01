@@ -97,6 +97,17 @@ describe('StubQueue', () => {
         expect(serve(queue, { headers: { 'x-other': '1' } })).toBe('anonymous');
     });
 
+    test('stub queue — selection — a hand-built request states its absent headers in any case', () => {
+        // Given - a stub request written without the http builder, its absent header capitalised
+        const queue = new StubQueue([
+            stub({ ...http.get(URL_A), absentHeaders: ['Cookie'] }, 'anonymous'),
+        ]);
+
+        // Then - the observed lowercased header still keeps the stub from firing
+        expect(serve(queue, { headers: { cookie: 'session=1' } })).toBeNull();
+        expect(serve(queue)).toBe('anonymous');
+    });
+
     test('stub queue — strict failure message (rule `network-strict-after-first-stub`) — names the header a declared stub states absent', () => {
         // Given - a stub forbidding a header the request carries
         const queue = new StubQueue([
