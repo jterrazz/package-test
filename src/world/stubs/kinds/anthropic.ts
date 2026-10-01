@@ -111,6 +111,7 @@ export const anthropic = {
         };
     },
 
+    /** A stub the chain fails on if the subject reaches this endpoint: `http.never()`. */
     never(request: StubRequest): Stub {
         return http.never(request);
     },

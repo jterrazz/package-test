@@ -22,6 +22,7 @@ export type HttpStubFilter = {
     headers?: Record<string, RegExp | string>;
     /** Query-param subset. string = exact value, RegExp = `test()`. */
     query?: Record<string, RegExp | string>;
+    /** Headers the request must not carry; a name present with any value keeps the stub from firing. */
     without?: { headers?: readonly string[] };
 };
 
