@@ -1,0 +1,19 @@
+import { resolve } from 'node:path';
+import { test } from 'vitest';
+
+const { process: processService, specification } = await import(process.env.IN_PLACE_ENTRY);
+
+const { integration } = await specification.integration({
+    services: {
+        api: processService({
+            command: `node -e "require('node:fs').writeFileSync(process.env.PID_FILE, String(process.pid)); const s = require('node:http').createServer((q, r) => r.end()); s.listen(0, '127.0.0.1', () => console.log('listening on port ' + s.address().port))"`,
+            env: { PID_FILE: resolve('served.pid') },
+            ready: /listening on port (\d+)/u,
+        }),
+    },
+});
+
+test('the run is killed with its server up', async () => {
+    await integration.call(() => undefined);
+    process.kill(0, 'SIGKILL');
+});

@@ -50,10 +50,6 @@ app's own `vite.config.ts`.
 
 ## 4. Known defects and debt
 
-- **A server command outlives a killed run.** `serve.ts` spawns every `process()` service
-  and the run's Appium server `detached`, in a process group of its own, so a vitest killed
-  with SIGKILL leaves them running; only teardown stops them. The runner needs a parent
-  watchdog: the child's group exits when the run's process is gone.
 - **A mobile session that died is attached to anyway.** The run's ledger hands later files
   the recorded session with no probe, and no `appium:newCommandTimeout` is set, so a
   session the server expired fails each later file on its first command. Settle it with a

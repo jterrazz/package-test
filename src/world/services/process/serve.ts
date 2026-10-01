@@ -11,6 +11,31 @@ import type { ProcessOptions } from './process.adapter.js';
 const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
+const GROUP_POLL_MS = 1000;
+
+const WATCHDOG = `
+const group = -Number(process.argv[1]);
+const gone = () => { try { process.kill(group, 0); return false; } catch { return true; } };
+const end = () => {
+    try { process.kill(group, 'SIGTERM'); } catch { process.exit(0); }
+    setTimeout(() => { try { process.kill(group, 'SIGKILL'); } catch {} process.exit(0); }, ${KILL_GRACE_MS});
+};
+process.stdin.on('end', end);
+process.stdin.on('error', end);
+process.stdin.resume();
+setInterval(() => { if (gone()) process.exit(0); }, ${GROUP_POLL_MS});
+`;
+
+function watchGroup(groupId: number): ChildProcess {
+    const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
+        detached: true,
+        stdio: ['pipe', 'ignore', 'ignore'],
+    });
+    watchdog.unref();
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a piped stdin is a socket, and its handle alone would hold the run open
+    (watchdog.stdin as unknown as null | { unref: () => void })?.unref();
+    return watchdog;
+}
 
 export function runToCompletion(command: string, env: NodeJS.ProcessEnv): void {
     execSync(command, { env, stdio: 'pipe' });
@@ -35,7 +60,7 @@ async function findFreePort(): Promise<number> {
     });
 }
 
-/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too. */
+/** Any HTTP status counts as ready. The child runs in its own process group so `stop()` kills a `next start` grandchild too, and a watchdog kills that group when the run dies before `stop()`. */
 export class ServedProcess {
     port: null | number = null;
     private child: ChildProcess | null = null;
@@ -44,6 +69,7 @@ export class ServedProcess {
     private readonly options: ProcessOptions;
     private output = '';
     private readonly root: string;
+    private watchdog: ChildProcess | null = null;
 
     constructor(
         options: ProcessOptions,
@@ -76,6 +102,9 @@ export class ServedProcess {
             shell: true,
             stdio: ['ignore', 'pipe', 'pipe'],
         });
+        if (this.child.pid !== undefined && process.platform !== 'win32') {
+            this.watchdog = watchGroup(this.child.pid);
+        }
         this.child.stdout?.on('data', (data) => {
             this.output += data.toString();
         });
@@ -201,6 +230,8 @@ export class ServedProcess {
             return;
         }
         this.child = null;
+        this.watchdog?.kill('SIGKILL');
+        this.watchdog = null;
 
         await new Promise<void>((resolve) => {
             let exited = false;

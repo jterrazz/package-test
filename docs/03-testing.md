@@ -92,7 +92,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 126   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
-| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 167   |
+| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 168   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
@@ -355,7 +355,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.response`     | 24  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
-| `.file()`       | 1   | —   | 13  | 7    | 1           | —       | —      | —         | —      |
+| `.file()`       | 1   | —   | 13  | 7    | 2           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
 | `.stdout`       | —   | —   | 24  | —    | —           | —       | —      | —         | —      |
 | `.stderr`       | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
