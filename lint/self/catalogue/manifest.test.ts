@@ -260,7 +260,7 @@ function coordinatesOf(from: string, text: string): Coordinate[] {
 }
 
 function pages(): string[] {
-    const found: string[] = ['README.md', 'AGENTS.md', 'TODO.md'];
+    const found: string[] = ['README.md', 'AGENTS.md'];
     for (const root of ['docs', 'skills']) {
         for (const entry of readdirSync(resolve(ROOT, root), { recursive: true })) {
             const path = `${root}/${String(entry).replaceAll('\\', '/')}`;
