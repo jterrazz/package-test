@@ -1,3 +1,4 @@
+import { refusal } from '../../../../lint/index.refusal.js';
 import { CaptureScope } from '../../../expectations/tokens/match.js';
 import { structuralSubset } from '../../../expectations/tokens/structural.js';
 import { STREAM_BODY } from '../exchange.js';
@@ -19,6 +20,7 @@ export type HttpStubFilter = {
     headers?: Record<string, RegExp | string>;
     /** Query-param subset. string = exact value, RegExp = `test()`. */
     query?: Record<string, RegExp | string>;
+    without?: { headers?: readonly string[] };
 };
 
 /** Init options for a streamed reply. */
@@ -128,8 +130,37 @@ function buildMatch(filter?: HttpStubFilter): StubRequest['match'] {
     };
 }
 
+function absentHeadersOf(filter?: HttpStubFilter): string[] | undefined {
+    const absent = filter?.without?.headers?.map((name) => name.toLowerCase()) ?? [];
+    if (absent.length === 0) {
+        return undefined;
+    }
+    const required = new Set(Object.keys(filter?.headers ?? {}).map((name) => name.toLowerCase()));
+    const contradicted = absent.filter((name) => required.has(name));
+    if (contradicted.length > 0) {
+        const names = contradicted.join(', ');
+        throw new Error(
+            refusal({
+                fix: `state ${names} in \`headers\` or in \`without.headers\`, never both`,
+                found: `an http stub filter that both requires and forbids the header(s) ${names}`,
+                read: 'docs/16-stubs.md#http--any-url',
+                why: 'A header both required and absent matches no request, so the stub could never fire.',
+            }),
+        );
+    }
+    return absent;
+}
+
 function declare(method: string, url: RegExp | string, filter?: HttpStubFilter): StubRequest {
-    return { adapter: 'http', match: buildMatch(filter), method, url, wrap: wrapJson };
+    const absentHeaders = absentHeadersOf(filter);
+    return {
+        ...(absentHeaders && { absentHeaders }),
+        adapter: 'http',
+        match: buildMatch(filter),
+        method,
+        url,
+        wrap: wrapJson,
+    };
 }
 
 /** Generic HTTP stub helpers: an absolute URL, or a path form (`/articles/{{uuid}}`) matching any origin. */

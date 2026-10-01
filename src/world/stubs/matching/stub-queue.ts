@@ -4,11 +4,14 @@ import type { Stub } from '../stub.js';
 import { describeRoute, routePatternOf, urlMatches } from './route.js';
 
 function stubMatches(stub: Stub, request: MatchableRequest): boolean {
-    const { match, method, url } = stub.request;
+    const { absentHeaders, match, method, url } = stub.request;
     if (method !== '*' && method.toUpperCase() !== request.method.toUpperCase()) {
         return false;
     }
     if (!urlMatches(url, request.url)) {
+        return false;
+    }
+    if (absentHeaders?.some((name) => request.headers[name] !== undefined) === true) {
         return false;
     }
     return match ? match(request) : true;

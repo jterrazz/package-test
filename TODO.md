@@ -42,14 +42,10 @@ then implement against numbers. By expected return, descending.
 
 ## 3. What the stub vocabulary still cannot say
 
-Found by package-analytics' 15.3 adoption (2026-09-20). Both are product lines: a
-rule about either one is a line of [18 § The backlog](docs/18-conventions.md#the-backlog--the-criterion-written-coded-on-its-first-occurrence),
+Found by package-analytics' 15.3 adoption (2026-09-20). It is a product line: a
+rule about it is a line of [18 § The backlog](docs/18-conventions.md#the-backlog--the-criterion-written-coded-on-its-first-occurrence),
 and it waits on the surface.
 
-- **A stub cannot state an ABSENT header.** A response's headers are matched as a
-  SUBSET, which proves presence and nothing else, so "this reply carries no
-  `set-cookie`" is not sayable. Either a `without: { headers: [...] }` filter beside the
-  subset, or a captured-request accessor the test reads and asserts on itself.
 - **There is no must-never-be-called stub.** A negative test leans on
   `http.unreachable()` plus an empty `result.error`, which says "the call failed", not
   "the call never happened". `http.never(request)` — or `required: false` with

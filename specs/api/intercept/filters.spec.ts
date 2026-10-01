@@ -43,6 +43,42 @@ describe('filters', () => {
         );
     });
 
+    test('a request without the headers a stub states absent matches it', async () => {
+        // Given - a stub forbidding a cookie the /submit request never carries
+        const result = await api
+            .intercept(
+                http.post(QUOTES_URL, { without: { headers: ['Cookie'] } }),
+                http.json({ quote: 'anonymous' }),
+            )
+            .get('/submit');
+
+        // Then - the absent header let the stub fire
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {
+                "quote": "anonymous"
+            }
+        `);
+    });
+
+    test('a request carrying a header the stub states absent is unmatched, and the refusal names it', async () => {
+        // Given - a stub forbidding the x-tenant header the /submit request carries
+        const chain = api
+            .intercept(
+                http.post(QUOTES_URL, { without: { headers: ['x-tenant'] } }),
+                http.json({ quote: 'never' }),
+            )
+            .get('/submit');
+
+        // Then - strict failure, the declared stub listed with the header it forbids
+        await expect(chain).rejects.toThrow(
+            `found: an unmatched outgoing request, POST ${QUOTES_URL}?lang=en`,
+        );
+        await expect(chain).rejects.toThrow(`- POST ${QUOTES_URL} (without header x-tenant)`);
+    });
+
     test('a stub computes its response body from the request body', async () => {
         // Given - a stub whose response derives from the observed request: the /submit route POSTs { action, user: { role: 'admin' } }
         const result = await api

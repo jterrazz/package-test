@@ -30,7 +30,7 @@ export default defineStub({
 
 ### Selection
 
-One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, and the `match` predicate — if any — passes on the body.
+One queue serves all three deliveries. An observed request matches a stub when the method matches (`'*'` accepted), the url matches, the declared query params and headers are a **subset** of the observed ones, none of the headers it states absent is present, and the `match` predicate — if any — passes on the body.
 
 **The first stub in list order that matches AND is not exhausted wins.** That single rule covers the two shapes you need:
 
@@ -280,6 +280,7 @@ http.post('https://api.shoply.dev/orders', {
     headers: { 'x-tenant': 'acme' },
     query: { lang: 'en' },
 });
+http.get('/me', { without: { headers: ['cookie'] } }); // fires only for an anonymous request
 ```
 
 `http.get | post | put | patch | delete | any(urlOrPath, filter?)`. A **path-form** url (`'/articles/{{uuid}}'`) matches that path on **any origin** — the app's real host does not matter — and `{{token}}` segments match structurally ([15 — Tokens](15-tokens.md)).
@@ -288,6 +289,7 @@ The optional `filter` narrows beyond method + URL, and these are **filters**, so
 
 - `body`: an object is a deep **subset** match whose leaves may be `match.*` matchers; a string is a containment test; a RegExp is a `test()` over the raw text body.
 - `headers` / `query`: subset match (header names case-insensitive); a string value is **exact**, a RegExp is `test()`.
+- `without.headers`: the headers the request must **not** carry — a name listed there, present with any value, keeps the stub from firing, and the strict refusal lists the stub with the headers it forbids (`GET /me (without header cookie)`). A subset proves presence only, so absence is stated here; a name both in `headers` and in `without.headers` is refused when the stub is declared.
 
 ### `openai.*` / `anthropic.*`
 

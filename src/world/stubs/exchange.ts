@@ -20,6 +20,7 @@ export type StubRequest = {
     url: RegExp | string;
     /** Optional request matcher — the stub only fires if this returns true. */
     match?: ((request: MatchableRequest) => boolean) | undefined;
+    absentHeaders?: readonly string[] | undefined;
     /** Transform raw data into a provider-specific response envelope. */
     wrap: (data: unknown) => StubResponse;
 };

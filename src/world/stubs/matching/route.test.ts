@@ -61,4 +61,16 @@ describe('route', () => {
             'ANY /events',
         ]);
     });
+
+    test('route — the name of a route — names the headers its request must not carry', () => {
+        // Given - routes forbidding one header, then two
+        const one = http.get('/events', { without: { headers: ['cookie'] } });
+        const two = http.get('/events', { without: { headers: ['cookie', 'authorization'] } });
+
+        // Then - the description carries them after the url
+        expect([describeRoute(one), describeRoute(two)]).toStrictEqual([
+            'GET /events (without header cookie)',
+            'GET /events (without headers cookie, authorization)',
+        ]);
+    });
 });

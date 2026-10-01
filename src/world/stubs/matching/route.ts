@@ -86,6 +86,13 @@ export function routeKeyOf({ method, url }: StubRequest): string {
     return url instanceof RegExp ? `${method} re:${url.source}` : `${method} str:${url}`;
 }
 
-export function describeRoute({ method, url }: StubRequest): string {
-    return `${method === '*' ? 'ANY' : method} ${url instanceof RegExp ? String(url) : url}`;
+function describeAbsent(absentHeaders: StubRequest['absentHeaders']): string {
+    if (absentHeaders === undefined || absentHeaders.length === 0) {
+        return '';
+    }
+    return ` (without header${absentHeaders.length > 1 ? 's' : ''} ${absentHeaders.join(', ')})`;
+}
+
+export function describeRoute({ absentHeaders, method, url }: StubRequest): string {
+    return `${method === '*' ? 'ANY' : method} ${url instanceof RegExp ? String(url) : url}${describeAbsent(absentHeaders)}`;
 }

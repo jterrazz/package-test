@@ -142,6 +142,33 @@ describe('http', () => {
         expect(declared.match!(request({ headers: { 'x-env': 'prod' } }))).toBe(false);
     });
 
+    test('http — absent-header filter — without.headers names what the request must not carry, case-insensitively', () => {
+        // Given - a filter forbidding a header, written in mixed case
+        const declared = http.get(URL, { without: { headers: ['Set-Cookie', 'x-debug'] } });
+
+        // Then - the names are kept lowercased, as observed headers are keyed
+        expect(declared.absentHeaders).toStrictEqual(['set-cookie', 'x-debug']);
+        expect(http.get(URL, { without: { headers: [] } }).absentHeaders).toBeUndefined();
+    });
+
+    test('http — absent-header filter — a header both required and forbidden is refused at declaration', () => {
+        // Given - a filter that requires a header and forbids it
+        const filter = { headers: { 'X-Tenant': 'acme' }, without: { headers: ['x-tenant'] } };
+        const declare = (): unknown => http.get(URL, filter);
+
+        // Then - the refusal names the header and routes to the filter's section
+        expect(declare).toThrow(
+            new Error(
+                [
+                    'found: an http stub filter that both requires and forbids the header(s) x-tenant',
+                    'why: A header both required and absent matches no request, so the stub could never fire.',
+                    'fix: state x-tenant in `headers` or in `without.headers`, never both',
+                    'read: docs/16-stubs.md#http--any-url',
+                ].join('\n'),
+            ),
+        );
+    });
+
     test('http — query filter — matches a subset of URL search params; string exact, RegExp tests', () => {
         // Given - a query subset filter
         const declared = http.get(URL, { query: { page: /^\d+$/u, tag: 'news' } });

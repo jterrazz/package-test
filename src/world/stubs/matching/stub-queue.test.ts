@@ -86,6 +86,30 @@ describe('StubQueue', () => {
         expect(serve(queue, { body: { user: 'carol' }, method: 'POST' })).toBeNull();
     });
 
+    test('stub queue — selection — a request carrying a header the stub states absent does not match', () => {
+        // Given - a stub that fires only on a request without a cookie
+        const queue = new StubQueue([
+            stub(http.get(URL_A, { without: { headers: ['Cookie'] } }), 'anonymous'),
+        ]);
+
+        // Then - the header present, with any value, keeps the stub from firing
+        expect(serve(queue, { headers: { cookie: '' } })).toBeNull();
+        expect(serve(queue, { headers: { 'x-other': '1' } })).toBe('anonymous');
+    });
+
+    test('stub queue — strict failure message (rule `network-strict-after-first-stub`) — names the header a declared stub states absent', () => {
+        // Given - a stub forbidding a header the request carries
+        const queue = new StubQueue([
+            stub(http.get(URL_A, { without: { headers: ['cookie'] } }), 'anonymous'),
+        ]);
+        queue.take(req({ headers: { cookie: 'session=1' } }));
+
+        // Then - the declared list says what the stub refused
+        expect(queue.unmatchedError('GET', URL_A).message).toContain(
+            `- GET ${URL_A} (without header cookie)`,
+        );
+    });
+
     test('stub queue — url forms — a RegExp url tests the full observed url', () => {
         // Given - a pattern stub
         const queue = new StubQueue([stub(http.get(/example\.com\/a/u), 're')]);
