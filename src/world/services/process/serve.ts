@@ -252,7 +252,7 @@ export class ServedProcess {
         }
         const group = -child.pid;
         this.kill(child, 'SIGTERM');
-        if (!(await groupEnded(group, Date.now() + KILL_GRACE_MS))) {
+        if (!(await groupEnded(group, KILL_GRACE_MS))) {
             this.kill(child, 'SIGKILL');
         }
     }

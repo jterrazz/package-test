@@ -26,7 +26,7 @@ function groupRunning(group: number): boolean {
     }
 }
 
-export async function groupEnded(group: number, deadline: number): Promise<boolean> {
+async function endedBy(group: number, deadline: number): Promise<boolean> {
     if (!groupRunning(group)) {
         return true;
     }
@@ -34,5 +34,9 @@ export async function groupEnded(group: number, deadline: number): Promise<boole
         return false;
     }
     await pause(GROUP_SETTLE_MS);
-    return await groupEnded(group, deadline);
+    return await endedBy(group, deadline);
+}
+
+export async function groupEnded(group: number, withinMs: number): Promise<boolean> {
+    return await endedBy(group, Date.now() + withinMs);
 }
