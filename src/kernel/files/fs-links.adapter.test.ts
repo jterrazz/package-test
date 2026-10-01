@@ -1,4 +1,11 @@
-import { mkdirSync, readFileSync, realpathSync, writeFileSync } from 'node:fs';
+import {
+    existsSync,
+    mkdirSync,
+    readFileSync,
+    realpathSync,
+    symlinkSync,
+    writeFileSync,
+} from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
@@ -47,6 +54,21 @@ describe('fsLinks', () => {
 
         // Then - the walk ends at the filesystem root empty-handed
         expect(installedPackage('@acme/absent', testDir)).toBeNull();
+    });
+
+    test('fsLinks — a symlinked node_modules — is refused, and the install it points to is kept', () => {
+        // Given - a working directory whose node_modules is a symlink to the project's own install
+        const { root, testDir } = project();
+        const workDir = workDirectory();
+        symlinkSync(resolve(root, 'node_modules'), resolve(workDir, 'node_modules'), 'dir');
+
+        // Then - the link is refused, naming the symlink, and the real package is untouched
+        expect(() => {
+            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
+        }).toThrow(
+            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules')} is a symlink`,
+        );
+        expect(existsSync(resolve(root, 'node_modules/@acme/greeter/package.json'))).toBe(true);
     });
 
     test('fsLinks — a bare name — links the package the spec’s project resolves', () => {

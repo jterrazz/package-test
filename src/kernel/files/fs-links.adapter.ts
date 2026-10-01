@@ -1,5 +1,5 @@
-import { existsSync, mkdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
+import { existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
+import { dirname, relative, resolve } from 'node:path';
 
 import { refusal } from '../../../lint/index.refusal.js';
 import type { LinkPort } from './link.port.js';
@@ -55,10 +55,28 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
     return src;
 }
 
+function refuseSymlinkedAncestor(name: string, workDir: string, dest: string): void {
+    let ancestor = workDir;
+    for (const segment of relative(workDir, dirname(dest)).split(/[\\/]/u)) {
+        ancestor = resolve(ancestor, segment);
+        if (existsSync(ancestor) && lstatSync(ancestor).isSymbolicLink()) {
+            throw new Error(
+                refusal({
+                    fix: `drop the symlink at ${ancestor} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
+                    found: `link('${name}'): ${ancestor} is a symlink, so the link would replace ${name} wherever it points`,
+                    read: 'docs/12-cli.md#link--a-package-the-working-directory-resolves',
+                    why: 'A link is laid inside the working directory only; through a symlinked folder it would delete a real install outside it.',
+                }),
+            );
+        }
+    }
+}
+
 export const fsLinks: LinkPort = {
     link: (name, path, testDir, workDir) => {
         const src = sourceOf(name, path, testDir);
         const dest = resolve(workDir, 'node_modules', name);
+        refuseSymlinkedAncestor(name, workDir, dest);
         mkdirSync(dirname(dest), { recursive: true });
         rmSync(dest, { force: true, recursive: true });
         symlinkSync(src, dest, 'dir');
