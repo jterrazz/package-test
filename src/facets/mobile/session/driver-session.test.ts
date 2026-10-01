@@ -119,6 +119,25 @@ describe('openSession', () => {
         expect(factories.calls).toMatchObject({ attached: ['s-2'], created: 2 });
     });
 
+    test("openSession — the run's one session — a runner probes every session recorded for its server and device before it creates one", async () => {
+        // Given - two sessions recorded for one device, the first expired, the second still held
+        const serverUrl = await appiumHolding(new Set(['s-9']));
+        const ledger = runLedger();
+        const factories = stubFactories();
+        await openSession(request(serverUrl, factories, ledger));
+        ledger.record(factories.calls.asked[0] ?? {}, {
+            capabilities: {},
+            serverUrl,
+            sessionId: 's-9',
+        });
+
+        // When - a later runner opens its session
+        await openSession(request(serverUrl, factories, ledger));
+
+        // Then - it drove the held one, and created nothing more
+        expect(factories.calls).toMatchObject({ attached: ['s-9'], created: 1 });
+    });
+
     test("openSession — the run's one session — a recorded session the probe cannot confirm is ended before it is replaced", async () => {
         // Given - a server that fails the probe of the recorded session
         const deleted: string[] = [];

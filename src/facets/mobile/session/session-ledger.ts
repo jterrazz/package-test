@@ -15,11 +15,10 @@ type RecordedSession = {
 /** A recorded session is the run's to end, not the runner's. */
 export type SessionLedger = {
     forget: (sessionId: string) => void;
-    lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession | undefined;
+    lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession[];
+    /** Keyed by the session's own id, never overwritten: a second session for one server and capabilities is a second record, and the run ends both. */
     record: (requested: Record<string, unknown>, session: RecordedSession) => void;
 };
-
-/** Recorded under each session's own id: two runners opening one each in parallel leave two records, both ended. */
 
 export const MOBILE_SESSIONS_DIR = `${VITEST_ARTIFACTS_DIR}/mobile-sessions`;
 
@@ -62,14 +61,13 @@ export function sessionLedger(directory: string): SessionLedger {
         },
         lookup: (serverUrl, requested) => {
             const key = keyOf(serverUrl, requested);
-            const found = entries(directory).find((entry) => entry.key === key);
-            return found === undefined
-                ? undefined
-                : {
-                      capabilities: found.capabilities,
-                      serverUrl: found.serverUrl,
-                      sessionId: found.sessionId,
-                  };
+            return entries(directory)
+                .filter((entry) => entry.key === key)
+                .map(({ capabilities, serverUrl: url, sessionId }) => ({
+                    capabilities,
+                    serverUrl: url,
+                    sessionId,
+                }));
         },
         record: (requested, session) => {
             const entry: LedgerEntry = { ...session, key: keyOf(session.serverUrl, requested) };

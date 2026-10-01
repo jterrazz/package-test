@@ -97,17 +97,18 @@ export async function openSession(
         request.remote === undefined
             ? await loadWebdriverio()
             : { attach: request.attach, remote: request.remote };
-    const recorded = ledger?.lookup(serverUrl, capabilities);
-    if (recorded !== undefined && !(await stillHeld(serverUrl, recorded.sessionId))) {
-        await endUnconfirmed(serverUrl, recorded.sessionId);
-        ledger?.forget(recorded.sessionId);
-    } else if (recorded !== undefined && webdriverio.attach !== undefined) {
-        const driver = await webdriverio.attach({
-            ...server,
-            capabilities: recorded.capabilities,
-            sessionId: recorded.sessionId,
-        });
-        return { driver, shared: true };
+    for (const recorded of ledger?.lookup(serverUrl, capabilities) ?? []) {
+        if (!(await stillHeld(serverUrl, recorded.sessionId))) {
+            await endUnconfirmed(serverUrl, recorded.sessionId);
+            ledger?.forget(recorded.sessionId);
+        } else if (webdriverio.attach !== undefined) {
+            const driver = await webdriverio.attach({
+                ...server,
+                capabilities: recorded.capabilities,
+                sessionId: recorded.sessionId,
+            });
+            return { driver, shared: true };
+        }
     }
     const driver = await webdriverio.remote({ ...server, capabilities });
     ledger?.record(capabilities, {

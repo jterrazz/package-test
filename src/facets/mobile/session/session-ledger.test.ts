@@ -44,7 +44,7 @@ describe('sessionLedger', () => {
         // Then - the same server and capabilities find it, in any order
         expect(
             ledger.lookup('http://a', { platformName: 'iOS', 'appium:deviceName': 'iPhone 17' }),
-        ).toStrictEqual(session);
+        ).toStrictEqual([session]);
     });
 
     test('the session ledger — one driver session per run — another server, or another device, finds nothing', () => {
@@ -53,16 +53,16 @@ describe('sessionLedger', () => {
         ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' });
 
         // Then - a session is the server's and the capabilities', never another's
-        expect(ledger.lookup('http://b', IPHONE)).toBeUndefined();
-        expect(
-            ledger.lookup('http://a', { ...IPHONE, 'appium:deviceName': 'iPad' }),
-        ).toBeUndefined();
+        expect(ledger.lookup('http://b', IPHONE)).toStrictEqual([]);
+        expect(ledger.lookup('http://a', { ...IPHONE, 'appium:deviceName': 'iPad' })).toStrictEqual(
+            [],
+        );
     });
 
     test('the session ledger — one driver session per run — a run that opened nothing has nothing to find', () => {
         // Given - the folder the setup handed out, never written to
         // Then - no session
-        expect(sessionLedger(ledgerFolder()).lookup('http://a', IPHONE)).toBeUndefined();
+        expect(sessionLedger(ledgerFolder()).lookup('http://a', IPHONE)).toStrictEqual([]);
     });
 
     test('the session ledger — one driver session per run — a forgotten session is found no more, and its replacement is', () => {
@@ -75,7 +75,9 @@ describe('sessionLedger', () => {
         ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-2' });
 
         // Then - the replacement is the one found
-        expect(ledger.lookup('http://a', IPHONE)?.sessionId).toBe('s-2');
+        expect(ledger.lookup('http://a', IPHONE).map(({ sessionId }) => sessionId)).toStrictEqual([
+            's-2',
+        ]);
     });
 
     test('the session ledger — one driver session per run — the run ends every session it recorded, then clears the ledger', async () => {
