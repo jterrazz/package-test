@@ -87,4 +87,34 @@ describe('setup', () => {
         expect(afterFirst).toContain(DOCKER_ABSENT);
         await expect(connection(String(url))).resolves.toBe('ECONNREFUSED');
     });
+
+    test('the services setup — the run containers, served — never joins the registry another version of the package opened', async () => {
+        // Given - a run whose registry was opened by another version of the package
+        const foreign = Symbol.for('@jterrazz/test.run-services@0.0.0-foreign');
+        const joined: string[] = [];
+        Reflect.set(globalThis, foreign, {
+            enter: async () => {
+                joined.push('foreign');
+                return await Promise.resolve({ leave: async () => {}, url: 'http://foreign' });
+            },
+        });
+        const provided: string[] = [];
+        const teardown = await setup(
+            {
+                provide: (_key: string, value: string) => {
+                    provided.push(value);
+                },
+            },
+            absent,
+        );
+
+        // Then - this copy served its own, and the foreign registry was never entered
+        try {
+            expect(joined).toStrictEqual([]);
+            expect(provided[0]).toMatch(/^http:\/\/127\.0\.0\.1:\d+$/u);
+        } finally {
+            await teardown();
+            Reflect.deleteProperty(globalThis, foreign);
+        }
+    });
 });

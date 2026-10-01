@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from 'node:fs';
+import { dirname, join } from 'node:path';
+
 import { refusal } from '../../../../lint/index.refusal.js';
 import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { loadPeer } from '../peer.js';
@@ -58,7 +61,21 @@ type Joined = { leave: () => Promise<void>; url: string };
 /** Vitest evaluates each project's setup in a module runner of its own, so the run is found on the one realm every runner shares. */
 type RunServices = { enter: () => Promise<Joined> };
 
-const RUN_SERVICES = Symbol.for('@jterrazz/test.run-services');
+function packageVersion(): string {
+    let dir = import.meta.dirname;
+    while (!existsSync(join(dir, 'package.json'))) {
+        const parent = dirname(dir);
+        if (parent === dir) {
+            return 'unversioned';
+        }
+        dir = parent;
+    }
+    const manifest: unknown = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+    return String(field(manifest, 'version'));
+}
+
+/** Versioned: two copies of the package in one run each open their own, never a registry whose protocol may differ. */
+const RUN_SERVICES = Symbol.for(`@jterrazz/test.run-services@${packageVersion()}`);
 
 function settled(prepare: () => Promise<void>): () => Promise<void> {
     // Settled here and rethrown on request: unasked, a refusal is nobody's.
