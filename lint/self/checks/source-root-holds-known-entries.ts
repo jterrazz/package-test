@@ -28,7 +28,7 @@ const ENTRIES: Readonly<Record<string, string>> = {
 const row = rowNamed(selfRows, 'source-root-holds-known-entries');
 
 export const sourceRootHoldsKnownEntries: NamesRule = {
-    fix: 'move it into the tree whose concept it is — what is tested (`facets/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), what surrounds the subject (`stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), the machinery (`chain/`) or the runner config (`vitest/`)',
+    fix: row.fix,
     ls: {
         src: {
             ...Object.fromEntries(['.*', '.*.*', '.*.*.*'].map((key) => [key, 'exists:0'])),
