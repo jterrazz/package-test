@@ -58,7 +58,6 @@ type RunProject = { provide: (key: 'serviceContainers', value: string) => void }
 
 type Joined = { leave: () => Promise<void>; url: string };
 
-/** Vitest evaluates each project's setup in a module runner of its own, so the run is found on the one realm every runner shares. */
 type RunServices = { enter: () => Promise<Joined> };
 
 function packageVersion(): string {
@@ -74,7 +73,7 @@ function packageVersion(): string {
     return String(field(manifest, 'version'));
 }
 
-/** Versioned: two copies of the package in one run each open their own, never a registry whose protocol may differ. */
+/** On globalThis: vitest evaluates each project's setup in a module runner of its own, and the realm is what every runner shares. Versioned: two copies of the package in one run each open their own, never a registry whose protocol may differ. */
 const RUN_SERVICES = Symbol.for(`@jterrazz/test.run-services@${packageVersion()}`);
 
 function settled(prepare: () => Promise<void>): () => Promise<void> {
