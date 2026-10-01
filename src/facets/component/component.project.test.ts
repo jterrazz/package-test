@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { ConfigEnv } from 'vite';
+import type { ConfigEnv, UserConfigFn } from 'vite';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
@@ -20,6 +20,10 @@ function pluginNames(project: TestProjectInlineConfiguration): string[] {
             ? [String(plugin.name)]
             : [],
     );
+}
+
+async function returnsNothing(): Promise<void> {
+    await Promise.resolve();
 }
 
 describe('component', () => {
@@ -177,6 +181,22 @@ describe('component', () => {
         ]);
         expect(project).not.toHaveProperty('root');
         expect(project).not.toHaveProperty('server');
+    });
+
+    test('component() — the browser project — refuses a config function that returns no config, naming the function form', async () => {
+        // Given - a config function that returns nothing, as an untyped caller's can
+        const loading = component({
+            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's function returns what the type forbids
+            vite: returnsNothing as unknown as UserConfigFn,
+        });
+
+        // Then - the refusal names the function, and how to return the framework's config
+        await expect(loading).rejects.toThrow(
+            'found: component({ vite }): the config function returned no config',
+        );
+        await expect(loading).rejects.toThrow(
+            "fix: return the framework's config from the function",
+        );
     });
 
     test('component() — the browser project — keeps a consumer JSX transform rather than stating its own over it', async () => {

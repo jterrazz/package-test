@@ -127,23 +127,28 @@ async function reroot(
 ): Promise<Record<string, unknown>> {
     const environment = { command: 'serve', isSsrBuild: false, mode: 'test' } as const;
     let loaded: undefined | UserConfig;
-    let from = 'the value it was given';
+    let found = 'the config promise resolved to no config';
+    let fix =
+        "return the framework's config from the function (for Astro, `getViteConfig({}, { root: import.meta.dirname })`)";
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
         // `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
-        from = isAbsolute(source) ? source : resolve(root, source);
+        const from = isAbsolute(source) ? source : resolve(root, source);
         const file = await loadConfigFromFile(environment, from);
         loaded = file?.config;
+        found = `${from} exports no config`;
+        fix = "point `vite` at the app's own vite.config.ts";
     } else if (typeof source === 'function') {
         loaded = await source(environment);
+        found = 'the config function returned no config';
     } else {
         loaded = await source;
     }
     if (loaded === undefined) {
         throw new Error(
             refusal({
-                fix: "point `vite` at the app's own vite.config.ts",
-                found: `component({ vite }): ${from} exports no config`,
+                fix,
+                found: `component({ vite }): ${found}`,
                 read: 'docs/07-component.md#the-constructor-there-is-none',
                 why: 'A component renders through the Vite pipeline the app builds with, read from its config.',
             }),
