@@ -2,11 +2,11 @@ import { refusal } from '../../../../lint/index.refusal.js';
 import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { loadPeer } from '../peer.js';
 import { sweepOrphans } from './orphans.js';
-import { RunContainers, serveContainers } from './run-containers.js';
+import { field, RunContainers, serveContainers } from './run-containers.js';
 import { SERVICE_IMAGES } from './service-images.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
-/** One per vitest project. Default images are pulled in the background, so the first file waits on a pull at most once; a project declaring no service needs no Docker. */
+/** Every project's setup joins the one run's containers. Default images are pulled in the background, so the first file waits on a pull at most once; a project declaring no service needs no Docker. */
 
 export const DOCKER_ABSENT = 'no Docker daemon answered';
 
@@ -25,7 +25,7 @@ export async function prepareDocker(): Promise<void> {
             refusal({
                 fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
                 found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (${reason})`,
-                read: 'docs/17-services.md#one-container-per-project',
+                read: 'docs/17-services.md#one-container-per-run',
                 why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',
             }),
             { cause: error },
@@ -53,10 +53,14 @@ export function servicesSetup(): string {
 
 type RunProject = { provide: (key: 'serviceContainers', value: string) => void };
 
-export default async function setup(
-    project: RunProject,
-    prepare: () => Promise<void> = prepareDocker,
-): Promise<() => Promise<void>> {
+type Joined = { leave: () => Promise<void>; url: string };
+
+/** Vitest evaluates each project's setup in a module runner of its own, so the run is found on the one realm every runner shares. */
+type RunServices = { enter: () => Promise<Joined> };
+
+const RUN_SERVICES = Symbol.for('@jterrazz/test.run-services');
+
+function settled(prepare: () => Promise<void>): () => Promise<void> {
     // Settled here and rethrown on request: unasked, a refusal is nobody's.
     const prepared = (async (): Promise<Error | null> => {
         try {
@@ -75,17 +79,90 @@ export default async function setup(
                   );
         }
     })();
-    const ready = async (): Promise<void> => {
+    return async () => {
         const refused = await prepared;
         if (refused !== null) {
             throw refused;
         }
     };
-    const containers = new RunContainers((request) => new TestcontainersAdapter(request), ready);
+}
+
+async function open(
+    prepare: () => Promise<void>,
+): Promise<{ close: () => Promise<void>; url: string }> {
+    const containers = new RunContainers(
+        (request) => new TestcontainersAdapter(request),
+        settled(prepare),
+    );
     const served = await serveContainers(containers);
-    project.provide('serviceContainers', served.url);
-    return async () => {
-        await served.close();
-        await containers.stop();
+    return {
+        close: async () => {
+            await served.close();
+            await containers.stop();
+        },
+        url: served.url,
     };
+}
+
+function runServices(prepare: () => Promise<void>): RunServices {
+    let holders = 0;
+    let opened: null | ReturnType<typeof open> = null;
+    const forget = (): void => {
+        opened = null;
+        Reflect.deleteProperty(globalThis, RUN_SERVICES);
+    };
+    return {
+        enter: async () => {
+            holders += 1;
+            opened ??= open(prepare);
+            const current = opened;
+            let served: Awaited<typeof current>;
+            try {
+                served = await current;
+            } catch (error) {
+                holders -= 1;
+                forget();
+                throw error;
+            }
+            let left = false;
+            return {
+                leave: async () => {
+                    if (left) {
+                        return;
+                    }
+                    left = true;
+                    holders -= 1;
+                    if (holders > 0) {
+                        return;
+                    }
+                    forget();
+                    await served.close();
+                },
+                url: served.url,
+            };
+        },
+    };
+}
+
+function isRunServices(value: unknown): value is RunServices {
+    return typeof field(value, 'enter') === 'function';
+}
+
+function theRun(prepare: () => Promise<void>): RunServices {
+    const found: unknown = Reflect.get(globalThis, RUN_SERVICES);
+    if (isRunServices(found)) {
+        return found;
+    }
+    const created = runServices(prepare);
+    Reflect.set(globalThis, RUN_SERVICES, created);
+    return created;
+}
+
+export default async function setup(
+    project: RunProject,
+    prepare: () => Promise<void> = prepareDocker,
+): Promise<() => Promise<void>> {
+    const joined = await theRun(prepare).enter();
+    project.provide('serviceContainers', joined.url);
+    return joined.leave;
 }

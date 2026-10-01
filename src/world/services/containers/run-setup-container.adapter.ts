@@ -22,13 +22,13 @@ function relayed(message: string, image: string): Error {
         refusal({
             fix: 'fix what the reason names, and run again',
             found: `the run's setup could not start ${image}:\n  ${message.replaceAll('\n', '\n  ')}`,
-            read: 'docs/17-services.md#one-container-per-project',
-            why: 'A container is started once per run, by the project’s setup, and a worker asks it for the address.',
+            read: 'docs/17-services.md#one-container-per-run',
+            why: 'A container is started once per run, by the run’s setup, and a worker asks it for the address.',
         }),
     );
 }
 
-/** Started by asking the project's setup, never stopped by the worker. */
+/** Started by asking the run's setup, never stopped by the worker. */
 export class RunSetupContainer implements ContainerPort {
     private address: null | RunAddress = null;
     private readonly url: string;

@@ -79,7 +79,7 @@ export class RunContainers {
             await container.start();
             return container;
         } catch (error) {
-            // A start that failed is not the project's container: the next request tries again.
+            // A start that failed is not the run's container: the next request tries again.
             this.started.delete(key);
             throw error;
         }

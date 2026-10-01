@@ -3,7 +3,7 @@ import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { RunSetupContainer } from './run-setup-container.adapter.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';
 
-/** The project's container when its setup serves one, asked for at start; its own otherwise. */
+/** The run's container when a setup serves one, asked for at start; its own otherwise. */
 export class ServiceContainer implements ContainerPort {
     private delegate: ContainerPort | null = null;
     private readonly request: ContainerRequest;
@@ -63,7 +63,7 @@ export async function serviceContainers(): Promise<string | undefined> {
 declare module 'vitest' {
     // oxlint-disable-next-line typescript/consistent-type-definitions -- a module augmentation MERGES only as an interface; a type alias redeclares the name and every member is lost
     interface ProvidedContext {
-        /** The loopback address the project's containers are asked for at. */
+        /** The loopback address the run's containers are asked for at. */
         serviceContainers?: string;
     }
 }

@@ -88,7 +88,7 @@ describe('postgres', () => {
     });
 
     test('reaches the container the run started, not one of its own', async () => {
-        // Given - the project's containers asked for the one this handle's request names
+        // Given - the run's containers asked for the one this handle's request names
         const result = await integration.call(async ({ db }) => {
             const run = inject('serviceContainers');
             const asked = await fetch(`${run}/containers`, {
@@ -110,7 +110,7 @@ describe('postgres', () => {
             return { sameServer };
         });
 
-        // Then - the handle's server is the project's: one container for every file
+        // Then - the handle's server is the run's: one container for every file
         expect(result.value).toMatch({
             sameServer: true,
         });
