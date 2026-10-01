@@ -29,8 +29,10 @@ setInterval(() => { if (gone()) process.exit(0); }, ${GROUP_POLL_MS});
 function watchGroup(groupId: number): ChildProcess {
     const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
         detached: true,
+        env: { ...process.env, NODE_OPTIONS: undefined },
         stdio: ['pipe', 'ignore', 'ignore'],
     });
+    watchdog.on('error', () => {});
     watchdog.unref();
     if (watchdog.stdin instanceof Socket) {
         watchdog.stdin.unref();
