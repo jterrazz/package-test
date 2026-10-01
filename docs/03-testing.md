@@ -171,7 +171,7 @@ behaviour, no sibling test and nobody able to say what covers it is the silence
 this section closes.
 
 `lint/self/corpus/siblingless-kinds.ts` declares the kinds, each naming the PATHS it claims —
-never a prefix, because a kind claiming `src/world/` would claim every module
+never a prefix, because a kind claiming `src/stubs/` would claim every module
 written there next year and `siblingless-module-declared` would be a poster. **`siblingless-module-declared`** fails on a module that
 matches none of them, which is what makes a new, unclaimed module fail the
 suite on the day it lands.

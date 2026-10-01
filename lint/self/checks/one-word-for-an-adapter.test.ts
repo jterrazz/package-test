@@ -13,7 +13,7 @@ describe('checkOneWordForAnAdapter', () => {
             'src/clock/clock.driver.test.ts': '',
             'src/clock/clock.driver.ts': '',
             'src/clock/process-clock.adapter.ts': '',
-            'src/world/page/page.driver.tsx': '',
+            'src/stubs/page/page.driver.tsx': '',
         });
 
         // Then - the package holds none; each driver is named at itself with its own sibling kind and extension, the adapter left alone
@@ -28,7 +28,7 @@ describe('checkOneWordForAnAdapter', () => {
             "src/clock/clock.driver.test-d.ts:1 `clock.driver.test-d.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test-d.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
             "src/clock/clock.driver.test.ts:1 `clock.driver.test.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.test.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
             "src/clock/clock.driver.ts:1 `clock.driver.ts` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.ts` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
-            "src/world/page/page.driver.tsx:1 `page.driver.tsx` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.tsx` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
+            "src/stubs/page/page.driver.tsx:1 `page.driver.tsx` carries the suffix `.driver`, a second word for an adapter | rename it `<what it adapts>.adapter.tsx` — the process clock's is `process-clock.adapter.ts` — and the paths that import it",
         ]);
     });
 
