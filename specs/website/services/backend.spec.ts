@@ -15,4 +15,19 @@ describe('backend', () => {
         // Then - the page the server rendered carries the stub's answer
         expect(result.content.text).toContain('Hello from the stub');
     });
+
+    test('a never stub the server reaches rejects the visit, naming the route and the call', async () => {
+        // Given - the backend's greeting declared never requested
+        const chain = website
+            .intercept(http.never(http.get('/greeting')))
+            .visit('/greeting', async (visitor) => {
+                await visitor.see(content('Greeting'));
+            });
+
+        // Then - the stub backend refuses the call at the end of the visit
+        await expect(chain).rejects.toThrow(
+            'found: a route the chain declared never requested was reached:',
+        );
+        await expect(chain).rejects.toThrow('- GET /greeting — reached by GET');
+    });
 });
