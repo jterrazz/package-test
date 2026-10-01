@@ -126,10 +126,9 @@ async function reroot(
     root: string,
 ): Promise<Record<string, unknown>> {
     const environment = { command: 'serve', isSsrBuild: false, mode: 'test' } as const;
-    let loaded: undefined | UserConfig;
-    let found = 'the config promise resolved to no config';
-    let fix =
-        "return the framework's config from the function (for Astro, `getViteConfig({}, { root: import.meta.dirname })`)";
+    let loaded: unknown;
+    let found: string;
+    let fix: string;
     if (typeof source === 'string') {
         const { loadConfigFromFile } = await import('vite');
         // `loadConfigFromFile` resolves a relative path against the tool's cwd, not the config's.
@@ -140,11 +139,19 @@ async function reroot(
         fix = "point `vite` at the app's own vite.config.ts";
     } else if (typeof source === 'function') {
         loaded = await source(environment);
-        found = 'the config function returned no config';
+        if (typeof loaded === 'function') {
+            found = 'the config function returned a function, not a config';
+            fix = "call the framework's factory and pass what it returns (for Astro, `getViteConfig({}, { root: import.meta.dirname })`, never `getViteConfig`)";
+        } else {
+            found = 'the config function returned no config';
+            fix = "return the framework's config from the function (for Astro, `getViteConfig({}, { root: import.meta.dirname })`)";
+        }
     } else {
         loaded = await source;
+        found = 'the config promise resolved to no config';
+        fix = "resolve the promise to the framework's config object";
     }
-    if (loaded === undefined) {
+    if (typeof loaded !== 'object' || loaded === null) {
         throw new Error(
             refusal({
                 fix,
