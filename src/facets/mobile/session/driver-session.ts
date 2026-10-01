@@ -76,6 +76,15 @@ async function stillHeld(serverUrl: string, sessionId: string): Promise<boolean>
     }
 }
 
+async function endUnconfirmed(serverUrl: string, sessionId: string): Promise<void> {
+    await fetch(`${serverUrl}/session/${sessionId}`, {
+        method: 'DELETE',
+        signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+    })
+        .then(async (response) => await response.body?.cancel())
+        .catch(() => null);
+}
+
 /** Attached to the session the run recorded for this server and capabilities, or created and recorded; `shared` sessions are the run's to end. */
 export async function openSession(
     request: SessionRequest,
@@ -90,6 +99,7 @@ export async function openSession(
             : { attach: request.attach, remote: request.remote };
     const recorded = ledger?.lookup(serverUrl, capabilities);
     if (recorded !== undefined && !(await stillHeld(serverUrl, recorded.sessionId))) {
+        await endUnconfirmed(serverUrl, recorded.sessionId);
         ledger?.forget(recorded.sessionId);
     } else if (recorded !== undefined && webdriverio.attach !== undefined) {
         const driver = await webdriverio.attach({

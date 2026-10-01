@@ -119,6 +119,36 @@ describe('openSession', () => {
         expect(factories.calls).toMatchObject({ attached: ['s-2'], created: 2 });
     });
 
+    test("openSession — the run's one session — a recorded session the probe cannot confirm is ended before it is replaced", async () => {
+        // Given - a server that fails the probe of the recorded session
+        const deleted: string[] = [];
+        const server = createServer((incoming, response) => {
+            if (incoming.method === 'DELETE') {
+                deleted.push(incoming.url ?? '');
+            }
+            response.writeHead(incoming.method === 'DELETE' ? 200 : 500);
+            response.end('{"value":null}');
+        });
+        server.listen(0, '127.0.0.1');
+        await once(server, 'listening');
+        onTestFinished(() => {
+            server.close();
+        });
+        const address = server.address();
+        const port = typeof address === 'object' && address !== null ? address.port : 0;
+        const serverUrl = `http://127.0.0.1:${port}`;
+        const ledger = runLedger();
+        const factories = stubFactories();
+        await openSession(request(serverUrl, factories, ledger));
+
+        // When - a later runner opens its session
+        await openSession(request(serverUrl, factories, ledger));
+
+        // Then - the unconfirmed session was ended, and a new one created in its place
+        expect(deleted).toStrictEqual(['/session/s-1']);
+        expect(factories.calls).toMatchObject({ attached: [], created: 2 });
+    });
+
     test('openSession — the session it asks for — states an idle budget that outlives the gap between two files', async () => {
         // Given - a runner on a server
         const serverUrl = await appiumHolding(new Set());
