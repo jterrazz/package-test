@@ -33,15 +33,7 @@ then implement against numbers. By expected return, descending.
 - **The next large consumer.** A repository on another stack, to test how general the
   conventions are outside this ecosystem.
 
-## 3. A framework's Vite config function under `component()`
-
-`component({ vite })` accepts the function a framework exports — Astro's `getViteConfig()`
-is one — but no spike has proven that pipeline under the component facet: the cross-repo
-probe that suggested it was confounded by two Vite versions. The proof owed is an in-repo
-spike inside a `jterrazz-web` worktree; until it lands, chapter 07 sends a consumer to the
-app's own `vite.config.ts`.
-
-## 4. Known defects and debt
+## 3. Known defects and debt
 
 - **`typescript/no-unsafe-type-assertion` held by the ratchet** (`oxlint-suppressions.json`
   counts them). The largest group is `as AstNode` or `as AstNode[]` in the consumer rules,
