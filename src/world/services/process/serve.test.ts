@@ -103,9 +103,13 @@ describe('serve', () => {
 
     test('a served process — a server its shell left running is served, and stopped with SIGTERM before any SIGKILL', async () => {
         // Given - a shell that backgrounds a server recording the SIGTERM it receives, then exits
-        const marker = join(mkdtempSync(join(tmpdir(), 'serve-')), 'terminated');
+        const scratch = mkdtempSync(join(tmpdir(), 'serve-'));
+        const marker = join(scratch, 'terminated');
         const server = `node -e "process.on('SIGTERM',()=>{require('node:fs').writeFileSync(process.argv[1],'');process.exit(0)});const s=require('node:http').createServer((q,r)=>r.end());s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))" ${marker} &`;
-        adapter = new ServedProcess({ command: server, ready: READY, timeout: 5000 }, process.cwd());
+        adapter = new ServedProcess(
+            { command: server, ready: READY, timeout: 5000 },
+            process.cwd(),
+        );
 
         // When - it is served, then stopped
         await adapter.start();

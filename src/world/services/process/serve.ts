@@ -5,34 +5,20 @@ import { resolve as resolvePath } from 'node:path';
 
 import { invariant, refusal } from '../../../../lint/index.refusal.js';
 import { pause } from '../../../kernel/pause.js';
+import { groupEnded, KILL_GRACE_MS, WATCHDOG } from './process-group.js';
 import type { ProcessOptions } from './process.adapter.js';
 
-const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
-const GROUP_POLL_MS = 1000;
-const GROUP_SETTLE_MS = 50;
-
-const WATCHDOG = `
-const group = -Number(process.argv[1]);
-const gone = () => { try { process.kill(group, 0); return false; } catch { return true; } };
-const end = () => {
-    try { process.kill(group, 'SIGTERM'); } catch { process.exit(0); }
-    setTimeout(() => { try { process.kill(group, 'SIGKILL'); } catch {} process.exit(0); }, ${KILL_GRACE_MS});
-};
-process.stdin.on('end', end);
-process.stdin.on('error', end);
-process.stdin.resume();
-setInterval(() => { if (gone()) process.exit(0); }, ${GROUP_POLL_MS});
-`;
-
 function watchGroup(groupId: number): ChildProcess {
     const watchdog = spawn(process.execPath, ['-e', WATCHDOG, String(groupId)], {
         detached: true,
         env: { ...process.env, NODE_OPTIONS: undefined },
         stdio: ['pipe', 'ignore', 'ignore'],
     });
-    watchdog.on('error', () => {});
+    watchdog.on('error', () => {
+        watchdog.stdin?.destroy();
+    });
     watchdog.unref();
     if (watchdog.stdin instanceof Socket) {
         watchdog.stdin.unref();
@@ -265,20 +251,8 @@ export class ServedProcess {
             return;
         }
         const group = -child.pid;
-        const running = (): boolean => {
-            try {
-                process.kill(group, 0);
-                return true;
-            } catch {
-                return false;
-            }
-        };
         this.kill(child, 'SIGTERM');
-        const deadline = Date.now() + KILL_GRACE_MS;
-        while (running() && Date.now() < deadline) {
-            await pause(GROUP_SETTLE_MS);
-        }
-        if (running()) {
+        if (!(await groupEnded(group, Date.now() + KILL_GRACE_MS))) {
             this.kill(child, 'SIGKILL');
         }
     }
