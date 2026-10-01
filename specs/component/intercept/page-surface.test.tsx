@@ -16,6 +16,21 @@ describe('SurfacePanel', () => {
         await expect(response.text()).resolves.toBe('from the worker');
     });
 
+    test('a stub forbidding the cookie answers a page request, the browser adding the cookie after the worker', async () => {
+        // Given - a session cookie on the page, and a stub declared only for a request without a cookie
+        document.cookie = 'session=1; path=/';
+        await using _ = await intercept(
+            http.get('/api/surface', { without: { headers: ['cookie'] } }),
+            http.text('anonymous'),
+        );
+
+        // Then - the cookie is the page's, yet the worker sees the request before it is added, so the stub fires
+        expect(document.cookie).toContain('session=1');
+        const response = await fetch('/api/surface');
+        document.cookie = 'session=; max-age=0; path=/';
+        await expect(response.text()).resolves.toBe('anonymous');
+    });
+
     test('a port double is a render prop, and records what the unit told it', async () => {
         // Given - the unit's collaborator as a double, and its network on the chain
         const port = mockOf<SurfacePort>();

@@ -30,4 +30,19 @@ describe('backend', () => {
         );
         await expect(chain).rejects.toThrow('- GET /greeting — reached by GET');
     });
+
+    test('a stub forbidding a header the server sends does not answer it, and the visit is refused naming the forbidden header', async () => {
+        // Given - the greeting declared only for a request without a user agent, which node's fetch always sends
+        const chain = website
+            .intercept(
+                http.get('/greeting', { without: { headers: ['User-Agent'] } }),
+                http.json({ message: 'Hello from the stub' }),
+            )
+            .visit('/greeting', async (visitor) => {
+                await visitor.see(content('Greeting'));
+            });
+
+        // Then - the stub backend matched nothing, and lists the stub with the header it forbids
+        await expect(chain).rejects.toThrow('- GET /greeting (without header user-agent)');
+    });
 });
