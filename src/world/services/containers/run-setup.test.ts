@@ -1,7 +1,21 @@
+import { connect } from 'node:net';
 import { describe, expect, test } from 'vitest';
 
 import { RunSetupContainer } from './run-setup-container.adapter.js';
 import setup, { DOCKER_ABSENT } from './run-setup.js';
+
+async function connection(url: string): Promise<string> {
+    return await new Promise((resolve) => {
+        const socket = connect(Number(new URL(url).port), '127.0.0.1');
+        socket.on('connect', () => {
+            socket.destroy();
+            resolve('open');
+        });
+        socket.on('error', (error: NodeJS.ErrnoException) => {
+            resolve(error.code ?? error.message);
+        });
+    });
+}
 
 async function absent(): Promise<void> {
     await Promise.resolve();
@@ -67,11 +81,10 @@ describe('setup', () => {
         await first();
         const afterFirst = await asked();
         await second();
-        const afterLast = await asked();
 
         // Then - one address for both, still answering after the first, gone after the last
         expect(provided).toStrictEqual([url, url]);
         expect(afterFirst).toContain(DOCKER_ABSENT);
-        expect(afterLast).toBe('fetch failed');
+        await expect(connection(String(url))).resolves.toBe('ECONNREFUSED');
     });
 });
