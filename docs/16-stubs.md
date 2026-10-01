@@ -81,7 +81,15 @@ test('a preview never places the order', async () => {
         .post('/orders/preview', { items: ['book'] });
 
     // Then - the preview answered without reaching the shop
-    expect(result.status).toBe(200);
+    expect(result.response).toMatch(`
+        HTTP/1.1 200 OK
+        content-type: application/json
+
+        {
+            "items": ["book"],
+            "placed": false
+        }
+    `);
 });
 ```
 
@@ -110,7 +118,7 @@ export default defineStubs(events, {
 
 `.with(...)` derives a **variant** without mutating the base. Two steps, in this order:
 
-1. Every base stub whose **route** an override claims is removed. Same route = same `method` + the same declared url pattern (string equality of the declared path, `.source` equality for a RegExp).
+1. Every base stub whose **route** an override claims is removed. Same route = same `method` + the same declared url pattern (string equality of the declared path, `.source` equality for a RegExp) — filters do not enter it, `without.headers` included: an override `http.get('/me', { without: { headers: ['authorization'] } })` removes every base `GET /me` stub, the authenticated one too, so an override that must keep both states both.
 2. The overrides are **prepended**, keeping their own order.
 
 The prepend is what makes a _more specific_ override work without deleting the generic route it lives beside: `/articles/gone-1` does not claim the route `/articles/{{uuid}}`, so the generic stub survives — but the override is checked first, so the one article that is gone answers 410 while every other article still answers 200.
