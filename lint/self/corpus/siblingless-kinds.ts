@@ -92,9 +92,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         why: 'it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `index.refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners)',
     },
     {
-        claims: (path) => /^src\/facets\/[a-z]+\/[a-z]+\.project\.ts$/u.test(path),
+        claims: oneOf('src/facets/lint/lint.project.ts'),
         name: "a facet's vitest project",
-        why: '`index.vitest.test.ts` builds them through the entry, or `<facet>.project.test.ts` beside it, and asserts the project it produces',
+        why: 'it only names its facet to `facetProject`, whose defaults `vitest/project.test.ts` holds; a project that adds an option of its own carries `<facet>.project.test.ts` beside it',
     },
     {
         claims: oneOf(

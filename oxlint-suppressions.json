@@ -972,11 +972,6 @@
             "count": 2
         }
     },
-    "src/index.vitest.test.ts": {
-        "jterrazz/no-expect-in-a-loop": {
-            "count": 1
-        }
-    },
     "src/services/containers/testcontainers.adapter.ts": {
         "typescript/no-explicit-any": {
             "count": 1

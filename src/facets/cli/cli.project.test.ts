@@ -25,4 +25,11 @@ describe('cli', () => {
         expect(pluginNames(cli({ literate: false }))).toStrictEqual([]);
         expect(cli({ literate: false }).test?.name).toBe('cli');
     });
+
+    test('cli.project — cli() — the binary, and the documents that specify it — runs in the node group, serially when asked to', () => {
+        // Given - the canonical cli project, and one asked to run its files one at a time
+        // Then - the node group, and the serial run stated
+        expect(cli().test?.sequence?.groupOrder).toBe(0);
+        expect(cli({ literate: false, serial: true }).test?.fileParallelism).toBe(false);
+    });
 });

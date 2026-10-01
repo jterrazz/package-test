@@ -2,19 +2,11 @@ import { GROUND_GLOB } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
-import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { VITEST_ARTIFACTS_DIR } from '../lint/engine/project/artifacts.js';
-import { api, cli, defineSpecConfig, integration, job, mobile } from './index.vitest.js';
-import { servicesSetup } from './services/containers/run-setup.js';
+import { defineSpecConfig } from './index.vitest.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
-
-function testOf(
-    project: TestProjectInlineConfiguration,
-): NonNullable<TestProjectInlineConfiguration['test']> {
-    return project.test ?? {};
-}
 
 type ProjectHelper = () => { test?: { globalSetup?: string | string[] } };
 
@@ -42,77 +34,6 @@ describe('index.vitest', () => {
             'dist/temp-root.js',
         ]);
         expect(named.filter((setup) => !existsSync(resolve(ROOT, setup)))).toStrictEqual([]);
-    });
-
-    test('the node facet helpers — one canonical project per kind — each collects its own facet tree, under its own name', () => {
-        // Given - the canonical projects, stated by nobody
-        // Then - `--project api` means the same tree in every repository
-        expect(
-            [api(), job(), integration(), mobile()].map((project) => testOf(project).name),
-        ).toStrictEqual(['api', 'job', 'integration', 'mobile']);
-        expect(testOf(api()).include).toStrictEqual(['specs/api/**/*.spec.ts']);
-        expect(testOf(integration()).include).toStrictEqual(['specs/integration/**/*.spec.ts']);
-    });
-
-    test('the node facet helpers — one canonical project per kind — the facets that declare services carry the setup that starts them once per run', () => {
-        // Given - the global setups of the three facets whose specs declare containers
-        const setups = [api(), job(), integration()].map((project) => testOf(project).globalSetup);
-
-        // Then - each joins the run's containers, which a file without it starts per specification
-        for (const carried of setups) {
-            expect(carried).toContain(servicesSetup());
-        }
-        expect(servicesSetup()).toMatch(/run-setup\.ts$/u);
-    });
-
-    test('the node facet helpers — one canonical project per kind — node facets run first, and the simulator runs alone at the end', () => {
-        // Given - the group order each helper states
-        const orders = [api(), job(), integration(), cli(), mobile()].map(
-            (project) => testOf(project).sequence?.groupOrder,
-        );
-
-        // Then - everything node shares group 0; website is 1, component 2, and a simulator cannot share a machine with itself
-        expect(orders).toStrictEqual([0, 0, 0, 0, 3]);
-    });
-
-    test('the node facet helpers — one canonical project per kind — takes the tree and the budget a repository states instead', () => {
-        // Given - a facet whose tree and budget are not the convention's
-        const stated = testOf(
-            api({
-                exclude: ['specs/api/slow/**'],
-                include: ['suites/api/**/*.test.ts'],
-                timeout: 90_000,
-            }),
-        );
-
-        // Then - all three are the repository's, the name stays canonical
-        expect(stated.include).toStrictEqual(['suites/api/**/*.test.ts']);
-        expect(stated.exclude).toContain('specs/api/slow/**');
-        expect(stated.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
-        expect(stated.testTimeout).toBe(90_000);
-        expect(stated.name).toBe('api');
-    });
-
-    test('the node facet helpers — one canonical project per kind — a node facet states its own serial run, the way website() does', () => {
-        // Given - an integration suite whose files share one database file
-        const shared = testOf(integration({ serial: true }));
-
-        // Then - the project states it, and a silent helper states nothing
-        expect(shared.fileParallelism).toBe(false);
-        expect(testOf(integration()).fileParallelism).toBeUndefined();
-    });
-
-    test('the node facet helpers — one canonical project per kind — every helper takes `serial`', () => {
-        // Given - each node facet helper asked to run serially
-        const serial = [
-            api({ serial: true }),
-            job({ serial: true }),
-            mobile({ serial: true }),
-            cli({ literate: false, serial: true }),
-        ].map((project) => testOf(project).fileParallelism);
-
-        // Then - `serial` is what chapter 02 says it is: every helper's
-        expect(serial).toStrictEqual([false, false, false, false]);
     });
 
     test('defineSpecConfig() — the literate plugin — registers the plugin when a specification is given', () => {

@@ -35,4 +35,13 @@ describe('mobile', () => {
         expect(mobile().test?.fileParallelism).toBe(false);
         expect(mobile({ serial: true }).test?.fileParallelism).toBe(false);
     });
+
+    test('mobile() — one driver session per run — collects the mobile specs under its own name, and runs alone at the end', () => {
+        // Given - the canonical mobile project, stated by nobody
+        const project = mobile().test;
+
+        // Then - a simulator cannot share a machine with itself: the last group, after node, website and component
+        expect(project?.name).toBe('mobile');
+        expect(project?.sequence?.groupOrder).toBe(3);
+    });
 });
