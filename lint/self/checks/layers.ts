@@ -101,12 +101,11 @@ export const FRAMEWORK_LAYERS = {
     },
     lint: {
         imports: ['lint/'],
-        // oxlint's plugin types and the toolchain's config type (erased), its config names (inlined), and the module parser.
+        // oxlint's plugin types and the toolchain's config type (erased), and the module parser.
         packages: [
             '@oxlint/plugins',
             '@jterrazz/typescript/config',
             '@jterrazz/typescript/oxlint',
-            '@jterrazz/typescript/oxlint-config-names',
             'vitest',
             ...librariesOwnedIn('lint/'),
         ],

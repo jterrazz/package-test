@@ -4,9 +4,6 @@ import { defineConfig } from 'tsdown';
 export default defineConfig([
     {
         clean: true,
-        deps: {
-            alwaysBundle: ['@jterrazz/typescript/oxlint-config-names'],
-        },
         dts: true,
         entry: {
             checker: 'lint/index.checker.ts',
@@ -28,9 +25,6 @@ export default defineConfig([
     },
     {
         clean: false,
-        deps: {
-            alwaysBundle: ['@jterrazz/typescript/oxlint-config-names'],
-        },
         dts: true,
         entry: {
             self: 'lint/self/index.ts',

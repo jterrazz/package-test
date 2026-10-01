@@ -1,4 +1,4 @@
-import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
+import { OXLINT_CONFIG_NAMES } from '@jterrazz/typescript/rules';
 import {
     chmodSync,
     existsSync,
@@ -184,7 +184,7 @@ describe('own-fixes', () => {
         expect(module).toHaveProperty('default.rules', { 'jterrazz/given-in-the-test': 'warn' });
     });
 
-    test.each(configNames)(
+    test.each(OXLINT_CONFIG_NAMES)(
         'ratchet-own-fixes — fixes under the wrapper of a root `%s`, then deletes it',
         (name) => {
             // Given - a root config under a name the toolchain lists, and an oxlint leaving diagnostics (exit 1)

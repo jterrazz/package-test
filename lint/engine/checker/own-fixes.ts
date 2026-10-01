@@ -1,12 +1,13 @@
-import configNames from '@jterrazz/typescript/oxlint-config-names' with { type: 'json' };
-import { GROUND_FOLDERS, OXLINT_SUPPRESSIONS } from '@jterrazz/typescript/rules';
+import {
+    GROUND_FOLDERS,
+    OXLINT_CONFIG_NAMES,
+    OXLINT_SUPPRESSIONS,
+} from '@jterrazz/typescript/rules';
 import { spawnSync } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { join, relative } from 'node:path';
 
 import { PRUNED_WITH_OUTPUTS } from '../project/module-tests.js';
-
-const CONFIG_NAMES: readonly string[] = configNames;
 
 /** Never one found above the root: a fixture project inside another repository would be linted with that repository's config. */
 function oxlintOf(root: string): string | undefined {
@@ -191,7 +192,7 @@ function fixUnder(oxlint: string, directory: string, config: string, nested: str
 /** oxlint exits 1 when diagnostics remain (the ratchet's to count) and past 1 when it could not run; a config it could not load is refused by name. */
 export function applyOwnFixes(root: string): void {
     const oxlint = oxlintOf(root);
-    const config = configIn(root, CONFIG_NAMES);
+    const config = configIn(root, OXLINT_CONFIG_NAMES);
     if (oxlint === undefined || config === undefined) {
         return;
     }
