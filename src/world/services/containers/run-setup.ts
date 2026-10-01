@@ -121,7 +121,9 @@ async function open(
     };
 }
 
-function runServices(prepare: () => Promise<void>): RunServices {
+type Open = typeof open;
+
+function runServices(prepare: () => Promise<void>, opening: Open): RunServices {
     let holders = 0;
     let opened: null | ReturnType<typeof open> = null;
     const forget = (): void => {
@@ -131,7 +133,7 @@ function runServices(prepare: () => Promise<void>): RunServices {
     return {
         enter: async () => {
             holders += 1;
-            opened ??= open(prepare);
+            opened ??= opening(prepare);
             const current = opened;
             let served: Awaited<typeof current>;
             try {
@@ -165,12 +167,12 @@ function isRunServices(value: unknown): value is RunServices {
     return typeof field(value, 'enter') === 'function';
 }
 
-function theRun(prepare: () => Promise<void>): RunServices {
+function theRun(prepare: () => Promise<void>, opening: Open): RunServices {
     const found: unknown = Reflect.get(globalThis, RUN_SERVICES);
     if (isRunServices(found)) {
         return found;
     }
-    const created = runServices(prepare);
+    const created = runServices(prepare, opening);
     Reflect.set(globalThis, RUN_SERVICES, created);
     return created;
 }
@@ -178,8 +180,9 @@ function theRun(prepare: () => Promise<void>): RunServices {
 export default async function setup(
     project: RunProject,
     prepare: () => Promise<void> = prepareDocker,
+    opening: Open = open,
 ): Promise<() => Promise<void>> {
-    const joined = await theRun(prepare).enter();
+    const joined = await theRun(prepare, opening).enter();
     project.provide('serviceContainers', joined.url);
     return joined.leave;
 }

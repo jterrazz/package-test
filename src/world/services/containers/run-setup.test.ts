@@ -117,4 +117,54 @@ describe('setup', () => {
             Reflect.deleteProperty(globalThis, foreign);
         }
     });
+
+    test('the services setup — the run containers, served — a run whose services failed to open is opened afresh by the next setup', async () => {
+        // Given - a first setup whose loopback server fails to open
+        const provided: string[] = [];
+        const project = {
+            provide: (_key: string, value: string) => {
+                provided.push(value);
+            },
+        };
+        const refuses = async (): Promise<never> => {
+            await Promise.resolve();
+            throw new Error('the loopback refused to listen');
+        };
+        await expect(setup(project, absent, refuses)).rejects.toThrow(
+            'the loopback refused to listen',
+        );
+
+        // When - a later project's setup runs
+        const teardown = await setup(project, absent);
+
+        // Then - it serves a fresh address rather than the first failure
+        try {
+            expect(provided).toHaveLength(1);
+            await expect(connection(String(provided[0]))).resolves.toBe('open');
+        } finally {
+            await teardown();
+        }
+    });
+
+    test('the services setup — the run containers, served — a teardown called twice leaves the services to the project still holding them', async () => {
+        // Given - two projects holding the run's services
+        const provided: string[] = [];
+        const project = {
+            provide: (_key: string, value: string) => {
+                provided.push(value);
+            },
+        };
+        const first = await setup(project, absent);
+        const second = await setup(project, absent);
+        const [url] = provided;
+
+        // When - the first project's teardown runs twice
+        await first();
+        await first();
+
+        // Then - the services still answer until the second project tears down
+        await expect(connection(String(url))).resolves.toBe('open');
+        await second();
+        await expect(connection(String(url))).resolves.toBe('ECONNREFUSED');
+    });
 });
