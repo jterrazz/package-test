@@ -71,6 +71,38 @@ describe('fsLinks', () => {
         expect(existsSync(resolve(root, 'node_modules/@acme/greeter/package.json'))).toBe(true);
     });
 
+    test('fsLinks — a symlinked scope folder — is refused, and the install it points to is kept', () => {
+        // Given - a working directory whose own node_modules holds the scope as a symlink to the project's
+        const { root, testDir } = project();
+        const workDir = workDirectory();
+        mkdirSync(resolve(workDir, 'node_modules'));
+        symlinkSync(resolve(root, 'node_modules/@acme'), resolve(workDir, 'node_modules/@acme'), 'dir');
+
+        // Then - the link is refused, naming the scope folder, and the real package is untouched
+        expect(() => {
+            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
+        }).toThrow(
+            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules/@acme')} is a symlink`,
+        );
+        expect(existsSync(resolve(root, 'node_modules/@acme/greeter/package.json'))).toBe(true);
+    });
+
+    test('fsLinks — a file where a folder goes — is refused as a refusal, naming the file', () => {
+        // Given - a working directory a fixture laid with node_modules as a file
+        const { testDir } = project();
+        const workDir = workDirectory();
+        writeFileSync(resolve(workDir, 'node_modules'), '');
+
+        // Then - the link is refused, naming the file and the chapter
+        const laying = (): void => {
+            fsLinks.link('@acme/greeter', './_fixtures/greeter/', testDir, workDir);
+        };
+        expect(laying).toThrow(
+            `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules')} is a file, not a folder`,
+        );
+        expect(laying).toThrow('docs/12-cli.md#link--a-package-the-working-directory-resolves');
+    });
+
     test('fsLinks — a bare name — links the package the spec’s project resolves', () => {
         // Given - an empty working directory
         const { testDir } = project();

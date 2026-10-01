@@ -252,7 +252,7 @@ test('loads the plugin the project installed', async () => {
 });
 ```
 
-A link is armed after every fixture, so it replaces a package a fixture laid under the same name. The name is a package name — `@scope/name` or `name` — and one name is linked once per chain; a bare name no `node_modules` above the spec holds, or a `directory()` naming nothing, is refused before the binary runs. So is a working directory whose `node_modules` (or scope folder) is a symlink — a fixture can carry one, a binary can lay one: the link would replace the real install it points to.
+A link is armed after every fixture, so it replaces a package a fixture laid under the same name. The name is a package name — `@scope/name` or `name` — and one name is linked once per chain; a bare name no `node_modules` above the spec holds, or a `directory()` naming nothing, is refused before the binary runs. So is a working directory whose `node_modules` (or scope folder) is a symlink — a fixture can carry one, a binary can lay one: the link would replace the real install it points to — or a file, which leaves the link no folder to be laid in.
 
 ### The chain never reaches a real system
 

@@ -45,7 +45,7 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
         );
     }
     if (!statSync(src).isDirectory()) {
-        throw new TypeError(
+        throw new Error(
             refusal('disk-named-by-relative-path-at-runtime', {
                 fix: `name the directory that holds the package's package.json: directory('${dirname(path)}/')`,
                 found: `link('${name}', directory(${JSON.stringify(path)})) names a file`,
@@ -55,11 +55,25 @@ function sourceOf(name: string, path: null | string, testDir: string): string {
     return src;
 }
 
-function refuseSymlinkedAncestor(name: string, workDir: string, dest: string): void {
+function refuseUnusableAncestor(name: string, workDir: string, dest: string): void {
     let ancestor = workDir;
     for (const segment of relative(workDir, dirname(dest)).split(/[\\/]/u)) {
         ancestor = resolve(ancestor, segment);
-        if (existsSync(ancestor) && lstatSync(ancestor).isSymbolicLink()) {
+        if (!existsSync(ancestor)) {
+            return;
+        }
+        const entry = lstatSync(ancestor);
+        if (!entry.isSymbolicLink() && !entry.isDirectory()) {
+            throw new Error(
+                refusal({
+                    fix: `drop the file at ${ancestor} from the fixture or the command that lays it, so the link can lay its folder there`,
+                    found: `link('${name}'): ${ancestor} is a file, not a folder`,
+                    read: 'docs/12-cli.md#link--a-package-the-working-directory-resolves',
+                    why: 'A link is laid at node_modules/<name> inside the working directory, and a file on that path leaves it no folder to lay it in.',
+                }),
+            );
+        }
+        if (entry.isSymbolicLink()) {
             throw new Error(
                 refusal({
                     fix: `drop the symlink at ${ancestor} from the fixture or the command that lays it, so the working directory holds its own node_modules`,
@@ -76,7 +90,7 @@ export const fsLinks: LinkPort = {
     link: (name, path, testDir, workDir) => {
         const src = sourceOf(name, path, testDir);
         const dest = resolve(workDir, 'node_modules', name);
-        refuseSymlinkedAncestor(name, workDir, dest);
+        refuseUnusableAncestor(name, workDir, dest);
         mkdirSync(dirname(dest), { recursive: true });
         rmSync(dest, { force: true, recursive: true });
         symlinkSync(src, dest, 'dir');
