@@ -1,9 +1,9 @@
 import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
 import { refusal } from '../../../../lint/refusal.js';
+import { defineAction } from '../../../chain/action.js';
+import type { ChainSignature } from '../../../chain/capability.js';
+import { scratchDirectory } from '../../../chain/paths/scratch.js';
 import { CLI_RESULT_ROWS, CliResult } from '../../../expectations/command/cli.result.js';
-import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { scratchDirectory } from '../../../kernel/files/scratch.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliOutput, CliPort, ExecOptions } from './cli.port.js';
 import { env as chainEnv, childEnv } from './env.capability.js';

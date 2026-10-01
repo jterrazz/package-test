@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineCapability } from '../../../kernel/chain/capability.js';
-import { defineFacet } from '../../../kernel/chain/define-facet.js';
-import { headers } from '../../../kernel/context/headers.capability.js';
+import { defineCapability } from '../../../chain/capability.js';
+import { headers } from '../../../chain/context/headers.capability.js';
+import { defineFacet } from '../../../chain/define-facet.js';
 import type { ServerPort, ServerRequestOptions } from '../server/server.port.js';
 import { get } from './request.action.js';
 

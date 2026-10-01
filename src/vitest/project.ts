@@ -3,8 +3,8 @@ import { configDefaults, mergeConfig } from 'vitest/config';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { ATTACHMENTS_DIR, VITEST_ARTIFACTS_DIR } from '../../lint/engine/project/artifacts.js';
+import { tempRootSetup } from '../chain/paths/temp-root.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
-import { tempRootSetup } from '../kernel/files/temp-root.js';
 
 /** Vitest's 5s default is outlived by a container boot or a `next build`; 30s is what the ecosystem converged on. */
 const TEST_TIMEOUT_MS = 30_000;

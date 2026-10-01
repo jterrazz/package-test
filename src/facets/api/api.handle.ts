@@ -1,12 +1,12 @@
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
+import type { Started } from '../../chain/config.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
 import { createDockerReader } from '../../expectations/command/container.js';
 import type { ContainerAccessor } from '../../expectations/command/container.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { Started } from '../../kernel/chain/config.js';
-import { getCallerDir } from '../../kernel/files/caller.js';
-import { declaredDatabaseKeys } from '../../world/services/services.js';
-import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
-import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
+import { declaredDatabaseKeys } from '../../services/services.js';
+import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
+import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
 import type { ApiSpecification } from './api.facet.js';
 import { apiFacet } from './api.facet.js';
 import { routesLedger, writeLedger } from './routes/ledger.js';

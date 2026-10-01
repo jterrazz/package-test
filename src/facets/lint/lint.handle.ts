@@ -5,9 +5,9 @@ import { dirname, isAbsolute, join, resolve } from 'node:path';
 
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
 import { refusal } from '../../../lint/refusal.js';
+import type { ChainConfig, Started } from '../../chain/config.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import type { ChainConfig, Started } from '../../kernel/chain/config.js';
-import { getCallerDir } from '../../kernel/files/caller.js';
 import type { LintSpecification } from './lint.facet.js';
 import { lintFacet } from './lint.facet.js';
 import type { LintPort } from './lint.port.js';

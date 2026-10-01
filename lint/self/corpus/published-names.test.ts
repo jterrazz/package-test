@@ -4,9 +4,9 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
+import { file } from '../../../src/chain/paths/spec-path.js';
 import { registerMatchers } from '../../../src/expectations/goldens/matchers.js';
 import { text } from '../../../src/expectations/text/text-subject.js';
-import { file } from '../../../src/kernel/files/spec-path.js';
 import { exportedNames, renderPublishedNames } from './published-names.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');

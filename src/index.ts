@@ -10,7 +10,7 @@ export { ruleTester } from './facets/lint/lint.face.js';
 export type * from './facets/mobile/mobile.face.js';
 export type * from './facets/website/website.face.js';
 
-export type { ChainContext } from './kernel/context/with.capability.js';
+export type { ChainContext } from './chain/context/with.capability.js';
 export type { TestSettings } from '../lint/engine/project/settings.js';
 
 export {
@@ -21,25 +21,19 @@ export {
     file,
     type FileAt,
     type RelativePath,
-} from './kernel/files/spec-path.js';
+} from './chain/paths/spec-path.js';
 
-export { anthropic } from './world/stubs/kinds/anthropic.js';
+export { anthropic } from './stubs/kinds/anthropic.js';
 export {
     http,
     type HttpResponseInit,
     type HttpStreamInit,
     type HttpStubFilter,
     type SseEvent,
-} from './world/stubs/kinds/http.js';
-export { type TextFilter } from './world/stubs/kinds/text-filter.js';
-export { openai } from './world/stubs/kinds/openai.js';
-export {
-    defineStub,
-    defineStubs,
-    type Stub,
-    type StubInput,
-    type Stubs,
-} from './world/stubs/stub.js';
+} from './stubs/kinds/http.js';
+export { type TextFilter } from './stubs/kinds/text-filter.js';
+export { openai } from './stubs/kinds/openai.js';
+export { defineStub, defineStubs, type Stub, type StubInput, type Stubs } from './stubs/stub.js';
 export type {
     MatchableRequest,
     StreamBody,
@@ -47,32 +41,25 @@ export type {
     StubResponder,
     StubResponse,
     StubResponseValue,
-} from './world/stubs/exchange.js';
-export { intercept } from './world/stubs/delivery/same-process/intercept.js';
-export type {
-    Intercept,
-    InterceptOptions,
-    InterceptScope,
-} from './world/stubs/intercept/intercept.js';
-export { postgres, type PostgresOptions } from './world/services/postgres/postgres.adapter.js';
-export { redis, type RedisOptions } from './world/services/redis/redis.adapter.js';
-export { sqlite, type SqliteOptions } from './world/services/sqlite/sqlite.adapter.js';
+} from './stubs/exchange.js';
+export { intercept } from './stubs/delivery/same-process/intercept.js';
+export type { Intercept, InterceptOptions, InterceptScope } from './stubs/intercept/intercept.js';
+export { postgres, type PostgresOptions } from './services/postgres/postgres.adapter.js';
+export { redis, type RedisOptions } from './services/redis/redis.adapter.js';
+export { sqlite, type SqliteOptions } from './services/sqlite/sqlite.adapter.js';
 export {
     processService as process,
     ProcessHandle,
     type ProcessOptions,
-} from './world/services/process/process.adapter.js';
-export { type DatabaseKeys, type ServiceRecord } from './world/services/services.js';
-export type { SeedSource } from './world/services/seed/seed.capability.js';
-export type { DatabasePort } from './world/services/database.port.js';
-export type { IsolationStrategy } from './world/services/isolation.port.js';
-export type { ServiceHandle } from './world/services/service.port.js';
-export type {
-    ContainerOptions,
-    ContainerPort,
-} from './world/services/containers/container.port.js';
-export { clock, type PinnedClock } from './world/clock/clock.js';
-export { mockOf, type MockOfOptions, type MockPort } from './world/mocks/mock-of.js';
+} from './services/process/process.adapter.js';
+export { type DatabaseKeys, type ServiceRecord } from './services/services.js';
+export type { SeedSource } from './services/seed/seed.capability.js';
+export type { DatabasePort } from './services/database.port.js';
+export type { IsolationStrategy } from './services/isolation.port.js';
+export type { ServiceHandle } from './services/service.port.js';
+export type { ContainerOptions, ContainerPort } from './services/containers/container.port.js';
+export { clock, type PinnedClock } from './clock/clock.js';
+export { mockOf, type MockOfOptions, type MockPort } from './mocks/mock-of.js';
 
 export {
     button,

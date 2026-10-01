@@ -18,17 +18,17 @@ describe('folder-named-for-a-concept', () => {
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
+            src/clock:1:1  jterrazz-check(folder-named-for-a-concept)
+                found: the folder \`clock/\` holds one entry
+                why: A folder under \`src/\` is named for a concept, never a role (\`ports/\`, \`adapters/\`, \`capabilities/\`, \`actions/\`, \`results/\`, \`types/\`, \`utils/\`, \`helpers/\`, \`common/\`, \`lib/\`, \`core/\`, \`shared/\`, \`misc/\`): the role rides on the file suffix (\`*.port.ts\`, \`*.adapter.ts\`, \`*.capability.ts\` …).
+                fix: fold what it holds into its parent, or give the concept the second file it groups
+                read: docs/03-testing.md#folder-named-for-a-concept
             src/facets/api/route.ts:1:1  jterrazz-check(folder-named-for-a-concept)
                 found: \`route.ts\` sits at the root of the facet \`api\`, and is no file of its face
                 why: A folder under \`src/\` is named for a concept, never a role (\`ports/\`, \`adapters/\`, \`capabilities/\`, \`actions/\`, \`results/\`, \`types/\`, \`utils/\`, \`helpers/\`, \`common/\`, \`lib/\`, \`core/\`, \`shared/\`, \`misc/\`): the role rides on the file suffix (\`*.port.ts\`, \`*.adapter.ts\`, \`*.capability.ts\` …).
                 fix: move it into the concept folder it belongs to; the root of a facet with concept folders holds its face alone — \`<facet>.face.ts\`, \`<facet>.facet.ts\`, \`<facet>.handle.ts\`, \`<facet>.project.ts\`
                 read: docs/03-testing.md#folder-named-for-a-concept
-            src/world/clock:1:1  jterrazz-check(folder-named-for-a-concept)
-                found: the folder \`clock/\` holds one entry
-                why: A folder under \`src/\` is named for a concept, never a role (\`ports/\`, \`adapters/\`, \`capabilities/\`, \`actions/\`, \`results/\`, \`types/\`, \`utils/\`, \`helpers/\`, \`common/\`, \`lib/\`, \`core/\`, \`shared/\`, \`misc/\`): the role rides on the file suffix (\`*.port.ts\`, \`*.adapter.ts\`, \`*.capability.ts\` …).
-                fix: fold what it holds into its parent, or give the concept the second file it groups
-                read: docs/03-testing.md#folder-named-for-a-concept
-            src/world/utils:1:1  jterrazz-check(folder-named-for-a-concept)
+            src/stubs/utils:1:1  jterrazz-check(folder-named-for-a-concept)
                 found: the folder \`utils/\` is named for a role, not a concept
                 why: A folder under \`src/\` is named for a concept, never a role (\`ports/\`, \`adapters/\`, \`capabilities/\`, \`actions/\`, \`results/\`, \`types/\`, \`utils/\`, \`helpers/\`, \`common/\`, \`lib/\`, \`core/\`, \`shared/\`, \`misc/\`): the role rides on the file suffix (\`*.port.ts\`, \`*.adapter.ts\`, \`*.capability.ts\` …).
                 fix: name the folder for what its files are about, and let each file carry its role on its suffix (\`*.port.ts\`, \`*.adapter.ts\`, \`*.capability.ts\` …)

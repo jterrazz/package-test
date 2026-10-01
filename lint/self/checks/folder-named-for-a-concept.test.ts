@@ -14,21 +14,22 @@ describe('checkFolderNamedForAConcept', () => {
             'src/facets/api/route.ts': '',
             'src/facets/job/job.facet.ts': '',
             'src/facets/job/trigger.action.ts': '',
-            'src/kernel/core/chain.ts': '',
-            'src/kernel/core/state.ts': '',
-            'src/kernel/pause.ts': '',
-            'src/world/clock/clock.ts': '',
-            'src/world/utils/format.test.ts': '',
-            'src/world/utils/format.ts': '',
+            'src/chain/core/chain.ts': '',
+            'src/chain/core/state.ts': '',
+            'src/chain/pause.ts': '',
+            'src/clock/clock.ts': '',
+            'src/stubs/stub.ts': '',
+            'src/stubs/utils/format.test.ts': '',
+            'src/stubs/utils/format.ts': '',
         });
 
         // Then - the package holds none; each misshapen folder or file is named at itself, the ground left alone
         expect(checkFolderNamedForAConcept(ROOT)).toStrictEqual([]);
         expect(located(checkFolderNamedForAConcept(misshapen))).toStrictEqual([
+            'src/chain/core:1:1 folder-named-for-a-concept: the folder `core/` is named for a role, not a concept',
+            'src/clock:1:1 folder-named-for-a-concept: the folder `clock/` holds one entry',
             'src/facets/api/route.ts:1:1 folder-named-for-a-concept: `route.ts` sits at the root of the facet `api`, and is no file of its face',
-            'src/kernel/core:1:1 folder-named-for-a-concept: the folder `core/` is named for a role, not a concept',
-            'src/world/clock:1:1 folder-named-for-a-concept: the folder `clock/` holds one entry',
-            'src/world/utils:1:1 folder-named-for-a-concept: the folder `utils/` is named for a role, not a concept',
+            'src/stubs/utils:1:1 folder-named-for-a-concept: the folder `utils/` is named for a role, not a concept',
         ]);
     });
 });

@@ -1,4 +1,4 @@
-import { getCallerDir } from '../../kernel/files/caller.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
 import { TextAccessor } from './text.js';
 
 /** Wrap a string as a `TextAccessor` anchored on the calling test's directory. */

@@ -5,27 +5,27 @@ import { checkStubsReachedByTheirSurface } from './stubs-reached-by-their-surfac
 
 describe('checkStubsReachedByTheirSurface', () => {
     test('stubs-reached-by-their-surface — the stubs are entered by what they publish, a delivery by the facet that wires it', () => {
-        // Given - the package's own tree, and one where a facet reaches the matching, another facet a delivery it does not wire, a third the intercept's input normaliser and the delivery port, and the kernel an entry's channel pick
+        // Given - the package's own tree, and one where a facet reaches the matching, another facet a delivery it does not wire, a third the intercept's input normaliser and the delivery port, and the chain an entry's channel pick
         const reaching = treeOf({
             'src/facets/api/api.facet.ts': [
-                "import { http } from '../../world/stubs/kinds/http.js';",
-                "import { mswNode } from '../../world/stubs/delivery/same-process/msw-node.adapter.js';",
-                "import { StubQueue } from '../../world/stubs/matching/stub-queue.js';",
+                "import { http } from '../../stubs/kinds/http.js';",
+                "import { mswNode } from '../../stubs/delivery/same-process/msw-node.adapter.js';",
+                "import { StubQueue } from '../../stubs/matching/stub-queue.js';",
                 '',
             ].join('\n'),
             'src/facets/cli/cli.facet.ts':
-                "import { mswNode } from '../../world/stubs/delivery/same-process/msw-node.adapter.js';\n",
+                "import { mswNode } from '../../stubs/delivery/same-process/msw-node.adapter.js';\n",
             'src/facets/job/job.facet.ts': [
-                "import { interceptCapability } from '../../world/stubs/intercept/intercept.capability.js';",
-                "import { declared } from '../../world/stubs/intercept/declared.js';",
-                "import type { InterceptPort } from '../../world/stubs/intercept/intercept.port.js';",
+                "import { interceptCapability } from '../../stubs/intercept/intercept.capability.js';",
+                "import { declared } from '../../stubs/intercept/declared.js';",
+                "import type { InterceptPort } from '../../stubs/intercept/intercept.port.js';",
                 '',
             ].join('\n'),
             'src/index.ts':
-                "export { intercept } from './world/stubs/delivery/same-process/intercept.js';\n",
-            'src/kernel/chain/arm.ts':
-                "import { intercept } from '../../world/stubs/delivery/same-process/intercept.js';\n",
-            'src/world/stubs/delivery/same-process/msw-node.adapter.ts':
+                "export { intercept } from './stubs/delivery/same-process/intercept.js';\n",
+            'src/chain/arm.ts':
+                "import { intercept } from '../stubs/delivery/same-process/intercept.js';\n",
+            'src/stubs/delivery/same-process/msw-node.adapter.ts':
                 "import type { InterceptPort } from '../../intercept/intercept.port.js';\n",
         });
 
@@ -38,11 +38,11 @@ describe('checkStubsReachedByTheirSurface', () => {
                 }),
             ),
         ).toStrictEqual([
-            'src/facets/api/api.facet.ts:3:1 stubs-reached-by-their-surface: `src/world/stubs/matching/stub-queue.ts` is reached from outside the stubs, below their surface',
-            'src/facets/cli/cli.facet.ts:1:1 stubs-reached-by-their-surface: `src/world/stubs/delivery/same-process/msw-node.adapter.ts` is reached from outside the stubs, below their surface',
-            'src/facets/job/job.facet.ts:2:1 stubs-reached-by-their-surface: `src/world/stubs/intercept/declared.ts` is reached from outside the stubs, below their surface',
-            'src/facets/job/job.facet.ts:3:1 stubs-reached-by-their-surface: `src/world/stubs/intercept/intercept.port.ts` is reached from outside the stubs, below their surface',
-            'src/kernel/chain/arm.ts:1:1 stubs-reached-by-their-surface: `src/world/stubs/delivery/same-process/intercept.ts` is reached from outside the stubs, below their surface',
+            'src/chain/arm.ts:1:1 stubs-reached-by-their-surface: `src/stubs/delivery/same-process/intercept.ts` is reached from outside the stubs, below their surface',
+            'src/facets/api/api.facet.ts:3:1 stubs-reached-by-their-surface: `src/stubs/matching/stub-queue.ts` is reached from outside the stubs, below their surface',
+            'src/facets/cli/cli.facet.ts:1:1 stubs-reached-by-their-surface: `src/stubs/delivery/same-process/msw-node.adapter.ts` is reached from outside the stubs, below their surface',
+            'src/facets/job/job.facet.ts:2:1 stubs-reached-by-their-surface: `src/stubs/intercept/declared.ts` is reached from outside the stubs, below their surface',
+            'src/facets/job/job.facet.ts:3:1 stubs-reached-by-their-surface: `src/stubs/intercept/intercept.port.ts` is reached from outside the stubs, below their surface',
         ]);
     });
 
@@ -50,7 +50,7 @@ describe('checkStubsReachedByTheirSurface', () => {
         // Given - a tree holding the lock, a table declaring two readers of the node delivery, and only one of them importing it
         const tree = treeOf({
             'src/facets/api/api.facet.ts':
-                "import { mswNode } from '../../world/stubs/delivery/same-process/msw-node.adapter.js';\n",
+                "import { mswNode } from '../../stubs/delivery/same-process/msw-node.adapter.js';\n",
             'lint/self/checks/stubs-reached-by-their-surface.ts': '',
             'src/facets/job/job.facet.ts': "export const job = 'no delivery';\n",
         });

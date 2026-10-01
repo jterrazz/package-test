@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { scratchDirectory } from '../../kernel/files/scratch.js';
+import { scratchDirectory } from '../../chain/paths/scratch.js';
 import { oxlintBinary, startLint } from './lint.handle.js';
 
 describe('lint.handle', () => {

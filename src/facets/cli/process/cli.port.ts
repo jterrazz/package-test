@@ -1,5 +1,5 @@
+import type { EnvRecord } from '../../../chain/context/with.capability.js';
 import type { CliOutput } from '../../../expectations/command/cli.result.js';
-import type { EnvRecord } from '../../../kernel/context/with.capability.js';
 
 export type { CliOutput } from '../../../expectations/command/cli.result.js';
 

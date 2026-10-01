@@ -2,8 +2,8 @@ import { existsSync, readdirSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import type { MatrixRow } from '../../../src/kernel/chain/capability.js';
-import type { Composition } from '../../../src/kernel/chain/define-facet.js';
+import type { MatrixRow } from '../../../src/chain/capability.js';
+import type { Composition } from '../../../src/chain/define-facet.js';
 import { COMPOSITIONS, rowsOfCompositions } from './compositions.js';
 import { facetMatrixMember } from './facet-matrix.js';
 

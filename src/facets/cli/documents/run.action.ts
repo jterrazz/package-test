@@ -1,14 +1,14 @@
 import { relative } from 'node:path';
 
 import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
+import { defineAction } from '../../../chain/action.js';
+import type { ChainSignature } from '../../../chain/capability.js';
+import { resolveSpecPath } from '../../../chain/paths/resolved-spec-path.js';
+import { scratchDirectory } from '../../../chain/paths/scratch.js';
+import { requireDiskFile } from '../../../chain/paths/spec-path.js';
+import type { DiskFile } from '../../../chain/paths/spec-path.js';
 import { CLI_RESULT_ROWS } from '../../../expectations/command/cli.result.js';
 import type { CliResult } from '../../../expectations/command/cli.result.js';
-import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
-import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
-import { scratchDirectory } from '../../../kernel/files/scratch.js';
-import { requireDiskFile } from '../../../kernel/files/spec-path.js';
-import type { DiskFile } from '../../../kernel/files/spec-path.js';
 import type { CliConfig } from '../cli.handle.js';
 import { env as chainEnv, childEnv } from '../process/env.capability.js';
 import { runSpecDocument } from './literate.js';

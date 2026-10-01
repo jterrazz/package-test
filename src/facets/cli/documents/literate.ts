@@ -14,6 +14,7 @@ import type {
     SpecRun,
 } from '../../../../lint/engine/project/spec-document.js';
 import { invariant, refusal } from '../../../../lint/refusal.js';
+import { fsFixtures } from '../../../disk/fs-fixtures.adapter.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
@@ -24,8 +25,7 @@ import {
     textContains,
     textEquals,
 } from '../../../expectations/tokens/structural.js';
-import { fsFixtures } from '../../../kernel/files/fs-fixtures.adapter.js';
-import { ServedProcess } from '../../../world/services/process/serve.js';
+import { ServedProcess } from '../../../services/process/serve.js';
 import type { CliConfig } from '../cli.handle.js';
 import type { CliEnv, CliOutput } from '../process/cli.port.js';
 import { expandWorkdir } from '../process/env.capability.js';

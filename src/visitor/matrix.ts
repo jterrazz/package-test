@@ -1,4 +1,4 @@
-import type { MatrixRow } from '../kernel/chain/capability.js';
+import type { MatrixRow } from '../chain/capability.js';
 
 export const EVERY_SURFACE_VERBS: readonly MatrixRow[] = [
     { group: 'Verb', name: 'see', probe: '.see(' },

@@ -10,7 +10,7 @@ import {
 } from '../../engine/project/source.js';
 import type { SelfPassId } from './checker.js';
 
-const STUBS = 'src/world/stubs/';
+const STUBS = 'src/stubs/';
 
 const ENTRIES = new Set(['src/index.browser.ts', 'src/index.ts']);
 

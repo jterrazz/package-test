@@ -1,6 +1,6 @@
+import { defineAction } from '../../../chain/action.js';
+import type { ChainSignature, MatrixRow } from '../../../chain/capability.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
-import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import {
     BROWSER_STATES,
     BROWSER_TARGETS,

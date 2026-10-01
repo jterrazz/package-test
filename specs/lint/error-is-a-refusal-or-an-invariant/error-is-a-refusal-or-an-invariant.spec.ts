@@ -18,17 +18,17 @@ describe('error-is-a-refusal-or-an-invariant', () => {
 
         // Then - each finding at its line and column, with its lesson
         expect(result.report).toMatch(`
-            src/world/clock/clock.ts:3:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
+            src/clock/clock.ts:3:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
                 found: \`new Error(…)\` carries a message written by hand
                 why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/05-module-tests.md#time\`) or a catalogue row.
                 fix: a user can cause it: \`new Error(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\`
                 read: docs/03-testing.md#error-is-a-refusal-or-an-invariant
-            src/world/clock/clock.ts:11:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
+            src/clock/clock.ts:11:15  jterrazz-check(error-is-a-refusal-or-an-invariant)
                 found: \`new PinError(…)\` carries a message written by hand
                 why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/05-module-tests.md#time\`) or a catalogue row.
                 fix: a user can cause it: \`new PinError(refusal({ found, why, fix, read }))\`, its read the chapter heading that explains it; only the framework can: \`invariant('<what broke>')\`
                 read: docs/03-testing.md#error-is-a-refusal-or-an-invariant
-            src/world/clock/instant.ts:8:19  jterrazz-check(error-is-a-refusal-or-an-invariant)
+            src/clock/instant.ts:8:19  jterrazz-check(error-is-a-refusal-or-an-invariant)
                 found: \`docs/05-module-tests.md#instants\` names a heading no chapter has
                 why: An error a user can cause — a verb misused, an option out of range, a path, a peer or a tool the machine lacks, a peer or a runtime breaking its own contract — is thrown as a refusal: \`new Error(refusal(…))\`, its four parts found · why · fix · read, the read a chapter heading written in place that exists (\`docs/05-module-tests.md#time\`) or a catalogue row.
                 fix: read a heading that exists, and write the section that explains the refusal where none does

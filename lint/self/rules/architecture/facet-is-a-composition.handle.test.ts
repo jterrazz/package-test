@@ -7,7 +7,7 @@ import { handleFileFindings } from './facet-is-a-composition.handle.js';
 function findingsOf(body: string): string[] {
     const program = parseProgram(
         'job.handle.ts',
-        `import { seed } from '../../world/services/seed/seed.capability.js';\nimport * as results from '../../expectations/result.js';\nimport { jobFacet } from './job.facet.js';\n${body}`,
+        `import { seed } from '../../services/seed/seed.capability.js';\nimport * as results from '../../expectations/result.js';\nimport { jobFacet } from './job.facet.js';\n${body}`,
     );
     if (!isNode(program)) {
         throw new Error('the constructor does not parse');

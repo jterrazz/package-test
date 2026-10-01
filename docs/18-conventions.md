@@ -21,7 +21,7 @@ The catalogue is organized by family. What each family judges is its section hea
 | `layout`       | [02](02-developing.md), [14](14-assertions.md)                                       |
 | `expectations` | [14](14-assertions.md), [15](15-tokens.md), [20](20-documents.md)                    |
 | `world`        | [16](16-stubs.md), [17](17-services.md)                                              |
-| `elements`     | [08](08-website.md), [09](09-mobile.md)                                              |
+| `visitor`      | [13](13-visitor.md), [08](08-website.md), [09](09-mobile.md)                         |
 | `imports`      | [02](02-developing.md)                                                               |
 | `architecture` | below · [01](01-architecture.md) for this repo's own layer map                       |
 | `catalogue`    | [03](03-testing.md#the-packages-own-rules), this package's own rules                 |

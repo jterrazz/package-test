@@ -1,11 +1,11 @@
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import type { FacetParams, MatrixRow } from '../../kernel/chain/capability.js';
-import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { ChainConfig } from '../../kernel/chain/config.js';
-import { defineFacet } from '../../kernel/chain/define-facet.js';
-import { clock } from '../../world/clock/clock.capability.js';
-import { mswWorker } from '../../world/stubs/delivery/browser-page/msw-worker.adapter.js';
-import { intercept } from '../../world/stubs/intercept/intercept.capability.js';
+import type { FacetParams, MatrixRow } from '../../chain/capability.js';
+import type { ChainOf } from '../../chain/chain.js';
+import type { ChainConfig } from '../../chain/config.js';
+import { defineFacet } from '../../chain/define-facet.js';
+import { clock } from '../../clock/clock.capability.js';
+import { mswWorker } from '../../stubs/delivery/browser-page/msw-worker.adapter.js';
+import { intercept } from '../../stubs/intercept/intercept.capability.js';
 import type { ComponentOptions } from './component.project.js';
 import { pageClock } from './page/page-clock.adapter.js';
 import { afterThisTest, pageDirectory } from './page/page-runtime.js';

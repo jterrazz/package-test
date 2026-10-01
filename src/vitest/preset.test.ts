@@ -6,8 +6,8 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../../lint/engine/project/artifacts.js';
+import { tempRootSetup } from '../chain/paths/temp-root.js';
 import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
-import { tempRootSetup } from '../kernel/files/temp-root.js';
 import { presetConfig, reporterOutputFiles } from './preset.js';
 import { unit } from './unit.project.js';
 

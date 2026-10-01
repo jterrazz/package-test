@@ -1,6 +1,6 @@
-import { defineAction } from '../../kernel/chain/action.js';
-import type { ChainSignature } from '../../kernel/chain/capability.js';
-import { scratchDirectory } from '../../kernel/files/scratch.js';
+import { defineAction } from '../../chain/action.js';
+import type { ChainSignature } from '../../chain/capability.js';
+import { scratchDirectory } from '../../chain/paths/scratch.js';
 import { lintReport } from './lint-report.js';
 import type { LintPort } from './lint.port.js';
 import { LINT_RESULT_ROWS, LintResult } from './lint.result.js';

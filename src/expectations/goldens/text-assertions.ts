@@ -1,6 +1,6 @@
 import { dedent } from '../../../lint/engine/project/dedent.js';
 import { refusal } from '../../../lint/refusal.js';
-import { isDiskTarget } from '../../kernel/files/spec-path.js';
+import { isDiskTarget } from '../../chain/paths/spec-path.js';
 import { TextAccessor } from '../text/text.js';
 import { CaptureScope } from '../tokens/match.js';
 import { textEquals } from '../tokens/structural.js';

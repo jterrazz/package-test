@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { refusal } from '../../../../lint/refusal.js';
-import { ServedProcess } from '../../../world/services/process/serve.js';
+import { ServedProcess } from '../../../services/process/serve.js';
 import type { MobileDevice } from '../device/device.port.js';
 import { ensureBooted, resolveSimulatorUdid, sameRuntime } from './simulator.js';
 

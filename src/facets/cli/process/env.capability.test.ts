@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineAction } from '../../../kernel/chain/action.js';
-import { defineFacet } from '../../../kernel/chain/define-facet.js';
-import { sharing } from '../../../kernel/context/with.capability.js';
-import type { DatabasePort } from '../../../world/services/database.port.js';
-import type { ServiceHandle } from '../../../world/services/service.port.js';
+import { defineAction } from '../../../chain/action.js';
+import { sharing } from '../../../chain/context/with.capability.js';
+import { defineFacet } from '../../../chain/define-facet.js';
+import type { DatabasePort } from '../../../services/database.port.js';
+import type { ServiceHandle } from '../../../services/service.port.js';
 import type { CliEnv } from './cli.port.js';
 import { childEnv, env } from './env.capability.js';
 import type { EnvMethod } from './env.capability.js';

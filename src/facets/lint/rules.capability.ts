@@ -1,5 +1,5 @@
-import { defineCapability } from '../../kernel/chain/capability.js';
-import type { ChainSignature } from '../../kernel/chain/capability.js';
+import { defineCapability } from '../../chain/capability.js';
+import type { ChainSignature } from '../../chain/capability.js';
 import type { LintRules } from './lint.port.js';
 
 export type RulesChain<Self> = {

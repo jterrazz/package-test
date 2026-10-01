@@ -27,8 +27,8 @@ describe('facet-is-a-composition.values', () => {
     test("facet-values — facet values — an adapter is a plain value or an adapter's constructor called on plain values", () => {
         // Given - an adapter's constructor and a definition
         const imports = new Map([
-            ['databaseSet', '../../world/services/seed/database-set.adapter.js'],
-            ['seed', '../../world/services/seed/seed.capability.js'],
+            ['databaseSet', '../../services/seed/database-set.adapter.js'],
+            ['seed', '../../services/seed/seed.capability.js'],
         ]);
 
         // Then - only the adapter's constructor builds one, and only on plain values

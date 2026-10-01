@@ -29,7 +29,7 @@ export const facetIsAComposition = defineRule(
         messages: {
             adapter: {
                 found: 'the adapter `{{port}}` is a {{what}} written in the facet, not one its adapter module builds',
-                fix: 'name the adapter, or call the constructor its adapter module exports — under `src/world/`, or in a concept folder of the facet — on the config alone',
+                fix: 'name the adapter, or call the constructor its adapter module exports — under the notion it adapts (`src/stubs/`, `src/services/`, `src/disk/`, `src/clock/`, `src/mocks/`), or in a concept folder of the facet — on the config alone',
             },
             buildsResult: {
                 found: 'the constructor builds a `{{built}}`, a result',
@@ -45,7 +45,7 @@ export const facetIsAComposition = defineRule(
             },
             inline: {
                 found: "the facet's `{{key}}` is a {{what}} written in the facet, not a reference imported from its module",
-                fix: 'import what the facet hands the kernel from the module that owns it, and name it here',
+                fix: 'import what the facet hands the chain from the module that owns it, and name it here',
             },
             listed: {
                 found: '`{{key}}` lists a {{what}}, not a definition imported from a `*.capability.ts` or `*.action.ts` module',

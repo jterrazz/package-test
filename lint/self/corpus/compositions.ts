@@ -1,3 +1,4 @@
+import type { Composition } from '../../../src/chain/define-facet.js';
 import { apiFacet } from '../../../src/facets/api/api.facet.js';
 import { cliFacet } from '../../../src/facets/cli/cli.facet.js';
 import { componentFacet } from '../../../src/facets/component/component.facet.js';
@@ -6,7 +7,6 @@ import { jobFacet } from '../../../src/facets/job/job.facet.js';
 import { lintFacet } from '../../../src/facets/lint/lint.facet.js';
 import { mobileFacet } from '../../../src/facets/mobile/mobile.facet.js';
 import { websiteFacet } from '../../../src/facets/website/website.facet.js';
-import type { Composition } from '../../../src/kernel/chain/define-facet.js';
 import type { Column } from './facet-matrix.js';
 
 type MatrixRow = Composition['options'][string];

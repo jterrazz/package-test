@@ -1,6 +1,6 @@
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { definitionsIn, modulesOf, outsideLoadsReached, straysOf } from './architecture.js';
@@ -38,13 +38,13 @@ const ACTION_MODULES = {
     visit: 'visit',
 };
 
-/** Meta-tests `kernel-loads-in-a-page` (`kernel-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component facet composes a setup inside a page, so what the kernel and a setup load must load there too. */
+/** Meta-tests `chain-loads-in-a-page` (`chain-loads-in-a-page`) and `definition-is-its-module` (`definition-is-its-module`): the component facet composes a setup inside a page, so what the chain and a setup load must load there too. */
 describe('architecture', () => {
-    test('the architecture a facet is composed in (meta-tests) — `kernel-loads-in-a-page` — the kernel and every setup load no node builtin and no package, at any depth', () => {
-        // Given - every module of the chain kernel, and every setup module
+    test('the architecture a facet is composed in (meta-tests) — `chain-loads-in-a-page` — the chain and every setup load no node builtin and no package, at any depth', () => {
+        // Given - every module of the chain machinery, and every setup module
         const starts = [
-            ...modulesOf(ROOT, 'kernel/chain', '.ts').filter(
-                (path) => !path.endsWith('.test-d.ts'),
+            ...modulesOf(ROOT, 'chain', '.ts').filter(
+                (path) => dirname(path) === 'src/chain' && !path.endsWith('.test-d.ts'),
             ),
             ...modulesOf(ROOT, '', '.capability.ts'),
         ];
@@ -53,7 +53,7 @@ describe('architecture', () => {
         expect(outsideLoadsReached(ROOT, starts)).toStrictEqual([]);
     });
 
-    test('the architecture a facet is composed in (meta-tests `kernel-loads-in-a-page`, `definition-is-its-module`) — a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
+    test('the architecture a facet is composed in (meta-tests `chain-loads-in-a-page`, `definition-is-its-module`) — a builtin or a package is reached through a value or a dynamic import at any depth, never through an `import type`', () => {
         // Given - a module importing a type from a builtin, an inline-typed name from it, and a value from a sibling that loads builtins, one of them lazily, and a package
         const root = mkdtempSync(join(tmpdir(), 'architecture-'));
         mkdirSync(join(root, 'src'));

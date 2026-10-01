@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
-import { defineAction } from '../../../kernel/chain/action.js';
-import { defineFacet } from '../../../kernel/chain/define-facet.js';
+import { defineAction } from '../../../chain/action.js';
+import { defineFacet } from '../../../chain/define-facet.js';
 import { viewport } from './viewport.capability.js';
 import type { ViewportMethod } from './viewport.capability.js';
 import type { ViewportPort } from './viewport.port.js';

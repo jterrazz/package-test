@@ -4,8 +4,8 @@ import { join, sep } from 'node:path';
 
 import { dedent } from '../../../lint/engine/project/dedent.js';
 import { refusal } from '../../../lint/refusal.js';
-import { isFrameworkFrame, stackFrames } from '../../kernel/files/caller.js';
-import type { StackFrame } from '../../kernel/files/caller.js';
+import { isFrameworkFrame, stackFrames } from '../../chain/paths/caller.js';
+import type { StackFrame } from '../../chain/paths/caller.js';
 
 /** Every rewrite of a file is laid on the source the run loaded. The file is written when the run ends: vitest frames a failure by reading the file on disk. */
 

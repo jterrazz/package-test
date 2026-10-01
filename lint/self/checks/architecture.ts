@@ -14,7 +14,7 @@ const SPAWNING_SITES = [
     'facets/cli/process/exec.adapter.ts',
     'facets/lint/local-linters.adapter.ts',
     'facets/mobile/server/simulator.ts',
-    'world/services/process/serve.ts',
+    'services/process/serve.ts',
 ];
 
 const TEST_MATERIAL = `${TEST_SUFFIX.source}|/(${GROUND_FOLDERS.join('|')})/`;
@@ -55,7 +55,7 @@ function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;
 }
 
-/** A declared path as the map writes it: `kernel/` a folder, `lint/refusal` one module, relative to `src/` unless it opens on `lint/`. */
+/** A declared path as the map writes it: `chain/` a folder, `lint/refusal` one module, relative to `src/` unless it opens on `lint/`. */
 function targetOf(path: string): string {
     const rooted = path.startsWith('lint/') ? path : `src/${path}`;
 
@@ -127,7 +127,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
                     dependencyTypes: LOCAL_DEPENDENCY,
                     pathNot: either(imports.map((one) => targetOf(one))),
                 },
-                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: kernel ← world · visitor · expectations ← vitest ← facets ← the entries`,
+                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`,
             },
             {
                 fix: 'import it from the slice that owns it, or declare the package on the layer in `FRAMEWORK_LAYERS` with its reason',
@@ -210,7 +210,7 @@ function facetRules(): ArchitectureRule[] {
 
     return [
         {
-            fix: 'move what the two facets share below the facets — to `kernel/`, `world/`, `visitor/` or `expectations/` — and import it from there',
+            fix: 'move what the two facets share below the facets — to `chain/` or the notion it is (`visitor/`, `expectations/`, `stubs/`, `services/`, `disk/`, `clock/`, `mocks/`) — and import it from there',
             from: { path: '^src/facets/([^/]+)/', pathNot: TEST_MATERIAL },
             name: 'facet-imports-no-other-facet',
             read: READ_LAYERS,
@@ -249,7 +249,7 @@ export const ARCHITECTURE: readonly ArchitectureRule[] = Object.freeze([
     ...ownerRules(),
     ...facetRules(),
     {
-        fix: "spawn it from the concept folder that owns the program, or, inside `world/`, through `world/services/process/serve.ts`'s `runToCompletion`",
+        fix: "spawn it from the concept folder that owns the program, or, inside `services/`, through `services/process/serve.ts`'s `runToCompletion`",
         from: { path: '^src/', pathNot: either([TEST_MATERIAL, ...SPAWNING_SITES.map(targetOf)]) },
         name: 'process-spawned-by-its-program-owner',
         read: READ_LAYERS,

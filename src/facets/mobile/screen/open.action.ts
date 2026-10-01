@@ -1,5 +1,5 @@
-import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
+import { defineAction } from '../../../chain/action.js';
+import type { ChainSignature, MatrixRow } from '../../../chain/capability.js';
 import { EVERY_SURFACE_TARGETS, EVERY_SURFACE_VERBS, WITHIN } from '../../../visitor/matrix.js';
 import type { MobileScenario } from '../device/device.port.js';
 import type { AppPort } from './app.port.js';

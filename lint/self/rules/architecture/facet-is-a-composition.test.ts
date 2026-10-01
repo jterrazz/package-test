@@ -4,10 +4,10 @@ import { facetIsAComposition } from './facet-is-a-composition.js';
 
 const COMPOSED = `
 import { trigger } from './trigger.action.js';
-import { clock } from '../../world/clock/clock.capability.js';
-import { getCallerDir } from '../../kernel/files/caller.js';
-import { databaseSet } from '../../world/services/seed/database-set.adapter.js';
-import { processClock } from '../../world/clock/process-clock.adapter.js';
+import { clock } from '../../clock/clock.capability.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
+import { databaseSet } from '../../services/seed/database-set.adapter.js';
+import { processClock } from '../../clock/process-clock.adapter.js';
 import type { ChainOf } from '../chain.js';
 import { defineFacet } from '../define-facet.js';
 
@@ -29,7 +29,7 @@ export const jobFacet = defineFacet<JobSpecification>()({
 
 const OPENS = `
 import { BaseResult } from '../../expectations/result.js';
-import { seed } from '../../world/services/seed/seed.capability.js';
+import { seed } from '../../services/seed/seed.capability.js';
 import { jobFacet } from './job.facet.js';
 
 export async function startJob(options) {
@@ -102,7 +102,7 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
             code: COMPOSED.replace(
                 "options: { root: { group: 'Constructor option', name: 'root', probe: 'root:' } }",
                 "options: { root: { group: 'Constructor option', name: 'root', probe: String('root:') } }",
-            ).replace('actions: [trigger],', 'actions: [trigger],\n    kernel: clock.reduce,'),
+            ).replace('actions: [trigger],', 'actions: [trigger],\n    chain: clock.reduce,'),
             errors: [
                 { column: 4, line: 12, messageId: 'member' },
                 { column: 15, line: 14, messageId: 'option' },
@@ -157,7 +157,7 @@ ruleTester().run('facet-is-a-composition', facetIsAComposition, {
         },
         // A step reached through a namespace import, a destructured step, and one reached through the facet.
         {
-            code: `${OPENS}\nimport * as defs from '../../world/services/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
+            code: `${OPENS}\nimport * as defs from '../../services/seed/seed.capability.js';\nexport function steps(state, context) {\n    const { reduce: seeding } = seed;\n    defs.seed.reduce([], state, context);\n    seeding([], state, context);\n    return jobFacet.composition.capabilities[0].reduce([], state, context);\n}\n`,
             errors: [
                 { column: 4, line: 14, messageId: 'runsStep' },
                 { column: 4, line: 15, messageId: 'runsStep' },

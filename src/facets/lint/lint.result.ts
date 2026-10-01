@@ -1,7 +1,7 @@
+import type { MatrixRow } from '../../chain/capability.js';
 import { BaseResult } from '../../expectations/result.js';
 import type { BaseResultOptions } from '../../expectations/result.js';
 import { TextAccessor } from '../../expectations/text/text.js';
-import type { MatrixRow } from '../../kernel/chain/capability.js';
 
 export const LINT_RESULT_ROWS: readonly MatrixRow[] = [
     { group: 'Result accessor', name: '.report', probe: 'result.report' },

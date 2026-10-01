@@ -1,4 +1,4 @@
-import type { Started } from '../../../kernel/chain/config.js';
+import type { Started } from '../../../chain/config.js';
 import type { MobileConfig } from '../mobile.handle.js';
 import type { AppPort } from './app.port.js';
 

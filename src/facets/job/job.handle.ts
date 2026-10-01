@@ -1,11 +1,11 @@
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
-import { getCallerDir } from '../../kernel/files/caller.js';
-import { declaredDatabaseKeys } from '../../world/services/services.js';
-import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../world/services/services.js';
-import type { Orchestrator } from '../../world/services/startup/orchestrator.js';
-import { releaseIsolation, startServices } from '../../world/services/startup/start-services.js';
-import type { StartedServices } from '../../world/services/startup/start-services.js';
+import { declaredDatabaseKeys } from '../../services/services.js';
+import type { DatabaseKeys, ServiceRecord, ServicesConfig } from '../../services/services.js';
+import type { Orchestrator } from '../../services/startup/orchestrator.js';
+import { releaseIsolation, startServices } from '../../services/startup/start-services.js';
+import type { StartedServices } from '../../services/startup/start-services.js';
 import type { JobSpecification } from './job.facet.js';
 import { jobFacet } from './job.facet.js';
 

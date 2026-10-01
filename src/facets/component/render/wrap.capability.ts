@@ -1,5 +1,5 @@
-import { defineCapability } from '../../../kernel/chain/capability.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
+import { defineCapability } from '../../../chain/capability.js';
+import type { ChainSignature } from '../../../chain/capability.js';
 import type { ComponentUi } from './scenario.js';
 
 type Wrapper = (ui: ComponentUi) => ComponentUi;

@@ -21,9 +21,9 @@ function findingsOf(source: string): string[] {
 
 function facetWiring(adapters: string): string {
     return `
-import { seed } from '../../../../world/services/seed/seed.capability.js';
-import { getCallerDir } from '../../../../kernel/files/caller.js';
-import { databaseSet } from '../../../../world/services/seed/database-set.adapter.js';
+import { seed } from '../../../../services/seed/seed.capability.js';
+import { getCallerDir } from '../../../../chain/paths/caller.js';
+import { databaseSet } from '../../../../services/seed/database-set.adapter.js';
 import { defineFacet } from '../../../define-facet.js';
 
 const composition = {

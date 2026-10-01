@@ -2,6 +2,7 @@ import { chai, expect, inject } from 'vitest';
 
 import { dedent } from '../../../../lint/engine/project/dedent.js';
 import { refusal } from '../../../../lint/refusal.js';
+import { isDiskFile } from '../../../chain/paths/spec-path.js';
 import type { MatchFixtureOptions } from '../../../expectations/goldens/match-options.js';
 import {
     compareStreamInPlace,
@@ -17,7 +18,6 @@ import type { WholeCall } from '../../../expectations/goldens/text-assertions.js
 import { missingHint } from '../../../expectations/in-place/update.js';
 import { TextAccessor } from '../../../expectations/text/text.js';
 import { mergeTextPreservingPlaceholders } from '../../../expectations/tokens/structural.js';
-import { isDiskFile } from '../../../kernel/files/spec-path.js';
 import { readGolden, writeGolden, writeInPlaceText } from '../page/vitest-browser-dom.js';
 
 /** The comparison is `goldens/text-assertions.ts`'s in both builds; only the transport differs: two server commands and one `provide`. */

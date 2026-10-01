@@ -2,7 +2,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { scratchDirectory } from '../../../kernel/files/scratch.js';
+import { scratchDirectory } from '../../../chain/paths/scratch.js';
 import { resolveCommand } from './command.js';
 
 function rootWithTool(): string {

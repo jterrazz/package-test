@@ -24,7 +24,8 @@ function isPlainValue(node: AstNode | undefined): boolean {
 
 function isDriverSource(source: string): boolean {
     return (
-        (/(?:^|\/)world\//u.test(source) || /^\.\/[^/]+\/[^/]+\.js$/u.test(source)) &&
+        (/(?:^|\/)(?:clock|disk|mocks|services|stubs)\//u.test(source) ||
+            /^\.\/[^/]+\/[^/]+\.js$/u.test(source)) &&
         !/\.(?:capability|action|facet|result)\.js$/u.test(source)
     );
 }

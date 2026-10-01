@@ -6,7 +6,7 @@ import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { VITEST_ARTIFACTS_DIR } from '../lint/engine/project/artifacts.js';
 import { api, cli, defineSpecConfig, integration, job, mobile } from './index.vitest.js';
-import { servicesSetup } from './world/services/containers/run-setup.js';
+import { servicesSetup } from './services/containers/run-setup.js';
 
 const ROOT = resolve(import.meta.dirname, '..');
 

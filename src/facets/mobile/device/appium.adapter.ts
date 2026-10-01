@@ -3,7 +3,7 @@ import { resolve } from 'node:path';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/refusal.js';
-import { scenarioFailure } from '../../../kernel/refusals/scenario-failure.js';
+import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../visitor/matching/candidates.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';
 import { scopeChain } from '../../../visitor/targets/landmarks.js';

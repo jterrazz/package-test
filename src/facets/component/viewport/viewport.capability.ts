@@ -1,5 +1,5 @@
-import { defineCapability } from '../../../kernel/chain/capability.js';
-import type { ChainSignature } from '../../../kernel/chain/capability.js';
+import { defineCapability } from '../../../chain/capability.js';
+import type { ChainSignature } from '../../../chain/capability.js';
 import type { ViewportPort } from './viewport.port.js';
 
 type Size = { height: number; width: number };

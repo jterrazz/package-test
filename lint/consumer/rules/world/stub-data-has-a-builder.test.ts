@@ -32,7 +32,7 @@ ruleTester().run('stub-data-has-a-builder', stubDataHasABuilder, {
         },
         {
             code: "export const path = '/articles';",
-            filename: '/repo/src/world/stubs/http/articles.request.ts',
+            filename: '/repo/src/stubs/http/articles.request.ts',
         },
     ],
 });

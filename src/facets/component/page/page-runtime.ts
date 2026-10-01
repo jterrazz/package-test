@@ -1,6 +1,6 @@
 import { inject, onTestFinished, vi } from 'vitest';
 
-import { instantOf } from '../../../world/clock/instant.js';
+import { instantOf } from '../../../clock/instant.js';
 
 export function pageDirectory(): string {
     return '';

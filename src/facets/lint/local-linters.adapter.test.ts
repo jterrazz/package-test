@@ -2,7 +2,7 @@ import { writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { scratchDirectory } from '../../kernel/files/scratch.js';
+import { scratchDirectory } from '../../chain/paths/scratch.js';
 import { localLinters } from './local-linters.adapter.js';
 import type { Linters } from './local-linters.adapter.js';
 

@@ -54,11 +54,11 @@ describe('siblings', () => {
     test('modules with no sibling test (meta-test `siblingless-module-declared`) — a module no kind LISTS is unclaimed, whatever tree it is written in', () => {
         // Given - a new module in each of the trees a prefix kind used to swallow
         const newcomers = [
-            'src/kernel/chain/lens.ts',
+            'src/chain/lens.ts',
             'src/facets/api/lens.ts',
             'lint/lens.ts',
             'src/vitest/lens.ts',
-            'src/world/services/lens.ts',
+            'src/services/lens.ts',
         ];
 
         // Then - none of them is claimed: `siblingless-module-declared` asks for the test, or for the kind

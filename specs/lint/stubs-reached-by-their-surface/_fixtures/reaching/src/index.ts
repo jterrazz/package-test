@@ -1,2 +1,2 @@
-export { http } from './world/stubs/kinds/http.js';
-export { intercept } from './world/stubs/delivery/same-process/intercept.js';
+export { http } from './stubs/kinds/http.js';
+export { intercept } from './stubs/delivery/same-process/intercept.js';

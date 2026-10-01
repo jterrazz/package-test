@@ -1,7 +1,8 @@
 import { invariant } from '../../../../lint/refusal.js';
-import { defineAction } from '../../../kernel/chain/action.js';
-import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
-import { headers } from '../../../kernel/context/headers.capability.js';
+import { defineAction } from '../../../chain/action.js';
+import type { ChainSignature, MatrixRow } from '../../../chain/capability.js';
+import { headers } from '../../../chain/context/headers.capability.js';
+import { clock } from '../../../clock/clock.capability.js';
 import {
     BROWSER_STATES,
     BROWSER_TARGETS,
@@ -10,7 +11,6 @@ import {
     EVERY_SURFACE_VERBS,
     WITHIN,
 } from '../../../visitor/matrix.js';
-import { clock } from '../../../world/clock/clock.capability.js';
 import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
 import { PageResult } from './page.result.js';

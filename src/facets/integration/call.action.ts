@@ -1,5 +1,5 @@
-import { defineAction } from '../../kernel/chain/action.js';
-import type { ChainSignature, FacetParams } from '../../kernel/chain/capability.js';
+import { defineAction } from '../../chain/action.js';
+import type { ChainSignature, FacetParams } from '../../chain/capability.js';
 import { CallResult } from './call.result.js';
 import type { CallOutcome } from './call.result.js';
 

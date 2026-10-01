@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../kernel/files/spec-path.js';
+import { file } from '../../chain/paths/spec-path.js';
 import { TextAccessor } from '../text/text.js';
 import {
     cutFramesUnder,

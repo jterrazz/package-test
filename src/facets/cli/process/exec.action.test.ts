@@ -1,8 +1,8 @@
 import { existsSync } from 'node:fs';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
+import { defineFacet } from '../../../chain/define-facet.js';
 import type { CliResult } from '../../../expectations/command/cli.result.js';
-import { defineFacet } from '../../../kernel/chain/define-facet.js';
 import type { CliEnv, CliOutput, CliPort, ExecOptions } from './cli.port.js';
 import { env } from './env.capability.js';
 import type { EnvMethod } from './env.capability.js';

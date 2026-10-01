@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
+import { tempRootSetup } from '../../chain/paths/temp-root.js';
 import { inPlaceSetup } from '../../expectations/in-place/in-place-setup.js';
-import { tempRootSetup } from '../../kernel/files/temp-root.js';
 import { mobile } from './mobile.project.js';
 import { mobileSessionSetup } from './session/mobile-session.js';
 

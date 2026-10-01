@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { clock } from '../../world/clock/clock.js';
+import { clock } from '../../clock/clock.js';
 import { waitUntil } from './wait-until.js';
 
 describe('waitUntil', () => {

@@ -1,6 +1,6 @@
 import { beforeAll, describe, expect, test } from 'vitest';
 
-import { file } from '../../kernel/files/spec-path.js';
+import { file } from '../../chain/paths/spec-path.js';
 import { registerMatchers } from '../goldens/matchers.js';
 import { text } from './text-subject.js';
 import { TextAccessor } from './text.js';

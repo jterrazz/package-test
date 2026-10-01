@@ -3,8 +3,8 @@ import { dirname } from 'node:path';
 import type { BrowserCommand } from 'vitest/node';
 
 import { invariant, refusal } from '../../../../lint/refusal.js';
+import { resolveSpecPath } from '../../../chain/paths/resolved-spec-path.js';
 import { renderText, writeInPlace } from '../../../expectations/in-place/in-place.js';
-import { resolveSpecPath } from '../../../kernel/files/resolved-spec-path.js';
 
 /** `context.page` is the orchestrator frame and answers `- iframe`: the ARIA tree is read on the tester frame. A golden resolves against `context.testPath`, not the project root. */
 

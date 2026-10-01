@@ -11,40 +11,50 @@ export type LayerOptions = {
     seams?: Record<string, string[]>;
 };
 
-/** This package's layer map: `kernel ← world · visitor · expectations ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
+const CHAIN_AND_REFUSALS = ['chain/', 'lint/engine/', 'lint/refusal'];
+
+/** This package's layer map: `chain ← visitor · expectations · stubs · services · disk · clock · mocks ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
-    kernel: {
+    chain: {
         folders: {
-            chain: [],
             context: [],
             // A scratch folder ends with the test that asked for it (vitest's `onTestFinished`).
-            files: ['vitest'],
+            paths: ['vitest'],
             refusals: [],
         },
-        imports: ['kernel/', 'lint/engine/', 'lint/refusal'],
+        imports: CHAIN_AND_REFUSALS,
         // The four-part lesson a refusal prints is the toolchain's rules kit.
         packages: ['@jterrazz/typescript/rules'],
     },
-    world: {
-        folders: {
-            clock: ['vitest'],
-            mocks: ['vitest', ...librariesOwnedIn('src/world/mocks/')],
-            // The container server's reader is a provided value (`vitest`).
-            services: [...librariesOwnedIn('src/world/services/'), 'vitest'],
-            stubs: librariesOwnedIn('src/world/stubs/'),
-        },
-        imports: ['kernel/', 'lint/engine/', 'lint/refusal'],
+    visitor: { imports: [...CHAIN_AND_REFUSALS, 'visitor/'] },
+    expectations: {
+        imports: [...CHAIN_AND_REFUSALS, 'expectations/'],
+        packages: ['vitest'],
         seams: {
-            // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
-            'world/stubs/kinds/http.ts': ['expectations/tokens/'],
-            'world/stubs/kinds/text-filter.ts': ['expectations/tokens/'],
-            'world/stubs/matching/route.ts': ['expectations/tokens/'],
+            // A table read names its database by the rule a seed names it by: one validation.
+            'expectations/result.ts': ['services/database-option'],
         },
     },
-    visitor: { imports: ['kernel/', 'visitor/', 'lint/engine/', 'lint/refusal'] },
-    expectations: {
-        imports: ['kernel/', 'expectations/', 'lint/engine/', 'lint/refusal'],
-        packages: ['vitest'],
+    stubs: {
+        imports: [...CHAIN_AND_REFUSALS, 'stubs/'],
+        packages: librariesOwnedIn('src/stubs/'),
+        seams: {
+            // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
+            'stubs/kinds/http.ts': ['expectations/tokens/'],
+            'stubs/kinds/text-filter.ts': ['expectations/tokens/'],
+            'stubs/matching/route.ts': ['expectations/tokens/'],
+        },
+    },
+    services: {
+        imports: [...CHAIN_AND_REFUSALS, 'services/'],
+        // The container server's reader is a provided value (`vitest`).
+        packages: [...librariesOwnedIn('src/services/'), 'vitest'],
+    },
+    disk: { imports: [...CHAIN_AND_REFUSALS, 'disk/'] },
+    clock: { imports: [...CHAIN_AND_REFUSALS, 'clock/'], packages: ['vitest'] },
+    mocks: {
+        imports: [...CHAIN_AND_REFUSALS, 'mocks/'],
+        packages: ['vitest', ...librariesOwnedIn('src/mocks/')],
     },
     // A folder owns its files, and no facet lists another.
     facets: {
@@ -58,7 +68,16 @@ export const FRAMEWORK_LAYERS = {
             mobile: librariesOwnedIn('src/facets/mobile/'),
             website: librariesOwnedIn('src/facets/website/'),
         },
-        imports: ['kernel/', 'world/', 'visitor/', 'expectations/', 'lint/engine/', 'lint/refusal'],
+        imports: [
+            ...CHAIN_AND_REFUSALS,
+            'visitor/',
+            'expectations/',
+            'stubs/',
+            'services/',
+            'disk/',
+            'clock/',
+            'mocks/',
+        ],
         packages: ['vitest'],
         seams: {
             'facets/specification.ts': [
@@ -84,7 +103,7 @@ export const FRAMEWORK_LAYERS = {
     vitest: {
         imports: [
             'vitest/',
-            'kernel/',
+            'chain/',
             // Update mode's global setup, which every project carries.
             'expectations/in-place/in-place-setup',
             'lint/engine/',
@@ -102,6 +121,6 @@ export const FRAMEWORK_LAYERS = {
             'vitest',
             ...librariesOwnedIn('lint/'),
         ],
-        seams: { 'lint/self/corpus/compositions.ts': ['facets/', 'kernel/chain/define-facet'] },
+        seams: { 'lint/self/corpus/compositions.ts': ['facets/', 'chain/define-facet'] },
     },
 } satisfies Record<string, LayerOptions>;

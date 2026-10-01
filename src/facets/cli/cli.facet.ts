@@ -1,16 +1,16 @@
 /* oxlint-disable typescript/consistent-type-definitions, typescript/no-empty-object-type -- the chain is an empty interface over its computed type: the compiler prints an interface by its name, where an alias of a computed type may print expanded */
-import type { MatrixRow } from '../../kernel/chain/capability.js';
-import type { ChainOf } from '../../kernel/chain/chain.js';
-import type { Started } from '../../kernel/chain/config.js';
-import { defineFacet } from '../../kernel/chain/define-facet.js';
-import { sharing } from '../../kernel/context/with.capability.js';
-import { getCallerDir } from '../../kernel/files/caller.js';
-import { fixture } from '../../kernel/files/fixture.capability.js';
-import { fsFixtures } from '../../kernel/files/fs-fixtures.adapter.js';
-import { fsLinks } from '../../kernel/files/fs-links.adapter.js';
-import { link } from '../../kernel/files/link.capability.js';
-import { databaseSet } from '../../world/services/seed/database-set.adapter.js';
-import { seed } from '../../world/services/seed/seed.capability.js';
+import type { MatrixRow } from '../../chain/capability.js';
+import type { ChainOf } from '../../chain/chain.js';
+import type { Started } from '../../chain/config.js';
+import { sharing } from '../../chain/context/with.capability.js';
+import { defineFacet } from '../../chain/define-facet.js';
+import { getCallerDir } from '../../chain/paths/caller.js';
+import { fixture } from '../../disk/fixture.capability.js';
+import { fsFixtures } from '../../disk/fs-fixtures.adapter.js';
+import { fsLinks } from '../../disk/fs-links.adapter.js';
+import { link } from '../../disk/link.capability.js';
+import { databaseSet } from '../../services/seed/database-set.adapter.js';
+import { seed } from '../../services/seed/seed.capability.js';
 import type { CliConfig, CliSpecificationOptions } from './cli.handle.js';
 import { run } from './documents/run.action.js';
 import { env } from './process/env.capability.js';

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../kernel/files/spec-path.js';
+import { file } from '../../../chain/paths/spec-path.js';
 import { run } from './run.action.js';
 
 const unread = <Slice>(capability: { readonly initial: Slice }): Slice => capability.initial;

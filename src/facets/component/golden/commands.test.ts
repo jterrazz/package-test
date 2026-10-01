@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 import type { BrowserCommandContext } from 'vitest/node';
 
-import { scratchDirectory } from '../../../kernel/files/scratch.js';
+import { scratchDirectory } from '../../../chain/paths/scratch.js';
 import { COMPONENT_COMMANDS } from './commands.js';
 
 function contextOf(
