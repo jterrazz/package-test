@@ -7,7 +7,6 @@ import { invariant, refusal } from '../../../../lint/index.refusal.js';
 import { pause } from '../../../kernel/pause.js';
 import type { ProcessOptions } from './process.adapter.js';
 
-/** Grace period between SIGTERM and the SIGKILL escalation. */
 const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
@@ -290,7 +289,8 @@ export class ServedProcess {
                 process.kill(-child.pid, signal);
                 return;
             } catch {
-                // Group already reaped (ESRCH) — fall through to direct kill.
+                child.kill(signal);
+                return;
             }
         }
         child.kill(signal);
