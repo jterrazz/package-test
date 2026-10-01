@@ -15,5 +15,6 @@ const { integration } = await specification.integration({
 
 test('the run is killed with its server up', async () => {
     await integration.call(() => undefined);
-    process.kill(0, 'SIGKILL');
+    process.kill(process.ppid, 'SIGKILL');
+    process.kill(process.pid, 'SIGKILL');
 });

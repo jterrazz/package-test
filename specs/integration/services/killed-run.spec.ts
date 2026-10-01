@@ -14,7 +14,7 @@ function alive(pid: number): boolean {
 
 describe('killed-run', () => {
     test('a run killed with SIGKILL leaves no process() server behind', async () => {
-        // Given - a scratch run that starts a process() service, then SIGKILLs its own process group, teardown never reached
+        // Given - a scratch run that starts a process() service, then SIGKILLs its own vitest and worker, teardown never reached
         const result = await vitestCli
             .fixture(directory('./_fixtures/killed-run/'))
             .exec('run', { timeout: 60_000 });
