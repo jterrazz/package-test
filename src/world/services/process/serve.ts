@@ -116,7 +116,7 @@ export class ServedProcess {
         });
 
         let exited = false;
-        this.child.on('exit', () => {
+        this.child.on('close', () => {
             exited = true;
         });
 
