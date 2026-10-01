@@ -119,7 +119,8 @@ export class ServedProcess {
         });
 
         const deadline = Date.now() + timeout;
-        const died = (): never => {
+        const died = async (): Promise<never> => {
+            await this.stop();
             throw new Error(
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
@@ -152,7 +153,7 @@ export class ServedProcess {
                     return `http://127.0.0.1:${captured}`;
                 }
                 if (exited) {
-                    died();
+                    break;
                 }
                 if (Date.now() >= deadline) {
                     await this.stop();
@@ -167,13 +168,14 @@ export class ServedProcess {
                 }
                 await pause(READY_POLL_INTERVAL_MS);
             }
+            return await died();
         }
 
         const baseUrl = `http://127.0.0.1:${port}`;
         const readyUrl = `${baseUrl}${this.options.ready ?? '/'}`;
         for (;;) {
             if (exited) {
-                died();
+                break;
             }
             try {
                 await fetch(readyUrl, { redirect: 'manual' });
@@ -194,6 +196,7 @@ export class ServedProcess {
                 await pause(READY_POLL_INTERVAL_MS);
             }
         }
+        return await died();
     }
 
     private workingDirectory(): string {
@@ -241,6 +244,7 @@ export class ServedProcess {
                 resolve();
             });
             if (child.exitCode !== null || child.signalCode !== null) {
+                this.kill(child, 'SIGKILL');
                 resolve();
                 return;
             }

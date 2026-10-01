@@ -67,6 +67,23 @@ describe('serve', () => {
         await expect(adapter.start()).rejects.toThrow('bad config');
     });
 
+    test('a served process — a command that dies before it is ready leaves nothing of its group running', async () => {
+        // Given - a command that forks a sleeper into its group, then exits
+        adapter = new ServedProcess(
+            {
+                command: `node -e "const c = require('node:child_process').spawn('sleep', ['30'], { stdio: 'ignore' }); console.log('sleeper ' + c.pid); process.exit(1)"`,
+                timeout: 5000,
+            },
+            process.cwd(),
+        );
+
+        // Then - the refusal names the sleeper, and the sleeper is gone with the group
+        const failure = await adapter.start().then(() => '', String);
+        const sleeper = Number(/sleeper (?<pid>\d+)/u.exec(failure)?.groups?.pid);
+        expect(sleeper).toBeGreaterThan(0);
+        await expect.poll(() => alive(sleeper), { timeout: 3000 }).toBe(false);
+    });
+
     test('a served process — stop terminates the process group', async () => {
         // Given - a running server, and the pid it answers with
         adapter = new ServedProcess({ command: SERVER, ready: READY }, process.cwd());
