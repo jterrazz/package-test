@@ -65,6 +65,19 @@ describe('sessionLedger', () => {
         expect(sessionLedger(ledgerFolder()).lookup('http://a', IPHONE)).toBeUndefined();
     });
 
+    test('the session ledger — one driver session per run — a forgotten session is found no more, and its replacement is', () => {
+        // Given - a run's ledger holding a session its server expired
+        const ledger = sessionLedger(ledgerFolder());
+        ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-1' });
+
+        // When - it is forgotten, and the session opened in its place recorded
+        ledger.forget('s-1');
+        ledger.record(IPHONE, { capabilities: {}, serverUrl: 'http://a', sessionId: 's-2' });
+
+        // Then - the replacement is the one found
+        expect(ledger.lookup('http://a', IPHONE)?.sessionId).toBe('s-2');
+    });
+
     test('the session ledger — one driver session per run — the run ends every session it recorded, then clears the ledger', async () => {
         // Given - two sessions recorded on one server
         const server = await recordingServer();

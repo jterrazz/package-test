@@ -23,6 +23,19 @@ describe('session', () => {
         expect(result.stdout.text).toContain('appium double: 1 session(s) created, 1 deleted');
     });
 
+    test('a run whose session the server expired opens another in its place for the next runner, and ends it', async () => {
+        // Given - a scratch project whose second runner opens once the double expired the session the first one drove
+        const result = await vitestCli
+            .fixture(directory('./_fixtures/mobile-expired-session/'))
+            .env(ON_THE_DOUBLE)
+            .exec('run --configLoader runner');
+
+        // Then - the second runner drove a session of its own, not the dead one, and the run ended it
+        expect(result.exitCode).toBe(0);
+        expect(result.stdout.text).toContain('Tests  1 passed');
+        expect(result.stdout.text).toContain('appium double: 2 session(s) created, 2 deleted');
+    });
+
     test('a run whose project declares the device spawns one server, and its files drive one session', async () => {
         // Given - a scratch project declaring its simulator and appium root, and two files naming no device and spawning no server
         const result = await vitestCli

@@ -50,10 +50,6 @@ app's own `vite.config.ts`.
 
 ## 4. Known defects and debt
 
-- **A mobile session that died is attached to anyway.** The run's ledger hands later files
-  the recorded session with no probe, and no `appium:newCommandTimeout` is set, so a
-  session the server expired fails each later file on its first command. Settle it with a
-  timed `make test-mobile` on a warm simulator, then probe before attaching.
 - **The cli facet cannot install a package into its fixture.** A spec whose subject
   resolves an installed package stays a raw chain: `@jterrazz/typescript`'s publish-guard
   spec links `node_modules/@jterrazz/test` into its fixture by hand, one of the

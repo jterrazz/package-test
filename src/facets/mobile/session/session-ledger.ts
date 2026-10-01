@@ -14,6 +14,7 @@ type RecordedSession = {
 
 /** A recorded session is the run's to end, not the runner's. */
 export type SessionLedger = {
+    forget: (sessionId: string) => void;
     lookup: (serverUrl: string, requested: Record<string, unknown>) => RecordedSession | undefined;
     record: (requested: Record<string, unknown>, session: RecordedSession) => void;
 };
@@ -56,6 +57,9 @@ function entries(directory: string): LedgerEntry[] {
 
 export function sessionLedger(directory: string): SessionLedger {
     return {
+        forget: (sessionId) => {
+            rmSync(join(directory, `${sessionId}.json`), { force: true });
+        },
         lookup: (serverUrl, requested) => {
             const key = keyOf(serverUrl, requested);
             const found = entries(directory).find((entry) => entry.key === key);

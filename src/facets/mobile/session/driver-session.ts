@@ -25,6 +25,10 @@ type SessionRequest = {
     serverUrl: string;
 };
 
+const IDLE_SESSION_BUDGET_S = 300;
+
+const PROBE_TIMEOUT_MS = 10_000;
+
 function platformVersion(os: string): string {
     return os.replace(/^ios\s+/iu, '');
 }
@@ -50,12 +54,26 @@ function capabilitiesOf(request: SessionRequest): Record<string, unknown> {
         'appium:automationName': 'XCUITest',
         'appium:bundleId': request.bundleId,
         'appium:deviceName': name,
+        'appium:newCommandTimeout': IDLE_SESSION_BUDGET_S,
         'appium:noReset': true,
         ...(os === undefined ? {} : { 'appium:platformVersion': platformVersion(os) }),
         ...(udid === undefined ? {} : { 'appium:udid': udid }),
         'appium:wdaLaunchTimeout': request.launchTimeoutMs,
         platformName: 'iOS',
     };
+}
+
+/** Appium answers `timeouts` without a WebDriverAgent round trip, and any command restarts the session's idle clock. */
+async function stillHeld(serverUrl: string, sessionId: string): Promise<boolean> {
+    try {
+        const response = await fetch(`${serverUrl}/session/${sessionId}/timeouts`, {
+            signal: AbortSignal.timeout(PROBE_TIMEOUT_MS),
+        });
+        await response.body?.cancel();
+        return response.ok;
+    } catch {
+        return false;
+    }
 }
 
 /** Attached to the session the run recorded for this server and capabilities, or created and recorded; `shared` sessions are the run's to end. */
@@ -71,7 +89,9 @@ export async function openSession(
             ? await loadWebdriverio()
             : { attach: request.attach, remote: request.remote };
     const recorded = ledger?.lookup(serverUrl, capabilities);
-    if (recorded !== undefined && webdriverio.attach !== undefined) {
+    if (recorded !== undefined && !(await stillHeld(serverUrl, recorded.sessionId))) {
+        ledger?.forget(recorded.sessionId);
+    } else if (recorded !== undefined && webdriverio.attach !== undefined) {
         const driver = await webdriverio.attach({
             ...server,
             capabilities: recorded.capabilities,

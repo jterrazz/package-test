@@ -19,7 +19,7 @@ import { StaleElementError } from './stale-element-error.js';
  * created for the app's bundle id on a named device, the `mobile:` scripts
  * that terminate, activate, deep-link and scroll to an element, element
  * search by `-ios predicate string`, click, clear and value, attributes, the
- * page source and a screenshot. Every other endpoint answers `unknown command`, the
+ * page source, a screenshot and the session's timeouts. Every other endpoint answers `unknown command`, the
  * way a driver refuses one it does not implement — so a new call the adapter
  * starts making fails here before it fails on a device.
  */
@@ -86,6 +86,7 @@ const COMMANDS: Readonly<Record<string, (call: Call) => unknown>> = {
     'GET element/:id/attribute': ({ element, rest }) => attributeOf(element(), rest[3] ?? ''),
     'GET screenshot': () => PIXEL,
     'GET source': ({ session }) => session.app.source(),
+    'GET timeouts': () => ({ implicit: 0, pageLoad: 300_000, script: 30_000 }),
     'POST element/:id/clear': ({ element, session }) => {
         session.app.clear(element());
         return null;
