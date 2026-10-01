@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { CountedButton } from './counted-button.js';
 
 describe('CountedButton', () => {
-    test('the name a descriptor matches is the computed one, not the text', async () => {
-        // Given - a descriptor naming part of the computed name
+    test('the name a target matches is the computed one, not the text', async () => {
+        // Given - a target naming part of the computed name
         const result = await component.render(<CountedButton />, async (visitor) => {
             await visitor.gone(button('Experiments'));
         });

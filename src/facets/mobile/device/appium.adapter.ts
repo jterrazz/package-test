@@ -3,11 +3,11 @@ import { resolve } from 'node:path';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/refusal.js';
-import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
-import { asWritten } from '../../../elements/descriptors/as-written.js';
-import type { ElementRef } from '../../../elements/descriptors/element.js';
-import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { scenarioFailure } from '../../../kernel/refusals/scenario-failure.js';
+import { MAX_REPORTED_MATCHES, shortened } from '../../../visitor/matching/candidates.js';
+import { asWritten } from '../../../visitor/targets/as-written.js';
+import { scopeChain } from '../../../visitor/targets/landmarks.js';
+import type { Target } from '../../../visitor/targets/target.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
@@ -61,16 +61,16 @@ const PREDICATES: Record<MobileElementKind, (parts: PredicateParts) => string> =
         `(${contains('label')} OR ${contains('value')}) AND ${visible}`,
 };
 
-function isMobileKind(kind: ElementRef['kind']): kind is MobileElementKind {
+function isMobileKind(kind: Target['kind']): kind is MobileElementKind {
     return Object.hasOwn(PREDICATES, kind);
 }
 
 /** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
-function compilePredicate(element: ElementRef, options?: { anyVisibility?: boolean }): string {
+function compilePredicate(element: Target, options?: { anyVisibility?: boolean }): string {
     if (!isMobileKind(element.kind)) {
         throw new Error(
             refusal('no-landmark-on-mobile', {
-                fix: `scope with within(testId('…'), …) — any descriptor works as the scope`,
+                fix: `scope with within(testId('…'), …) — any target works as the scope`,
                 found: `${asWritten(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
             }),
         );
@@ -89,7 +89,7 @@ function compilePredicate(element: ElementRef, options?: { anyVisibility?: boole
 /** `$$` answers a chainable typed as its array: the one await of it lives here. */
 async function matching(
     scope: MatchScope,
-    element: ElementRef,
+    element: Target,
     options?: { anyVisibility?: boolean },
 ): Promise<ElementList> {
     /* oxlint-disable typescript/await-thenable -- webdriverio's chainable is TYPED as the array it resolves to and is a promise at runtime: the await is what runs the query */
@@ -197,7 +197,7 @@ export class AppiumAdapter implements DevicePort {
     /** Scopes stay strict in both modes; the chain resolves outside-in, so an ambiguous scope names itself. */
     private async resolveOne(
         driver: Driver,
-        element: ElementRef,
+        element: Target,
         verb: string,
         cardinality: 'any' | 'one',
     ): Promise<DriverElement> {
@@ -223,7 +223,7 @@ export class AppiumAdapter implements DevicePort {
 
     private async resolveChain(
         driver: Driver,
-        chain: ElementRef[],
+        chain: Target[],
         cardinality: 'any' | 'one',
         options?: { tryScroll?: boolean },
     ): Promise<DriverElement | null> {
@@ -289,7 +289,7 @@ export class AppiumAdapter implements DevicePort {
         }
     }
 
-    private async timeoutError(driver: Driver, element: ElementRef, verb: string): Promise<Error> {
+    private async timeoutError(driver: Driver, element: Target, verb: string): Promise<Error> {
         let excerpt = '';
         try {
             const source = await driver.getPageSource();

@@ -7,7 +7,7 @@ const AMBIGUOUS = refusal({
     fix: 'designate one of them',
     found: 'button("Save") matched 2 elements',
     read: 'docs/08-website.md#visit-scenarios--the-when',
-    why: 'A descriptor names one element.',
+    why: 'A target names one element.',
 });
 
 describe('scenarioFailure', () => {
@@ -19,7 +19,7 @@ describe('scenarioFailure', () => {
         expect(failure.message).toBe(
             [
                 'found: button("Save") matched 2 elements\nEvidence: /tmp/evidence/page.png',
-                'why: A descriptor names one element.',
+                'why: A target names one element.',
                 'fix: designate one of them',
                 'read: docs/08-website.md#visit-scenarios--the-when',
             ].join('\n'),

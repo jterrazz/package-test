@@ -3,11 +3,11 @@ import { commands, locators, page, userEvent } from 'vitest/browser';
 import type { Locator, LocatorSelectors } from 'vitest/browser';
 
 import { refusal } from '../../../../lint/refusal.js';
-import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
-import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
-import { asWritten } from '../../../elements/descriptors/as-written.js';
-import type { ElementRef } from '../../../elements/descriptors/element.js';
-import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
+import { ambiguousElementError } from '../../../visitor/matching/ambiguous.js';
+import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';
+import { asWritten } from '../../../visitor/targets/as-written.js';
+import { scopeChain } from '../../../visitor/targets/landmarks.js';
+import type { Target } from '../../../visitor/targets/target.js';
 import type { MountedSurface } from '../render/page.port.js';
 import type { ComponentUi, ComponentVisitor, DomMount } from '../render/scenario.js';
 
@@ -38,7 +38,7 @@ function answersSearch(scope: LocatorSelectors): scope is SearchScope {
 }
 
 /** A `<search>` takes its accessible name from its author alone. */
-function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boolean): Locator {
+function locateSearch(scope: LocatorSelectors, element: Target, exact: boolean): Locator {
     const byRole =
         element.name === undefined
             ? scope.getByRole('search', { exact })
@@ -54,8 +54,8 @@ function locateSearch(scope: LocatorSelectors, element: ElementRef, exact: boole
     );
 }
 
-/** No `.first()`: taking the first match is the silent wrong-element bug `descriptor-matches-one-element` prevents. */
-export function locate(root: LocatorSelectors, element: ElementRef): Locator {
+/** No `.first()`: taking the first match is the silent wrong-element bug `target-matches-one-element` prevents. */
+export function locate(root: LocatorSelectors, element: Target): Locator {
     const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
     // An absent `exact` is the default, not a choice.
     const exact = element.exact ?? true;
@@ -83,7 +83,7 @@ export function locate(root: LocatorSelectors, element: ElementRef): Locator {
     );
 }
 
-function ambiguousLevel(element: ElementRef): ElementRef {
+function ambiguousLevel(element: Target): Target {
     for (const level of scopeChain(element).slice(0, -1)) {
         if (locate(page, level).elements().length > 1) {
             return level;
@@ -94,7 +94,7 @@ function ambiguousLevel(element: ElementRef): ElementRef {
 
 /** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 export async function act<T>(
-    element: ElementRef,
+    element: Target,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
     const locator = locate(page, element);
@@ -112,7 +112,7 @@ export async function act<T>(
 }
 
 /** A collapsed select's options have no box: visibility would answer "no" for every one. */
-function byPresence(element: ElementRef): boolean {
+function byPresence(element: Target): boolean {
     return element.kind === 'option';
 }
 
@@ -124,7 +124,7 @@ function valueOf(node: Element | null): string | undefined {
         : undefined;
 }
 
-function isGone(locator: Locator, element: ElementRef): boolean {
+function isGone(locator: Locator, element: Target): boolean {
     const node = locator.query();
     if (element.focused === true) {
         return node !== document.activeElement;

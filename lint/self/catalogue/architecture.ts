@@ -108,10 +108,10 @@ export const ARCHITECTURE_TOOLCHAIN_RULES: Row[] = [
         audience: 'self',
         channel: 'toolchain',
         sentence:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, the entries\u2019 tests `index.test.ts` and `index.vitest.test.ts`, the type channel `index.test-d.ts`, and the six trees — `kernel/`, `world/`, `elements/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
+            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, the entries\u2019 tests `index.test.ts` and `index.vitest.test.ts`, the type channel `index.test-d.ts`, and the six trees — `kernel/`, `world/`, `visitor/`, `expectations/`, `facets/`, `vitest/` — and nothing else. An error at the stray entry.',
         facet: 'model',
         family: 'architecture',
-        fix: 'Move the module into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`).',
+        fix: 'Move the module into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`).',
         name: 'source-root-holds-known-entries',
         rationale:
             'A module left at the root belongs to every tree and to none: the grab-bag the restructure dissolved (`surface.ts`, `settings.ts`) starts again as one file nobody owns.',

@@ -1,10 +1,6 @@
-import {
-    EVERY_SURFACE_DESCRIPTORS,
-    EVERY_SURFACE_VERBS,
-    WITHIN,
-} from '../../../elements/matrix.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
+import { EVERY_SURFACE_TARGETS, EVERY_SURFACE_VERBS, WITHIN } from '../../../visitor/matrix.js';
 import type { MobileScenario } from '../device/device.port.js';
 import type { AppPort } from './app.port.js';
 import { ScreenResult } from './screen.result.js';
@@ -29,7 +25,7 @@ export const open = defineAction<
         { group: 'Result accessor', name: '.content', probe: 'result.content' },
         { group: 'Result accessor', name: '.screen', probe: 'result.screen' },
     ],
-    descriptors: [...EVERY_SURFACE_DESCRIPTORS, WITHIN],
+    targets: [...EVERY_SURFACE_TARGETS, WITHIN],
     name: 'open',
     perform: async ([deepLink, scenario], _read, { app }, { config, testDir }) =>
         new ScreenResult({ config, screen: await app.open(deepLink, scenario), testDir }),

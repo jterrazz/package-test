@@ -132,9 +132,9 @@ test('subscribes through the form and captures the final state', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
 
-The visitor's verbs and the words it names elements with are [13 — Elements](13-elements.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the descriptors and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
+The visitor's verbs and the words it names elements with are [13 — The visitor](13-visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
 
-Designating exactly one element is rule `descriptor-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-elements.md#designating-exactly-one-element).
+Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-visitor.md#designating-exactly-one-element).
 
 Navigating within a scenario changes what the capture describes:
 
@@ -373,9 +373,9 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
 - **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
-- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, `descriptor-matches-one-element`'s fix — [13 § `testId()`](13-elements.md#testid--the-one-escape-hatch).
+- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, `target-matches-one-element`'s fix — [13 § `testId()`](13-visitor.md#testid--the-one-escape-hatch).
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
-- **Snapshotting the tree to prove focus.** The tree carries none — [13 § Modifiers](13-elements.md#modifiers) says what does, and what a golden may pin instead.
+- **Snapshotting the tree to prove focus.** The tree carries none — [13 § Modifiers](13-visitor.md#modifiers) says what does, and what a golden may pin instead.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.

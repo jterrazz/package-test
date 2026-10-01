@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
 import { REFUSAL_WHY } from '../../../../lint/refusal.js';
-import { within } from '../../../elements/descriptors/landmarks.js';
-import { button, content, testId } from '../../../elements/descriptors/roles.js';
+import { within } from '../../../visitor/targets/landmarks.js';
+import { button, content, testId } from '../../../visitor/targets/roles.js';
 import { ambiguousScreenElementError } from './ambiguity.js';
 import type { MobileElementMatch } from './device.port.js';
 
@@ -13,7 +13,7 @@ const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch 
 });
 
 describe('ambiguousScreenElementError', () => {
-    test('names the descriptor and the count', () => {
+    test('names the target and the count', () => {
         // Given - three candidates for one button
         const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
@@ -55,17 +55,17 @@ describe('ambiguousScreenElementError', () => {
 
     // RUNTIME no-landmark-on-mobile — the vocabulary is ONE across the facets, and the part with no iOS equivalent is refused rather than approximated: a screen has no ARIA landmarks, so the fix it offers is `within(testId(…), …)`.
     test('suggests scoping first — a screen has no landmarks to name', () => {
-        // Given - an unscoped ambiguous descriptor
+        // Given - an unscoped ambiguous target
         const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match()],
         });
 
-        // Then - within() is offered with any-descriptor scoping spelled out
+        // Then - within() is offered with any-target scoping spelled out
         expect(message).toContain('within(testId(\'…\'), button("Bookmark"))');
     });
 
-    test('offers exact to a descriptor that opted OUT, with what it leaves', () => {
+    test('offers exact to a target that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const { message } = ambiguousScreenElementError({
             element: button('Bookmark', { exact: false }),
@@ -77,8 +77,8 @@ describe('ambiguousScreenElementError', () => {
         expect(message).toContain('leaves 1 of 2');
     });
 
-    test('never offers exact to an ordinary descriptor — it is already exact', () => {
-        // Given - a descriptor stating nothing, which is the whole-label default
+    test('never offers exact to an ordinary target — it is already exact', () => {
+        // Given - a target stating nothing, which is the whole-label default
         const { message } = ambiguousScreenElementError({
             element: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' })],
@@ -114,7 +114,7 @@ describe('ambiguousScreenElementError', () => {
         expect(message).toContain('also here: event-2-bookmark');
     });
 
-    test('does not re-suggest scoping a descriptor that is already scoped', () => {
+    test('does not re-suggest scoping a target that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
         const { message } = ambiguousScreenElementError({
             element: within(testId('event-list'), button('Bookmark')),
@@ -134,7 +134,7 @@ describe('ambiguousScreenElementError', () => {
         });
 
         // Then - an agent reading the failure reads the rule, and where it is whole
-        expect(message).toContain(`why: ${REFUSAL_WHY['descriptor-matches-one-element']}`);
-        expect(message).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
+        expect(message).toContain(`why: ${REFUSAL_WHY['target-matches-one-element']}`);
+        expect(message).toContain('read: docs/19-linting.md#target-matches-one-element');
     });
 });

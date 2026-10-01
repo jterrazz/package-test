@@ -1,13 +1,13 @@
 import { field, option, selected, valued, within } from '@jterrazz/test';
-import type { ElementRef } from '@jterrazz/test';
+import type { Target } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { website } from '../website.specification.js';
 
-/** Named: three descriptors inside a verb is one call too deep for `unicorn/max-nested-calls`. */
-const channelIs = (name: string): ElementRef => within(field('Channel'), selected(option(name)));
+/** Named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`. */
+const channelIs = (name: string): Target => within(field('Channel'), selected(option(name)));
 
-const topicIs = (name: string): ElementRef => within(field('Topic'), selected(option(name)));
+const topicIs = (name: string): Target => within(field('Topic'), selected(option(name)));
 
 describe('options', () => {
     test('names an option of a field, and which one the field is on', async () => {

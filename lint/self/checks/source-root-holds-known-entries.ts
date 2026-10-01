@@ -3,7 +3,7 @@ import { firstSentence, readAt, rowNamed } from '@jterrazz/typescript/rules';
 
 import { SELF_CHAPTER, selfRows } from '../catalogue/manifest.js';
 
-const TREES = ['elements', 'expectations', 'facets', 'kernel', 'vitest', 'world'];
+const TREES = ['expectations', 'facets', 'kernel', 'visitor', 'vitest', 'world'];
 
 const ENTRIES: Readonly<Record<string, string>> = {
     '.browser.ts': 'index',
@@ -17,7 +17,7 @@ const ENTRIES: Readonly<Record<string, string>> = {
 const row = rowNamed(selfRows, 'source-root-holds-known-entries');
 
 export const sourceRootHoldsKnownEntries: NamesRule = {
-    fix: 'move it into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`elements/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`)',
+    fix: 'move it into the tree whose concept it is — what is tested (`facets/`), what surrounds it (`world/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), the machinery (`kernel/`) or the runner config (`vitest/`)',
     ls: {
         src: {
             ...Object.fromEntries(['.*', '.*.*', '.*.*.*'].map((key) => [key, 'exists:0'])),

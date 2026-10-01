@@ -1,6 +1,6 @@
 import { LANDMARK_SELECTOR } from './landmark-of-tag.js';
 
-/** One candidate of an ambiguous descriptor, as the refusal lists it. */
+/** One candidate of an ambiguous target, as the refusal lists it. */
 export type ElementMatch = {
     /** The accessible name, when it differs from the text (an `aria-label`). */
     accessibleName?: string | undefined;

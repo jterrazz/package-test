@@ -58,7 +58,7 @@ export {
     status,
     table,
     testId,
-} from './elements/descriptors/roles.js';
+} from './visitor/targets/roles.js';
 export {
     banner,
     complementary,
@@ -69,8 +69,8 @@ export {
     region,
     search,
     within,
-} from './elements/descriptors/landmarks.js';
-export { disabled, enabled, focused, selected, valued } from './elements/descriptors/modifiers.js';
+} from './visitor/targets/landmarks.js';
+export { disabled, enabled, focused, selected, valued } from './visitor/targets/modifiers.js';
 export { match, Matcher } from './expectations/tokens/match.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil } from './expectations/conditions/wait-until.js';

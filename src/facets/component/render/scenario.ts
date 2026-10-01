@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react';
 
-import type { PageVerbs } from '../../../elements/verbs.js';
+import type { VisitorVerbs } from '../../../visitor/verbs.js';
 
 /** A React tree; `react` is an optional peer, its type kept off a build by `skipLibCheck`. */
 export type ComponentUi = ReactNode;
@@ -10,7 +10,7 @@ export type ComponentUi = ReactNode;
 export type DomMount = (container: HTMLElement) => (() => void) | void;
 
 /** The verbs a render scenario is handed: a page's, plus the two a parent owns. */
-export type ComponentVisitor = PageVerbs & {
+export type ComponentVisitor = VisitorVerbs & {
     rerender: (ui: ComponentUi) => Promise<void>;
     unmount: () => Promise<void>;
 };

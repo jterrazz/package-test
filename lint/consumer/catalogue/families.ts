@@ -5,7 +5,7 @@ export const FAMILIES = {
     layout: 'Files, folders, sizes, names, and the suppressions a file carries',
     expectations: 'What is compared, and how',
     world: 'Stubs, doubles, time and seeds',
-    elements: 'Screens, descriptors and scenarios',
+    visitor: 'Screens, targets and scenarios',
     imports: 'Who imports whom, and protecting production',
     architecture: 'Source layers',
 } as const;

@@ -13,12 +13,12 @@ async function refusalOf(path: string, scenario: VisitScenario): Promise<string>
     throw new Error(`expected ${path} to be refused, but the visit succeeded`);
 }
 
-// RUNTIME descriptor-matches-one-element — a descriptor a verb ACTS on must designate exactly one element; the refusal enumerates the candidates and the rewrites.
+// RUNTIME target-matches-one-element — a target a verb ACTS on must designate exactly one element; the refusal enumerates the candidates and the rewrites.
 describe('ambiguity', () => {
     test('refuses an element that matches more than one node', async () => {
         // Given - a page where "Articles" names two links verbatim, and a third only as a substring ("Read Articles"), which the whole-name default does not reach
         const message = await refusalOf('/ambiguous', async (visitor) => {
-            // When - a scenario acts on the bare descriptor
+            // When - a scenario acts on the bare target
             await visitor.click(link('Articles'));
         });
 
@@ -36,7 +36,7 @@ describe('ambiguity', () => {
         expect(message).toContain('in <nav>');
         expect(message).toContain('in <footer>');
         expect(message).toContain('within(navigation(), link("Articles"))');
-        expect(message).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
+        expect(message).toContain('read: docs/19-linting.md#target-matches-one-element');
     });
 
     test('names a candidate inside a `<search>` element by its landmark', async () => {
@@ -75,7 +75,7 @@ describe('ambiguity', () => {
         expect(message).toContain('within(navigation(), link("Home"))');
     });
 
-    test('resolves the ambiguity when the descriptor is scoped to a landmark', async () => {
+    test('resolves the ambiguity when the target is scoped to a landmark', async () => {
         // Given - the same page, the link designated inside the nav
         const result = await website.visit('/ambiguous', async (visitor) => {
             // When - the scope narrows it to exactly one
@@ -92,7 +92,7 @@ describe('ambiguity', () => {
             await visitor.click(within(contentinfo(), link('Articles')));
         });
 
-        // Then - the descriptor designates the footer link
+        // Then - the target designates the footer link
         expect(result.url).toContain('/articles');
     });
 
@@ -129,7 +129,7 @@ describe('ambiguity', () => {
     });
 
     test('sees an element only when it too designates exactly one', async () => {
-        // Given - the synchronization primitive on an ambiguous descriptor
+        // Given - the synchronization primitive on an ambiguous target
         const message = await refusalOf('/ambiguous', async (visitor) => {
             await visitor.see(link('Articles'));
         });
@@ -138,8 +138,8 @@ describe('ambiguity', () => {
         expect(message).toContain('matched 2 elements');
     });
 
-    test('names the accessible name a descriptor matched on when it is not the text', async () => {
-        // Given - a row button labelled by an aria-label, and a dialog button named verbatim: one descriptor, two matches, and only one of them reads as itself
+    test('names the accessible name a target matched on when it is not the text', async () => {
+        // Given - a row button labelled by an aria-label, and a dialog button named verbatim: one target, two matches, and only one of them reads as itself
         const message = await refusalOf('/ambiguous', async (visitor) => {
             await visitor.click(button('Delete post'));
         });

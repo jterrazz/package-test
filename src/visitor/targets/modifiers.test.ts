@@ -5,11 +5,11 @@ import { disabled, enabled, focused, selected, valued } from './modifiers.js';
 import { button, field, link, option } from './roles.js';
 
 describe('modifiers', () => {
-    test('focused — modifies a descriptor rather than replacing it', () => {
+    test('focused — modifies a target rather than replacing it', () => {
         // Given - the button a dialog should hand the keyboard back to
         const element = focused(button('Open'));
 
-        // Then - the descriptor is the same one, asked about its focus
+        // Then - the target is the same one, asked about its focus
         expect(element).toStrictEqual({ focused: true, kind: 'button', name: 'Open' });
     });
 
@@ -26,9 +26,9 @@ describe('modifiers', () => {
         });
     });
 
-    test('disabled / enabled — modify a descriptor rather than replacing it', () => {
+    test('disabled / enabled — modify a target rather than replacing it', () => {
         // Given - the same control, asked about each direction of enablement
-        // Then - one flag, two answers; the descriptor is untouched otherwise
+        // Then - one flag, two answers; the target is untouched otherwise
         expect(disabled(button('Publish'))).toStrictEqual({
             disabled: true,
             kind: 'button',
@@ -58,7 +58,7 @@ describe('modifiers', () => {
         // Given - the chosen channel, named inside the field that holds it
         const element = within(field('Channel'), selected(option('LinkedIn')));
 
-        // Then - the scope and the state travel on the one descriptor
+        // Then - the scope and the state travel on the one target
         expect(element).toStrictEqual({
             kind: 'option',
             name: 'LinkedIn',
@@ -71,7 +71,7 @@ describe('modifiers', () => {
         // Given - the title a form was filled with
         const element = valued(field('Title'), 'Launch teaser');
 
-        // Then - the descriptor is the same one, asked about its value
+        // Then - the target is the same one, asked about its value
         expect(element).toStrictEqual({
             kind: 'field',
             name: 'Title',

@@ -207,7 +207,7 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)                               |
 | Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md), [docs/21](docs/21-lint.md) |
 | A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                                          |
-| Naming an element: descriptors, verbs, `within`, exact names     | [docs/13](docs/13-elements.md)                                                           |
+| The visitor: verbs, targets, `within`, exact names               | [docs/13](docs/13-visitor.md)                                                            |
 | Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                                         |
 | The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                                             |
 | Stubs, selection, provider builders, `intercept()`               | [docs/16](docs/16-stubs.md)                                                              |

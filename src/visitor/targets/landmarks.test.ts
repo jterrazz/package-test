@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { main, navigation, region, within } from './landmarks.js';
+import { main, navigation, region, scopeChain, within } from './landmarks.js';
 import { button, link, testId } from './roles.js';
 
 describe('landmarks', () => {
@@ -24,7 +24,7 @@ describe('landmarks', () => {
         // Given - a link designated inside the nav
         const element = within(navigation(), link('Articles'));
 
-        // Then - the scope rides along on the descriptor
+        // Then - the scope rides along on the target
         expect(element).toStrictEqual({
             kind: 'link',
             name: 'Articles',
@@ -47,7 +47,7 @@ describe('landmarks', () => {
         });
     });
 
-    test('within — accepts any descriptor as a scope, including the escape hatch', () => {
+    test('within — accepts any target as a scope, including the escape hatch', () => {
         // Given - a container with no landmark role to stand on
         const element = within(testId('row-3'), button('Delete'));
 
@@ -56,13 +56,41 @@ describe('landmarks', () => {
     });
 
     test('within — leaves the original target untouched', () => {
-        // Given - a descriptor reused across two scopes
+        // Given - a target reused across two scopes
         const target = link('Articles');
 
         // When - it is scoped
         within(navigation(), target);
 
-        // Then - the source descriptor is not mutated
+        // Then - the source target is not mutated
         expect(target.scope).toBeUndefined();
+    });
+
+    test('landmark — carries exact when asked for', () => {
+        // Given - a named region opting out of the whole-name match
+        const element = region('Series', { exact: false });
+
+        // Then - the stated flag travels with the target
+        expect(element).toStrictEqual({ exact: false, kind: 'region', name: 'Series' });
+    });
+
+    test('scopeChain — unrolls a nested scope from the outermost container to the target', () => {
+        // Given - a link scoped to a region, itself scoped to main
+        const element = within(main(), within(region('Series'), link('Part 2')));
+
+        // Then - each level stands alone, outermost first
+        expect(scopeChain(element).map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
+            { kind: 'main', name: undefined },
+            { kind: 'region', name: 'Series' },
+            { kind: 'link', name: 'Part 2' },
+        ]);
+    });
+
+    test('scopeChain — answers an unscoped target with itself alone', () => {
+        // Given - a bare link
+        const element = link('Articles');
+
+        // Then - the chain is that one level
+        expect(scopeChain(element)).toStrictEqual([element]);
     });
 });

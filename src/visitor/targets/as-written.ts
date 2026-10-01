@@ -1,6 +1,6 @@
-import type { ElementRef } from './element.js';
+import type { Target } from './target.js';
 
-export const FUNCTION_NAME_OF_KIND: Record<ElementRef['kind'], string> = {
+export const FUNCTION_NAME_OF_KIND: Record<Target['kind'], string> = {
     banner: 'banner',
     button: 'button',
     complementary: 'complementary',
@@ -24,12 +24,12 @@ export const FUNCTION_NAME_OF_KIND: Record<ElementRef['kind'], string> = {
 };
 
 /** Spoken in the vocabulary the author wrote, never playwright's: an option appears only when the author stated one. */
-export function asWritten(element: ElementRef): string {
+export function asWritten(element: Target): string {
     const bare = asWrittenUnscoped(element);
     return element.scope ? `within(${asWritten(element.scope)}, ${bare})` : bare;
 }
 
-export function asWrittenUnscoped(element: ElementRef): string {
+export function asWrittenUnscoped(element: Target): string {
     const args: string[] = [];
     if (element.name !== undefined) {
         args.push(JSON.stringify(element.name));

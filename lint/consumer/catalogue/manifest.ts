@@ -703,7 +703,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'A scenario (`.visit()` on website, `.open()` on mobile, `.render()` on component) is the When: the visitor acts and the capture reflects the settled state; no `expect()` in the callback — assertions live in the Then, on the returned result.',
         facet: 'model',
-        family: 'elements',
+        family: 'visitor',
         fix: 'Move the assertion out of the callback, onto the result the terminal action resolves to.',
         name: 'no-expect-in-scenario',
         rationale:
@@ -716,7 +716,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             "In a test file, a scenario's elements are user-facing (`button`, `link`, `field`, `heading`, `content`; on mobile `button`, `field`, `content`). `testId()` is the one escape hatch, and the line STATES what the element lacks: a `// testId: <what is missing>` comment on the call's own line or the one directly above. It is an invariant, not a rationale.",
         facet: 'model',
-        family: 'elements',
+        family: 'visitor',
         fix: 'Write `// testId: <no accessible name | no role | …>` on the call’s line or the one above — or name the element with `button()`/`link()`/`field()`/`heading()`/`content()`.',
         name: 'test-id-states-what-is-missing',
         rationale:
@@ -729,7 +729,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'A scenario under `specs/` that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`) on the visitor it was handed ends on `visitor.see(…)`, `visitor.gone(…)` or `visitor.unmount()` — through the block, branch, loop or `.then()` it ends in. A scenario that only reads is out of reach, and so is a component test, whose action often produces a CALL rather than a screen.',
         facet: 'model',
-        family: 'elements',
+        family: 'visitor',
         fix: 'End on `visitor.see(<what the action produced>)` or `visitor.gone(<what it removed>)`.',
         name: 'scenario-ends-settled',
         rationale:
@@ -1419,7 +1419,7 @@ export const TYPE_ROWS: Row[] = [
         sentence:
             "The verb set is the boundary between the facets: `goto` is the page's, `rerender`/`unmount` the component's, `tap` the screen's, and `focused`/`disabled`/`selected`/`valued` reach only where `see` and `gone` do.",
         facet: 'model',
-        family: 'elements',
+        family: 'visitor',
         fix: 'Reach for the verb the facet offers; a missing one is a decision, not an omission.',
         name: 'verb-belongs-to-its-facet',
         rationale:
@@ -1628,11 +1628,11 @@ export const RUNTIME_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'runtime',
-        sentence: `${REFUSAL_WHY['descriptor-matches-one-element']} An element descriptor must designate exactly ONE element when a verb ACTS on it (\`click\`/\`tap\`/\`fill\`): if several match, the action is refused with an error enumerating the candidates and offering the rewrites (\`within(...)\`, another descriptor). The framework never acts on "the first". A name designates the WHOLE accessible name — \`{ exact: false }\` is the opt-out — and a descriptor that finds nothing whole is not found, whatever a substring would have matched. It holds on both scenario facets, website and mobile; on mobile, \`see()\` — which acts on nothing — is satisfied by any visible match (the XCUITest tree legitimately duplicates a label between a container and its child).`,
+        sentence: `${REFUSAL_WHY['target-matches-one-element']} An element target must designate exactly ONE element when a verb ACTS on it (\`click\`/\`tap\`/\`fill\`): if several match, the action is refused with an error enumerating the candidates and offering the rewrites (\`within(...)\`, another target). The framework never acts on "the first". A name designates the WHOLE accessible name — \`{ exact: false }\` is the opt-out — and a target that finds nothing whole is not found, whatever a substring would have matched. It holds on both scenario facets, website and mobile; on mobile, \`see()\` — which acts on nothing — is satisfied by any visible match (the XCUITest tree legitimately duplicates a label between a container and its child).`,
         facet: 'model',
-        family: 'elements',
-        fix: 'Scope it with `within(<landmark>, …)`, or name the element with a descriptor that designates one thing.',
-        name: 'descriptor-matches-one-element',
+        family: 'visitor',
+        fix: 'Scope it with `within(<landmark>, …)`, or name the element with a target that designates one thing.',
+        name: 'target-matches-one-element',
         rationale:
             'Acting on the first match makes a spec green while the visitor clicks something else, and nothing ever says so — an ambiguity is a writing fault, not a case to be settled by DOM order. The counting exists only at run time: no static analysis can do it, which is why the channel is runtime.',
         reach: 'tests',
@@ -1642,8 +1642,8 @@ export const RUNTIME_RULES: Row[] = [
         channel: 'runtime',
         sentence: `${REFUSAL_WHY['no-landmark-on-mobile']} The element vocabulary is ONE between the website and mobile facets; an ARIA landmark (\`main()\`, \`navigation()\`…) passed to a mobile verb is refused at run time.`,
         facet: 'mobile',
-        family: 'elements',
-        fix: 'Scope with `within(testId(…), …)`: a screen has no landmarks, and any descriptor works as the scope.',
+        family: 'visitor',
+        fix: 'Scope with `within(testId(…), …)`: a screen has no landmarks, and any target works as the scope.',
         name: 'no-landmark-on-mobile',
         rationale:
             'One vocabulary keeps the API memorable; refusing the part with no iOS equivalent outright avoids a silent approximation.',

@@ -1,4 +1,4 @@
-import type { PageVerbs } from '../../../elements/verbs.js';
+import type { VisitorVerbs } from '../../../visitor/verbs.js';
 
 /** A `<link>` element captured from the rendered document's head. */
 export type BrowserLinkElement = {
@@ -22,7 +22,7 @@ export type BrowserConsoleMessage = {
 };
 
 /** The verbs a visit scenario is handed: a page's, plus navigation. */
-export type Visitor = PageVerbs & {
+export type Visitor = VisitorVerbs & {
     /** Navigate to a path of the site under test. */
     goto: (path: string) => Promise<void>;
 };

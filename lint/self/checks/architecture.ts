@@ -127,7 +127,7 @@ function layerRules(layer: string, options: LayerOptions): ArchitectureRule[] {
                     dependencyTypes: LOCAL_DEPENDENCY,
                     pathNot: either(imports.map((one) => targetOf(one))),
                 },
-                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: kernel ← world · elements · expectations ← vitest ← facets ← the entries`,
+                why: `\`${reach}\` reaches only what \`FRAMEWORK_LAYERS\` grants it: kernel ← world · visitor · expectations ← vitest ← facets ← the entries`,
             },
             {
                 fix: 'import it from the slice that owns it, or declare the package on the layer in `FRAMEWORK_LAYERS` with its reason',
@@ -210,7 +210,7 @@ function facetRules(): ArchitectureRule[] {
 
     return [
         {
-            fix: 'move what the two facets share below the facets — to `kernel/`, `world/`, `elements/` or `expectations/` — and import it from there',
+            fix: 'move what the two facets share below the facets — to `kernel/`, `world/`, `visitor/` or `expectations/` — and import it from there',
             from: { path: '^src/facets/([^/]+)/', pathNot: TEST_MATERIAL },
             name: 'facet-imports-no-other-facet',
             read: READ_LAYERS,

@@ -110,7 +110,7 @@ function stringsOf(source: string): boolean[] {
 
 const WRITTEN_IN_CODE = new Set<Capability['group']>([
     'Constructor option',
-    'Descriptor',
+    'Target',
     'Result accessor',
     'Route option',
     'Setup',
@@ -182,7 +182,7 @@ const FACET_GROUPS: readonly CapabilityGroup[] = [
     'Terminal action',
     'Route option',
     'Verb',
-    'Descriptor',
+    'Target',
     'Result accessor',
 ];
 

@@ -5,8 +5,8 @@ export type {
     DeviceTimeouts,
     MobileElementKind,
     MobileElementMatch,
-    MobileElementRef,
     MobileScenario,
+    MobileTarget,
     MobileVisitor,
     ScreenNode,
 } from './device/device.port.js';

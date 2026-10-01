@@ -23,7 +23,7 @@ describe('Filters', () => {
     });
 
     test('takes the summary off the screen when the visitor clears it', async () => {
-        // Given - a summary on screen, then cleared. The descriptor names the line WHOLE: a name designates the accessible name entire, and `content('Showing everything')` designates nothing here
+        // Given - a summary on screen, then cleared. The target names the line WHOLE: a name designates the accessible name entire, and `content('Showing everything')` designates nothing here
         const summary = content('Showing everything · published · newest');
         const result = await component.render(
             <Filters onApply={vi.fn<Apply>()} />,

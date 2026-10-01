@@ -103,14 +103,6 @@
             "count": 2
         }
     },
-    "lint/consumer/rules/elements/test-id-states-what-is-missing.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 3
-        }
-    },
     "lint/consumer/rules/expectations/negative-golden-frozen.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 11
@@ -188,6 +180,14 @@
     "lint/consumer/rules/setup/no-unknown-constructor.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
+        }
+    },
+    "lint/consumer/rules/visitor/test-id-states-what-is-missing.ts": {
+        "max-lines-per-function": {
+            "count": 1
+        },
+        "typescript/no-unsafe-type-assertion": {
+            "count": 3
         }
     },
     "lint/consumer/rules/world/stubs-root-holds-facades-and-kinds.ts": {
@@ -525,11 +525,6 @@
     },
     "specs/website/within/ambiguity.spec.ts": {
         "jterrazz/scenario-ends-settled": {
-            "count": 3
-        }
-    },
-    "src/elements/ambiguity/ambiguity.ts": {
-        "typescript/strict-boolean-expressions": {
             "count": 3
         }
     },
@@ -939,6 +934,14 @@
             "count": 1
         }
     },
+    "src/index.test-d.ts": {
+        "max-lines-per-function": {
+            "count": 1
+        },
+        "vitest/max-expects": {
+            "count": 2
+        }
+    },
     "src/index.vitest.test.ts": {
         "jterrazz/no-expect-in-a-loop": {
             "count": 1
@@ -974,12 +977,9 @@
             "count": 1
         }
     },
-    "src/index.test-d.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        },
-        "vitest/max-expects": {
-            "count": 2
+    "src/visitor/matching/ambiguous.ts": {
+        "typescript/strict-boolean-expressions": {
+            "count": 3
         }
     },
     "src/vitest/preset.test.ts": {

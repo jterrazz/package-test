@@ -1,14 +1,14 @@
-import {
-    BROWSER_DESCRIPTORS,
-    BROWSER_STATES,
-    BROWSER_VERBS,
-    EVERY_SURFACE_DESCRIPTORS,
-    EVERY_SURFACE_VERBS,
-    WITHIN,
-} from '../../../elements/matrix.js';
 import { consoleOf, errorsOf } from '../../../expectations/text/console.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
+import {
+    BROWSER_STATES,
+    BROWSER_TARGETS,
+    BROWSER_VERBS,
+    EVERY_SURFACE_TARGETS,
+    EVERY_SURFACE_VERBS,
+    WITHIN,
+} from '../../../visitor/matrix.js';
 import { recordConsole } from './console-recorder.js';
 import type { PagePort } from './page.port.js';
 import { RenderResult } from './render.result.js';
@@ -89,7 +89,7 @@ export const render = defineAction<
         { group: 'Result accessor', name: '.errors', probe: 'result.errors' },
         { group: 'Result accessor', name: '.html', probe: 'result.html' },
     ],
-    descriptors: [...EVERY_SURFACE_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
+    targets: [...EVERY_SURFACE_TARGETS, ...BROWSER_TARGETS, WITHIN, ...BROWSER_STATES],
     name: 'render',
     perform: async ([subject, scenario], read, { page }) => {
         const recorder = recordConsole();

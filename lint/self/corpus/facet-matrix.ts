@@ -16,11 +16,11 @@ export type Column = (typeof FACET_MATRIX_COLUMNS)[number];
 
 export type CapabilityGroup =
     | 'Constructor option'
-    | 'Descriptor'
     | 'Golden'
     | 'Result accessor'
     | 'Route option'
     | 'Setup'
+    | 'Target'
     | 'Terminal action'
     | 'Time & doubles'
     | 'Token'

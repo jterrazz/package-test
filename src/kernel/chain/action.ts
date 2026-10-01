@@ -15,7 +15,7 @@ export type Action<
     Config extends ChainConfig = ChainConfig,
 > = {
     readonly accessors: readonly MatrixRow[];
-    readonly descriptors?: readonly MatrixRow[];
+    readonly targets?: readonly MatrixRow[];
     readonly kind: 'action';
     readonly name: Name;
     readonly options?: readonly ActionOption<string>[];

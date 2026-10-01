@@ -1,7 +1,7 @@
 import { refusal } from '../../../lint/refusal.js';
-import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../descriptors/as-written.js';
-import type { ElementRef } from '../descriptors/element.js';
-import type { ElementMatch } from './candidate.js';
+import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../targets/as-written.js';
+import type { Target } from '../targets/target.js';
+import type { ElementMatch } from './candidates.js';
 import { landmarkOfTagOrRole } from './landmark-of-tag.js';
 
 /** A region is a landmark only when named, and a page holds several, so it is offered by name alone. */
@@ -40,7 +40,7 @@ function landmarkCounts(matches: ElementMatch[]): [string, number][] {
     return [...counts].toSorted(([, a], [, b]) => a - b);
 }
 
-function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
+function formatFixes(element: Target, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
     const landmarksThatCutTheSet = landmarkCounts(matches).filter(
@@ -75,14 +75,14 @@ function formatFixes(element: ElementRef, matches: ElementMatch[]): string[] {
 }
 
 export function ambiguityError(options: {
-    element: ElementRef;
+    element: Target;
     fixes: string[];
     lines: string[];
     where: string;
 }): Error {
     const { element, fixes, lines, where } = options;
     return new Error(
-        refusal('descriptor-matches-one-element', {
+        refusal('target-matches-one-element', {
             fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
             found: [
                 `Ambiguous element: ${asWritten(element)} matched ${lines.length} elements on ${where} —`,
@@ -93,7 +93,7 @@ export function ambiguityError(options: {
 }
 
 export function ambiguousElementError(options: {
-    element: ElementRef;
+    element: Target;
     matches: ElementMatch[];
     url: string;
 }): Error {

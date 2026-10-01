@@ -28,7 +28,7 @@ function actionRows(action: Composition['actions'][number]): MatrixRow[] {
         action.row,
         ...(action.options ?? []).map((option) => option.row),
         ...(action.verbs ?? []),
-        ...(action.descriptors ?? []),
+        ...(action.targets ?? []),
         ...action.accessors,
     ];
 }

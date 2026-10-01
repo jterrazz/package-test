@@ -3,10 +3,10 @@ import type { ChainConfig } from './config.js';
 
 type MatrixGroup =
     | 'Constructor option'
-    | 'Descriptor'
     | 'Result accessor'
     | 'Route option'
     | 'Setup'
+    | 'Target'
     | 'Terminal action'
     | 'Verb';
 

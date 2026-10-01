@@ -1,6 +1,6 @@
-import { ambiguityError } from '../../../elements/ambiguity/ambiguity.js';
-import { asWrittenUnscoped } from '../../../elements/descriptors/as-written.js';
-import type { ElementRef } from '../../../elements/descriptors/element.js';
+import { ambiguityError } from '../../../visitor/matching/ambiguous.js';
+import { asWrittenUnscoped } from '../../../visitor/targets/as-written.js';
+import type { Target } from '../../../visitor/targets/target.js';
 import type { MobileElementMatch } from './device.port.js';
 
 function formatMatch(match: MobileElementMatch, index: number): string {
@@ -10,13 +10,13 @@ function formatMatch(match: MobileElementMatch, index: number): string {
     return `  ${index + 1}. ${match.type}${label}${value}${identifier}`;
 }
 
-/** `exact` is offered only to a descriptor that opted out; distinct identifiers make `testId()` a concrete rewrite. */
-function formatFixes(element: ElementRef, matches: MobileElementMatch[]): string[] {
+/** `exact` is offered only to a target that opted out; distinct identifiers make `testId()` a concrete rewrite. */
+function formatFixes(element: Target, matches: MobileElementMatch[]): string[] {
     const fixes: string[] = [];
 
     if (!element.scope) {
         fixes.push(
-            `scope it       within(testId('…'), ${asWrittenUnscoped(element)}) — a screen has no landmarks; any descriptor works as the scope`,
+            `scope it       within(testId('…'), ${asWrittenUnscoped(element)}) — a screen has no landmarks; any target works as the scope`,
         );
     }
 
@@ -50,7 +50,7 @@ function formatFixes(element: ElementRef, matches: MobileElementMatch[]): string
 }
 
 export function ambiguousScreenElementError(options: {
-    element: ElementRef;
+    element: Target;
     matches: MobileElementMatch[];
 }): Error {
     const { element, matches } = options;

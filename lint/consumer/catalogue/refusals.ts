@@ -9,8 +9,8 @@ export const REFUSAL_WHY = {
         '`toMatch` on a result the framework produced compares the WHOLE result, to a value written in place or to a `file()`/`directory()` golden.',
     'network-strict-after-first-stub':
         'From its first stub, a chain’s network is strict: every outgoing request matches a declared stub.',
-    'descriptor-matches-one-element':
-        'A verb acts on exactly ONE element: a descriptor that matches several is refused, never settled by the first.',
+    'target-matches-one-element':
+        'A verb acts on exactly ONE element: a target that matches several is refused, never settled by the first.',
     'seam-is-an-optional-peer':
         'Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.',
     'no-landmark-on-mobile':

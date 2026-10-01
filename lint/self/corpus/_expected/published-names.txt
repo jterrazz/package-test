@@ -41,8 +41,6 @@ dist/index.d.ts:
     DomMount
     ElementKind
     ElementMatch
-    ElementOptions
-    ElementRef
     ExecOptions
     FetchResult
     FileAccessor
@@ -83,11 +81,11 @@ dist/index.d.ts:
     MobileBackendOptions
     MobileElementKind
     MobileElementMatch
-    MobileElementRef
     MobileHandle
     MobileScenario
     MobileSpecification
     MobileSpecificationOptions
+    MobileTarget
     MobileVisitor
     MockOfOptions
     MockPort
@@ -132,6 +130,8 @@ dist/index.d.ts:
     StubResponseValue
     Stubs
     TableAccessor
+    Target
+    TargetOptions
     TestSettings
     TextAccessor
     TextFilter

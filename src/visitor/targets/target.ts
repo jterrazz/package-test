@@ -24,11 +24,11 @@ export type ElementKind =
     | 'testId'
     | 'text';
 
-/** A user-facing element descriptor; it must designate exactly one element (`descriptor-matches-one-element`). */
-export type ElementRef = {
+/** What a visitor acts on, named as its user sees it; it must designate exactly one element (`target-matches-one-element`). */
+export type Target = {
     /** Match the accessible name whole; absent means the default, exact. */
     exact?: boolean;
-    /** Assert focus rather than presence, built by `focused(element)`. */
+    /** Assert focus rather than presence, built by `focused(target)`. */
     focused?: boolean;
     /** Accepting input or not, built by `disabled(x)` / `enabled(x)`. */
     disabled?: boolean;
@@ -39,12 +39,16 @@ export type ElementRef = {
     selected?: boolean;
     /** The field's live value, built by `valued(field, value)`. */
     value?: string;
-    /** Search inside another descriptor, built by `within(scope, target)`. */
-    scope?: ElementRef;
+    /** Search inside another target, built by `within(scope, target)`. */
+    scope?: Target;
 };
 
-/** Options accepted by every named descriptor. */
-export type ElementOptions = {
+/** Options accepted by every named target. */
+export type TargetOptions = {
     /** Match the accessible name whole; `true` by default, `{ exact: false }` for a name with a variable part. */
     exact?: boolean;
 };
+
+export type NamedTarget = (name: string, options?: TargetOptions) => Target;
+
+export type OptionallyNamedTarget = (name?: string, options?: TargetOptions) => Target;

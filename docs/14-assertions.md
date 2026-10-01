@@ -251,7 +251,7 @@ expect(result.tree).toMatch(file('./_expected/home.aria.yaml'));
 await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
 ```
 
-The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — Elements](13-elements.md#modifiers)).
+The `await` is the component's, not the tree's: a subject captured inside a page crosses the browser seam through a server command, and every accessor of a `component` result is awaited for that reason. It carries what the tree carries and nothing else — enablement (`[disabled]`), selection (`[selected]`), the roles and the accessible names. It does NOT carry focus, so a keyboard assertion is a verb, never a golden ([13 — The visitor](13-visitor.md#modifiers)).
 
 ## `result.html` — the markup (component)
 

@@ -87,7 +87,7 @@ export {
     status,
     table,
     testId,
-} from './elements/descriptors/roles.js';
+} from './visitor/targets/roles.js';
 export {
     banner,
     complementary,
@@ -98,15 +98,10 @@ export {
     region,
     search,
     within,
-} from './elements/descriptors/landmarks.js';
-export { disabled, enabled, focused, selected, valued } from './elements/descriptors/modifiers.js';
-export type {
-    ElementKind,
-    ElementOptions,
-    ElementRef,
-    LandmarkKind,
-} from './elements/descriptors/element.js';
-export type { ElementMatch } from './elements/ambiguity/candidate.js';
+} from './visitor/targets/landmarks.js';
+export { disabled, enabled, focused, selected, valued } from './visitor/targets/modifiers.js';
+export type { ElementKind, LandmarkKind, Target, TargetOptions } from './visitor/targets/target.js';
+export type { ElementMatch } from './visitor/matching/candidates.js';
 
 export {
     type CaptureScope,

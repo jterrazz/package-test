@@ -5,12 +5,12 @@ import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwr
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/refusal.js';
-import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
-import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
-import { asWritten } from '../../../elements/descriptors/as-written.js';
-import type { ElementRef } from '../../../elements/descriptors/element.js';
-import { scopeChain } from '../../../elements/descriptors/scope-chain.js';
 import { scenarioFailure } from '../../../kernel/refusals/scenario-failure.js';
+import { ambiguousElementError } from '../../../visitor/matching/ambiguous.js';
+import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';
+import { asWritten } from '../../../visitor/targets/as-written.js';
+import { scopeChain } from '../../../visitor/targets/landmarks.js';
+import type { Target } from '../../../visitor/targets/target.js';
 import type {
     BrowserConsoleMessage,
     BrowserLinkElement,
@@ -48,8 +48,8 @@ const FIELD_ROLES = [
     'textbox',
 ] as const;
 
-/** No `.first()`: playwright's strict mode is the mechanism behind `descriptor-matches-one-element`. */
-function locate(root: MatchScope, element: ElementRef): Locator {
+/** No `.first()`: playwright's strict mode is the mechanism behind `target-matches-one-element`. */
+function locate(root: MatchScope, element: Target): Locator {
     const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
     // `exact` is the framework's default, not playwright's.
     const exact = element.exact ?? true;
@@ -82,7 +82,7 @@ function isStrictViolation(error: unknown): boolean {
 /** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 async function act<T>(
     page: Page,
-    element: ElementRef,
+    element: Target,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
     try {
@@ -97,7 +97,7 @@ async function act<T>(
     }
 }
 
-async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<ElementRef> {
+async function findAmbiguousLevel(page: Page, element: Target): Promise<Target> {
     for (const level of scopeChain(element).slice(0, -1)) {
         if ((await locate(page, level).count()) > 1) {
             return level;
@@ -107,7 +107,7 @@ async function findAmbiguousLevel(page: Page, element: ElementRef): Promise<Elem
 }
 
 /** A second locator condition keeps playwright's retry; `toBeFocused()` lives in `@playwright/test`, which this package does not carry. */
-function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator | null {
+function stateOnly(page: Page, locator: Locator, element: Target): Locator | null {
     if (element.focused === true) {
         return locator.and(page.locator(':focus'));
     }
@@ -121,7 +121,7 @@ function stateOnly(page: Page, locator: Locator, element: ElementRef): Locator |
 }
 
 /** A collapsed select's options have no box until opened. */
-function byPresence(element: ElementRef): boolean {
+function byPresence(element: Target): boolean {
     return element.kind === 'option';
 }
 
@@ -129,7 +129,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
     try {
         return await locator.inputValue({ timeout: VALUE_POLL_MS });
     } catch (error) {
-        // A strict-mode violation is `act()`'s `descriptor-matches-one-element` refusal; anything else means the field is not there yet.
+        // A strict-mode violation is `act()`'s `target-matches-one-element` refusal; anything else means the field is not there yet.
         if (isStrictViolation(error)) {
             throw error;
         }
@@ -138,7 +138,7 @@ async function currentValue(locator: Locator): Promise<null | string> {
 }
 
 /** A poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves. */
-async function waitForValue(locator: Locator, element: ElementRef, wanted: boolean): Promise<void> {
+async function waitForValue(locator: Locator, element: Target, wanted: boolean): Promise<void> {
     const value = element.value ?? '';
     const deadline = Date.now() + VALUE_TIMEOUT_MS;
     for (;;) {
@@ -152,7 +152,7 @@ async function waitForValue(locator: Locator, element: ElementRef, wanted: boole
                 refusal({
                     fix: 'correct the value the scenario states, or what the page puts in the field',
                     found: `${asWritten(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
-                    read: 'docs/13-elements.md#see-and-gone-are-the-synchronization',
+                    read: 'docs/13-visitor.md#see-and-gone-are-the-synchronization',
                     why: 'A verb waits for what it states to hold, within its budget, and never sleeps.',
                 }),
             );

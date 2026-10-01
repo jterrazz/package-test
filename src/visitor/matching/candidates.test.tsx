@@ -1,13 +1,13 @@
 import { describe, expect, test } from 'vitest';
 
-import { CANDIDATE_LIMITS, candidatesOf, MATCH_TEXT_LENGTH } from './candidate.js';
+import { CANDIDATE_LIMITS, candidatesOf, MATCH_TEXT_LENGTH } from './candidates.js';
 
 function nodesOf(html: string, selector: string): Element[] {
     document.body.innerHTML = html;
     return [...document.querySelectorAll(selector)];
 }
 
-describe('candidate', () => {
+describe('candidates', () => {
     test('candidatesOf — names a section by the text its aria-labelledby points at', () => {
         // Given - a button inside a section labelled by its heading
         const nodes = nodesOf(

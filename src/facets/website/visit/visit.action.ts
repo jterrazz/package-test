@@ -1,15 +1,15 @@
 import { invariant } from '../../../../lint/refusal.js';
-import {
-    BROWSER_DESCRIPTORS,
-    BROWSER_STATES,
-    BROWSER_VERBS,
-    EVERY_SURFACE_DESCRIPTORS,
-    EVERY_SURFACE_VERBS,
-    WITHIN,
-} from '../../../elements/matrix.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow } from '../../../kernel/chain/capability.js';
 import { headers } from '../../../kernel/context/headers.capability.js';
+import {
+    BROWSER_STATES,
+    BROWSER_TARGETS,
+    BROWSER_VERBS,
+    EVERY_SURFACE_TARGETS,
+    EVERY_SURFACE_VERBS,
+    WITHIN,
+} from '../../../visitor/matrix.js';
 import { clock } from '../../../world/clock/clock.capability.js';
 import type { BrowserPort, VisitScenario } from '../browser/browser.port.js';
 import type { WebsiteConfig } from '../website.handle.js';
@@ -50,7 +50,7 @@ export const visit = defineAction<
         { group: 'Result accessor', name: '.links', probe: 'result.links' },
         { group: 'Result accessor', member: 'meta', name: '.meta()', probe: 'result.meta' },
     ],
-    descriptors: [...EVERY_SURFACE_DESCRIPTORS, ...BROWSER_DESCRIPTORS, WITHIN, ...BROWSER_STATES],
+    targets: [...EVERY_SURFACE_TARGETS, ...BROWSER_TARGETS, WITHIN, ...BROWSER_STATES],
     name: 'visit',
     perform: async ([path, scenario], read, { browser }, { config, testDir }) => {
         const { backendUrl, baseUrl } = config;

@@ -5,8 +5,8 @@ import { main, navigation, region, within } from './landmarks.js';
 import { content, link } from './roles.js';
 
 describe('asWritten', () => {
-    test('asWritten — renders a descriptor as the source that would build it', () => {
-        // Given - a plain named descriptor
+    test('asWritten — renders a target as the source that would build it', () => {
+        // Given - a plain named target
         const element = link('Articles');
 
         // Then - the error speaks the caller's vocabulary, not playwright's
@@ -14,7 +14,7 @@ describe('asWritten', () => {
     });
 
     test('asWritten — renders the exact option', () => {
-        // Given - a descriptor asking for a whole-name match
+        // Given - a target asking for a whole-name match
         const element = link('Articles', { exact: true });
 
         // Then - the option is echoed as written
@@ -30,7 +30,7 @@ describe('asWritten', () => {
     });
 
     test('asWritten — renders a scope as the within() call that produced it', () => {
-        // Given - a scoped descriptor
+        // Given - a scoped target
         const element = within(navigation(), link('Articles'));
 
         // Then - the rendering round-trips to source the author could paste
@@ -47,7 +47,7 @@ describe('asWritten', () => {
     });
 
     test('asWritten — speaks content() for the text kind', () => {
-        // Given - a descriptor built by content(), whose kind is text
+        // Given - a target built by content(), whose kind is text
         const element = content('Hello');
 
         // Then - the author's function is named, never the kind

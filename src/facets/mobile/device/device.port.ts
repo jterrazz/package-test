@@ -1,5 +1,5 @@
-import type { ElementRef } from '../../../elements/descriptors/element.js';
-import type { PageVerbs } from '../../../elements/verbs.js';
+import type { Target } from '../../../visitor/targets/target.js';
+import type { VisitorVerbs } from '../../../visitor/verbs.js';
 
 export type MobileDevice = {
     /** Simulator name, matched exactly (`iPhone 17`). */
@@ -13,10 +13,10 @@ export type MobileDevice = {
 /** The element kinds a mobile screen designates, each compiled to an iOS predicate; every other kind is refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
 
-/** The shared element descriptor, under the mobile surface's name. */
-export type MobileElementRef = ElementRef;
+/** The shared element target, under the mobile surface's name. */
+export type MobileTarget = Target;
 
-/** One candidate of an ambiguous descriptor, as the refusal lists it. */
+/** One candidate of an ambiguous target, as the refusal lists it. */
 export type MobileElementMatch = {
     /** The accessibility identifier (`testId()` target), when one is set. */
     identifier?: string;
@@ -29,8 +29,8 @@ export type MobileElementMatch = {
 };
 
 /** The verbs a mobile scenario is handed: a page's `see` and `fill`, and a `tap`; each polls until a visible match exists. */
-export type MobileVisitor = Pick<PageVerbs, 'fill' | 'see'> & {
-    tap: PageVerbs['click'];
+export type MobileVisitor = Pick<VisitorVerbs, 'fill' | 'see'> & {
+    tap: VisitorVerbs['click'];
 };
 
 /** The behavior of an open — the When of the spec; assertions stay in the Then. */

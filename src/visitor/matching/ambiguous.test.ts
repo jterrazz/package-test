@@ -1,10 +1,10 @@
 import { describe, expect, test } from 'vitest';
 
 import { REFUSAL_WHY } from '../../../lint/refusal.js';
-import { navigation, within } from '../descriptors/landmarks.js';
-import { link } from '../descriptors/roles.js';
-import { ambiguousElementError } from './ambiguity.js';
-import type { ElementMatch } from './candidate.js';
+import { navigation, within } from '../targets/landmarks.js';
+import { link } from '../targets/roles.js';
+import { ambiguousElementError } from './ambiguous.js';
+import type { ElementMatch } from './candidates.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     tag: 'a',
@@ -12,8 +12,8 @@ const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
     ...overrides,
 });
 
-describe('ambiguity', () => {
-    test('ambiguousElementError — names the descriptor, the count and the page', () => {
+describe('ambiguous', () => {
+    test('ambiguousElementError — names the target, the count and the page', () => {
         // Given - three candidates for one link
         const { message } = ambiguousElementError({
             element: link('Articles'),
@@ -98,11 +98,11 @@ describe('ambiguity', () => {
             url: 'http://site.test/',
         });
 
-        // Then - the evidence names what the descriptor actually matched on
+        // Then - the evidence names what the target actually matched on
         expect(message).toContain('named "Delete Post a"');
     });
 
-    test('ambiguousElementError — offers exact to a descriptor that opted OUT, with what it leaves', () => {
+    test('ambiguousElementError — offers exact to a target that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const { message } = ambiguousElementError({
             element: link('Articles', { exact: false }),
@@ -115,8 +115,8 @@ describe('ambiguity', () => {
         expect(message).toContain('leaves 1 of 2');
     });
 
-    test('ambiguousElementError — never offers exact to an ordinary descriptor — it is already exact', () => {
-        // Given - a descriptor stating nothing, which is the whole-name default
+    test('ambiguousElementError — never offers exact to an ordinary target — it is already exact', () => {
+        // Given - a target stating nothing, which is the whole-name default
         const { message } = ambiguousElementError({
             element: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' })],
@@ -139,7 +139,7 @@ describe('ambiguity', () => {
         expect(message).not.toContain('exact: true');
     });
 
-    test('ambiguousElementError — does not re-suggest scoping a descriptor that is already scoped', () => {
+    test('ambiguousElementError — does not re-suggest scoping a target that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
         const { message } = ambiguousElementError({
             element: within(navigation(), link('Articles')),
@@ -161,7 +161,7 @@ describe('ambiguity', () => {
         });
 
         // Then - an agent reading the failure reads the rule, and where it is whole
-        expect(message).toContain(`why: ${REFUSAL_WHY['descriptor-matches-one-element']}`);
-        expect(message).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
+        expect(message).toContain(`why: ${REFUSAL_WHY['target-matches-one-element']}`);
+        expect(message).toContain('read: docs/19-linting.md#target-matches-one-element');
     });
 });

@@ -11,7 +11,7 @@ async function refusalOf(scenario: Parameters<typeof component.render>[1]): Prom
 }
 
 describe('AmbiguousLinks', () => {
-    test('refuses a descriptor matching several elements, and says how to fix it', async () => {
+    test('refuses a target matching several elements, and says how to fix it', async () => {
         // Given - two links carrying the SAME whole accessible name, in two regions
         const refusal = await refusalOf(async (visitor) => {
             await visitor.click(link('Articles'));
@@ -20,7 +20,7 @@ describe('AmbiguousLinks', () => {
         // Then - the refusal is the website facet's, word for word: same rule, same fix
         expect(refusal).toContain('Ambiguous element: link("Articles") matched 2 elements');
         expect(refusal).toContain('within(navigation(), link("Articles"))');
-        expect(refusal).toContain('read: docs/19-linting.md#descriptor-matches-one-element');
+        expect(refusal).toContain('read: docs/19-linting.md#target-matches-one-element');
     });
 
     test('a name designates the accessible name WHOLE — the default', async () => {
@@ -29,7 +29,7 @@ describe('AmbiguousLinks', () => {
             await visitor.see(link('Articles archive'));
         });
 
-        // Then - "Articles archive" is one element, not two, and the longer name is still on the screen: the descriptor narrowed, not the DOM
+        // Then - "Articles archive" is one element, not two, and the longer name is still on the screen: the target narrowed, not the DOM
         expect(result.content.text).toContain('Articles archive');
     });
 

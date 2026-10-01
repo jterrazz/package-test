@@ -147,14 +147,14 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | `.render(<X />, scenario?)` | A React tree                                                                  |
 | `.render((container) => …)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — Elements § Verbs](13-elements.md#verbs) — plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — Elements § Verbs](13-visitor.md#verbs) — plus the two only a parent has:
 
 | Verb           | Description                                               |
 | -------------- | --------------------------------------------------------- |
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included — [13 — Elements § Modifiers](13-elements.md#modifiers) owns them all, with the `descriptor-matches-one-element` refusal and the exact-name rule.
+`goto()` does not exist here, because a component has no address. The element vocabulary is the page's too, modifiers included — [13 — Elements § Modifiers](13-visitor.md#modifiers) owns them all, with the `target-matches-one-element` refusal and the exact-name rule.
 
 ## The result
 
@@ -251,9 +251,9 @@ const result = await component.render((container) => {
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
 - **Hand-rolling `browser:` in a config.** Rule `browser-project-from-component` refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
-- **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-elements.md#modifiers) says what asserts it.
+- **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-visitor.md#modifiers) says what asserts it.
 - **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./_expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
-- **Reading the `descriptor-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-elements.md#a-name-designates-the-accessible-name-whole)'s.
+- **Reading the `target-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — Elements § A name designates the accessible name WHOLE](13-visitor.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.
 

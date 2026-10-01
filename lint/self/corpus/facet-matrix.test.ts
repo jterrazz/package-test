@@ -1,10 +1,5 @@
 import { describe, expect, test } from 'vitest';
 
-/* oxlint-disable import/no-namespace -- the point of these imports IS the export list: the test holds the vocabulary equal to what the descriptor modules publish, which a named import cannot read. */
-import * as landmarks from '../../../src/elements/descriptors/landmarks.js';
-import * as modifiers from '../../../src/elements/descriptors/modifiers.js';
-import * as roles from '../../../src/elements/descriptors/roles.js';
-/* oxlint-enable import/no-namespace */
 import type { CliResult } from '../../../src/expectations/command/cli.result.js';
 import type { HttpResult } from '../../../src/facets/api/api.face.js';
 import type { RouteOptionsAny } from '../../../src/facets/api/request/route.js';
@@ -17,6 +12,11 @@ import type { MobileElementKind } from '../../../src/facets/mobile/device/device
 import type { MobileVisitor, ScreenResult } from '../../../src/facets/mobile/mobile.face.js';
 import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/website.face.js';
 import type { JobResult, LintResult } from '../../../src/index.js';
+/* oxlint-disable import/no-namespace -- the point of these imports IS the export list: the test holds the vocabulary equal to what the target modules publish, which a named import cannot read. */
+import * as landmarks from '../../../src/visitor/targets/landmarks.js';
+import * as modifiers from '../../../src/visitor/targets/modifiers.js';
+import * as roles from '../../../src/visitor/targets/roles.js';
+/* oxlint-enable import/no-namespace */
 import {
     FACET_MATRIX_CAPABILITIES,
     FACET_MATRIX_COLUMNS,
@@ -209,7 +209,7 @@ const componentVisitor = {
 const MOBILE_SCOPES = ['within'];
 
 /** `text` is `content()`. */
-const MOBILE_DESCRIPTORS: Record<MobileElementKind, string> = {
+const MOBILE_TARGETS: Record<MobileElementKind, string> = {
     button: 'button',
     field: 'field',
     testId: 'testId',
@@ -242,17 +242,18 @@ describe('facet-matrix', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `elements/descriptors/` exports', () => {
-        // Given - the descriptor modules, which are the vocabulary's one home
+    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `visitor/targets/` exports, but the scope walk the adapters share', () => {
+        // Given - the target modules, which are the vocabulary's one home
         const exported = [roles, landmarks, modifiers]
             .flatMap((module) => Object.keys(module))
+            .filter((name) => name !== landmarks.scopeChain.name)
             .toSorted();
 
         // Then - the browsers declare them all, the device the four XCUITest kinds and the scope
-        expect(declared('website', 'Descriptor')).toStrictEqual(exported);
-        expect(declared('component', 'Descriptor')).toStrictEqual(exported);
-        expect(declared('mobile', 'Descriptor')).toStrictEqual(
-            [...Object.values(MOBILE_DESCRIPTORS), ...MOBILE_SCOPES].toSorted(),
+        expect(declared('website', 'Target')).toStrictEqual(exported);
+        expect(declared('component', 'Target')).toStrictEqual(exported);
+        expect(declared('mobile', 'Target')).toStrictEqual(
+            [...Object.values(MOBILE_TARGETS), ...MOBILE_SCOPES].toSorted(),
         );
     });
 

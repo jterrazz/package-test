@@ -110,7 +110,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 | cli                                         | [docs/12-cli.md](../../docs/12-cli.md)                   |
 | a cli `<case>.spec.yaml`                    | [docs/20-documents.md](../../docs/20-documents.md)       |
 | lint — a rule over a tree, or alone         | [docs/21-lint.md](../../docs/21-lint.md)                 |
-| naming an element on any surface that draws | [docs/13-elements.md](../../docs/13-elements.md)         |
+| naming an element on any surface that draws | [docs/13-visitor.md](../../docs/13-visitor.md)           |
 | a matcher, sync or awaited                  | [docs/14-assertions.md](../../docs/14-assertions.md)     |
 | a `{{token}}`, or update mode               | [docs/15-tokens.md](../../docs/15-tokens.md)             |
 | what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |

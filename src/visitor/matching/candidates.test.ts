@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 
-import { MATCH_TEXT_LENGTH, shortened } from './candidate.js';
+import { MATCH_TEXT_LENGTH, shortened } from './candidates.js';
 
-describe('candidate', () => {
+describe('candidates', () => {
     test('shortened — collapses whitespace so a candidate reads on one line', () => {
         // Given - a text broken across lines by its markup
         const text = '  Read\n   the   Articles  ';

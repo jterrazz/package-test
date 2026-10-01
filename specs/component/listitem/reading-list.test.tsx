@@ -5,7 +5,7 @@ import { ReadingList } from './reading-list.js';
 
 describe('ReadingList', () => {
     test('names a list item by its role where the list holds exactly one', async () => {
-        // Given - a one-row list, so the role designates exactly one element (`descriptor-matches-one-element`)
+        // Given - a one-row list, so the role designates exactly one element (`target-matches-one-element`)
         const result = await component.render(<ReadingList />, async (visitor) => {
             await visitor.see(listitem());
         });

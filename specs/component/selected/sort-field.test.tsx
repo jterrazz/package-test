@@ -1,11 +1,11 @@
 import { component, field, option, selected, within } from '@jterrazz/test';
-import type { ElementRef } from '@jterrazz/test';
+import type { Target } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { SortField } from './sort-field.js';
 
-/** Named: three descriptors inside a verb is one call too deep for `unicorn/max-nested-calls`. */
-const sortedBy = (name: string): ElementRef => within(field('Sort'), selected(option(name)));
+/** Named: three targets inside a verb is one call too deep for `unicorn/max-nested-calls`. */
+const sortedBy = (name: string): Target => within(field('Sort'), selected(option(name)));
 
 describe('SortField', () => {
     test('names the options a field offers, and the one it is on', async () => {

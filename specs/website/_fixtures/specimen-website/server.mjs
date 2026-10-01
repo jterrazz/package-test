@@ -73,7 +73,7 @@ const pages = {
     <body><h1>Noisy</h1><script>console.log('hello'); console.error('boom');</script></body></html>`,
     // The ambiguity fixture: "Articles" appears three times — twice as the
     // WHOLE accessible name in two landmarks, once only as a substring ("Read
-    // Articles"). The first pair is what descriptor-matches-one-element refuses to guess between; the third
+    // Articles"). The first pair is what target-matches-one-element refuses to guess between; the third
     // Is what a substring match would fold in silently.
     '/ambiguous': `<!doctype html><html lang="en"><head>${head('Fixture — Ambiguous', '/ambiguous')}
     </head><body>

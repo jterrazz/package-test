@@ -11,7 +11,7 @@ export type LayerOptions = {
     seams?: Record<string, string[]>;
 };
 
-/** This package's layer map: `kernel ← world · elements · expectations ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
+/** This package's layer map: `kernel ← world · visitor · expectations ← vitest ← facets ← the entries`, compiled by `architecture.ts` into the dependency-cruiser rules `jterrazz.config.ts` declares. */
 export const FRAMEWORK_LAYERS = {
     kernel: {
         folders: {
@@ -41,7 +41,7 @@ export const FRAMEWORK_LAYERS = {
             'world/stubs/matching/route.ts': ['expectations/tokens/'],
         },
     },
-    elements: { imports: ['kernel/', 'elements/', 'lint/engine/', 'lint/refusal'] },
+    visitor: { imports: ['kernel/', 'visitor/', 'lint/engine/', 'lint/refusal'] },
     expectations: {
         imports: ['kernel/', 'expectations/', 'lint/engine/', 'lint/refusal'],
         packages: ['vitest'],
@@ -58,14 +58,7 @@ export const FRAMEWORK_LAYERS = {
             mobile: librariesOwnedIn('src/facets/mobile/'),
             website: librariesOwnedIn('src/facets/website/'),
         },
-        imports: [
-            'kernel/',
-            'world/',
-            'elements/',
-            'expectations/',
-            'lint/engine/',
-            'lint/refusal',
-        ],
+        imports: ['kernel/', 'world/', 'visitor/', 'expectations/', 'lint/engine/', 'lint/refusal'],
         packages: ['vitest'],
         seams: {
             'facets/specification.ts': [
