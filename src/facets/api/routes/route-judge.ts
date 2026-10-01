@@ -3,7 +3,7 @@ import {
     recordUnreached,
     ROUTES_KEY,
 } from '../../../../lint/engine/baseline/test-baseline.js';
-import type { Lesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/refusal.js';
 import { measure, readLedgers } from './ledger.js';
 import type { Ledger } from './ledger.js';
 import { declaredMethodless, declaredRoutes, unreachedRoutes } from './routes.js';

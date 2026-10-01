@@ -1,4 +1,4 @@
-import { invariant, refusal } from '../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../lint/refusal.js';
 import type { ContainerOptions } from '../containers/container.port.js';
 import { SERVICE_IMAGES } from '../containers/service-images.js';
 import type { DatabasePort } from '../database.port.js';

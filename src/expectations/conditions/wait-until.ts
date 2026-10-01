@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { pause } from '../../kernel/pause.js';
 
 /** How long to wait, and how often to look. */

@@ -2,7 +2,7 @@ import { mkdtempSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { MAX_REPORTED_MATCHES, shortened } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';
 import type { ElementRef } from '../../../elements/descriptors/element.js';

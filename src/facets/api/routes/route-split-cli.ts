@@ -2,7 +2,7 @@
 /* oxlint-disable eslint/no-console -- this file IS the CLI: its output is the product, and a gate that wrote anywhere else would be reporting to nobody. */
 import { resolve } from 'node:path';
 
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { judgeSplit } from './route-split.js';
 

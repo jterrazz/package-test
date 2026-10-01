@@ -62,8 +62,8 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>
         const children = paths.filter(({ path: entry }) => dirname(entry) === path);
         const flat = !children.some(({ directory, path: entry }) => directory && !inGround(entry));
         const face = new Set([
-            'index.ts',
-            ...(facet === 'component' ? ['index.browser.ts'] : []),
+            `${facet}.face.ts`,
+            ...(facet === 'component' ? ['component.face.browser.ts'] : []),
             `${facet}.facet.ts`,
             `${facet}.handle.ts`,
             `${facet}.project.ts`,
@@ -81,7 +81,7 @@ function strayFaceFiles(paths: Listed[], folders: Listed[]): Spotted<SelfPassId>
                   )
                   .map((file) =>
                       finding('folder-named-for-a-concept', file, {
-                          fix: 'move it into the concept folder it belongs to; the root of a facet with concept folders holds its face alone — `index.ts`, `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts`',
+                          fix: 'move it into the concept folder it belongs to; the root of a facet with concept folders holds its face alone — `<facet>.face.ts`, `<facet>.facet.ts`, `<facet>.handle.ts`, `<facet>.project.ts`',
                           found: `\`${file.split('/').at(-1) ?? ''}\` sits at the root of the facet \`${facet}\`, and is no file of its face`,
                       }),
                   );

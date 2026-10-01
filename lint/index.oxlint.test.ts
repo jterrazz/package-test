@@ -20,7 +20,7 @@ function answersOf(readers: MaterialReaders): unknown[] {
     ];
 }
 
-describe('index', () => {
+describe('index.oxlint', () => {
     test('the ./oxlint entry — the ./oxlint entry publishes what test material is — both builds answer materialAt and testPackageOf, typed from the published declarations', () => {
         // Given - the entry as a consumer imports it, and its CommonJS build (`npm run build` first)
         // oxlint-disable-next-line typescript/no-unsafe-assignment -- `require` answers `any`: the ESM build's published types are the shape the CJS build must carry

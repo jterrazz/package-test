@@ -13,7 +13,7 @@ import type {
     SpecFileAssertion,
     SpecRun,
 } from '../../../../lint/engine/project/spec-document.js';
-import { invariant, refusal } from '../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../lint/refusal.js';
 import { CliResult } from '../../../expectations/command/cli.result.js';
 import { formatStdoutDiff } from '../../../expectations/goldens/diff.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';

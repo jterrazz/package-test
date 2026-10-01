@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 
 export function instantOf(method: string, iso: string): Date {
     const at = new Date(iso);

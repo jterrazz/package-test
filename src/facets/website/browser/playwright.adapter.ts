@@ -4,7 +4,7 @@ import { setTimeout as sleep } from 'node:timers/promises';
 import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwright';
 
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { ambiguousElementError } from '../../../elements/ambiguity/ambiguity.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../elements/ambiguity/candidate.js';
 import { asWritten } from '../../../elements/descriptors/as-written.js';

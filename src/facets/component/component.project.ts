@@ -5,7 +5,7 @@ import type { Plugin, UserConfig, UserConfigFn } from 'vite';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
 import { SCREENSHOTS_DIR, VITEST_ARTIFACTS_DIR } from '../../../lint/engine/project/artifacts.js';
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { shouldUpdateSnapshots } from '../../expectations/in-place/update.js';
 import { callerFrames } from '../../kernel/files/caller.js';
 import type { FacetProjectOptions } from '../../vitest/project.js';

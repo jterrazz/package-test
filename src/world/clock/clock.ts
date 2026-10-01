@@ -1,6 +1,6 @@
 import { vi } from 'vitest';
 
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { instantOf } from './instant.js';
 
 /** A pinned clock — released when the `using` scope that declared it ends. */

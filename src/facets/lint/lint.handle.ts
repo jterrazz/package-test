@@ -4,7 +4,7 @@ import { createRequire } from 'node:module';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ChainConfig, Started } from '../../kernel/chain/config.js';
 import { getCallerDir } from '../../kernel/files/caller.js';

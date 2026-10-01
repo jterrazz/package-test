@@ -1,6 +1,6 @@
 /** The page's entry: the node entry's types whole, the values a page can run, and a refusing stub for every node-only name. */
 
-import type { ruleTester as ruleTesterFn } from './facets/lint/index.js';
+import type { ruleTester as ruleTesterFn } from './facets/lint/lint.face.js';
 import type { Specification } from './facets/specification.js';
 import { nodeOnlyClass, refuse } from './kernel/refusals/node-only.js';
 import type { postgres as postgresFn } from './world/services/postgres/postgres.adapter.js';
@@ -14,7 +14,7 @@ import type { sqlite as sqliteFn } from './world/services/sqlite/sqlite.adapter.
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: its types are the node entry's by design, so the two runtimes cannot publish two type surfaces
 export type * from './index.js';
 
-export { component } from './facets/component/index.browser.js';
+export { component } from './facets/component/component.face.browser.js';
 
 export { intercept } from './world/stubs/delivery/browser-page/intercept.js';
 

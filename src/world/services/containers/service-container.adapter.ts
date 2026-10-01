@@ -1,4 +1,4 @@
-import { invariant } from '../../../../lint/index.refusal.js';
+import { invariant } from '../../../../lint/refusal.js';
 import type { ContainerPort, ContainerRequest } from './container.port.js';
 import { RunSetupContainer } from './run-setup-container.adapter.js';
 import { TestcontainersAdapter } from './testcontainers.adapter.js';

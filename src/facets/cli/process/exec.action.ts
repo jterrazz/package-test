@@ -1,5 +1,5 @@
 import { safeRealpath } from '../../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { CLI_RESULT_ROWS, CliResult } from '../../../expectations/command/cli.result.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { ChainSignature } from '../../../kernel/chain/capability.js';

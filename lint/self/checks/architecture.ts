@@ -55,7 +55,7 @@ function treeOf(layer: string): string {
     return layer === 'lint' ? 'lint/' : `src/${layer}/`;
 }
 
-/** A declared path as the map writes it: `kernel/` a folder, `lint/index.refusal` one module, relative to `src/` unless it opens on `lint/`. */
+/** A declared path as the map writes it: `kernel/` a folder, `lint/refusal` one module, relative to `src/` unless it opens on `lint/`. */
 function targetOf(path: string): string {
     const rooted = path.startsWith('lint/') ? path : `src/${path}`;
 
@@ -200,10 +200,10 @@ function grantedTargets(paths: readonly string[]): string[] {
 }
 
 function facetRules(): ArchitectureRule[] {
-    const face = String.raw`^src/facets/[^/]+/index(\.browser)?\.ts$`;
+    const face = String.raw`^src/facets/[^/]+/[^/]+\.face(\.browser)?\.ts$`;
     const readers = facetReaders();
     const outside: Pick<ArchitectureRule, 'fix' | 'read' | 'why'> = {
-        fix: 'import it from the facet’s face — export it from `src/facets/<facet>/index.ts` — or move it below the facets',
+        fix: 'import it from the facet’s face — export it from `src/facets/<facet>/<facet>.face.ts` — or move it below the facets',
         read: READ_LAYERS,
         why: 'a facet is entered from outside by its face, and a concept folder reached from outside is an internal that can no longer move',
     };

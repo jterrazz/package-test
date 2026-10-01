@@ -19,11 +19,11 @@ import {
 import { CHECKER_PASS_IDS as CHECKER_PASS_REGISTRY } from '../../consumer/checks/checker.js';
 import { testPreset } from '../../consumer/rulebook/preset.js';
 import { TOKEN_KINDS } from '../../engine/project/tokens.js';
-import plugin from '../../index.js';
+import plugin from '../../index.oxlint.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
-import { chapterAt } from '../index.js';
 import selfPlugin from '../rules/plugin.js';
+import { chapterAt } from '../self.bin.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { SELF_FAMILIES } from './families.js';
 import {
@@ -625,7 +625,7 @@ describe('manifest', () => {
                 'type',
                 (entry) =>
                     [`// ${entry.name} —`, `@ts-expect-error ${entry.name} —`].some((marker) =>
-                        read('src/type-channel.test-d.ts').includes(marker),
+                        read('src/index.test-d.ts').includes(marker),
                     ),
             ],
             ['runtime', (entry) => runtimeMarkers().has(entry.name)],

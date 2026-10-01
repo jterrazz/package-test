@@ -1,4 +1,4 @@
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import type { MatchableRequest } from '../exchange.js';
 import type { Stub } from '../stub.js';
 import { describeRoute, routePatternOf, urlMatches } from './route.js';

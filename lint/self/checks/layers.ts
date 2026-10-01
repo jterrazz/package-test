@@ -21,7 +21,7 @@ export const FRAMEWORK_LAYERS = {
             files: ['vitest'],
             refusals: [],
         },
-        imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
+        imports: ['kernel/', 'lint/engine/', 'lint/refusal'],
         // The four-part lesson a refusal prints is the toolchain's rules kit.
         packages: ['@jterrazz/typescript/rules'],
     },
@@ -33,7 +33,7 @@ export const FRAMEWORK_LAYERS = {
             services: [...librariesOwnedIn('src/world/services/'), 'vitest'],
             stubs: librariesOwnedIn('src/world/stubs/'),
         },
-        imports: ['kernel/', 'lint/engine/', 'lint/index.refusal'],
+        imports: ['kernel/', 'lint/engine/', 'lint/refusal'],
         seams: {
             // A stub's request filter is an expectation on the outgoing request: one grammar, never a second.
             'world/stubs/kinds/http.ts': ['expectations/tokens/'],
@@ -41,9 +41,9 @@ export const FRAMEWORK_LAYERS = {
             'world/stubs/matching/route.ts': ['expectations/tokens/'],
         },
     },
-    elements: { imports: ['kernel/', 'elements/', 'lint/engine/', 'lint/index.refusal'] },
+    elements: { imports: ['kernel/', 'elements/', 'lint/engine/', 'lint/refusal'] },
     expectations: {
-        imports: ['kernel/', 'expectations/', 'lint/engine/', 'lint/index.refusal'],
+        imports: ['kernel/', 'expectations/', 'lint/engine/', 'lint/refusal'],
         packages: ['vitest'],
     },
     // A folder owns its files, and no facet lists another.
@@ -64,7 +64,7 @@ export const FRAMEWORK_LAYERS = {
             'elements/',
             'expectations/',
             'lint/engine/',
-            'lint/index.refusal',
+            'lint/refusal',
         ],
         packages: ['vitest'],
         seams: {

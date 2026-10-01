@@ -1,7 +1,7 @@
 import { createServer } from 'node:http';
 import type { IncomingMessage, Server, ServerResponse } from 'node:http';
 
-import { invariant, refusal } from '../../../../../lint/index.refusal.js';
+import { invariant, refusal } from '../../../../../lint/refusal.js';
 import type { ChainConfig } from '../../../../kernel/chain/config.js';
 import { pause } from '../../../../kernel/pause.js';
 import { isStreamBody } from '../../exchange.js';

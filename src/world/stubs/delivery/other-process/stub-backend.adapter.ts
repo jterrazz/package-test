@@ -1,4 +1,4 @@
-import { refusal } from '../../../../../lint/index.refusal.js';
+import { refusal } from '../../../../../lint/refusal.js';
 import type { InterceptPort } from '../../intercept/intercept.port.js';
 import type { StubBackend } from './stub-backend.js';
 

@@ -1,4 +1,4 @@
-import { invariant } from '../../../../lint/index.refusal.js';
+import { invariant } from '../../../../lint/refusal.js';
 import {
     BROWSER_DESCRIPTORS,
     BROWSER_STATES,

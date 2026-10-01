@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 
 export function refuse(name: string): never {
     throw new Error(

@@ -1,6 +1,6 @@
 import { join } from 'node:path';
 
-import type { Lesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/refusal.js';
 import { partialShards, readShardLedgers, ROUTES_DIR } from './ledger.js';
 import { judgeLedgers } from './route-judge.js';
 import type { RouteRun, RouteVerdict } from './route-judge.js';

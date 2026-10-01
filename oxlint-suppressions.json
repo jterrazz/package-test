@@ -974,7 +974,7 @@
             "count": 1
         }
     },
-    "src/type-channel.test-d.ts": {
+    "src/index.test-d.ts": {
         "max-lines-per-function": {
             "count": 1
         },

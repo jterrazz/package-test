@@ -57,7 +57,7 @@ describe('ARCHITECTURE', () => {
     test('the layer map refuses a reverse edge and a package the layer does not declare, and passes its seams', () => {
         // Given - one reverse edge per layer, edges leaving both trees, and the seams the map grants
         const violations = violationsIn({
-            'src/elements/descriptors/roles.ts': "import '../../facets/website/index.js';\n",
+            'src/elements/descriptors/roles.ts': "import '../../facets/website/website.face.js';\n",
             'src/expectations/result.ts': "import '../world/services/services.js';\n",
             'src/facets/api/api.project.ts': "import '../../vitest/project.js';\n",
             'src/facets/api/request/route.ts': "import '../../../vitest/project.js';\n",
@@ -76,7 +76,7 @@ describe('ARCHITECTURE', () => {
 
         // Then - each reverse edge and each edge leaving both trees is named by the layer it leaves, and no seam is
         expect(violations).toStrictEqual([
-            'src/elements/descriptors/roles.ts → src/facets/website/index.ts  layer-src-elements-imports-within-its-map',
+            'src/elements/descriptors/roles.ts → src/facets/website/website.face.ts  layer-src-elements-imports-within-its-map',
             'src/expectations/result.ts → src/world/services/services.ts  layer-src-expectations-imports-within-its-map',
             'src/facets/api/request/route.ts → src/vitest/project.ts  layer-src-facets-api-imports-within-its-map',
             'src/kernel/chain/chain.ts → src/world/clock/clock.ts  layer-src-kernel-chain-imports-within-its-map',

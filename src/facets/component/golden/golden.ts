@@ -1,7 +1,7 @@
 import { chai, expect, inject } from 'vitest';
 
 import { dedent } from '../../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import type { MatchFixtureOptions } from '../../../expectations/goldens/match-options.js';
 import {
     compareStreamInPlace,

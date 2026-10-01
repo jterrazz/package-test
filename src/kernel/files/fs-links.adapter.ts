@@ -1,7 +1,7 @@
 import { existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from 'node:fs';
 import { dirname, relative, resolve } from 'node:path';
 
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import type { LinkPort } from './link.port.js';
 import { resolveSpecPath } from './resolved-spec-path.js';
 

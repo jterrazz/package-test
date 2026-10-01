@@ -13,7 +13,7 @@ import { REFUSAL_WHY } from '../../consumer/catalogue/refusals.js';
 import type { RefusalRow } from '../../consumer/catalogue/refusals.js';
 import { CHECKER_PASS_IDS } from '../../consumer/checks/checker.js';
 import plugin from '../../consumer/rules/plugin.js';
-import { refusal } from '../../index.refusal.js';
+import { refusal } from '../../refusal.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import selfPlugin from '../rules/plugin.js';
 import { chapterOf, goldenCheckerLines, ROOT, rowNamed, sourcesUnder } from './messages.js';

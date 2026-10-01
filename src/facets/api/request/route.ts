@@ -1,4 +1,4 @@
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import type { ActionOption } from '../../../kernel/chain/capability.js';
 
 /** A path with no `:name` segment is sent as written; `{ params: {} }` states that it is the route. */

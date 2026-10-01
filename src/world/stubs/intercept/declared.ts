@@ -1,4 +1,4 @@
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import type { StubRequest, StubResponder, StubResponse } from '../exchange.js';
 import { stubsOf } from '../stub.js';
 import type { Stub, StubInput } from '../stub.js';

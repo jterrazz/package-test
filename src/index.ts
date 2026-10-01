@@ -1,14 +1,14 @@
 export { specification, type SpecificationConfig } from './facets/specification.js';
 // oxlint-disable-next-line oxc/no-barrel-file -- the entry IS the barrel: `no-unpublished-subpath` publishes ONE specifier, so every name a spec imports is re-exported here by design; the module count is the framework's, not this line's
-export type * from './facets/api/index.js';
-export type * from './facets/cli/index.js';
-export * from './facets/component/index.js';
-export type * from './facets/integration/index.js';
-export type * from './facets/job/index.js';
-export type * from './facets/lint/index.js';
-export { ruleTester } from './facets/lint/index.js';
-export type * from './facets/mobile/index.js';
-export type * from './facets/website/index.js';
+export type * from './facets/api/api.face.js';
+export type * from './facets/cli/cli.face.js';
+export * from './facets/component/component.face.js';
+export type * from './facets/integration/integration.face.js';
+export type * from './facets/job/job.face.js';
+export type * from './facets/lint/lint.face.js';
+export { ruleTester } from './facets/lint/lint.face.js';
+export type * from './facets/mobile/mobile.face.js';
+export type * from './facets/website/website.face.js';
 
 export type { ChainContext } from './kernel/context/with.capability.js';
 export type { TestSettings } from '../lint/engine/project/settings.js';

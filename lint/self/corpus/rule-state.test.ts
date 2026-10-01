@@ -2,7 +2,7 @@ import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import plugin from '../../consumer/rules/plugin.js';
-import { recommendedRules } from '../../index.js';
+import { recommendedRules } from '../../index.oxlint.js';
 import selfPlugin, { selfPluginRules } from '../rules/plugin.js';
 import { corpusOf, optionsOf, ROOT, ruleSources, session, unresetState } from './rule-state.js';
 

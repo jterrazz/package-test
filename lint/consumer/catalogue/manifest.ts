@@ -1310,7 +1310,7 @@ export const CHECKER_PASSES: Row[] = [
     },
 ];
 
-/** Each row is proven by an `@ts-expect-error` in `src/type-channel.test-d.ts`, naming the words of its error, which `lint/self/corpus/type-channel.test.ts` holds it to. */
+/** Each row is proven by an `@ts-expect-error` in `src/index.test-d.ts`, naming the words of its error, which `lint/self/corpus/type-channel.test.ts` holds it to. */
 export const TYPE_ROWS: Row[] = [
     {
         audience: 'consumer',

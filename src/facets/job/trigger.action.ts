@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { BaseResult } from '../../expectations/result.js';
 import { defineAction } from '../../kernel/chain/action.js';
 import type { ChainSignature } from '../../kernel/chain/capability.js';

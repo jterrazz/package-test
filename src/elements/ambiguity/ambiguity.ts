@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { asWritten, asWrittenUnscoped, FUNCTION_NAME_OF_KIND } from '../descriptors/as-written.js';
 import type { ElementRef } from '../descriptors/element.js';
 import type { ElementMatch } from './candidate.js';

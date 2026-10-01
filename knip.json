@@ -3,11 +3,11 @@
     "entry": [
         "src/index.ts",
         "src/index.vitest.ts",
-        "lint/index.ts",
+        "lint/index.oxlint.ts",
         "lint/self/rules/plugin.ts",
-        "lint/index.checker.ts",
+        "lint/checker.bin.ts",
         "lint/index.config.ts",
-        "lint/self/index.ts",
+        "lint/self/self.bin.ts",
         "src/facets/cli/documents/schema-cli.ts"
     ],
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to

@@ -1,7 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
 import { resolveRoot } from '../../../lint/engine/project/resolve.js';
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { registerMatchers } from '../../expectations/goldens/matchers.js';
 import type { ResultConfig } from '../../expectations/result.js';
 import type { Started } from '../../kernel/chain/config.js';

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 
-import { REFUSAL_WHY } from '../../../lint/index.refusal.js';
+import { REFUSAL_WHY } from '../../../lint/refusal.js';
 import { navigation, within } from '../descriptors/landmarks.js';
 import { link } from '../descriptors/roles.js';
 import { ambiguousElementError } from './ambiguity.js';

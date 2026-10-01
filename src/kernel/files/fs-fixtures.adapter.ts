@@ -1,7 +1,7 @@
 import { cpSync, existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import type { FixturePort } from './fixture.port.js';
 import { resolveSpecPath } from './resolved-spec-path.js';
 

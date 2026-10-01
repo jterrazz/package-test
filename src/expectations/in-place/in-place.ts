@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync
 import { join, sep } from 'node:path';
 
 import { dedent } from '../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { isFrameworkFrame, stackFrames } from '../../kernel/files/caller.js';
 import type { StackFrame } from '../../kernel/files/caller.js';
 

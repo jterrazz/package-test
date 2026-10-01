@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import type { TestProject } from 'vitest/node';
 
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { shouldUpdateSnapshots } from '../../../expectations/in-place/update.js';
 import { setupEntry } from '../../../kernel/files/setup-entry.js';
 import { clearLedgers, markPartial, ROUTES_DIR, shardLedgersDir } from './ledger.js';

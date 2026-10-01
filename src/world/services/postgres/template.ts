@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { Client } from 'pg';
 
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { loadPeer } from '../peer.js';
 
 /** An optional peer: a repository that never connects never pays for the import. */

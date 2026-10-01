@@ -3,7 +3,7 @@ import { basename, isAbsolute, resolve } from 'node:path';
 
 import { readSpecFile, SpecSyntaxError } from '../../../../lint/engine/project/spec-document.js';
 import type { SpecFile } from '../../../../lint/engine/project/spec-document.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { DISK_KEY } from '../../../kernel/files/spec-path.js';
 
 /** Makes a `<case>.spec.yaml` a test file: the runner shows the document's path and its `description:`. */

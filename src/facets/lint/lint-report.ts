@@ -1,7 +1,7 @@
 import { LESSON_PARTS, lessonParts } from '@jterrazz/typescript/rules';
 import type { Finding } from '@jterrazz/typescript/rules';
 
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 
 export type Diagnostic = { at: string; message: string; rule: string };
 

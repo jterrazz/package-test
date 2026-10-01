@@ -1,9 +1,9 @@
 import { lessonParts } from '@jterrazz/typescript/rules';
 import { describe, expect, test } from 'vitest';
 
-import { invariant, refusal, REFUSAL_WHY } from './index.refusal.js';
+import { invariant, refusal, REFUSAL_WHY } from './refusal.js';
 
-describe('index.refusal', () => {
+describe('refusal', () => {
     test('refusal — a refusal — the lesson the runtime throws — states the case, the row’s sentence and the row’s heading, a part per line', () => {
         // Given - a refusal of the disk law, for one call
         const message = refusal('disk-named-by-relative-path-at-runtime', {

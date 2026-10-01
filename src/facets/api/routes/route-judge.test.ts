@@ -4,7 +4,7 @@ import { join } from 'node:path';
 import { describe, expect, onTestFinished, test } from 'vitest';
 
 import { heldUnreached } from '../../../../lint/engine/baseline/test-baseline.js';
-import type { Lesson } from '../../../../lint/index.refusal.js';
+import type { Lesson } from '../../../../lint/refusal.js';
 import { writeLedger } from './ledger.js';
 import { judgeRoutes, PARTIAL_UNJUDGED, SHARD_UNJUDGED, UNKNOWN_TABLE } from './route-judge.js';
 

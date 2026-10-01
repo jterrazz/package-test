@@ -7,7 +7,7 @@ const TREES = ['elements', 'expectations', 'facets', 'kernel', 'vitest', 'world'
 
 const ENTRIES: Readonly<Record<string, string>> = {
     '.browser.ts': 'index',
-    '.test-d.ts': 'type-channel',
+    '.test-d.ts': 'index',
     '.test.ts': 'index',
     '.ts': 'index',
     '.vitest.test.ts': 'index',

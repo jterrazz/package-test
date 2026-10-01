@@ -1,4 +1,4 @@
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { defineCapability } from '../chain/capability.js';
 import type { ChainSignature } from '../chain/capability.js';
 import type { LinkPort } from './link.port.js';

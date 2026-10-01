@@ -1,7 +1,7 @@
 import { readFileSync } from 'node:fs';
 
 import { dedent } from '../../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../../lint/index.refusal.js';
+import { refusal } from '../../../../lint/refusal.js';
 import { defineAction } from '../../../kernel/chain/action.js';
 import type { SliceReader } from '../../../kernel/chain/action.js';
 import type { ChainSignature, MatrixRow, Run } from '../../../kernel/chain/capability.js';

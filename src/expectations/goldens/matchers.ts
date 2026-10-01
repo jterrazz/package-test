@@ -4,7 +4,7 @@ import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } fr
 import { dirname, resolve } from 'node:path';
 
 import { dedent } from '../../../lint/engine/project/dedent.js';
-import { refusal } from '../../../lint/index.refusal.js';
+import { refusal } from '../../../lint/refusal.js';
 import { resolveSpecPath } from '../../kernel/files/resolved-spec-path.js';
 import { isDiskDirectory, isDiskFile } from '../../kernel/files/spec-path.js';
 import { ContainerAccessor } from '../command/container.js';

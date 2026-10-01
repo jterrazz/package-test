@@ -53,7 +53,7 @@ ruleTester().run('paths-named-in-the-test', pathsNamedInTheTest, {
         },
         {
             code: `${IMPORT}const f = file('./_expected/x.txt');`,
-            filename: '/repo/src/type-channel.test-d.ts',
+            filename: '/repo/src/index.test-d.ts',
         },
         // A helper that takes it as a parameter.
         {

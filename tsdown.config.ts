@@ -6,7 +6,7 @@ export default defineConfig([
         clean: true,
         dts: true,
         entry: {
-            checker: 'lint/index.checker.ts',
+            checker: 'lint/checker.bin.ts',
             config: 'lint/index.config.ts',
             index: 'src/index.ts',
             'in-place-setup': 'src/expectations/in-place/in-place-setup.ts',
@@ -27,8 +27,8 @@ export default defineConfig([
         clean: false,
         dts: true,
         entry: {
-            self: 'lint/self/index.ts',
-            'self-config': 'lint/self/index.config.ts',
+            self: 'lint/self/self.bin.ts',
+            'self-config': 'lint/self/preset.ts',
             'self-oxlint': 'lint/self/rules/plugin.ts',
         },
         format: ['esm'],
@@ -57,7 +57,7 @@ export default defineConfig([
         clean: false,
         dts: true,
         entry: {
-            oxlint: 'lint/index.ts',
+            oxlint: 'lint/index.oxlint.ts',
         },
         format: ['esm', 'cjs'],
         hash: false,
