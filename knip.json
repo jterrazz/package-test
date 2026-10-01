@@ -5,9 +5,9 @@
         "src/index.vitest.ts",
         "lint/index.oxlint.ts",
         "lint/self/rules/plugin.ts",
-        "lint/checker.bin.ts",
+        "lint/jterrazz-test-check.bin.ts",
         "lint/index.config.ts",
-        "lint/self/self.bin.ts",
+        "lint/self/self-cli.ts",
         "src/facets/cli/documents/schema-cli.ts"
     ],
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to

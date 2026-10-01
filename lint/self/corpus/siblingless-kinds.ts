@@ -174,8 +174,8 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     },
     {
         claims: oneOf(
-            'lint/checker.bin.ts',
-            'lint/self/self.bin.ts',
+            'lint/jterrazz-test-check.bin.ts',
+            'lint/self/self-cli.ts',
             'lint/engine/checker/at-zero-pass.ts',
             'lint/engine/checker/conventions.ts',
             'lint/engine/checker/coverage-run.ts',

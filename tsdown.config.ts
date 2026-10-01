@@ -6,7 +6,7 @@ export default defineConfig([
         clean: true,
         dts: true,
         entry: {
-            checker: 'lint/checker.bin.ts',
+            checker: 'lint/jterrazz-test-check.bin.ts',
             config: 'lint/index.config.ts',
             index: 'src/index.ts',
             'in-place-setup': 'src/expectations/in-place/in-place-setup.ts',
@@ -27,7 +27,7 @@ export default defineConfig([
         clean: false,
         dts: true,
         entry: {
-            self: 'lint/self/self.bin.ts',
+            self: 'lint/self/self-cli.ts',
             'self-config': 'lint/self/preset.ts',
             'self-oxlint': 'lint/self/rules/plugin.ts',
         },

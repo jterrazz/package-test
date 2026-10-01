@@ -23,7 +23,7 @@ import plugin from '../../index.oxlint.js';
 import { SELF_CHECKER_PASS_IDS } from '../checks/checker.js';
 import { sourceRootHoldsKnownEntries } from '../checks/source-root-holds-known-entries.js';
 import selfPlugin from '../rules/plugin.js';
-import { chapterAt } from '../self.bin.js';
+import { chapterAt } from '../self-cli.js';
 import { SELF_CHAPTER_MARKERS, selfChapterTable } from './chapter.js';
 import { SELF_FAMILIES } from './families.js';
 import {
