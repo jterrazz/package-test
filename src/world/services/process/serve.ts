@@ -12,6 +12,7 @@ const KILL_GRACE_MS = 2000;
 const DEFAULT_READY_TIMEOUT = 30_000;
 const READY_POLL_INTERVAL_MS = 250;
 const GROUP_POLL_MS = 1000;
+const GROUP_SETTLE_MS = 50;
 
 const WATCHDOG = `
 const group = -Number(process.argv[1]);
@@ -246,8 +247,7 @@ export class ServedProcess {
                 resolve();
             });
             if (child.exitCode !== null || child.signalCode !== null) {
-                this.kill(child, 'SIGKILL');
-                resolve();
+                void this.endLeaderlessGroup(child).then(resolve);
                 return;
             }
             this.kill(child, 'SIGTERM');
@@ -259,6 +259,29 @@ export class ServedProcess {
             }, KILL_GRACE_MS);
             killTimer.unref?.();
         });
+    }
+
+    private async endLeaderlessGroup(child: ChildProcess): Promise<void> {
+        if (child.pid === undefined || process.platform === 'win32') {
+            return;
+        }
+        const group = -child.pid;
+        const running = (): boolean => {
+            try {
+                process.kill(group, 0);
+                return true;
+            } catch {
+                return false;
+            }
+        };
+        this.kill(child, 'SIGTERM');
+        const deadline = Date.now() + KILL_GRACE_MS;
+        while (running() && Date.now() < deadline) {
+            await pause(GROUP_SETTLE_MS);
+        }
+        if (running()) {
+            this.kill(child, 'SIGKILL');
+        }
     }
 
     private kill(child: ChildProcess, signal: NodeJS.Signals): void {

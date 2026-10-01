@@ -1,6 +1,9 @@
 import { once } from 'node:events';
+import { existsSync, mkdtempSync } from 'node:fs';
 import { createServer } from 'node:http';
 import type { Server } from 'node:http';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { afterEach, describe, expect, test, vi } from 'vitest';
 
 import { runToCompletion, ServedProcess } from './serve.js';
@@ -96,6 +99,20 @@ describe('serve', () => {
 
         // Then - the server itself is gone, not only the shell that started it
         expect(alive(pid)).toBe(false);
+    });
+
+    test('a served process — a server its shell left running is served, and stopped with SIGTERM before any SIGKILL', async () => {
+        // Given - a shell that backgrounds a server recording the SIGTERM it receives, then exits
+        const marker = join(mkdtempSync(join(tmpdir(), 'serve-')), 'terminated');
+        const server = `node -e "process.on('SIGTERM',()=>{require('node:fs').writeFileSync(process.argv[1],'');process.exit(0)});const s=require('node:http').createServer((q,r)=>r.end());s.listen(0,'127.0.0.1',()=>console.log('listening on port '+s.address().port))" ${marker} &`;
+        adapter = new ServedProcess({ command: server, ready: READY, timeout: 5000 }, process.cwd());
+
+        // When - it is served, then stopped
+        await adapter.start();
+        await adapter.stop();
+
+        // Then - the server was given its SIGTERM, and the chance to act on it
+        expect(existsSync(marker)).toBe(true);
     });
 
     test('a served process — the PORT form picks a port, hands it as PORT, and polls the ready path on it', async () => {
