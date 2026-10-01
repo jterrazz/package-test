@@ -1,10 +1,8 @@
 /* oxlint-disable jterrazz/runner-in-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
 import { expect } from 'vitest';
 
-import type { ComponentChain, ComponentVisitor } from './facets/component/component.face.js';
-import type { MobileVisitor } from './facets/mobile/mobile.face.js';
-import type { Visitor } from './facets/website/website.face.js';
 import { directory, file, mockOf, postgres, specification } from './index.js';
+import type { ComponentChain, ComponentVisitor, MobileVisitor, Visitor } from './index.js';
 
 /** Each `@ts-expect-error` below is the assertion: `typescript check` fails the day the line compiles. */
 

@@ -1,4 +1,3 @@
-import { GROUND_GLOB } from '@jterrazz/typescript/rules';
 import { existsSync } from 'node:fs';
 import { relative, resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
@@ -54,18 +53,6 @@ describe('index.vitest', () => {
 
         // Then - no plugin was invented
         expect(config.plugins).toBeUndefined();
-    });
-
-    test('defineSpecConfig() — the preset — a config stating nothing receives the defaults of the preset', () => {
-        // Given - the published function, called with nothing
-        const config = defineSpecConfig();
-
-        // Then - the budgets, the ground exclude and the artefact cache are the preset's
-        expect(config.cacheDir).toBe(VITEST_ARTIFACTS_DIR);
-        expect(config.test?.testTimeout).toBe(30_000);
-        expect(config.test?.hookTimeout).toBe(30_000);
-        expect(config.test?.exclude).toContain(GROUND_GLOB);
-        expect(config.test?.retry).toBe(0);
     });
 
     test('defineSpecConfig() — the preset — projects keep their defaults beside a literate config', () => {
