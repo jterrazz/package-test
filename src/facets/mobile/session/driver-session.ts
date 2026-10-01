@@ -84,6 +84,25 @@ async function endUnconfirmed(serverUrl: string, sessionId: string): Promise<voi
         .catch(() => null);
 }
 
+type Recorded = ReturnType<SessionLedger['lookup']>[number];
+
+async function firstHeld(
+    serverUrl: string,
+    ledger: SessionLedger | undefined,
+    recorded: readonly Recorded[],
+): Promise<Recorded | undefined> {
+    const [candidate, ...rest] = recorded;
+    if (candidate === undefined) {
+        return undefined;
+    }
+    if (await stillHeld(serverUrl, candidate.sessionId)) {
+        return candidate;
+    }
+    await endUnconfirmed(serverUrl, candidate.sessionId);
+    ledger?.forget(candidate.sessionId);
+    return await firstHeld(serverUrl, ledger, rest);
+}
+
 /** Attached to the session the run recorded for this server and capabilities, or created and recorded; `shared` sessions are the run's to end. */
 export async function openSession(
     request: SessionRequest,
@@ -96,18 +115,14 @@ export async function openSession(
         request.remote === undefined
             ? await loadWebdriverio()
             : { attach: request.attach, remote: request.remote };
-    for (const recorded of ledger?.lookup(serverUrl, capabilities) ?? []) {
-        if (!(await stillHeld(serverUrl, recorded.sessionId))) {
-            await endUnconfirmed(serverUrl, recorded.sessionId);
-            ledger?.forget(recorded.sessionId);
-        } else if (webdriverio.attach !== undefined) {
-            const driver = await webdriverio.attach({
-                ...server,
-                capabilities: recorded.capabilities,
-                sessionId: recorded.sessionId,
-            });
-            return { driver, shared: true };
-        }
+    const held = await firstHeld(serverUrl, ledger, ledger?.lookup(serverUrl, capabilities) ?? []);
+    if (held !== undefined && webdriverio.attach !== undefined) {
+        const driver = await webdriverio.attach({
+            ...server,
+            capabilities: held.capabilities,
+            sessionId: held.sessionId,
+        });
+        return { driver, shared: true };
     }
     const driver = await webdriverio.remote({ ...server, capabilities });
     ledger?.record(capabilities, {
