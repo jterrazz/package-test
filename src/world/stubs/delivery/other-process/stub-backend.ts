@@ -85,13 +85,13 @@ export class StubBackend {
         this.unmatchedRequests.clear();
     }
 
-    /** Non-null when the chain declared a stub and a request went unmatched or a `required` stub was never met. */
+    /** Non-null when the chain declared a stub and a request went unmatched, a never stub was reached, or a `required` stub was never met. */
     violation(): Error | null {
         if (!this.guarded) {
             return null;
         }
         if (this.unmatchedRequests.size === 0) {
-            return this.queue.requiredError();
+            return this.queue.verdict();
         }
         const unmatched = [...this.unmatchedRequests.values()]
             .map(
@@ -99,12 +99,14 @@ export class StubBackend {
                     `  - ${entry.method} ${entry.path}${entry.count > 1 ? ` (${entry.count} times)` : ''}`,
             )
             .join('\n');
-        return new Error(
+        const declared = this.describeRoutes();
+        const strict = new Error(
             refusal('network-strict-after-first-stub', {
                 fix: "add a stub for each to the chain's composite",
-                found: `unmatched request(s) hit the declared backend during the chain:\n${unmatched}\ndeclared stubs:\n${this.describeRoutes()}`,
+                found: `unmatched request(s) hit the declared backend during the chain:\n${unmatched}\ndeclared stubs:\n${declared}`,
             }),
         );
+        return this.queue.verdict(strict);
     }
 
     private corsHeaders(request: IncomingMessage): Record<string, string> {

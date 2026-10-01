@@ -90,22 +90,45 @@ export class StubQueue {
         return null;
     }
 
-    requiredError(): Error | null {
-        const reached = this.entries.filter(({ stub, served }) => isNever(stub) && served > 0);
-        if (reached.length > 0) {
-            const lines = reached.map(
-                ({ reached: calls, stub }) =>
-                    `  - ${describeRoute(stub.request)} — reached by ${calls.join(', ')}`,
-            );
-            return new Error(
-                refusal({
-                    fix: 'take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
-                    found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
-                    read: 'docs/16-stubs.md#never--a-call-that-must-not-happen',
-                    why: 'A never stub states the subject must not reach its route within the terminal action it is declared for.',
-                }),
-            );
+    verdict(unmatched: Error | null = null): Error | null {
+        const errors = [this.neverError(), unmatched, this.unmetError()].filter(
+            (error): error is Error => error !== null,
+        );
+        if (errors.length <= 1) {
+            return errors[0] ?? null;
         }
+        const reports = errors.map(({ message }) => message).join('\n\n');
+        return new AggregateError(
+            errors,
+            refusal({
+                fix: 'correct each outcome in turn, by its own fix',
+                found: `${errors.length} outcomes of one action, each with its own refusal:\n\n${reports}`,
+                read: 'docs/16-stubs.md#strict-by-construction',
+                why: 'A reached never stub, an unmatched request and an unmet required stub are independent facts about one action, so all are reported at once.',
+            }),
+        );
+    }
+
+    private neverError(): Error | null {
+        const reached = this.entries.filter(({ stub, served }) => isNever(stub) && served > 0);
+        if (reached.length === 0) {
+            return null;
+        }
+        const lines = reached.map(
+            ({ reached: calls, stub }) =>
+                `  - ${describeRoute(stub.request)} — reached by ${calls.join(', ')}`,
+        );
+        return new Error(
+            refusal({
+                fix: 'take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
+                read: 'docs/16-stubs.md#never--a-call-that-must-not-happen',
+                why: "A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
+            }),
+        );
+    }
+
+    private unmetError(): Error | null {
         const unmet: string[] = [];
         for (const { stub, served } of this.entries) {
             if (!stub.required || isNever(stub)) {

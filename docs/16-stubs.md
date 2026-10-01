@@ -66,7 +66,7 @@ Without `required`, a stub nobody calls is invisible: the test passes, and the a
 
 ### `never` — a call that must not happen
 
-The other half of a call count is zero. `http.never(request)` is the stub `required` with `times: 0`, and it states that the subject must not reach the route within the terminal action:
+The other half of a call count is zero. `http.never(request)` is the stub `required` with `times: 0`, and it states that the subject must not reach the route within the chain's terminal action, or the `intercept()` scope, it is declared for:
 
 ```typescript
 import { http } from '@jterrazz/test';
@@ -446,7 +446,7 @@ fix: declare a stub for POST https://api.openai.com/v1/chat/completions — or r
 read: docs/19-linting.md#network-strict-after-first-stub
 ```
 
-At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route.
+At chain end the same channel verifies `required` stubs: one that was declared and never requested fails the spec, naming its route, and a never stub that was reached fails it, naming the route and each call ([never](#never--a-call-that-must-not-happen)). Every outcome of one action is reported together: a reached never stub, an unmatched request and an unmet `required` stub each keep their own refusal in the one error.
 
 ### `required` is verified per terminal action
 

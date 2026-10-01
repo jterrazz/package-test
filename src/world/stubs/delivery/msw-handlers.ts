@@ -91,7 +91,7 @@ export function buildStubHandlers(
         ),
     );
 
-    return { handlers, violation: () => violation ?? queue.requiredError() };
+    return { handlers, violation: () => queue.verdict(violation) };
 }
 
 async function observe(request: Request): Promise<MatchableRequest> {

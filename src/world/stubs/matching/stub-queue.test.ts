@@ -165,7 +165,7 @@ describe('StubQueue', () => {
         const queue = new StubQueue([stub(http.get(URL_A), 'a', { required: true })]);
 
         // Then - the chain-end check names the route and the omission
-        const error = queue.requiredError();
+        const error = queue.verdict();
         expect(error?.message).toContain(
             `- GET ${URL_A} — declared and required but never requested`,
         );
@@ -177,7 +177,7 @@ describe('StubQueue', () => {
         serve(queue);
 
         // Then - nothing to report
-        expect(queue.requiredError()).toBeNull();
+        expect(queue.verdict()).toBeNull();
     });
 
     test('stub queue — required verification — required with times demands exactly that many requests', () => {
@@ -186,12 +186,12 @@ describe('StubQueue', () => {
         serve(queue);
 
         // Then - the count mismatch is the failure
-        expect(queue.requiredError()?.message).toContain(
+        expect(queue.verdict()?.message).toContain(
             'declared required with times: 2 but was requested 1 time(s)',
         );
 
         serve(queue);
-        expect(queue.requiredError()).toBeNull();
+        expect(queue.verdict()).toBeNull();
     });
 
     test('stub queue — never verification — a never stub nobody reaches passes, and takes no request it does not match', () => {
@@ -200,7 +200,7 @@ describe('StubQueue', () => {
         serve(queue);
 
         // Then - the chain end has nothing to report
-        expect(queue.requiredError()).toBeNull();
+        expect(queue.verdict()).toBeNull();
     });
 
     test('stub queue — never verification — a never stub wins its route over a later stub, and the refusal names the route and the call', () => {
@@ -216,16 +216,43 @@ describe('StubQueue', () => {
             status: 418,
             body: { error: `@jterrazz/test: GET ${URL_A} is declared never requested` },
         });
-        expect(queue.requiredError()).toStrictEqual(
+        expect(queue.verdict()).toStrictEqual(
             new Error(
                 [
                     'found: a route the chain declared never requested was reached:',
                     `  - GET ${URL_A} — reached by GET ${URL_A}?page=2`,
-                    'why: A never stub states the subject must not reach its route within the terminal action it is declared for.',
+                    "why: A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
                     'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
                     'read: docs/16-stubs.md#never--a-call-that-must-not-happen',
                 ].join('\n'),
             ),
+        );
+    });
+
+    test('stub queue — never verification — a reached never stub and an unmet required stub are both reported', () => {
+        // Given - a never stub the subject reaches, beside a required stub it never calls
+        const queue = new StubQueue([
+            http.never(http.get(URL_A)),
+            stub(http.get(URL_B), 'b', { required: true }),
+        ]);
+        queue.take(req());
+
+        // Then - one verdict carries both refusals
+        const message = queue.verdict()?.message;
+        expect(message).toContain(`- GET ${URL_A} — reached by GET ${URL_A}`);
+        expect(message).toContain(`- GET ${URL_B} — declared and required but never requested`);
+    });
+
+    test('stub queue — never verification — a strict violation does not hide a reached never stub', () => {
+        // Given - the subject reaches a never stub, then falls back to an undeclared call
+        const queue = new StubQueue([http.never(http.get(URL_A))]);
+        queue.take(req());
+
+        // Then - the verdict names the never breach before the unmatched request
+        const message = queue.verdict(queue.unmatchedError('GET', URL_B))?.message ?? '';
+        expect(message.indexOf('declared never requested was reached')).toBeGreaterThanOrEqual(0);
+        expect(message.indexOf('declared never requested was reached')).toBeLessThan(
+            message.indexOf(`an unmatched outgoing request, GET ${URL_B}`),
         );
     });
 
