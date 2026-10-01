@@ -23,12 +23,20 @@ type StubRoute = {
 };
 
 type StubEntry = {
+    reached: string[];
     stub: Stub;
     served: number;
 };
 
+function isNever({ required, times }: Stub): boolean {
+    return required === true && times === 0;
+}
+
 function stateOf({ stub, served }: StubEntry): string {
     const { times } = stub;
+    if (isNever(stub)) {
+        return served === 0 ? ' (never)' : ` (never, reached ${served} time(s))`;
+    }
     if (times !== undefined && served >= times) {
         return ` (exhausted after ${times})`;
     }
@@ -40,7 +48,7 @@ export class StubQueue {
     private readonly entries: StubEntry[];
 
     constructor(stubs: readonly Stub[]) {
-        this.entries = stubs.map((stub) => ({ stub, served: 0 }));
+        this.entries = stubs.map((stub) => ({ reached: [], stub, served: 0 }));
     }
 
     /** Deduped by pattern: two stubs on one URL share one handler and one queue. */
@@ -66,22 +74,41 @@ export class StubQueue {
     take(request: MatchableRequest): null | Stub {
         for (const entry of this.entries) {
             const { times } = entry.stub;
-            if (times !== undefined && entry.served >= times) {
+            const never = isNever(entry.stub);
+            if (!never && times !== undefined && entry.served >= times) {
                 continue;
             }
             if (!stubMatches(entry.stub, request)) {
                 continue;
             }
             entry.served += 1;
+            if (never) {
+                entry.reached.push(`${request.method} ${request.url}`);
+            }
             return entry.stub;
         }
         return null;
     }
 
     requiredError(): Error | null {
+        const reached = this.entries.filter(({ stub, served }) => isNever(stub) && served > 0);
+        if (reached.length > 0) {
+            const lines = reached.map(
+                ({ reached: calls, stub }) =>
+                    `  - ${describeRoute(stub.request)} — reached by ${calls.join(', ')}`,
+            );
+            return new Error(
+                refusal({
+                    fix: 'take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                    found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
+                    read: 'docs/16-stubs.md#never--a-call-that-must-not-happen',
+                    why: 'A never stub states the subject must not reach its route within the terminal action it is declared for.',
+                }),
+            );
+        }
         const unmet: string[] = [];
         for (const { stub, served } of this.entries) {
-            if (!stub.required) {
+            if (!stub.required || isNever(stub)) {
                 continue;
             }
             const { times } = stub;

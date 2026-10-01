@@ -92,7 +92,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 - **An `expect` in a helper or a loop** — a `_setup/` module, a test adapter or a `*.specification.ts` returns what it reads, and the test asserts it (`no-expect-outside-a-test`); a loop asserts nothing over an empty collection, so compare the collection whole or state the cases with `test.each` (`no-expect-in-a-loop`).
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (the types say which: `typescript/no-floating-promises`, `typescript/await-thenable`).
-- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits.
+- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits. A call that must not happen is `.intercept(http.never(http.post(url)))` — `http.unreachable()` and an empty error say it failed, not that it never happened.
 - **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
 - **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a stub stays on its test's chain.
 

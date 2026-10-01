@@ -21,12 +21,12 @@ export default defineStub({
 });
 ```
 
-| Field       | Meaning                                                                                                                     |
-| ----------- | --------------------------------------------------------------------------------------------------------------------------- |
-| `request`   | What outgoing call this stub speaks for — a stub builder (`http.*`, `openai.*`, `anthropic.*`)                              |
-| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                       |
-| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves. |
-| `required?` | The chain FAILS unless it was actually requested — at least once, or exactly `times` times when `times` is set.             |
+| Field       | Meaning                                                                                                                                                                         |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `request`   | What outgoing call this stub speaks for — a stub builder (`http.*`, `openai.*`, `anthropic.*`)                                                                                  |
+| `response`  | The reply: a fixed value, or `(request) => StubResponse` evaluated per served request                                                                                           |
+| `times?`    | How many times it may serve. **Omitted = unlimited** (a re-render or a retry replays it). `n` = exhausted after `n` serves.                                                     |
+| `required?` | The chain FAILS unless it was actually requested — at least once, or exactly `times` times when `times` is set, zero included ([`never`](#never--a-call-that-must-not-happen)). |
 
 ### Selection
 
@@ -63,6 +63,29 @@ export default defineStub({
 ```
 
 Without `required`, a stub nobody calls is invisible: the test passes, and the assertion it was supposed to protect never ran.
+
+### `never` — a call that must not happen
+
+The other half of a call count is zero. `http.never(request)` is the stub `required` with `times: 0`, and it states that the subject must not reach the route within the terminal action:
+
+```typescript
+import { http } from '@jterrazz/test';
+import { expect, test } from 'vitest';
+
+import { api } from '../api.specification.js';
+
+test('a preview never places the order', async () => {
+    // Given - the shop's order endpoint declared never requested
+    const result = await api
+        .intercept(http.never(http.post('https://shop.test/orders')))
+        .post('/orders/preview', { items: ['book'] });
+
+    // Then - the preview answered without reaching the shop
+    expect(result.status).toBe(200);
+});
+```
+
+Unlike an exhausted stub, a never stub is never skipped: the first request it matches is taken by it, whatever stub follows on the same route, and the subject receives a `501` whose body names the route. The chain then fails at its end, naming the route and every call that reached it. `http.unreachable()` beside an empty error says the call FAILED; only `never` says it did not happen. `openai.never(request)` and `anthropic.never(request)` are the same stub, so a unit of `openai/` or `anthropic/` calls its own folder's builder. It is a stub like any other: it turns the chain's network strict, and in `.with()` it claims its route.
 
 ## `defineStubs` — it's stubs all the way down
 
@@ -246,7 +269,7 @@ It is real in both runtimes — msw's server under node, msw's worker in a page 
 await using _ = await intercept(posts, { origin: 'http://console.test' });
 ```
 
-**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare the call with `http.unreachable()` on every feed it could reach, and the spec fails if it makes one.
+**An empty list is refused.** `intercept(defineStubs())` guards nothing, and a subject with no network needs no intercept at all — the message says so. "This subject makes no network call" is said the other way round: declare each call it could make with [`http.never()`](#never--a-call-that-must-not-happen), and the spec fails if it makes one.
 
 **A body the subject cancels settles.** Under node, every reply to `fetch` reaches the subject with its body as a stream this package owns, so `response.body.cancel()` — what an SDK client does with a body it will not read, before a retry — resolves at once. The status, the headers and the address the reply came from are read as they were served. msw keeps a branch of every body for itself and never cancels it; the owned stream is what stands between that branch and the subject's cancel. A reply no stub answered is owned too, since msw branches the body of a request it passes through to the network as well. `specs/api/intercept/body-cancel.spec.ts` is the proof for a stub's reply: an app that cancels the body of `http.error(503, { … })` answers its request. `specs/integration/intercept/passthrough-cancel.spec.ts` is the proof for a reply passed through to a real server. In a page nothing is wrapped: the worker's reply reaches the subject through the browser's own network stack, and its cancel settles as served — `specs/component/intercept/quote-status.test.tsx` is the proof.
 

@@ -3,6 +3,8 @@ import { CaptureScope } from '../../../expectations/tokens/match.js';
 import { structuralSubset } from '../../../expectations/tokens/structural.js';
 import { STREAM_BODY } from '../exchange.js';
 import type { MatchableRequest, StreamBody, StubRequest, StubResponse } from '../exchange.js';
+import { describeRoute } from '../matching/route.js';
+import type { Stub } from '../stub.js';
 
 function wrapJson(data: unknown): StubResponse {
     return { status: 200, body: data };
@@ -187,6 +189,21 @@ export const http = {
 
     put(url: RegExp | string, filter?: HttpStubFilter): StubRequest {
         return declare('PUT', url, filter);
+    },
+
+    /** A stub the chain fails on if the subject reaches its route: `required` with `times: 0`. */
+    never(request: StubRequest): Stub {
+        return {
+            request,
+            required: true,
+            response: {
+                status: 501,
+                body: {
+                    error: `@jterrazz/test: ${describeRoute(request)} is declared never requested`,
+                },
+            },
+            times: 0,
+        };
     },
 
     /** Response: a body-less reply (204 by default). */

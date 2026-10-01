@@ -262,4 +262,16 @@ describe('anthropic', () => {
             status: 200,
         });
     });
+
+    test('anthropic — never — never() is http.never() spelled in this kind, over the endpoint it is handed', () => {
+        // Given - the provider call a cached path must not make
+        const declared = anthropic.never(anthropic.messages());
+
+        // Then - a stub required exactly zero times on that endpoint
+        expect(declared).toMatchObject({
+            request: { adapter: 'anthropic', method: 'POST', url: ANTHROPIC_MESSAGES_URL },
+            required: true,
+            times: 0,
+        });
+    });
 });

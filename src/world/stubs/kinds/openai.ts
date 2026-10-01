@@ -1,4 +1,5 @@
 import type { StubRequest, StubResponse } from '../exchange.js';
+import type { Stub } from '../stub.js';
 import { http } from './http.js';
 import type { SseEvent } from './http.js';
 import { matchesText } from './text-filter.js';
@@ -199,6 +200,10 @@ export const openai = {
             match: filter ? ({ body }) => matchesResponsesFilter(body, filter) : undefined,
             wrap: buildResponsesReply,
         };
+    },
+
+    never(request: StubRequest): Stub {
+        return http.never(request);
     },
 
     /** Response: data wrapped in the Chat Completions format. */

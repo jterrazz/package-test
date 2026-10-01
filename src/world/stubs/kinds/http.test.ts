@@ -219,6 +219,21 @@ describe('http', () => {
         ).toBe(false);
     });
 
+    test('http — never — never() is a stub required exactly zero times, its reply naming the route', () => {
+        // Given - a route the subject must not reach
+        const declared = http.never(http.post(URL));
+
+        // Then - the count is the statement, and a subject that reaches it reads why it failed
+        expect(declared).toMatchObject({
+            required: true,
+            response: {
+                status: 501,
+                body: { error: `@jterrazz/test: POST ${URL} is declared never requested` },
+            },
+            times: 0,
+        });
+    });
+
     test('http — responses — unreachable() is a transport failure, not a status', () => {
         // Given - the collection declared unreachable
         const response = http.unreachable();

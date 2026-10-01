@@ -193,4 +193,48 @@ describe('StubQueue', () => {
         serve(queue);
         expect(queue.requiredError()).toBeNull();
     });
+
+    test('stub queue — never verification — a never stub nobody reaches passes, and takes no request it does not match', () => {
+        // Given - a route declared never requested, beside one the subject calls
+        const queue = new StubQueue([http.never(http.get(URL_B)), stub(http.get(URL_A), 'a')]);
+        serve(queue);
+
+        // Then - the chain end has nothing to report
+        expect(queue.requiredError()).toBeNull();
+    });
+
+    test('stub queue — never verification — a never stub wins its route over a later stub, and the refusal names the route and the call', () => {
+        // Given - a never stub declared before a stub that would answer the same request
+        const queue = new StubQueue([
+            http.never(http.get(URL_A)),
+            stub(http.get(URL_A), 'answered'),
+        ]);
+        const served = queue.take(req({ url: `${URL_A}?page=2` }));
+
+        // Then - the never stub took the call, and the chain end refuses it
+        expect(served?.response).toStrictEqual({
+            status: 501,
+            body: { error: `@jterrazz/test: GET ${URL_A} is declared never requested` },
+        });
+        expect(queue.requiredError()).toStrictEqual(
+            new Error(
+                [
+                    'found: a route the chain declared never requested was reached:',
+                    `  - GET ${URL_A} — reached by GET ${URL_A}?page=2`,
+                    'why: A never stub states the subject must not reach its route within the terminal action it is declared for.',
+                    'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                    'read: docs/16-stubs.md#never--a-call-that-must-not-happen',
+                ].join('\n'),
+            ),
+        );
+    });
+
+    test('stub queue — never verification — the strict refusal lists a never stub as such', () => {
+        // Given - a never stub on one route, and a request to another
+        const queue = new StubQueue([http.never(http.post(URL_A))]);
+        queue.take(req({ url: URL_B }));
+
+        // Then - the declared list says the route is never to be requested
+        expect(queue.unmatchedError('GET', URL_B).message).toContain(`- POST ${URL_A} (never)`);
+    });
 });

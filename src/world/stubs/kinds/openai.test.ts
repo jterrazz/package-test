@@ -259,4 +259,16 @@ describe('openai', () => {
         });
         expect(timeout).toStrictEqual({ body: {}, delay: 30_000, status: 200 });
     });
+
+    test('openai — never — never() is http.never() spelled in this kind, over the endpoint it is handed', () => {
+        // Given - the provider call a cached path must not make
+        const declared = openai.never(openai.chat({ model: 'gpt-4o' }));
+
+        // Then - a stub required exactly zero times on that endpoint
+        expect(declared).toMatchObject({
+            request: { adapter: 'openai', method: 'POST', url: CHAT_URL },
+            required: true,
+            times: 0,
+        });
+    });
 });

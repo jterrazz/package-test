@@ -40,18 +40,7 @@ then implement against numbers. By expected return, descending.
 - **The next large consumer.** A repository on another stack, to test how general the
   conventions are outside this ecosystem.
 
-## 3. What the stub vocabulary still cannot say
-
-Found by package-analytics' 15.3 adoption (2026-09-20). It is a product line: a
-rule about it is a line of [18 § The backlog](docs/18-conventions.md#the-backlog--the-criterion-written-coded-on-its-first-occurrence),
-and it waits on the surface.
-
-- **There is no must-never-be-called stub.** A negative test leans on
-  `http.unreachable()` plus an empty `result.error`, which says "the call failed", not
-  "the call never happened". `http.never(request)` — or `required: false` with
-  `times: 0` — states it, and fails at chain end if the subject reached the route.
-
-## 4. A framework's Vite config function under `component()`
+## 3. A framework's Vite config function under `component()`
 
 `component({ vite })` accepts the function a framework exports — Astro's `getViteConfig()`
 is one — but no spike has proven that pipeline under the component facet: the cross-repo
@@ -59,7 +48,7 @@ probe that suggested it was confounded by two Vite versions. The proof owed is a
 spike inside a `jterrazz-web` worktree; until it lands, chapter 07 sends a consumer to the
 app's own `vite.config.ts`.
 
-## 5. Known defects and debt
+## 4. Known defects and debt
 
 - **A server command outlives a killed run.** `serve.ts` spawns every `process()` service
   and the run's Appium server `detached`, in a process group of its own, so a vitest killed
