@@ -11,20 +11,20 @@ function formatMatch(match: MobileElementMatch, index: number): string {
 }
 
 /** `exact` is offered only to a target that opted out; distinct identifiers make `testId()` a concrete rewrite. */
-function formatFixes(element: Target, matches: MobileElementMatch[]): string[] {
+function formatFixes(target: Target, matches: MobileElementMatch[]): string[] {
     const fixes: string[] = [];
 
-    if (!element.scope) {
+    if (!target.scope) {
         fixes.push(
-            `scope it       within(testId('…'), ${asWrittenUnscoped(element)}) — a screen has no landmarks; any target works as the scope`,
+            `scope it       within(testId('…'), ${asWrittenUnscoped(target)}) — a screen has no landmarks; any target works as the scope`,
         );
     }
 
-    if (element.exact === false && element.name !== undefined) {
-        const remaining = matches.filter((match) => match.label === element.name).length;
+    if (target.exact === false && target.name !== undefined) {
+        const remaining = matches.filter((match) => match.label === target.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
-                `exact name     ${asWrittenUnscoped({ ...element, exact: true })}` +
+                `exact name     ${asWrittenUnscoped({ ...target, exact: true })}` +
                     `   [leaves ${remaining} of ${matches.length}]`,
             );
         }
@@ -37,7 +37,7 @@ function formatFixes(element: Target, matches: MobileElementMatch[]): string[] {
                 .filter((identifier): identifier is string => identifier !== undefined),
         ),
     ];
-    if (identifiers.length > 1 && element.kind !== 'testId') {
+    if (identifiers.length > 1 && target.kind !== 'testId') {
         fixes.push(
             `test id        testId(${JSON.stringify(identifiers[0])})   [also here: ${identifiers
                 .slice(1)
@@ -50,13 +50,13 @@ function formatFixes(element: Target, matches: MobileElementMatch[]): string[] {
 }
 
 export function ambiguousScreenElementError(options: {
-    element: Target;
+    target: Target;
     matches: MobileElementMatch[];
 }): Error {
-    const { element, matches } = options;
+    const { target, matches } = options;
     return ambiguityError({
-        element,
-        fixes: formatFixes(element, matches),
+        target,
+        fixes: formatFixes(target, matches),
         lines: matches.map((match, index) => formatMatch(match, index)),
         where: 'the screen',
     });

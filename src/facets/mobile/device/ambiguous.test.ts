@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { REFUSAL_WHY } from '../../../../lint/refusal.js';
 import { within } from '../../../visitor/targets/landmarks.js';
 import { button, content, testId } from '../../../visitor/targets/roles.js';
-import { ambiguousScreenElementError } from './ambiguity.js';
+import { ambiguousScreenElementError } from './ambiguous.js';
 import type { MobileElementMatch } from './device.port.js';
 
 const match = (overrides: Partial<MobileElementMatch> = {}): MobileElementMatch => ({
@@ -16,7 +16,7 @@ describe('ambiguousScreenElementError', () => {
     test('names the target and the count', () => {
         // Given - three candidates for one button
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' }), match()],
         });
 
@@ -27,7 +27,7 @@ describe('ambiguousScreenElementError', () => {
     test('enumerates every candidate with its type, label and identifier', () => {
         // Given - candidates carrying accessibility identifiers
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [
                 match({ identifier: 'event-1-bookmark' }),
                 match({ identifier: 'event-2-bookmark' }),
@@ -42,7 +42,7 @@ describe('ambiguousScreenElementError', () => {
     test('renders a value when the candidate carries one', () => {
         // Given - two text fields distinguished only by their content
         const { message } = ambiguousScreenElementError({
-            element: content('a@b.test'),
+            target: content('a@b.test'),
             matches: [
                 match({ label: 'Email', type: 'TextField', value: 'a@b.test' }),
                 match({ label: 'Confirm email', type: 'TextField', value: 'a@b.test' }),
@@ -57,7 +57,7 @@ describe('ambiguousScreenElementError', () => {
     test('suggests scoping first — a screen has no landmarks to name', () => {
         // Given - an unscoped ambiguous target
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [match(), match()],
         });
 
@@ -68,7 +68,7 @@ describe('ambiguousScreenElementError', () => {
     test('offers exact to a target that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark', { exact: false }),
+            target: button('Bookmark', { exact: false }),
             matches: [match(), match({ label: 'Bookmark all' })],
         });
 
@@ -80,7 +80,7 @@ describe('ambiguousScreenElementError', () => {
     test('never offers exact to an ordinary target — it is already exact', () => {
         // Given - a target stating nothing, which is the whole-label default
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [match(), match({ label: 'Bookmark all' })],
         });
 
@@ -91,7 +91,7 @@ describe('ambiguousScreenElementError', () => {
     test('omits the exact suggestion when every candidate matches the name whole', () => {
         // Given - two identical labels, where exact would change nothing
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [match(), match()],
         });
 
@@ -102,7 +102,7 @@ describe('ambiguousScreenElementError', () => {
     test('offers the distinct identifiers as a concrete testId rewrite', () => {
         // Given - candidates whose identifiers differ
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [
                 match({ identifier: 'event-1-bookmark' }),
                 match({ identifier: 'event-2-bookmark' }),
@@ -117,7 +117,7 @@ describe('ambiguousScreenElementError', () => {
     test('does not re-suggest scoping a target that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
         const { message } = ambiguousScreenElementError({
-            element: within(testId('event-list'), button('Bookmark')),
+            target: within(testId('event-list'), button('Bookmark')),
             matches: [match(), match()],
         });
 
@@ -129,7 +129,7 @@ describe('ambiguousScreenElementError', () => {
     test('states the rule and where it is documented', () => {
         // Given - any refusal
         const { message } = ambiguousScreenElementError({
-            element: button('Bookmark'),
+            target: button('Bookmark'),
             matches: [match(), match()],
         });
 

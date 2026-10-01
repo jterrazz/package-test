@@ -6,7 +6,7 @@ import type { Browser, BrowserContext, BrowserType, Locator, Page } from 'playwr
 import { evidenceDirectory } from '../../../../lint/engine/project/artifacts.js';
 import { refusal } from '../../../../lint/refusal.js';
 import { scenarioFailure } from '../../../chain/refusals/scenario-failure.js';
-import { ambiguousElementError } from '../../../visitor/matching/ambiguous.js';
+import { ambiguousTargetError } from '../../../visitor/matching/ambiguous.js';
 import { CANDIDATE_LIMITS, candidatesOf } from '../../../visitor/matching/candidates.js';
 import { asWritten } from '../../../visitor/targets/as-written.js';
 import { scopeChain } from '../../../visitor/targets/landmarks.js';
@@ -93,7 +93,7 @@ async function act<T>(
         }
         const culprit = await findAmbiguousLevel(page, element);
         const matches = await locate(page, culprit).evaluateAll(candidatesOf, CANDIDATE_LIMITS);
-        throw ambiguousElementError({ element: culprit, matches, url: page.url() });
+        throw ambiguousTargetError({ target: culprit, matches, url: page.url() });
     }
 }
 

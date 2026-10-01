@@ -24,18 +24,18 @@ export const FUNCTION_NAME_OF_KIND: Record<Target['kind'], string> = {
 };
 
 /** Spoken in the vocabulary the author wrote, never playwright's: an option appears only when the author stated one. */
-export function asWritten(element: Target): string {
-    const bare = asWrittenUnscoped(element);
-    return element.scope ? `within(${asWritten(element.scope)}, ${bare})` : bare;
+export function asWritten(target: Target): string {
+    const bare = asWrittenUnscoped(target);
+    return target.scope ? `within(${asWritten(target.scope)}, ${bare})` : bare;
 }
 
-export function asWrittenUnscoped(element: Target): string {
+export function asWrittenUnscoped(target: Target): string {
     const args: string[] = [];
-    if (element.name !== undefined) {
-        args.push(JSON.stringify(element.name));
+    if (target.name !== undefined) {
+        args.push(JSON.stringify(target.name));
     }
-    if (element.exact !== undefined) {
-        args.push(`{ exact: ${String(element.exact)} }`);
+    if (target.exact !== undefined) {
+        args.push(`{ exact: ${String(target.exact)} }`);
     }
-    return `${FUNCTION_NAME_OF_KIND[element.kind]}(${args.join(', ')})`;
+    return `${FUNCTION_NAME_OF_KIND[target.kind]}(${args.join(', ')})`;
 }

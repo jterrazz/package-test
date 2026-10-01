@@ -4,28 +4,28 @@ import { main, navigation, region, scopeChain, within } from './landmarks.js';
 import { button, link, testId } from './roles.js';
 
 describe('landmarks', () => {
-    test('landmark — builds an anonymous landmark without a name', () => {
+    test('main — builds an anonymous landmark without a name', () => {
         // Given - the primary content region
-        const element = main();
+        const target = main();
 
         // Then - it designates the region itself, not a named one
-        expect(element).toStrictEqual({ kind: 'main' });
+        expect(target).toStrictEqual({ kind: 'main' });
     });
 
-    test('landmark — builds a named landmark for pages carrying several of a region', () => {
+    test('navigation — builds a named landmark for pages carrying several of a region', () => {
         // Given - a page with more than one nav
-        const element = navigation('Breadcrumb');
+        const target = navigation('Breadcrumb');
 
         // Then - the accessible name distinguishes them
-        expect(element).toStrictEqual({ kind: 'navigation', name: 'Breadcrumb' });
+        expect(target).toStrictEqual({ kind: 'navigation', name: 'Breadcrumb' });
     });
 
     test('within — attaches the scope to the target', () => {
         // Given - a link designated inside the nav
-        const element = within(navigation(), link('Articles'));
+        const target = within(navigation(), link('Articles'));
 
         // Then - the scope rides along on the target
-        expect(element).toStrictEqual({
+        expect(target).toStrictEqual({
             kind: 'link',
             name: 'Articles',
             scope: { kind: 'navigation' },
@@ -49,10 +49,10 @@ describe('landmarks', () => {
 
     test('within — accepts any target as a scope, including the escape hatch', () => {
         // Given - a container with no landmark role to stand on
-        const element = within(testId('row-3'), button('Delete'));
+        const target = within(testId('row-3'), button('Delete'));
 
         // Then - the escape hatch is still scopable
-        expect(element.scope).toStrictEqual({ kind: 'testId', name: 'row-3' });
+        expect(target.scope).toStrictEqual({ kind: 'testId', name: 'row-3' });
     });
 
     test('within — leaves the original target untouched', () => {
@@ -66,20 +66,20 @@ describe('landmarks', () => {
         expect(target.scope).toBeUndefined();
     });
 
-    test('landmark — carries exact when asked for', () => {
+    test('region — carries exact when asked for', () => {
         // Given - a named region opting out of the whole-name match
-        const element = region('Series', { exact: false });
+        const target = region('Series', { exact: false });
 
         // Then - the stated flag travels with the target
-        expect(element).toStrictEqual({ exact: false, kind: 'region', name: 'Series' });
+        expect(target).toStrictEqual({ exact: false, kind: 'region', name: 'Series' });
     });
 
     test('scopeChain — unrolls a nested scope from the outermost container to the target', () => {
         // Given - a link scoped to a region, itself scoped to main
-        const element = within(main(), within(region('Series'), link('Part 2')));
+        const target = within(main(), within(region('Series'), link('Part 2')));
 
         // Then - each level stands alone, outermost first
-        expect(scopeChain(element).map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
+        expect(scopeChain(target).map(({ kind, name }) => ({ kind, name }))).toStrictEqual([
             { kind: 'main', name: undefined },
             { kind: 'region', name: 'Series' },
             { kind: 'link', name: 'Part 2' },
@@ -88,9 +88,9 @@ describe('landmarks', () => {
 
     test('scopeChain — answers an unscoped target with itself alone', () => {
         // Given - a bare link
-        const element = link('Articles');
+        const target = link('Articles');
 
         // Then - the chain is that one level
-        expect(scopeChain(element)).toStrictEqual([element]);
+        expect(scopeChain(target)).toStrictEqual([target]);
     });
 });

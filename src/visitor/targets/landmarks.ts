@@ -1,36 +1,29 @@
-import type { LandmarkKind, OptionallyNamedTarget, Target, TargetOptions } from './target.js';
-
-const landmark =
-    (kind: LandmarkKind): OptionallyNamedTarget =>
-    (name?: string, options?: TargetOptions) => ({
-        kind,
-        ...(name === undefined ? {} : { name }),
-        ...(options?.exact === undefined ? {} : { exact: options.exact }),
-    });
+import { optionallyNamed } from './named.js';
+import type { OptionallyNamedTargetFactory, Target } from './target.js';
 
 /** The `banner` landmark — the page header. */
-export const banner: OptionallyNamedTarget = landmark('banner');
+export const banner: OptionallyNamedTargetFactory = optionallyNamed('banner');
 
 /** The `complementary` landmark — an `<aside>`, a sidebar. */
-export const complementary: OptionallyNamedTarget = landmark('complementary');
+export const complementary: OptionallyNamedTargetFactory = optionallyNamed('complementary');
 
 /** The `contentinfo` landmark — the page footer. */
-export const contentinfo: OptionallyNamedTarget = landmark('contentinfo');
+export const contentinfo: OptionallyNamedTargetFactory = optionallyNamed('contentinfo');
 
 /** The `form` landmark — a form carrying an accessible name. */
-export const form: OptionallyNamedTarget = landmark('form');
+export const form: OptionallyNamedTargetFactory = optionallyNamed('form');
 
 /** The `main` landmark — the primary content of the document. */
-export const main: OptionallyNamedTarget = landmark('main');
+export const main: OptionallyNamedTargetFactory = optionallyNamed('main');
 
 /** The `navigation` landmark — a `<nav>`. Name it when a page has several. */
-export const navigation: OptionallyNamedTarget = landmark('navigation');
+export const navigation: OptionallyNamedTargetFactory = optionallyNamed('navigation');
 
 /** The `region` landmark — a `<section>` carrying an accessible name. */
-export const region: OptionallyNamedTarget = landmark('region');
+export const region: OptionallyNamedTargetFactory = optionallyNamed('region');
 
 /** The `search` landmark. */
-export const search: OptionallyNamedTarget = landmark('search');
+export const search: OptionallyNamedTargetFactory = optionallyNamed('search');
 
 /** Restrict a target to the inside of another: `click(within(navigation(), link('Articles')))`. */
 export const within = (scope: Target, target: Target): Target => ({

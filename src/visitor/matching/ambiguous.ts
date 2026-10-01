@@ -40,29 +40,29 @@ function landmarkCounts(matches: ElementMatch[]): [string, number][] {
     return [...counts].toSorted(([, a], [, b]) => a - b);
 }
 
-function formatFixes(element: Target, matches: ElementMatch[]): string[] {
+function formatFixes(target: Target, matches: ElementMatch[]): string[] {
     const fixes: string[] = [];
 
     const landmarksThatCutTheSet = landmarkCounts(matches).filter(
         ([, count]) => count < matches.length,
     );
-    if (!element.scope) {
+    if (!target.scope) {
         const [first, ...rest] = landmarksThatCutTheSet;
         const alsoHere =
             rest.length > 0 ? `   [also here: ${rest.map(([name]) => name).join(', ')}]` : '';
         fixes.push(
             first === undefined
-                ? `scope it       within(<a container holding only this one>, ${asWrittenUnscoped(element)})`
-                : `scope it       within(${first[0]}, ${asWrittenUnscoped(element)})   [leaves ${first[1]} of ${matches.length}]${alsoHere}`,
+                ? `scope it       within(<a container holding only this one>, ${asWrittenUnscoped(target)})`
+                : `scope it       within(${first[0]}, ${asWrittenUnscoped(target)})   [leaves ${first[1]} of ${matches.length}]${alsoHere}`,
         );
     }
 
-    const optedOutOfExact = element.exact === false && element.name !== undefined;
+    const optedOutOfExact = target.exact === false && target.name !== undefined;
     if (optedOutOfExact) {
-        const remaining = matches.filter((match) => match.text === element.name).length;
+        const remaining = matches.filter((match) => match.text === target.name).length;
         if (remaining > 0 && remaining < matches.length) {
             fixes.push(
-                `exact name     ${asWrittenUnscoped({ ...element, exact: true })}` +
+                `exact name     ${asWrittenUnscoped({ ...target, exact: true })}` +
                     `   [leaves ${remaining} of ${matches.length}]`,
             );
         }
@@ -75,32 +75,32 @@ function formatFixes(element: Target, matches: ElementMatch[]): string[] {
 }
 
 export function ambiguityError(options: {
-    element: Target;
+    target: Target;
     fixes: string[];
     lines: string[];
     where: string;
 }): Error {
-    const { element, fixes, lines, where } = options;
+    const { target, fixes, lines, where } = options;
     return new Error(
         refusal('target-matches-one-element', {
             fix: ['designate one of them:', ...fixes.map((fix) => `  • ${fix}`)].join('\n'),
             found: [
-                `Ambiguous element: ${asWritten(element)} matched ${lines.length} elements on ${where} —`,
+                `Ambiguous element: ${asWritten(target)} matched ${lines.length} elements on ${where} —`,
                 ...lines,
             ].join('\n'),
         }),
     );
 }
 
-export function ambiguousElementError(options: {
-    element: Target;
+export function ambiguousTargetError(options: {
+    target: Target;
     matches: ElementMatch[];
     url: string;
 }): Error {
-    const { element, matches, url } = options;
+    const { target, matches, url } = options;
     return ambiguityError({
-        element,
-        fixes: formatFixes(element, matches),
+        target,
+        fixes: formatFixes(target, matches),
         lines: matches.map((match, index) => formatMatch(match, index)),
         where: url,
     });

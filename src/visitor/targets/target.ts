@@ -33,7 +33,6 @@ export type Target = {
     /** Accepting input or not, built by `disabled(x)` / `enabled(x)`. */
     disabled?: boolean;
     kind: ElementKind | LandmarkKind;
-    /** Landmarks may be anonymous (`main()`, `banner()`); everything else is named. */
     name?: string;
     /** The chosen option or not, built by `selected(x)`; read from `:checked`. */
     selected?: boolean;
@@ -49,6 +48,6 @@ export type TargetOptions = {
     exact?: boolean;
 };
 
-export type NamedTarget = (name: string, options?: TargetOptions) => Target;
+export type NamedTargetFactory = (name: string, options?: TargetOptions) => Target;
 
-export type OptionallyNamedTarget = (name?: string, options?: TargetOptions) => Target;
+export type OptionallyNamedTargetFactory = (name?: string, options?: TargetOptions) => Target;

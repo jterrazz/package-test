@@ -3,15 +3,15 @@ import { describe, expect, test } from 'vitest';
 import { button, dialog, field, link, listitem, option, row, status, table } from './roles.js';
 
 describe('roles', () => {
-    test('element vocabulary — builds a named target as plain data', () => {
+    test('link — builds a named target as plain data', () => {
         // Given - a link named by its accessible name
-        const element = link('Articles');
+        const target = link('Articles');
 
         // Then - targets stay serializable; no locator leaks into the target
-        expect(element).toStrictEqual({ kind: 'link', name: 'Articles' });
+        expect(target).toStrictEqual({ kind: 'link', name: 'Articles' });
     });
 
-    test('element vocabulary — names dialog, table and row by their role', () => {
+    test('dialog / table / row — name a target by its role', () => {
         // Given - the roles the estate's UI specs were reaching for by hand
         const named = [dialog('Settings'), table('Posts'), row('A first post')];
 
@@ -23,7 +23,7 @@ describe('roles', () => {
         ]);
     });
 
-    test('element vocabulary — lets the roles that usually carry no name stay anonymous', () => {
+    test('status / listitem — leave the name optional on the roles that usually carry none', () => {
         // Given - the live region of a page, and the item of a list
         // Then - a name is optional, exactly as it is on a landmark
         expect([status(), listitem('Part 2')]).toStrictEqual([
@@ -34,13 +34,13 @@ describe('roles', () => {
 
     test('option — names an option the way every other role target is named', () => {
         // Given - one of the channels a select offers
-        const element = option('LinkedIn');
+        const target = option('LinkedIn');
 
         // Then - it is a target of its role, carrying nothing else
-        expect(element).toStrictEqual({ kind: 'option', name: 'LinkedIn' });
+        expect(target).toStrictEqual({ kind: 'option', name: 'LinkedIn' });
     });
 
-    test('exact — stays absent when it was not asked for, so targets compare cleanly', () => {
+    test('button — leaves exact absent when it was not asked for, so targets compare cleanly', () => {
         // Given - a target built without options
         const target = button('Subscribe');
 
@@ -48,7 +48,7 @@ describe('roles', () => {
         expect(target).toStrictEqual({ kind: 'button', name: 'Subscribe' });
     });
 
-    test('exact — travels with the target when asked for, named or not', () => {
+    test('field / table — carry exact when asked for, named or optionally named', () => {
         // Given - a whole-name field and a partial-name table
         const targets = [field('Email', { exact: true }), table('Series', { exact: false })];
 

@@ -255,4 +255,9 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
         name: 'a chain or runner internal',
         why: 'it is reached through the chain, so its proof is the facet specs that drive the chain — a direct test would assert on a seam nothing else speaks to',
     },
+    {
+        claims: oneOf('src/visitor/targets/named.ts'),
+        name: 'the factory of public builders',
+        why: 'it builds the targets `roles.ts` and `landmarks.ts` publish, whose tests hold every shape it returns — a test of its own would assert on a seam no consumer speaks to',
+    },
 ];

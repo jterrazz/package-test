@@ -3,7 +3,7 @@ import { describe, expect, test } from 'vitest';
 import { REFUSAL_WHY } from '../../../lint/refusal.js';
 import { navigation, within } from '../targets/landmarks.js';
 import { link } from '../targets/roles.js';
-import { ambiguousElementError } from './ambiguous.js';
+import { ambiguousTargetError } from './ambiguous.js';
 import type { ElementMatch } from './candidates.js';
 
 const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
@@ -13,10 +13,10 @@ const match = (overrides: Partial<ElementMatch> = {}): ElementMatch => ({
 });
 
 describe('ambiguous', () => {
-    test('ambiguousElementError — names the target, the count and the page', () => {
+    test('ambiguousTargetError — names the target, the count and the page', () => {
         // Given - three candidates for one link
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' }), match()],
             url: 'http://site.test/',
         });
@@ -25,10 +25,10 @@ describe('ambiguous', () => {
         expect(message).toContain('link("Articles") matched 3 elements on http://site.test/');
     });
 
-    test('ambiguousElementError — enumerates every candidate with its tag, detail and landmark', () => {
+    test('ambiguousTargetError — enumerates every candidate with its tag, detail and landmark', () => {
         // Given - candidates sitting in different landmarks
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [
                 match({ context: 'nav', detail: '/articles' }),
                 match({ context: 'footer', detail: '/articles' }),
@@ -41,10 +41,10 @@ describe('ambiguous', () => {
         expect(message).toContain('2. <a href="/articles">Articles</a>  in <footer>');
     });
 
-    test('ambiguousElementError — suggests scoping to a landmark the candidates actually sit in', () => {
+    test('ambiguousTargetError — suggests scoping to a landmark the candidates actually sit in', () => {
         // Given - candidates in a nav and a footer
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match({ context: 'nav' }), match({ context: 'footer' })],
             url: 'http://site.test/',
         });
@@ -55,10 +55,10 @@ describe('ambiguous', () => {
         expect(message).toContain('also here: contentinfo()');
     });
 
-    test('ambiguousElementError — offers a named section as the region it is, and an unnamed one as nothing', () => {
+    test('ambiguousTargetError — offers a named section as the region it is, and an unnamed one as nothing', () => {
         // Given - candidates in two named sections, one reached by its role, and one in an unnamed section
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [
                 match({ context: 'section', contextName: 'Orders' }),
                 match({ context: 'region', contextName: 'Returns' }),
@@ -74,10 +74,10 @@ describe('ambiguous', () => {
         expect(message).not.toContain('region()');
     });
 
-    test('ambiguousElementError — does not offer a landmark that holds every candidate', () => {
+    test('ambiguousTargetError — does not offer a landmark that holds every candidate', () => {
         // Given - two candidates in the same main
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match({ context: 'main' }), match({ context: 'main' })],
             url: 'http://site.test/',
         });
@@ -87,10 +87,10 @@ describe('ambiguous', () => {
         expect(message).toContain('within(<a container holding only this one>');
     });
 
-    test('ambiguousElementError — names the accessible name when it is not the text that was matched', () => {
+    test('ambiguousTargetError — names the accessible name when it is not the text that was matched', () => {
         // Given - a row button labelled by an aria-label, beside a dialog button
-        const { message } = ambiguousElementError({
-            element: link('Delete post'),
+        const { message } = ambiguousTargetError({
+            target: link('Delete post'),
             matches: [
                 match({ accessibleName: 'Delete Post a', tag: 'button', text: 'Delete' }),
                 match({ tag: 'button', text: 'Delete post' }),
@@ -102,10 +102,10 @@ describe('ambiguous', () => {
         expect(message).toContain('named "Delete Post a"');
     });
 
-    test('ambiguousElementError — offers exact to a target that opted OUT, with what it leaves', () => {
+    test('ambiguousTargetError — offers exact to a target that opted OUT, with what it leaves', () => {
         // Given - `{ exact: false }`, which is the only way a substring candidate is in the set at all
-        const { message } = ambiguousElementError({
-            element: link('Articles', { exact: false }),
+        const { message } = ambiguousTargetError({
+            target: link('Articles', { exact: false }),
             matches: [match(), match({ text: 'Read Articles' })],
             url: 'http://site.test/',
         });
@@ -115,10 +115,10 @@ describe('ambiguous', () => {
         expect(message).toContain('leaves 1 of 2');
     });
 
-    test('ambiguousElementError — never offers exact to an ordinary target — it is already exact', () => {
+    test('ambiguousTargetError — never offers exact to an ordinary target — it is already exact', () => {
         // Given - a target stating nothing, which is the whole-name default
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match(), match({ text: 'Read Articles' })],
             url: 'http://site.test/',
         });
@@ -127,10 +127,10 @@ describe('ambiguous', () => {
         expect(message).not.toContain('exact name');
     });
 
-    test('ambiguousElementError — omits the exact suggestion when every candidate matches the name whole', () => {
+    test('ambiguousTargetError — omits the exact suggestion when every candidate matches the name whole', () => {
         // Given - two identical names, where exact would change nothing
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match(), match()],
             url: 'http://site.test/',
         });
@@ -139,10 +139,10 @@ describe('ambiguous', () => {
         expect(message).not.toContain('exact: true');
     });
 
-    test('ambiguousElementError — does not re-suggest scoping a target that is already scoped', () => {
+    test('ambiguousTargetError — does not re-suggest scoping a target that is already scoped', () => {
         // Given - an ambiguity inside an existing scope
-        const { message } = ambiguousElementError({
-            element: within(navigation(), link('Articles')),
+        const { message } = ambiguousTargetError({
+            target: within(navigation(), link('Articles')),
             matches: [match({ context: 'nav' }), match({ context: 'nav' })],
             url: 'http://site.test/',
         });
@@ -152,10 +152,10 @@ describe('ambiguous', () => {
         expect(message).toContain('other element');
     });
 
-    test('ambiguousElementError — states the rule and where it is documented', () => {
+    test('ambiguousTargetError — states the rule and where it is documented', () => {
         // Given - any refusal
-        const { message } = ambiguousElementError({
-            element: link('Articles'),
+        const { message } = ambiguousTargetError({
+            target: link('Articles'),
             matches: [match(), match()],
             url: 'http://site.test/',
         });

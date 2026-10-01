@@ -11,7 +11,7 @@ import type { Target } from '../../../visitor/targets/target.js';
 import { openSession } from '../session/driver-session.js';
 import type { AttachFn, Driver, RemoteFn } from '../session/driver-session.js';
 import type { SessionLedger } from '../session/session-ledger.js';
-import { ambiguousScreenElementError } from './ambiguity.js';
+import { ambiguousScreenElementError } from './ambiguous.js';
 import type {
     DeviceOpenOptions,
     DevicePort,
@@ -252,7 +252,7 @@ export class AppiumAdapter implements DevicePort {
             const isTarget = index === chain.length - 1;
             if (count > 1 && (cardinality === 'one' || !isTarget)) {
                 throw ambiguousScreenElementError({
-                    element: level,
+                    target: level,
                     matches: await this.captureMatches(matches),
                 });
             }
