@@ -1,5 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type { ConfigEnv } from 'vite';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
@@ -148,6 +149,34 @@ describe('component', () => {
         expect(project.define).toStrictEqual({ __APP__: 'true' });
         expect(project).not.toHaveProperty('root');
         expect(project).not.toHaveProperty('build');
+    });
+
+    test("component() — the browser project — calls a framework's config function as a dev server under test, and keeps only its pipeline", async () => {
+        // Given - a config function shaped like Astro's getViteConfig(): it loads vite, then merges the app's config over the framework's
+        const environments: ConfigEnv[] = [];
+        const project = await component({
+            vite: async (environment) => {
+                environments.push(environment);
+                const { mergeConfig } = await import('vite');
+                return mergeConfig(
+                    { plugins: [{ name: 'framework:pages' }], root: '/framework/app' },
+                    {
+                        define: { 'import.meta.env.SITE': '"https://example.com"' },
+                        server: { port: 4321 },
+                    },
+                );
+            },
+        });
+
+        // Then - called once as a test-mode dev server; its pipeline joins the project, its place does not
+        expect(environments).toStrictEqual([{ command: 'serve', isSsrBuild: false, mode: 'test' }]);
+        expect(project.define).toStrictEqual({ 'import.meta.env.SITE': '"https://example.com"' });
+        expect(pluginNames(project)).toStrictEqual([
+            '@jterrazz/test:msw-worker',
+            'framework:pages',
+        ]);
+        expect(project).not.toHaveProperty('root');
+        expect(project).not.toHaveProperty('server');
     });
 
     test('component() — the browser project — keeps a consumer JSX transform rather than stating its own over it', async () => {

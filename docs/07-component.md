@@ -45,8 +45,6 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 
 **What runs under node stays there.** In a page, each node-only name the entry publishes — the seven constructors, the services, the docker accessors, the results that walk a disk — refuses where it is called: a page has no filesystem, no child process and no socket.
 
-**Point `vite` at the app's own `vite.config.ts`.** A framework's config function — Astro's `getViteConfig()` among them — is not yet a supported shape: the allow-list takes the pipeline from the app's own config.
-
 ## The constructor: there is none
 
 Every other facet starts something — a server, a database, a binary, a simulator — so every other facet has a `*.specification.ts` holding what was started. A component has nothing to start. What a specification file WOULD have held splits by owner:
@@ -91,6 +89,20 @@ export default defineSpecConfig({
 **Only the pipeline of `vite` is adopted.** An app's config says where the app LIVES — its `root`, its `build`, its `server.port`, its `publicDir` — and adopting those re-roots the run so the project collects nothing. The kept keys are an allow-list (`plugins`, `resolve`, `esbuild`/`oxc`, `css`, `define`, `assetsInclude`, `envPrefix`, `json`, `optimizeDeps`), and the consumer's `plugins` are concatenated after `component()`'s own, never assigned over them. So is its `optimizeDeps.include`, joined to the project's own: every dependency a component imports belongs there, since one Vite first finds when a test imports it is optimised mid-run, and the reload fails the tests already loading.
 
 **One transformer key, chosen from the installed Vite.** Vite 8 compiles with oxc and warns for every `esbuild` option handed to it beside an `oxc` one; Vite 6 and 7 compile with esbuild and have no `oxc` key at all. `component()` reads the installed major, states the JSX default on the key that Vite actually reads, and drops the other from the adopted pipeline — and the one it states yields to yours: a `jsxImportSource` or a classic runtime is the app's statement, not the project's to overwrite.
+
+**A framework's config function is called as a dev server under test.** `component()` calls it with `{ command: 'serve', mode: 'test', isSsrBuild: false }` and adopts what it returns through the same allow-list, so an Astro app hands over its whole pipeline — its integrations' plugins, React's and Tailwind's among them, its `import.meta.env` defines, its `tsconfig` paths:
+
+```typescript
+// vitest.config.ts of an Astro app
+import { component, defineSpecConfig } from '@jterrazz/test/vitest';
+import { getViteConfig } from 'astro/config';
+
+export default defineSpecConfig({
+    test: { projects: [component({ vite: getViteConfig({}, { root: import.meta.dirname }) })] },
+});
+```
+
+Both arguments are Astro's. The first is required: Astro reads the app's `root` off it. The second's `root` is the one `component({ root })` cannot give: Astro looks for `astro.config.*` in the CWD, not beside the config that calls it, so a config loaded from elsewhere — knip or `typescript check` at a repository root, an app nested in a workspace — finds none, warns `Missing pages directory`, and hands back a pipeline without the app's integrations, its defines or its plugins. Nothing fails then; a component that needed them renders wrong.
 
 **A `resolve.alias` is an unlisted dependency.** An alias tells the bundler where a specifier resolves; it tells knip nothing, so a package reached only through an alias reads as undeclared, and a `paths`-less `tsconfig` makes the compiler disagree with the bundler besides. Mirror the alias in the `tsconfig`'s `paths` (the compiler and the bundler then answer alike), or name the package in `knip.ignoreDependencies` with the alias as the reason.
 
