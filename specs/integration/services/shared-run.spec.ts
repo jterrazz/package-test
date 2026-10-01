@@ -26,7 +26,12 @@ describe('shared-run', () => {
             .exec('run --configLoader runner');
         expect(result.exitCode).toBe(0);
         const runs = (project: string): WorkerRun[] =>
-            [1, 2, 3].map((n): WorkerRun => JSON.parse(result.file(`${project}-${n}.json`).content));
+            [1, 2, 3].map((n): WorkerRun => {
+                const [pool = '', start, end] = result
+                    .file(`${project}-${n}.run`)
+                    .content.split(' ');
+                return { end: Number(end), pool, start: Number(start) };
+            });
         const overlapping = runs('integration').flatMap((ran) =>
             runs('job')
                 .filter((other) => ran.start < other.end && other.start < ran.end)

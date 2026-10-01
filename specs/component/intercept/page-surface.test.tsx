@@ -18,16 +18,16 @@ describe('SurfacePanel', () => {
 
     test('a stub forbidding the cookie answers a page request, the browser adding the cookie after the worker', async () => {
         // Given - a session cookie on the page, and a stub declared only for a request without a cookie
-        document.cookie = 'session=1; path=/';
+        await cookieStore.set('session', '1');
         await using _ = await intercept(
             http.get('/api/surface', { without: { headers: ['cookie'] } }),
             http.text('anonymous'),
         );
 
         // Then - the cookie is the page's, yet the worker sees the request before it is added, so the stub fires
-        expect(document.cookie).toContain('session=1');
+        await expect(cookieStore.get('session')).resolves.toMatchObject({ value: '1' });
         const response = await fetch('/api/surface');
-        document.cookie = 'session=; max-age=0; path=/';
+        await cookieStore.delete('session');
         await expect(response.text()).resolves.toBe('anonymous');
     });
 

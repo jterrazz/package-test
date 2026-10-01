@@ -1,6 +1,6 @@
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { ConfigEnv, UserConfig, UserConfigFn } from 'vite';
+import type { ConfigEnv, UserConfigFn } from 'vite';
 import { describe, expect, test } from 'vitest';
 import type { TestProjectInlineConfiguration } from 'vitest/config';
 
@@ -24,6 +24,11 @@ function pluginNames(project: TestProjectInlineConfiguration): string[] {
 
 async function returnsNothing(): Promise<void> {
     await Promise.resolve();
+}
+
+function untyped(source: unknown): UserConfigFn {
+    // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's source yields what the type forbids
+    return source as UserConfigFn;
 }
 
 describe('component', () => {
@@ -183,53 +188,33 @@ describe('component', () => {
         expect(project).not.toHaveProperty('server');
     });
 
-    test('component() — the browser project — refuses a config function that returns no config, naming the function form', async () => {
-        // Given - a config function that returns nothing, as an untyped caller's can
-        const loading = component({
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's function returns what the type forbids
-            vite: returnsNothing as unknown as UserConfigFn,
-        });
+    test.each([
+        {
+            fix: "return the framework's config from the function",
+            found: 'the config function returned no config',
+            source: untyped(returnsNothing),
+        },
+        {
+            fix: "call the framework's factory and pass what it returns",
+            found: 'the config function returned a function, not a config',
+            source: untyped(() => returnsNothing),
+        },
+        {
+            fix: "resolve the promise to the framework's config object",
+            found: 'the config promise resolved to no config',
+            source: untyped(returnsNothing()),
+        },
+    ])(
+        'component() — the browser project — refuses a source that yields no config object, in its own form’s words: $found',
+        async ({ fix, found, source }) => {
+            // Given - a vite source an untyped caller wrote, yielding no config object
+            const loading = component({ vite: source });
 
-        // Then - the refusal names the function, and how to return the framework's config
-        await expect(loading).rejects.toThrow(
-            'found: component({ vite }): the config function returned no config',
-        );
-        await expect(loading).rejects.toThrow(
-            "fix: return the framework's config from the function",
-        );
-    });
-
-    test('component() — the browser project — refuses a config function that returns a function, naming the factory to call', async () => {
-        // Given - a framework factory passed uncalled, so the config function it is called as returns another function
-        const loading = component({
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's function returns what the type forbids
-            vite: (() => returnsNothing) as unknown as UserConfigFn,
-        });
-
-        // Then - the refusal names the function it got, and the call to make instead
-        await expect(loading).rejects.toThrow(
-            'found: component({ vite }): the config function returned a function, not a config',
-        );
-        await expect(loading).rejects.toThrow(
-            "fix: call the framework's factory and pass what it returns",
-        );
-    });
-
-    test('component() — the browser project — refuses a config promise that resolves to nothing, naming the promise form', async () => {
-        // Given - a promise that resolves to no config
-        const loading = component({
-            // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- an untyped caller's promise resolves to what the type forbids
-            vite: returnsNothing() as unknown as Promise<UserConfig>,
-        });
-
-        // Then - the refusal's found and fix both speak of the promise
-        await expect(loading).rejects.toThrow(
-            'found: component({ vite }): the config promise resolved to no config',
-        );
-        await expect(loading).rejects.toThrow(
-            "fix: resolve the promise to the framework's config object",
-        );
-    });
+            // Then - the refusal's found and fix both name the form it was written in
+            await expect(loading).rejects.toThrow(`found: component({ vite }): ${found}`);
+            await expect(loading).rejects.toThrow(`fix: ${fix}`);
+        },
+    );
 
     test('component() — the browser project — keeps a consumer JSX transform rather than stating its own over it', async () => {
         // Given - an app compiling JSX through another library's runtime

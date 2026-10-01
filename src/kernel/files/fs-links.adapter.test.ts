@@ -76,7 +76,11 @@ describe('fsLinks', () => {
         const { root, testDir } = project();
         const workDir = workDirectory();
         mkdirSync(resolve(workDir, 'node_modules'));
-        symlinkSync(resolve(root, 'node_modules/@acme'), resolve(workDir, 'node_modules/@acme'), 'dir');
+        symlinkSync(
+            resolve(root, 'node_modules/@acme'),
+            resolve(workDir, 'node_modules/@acme'),
+            'dir',
+        );
 
         // Then - the link is refused, naming the scope folder, and the real package is untouched
         expect(() => {

@@ -141,10 +141,12 @@ async function reroot(
         loaded = await source(environment);
         if (typeof loaded === 'function') {
             found = 'the config function returned a function, not a config';
-            fix = "call the framework's factory and pass what it returns (for Astro, `getViteConfig({}, { root: import.meta.dirname })`, never `getViteConfig`)";
+            fix =
+                "call the framework's factory and pass what it returns (for Astro, `getViteConfig({}, { root: import.meta.dirname })`, never `getViteConfig`)";
         } else {
             found = 'the config function returned no config';
-            fix = "return the framework's config from the function (for Astro, `getViteConfig({}, { root: import.meta.dirname })`)";
+            fix =
+                "return the framework's config from the function (for Astro, `getViteConfig({}, { root: import.meta.dirname })`)";
         }
     } else {
         loaded = await source;

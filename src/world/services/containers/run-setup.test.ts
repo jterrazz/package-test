@@ -22,6 +22,11 @@ async function absent(): Promise<void> {
     throw new Error(DOCKER_ABSENT);
 }
 
+async function refuses(): Promise<never> {
+    await Promise.resolve();
+    throw new Error('the loopback refused to listen');
+}
+
 describe('setup', () => {
     test('the services setup — the run containers, served — provides a loopback address, and answers a request with one clear refusal when Docker is absent', async () => {
         // Given - the setup run with a runtime that no daemon answers
@@ -125,10 +130,6 @@ describe('setup', () => {
             provide: (_key: string, value: string) => {
                 provided.push(value);
             },
-        };
-        const refuses = async (): Promise<never> => {
-            await Promise.resolve();
-            throw new Error('the loopback refused to listen');
         };
         await expect(setup(project, absent, refuses)).rejects.toThrow(
             'the loopback refused to listen',
