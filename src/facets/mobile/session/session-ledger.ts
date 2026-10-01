@@ -20,6 +20,8 @@ export type SessionLedger = {
     record: (requested: Record<string, unknown>, session: RecordedSession) => void;
 };
 
+export const SERVER_CALL_TIMEOUT_MS = 10_000;
+
 export const MOBILE_SESSIONS_DIR = `${VITEST_ARTIFACTS_DIR}/mobile-sessions`;
 
 type LedgerEntry = RecordedSession & { key: string };
@@ -85,7 +87,11 @@ export async function endSessions(directory: string): Promise<void> {
     await Promise.all(
         entries(directory).map(async (entry) => {
             try {
-                await fetch(`${entry.serverUrl}/session/${entry.sessionId}`, { method: 'DELETE' });
+                const response = await fetch(`${entry.serverUrl}/session/${entry.sessionId}`, {
+                    method: 'DELETE',
+                    signal: AbortSignal.timeout(SERVER_CALL_TIMEOUT_MS),
+                });
+                await response.body?.cancel();
             } catch {
                 // The server is gone, and its sessions with it.
             }
