@@ -2,6 +2,7 @@ const { integration, job } = await import(/* @vite-ignore */ process.env.RUNNER_
 
 export default {
     test: {
-        projects: [integration({ include: ['integration.spec.mjs'] }), job({ include: ['job.spec.mjs'] })],
+        maxWorkers: 4,
+        projects: [integration({ include: ['integration*.spec.mjs'] }), job({ include: ['job*.spec.mjs'] })],
     },
 };
