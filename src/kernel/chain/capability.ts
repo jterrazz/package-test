@@ -70,7 +70,7 @@ export type Capability<
     readonly initial: Slice;
     readonly kind: 'setup';
     readonly name: Name;
-    /** Arm order across the setups of a chain: seed 10, fixture 20, viewport 30, intercept 40, clock 50. */
+    /** Arm order across the setups of a chain: seed 10, fixture 20, link 25, viewport 30, intercept 40, clock 50. */
     readonly phase: number;
     readonly row: MatrixRow;
     /** A type alone, never set at runtime: `ChainOf` reads it. */

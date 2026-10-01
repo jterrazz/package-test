@@ -230,6 +230,30 @@ test('deploys from a shaped workspace', async () => {
 
 A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span facets, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
 
+### `.link()` — a package the working directory resolves
+
+A fixture tree carries no `node_modules`: git never tracks one. A binary whose subject imports a package — a checker that loads a plugin, a build that resolves a peer — needs that package where Node looks for it, and `.link(name, source?)` puts it there: `<cwd>/node_modules/<name>`, a symlink to the package, never a copy and never an install.
+
+| Call                                                | Links                                                                              |
+| --------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| `.link('@acme/sdk')`                                | the package the spec's own project installed, found as Node finds it from the spec |
+| `.link('@acme/sdk', directory('./_fixtures/sdk/'))` | the package a directory holds — a stub install, a broken one, an older version     |
+
+```typescript
+test('loads the plugin the project installed', async () => {
+    // Given - a project fixture, and the plugin it imports linked into its node_modules
+    const result = await cli
+        .fixture(directory('./_fixtures/shop/'))
+        .link('@acme/sdk')
+        .exec('check');
+
+    // Then
+    expect(result.exitCode).toBe(0);
+});
+```
+
+A link is armed after every fixture, so it replaces a package a fixture laid under the same name. The name is a package name — `@scope/name` or `name` — and one name is linked once per chain; a bare name no `node_modules` above the spec holds, or a `directory()` naming nothing, is refused before the binary runs.
+
 ### The chain never reaches a real system
 
 A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is `network-strict-after-first-stub`, in [stubs](16-stubs.md).
@@ -458,6 +482,7 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `_fixtures/` and the shared `specs/_shared/_fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule `seeds-are-sql`).
 - **A bare fixture name.** `.fixture('shop/')` and `directory('shop/')` do not compile: the path is spelled from the spec — `./_fixtures/shop/` beside it, `../../_shared/_fixtures/shop/` in the pool (rule `disk-named-by-relative-path`).
+- **Building a `node_modules` by hand.** `mkdirSync` and `symlinkSync` around a raw `spawnSync` is a chain the runner already is: `.link()` lays the package, and the spec stays one chain.
 - **Forgetting the extension in `file('./_expected/help')`.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./_expected/help/')`.
 
 ## Related

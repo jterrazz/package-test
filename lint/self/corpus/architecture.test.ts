@@ -14,6 +14,7 @@ const SETUPS = [
     'fixture',
     'headers',
     'intercept',
+    'link',
     'rules',
     'seed',
     'viewport',

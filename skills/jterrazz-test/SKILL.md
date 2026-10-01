@@ -68,16 +68,16 @@ describe('shape', () => {
 
 What a test stands on is named by one of two calls, with the path relative to the spec file spelled in full; the verbs keep simple names and the type refuses a bare string where a file is meant:
 
-| Call                                                                      | Reads                                                |
-| ------------------------------------------------------------------------- | ---------------------------------------------------- |
-| `.seed(file('./_seeds/users.sql'))`                                       | database state, before the action — never SQL inline |
-| `.request(file('./_requests/create.http'))`                               | a complete request — the terminal action             |
-| `.post('/orders', file('./_requests/order.json'))`                        | a request body, sent as the file holds it            |
-| `.fixture(file('./_fixtures/config.toml'))`                               | one file, copied into the working directory          |
-| `.fixture(directory('../../_shared/_fixtures/shop/'))`                    | a directory's contents, spread into it               |
-| `cli.run(file('./build.spec.yaml'))`                                      | a cli document, run from a test                      |
-| `expect(x).toMatch(file('./_expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                 |
-| `await expect(result.filesystem).toMatch(directory('./_expected/tree/'))` | a golden tree                                        |
+| Call                                                                      | Reads                                                                                    |
+| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| `.seed(file('./_seeds/users.sql'))`                                       | database state, before the action — never SQL inline                                     |
+| `.request(file('./_requests/create.http'))`                               | a complete request — the terminal action                                                 |
+| `.post('/orders', file('./_requests/order.json'))`                        | a request body, sent as the file holds it                                                |
+| `.fixture(file('./_fixtures/config.toml'))`                               | one file copied into the working directory, or a `directory()`'s contents spread into it |
+| `.link('@acme/sdk', directory('./_fixtures/sdk/'))`                       | a package, linked into the cwd's `node_modules`                                          |
+| `cli.run(file('./build.spec.yaml'))`                                      | a cli document, run from a test                                                          |
+| `expect(x).toMatch(file('./_expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                                                     |
+| `await expect(result.filesystem).toMatch(directory('./_expected/tree/'))` | a golden tree                                                                            |
 
 `toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` — each verb reads its own, and the same four under the specs root's one `_shared/` folder (`specs/_shared/_fixtures/`, `specs/_shared/_seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it.
 

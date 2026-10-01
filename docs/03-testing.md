@@ -90,9 +90,9 @@ The package proves itself in five layers, and they are meant to be read from the
 
 | Layer                   | Where                                                         | What it judges                                                           | Files |
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
-| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 126   |
+| Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 128   |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 57    |
-| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 168   |
+| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 170   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 113   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 23    |
 
@@ -182,12 +182,12 @@ owner and the two gates cannot disagree.
 
 <!-- GENERATED:siblings — do not edit by hand; run `npm run docs`. Source: lint/self/corpus/siblings.ts -->
 
-Today **171 modules** have no sibling test, and every one of them is claimed:
+Today **172 modules** have no sibling test, and every one of them is claimed:
 
 | Kind                                  | Proven instead by                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
 | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | composition root or barrel (15)       | it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| type-only declaration (27)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                                                                                                                            |
+| type-only declaration (28)            | it declares a shape and executes nothing; the compiler is its test, and `type-channel.test-d.ts` holds what the compiler must refuse                                                                                                                                                                                                                                                                                                                                                                                                            |
 | constant data (16)                    | it is a table, not a behaviour; every reader of it asserts on it (`preset.test.ts` for the artefact paths, `manifest.test.ts` for the manifests, `siblings.test.ts` for these kinds, `define-facet.test.ts` for the `with()` declaration, `facet-matrix.test.ts` for the rows of the scenario vocabulary, `ambiguity.test.ts` for the landmarks a refusal offers, `messages.test.ts` and `index.refusal.test.ts` for the refusal sentences and their chapter, `stub.test.ts` for the stub kinds, `architecture.test.ts` for the library owners) |
 | a facet's vitest project (4)          | `index.vitest.test.ts` builds them through the entry, or `<facet>.project.test.ts` beside it, and asserts the project it produces                                                                                                                                                                                                                                                                                                                                                                                                               |
 | a module that runs only in a page (2) | it reads the `document` and `window` of the page it renders in, which node has none of — `no-simulated-dom` forbids a simulated one and `no-vitest-time-or-global-stub` a stubbed global — so `specs/component/`, run in a real browser under Vitest Browser Mode, is its proof                                                                                                                                                                                                                                                                 |
@@ -272,6 +272,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
 | `.fixture()`   | —   | —   | 35  | 113  | —           | —       | —      | —         | —      |
+| `.link()`      | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
 | `.viewport()`  | —   | —   | —   | —    | —           | —       | —      | 2         | —      |
 | `.wrap()`      | —   | —   | —   | —    | —           | —       | —      | 1         | —      |
@@ -286,7 +287,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 42  | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 44  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 113  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 9           | —       | —      | —         | —      |
 | `.visit()`   | —   | —   | —   | —    | —           | 21      | —      | —         | —      |
@@ -357,9 +358,9 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.table()`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.file()`       | 1   | —   | 13  | 7    | 2           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —   | 24  | —    | —           | —       | —      | —         | —      |
-| `.stderr`       | —   | —   | 11  | —    | —           | —       | —      | —         | —      |
-| `.exitCode`     | —   | —   | 33  | —    | —           | —       | —      | —         | —      |
+| `.stdout`       | —   | —   | 25  | —    | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —   | 12  | —    | —           | —       | —      | —         | —      |
+| `.exitCode`     | —   | —   | 34  | —    | —           | —       | —      | —         | —      |
 | `.json`         | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |
 | `.filesystem`   | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
@@ -394,7 +395,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 5      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
-| `.json body`           | 3   | —   | 6   | —    | 3           | 0       | —      | —         | 11     |
+| `.json body`           | 3   | —   | 7   | —    | 3           | 0       | —      | —         | 13     |
 | `.txt stream`          | 1   | —   | 9   | —    | 1           | 1       | —      | —         | 9      |
 | `{ frozen }`           | 2   | —   | 12  | —    | —           | —       | —      | 1         | 2      |
 
@@ -424,7 +425,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `{{number}}`   | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{path}}`     | 1   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{port}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 2      |
-| `{{semver}}`   | 0   | —   | 2   | —    | 0           | 0       | —      | —         | 1      |
+| `{{semver}}`   | 0   | —   | 3   | —    | 0           | 0       | —      | —         | 1      |
 | `{{sha}}`      | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{string}}`   | 2   | —   | 1   | —    | 0           | 0       | —      | —         | 1      |
 | `{{time}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |

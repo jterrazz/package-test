@@ -170,6 +170,9 @@ case "$COMMAND" in
         # Closed immediately, so this prints an empty line either way.
         tr '[:lower:]' '[:upper:]'
         ;;
+    package)
+        node -p "const manifest = require('$2/package.json'); manifest.name + '@' + manifest.version"
+        ;;
     help)
         echo "Usage: cli <command>"
         echo ""
