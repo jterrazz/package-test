@@ -13,21 +13,14 @@ release notes. An item delivered leaves this file.
 Benchmark: signews-api, 433 specs, three services. Nothing is optimised blind: instrument,
 then implement against numbers. By expected return, descending.
 
-1. **Containers shared across projects, and a pool.** A container is started once per
-   PROJECT of a run today ([17 § Services](docs/17-services.md)), so `api()` and
-   `integration()` that both declare `postgres()` start two. The `IsolationStrategy` port is
-   the shard abstraction already (a template database per worker, a redis index per
-   (worker, service) pair), and vitest 5.0.1 draws every pool id of a run from one pool, so
-   the indexes stay distinct across projects. The step is a run-level, then machine-level
-   pool: "start a service" becomes "acquire a slot". Consumer API impact: none.
-2. **Batched E2E lint runs (this repository).** What the lint suite costs is the SPAWN of
+1. **Batched E2E lint runs (this repository).** What the lint suite costs is the SPAWN of
    the oxlint process, not Docker: batching several violation/compliant pairs into one run
    turns N spawns into one.
-3. **CI sharding per vitest project.** `make test SHARD=i/n` and `make test-merge` split
+2. **CI sharding per vitest project.** `make test SHARD=i/n` and `make test-merge` split
    this repository's run; the shared workflow has no shard input yet. A consumer that
    shards needs the merge's route judgement, which `dist/route-split.js` gives this
    repository alone: publishing it as a bin comes with this row.
-4. **Observability first.** The startup reporter gains an "infrastructure time versus test
+3. **Observability first.** The startup reporter gains an "infrastructure time versus test
    time" summary, so every consumer can see its own bottleneck.
 
 ## 2. Carried
