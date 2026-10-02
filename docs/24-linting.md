@@ -18,56 +18,55 @@ This chapter says what the preset carries, how a project deviates, how each tool
 
 Which module may import which, and where a file or a folder may sit, are questions `@jterrazz/typescript` already answers with dependency-cruiser and ls-lint, so the rules of this catalogue that ask them are handed to it rather than run by code of this package. Everything this package holds a project to travels in ONE preset, `test()` from `@jterrazz/test/config`: the defaults of the `test` section, its oxlint plugin and rules, those import and naming rules, and the section of `jterrazz.baseline.json` it owns — `test`, the checker's debt. A project lists it in `jterrazz.config.ts`, after the base preset, as [06 — Setting up](06-setting-up.md#turning-the-conventions-on) writes.
 
-How the presets merge, and how a project sets one of their laws aside, is `@jterrazz/typescript`'s (`docs/09-rules-kit.md` § Presets). This repository is held the same way: its `oxlint.config.ts` is `fromPresets` of its own `jterrazz.config.ts` — `@jterrazz/test/oxlint`, which `test()` names, resolves to the build the package just made — and adds only its own overrides.
+How the presets merge, and how a project sets one of their laws aside, is `@jterrazz/typescript`'s: [Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/06-configuration.md#presets). This repository is held the same way: its `oxlint.config.ts` is `fromPresets` of its own `jterrazz.config.ts` — `@jterrazz/test/oxlint`, which `test()` names, resolves to the build the package just made — and adds only its own overrides.
 
-Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered, as the toolchain's chapter states (`@jterrazz/typescript` `docs/09-rules-kit.md` § Presets). Their debt is the toolchain's ratchet, `jterrazz.baseline.json › typescript`, recorded by `typescript baseline`.
+Its rules are the catalogue's `toolchain` channel. The import rules print as `architecture/<rule>` at the import, from the toolchain's Architecture (layer map) pass — `no-second-test-runtime` as one layer per seam it guards, `architecture/no-second-test-runtime-network` for `msw`, each teaching what replaces its package; the name rules print as `names/<rule>` at the file or the folder, from its Names (tree) pass; every one in four parts, its `read` the row of this catalogue. A project that declares no preset runs none of them: a preset is declared, never discovered ([Configuration § Presets](https://github.com/jterrazz/package-typescript/blob/main/docs/06-configuration.md#presets)). Their debt is the toolchain's ratchet, `jterrazz.baseline.json › typescript`, recorded by `typescript baseline`.
 
 - The oxlint half of `test()` is `{ jsPlugins: ['@jterrazz/test/oxlint'], rules: recommendedRules, overrides }`. Its `overrides` relaxes `import/exports-last` for `**/*.specification.ts` — the `cleanup-passed-to-after-all` idiom (`export const { cli, cleanup } … ; afterAll(cleanup)`) legitimately ends a spec file on a non-export statement, so the relaxation ships here instead of being hand-rolled in every strict consumer. The same idiom has a second consequence the preset cannot carry, because it belongs to a different tool: `cleanup` is exported and used only inside the file that exports it, which Knip reports as an unused export. One line settles it for the whole repository — `"ignoreExportsUsedInFile": true` in `knip.json`.
 - `recommendedRules` (also exported standalone) enables the whole catalogue in one spread, every rule at `error`. There is no warn tier: a rule errors, its debt held by the project's ratchet, or it goes — oxlint's `oxlint-suppressions.json` holds errors alone, so a warning would be debt nothing holds down.
-- Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. A project lists `test()` in `jterrazz.config.ts`, and its `oxlint.config.ts` composes the presets with `fromPresets`; a project that does not runs no `jterrazz/*` rule. When and how `typescript check` decides to RUN the checker is the toolchain's, not this chapter's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
+- Wiring is **explicit** — the preset never auto-detects `@jterrazz/test` from your dependencies. A project lists `test()` in `jterrazz.config.ts`, and its `oxlint.config.ts` composes the presets with `fromPresets`; a project that does not runs no `jterrazz/*` rule. When and how `typescript check` decides to RUN the checker is the toolchain's, not this chapter's: [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-test-conventions-pass).
 - `@jterrazz/test/oxlint` is **tool-facing only**: referenced from `oxlint.config.ts` (or a shared oxlint preset), never imported by test or production code. It is the one specifier exempt from rule `no-test-code-in-production` — a zero-runtime lint entry, so a preset that wires the plugin may import it from anywhere. `no-unpublished-subpath` exempts every subpath the package's `exports` map publishes, this one among them.
 - `materialAt(path, directory?)` and `testPackageOf(specifier)` (typed, with `MaterialKind`) are the reader `no-test-code-in-production` judges by, published for a build guard: the first names what a module id is — `'a test file'`, `'ground'`, `'the specs tree'`, `'a stub'` — or answers `undefined`; the second names the test package a bare specifier belongs to (`vitest/config` → `vitest`), this tool entry aside. They are published so a build guard — the toolchain's Publish pass — reads what test material is from its one owner, never a copy.
 - **The oxlint version is the toolchain's to pin.** `@jterrazz/typescript` owns the range every profile runs the binary at; a repository whose own code imports oxlint — this one does, from every rule test, through `oxlint/plugins-dev` — declares `oxlint` in its `devDependencies` at exactly that range, so the line here MIRRORS the pin instead of holding a second opinion about it and a plain `npm ci` hoists one oxlint rather than two. `lint/self/corpus/oxlint-pin.test.ts` fails the day the two diverge.
 
 ## Deviating from a rule
 
-`test()` adds this package's catalogue on top of the profile the base preset names; which profile a project is, and what each adds, is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
+`test()` adds this package's catalogue on top of the profile the base preset names; which profile a project is, and what each adds, is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/08-lint-presets.md#the-profiles).
 
-A published package's `isolatedDeclarations` refuses an inferred default export, so its config states its own type once:
+To deviate on a rule, compose an extra fragment after the presets with `compose()`, which `@jterrazz/typescript/oxlint` exports beside `fromPresets` and `defineConfig`. The whole `oxlint.config.ts`:
 
 ```typescript
-import { defineConfig, fromPresets, type OxlintConfig } from '@jterrazz/typescript/oxlint';
+// oxlint.config.ts
+import { compose, defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
 
 import settings from './jterrazz.config.ts';
 
-const config: OxlintConfig = defineConfig(fromPresets(settings));
+export default defineConfig(
+    compose(fromPresets(settings), {
+        rules: {
+            // A stub table is read field by field: raise `no-probe-cluster`'s cluster
+            // Threshold once here instead of suppressing the finding per case.
+            'jterrazz/no-probe-cluster': ['error', { threshold: 6 }],
 
-export default config;
+            'jterrazz/no-module-mock': [
+                'error',
+                {
+                    modules: [
+                        {
+                            module: '@react-native-async-storage/async-storage',
+                            reason: 'a native module no consumer can inject',
+                        },
+                    ],
+                },
+            ],
+        },
+    }),
+);
 ```
 
-`compose(...fragments)` merges deterministically: `jsPlugins`/`plugins`/`ignorePatterns` concatenated + deduped, `rules`/`categories` shallow-merged (last wins), `overrides` concatenated. To deviate on a rule, compose an extra fragment after the presets:
+`defineConfig()` stays the outer call: it types the file and adds nothing, so a config with no deviation is `defineConfig(fromPresets(settings))`. `compose(...fragments)` merges deterministically: `jsPlugins`/`plugins`/`ignorePatterns` concatenated + deduped, `rules`/`categories` shallow-merged (last wins), `overrides` concatenated.
 
-```typescript
-export default compose(fromPresets(settings), {
-    rules: {
-        // A stub table is read field by field: raise `no-probe-cluster`'s cluster
-        // Threshold once here instead of suppressing the finding per case.
-        'jterrazz/no-probe-cluster': ['error', { threshold: 6 }],
-
-        'jterrazz/no-module-mock': [
-            'error',
-            {
-                modules: [
-                    {
-                        module: '@react-native-async-storage/async-storage',
-                        reason: 'a native module no consumer can inject',
-                    },
-                ],
-            },
-        ],
-    },
-});
-```
+A published package's `isolatedDeclarations` refuses an inferred default export, so its config states its own type once: `const config: OxlintConfig = defineConfig(…); export default config;`, with `type OxlintConfig` imported from the same entry.
 
 A rule that takes options is declared, not suppressed — an `off` loses the check everywhere, a raised threshold keeps it. Three rules take one: `specs-at-declared-depth` (`depth` — the four tree shapes are [23 — Conventions](23-conventions.md#the-folder-follows-the-assets)), `no-probe-cluster` (`threshold`, default 3) and `no-module-mock` (`modules`, the specifiers this repository doubles, each `{ module, reason }` — an entry with no reason clears nothing).
 
@@ -80,7 +79,7 @@ This catalogue holds only what no upstream rule already holds. Oxlint ships a `v
 
 Four hygiene rules are that plugin's: no committed `.only`/`.skip` (`vitest/no-focused-tests`, `vitest/no-disabled-tests`), an `expect()` in every test (`vitest/expect-expect`), no two literal titles alike in a file (`vitest/no-identical-title`), a lowercase title (`vitest/prefer-lowercase-title`).
 
-`prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`); the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. A title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Deviating from a rule](#deviating-from-a-rule) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/07-lint-presets.md).
+`prefer-lowercase-title` flags a title whose first word is an all-caps identifier (`VALID_CATEGORIES …`, `HTTP …`, `DI …`); the rulebook sets no `allowedPrefixes` — a title starts lowercase, whatever its first word. A title that opens on an identifier is RENAMED (`the VALID_CATEGORIES table …` reads as the sentence it always was), and a consumer who disagrees overrides the rule in its own deviation fragment, which is theirs to justify — the form is [§ Deviating from a rule](#deviating-from-a-rule) above, and what a fragment may deviate on is [`@jterrazz/typescript`'s own chapter](https://github.com/jterrazz/package-typescript/blob/main/docs/08-lint-presets.md#the-profiles).
 
 ## What a finding says
 
@@ -90,7 +89,7 @@ A diagnostic is ONE line, its parts joined by `·`: oxlint's `unix` and `agent` 
 
 A refusal the runtime throws is a block, a part per line: vitest prints an error whole, and what it found (the candidates of an ambiguous element) may take several lines.
 
-The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessonsAt()` of `@jterrazz/typescript/rules`, handed the rule's row by name from the consumer catalogue; a finding's two fields in the checker), and the row gives the other two — its sentence's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules)).
+The `why` and the `read` are never typed: a rule writes its `found` and its `fix` (`lessonsAt()` of `@jterrazz/typescript/rules`, handed the rule's row by name from the consumer catalogue; a finding's two fields in the checker), and the row gives the other two — its sentence's first sentence and its own heading — so a message and the catalogue cannot say two things. This package's own meta-test refuses a message that lacks a part ([03 — Testing § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-packages-own-rules)).
 
 ## The conventions checker
 
@@ -98,7 +97,7 @@ oxlint reads JavaScript and TypeScript only, and some conventions are about othe
 
 ```bash
 jterrazz-test-check specs                                # one specs tree
-jterrazz-test-check apps/console                         # a project root: every specs tree below it
+jterrazz-test-check apps/web                         # a project root: every specs tree below it
 jterrazz-test-check --member packages/web                # one workspace member
 jterrazz-test-check --format json                        # every root, every member
 jterrazz-test-check baseline                             # record jterrazz.baseline.json › test
@@ -132,7 +131,7 @@ What it checks:
 
 It shares `TOKEN_KINDS` with the runtime matcher (the two cannot drift), skips `_fixtures/` trees (verbatim `.fixture()` cwd material — file state, not assertions), and ignores non-identifier braces (`{{.Server.Version}}`-style template output). The exit code is the ratchet's ([below](#the-ratchet-the-test-section-of-jterrazzbaselinejson)): with no `test` section in `jterrazz.baseline.json`, 1 on any finding and 0 on none.
 
-**In a repository's `make fix`, the checker's `--fix` runs FIRST and the toolchain's `typescript fix` LAST.** The checker's fixers write code — a moved helper, a view declared once, a value written in place — and none of it is formatted until the formatter runs over it; run the other way round, a `make fix` leaves the checker's writes for the next `make lint` to refuse. The recipe that runs every fixer whatever the one before it said is the toolchain's, `@jterrazz/typescript` `docs/06-quality-checks.md` § The six gestures; the order of the two lines is this one:
+**In a repository's `make fix`, the checker's `--fix` runs FIRST and the toolchain's `typescript fix` LAST.** The checker's fixers write code — a moved helper, a view declared once, a value written in place — and none of it is formatted until the formatter runs over it; run the other way round, a `make fix` leaves the checker's writes for the next `make lint` to refuse. The recipe that runs every fixer whatever the one before it said is the toolchain's, `@jterrazz/typescript`'s [Quality checks § The six gestures](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-six-gestures); the order of the two lines is this one:
 
 ```make
 fix:
@@ -170,7 +169,7 @@ The member pass also carries the two findings a tree walk of the member makes: `
 
 ### The ratchet: the `test` section of `jterrazz.baseline.json`
 
-This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. A section of this package's is named `test`, then `.<part>` for a part only one preset writes: `test.coverage`, the floor this repository's own suite is held to, is written and judged by `self()`, the preset this repository alone declares ([03 — Testing](03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
+This package records and judges its own debt. The family keeps one ratchet file at the project root, `jterrazz.baseline.json`, with a section per preset — `{ "typescript": {...}, "test": {...}, "test.coverage": {...} }` — and the `test()` preset owns one, `test`, this section. A section of this package's is named `test`, then `.<part>` for a part only one preset writes: `test.coverage`, the floor this repository's own suite is held to, is written and judged by `self()`, the preset this repository alone declares ([03 — Testing](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#coverage-is-a-ratchet-not-a-threshold)), since the gate is not one a consumer runs. Both are read, written and judged by the rules kit of `@jterrazz/typescript`, the same engine that judges the `typescript` section, so the refusals read alike: each names its gesture — `jterrazz-test-check baseline` to record, `jterrazz-test-check --fix` to re-record a fall.
 
 #### The section
 
@@ -200,7 +199,7 @@ A project with no `test` section fails on any finding, and says in four parts, b
 - **Failing**, every checker finding it counts, before the reasons, so a failing verdict and its evidence are one log. The plugin's diagnostics are oxlint's to print, in the Oxlint pass.
 - **`--format json`** prints the checker's findings whatever the verdict, and nothing else.
 
-The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
+The toolchain's side of this — when the pass runs, which install it resolves the binary from, and what the floor version is — is `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-test-conventions-pass).
 
 ## Cross-file checker passes
 
@@ -236,7 +235,7 @@ What stays custom is what neither tool can express:
 | `file-suffix-matches-place`           | The root `.spec.ts` above; a `.test.ts` under a facet folder is judged by whether it reaches a runner, and a document's name by its words and its folder.                                                                                                                                                                                                                                                                                                                                   |
 | `no-test-code-in-production` (source) | Test material is not a path pattern: a `stubs/` folder is test material only where it holds a `*.stubs.ts` facade, a path a module builds or reads (`join(import.meta.dirname, …)`, `readFileSync('./…')`) is no import edge, the test packages a unit allows run from its `test.production.allow`, and the cruise skips the ground folders this rule refuses an edge into. Its tarball half is the toolchain's Publish pass, which loads this package's readers from its `./oxlint` entry. |
 
-The self checks' verdicts are [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules).
+The self checks' verdicts are [03 — Testing § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-packages-own-rules).
 
 ## Writing the Given and Then markers under `--fix`
 
@@ -279,7 +278,7 @@ Standard oxlint disable comments work, and every suppression must carry its reas
 // oxlint-disable-next-line jterrazz/runner-in-specification-file -- negative constructor spec: the runner must fail to start
 ```
 
-The framework's own repo keeps its sanctioned exemptions visible, as config `overrides` in its `oxlint.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning `no-test-code-in-production` off by path for every module whose job is the runner coupling or a test package — [01 — Architecture § The source trees](01-architecture.md#the-source-trees) names them and says why.
+The framework's own repo keeps its sanctioned exemptions visible, as config `overrides` in its `oxlint.config.ts`, each with its reason: one for the constructor unit tests (`src/**/*.test.ts` may call `specification.*` — testing the constructors is their purpose), and one turning `no-test-code-in-production` off by path for every module whose job is the runner coupling or a test package — [01 — Architecture § The source trees](https://github.com/jterrazz/package-test/blob/main/docs/01-architecture.md#the-source-trees) names them and says why.
 
 The **cross-file checker passes** carry their own suppression comment (oxlint disable comments don't reach them — they are a separate binary):
 
@@ -292,7 +291,7 @@ expect(() => api.seed(file('./_seeds/one-user.sql'))).toThrow(/* … */);
 
 ## The rule catalogue
 
-The catalogue below is **generated** from `lint/consumer/catalogue/manifest.ts`, where each rule carries its normative text beside its implementation — never edit it by hand; `npm run docs` regenerates it, and a meta-test fails when the committed table is not what the code says. It lists every `consumer` rule — what a project using the package meets — across the channels a consumer meets (statique, toolchain, upstream, checker, runtime, type, process), grouped by convention family; the meta channel holds only this package's own suite. A `self` rule holds only this package's own suite, and is listed where the package says how it tests itself: [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules).
+The catalogue below is **generated** from `lint/consumer/catalogue/manifest.ts`, where each rule carries its normative text beside its implementation — never edit it by hand; `npm run docs` regenerates it, and a meta-test fails when the committed table is not what the code says. It lists every `consumer` rule — what a project using the package meets — across the channels a consumer meets (statique — French for static, the oxlint plugin's rules — then toolchain, upstream, checker, runtime, type, process), grouped by convention family; the meta channel holds only this package's own suite. A `self` rule holds only this package's own suite, and is listed where the package says how it tests itself: [03 — Testing § The package's own rules](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-packages-own-rules).
 
 A rule answers to ONE name, the same everywhere: the id you address in a config (`jterrazz/<name>`), the code a checker finding prints (`jterrazz-check(<name>)`, keyed `jterrazz-check/<name>` by [the ratchet](#the-ratchet-the-test-section-of-jterrazzbaselinejson)), the name a suppression gives, and the anchor a message's `read:` part lands on (`docs/24-linting.md#<name>`). The name states the requirement: a ban reads `no-<forbidden thing>`, a requirement names its subject and what holds of it (`seeds-are-sql`, `result-compared-whole`), a quantity reads `one-<thing>-per-<scope>`. A convention held over two channels is two rows, and so two names: the runtime twin alone carries `-at-runtime`. A name carries no severity, and neither does a row: every rule errors.
 

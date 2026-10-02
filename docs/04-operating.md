@@ -8,7 +8,7 @@ A release is three steps, in this order.
 
 1. **Bump and land the version.** The version in `package.json` moves, alone, in a commit whose subject is `chore: <version> — <what changed>`. The commit log is the changelog: this repository carries no `CHANGELOG.md`, by decision, and the release notes plus that subject line are the record.
 2. **Create the GitHub release**, tagged at that commit. This is the trigger and the only one — `.github/workflows/release.yaml` listens on `release: types: [created]`.
-3. **Watch the gate.** The workflow delegates to the estate's `jterrazz/jterrazz-actions/.github/workflows/release-npm.yaml`, which runs the FULL validate job first — the same build, lint and test the push gate runs, chromium included — and publishes only if it is green.
+3. **Watch the gate.** The workflow delegates to the shared `jterrazz/jterrazz-actions/.github/workflows/release-npm.yaml`, which runs the FULL validate job first — the same build, lint and test the push gate runs, chromium included — and publishes only if it is green.
 
 The publish step is `npm publish --access public --provenance`, on Node 24, with `id-token: write` granted so npm records a provenance attestation linking the tarball to the workflow run that built it. The registry is npm's, stated as `publishConfig` in the manifest.
 
@@ -24,7 +24,7 @@ The shipped chapters keep their links to the two pages left home, so from inside
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 
-One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less (a path that is NOT a specs tree is read as a project root and takes that third run, anchored there) — and `--format json` publishes the findings under the `jterrazz-check/<name>` keys the ratchet counts ([24 — Linting](24-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript` `docs/06-quality-checks.md` § The Test Conventions pass.
+One binary ships with them: `jterrazz-test-check`, the conventions checker, pointed at `dist/checker.js`. It answers three runs — a specs tree by path, one workspace member with `--member`, and the whole project path-less (a path that is NOT a specs tree is read as a project root and takes that third run, anchored there) — and `--format json` publishes the findings under the `jterrazz-check/<name>` keys the ratchet counts ([24 — Linting](24-linting.md#the-member-pass-and-the-json-contract)). When `typescript check` runs it, which install it resolves it from, and what the floor version is, are the toolchain's: `@jterrazz/typescript`'s [Quality checks § The Test Conventions pass](https://github.com/jterrazz/package-typescript/blob/main/docs/07-quality-checks.md#the-test-conventions-pass).
 
 ## The footprint it leaves
 
