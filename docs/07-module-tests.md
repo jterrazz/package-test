@@ -1,16 +1,8 @@
 # 07 — Module tests (`*.test.ts`, beside the module)
 
-A module test is one file of source code, met through its own exports, with nothing started. It needs no constructor, no folder and no runner — it is the rung the doubles ladder opens on. It is also the exception: a behaviour a user relies on is specified end to end, and a module test is kept only for a pure algorithm or a failure no end-to-end path provokes ([23 § Which test earns its place](23-conventions.md#which-test-earns-its-place)).
+A module test is plain vitest: one source file, called through its own exports, with nothing started. It needs no constructor, no runner and no folder under `specs/` — it sits beside the module it covers, as `<file>.test.ts`.
 
-| The shape           | Held below                                                         |
-| ------------------- | ------------------------------------------------------------------ |
-| What it specifies   | [What it specifies](#what-it-specifies)                            |
-| Where it is written | [The constructor: there is none](#the-constructor-there-is-none)   |
-| The chain           | [The chain: there is none either](#the-chain-there-is-none-either) |
-| What it may hold    | [What it may and may not do](#what-it-may-and-may-not-do)          |
-| The result          | [The result is the return value](#the-result-is-the-return-value)  |
-| What only it does   | [Unique here](#unique-here)                                        |
-| What it will refuse | [Pitfalls](#pitfalls)                                              |
+It is also the exception. A behaviour a user relies on is tested end to end, through the surface the user meets; a module test is kept for a pure algorithm whose edge cases are cheaper at its own level, or for a failure no end-to-end path can provoke ([23 § Which test earns its place](23-conventions.md#which-test-earns-its-place)).
 
 ## What it specifies
 
@@ -25,17 +17,17 @@ src/domain/posts/
 
 The suffix decides which project collects the file and therefore which rules judge it. `unit()` takes `**/*.test.ts` outside `specs/` and excludes `**/*.test.tsx`; a `.test.ts` UNDER `specs/<facet>/` is rule `file-suffix-matches-place`'s error, with the fix "rename it `.spec.ts`", and a rendered thing in a `.test.ts` is rule `no-dom-in-module-test`'s, with the fix "rename it `.test.tsx`" ([09 — Component specs](09-component.md)).
 
-Nothing in this kind is slow, so the `unit` project is the one every developer runs on every save, and this package holds its own to a time budget ([03 — Testing § The eight projects](03-testing.md#the-nine-projects) states it).
+Nothing in this kind is slow, so the `unit` project is the one a developer runs on every save.
 
 ## The constructor: there is none
 
-Every facet below this chapter starts something — a server, a database, a binary, a browser, a simulator — so every one of them has a `*.specification.ts` holding what was started. A module starts nothing. This kind has no folder under `specs/` at all — no specification file, and no project helper to configure beyond `unit()`.
+Every other kind starts something — a server, a database, a binary, a browser, a simulator — and keeps it in a `*.specification.ts`. A module starts nothing, so there is no specification file and no project to configure beyond `unit()`.
 
-That is the fork's whole criterion, and it runs both ways: the moment a test needs a real service, a real binary or a real screen, it is no longer this kind, and the chapter that owns it says which one it became ([05 — Getting started § Which kind of test](05-getting-started.md#which-kind-of-test)).
+The moment a test needs a real service, a real binary or a real screen, it is no longer this kind; [the fork](05-getting-started.md#which-kind-of-test) says which one it became.
 
 ## The chain: there is none either
 
-A module test is plain vitest: `test`, `expect`, the native matchers. What the framework adds are four primitives it may reach for by name — `mockOf`, `intercept()`, `clock` and `text()` — and the two that touch shared state, `intercept()` and `clock`, are scopes that give back what they took.
+A module test is `test`, `expect` and vitest's own matchers. The framework adds four primitives — `mockOf()`, `intercept()`, `clock` and `text()` — and the two that touch shared state, `intercept()` and `clock`, are scopes that give back what they took.
 
 ```typescript
 import { clock } from '@jterrazz/test';
@@ -128,14 +120,13 @@ There is no result object here, because there is no chain to hand one back. The 
 ## Unique here
 
 - **It is the only kind with no folder.** Every other kind is collected by a path (`specs/<facet>/`); this one is collected by a suffix, beside what it specifies. Moving a module test away from its module is `facet-test-uses-its-runner`'s error in one direction and `file-suffix-matches-place`'s in the other.
-- **It is the only kind that may build its own double.** Below this chapter a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
+- **It is the only kind that may build its own double.** In every other kind a double is DECLARED — a stub, a service, a seeded row — because the subject is an assembled product and the test does not hold its wiring. A module test is handed the wiring, so `mockOf` is in its hands.
 - **It is the only kind with no golden.** A golden is a file, and a file beside a module test is an asset; a module whose answer deserves a golden is describing something assembled, and the integration facet is where that goes ([08](08-integration.md#the-golden-half--a-pure-module-no-services-at-all)).
-- **It is the kind the budget is written for.** The `unit` project is the fast one, and the budget [above](#what-it-specifies) keeps the loop a loop.
 
 ## Pitfalls
 
 - **Reaching for `vi.mock` to avoid injecting a port.** The mock outlives the test's intent: every importer of that specifier gets the double, and the design pressure the injection would have applied is gone. Double the port.
-- **`vi.setSystemTime` instead of `clock`.** A fake timer taken without `using` outlasts the test that took it, and the next test in the file inherits a clock nobody declared. `no-vitest-time-or-global-stub` refuses it and names the primitive.
+- **`vi.setSystemTime` instead of `clock`.** `no-vitest-time-or-global-stub` refuses it — [19 § The clock](19-time-and-doubles.md#the-clock).
 - **Importing a `.json` payload.** `no-module-mock` refuses it. Put the payload in `<file>.fixtures.ts`, where the compiler reads it.
 - **Nesting `describe`.** The one level is THE describe, titled with the subject, holding every test ([23 § One file, one subject](23-conventions.md#one-file-one-subject)); a second level describes a structure the test file does not have. `one-describe-per-file` refuses a file with no describe or two, `one-describe-level` the nesting.
 - **Asserting on a DOM.** There is no document here, and there will not be one: `no-dom-in-module-test` refuses the globals, `no-simulated-dom` refuses the `@vitest-environment` comment that would conjure them, and the route is a `.test.tsx` in a real browser.
@@ -143,4 +134,4 @@ There is no result object here, because there is no chain to hand one back. The 
 
 ## Related
 
-[02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [08 — Integration specs](08-integration.md) · [09 — Component specs](09-component.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [17 — Stubs](17-stubs.md) · [23 — Conventions](23-conventions.md) · [24 — Linting](24-linting.md)
+[05 — Getting started](05-getting-started.md) · [08 — Integration specs](08-integration.md) · [09 — Component specs](09-component.md) · [17 — Stubs](17-stubs.md) · [19 — Time and doubles](19-time-and-doubles.md) · [21 — Assertions](21-assertions.md) · [23 — Conventions](23-conventions.md)
