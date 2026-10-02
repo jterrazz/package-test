@@ -1,6 +1,6 @@
 # 08 — Integration specs: a module against the real thing
 
-`specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared stub, a golden — and that is exactly the fork this facet closes.
+`specification.integration()` tests a module — a function your test calls — against the real things it depends on: a database, a cache, a process, a declared stub. It also takes a module whose expected answer is a golden file. There is no HTTP, no binary and no page here; what makes this a spec rather than a module test beside the code is what the module stands on.
 
 ```typescript
 // specs/integration/integration.specification.ts
@@ -40,13 +40,12 @@ describe('orders', () => {
 
 ## What it specifies
 
-Three questions decide, in order ([23 — Conventions](23-conventions.md)):
+An integration spec answers one question: **given these real services, what does this module return, throw, or leave in the database?** Two kinds of subject land here, the two halves of the fork's eighth question:
 
-1. Does the subject answer HTTP, run as a binary, render a page or a screen? Then it is that facet's, not this one.
-2. Does it need a real service — a database, a cache, a process — or is its oracle a GOLDEN file? Then it is an integration spec.
-3. Otherwise it is a module test, `<file>.test.ts` beside `<file>.ts`, with no runner at all.
+- **a module on a real service** — a repository against Postgres, a cache client against Redis;
+- **a module whose oracle is a golden** — a renderer, a parser, a formatter whose output is long enough to be read as a file.
 
-The second question has two halves and both land here: a module on a real service, and a module whose oracle is a golden. Why a facet, and what was weighed: [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
+A subject that answers HTTP, runs as a binary or draws a screen belongs to that kind instead; a module that needs neither a service nor a golden is a module test ([the fork](05-getting-started.md#which-kind-of-test)). Why this is a kind of its own: [ADR-004](decisions/004-a-module-against-real-services-or-a-golden-is-the-integration-facet.md).
 
 ## The constructor
 
@@ -183,4 +182,4 @@ specs/integration/
 
 ## Related
 
-[12 — API specs](12-api.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md) · [23 — Conventions](23-conventions.md)
+[07 — Module tests](07-module-tests.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md)
