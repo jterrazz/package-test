@@ -14,7 +14,7 @@ Three things make a test suite expensive to keep, and the framework takes each o
 
 Five ideas cover everything else in the manual. They match the four families of the docs map, plus the files a test stands on.
 
-**1. A kind of test, and its runner.** What you test decides the kind: a module, a module against a real service (integration), a rendered component, a website, a mobile screen, an HTTP API, a job, a CLI, or the lint rules a project ships. Each kind except module and component has a constructor — `specification.api()`, `specification.cli()`, … — called once per suite in a `*.specification.ts` file. It starts what the suite needs and returns a runner (`api`, `cli`, …) and a `cleanup` you pass to `afterAll`.
+**1. A kind of test, and its runner.** What you test decides the kind: a module, a module against a real service (integration), a rendered component, a website, a mobile screen, an HTTP API, a job, a CLI, or the lint rules a project ships. Each kind except module and component has a constructor — `specification.api()`, `specification.cli()`, … — called once per suite in a `*.specification.ts` file. It starts what the suite needs and returns a runner (`api`, `cli`, …) and a `cleanup` you pass to `afterAll`. The chapters call the code behind one kind a **facet**.
 
 **2. A chain: setups, then one action.** Every test is one chain on that runner: zero or more setups (`.seed()`, `.intercept()`, `.clock()`, `.env()` …), then exactly one action (`.get()`, `.exec()`, `.visit()`, `.trigger()`, `.call()` …), which resolves to a result. The chain reads as the test's sentence — the setups are the Given, the action is the When.
 
@@ -72,7 +72,7 @@ export const { api, cleanup } = await specification.api({
 afterAll(cleanup);
 ```
 
-The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
+`server` returns your app: any object with a `request()` method, which a Hono `app` is. The app runs in the test process, wired to a real SQLite database built from `schema.sql`. Each worker gets its own copy, and every chain starts from empty tables.
 
 ### 4. Write the test
 
