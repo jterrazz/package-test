@@ -10,11 +10,11 @@ describe('subpaths', () => {
             .fixture(directory('./_fixtures/consumer/'))
             .exec('node subpaths.mjs');
 
-        // Then - each subpath answers every condition it declares: node loads its builds, a page's build finds every package it imports
+        // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build imports — static, side-effect or dynamic — resolves under the browser condition
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             @jterrazz/test (types) → ./dist/index.d.ts: held
-            @jterrazz/test (browser) → ./dist/browser/index.js: imports vitest, vitest-mock-extended, vitest/browser, each resolved
+            @jterrazz/test (browser) → ./dist/browser/index.js: reaches 1 modules, imports msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
             @jterrazz/test (import) → ./dist/index.js: loads, 49 names
             @jterrazz/test/vitest (types) → ./dist/vitest.d.ts: held
             @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 11 names

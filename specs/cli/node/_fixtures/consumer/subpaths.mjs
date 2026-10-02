@@ -1,3 +1,4 @@
+import { spawnSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { join } from 'node:path';
@@ -24,19 +25,9 @@ async function load(specifier, condition, target) {
         return 'held';
     }
     if (condition === 'browser') {
-        const imported = [...readFileSync(path, 'utf8').matchAll(/from\s*"([^".][^"]*)"/gu)];
-        const packages = [...new Set(imported.map(([, name]) => name))].toSorted();
-        const unresolved = packages.filter((name) => {
-            try {
-                import.meta.resolve(name);
-                return false;
-            } catch {
-                return true;
-            }
-        });
-        return unresolved.length === 0
-            ? `imports ${packages.join(', ')}, each resolved`
-            : `imports ${unresolved.join(', ')}, which the install lacks`;
+        return spawnSync(process.execPath, ['--conditions=browser', 'browser-graph.mjs', path], {
+            encoding: 'utf8',
+        }).stdout;
     }
     const loaded =
         condition === 'require'
