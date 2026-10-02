@@ -20,7 +20,7 @@ export {
     file,
     type FileAt,
     type RelativePath,
-} from './chain/paths/spec-path.js';
+} from './disk/spec-path.js';
 export { anthropic } from './stubs/kinds/anthropic.js';
 export {
     http,

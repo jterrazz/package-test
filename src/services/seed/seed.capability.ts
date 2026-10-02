@@ -1,7 +1,7 @@
 import { defineCapability } from '../../chain/capability.js';
 import type { ChainSignature } from '../../chain/capability.js';
-import { requireDiskFile } from '../../chain/paths/spec-path.js';
-import type { DiskFile } from '../../chain/paths/spec-path.js';
+import { requireDiskFile } from '../../disk/spec-path.js';
+import type { DiskFile } from '../../disk/spec-path.js';
 import { validateDatabaseOption } from '../database-option.js';
 import type { ServicesConfig } from '../services.js';
 import type { SeedPort } from './seed.port.js';

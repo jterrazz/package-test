@@ -1,7 +1,7 @@
 import type {
     DiskDirectory as DiskDirectoryType,
     DiskFile as DiskFileType,
-} from '../../chain/paths/spec-path.js';
+} from '../../disk/spec-path.js';
 import type { ContainerAccessor as ContainerAccessorType } from '../command/container.js';
 import type { DirectoryAccessor as DirectoryAccessorType } from '../disk/directory.js';
 import type { FilesystemAccessor as FilesystemAccessorType } from '../disk/filesystem.js';

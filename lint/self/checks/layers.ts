@@ -33,6 +33,10 @@ export const FRAMEWORK_LAYERS = {
         seams: {
             // A table read names its database by the rule a seed names it by: one validation.
             'expectations/result.ts': ['services/database-option'],
+            // A golden is a file the spec names on disk, with the `file()`/`directory()` every verb takes.
+            'expectations/goldens/match-options.ts': ['disk/spec-path'],
+            'expectations/goldens/matchers.ts': ['disk/spec-path', 'disk/resolved-spec-path'],
+            'expectations/goldens/text-assertions.ts': ['disk/spec-path'],
         },
     },
     stubs: {
@@ -49,6 +53,11 @@ export const FRAMEWORK_LAYERS = {
         imports: [...CHAIN_AND_REFUSALS, 'services/'],
         // The container server's reader is a provided value (`vitest`).
         packages: [...librariesOwnedIn('src/services/'), 'vitest'],
+        seams: {
+            // A seed is a `.sql` file the spec names on disk, with `file()`.
+            'services/seed/database-set.adapter.ts': ['disk/resolved-spec-path'],
+            'services/seed/seed.capability.ts': ['disk/spec-path'],
+        },
     },
     disk: { imports: [...CHAIN_AND_REFUSALS, 'disk/'] },
     clock: { imports: [...CHAIN_AND_REFUSALS, 'clock/'], packages: ['vitest'] },

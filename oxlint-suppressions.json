@@ -528,11 +528,6 @@
             "count": 3
         }
     },
-    "src/chain/paths/spec-path.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 2
-        }
-    },
     "src/chain/refusals/node-only.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
@@ -541,6 +536,11 @@
     "src/clock/clock.test.ts": {
         "jterrazz/no-sampled-value-in-test": {
             "count": 1
+        }
+    },
+    "src/disk/spec-path.ts": {
+        "typescript/no-unsafe-type-assertion": {
+            "count": 2
         }
     },
     "src/expectations/command/cli.result.ts": {

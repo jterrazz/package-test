@@ -232,7 +232,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'src/services/database-option.ts',
             'src/services/startup/registry.ts',
             'src/chain/pause.ts',
-            'src/chain/paths/spec-path.ts',
             'src/chain/refusals/node-only.ts',
         ),
         name: 'a chain or runner internal',
@@ -241,11 +240,12 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/chain/context/headers.capability.ts',
-            'src/chain/paths/resolved-spec-path.ts',
             'src/clock/clock.capability.ts',
             'src/clock/instant.ts',
             'src/disk/fixture.capability.ts',
             'src/disk/link.capability.ts',
+            'src/disk/resolved-spec-path.ts',
+            'src/disk/spec-path.ts',
             'src/expectations/in-place/in-place-setup.ts',
             'src/expectations/text/ansi.ts',
             'src/services/seed/seed.capability.ts',

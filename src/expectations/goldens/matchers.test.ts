@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { beforeAll, describe, expect, inject, onTestFinished, test, vi } from 'vitest';
 
-import { directory, file } from '../../chain/paths/spec-path.js';
+import { directory, file } from '../../disk/spec-path.js';
 import type { DatabasePort } from '../../services/database.port.js';
 import { ContainerAccessor } from '../command/container.js';
 import { DirectoryAccessor } from '../disk/directory.js';

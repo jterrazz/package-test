@@ -2,8 +2,8 @@ import { existsSync, lstatSync, mkdirSync, rmSync, statSync, symlinkSync } from 
 import { dirname, relative, resolve } from 'node:path';
 
 import { refusal } from '../../lint/refusal.js';
-import { resolveSpecPath } from '../chain/paths/resolved-spec-path.js';
 import type { LinkPort } from './link.port.js';
+import { resolveSpecPath } from './resolved-spec-path.js';
 
 export function installedPackage(name: string, testDir: string): null | string {
     let dir = testDir;

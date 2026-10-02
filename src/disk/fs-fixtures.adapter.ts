@@ -2,8 +2,8 @@ import { cpSync, existsSync, statSync } from 'node:fs';
 import { basename, resolve } from 'node:path';
 
 import { refusal } from '../../lint/refusal.js';
-import { resolveSpecPath } from '../chain/paths/resolved-spec-path.js';
 import type { FixturePort } from './fixture.port.js';
+import { resolveSpecPath } from './resolved-spec-path.js';
 
 type FixtureCopyPlan = {
     dest: string;

@@ -1,8 +1,8 @@
 import { defineCapability } from '../chain/capability.js';
 import type { ChainSignature } from '../chain/capability.js';
-import { requireDiskTarget } from '../chain/paths/spec-path.js';
-import type { DiskTarget } from '../chain/paths/spec-path.js';
 import type { FixturePort } from './fixture.port.js';
+import { requireDiskTarget } from './spec-path.js';
+import type { DiskTarget } from './spec-path.js';
 
 export type FixtureMethod<Self> = (source: DiskTarget) => Self;
 

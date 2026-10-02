@@ -1,9 +1,9 @@
 import { refusal } from '../../lint/refusal.js';
 import { defineCapability } from '../chain/capability.js';
 import type { ChainSignature } from '../chain/capability.js';
-import { isDiskDirectory, isDiskFile } from '../chain/paths/spec-path.js';
-import type { DiskDirectory } from '../chain/paths/spec-path.js';
 import type { LinkPort } from './link.port.js';
+import { isDiskDirectory, isDiskFile } from './spec-path.js';
+import type { DiskDirectory } from './spec-path.js';
 
 export type LinkMethod<Self> = (name: string, source?: DiskDirectory) => Self;
 
