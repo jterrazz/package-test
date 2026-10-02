@@ -134,7 +134,7 @@ test('subscribes through the form and captures the final state', async () => {
 
 The visitor's verbs and the words it names elements with are [13 — The visitor](13-visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
 
-Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — Elements § Designating exactly one element](13-visitor.md#designating-exactly-one-element).
+Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — The visitor § Designating exactly one element](13-visitor.md#designating-exactly-one-element).
 
 Navigating within a scenario changes what the capture describes:
 

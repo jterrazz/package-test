@@ -158,13 +158,13 @@ test('bookmarks an event from its detail screen', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result.
 
-The element vocabulary is [13 — The visitor](13-visitor.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this chapter's, and it is three things.
+The visitor's vocabulary is [13 — The visitor](13-visitor.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this chapter's, and it is three things.
 
 **The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here ([13 § Verbs](13-visitor.md#verbs) says why). Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality. Actionability includes **scroll-into-view**: when a target matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
 
 **Four targets reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [13 — The visitor](13-visitor.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule `test-id-states-what-is-missing`'s escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
 
-**`target-matches-one-element` is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous target and print the candidates with their accessibility identifiers; `see()` does not — [13 — Elements § `see()` and `gone()`](13-visitor.md#see-and-gone-are-the-synchronization) says why, once.
+**`target-matches-one-element` is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous target and print the candidates with their accessibility identifiers; `see()` does not — [13 — The visitor § `see()` and `gone()`](13-visitor.md#see-and-gone-are-the-synchronization) says why, once.
 
 A mobile scope is any target, most often a `testId()` on the containing view, because iOS has no landmarks:
 

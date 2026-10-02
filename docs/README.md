@@ -32,7 +32,7 @@ The decisions this package alone took stand in [`decisions/`](decisions/), numbe
 
 - **01 to 04 are the spine**, and they answer for the repository itself: what it is, how it is changed, what proves a change, how it ships.
 - **05 to 12 are the kinds of test, in the order the fork asks them.** A module test needs no runner and has no folder (05); everything below it is an assembled product met through an entry. Read 02, then the one chapter matching what you specify.
-- **13 to 17, and 20, are shared references.** The element vocabulary reaches every rendered surface; assertions and the token grammar reach every facet; stubs apply wherever a facet meets the network, services wherever it has a database; the document format is the cli's. The kind chapters link into them and restate nothing.
+- **13 to 17, and 20, are shared references.** The visitor's vocabulary reaches every rendered surface; assertions and the token grammar reach every facet; stubs apply wherever a facet meets the network, services wherever it has a database; the document format is the cli's. The kind chapters link into them and restate nothing.
 - **21 is the kind the enforcement chapters call for**: the rules a project ships, specified as a facet, read after 18 and 19.
 - **18 and 19 cover enforcement.** 18 is the constitution — the principles and the criteria no machine settles. 19 documents the static plugin and the checker, and carries the generated catalogue, sourced from `lint/consumer/catalogue/manifest.ts`. The chapters explain and illustrate; the constitution and the catalogue decide.
 

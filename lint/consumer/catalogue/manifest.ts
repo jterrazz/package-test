@@ -769,7 +769,7 @@ export const TOOLCHAIN_RULES: Row[] = [
             'A test file imports no second test runtime: `@testing-library/*`, `happy-dom`, `jsdom`, `vitest/browser`, `vitest-browser-*`, `@vitest/browser*`, `msw`, `msw/*`, `nock`, `sinon`, `vitest-mock-extended`, `jest`, `@jest/*`, `mockdate`, `playwright`, `playwright-core`, `@playwright/test`, `webdriverio` and `appium` are errors, one layer per seam — `no-second-test-runtime-<seam>` — each named with what replaces it; `react-dom/server` is one too, in the `module` role alone. Reach: the roles that RUN a test (`module`, `component`, `spec`, `specification`) — a fixture project’s config and a providers module under `specs/` legitimately name the adapter.',
         facet: 'model',
         family: 'imports',
-        fix: 'Go through what replaces the seam: a facet, the element vocabulary, `intercept()`, `clock` or `mockOf`.',
+        fix: "Go through what replaces the seam: a facet, the visitor's vocabulary, `intercept()`, `clock` or `mockOf`.",
         name: 'no-second-test-runtime',
         rationale:
             "A test importing the adapter speaks the adapter's dialect: a repository ends up with as many vocabularies as it has seams. Every group names the seam this vocabulary already owns — the runner, the browser, the simulator, the network, the clock and the doubles.",
@@ -1640,7 +1640,7 @@ export const RUNTIME_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'runtime',
-        sentence: `${REFUSAL_WHY['no-landmark-on-mobile']} The element vocabulary is ONE between the website and mobile facets; an ARIA landmark (\`main()\`, \`navigation()\`…) passed to a mobile verb is refused at run time.`,
+        sentence: `${REFUSAL_WHY['no-landmark-on-mobile']} The visitor's vocabulary is ONE between the website and mobile facets; an ARIA landmark (\`main()\`, \`navigation()\`…) passed to a mobile verb is refused at run time.`,
         facet: 'mobile',
         family: 'visitor',
         fix: 'Scope with `within(testId(…), …)`: a screen has no landmarks, and any target works as the scope.',
