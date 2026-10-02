@@ -8,6 +8,7 @@
 export const NEWS_URL = 'https://news.spec.test/api/latest';
 export const QUOTES_URL = 'https://quotes.spec.test/api/quote';
 export const STREAM_URL = 'https://tokens.spec.test/api/stream';
+export const PING_URL = 'https://ping.spec.test/api/ping';
 const UNREGISTERED_URL = 'https://unregistered.spec.test/thing';
 const OPENAI_CHAT_URL = 'https://api.openai.com/v1/chat/completions';
 const OPENAI_RESPONSES_URL = 'https://api.openai.com/v1/responses';
@@ -131,6 +132,15 @@ const routes: Record<string, () => Promise<Response>> = {
         // A call nobody declared an intercept for.
         const response = await fetch(UNREGISTERED_URL);
         return Response.json({ status: response.status }, { status: response.status });
+    },
+    '/ping': async () => {
+        // A provider that answers with no body: the app reads the status and the headers alone.
+        const response = await fetch(PING_URL);
+        return Response.json({
+            body: await response.text(),
+            cacheControl: response.headers.get('cache-control'),
+            status: response.status,
+        });
     },
     '/quote': async () => {
         // One call, with a single retry on 429.
