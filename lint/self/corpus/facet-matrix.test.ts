@@ -242,11 +242,13 @@ describe('facet-matrix', () => {
         expect(declared('component', 'Verb')).toStrictEqual(published(componentVisitor));
     });
 
-    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `visitor/targets/` exports, but the scope walk the adapters share', () => {
+    test('facet capability declaration (`discovery-grows-a-guard` guard) — the vocabulary is exactly what `visitor/targets/` exports, but the scope walk the adapters share and the factory the landmarks build with', () => {
         // Given - the target modules, which are the vocabulary's one home
         const exported = [roles, landmarks, modifiers]
             .flatMap((module) => Object.keys(module))
-            .filter((name) => name !== landmarks.scopeChain.name)
+            .filter(
+                (name) => ![landmarks.scopeChain.name, roles.optionallyNamed.name].includes(name),
+            )
             .toSorted();
 
         // Then - the browsers declare them all, the device the four XCUITest kinds and the scope

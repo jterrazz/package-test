@@ -1,5 +1,20 @@
-import { named, optionallyNamed } from './named.js';
-import type { NamedTargetFactory, OptionallyNamedTargetFactory, Target } from './target.js';
+import type {
+    NamedTargetFactory,
+    OptionallyNamedTargetFactory,
+    Target,
+    TargetOptions,
+} from './target.js';
+
+const stated = (options?: TargetOptions): Pick<Target, 'exact'> =>
+    options?.exact === undefined ? {} : { exact: options.exact };
+
+const named =
+    (kind: Target['kind']): NamedTargetFactory =>
+    (name, options) => ({ kind, name, ...stated(options) });
+
+export const optionallyNamed =
+    (kind: Target['kind']): OptionallyNamedTargetFactory =>
+    (name, options) => ({ kind, ...(name === undefined ? {} : { name }), ...stated(options) });
 
 /** A button (or element with the button role), by accessible name. */
 export const button: NamedTargetFactory = named('button');

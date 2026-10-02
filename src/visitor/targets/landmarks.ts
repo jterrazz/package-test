@@ -1,4 +1,4 @@
-import { optionallyNamed } from './named.js';
+import { optionallyNamed } from './roles.js';
 import type { OptionallyNamedTargetFactory, Target } from './target.js';
 
 /** The `banner` landmark — the page header. */
