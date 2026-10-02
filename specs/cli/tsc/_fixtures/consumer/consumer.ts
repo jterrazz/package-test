@@ -16,6 +16,7 @@ import type {
     WebsiteSpecification,
     WebsiteVisitor,
 } from '@jterrazz/test';
+import type { TestSettings } from '@jterrazz/test/config';
 
 type Mailer = { send: (to: string) => Promise<void> };
 
@@ -231,8 +232,11 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
     expect(out.json).toMatch(file('./_expected/out.json'));
 }
 
-// test-settings-section — `jterrazz.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else.
+// test-settings-section — `jterrazz.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else; its type is published beside the preset, at `/config`.
+const section: TestSettings = { routes: './openapi.yaml' };
+
 export const testSettingsRows = [
+    defineConfig({ test: section }),
     defineConfig({ test: {} }),
     defineConfig({ test: { routes: './openapi.yaml' } }),
     defineConfig({ test: { collections: ['data', 'people'] } }),
