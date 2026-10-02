@@ -17,7 +17,7 @@ ruleTester().run('no-module-mock', noModuleMock, {
     invalid: [
         // Module mocking is banned under src/.
         {
-            code: 'vi.mock("../../../rules/world/match.js");',
+            code: 'vi.mock("../../../rules/mocks/match.js");',
             errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SRC_TEST,
         },
@@ -51,7 +51,7 @@ ruleTester().run('no-module-mock', noModuleMock, {
         // A spec under specs/ is a test too: module mocking is banned there as
         // well — the reach is every test file, not the src/ tree.
         {
-            code: 'vi.mock("../../../rules/world/x.js");',
+            code: 'vi.mock("../../../rules/mocks/x.js");',
             errors: [{ column: 0, line: 1, messageId: 'viMock' }],
             filename: SPEC,
         },

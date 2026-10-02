@@ -182,20 +182,20 @@
             "count": 1
         }
     },
+    "lint/consumer/rules/stubs/stubs-root-holds-facades-and-kinds.ts": {
+        "max-lines": {
+            "count": 1
+        },
+        "typescript/no-unsafe-type-assertion": {
+            "count": 4
+        }
+    },
     "lint/consumer/rules/visitor/test-id-states-what-is-missing.ts": {
         "max-lines-per-function": {
             "count": 1
         },
         "typescript/no-unsafe-type-assertion": {
             "count": 3
-        }
-    },
-    "lint/consumer/rules/world/stubs-root-holds-facades-and-kinds.ts": {
-        "max-lines": {
-            "count": 1
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
         }
     },
     "lint/engine/catalogue/chapter.ts": {

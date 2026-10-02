@@ -7,6 +7,8 @@ import { noRedundantServiceUrl } from './chain/no-redundant-service-url.js';
 import { noRepeatedChainSetting } from './chain/no-repeated-chain-setting.js';
 import { triggerNameInKebabCase } from './chain/trigger-name-in-kebab-case.js';
 import { whenBetweenGivenAndThen } from './chain/when-between-given-and-then.js';
+import { noSampledValueInTest } from './clock/no-sampled-value-in-test.js';
+import { noSleep } from './clock/no-sleep.js';
 import { expectedConstantShared } from './expectations/expected-constant-shared.js';
 import { negativeGoldenFrozen } from './expectations/negative-golden-frozen.js';
 import { noDoubleOnlyAssertion } from './expectations/no-double-only-assertion.js';
@@ -32,6 +34,8 @@ import { specsAtDeclaredDepth } from './layout/specs-at-declared-depth.js';
 import { testBesideItsModule } from './layout/test-beside-its-module.js';
 import { testBodyWithinLineLimit } from './layout/test-body-within-line-limit.js';
 import { verbReadsItsGroundFolder } from './layout/verb-reads-its-ground-folder.js';
+import { noModuleMock } from './mocks/no-module-mock.js';
+import { seedsAreSql } from './services/seeds-are-sql.js';
 import { browserProjectFromComponent } from './setup/browser-project-from-component.js';
 import { cleanupPassedToAfterAll } from './setup/cleanup-passed-to-after-all.js';
 import { includePointsAtAFolder } from './setup/include-points-at-a-folder.js';
@@ -45,16 +49,12 @@ import { noUnknownConstructor } from './setup/no-unknown-constructor.js';
 import { projectNamedForItsFacet } from './setup/project-named-for-its-facet.js';
 import { runnerInSpecificationFile } from './setup/runner-in-specification-file.js';
 import { vitestConfigFromDefineSpecConfig } from './setup/vitest-config-from-define-spec-config.js';
+import { stubDataHasABuilder } from './stubs/stub-data-has-a-builder.js';
+import { stubsImportedThroughFacade } from './stubs/stubs-imported-through-facade.js';
+import { stubsRootHoldsFacadesAndKinds } from './stubs/stubs-root-holds-facades-and-kinds.js';
 import { noExpectInScenario } from './visitor/no-expect-in-scenario.js';
 import { scenarioEndsSettled } from './visitor/scenario-ends-settled.js';
 import { testIdStatesWhatIsMissing } from './visitor/test-id-states-what-is-missing.js';
-import { noModuleMock } from './world/no-module-mock.js';
-import { noSampledValueInTest } from './world/no-sampled-value-in-test.js';
-import { noSleep } from './world/no-sleep.js';
-import { seedsAreSql } from './world/seeds-are-sql.js';
-import { stubDataHasABuilder } from './world/stub-data-has-a-builder.js';
-import { stubsImportedThroughFacade } from './world/stubs-imported-through-facade.js';
-import { stubsRootHoldsFacadesAndKinds } from './world/stubs-root-holds-facades-and-kinds.js';
 
 /** The `@jterrazz/test` oxlint plugin: `jsPlugins: ['@jterrazz/test/oxlint']`, rules as `jterrazz/<rule>`. Rules import nothing of the runtime, so the bundle stays free of msw, pg and testcontainers. */
 const plugin: LintPlugin = {

@@ -185,7 +185,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'Outside `specs/**/_setup/stubs/`, an import resolving into a kind folder (`_setup/stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.',
         facet: 'model',
-        family: 'world',
+        family: 'stubs',
         fix: 'Add a named scenario export to the facade and import that instead.',
         name: 'stubs-imported-through-facade',
         rationale:
@@ -198,7 +198,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'Inside a kind folder of `_setup/stubs/`, every `*.request.ts` — the exact request a unit matches — has a `<stem>.ts` sibling, the stem the name up to the FIRST dot (`classify-article.request.ts` → `classify-article.ts`). Orphan data is an error, reported on the orphan itself. A payload a unit serves is data, so it sits in the ground beside the `_setup/` (`_fixtures/<name>.json`), which `_setup/` never holds (`reserved-folder-in-closed-list`).',
         facet: 'model',
-        family: 'world',
+        family: 'stubs',
         fix: 'Write the stub that matches the request, or delete the request.',
         name: 'stub-data-has-a-builder',
         rationale:
@@ -224,7 +224,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'Under `specs/**/_setup/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat — a file nested below it is an error — and a folder under the root that is no kind is an error at each unit it holds; each file is judged on its own, and a file that is no module is `reserved-folder-in-closed-list`’s.',
         facet: 'model',
-        family: 'world',
+        family: 'stubs',
         fix: 'Move the file to the half it belongs to: a facade at the root, a unit under the folder of the builder it calls.',
         name: 'stubs-root-holds-facades-and-kinds',
         rationale:
@@ -249,7 +249,7 @@ export const STATIQUE_RULES: Row[] = [
         channel: 'statique',
         sentence: '`_seeds/` holds `*.sql` files only; any other file is an error.',
         facet: 'model',
-        family: 'world',
+        family: 'services',
         fix: 'Write the seed as SQL, or move the file to `_fixtures/` as the material it is.',
         name: 'seeds-are-sql',
         rationale: '`.seed()` carries database state only — no seed handlers, no prefix dispatch.',
@@ -352,7 +352,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             'A sampled value anywhere in a test callback is an error — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal, and on a `new Date()` or `Date.now()` after a `using _ = clock.at(<instant>)` or `clock.run(<instant>)` in the same block, where the reading is the pinned instant — a pin fakes `Date` alone, so `Math.random()`, `randomUUID()` and `performance.now()` stay samples under it, and an argument-less `clock.run()` pins no instant. A `*.specification.ts(x)` is out of reach.',
         facet: 'model',
-        family: 'world',
+        family: 'clock',
         fix: 'Reach for `clock.at()`, `clock.advance()`, or a token in the golden.',
         name: 'no-sampled-value-in-test',
         rationale:
@@ -664,7 +664,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
         facet: 'model',
-        family: 'world',
+        family: 'mocks',
         fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module as `{ module, reason }` (chapter 07 § Doubles).",
         name: 'no-module-mock',
         rationale:
@@ -677,7 +677,7 @@ export const STATIQUE_RULES: Row[] = [
         sentence:
             "No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil(predicate)` everywhere else. A timer inside a test DOUBLE's implementation is out of reach: the double is staging the world, not the test waiting on it. A double is a factory call (`vi.fn(…)`, `mockImplementation(…)`, a `mockOf` handler) or a function-valued PROPERTY of an object literal, which is the plainest double there is — `const git: GitGateway = { cloneRepository: async () => … }`, where the object itself is the double.",
         facet: 'model',
-        family: 'world',
+        family: 'clock',
         fix: 'Wait for the condition, not for a duration.',
         name: 'no-sleep',
         rationale:
@@ -928,7 +928,7 @@ export const CHECKER_PASSES: Row[] = [
         sentence:
             "A `_seeds/**/*.sql` states absolute timestamps: `CURRENT_TIMESTAMP`/`CURRENT_DATE`/`CURRENT_TIME`, `NOW()` and the quoted `'now'` SQLite's date functions take (`datetime('now')`, `strftime(…, 'now')`, `date('now', '-1 day')`) are refused. A comment is not state, so a clock read inside one is not a finding.",
         facet: 'model',
-        family: 'world',
+        family: 'services',
         fix: "Write the instant the case is about, and pin the run's clock with `.clock()` on the chain.",
         name: 'seeds-state-absolute-time',
         rationale:
@@ -1406,7 +1406,7 @@ export const TYPE_ROWS: Row[] = [
         sentence:
             '`mockOf<Port>()` needs its port: `T` is constrained to `object` with no default, so a double built without one has no surface and every call on it is refused.',
         facet: 'model',
-        family: 'world',
+        family: 'mocks',
         fix: 'State the port: `mockOf<PaymentGateway>()`.',
         name: 'mock-of-needs-a-port',
         rationale:
@@ -1477,7 +1477,7 @@ export const UPSTREAM_RULES: Row[] = [
         sentence:
             '`vi.stubGlobal`, `vi.useFakeTimers`, `vi.setSystemTime` and `vi.useRealTimers` are refused by `vitest/no-restricted-vi-methods`, each with the primitive that replaces it — a subject that fetches a relative URL states its base with `intercept(stubs, { origin })`. `vi.stubEnv` is sanctioned; `vi.mock`/`vi.doMock` stay on `no-module-mock`, whose allow-list the option cannot express.',
         facet: 'model',
-        family: 'world',
+        family: 'clock',
         fix: 'Reach for `intercept()` and `clock` — both give back what they took at the end of the scope.',
         name: 'no-vitest-time-or-global-stub',
         rationale:
@@ -1620,7 +1620,7 @@ export const RUNTIME_RULES: Row[] = [
         channel: 'runtime',
         sentence: `${REFUSAL_WHY['network-strict-after-first-stub']} As soon as an \`api\`/\`job\` chain declares an intercept, any unmatched outgoing request (an exhausted queue included) fails the spec with an explicit error.`,
         facet: 'model',
-        family: 'world',
+        family: 'stubs',
         fix: 'Declare the stub the request needs, or stop making the request.',
         name: 'network-strict-after-first-stub',
         rationale: 'A guarded network makes external interactions exhaustive and intentional.',

@@ -70,7 +70,7 @@ function isModuleDouble(node: AstNode): boolean {
     );
 }
 
-/** `vi.mock(import('../../../rules/world/x.js'), …)` too: `vitest/prefer-import-in-mock` requires that form, so reading only the string left no green spelling. */
+/** `vi.mock(import('../../../rules/mocks/x.js'), …)` too: `vitest/prefer-import-in-mock` requires that form, so reading only the string left no green spelling. */
 function mockedSpecifier(argument: AstNode | undefined): string | undefined {
     const literal = stringValue(argument);
     if (literal !== undefined) {
