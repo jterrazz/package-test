@@ -4,8 +4,8 @@ import { describe, expect, test } from 'vitest';
 import { lint as self } from '../self-lint.specification.js';
 
 describe('stubs-reached-by-their-surface', () => {
-    test('a facet importing a kind and the delivery it wires, and an entry its channel pick, passes', async () => {
-        // Given - the surfaced tree
+    test('a facet importing a kind and the delivery it wires, an entry its channel pick, and a module test reaching below the surface, passes', async () => {
+        // Given - the surfaced tree, whose module test imports the msw handlers, a test being no production module
         const result = await self.fixture(directory('./_fixtures/surfaced/')).run();
 
         // Then - nothing is reported
