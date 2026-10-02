@@ -41,7 +41,7 @@ Both take a modifier, so `see(focused(button('Open')))` waits for the keyboard t
 
 ### The per-facet matrix
 
-Which surface declares which verb, target and modifier is generated from the code — [03 — Testing § The capability matrix](03-testing.md#the-capability-matrix), its **Verb** and **Target** sections, a `—` for a word the facet does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
+Which surface declares which verb, target and modifier is generated from the code — [03 — Testing § The capability matrix](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#the-capability-matrix), its **Verb** and **Target** sections, a `—` for a word the facet does not declare. `within()` and `{ exact: false }` reach every surface. A blank cell is not a hole to be filled by a CSS selector — it is a boundary the adapter refuses at runtime, with a message naming it.
 
 The ARIA landmarks are web-only: passing one to a mobile verb refuses at runtime with a message naming the boundary — an iOS screen has no ARIA regions, and inventing an equivalent would be a second vocabulary wearing the first one's words.
 
