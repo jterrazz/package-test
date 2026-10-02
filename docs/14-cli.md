@@ -487,4 +487,4 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 
 ## Related
 
-[15 — Spec documents](15-documents.md) · [02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [18 — Services](18-services.md)
+[15 — Spec documents](15-documents.md) · [06 — Setting up a project](06-setting-up.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [18 — Services](18-services.md)

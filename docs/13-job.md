@@ -8,7 +8,7 @@ Use it when the behaviour you care about starts with "when the job runs…". If 
 
 A job spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([07](07-module-tests.md)); what the pipeline leaves in a database is this chapter's.
 
-A job spec exercises your job function directly, wired to real containers. The pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope — the job IS the subject, and the trigger name is how a spec reaches it.
+The scheduler that invokes the job in production — a cron, a queue — is out of scope: the job is the subject, and its name is how a spec reaches it.
 
 ## The constructor
 

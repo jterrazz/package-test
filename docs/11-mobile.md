@@ -300,4 +300,4 @@ No `_seeds/` or `_requests/` — a mobile chain has no `.seed()` and no request-
 
 ## Related
 
-[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [10 — Website specs](10-website.md)
+[06 — Setting up a project](06-setting-up.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [10 — Website specs](10-website.md)

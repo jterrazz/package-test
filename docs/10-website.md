@@ -1,6 +1,6 @@
 # 10 — Website specs (`specification.website`)
 
-`specification.website()` tests a rendered website — its raw HTTP surface (redirects, robots.txt, headers) and its rendered surface (title, head metadata, JSON-LD, console, and full user scenarios) — through a real chromium instance. It starts the site itself, or targets one already running.
+`specification.website()` tests a rendered website — its raw HTTP surface (redirects, robots.txt, headers) and its rendered surface (title, head metadata, JSON-LD, console, and full user scenarios) — through a real Chromium. It starts the site itself, or targets one already running.
 
 Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](12-api.md); for a binary use [cli](14-cli.md).
 
@@ -385,4 +385,4 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 
 ## Related
 
-[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [11 — Mobile specs](11-mobile.md) · [09 — Component specs](09-component.md)
+[06 — Setting up a project](06-setting-up.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [11 — Mobile specs](11-mobile.md) · [09 — Component specs](09-component.md)
