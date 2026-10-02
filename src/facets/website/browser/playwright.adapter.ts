@@ -18,7 +18,7 @@ import type {
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
-    Visitor,
+    WebsiteVisitor,
 } from './browser.port.js';
 
 type MatchScope = Locator | Page;
@@ -162,7 +162,7 @@ async function waitForValue(locator: Locator, element: Target, wanted: boolean):
     }
 }
 
-function createVisitor(page: Page, baseUrl: string): Visitor {
+function createVisitor(page: Page, baseUrl: string): WebsiteVisitor {
     return {
         check: async (element) => {
             await act(page, element, async (locator) => {

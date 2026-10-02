@@ -10,7 +10,11 @@ import type {
 import type { CallResult } from '../../../src/facets/integration/integration.face.js';
 import type { MobileElementKind } from '../../../src/facets/mobile/device/device.port.js';
 import type { MobileVisitor, ScreenResult } from '../../../src/facets/mobile/mobile.face.js';
-import type { FetchResult, PageResult, Visitor } from '../../../src/facets/website/website.face.js';
+import type {
+    FetchResult,
+    PageResult,
+    WebsiteVisitor,
+} from '../../../src/facets/website/website.face.js';
 import type { JobResult, LintResult } from '../../../src/index.js';
 /* oxlint-disable import/no-namespace -- the point of these imports IS the export list: the test holds the vocabulary equal to what the target modules publish, which a named import cannot read. */
 import * as landmarks from '../../../src/visitor/targets/landmarks.js';
@@ -184,7 +188,7 @@ const websiteVisitor = {
     press: true,
     see: true,
     select: true,
-} satisfies Record<keyof Visitor, Published>;
+} satisfies Record<keyof WebsiteVisitor, Published>;
 
 const mobileVisitor = {
     fill: true,

@@ -2,7 +2,7 @@
 import { expect } from 'vitest';
 
 import { directory, file, mockOf, postgres, specification } from './index.js';
-import type { ComponentChain, ComponentVisitor, MobileVisitor, Visitor } from './index.js';
+import type { ComponentChain, ComponentVisitor, MobileVisitor, WebsiteVisitor } from './index.js';
 
 /** Each `@ts-expect-error` below is the assertion: `typescript check` fails the day the line compiles. */
 
@@ -13,7 +13,7 @@ type Assert<Row extends true> = Row;
 type Carries<Verbs, Verb extends string> = Verb extends keyof Verbs ? true : false;
 
 // verb-belongs-to-its-facet — the verb set is the boundary between the facets; `goto` is the page's alone.
-export type WebsiteGoes = Assert<Carries<Visitor, 'goto'>>;
+export type WebsiteGoes = Assert<Carries<WebsiteVisitor, 'goto'>>;
 export type MobileNeverGoes = Assert<Carries<MobileVisitor, 'goto'> extends false ? true : false>;
 export type ComponentNeverGoes = Assert<
     Carries<ComponentVisitor, 'goto'> extends false ? true : false
@@ -22,14 +22,16 @@ export type ComponentNeverGoes = Assert<
 export type ComponentRerenders = Assert<Carries<ComponentVisitor, 'rerender'>>;
 export type ComponentUnmounts = Assert<Carries<ComponentVisitor, 'unmount'>>;
 export type WebsiteNeverRerenders = Assert<
-    Carries<Visitor, 'rerender'> extends false ? true : false
+    Carries<WebsiteVisitor, 'rerender'> extends false ? true : false
 >;
-export type WebsiteNeverUnmounts = Assert<Carries<Visitor, 'unmount'> extends false ? true : false>;
+export type WebsiteNeverUnmounts = Assert<
+    Carries<WebsiteVisitor, 'unmount'> extends false ? true : false
+>;
 export type MobileNeverRerenders = Assert<
     Carries<MobileVisitor, 'rerender'> extends false ? true : false
 >;
 
-export type WebsiteSeesAbsence = Assert<Carries<Visitor, 'gone'>>;
+export type WebsiteSeesAbsence = Assert<Carries<WebsiteVisitor, 'gone'>>;
 export type ComponentSeesAbsence = Assert<Carries<ComponentVisitor, 'gone'>>;
 export type MobileNeverAsksAboutAbsence = Assert<
     Carries<MobileVisitor, 'gone'> extends false ? true : false

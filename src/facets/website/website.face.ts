@@ -5,8 +5,8 @@ export type {
     BrowserOpenOptions,
     BrowserPage,
     BrowserPort,
-    Visitor,
     VisitScenario,
+    WebsiteVisitor,
 } from './browser/browser.port.js';
 export type { FetchResult } from './fetch/fetch.result.js';
 export type { PageResult } from './visit/page.result.js';

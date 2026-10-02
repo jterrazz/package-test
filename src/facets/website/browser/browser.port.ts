@@ -22,13 +22,13 @@ export type BrowserConsoleMessage = {
 };
 
 /** The verbs a visit scenario is handed: a page's, plus navigation. */
-export type Visitor = VisitorVerbs & {
+export type WebsiteVisitor = VisitorVerbs & {
     /** Navigate to a path of the site under test. */
     goto: (path: string) => Promise<void>;
 };
 
 /** The behavior of a visit — the When of the spec; assertions stay in the Then. */
-export type VisitScenario = (visitor: Visitor) => Promise<void>;
+export type VisitScenario = (visitor: WebsiteVisitor) => Promise<void>;
 
 /** Per-visit options forwarded to the browser context. */
 export type BrowserOpenOptions = {

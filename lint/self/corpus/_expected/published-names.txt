@@ -135,12 +135,12 @@ dist/index.d.ts:
     TextAccessor
     TextFilter
     VisitScenario
-    Visitor
     WaitUntilOptions
     WebsiteBackendOptions
     WebsiteHandle
     WebsiteSpecification
     WebsiteSpecificationOptions
+    WebsiteVisitor
     anthropic
     banner
     button
