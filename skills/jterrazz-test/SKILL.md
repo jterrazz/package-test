@@ -7,7 +7,7 @@ metadata:
 
 # `@jterrazz/test`
 
-What to decide BEFORE writing a test. Everything else — every option, every matcher, every rule — is in the chapter this page sends you to, and the types say the API.
+What to decide BEFORE writing a test. Everything else — every option, every matcher, every rule — is in the chapter this page sends you to, and the types say the API. Before the kind, whether the test earns its place: end to end through the public surface, a published package from its packed tarball; a module test only for a pure algorithm or a failure no end-to-end path provokes ([docs/18 § Which test earns its place](../../docs/18-conventions.md#which-test-earns-its-place)).
 
 ## Which kind — ask the fork first
 

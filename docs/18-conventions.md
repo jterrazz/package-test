@@ -42,7 +42,7 @@ Two doors carry every test the fork names: a UNIT sits beside the module it cove
 
 ### What has no address of its own
 
-What they specify is a REPOSITORY's own surface: the subpaths its `package.json` publishes, a `.d.ts` beside every `.js` it ships, the files a build is expected to write. There is no one module to sit beside — they resolve every module there is — and no runner to reach, since nothing is started. Put under a facet folder, `facet-test-uses-its-runner` refuses them ("reaches no runner"); put beside a module under `src/`, `test-beside-its-module` refuses them ("no neighbour `exports.ts` found"). Both refusals are right, and a legitimate file shape with no green position is a hole in the conventions, not a defect in the file.
+What they specify is a REPOSITORY's own surface read as files: what its packed tarball carries, the links its shipped pages hold, the files a build is expected to write. There is no one module to sit beside — they resolve every module there is — and no runner to reach, since nothing is started. Put under a facet folder, `facet-test-uses-its-runner` refuses them ("reaches no runner"); put beside a module under `src/`, `test-beside-its-module` refuses them ("no neighbour `exports.ts` found"). Both refusals are right, and a legitimate file shape with no green position is a hole in the conventions, not a defect in the file.
 
 ### The door, and the depth it is judged by
 
@@ -60,9 +60,11 @@ One suite carries a name the whole estate shares, because two repositories inven
 specs/
 └── surface/                      # what the package publishes
     └── package/
-        ├── exports.test.ts       # every subpath the manifest resolves
-        └── declarations.test.ts  # a `.d.ts` beside each `.js` it ships
+        ├── tarball.test.ts       # the files `npm pack` writes, and none it should not
+        └── shipped-links.test.ts # every link a shipped page holds resolves
 ```
+
+What a consumer DOES with the package — loading a subpath, compiling against its declarations, running its bin — is no suite's: it is a cli spec on the tarball installed as a consumer installs it ([Which test earns its place](#which-test-earns-its-place)).
 
 ### The suffix, and the one thing the door does not license
 
@@ -231,6 +233,34 @@ The `architecture` family governs the source tree rather than the spec tree, and
 
 **The test-file rules need no declaration.** `test-beside-its-module` (a module's test is its sibling) and `no-module-mock` (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
+## Which test earns its place
+
+The law is the estate's, and it is not restated here: [doctrine § A test earns its place](https://github.com/jterrazz/jterrazz-os/blob/main/home/_all/doctrine.md). This section is how it reads in a repository that tests with this package. [The fork](#the-fork--which-kind-of-test-this-is) says which kind a test is; this says whether it should exist at all.
+
+**End to end is the default.** A behaviour a user relies on is specified through the surface the user meets, on a facet under `specs/`, with the real engines — the app in-process, a declared service ([17](17-services.md)), a real Chromium, the built binary. A module test is the exception, and it is kept only when one of two criteria holds:
+
+| Keep the module test when                                                                                           | Because                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| the module is a pure algorithm — a parser, a matcher, a ranking — whose edge cases are cheaper at its own level     | each edge through the surface costs a whole chain, and at the module it costs one line of a `test.each` |
+| the failure it proves is one no end-to-end path can provoke honestly — a broken invariant, a race, a refused engine | reaching it from the surface would mean faking the engine, and the spec would then prove the fake       |
+
+**Every test file is given one verdict, and only one.**
+
+| Verdict     | When                                                                                                             | What is done                                                             |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| keep-module | one of the two criteria above holds                                                                              | it stays beside its module                                               |
+| promote     | it proves something a user relies on, at the wrong level                                                         | the spec is written through the surface, then the module test is deleted |
+| delete      | it restates the implementation, repeats a spec, tests a private helper, or stays green when the behaviour breaks | it is deleted, not kept for the count                                    |
+| strengthen  | it earns its place, and its assertions probe a part of an outcome that can be compared whole                     | its oracle becomes the whole outcome                                     |
+
+**A published package is specified from its artefact.** What a package publishes — every subpath of its `exports` map under each condition, the declarations a consumer compiles against, every bin — is proven against the tarball `npm pack` writes, installed in a fixture's `node_modules/` as a consumer installs it, never against the checkout's `src/` or its own `dist/`: a file the `files` field leaves out passes every spec that reads the checkout and fails every consumer. This package does it on `specs/cli/packed-cli.specification.ts` — `specs/cli/node/` loads every published subpath, `specs/cli/tsc/` compiles a consumer module against the installed `.d.ts` ([03 — Testing](03-testing.md#the-meta-test-channel)).
+
+**An assertion compares an outcome someone would care about**, whole when it can. That half is mechanized, in the `expectations` family of the catalogue ([19](19-linting.md)): `result-compared-whole`, `no-status-only-test`, `no-existence-only-assertion`, `no-probe-cluster`, `no-double-only-assertion`, `no-sampled-value-in-expectation`.
+
+**Mutants measure a suite, not lines.** Full line coverage with surviving mutants proves only that the lines ran; a mutant that survives names the assertion that is missing or too weak. This repository's measure is `make mutation`, never part of `make check` ([02 § The loop](02-developing.md#the-loop)).
+
+**Why no rule decides the verdict.** Whether a module is a pure algorithm, whether a failure is provokable from the surface, and whether a test repeats a spec are readings of the product, not shapes of a file: a rule would have to know every path the specs drive. What a machine can take is taken — the assertion rules above, and the surviving mutant, which is the evidence a verdict is argued from ([What stays human](#what-stays-human-and-why)).
+
 ## The fork — which kind of test this is
 
 The questions are asked IN ORDER, and the first yes is the kind. The answer fixes the folder, the constructor (or none), and the project. The table is generated from `lint/consumer/catalogue/fork.ts`.
@@ -360,6 +390,7 @@ takes of them anyway, so neither side is silently dropped.
 | `expected-named-for-its-content` — an expected file is named for what it HOLDS, not for the parameters that produced it: `limit-one.http` → `single-quiz-page.http` | what a response holds is a reading of its body; a name built from the request is still a well-formed name | —                                                                                                                                                                      |
 | one fixture per answer of the system                                                                                                                                | a reading of what the chain proves                                                                        | `document-description-unique` holds unique descriptions                                                                                                                |
 | stub realism                                                                                                                                                        | only a recorded exchange could judge it                                                                   | —                                                                                                                                                                      |
+| whether a module test earns its place — a pure algorithm, or a failure no end-to-end path provokes                                                                  | it is a reading of the product and of every path its specs drive                                          | the `expectations` rules hold the oracle; a surviving mutant under `make mutation` names the weak test                                                                 |
 | the depth a repository declares                                                                                                                                     | reviewed once, when the tree is born                                                                      | `specs-at-declared-depth` thereafter                                                                                                                                   |
 
 ## A message teaches

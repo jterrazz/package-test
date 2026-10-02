@@ -1,6 +1,6 @@
 # 05 — Module tests (`*.test.ts`, beside the module)
 
-A module test is the majority kind: one file of source code, met through its own exports, with nothing started. It needs no constructor, no folder and no runner — it is the rung the doubles ladder opens on, and the one every other chapter measures itself against.
+A module test is one file of source code, met through its own exports, with nothing started. It needs no constructor, no folder and no runner — it is the rung the doubles ladder opens on. It is also the exception: a behaviour a user relies on is specified end to end, and a module test is kept only for a pure algorithm or a failure no end-to-end path provokes ([18 § Which test earns its place](18-conventions.md#which-test-earns-its-place)).
 
 | The shape           | Held below                                                         |
 | ------------------- | ------------------------------------------------------------------ |
