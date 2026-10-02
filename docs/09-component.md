@@ -1,20 +1,8 @@
 # 09 — Component specs (`component`)
 
-`component` specifies a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless Chromium, the same browser [10 — Website specs](10-website.md) already drives through the same `playwright` peer.
+`component` tests one thing that draws itself — a React component, a React hook through a small host component written in the test, or a plain DOM function — rendered in a real headless Chromium through Vitest Browser Mode. It lives beside its code as `<file>.test.tsx`, starts nothing, and so has no constructor: the test calls the exported `component` chain directly.
 
-Use it when the subject is one thing that draws itself. For a whole served page use [website](10-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
-
-Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
-
-| The shape           | Held below                                                                       |
-| ------------------- | -------------------------------------------------------------------------------- |
-| What it specifies   | [What it specifies](#what-it-specifies)                                          |
-| What it refuses     | [What it does not do](#what-it-does-not-do)                                      |
-| Where it is written | [The constructor: there is none](#the-constructor-there-is-none)                 |
-| The chain           | [The chain](#the-chain) — `intercept` · `wrap` · `clock` · `viewport` · `render` |
-| The result          | [The result](#the-result) — `tree` `content` `html` `console` `errors`           |
-| What only it does   | [Unique here](#unique-here)                                                      |
-| What it will refuse | [Pitfalls](#pitfalls)                                                            |
+For a whole served page, use [10 — Website specs](10-website.md); for a module that draws nothing, a [module test](07-module-tests.md). Why a real browser rather than a simulated DOM: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
 
 ## What it specifies
 
@@ -259,4 +247,4 @@ const result = await component.render((container) => {
 
 ## Related
 
-[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [23 — Conventions](23-conventions.md) · [10 — Website specs](10-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)
+[06 — Setting up a project](06-setting-up.md) · [10 — Website specs](10-website.md) · [17 — Stubs](17-stubs.md) · [20 — The visitor](20-visitor.md) · [21 — Assertions](21-assertions.md)
