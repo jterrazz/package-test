@@ -1,19 +1,12 @@
 # 01 — Architecture
 
-What this package IS: one runner model behind seven constructors, one chain that needs none, source trees with declared edges, and eight channels through which its conventions are enforced — each row of the catalogue naming exactly one. The chapters that follow explain how to USE each facet; this one draws the lines they sit inside.
+How the package is built: the runner model every kind of test shares, the source trees and the one direction their imports go, the channels a convention is enforced through, and what the tarball publishes. What a test looks like from the outside is [05 — Getting started](05-getting-started.md); this chapter is for changing the package.
 
-| The shape                  | Held below                                                                                               |
-| -------------------------- | -------------------------------------------------------------------------------------------------------- |
-| The runner model           | [The runner model](#the-runner-model) — constructor, handle, chain, result                               |
-| The source trees           | [The source trees](#the-source-trees) — the root reads the sentence of a test, and `lint` sits beside it |
-| How a convention is held   | [The eight enforcement channels](#the-eight-enforcement-channels)                                        |
-| What ships out of the tree | [What the tree publishes](#what-the-tree-publishes)                                                      |
-
-The rules themselves — what each family says, what a reviewer must judge — are the constitution, [23 — Conventions](23-conventions.md); their normative sentences are the generated catalogue, [24 — Linting](24-linting.md).
+The rules themselves — what they say and why — are [23 — Conventions](23-conventions.md); their normative sentences are the generated catalogue, [24 — Linting](24-linting.md).
 
 ## The runner model
 
-Every facet is the same four steps. A **constructor** takes options and returns a **handle**; the handle opens a **chain** of zero or more setups closed by exactly one terminal action; the action executes and resolves to a **typed result**; the result is asserted through vitest's `expect()`. Nothing else is public — there is no imperative escape hatch, because a spec that can do anything proves nothing in particular.
+Every facet — the code behind one kind of test — is the same four steps. A **constructor** takes options and returns a **handle**; the handle opens a **chain** of zero or more setups closed by exactly one terminal action; the action executes and resolves to a **typed result**; the result is asserted through vitest's `expect()`. Nothing else is public — there is no imperative escape hatch, because a spec that can do anything proves nothing in particular.
 
 Seven constructors exist and the list is closed (`src/facets/specification.ts`):
 
