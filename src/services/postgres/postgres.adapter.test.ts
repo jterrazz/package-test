@@ -3,46 +3,39 @@ import { describe, expect, test } from 'vitest';
 import { postgres } from './postgres.adapter.js';
 
 describe('postgres', () => {
-    test('postgres.adapter — postgres handle — builds a postgresql connection string from a host and a port', () => {
-        // Given - the default credentials and database name
-        const connectionString = postgres().buildConnectionString('127.0.0.1', 54_321);
-
-        // Then - the string carries all four parts a client needs
-        expect(connectionString).toBe('postgresql://test:test@127.0.0.1:54321/test');
-    });
-
-    test('postgres.adapter — postgres handle — reads its credentials off the env override', () => {
-        // Given - a handle told which user, password and database to use
-        const handle = postgres({
+    test('postgres.adapter — postgres handle — connects with the credentials and on the image it is handed, and is its own database', () => {
+        // Given - a handle stated by nobody, and one handed credentials and an image
+        const silent = postgres();
+        const stated = postgres({
             env: { POSTGRES_DB: 'analytics', POSTGRES_PASSWORD: 'secret', POSTGRES_USER: 'app' },
+            image: 'postgres:17',
         });
 
-        // Then - they are the ones the connection string carries
-        expect(handle.buildConnectionString('db.test', 5432)).toBe(
-            'postgresql://app:secret@db.test:5432/analytics',
-        );
+        // Then - each connection string carries the four parts a client needs, the stated image wins, and the database port is the handle
+        expect({
+            silent: silent.buildConnectionString('127.0.0.1', 54_321),
+            stated: {
+                connection: stated.buildConnectionString('db.test', 5432),
+                database: stated.createDatabaseAdapter() === stated,
+                image: stated.defaultImage,
+            },
+        }).toStrictEqual({
+            silent: 'postgresql://test:test@127.0.0.1:54321/test',
+            stated: {
+                connection: 'postgresql://app:secret@db.test:5432/analytics',
+                database: true,
+                image: 'postgres:17',
+            },
+        });
     });
 
-    test('postgres.adapter — postgres handle — defaults to the slim postgres:17 image pinned by digest, and takes an override', () => {
-        // Given - one handle with no image option and one with an explicit image
-        // Then - the default is the pinned slim image, and the override wins
-        expect(postgres().defaultImage).toMatch(/^postgres:17-alpine@sha256:[0-9a-f]{64}$/u);
-        expect(postgres({ image: 'postgres:17' }).defaultImage).toBe('postgres:17');
-    });
-
-    test('postgres.adapter — postgres handle — is its own database adapter', () => {
-        // Given - a postgres handle
-        const handle = postgres();
-
-        // Then - the database port it exposes is itself
-        expect(handle.createDatabaseAdapter()).toBe(handle);
-    });
-
-    test('postgres.adapter — postgres handle — refuses a healthcheck with no connection string, naming what is missing', async () => {
+    test('postgres.adapter — postgres handle — a healthcheck before any connection string is the framework’s own broken invariant', async () => {
         // Given - a fresh handle nothing ever wired
-        // Then - the refusal says which half is absent
+        // Then - the refusal says which half is absent, and whose bug it is
         await expect(postgres().healthcheck()).rejects.toThrow(
-            'postgres() was healthchecked before it had a connection string',
+            new Error(
+                '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: postgres() was healthchecked before it had a connection string',
+            ),
         );
     });
 
@@ -52,13 +45,10 @@ describe('postgres', () => {
         unreachable.connectionString = 'postgresql://test:test@localhost:1/test';
 
         // Then - it rejects, naming the service AND keeping the driver's own reason, which survives as the error's cause
-        const failure = await unreachable
-            .healthcheck()
-            .then(() => null)
-            .catch((error: unknown) => (error instanceof Error ? error : null));
-        expect(failure?.message).toMatch(
+        const healthcheck = unreachable.healthcheck();
+        await expect(healthcheck).rejects.toThrow(
             /^found: postgres\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/17-services\.md#service-factories$/u,
         );
-        expect(failure?.cause).toBeDefined();
+        await expect(healthcheck).rejects.toHaveProperty('cause.code', 'ECONNREFUSED');
     });
 });

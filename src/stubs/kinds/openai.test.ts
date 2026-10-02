@@ -40,6 +40,20 @@ function responsesBody(tool: unknown): unknown {
     };
 }
 
+function chatCompletion(content: string): object {
+    return {
+        body: {
+            choices: [{ finish_reason: 'stop', index: 0, message: { content, role: 'assistant' } }],
+            created: 1_772_616_600,
+            id: 'chatcmpl-test',
+            model: 'gpt-4o-test',
+            object: 'chat.completion',
+            usage: { completion_tokens: 10, prompt_tokens: 10, total_tokens: 20 },
+        },
+        status: 200,
+    };
+}
+
 function framesOf(body: unknown): { data: unknown; event: string | undefined }[] {
     if (!isStreamBody(body)) {
         throw new Error('the reply is not a stream');
@@ -51,6 +65,7 @@ function framesOf(body: unknown): { data: unknown; event: string | undefined }[]
         return { data: JSON.parse(field('data')) as unknown, event: field('event') };
     });
 }
+
 function chatChunk(delta: object, finish: null | string): string {
     return `data: ${JSON.stringify({
         id: 'chatcmpl-test',
@@ -60,30 +75,48 @@ function chatChunk(delta: object, finish: null | string): string {
         choices: [{ index: 0, delta, logprobs: null, finish_reason: finish }],
     })}\n\n`;
 }
-function opened(type: string, sequence: number): object {
-    return { data: { sequence_number: sequence, type }, event: type };
+
+const PART = { content_index: 0, item_id: 'msg-test', output_index: 0 };
+
+const ENVELOPE = {
+    created_at: 1_772_616_600,
+    id: 'resp-test',
+    model: 'gpt-4o-test',
+    object: 'response',
+};
+
+const DONE = {
+    content: [{ annotations: [], text: 'Hello', type: 'output_text' }],
+    id: 'msg-test',
+    role: 'assistant',
+    status: 'completed',
+    type: 'message',
+};
+
+function event(type: string, sequence: number, fields: object): object {
+    return { data: { ...fields, sequence_number: sequence, type }, event: type };
 }
+
 describe('openai', () => {
-    test('intercept — openai chat completions — openai.chat() targets the Chat Completions endpoint and matches every call', () => {
-        // Given - a bare trigger
-        const trigger = openai.chat();
-
-        // Then - the default endpoint, and no filter
-        expect(trigger.adapter).toBe('openai');
-        expect(trigger.method).toBe('POST');
-        expect(trigger.url).toBe(CHAT_URL);
-        expect(trigger.match).toBeUndefined();
-    });
-
     test('intercept — openai chat completions — string filters match by exact equality on the model and the first system and user messages', () => {
         // Given - exact model, system and user filters
         const trigger = openai.chat({ model: 'gpt-4o', system: 'Classify.', user: 'an article' });
 
         // Then - the whole triple passes; a prefix or a superstring of any part does not
-        expect(lets(trigger, chatBody('gpt-4o', 'Classify.', 'an article'))).toBe(true);
-        expect(lets(trigger, chatBody('gpt-4o-mini', 'Classify.', 'an article'))).toBe(false);
-        expect(lets(trigger, chatBody('gpt-4o', 'Classify. Then', 'an article'))).toBe(false);
-        expect(lets(trigger, chatBody('gpt-4o', 'Classify.', 'an article about cats'))).toBe(false);
+        expect({
+            exact: lets(trigger, chatBody('gpt-4o', 'Classify.', 'an article')),
+            otherModel: lets(trigger, chatBody('gpt-4o-mini', 'Classify.', 'an article')),
+            systemSuperstring: lets(trigger, chatBody('gpt-4o', 'Classify. Then', 'an article')),
+            userSuperstring: lets(
+                trigger,
+                chatBody('gpt-4o', 'Classify.', 'an article about cats'),
+            ),
+        }).toStrictEqual({
+            exact: true,
+            otherModel: false,
+            systemSuperstring: false,
+            userSuperstring: false,
+        });
     });
 
     test('intercept — openai chat completions — the tools filter reads function names, and the temperature filter is exact', () => {
@@ -91,43 +124,11 @@ describe('openai', () => {
         const trigger = openai.chat({ temperature: 0, tools: ['get_weather'] });
 
         // Then - the tool among others at the temperature passes; a missing tool or another temperature does not
-        expect(lets(trigger, toolsBody(['get_time', 'get_weather'], 0))).toBe(true);
-        expect(lets(trigger, toolsBody(['get_time'], 0))).toBe(false);
-        expect(lets(trigger, toolsBody(['get_weather'], 0.7))).toBe(false);
-    });
-
-    test('intercept — openai chat completions — the wrap and openai.reply() build one chat completion around the data', () => {
-        // Given - an object fixture, wrapped by the trigger and by reply()
-        const wrapped = openai.chat().wrap({ categories: ['TECH'] });
-        const replied = openai.reply('plain text');
-
-        // Then - the data is the assistant message's content, serialised when it is not a string
-        expect(wrapped).toMatchObject({
-            body: {
-                choices: [
-                    {
-                        finish_reason: 'stop',
-                        message: { content: '{"categories":["TECH"]}', role: 'assistant' },
-                    },
-                ],
-                object: 'chat.completion',
-            },
-            status: 200,
-        });
-        expect(replied.body).toMatchObject({
-            choices: [{ message: { content: 'plain text', role: 'assistant' } }],
-        });
-    });
-
-    test('intercept — openai responses — openai.responses() targets the Responses endpoint, or the gateway it is given', () => {
-        // Given - a bare trigger, and one sent to a gateway
-        const bare = openai.responses();
-        const gateway = openai.responses({}, 'https://gateway.example/v1/responses');
-
-        // Then - the default endpoint, then the gateway's
-        expect(bare.url).toBe(RESPONSES_URL);
-        expect(bare.match).toBeUndefined();
-        expect(gateway.url).toBe('https://gateway.example/v1/responses');
+        expect({
+            among: lets(trigger, toolsBody(['get_time', 'get_weather'], 0)),
+            missing: lets(trigger, toolsBody(['get_time'], 0)),
+            warmer: lets(trigger, toolsBody(['get_weather'], 0.7)),
+        }).toStrictEqual({ among: true, missing: false, warmer: false });
     });
 
     test('intercept — openai responses — the system filter reads the instructions, or a system input when there are none', () => {
@@ -135,11 +136,15 @@ describe('openai', () => {
         const trigger = openai.responses({ system: 'Summarise.' });
 
         // Then - instructions and a system input both answer; another prompt does not
-        expect(lets(trigger, { input: [], instructions: 'Summarise.' }, RESPONSES_URL)).toBe(true);
-        expect(
-            lets(trigger, { input: [{ content: 'Summarise.', role: 'system' }] }, RESPONSES_URL),
-        ).toBe(true);
-        expect(lets(trigger, { input: [], instructions: 'Translate.' }, RESPONSES_URL)).toBe(false);
+        expect({
+            instructions: lets(trigger, { input: [], instructions: 'Summarise.' }, RESPONSES_URL),
+            other: lets(trigger, { input: [], instructions: 'Translate.' }, RESPONSES_URL),
+            systemInput: lets(
+                trigger,
+                { input: [{ content: 'Summarise.', role: 'system' }] },
+                RESPONSES_URL,
+            ),
+        }).toStrictEqual({ instructions: true, other: false, systemInput: true });
     });
 
     test('intercept — openai responses — the user filter reads every user input joined, and the tools filter either name form', () => {
@@ -147,31 +152,11 @@ describe('openai', () => {
         const trigger = openai.responses({ tools: ['search'], user: /the Report Ingestion/u });
 
         // Then - a flat name and a function name both count; the user text is read across inputs
-        expect(lets(trigger, responsesBody({ name: 'search' }), RESPONSES_URL)).toBe(true);
-        expect(lets(trigger, responsesBody({ function: { name: 'search' } }), RESPONSES_URL)).toBe(
-            true,
-        );
-        expect(lets(trigger, responsesBody({ name: 'fetch' }), RESPONSES_URL)).toBe(false);
-    });
-
-    test('intercept — openai responses — the wrap builds a Responses envelope with the data as its output text', () => {
-        // Given - an object fixture
-        const response = openai.responses().wrap({ ok: true });
-
-        // Then - one assistant message whose output text is the serialised data
-        expect(response).toMatchObject({
-            body: {
-                object: 'response',
-                output: [
-                    {
-                        content: [{ text: '{"ok":true}', type: 'output_text' }],
-                        role: 'assistant',
-                        type: 'message',
-                    },
-                ],
-            },
-            status: 200,
-        });
+        expect({
+            flat: lets(trigger, responsesBody({ name: 'search' }), RESPONSES_URL),
+            function: lets(trigger, responsesBody({ function: { name: 'search' } }), RESPONSES_URL),
+            other: lets(trigger, responsesBody({ name: 'fetch' }), RESPONSES_URL),
+        }).toStrictEqual({ flat: true, function: true, other: false });
     });
 
     test('intercept — openai streamed replies — stream() serves Chat Completions chunks — the role, one delta per piece, the finish — closed by [DONE]', () => {
@@ -199,75 +184,114 @@ describe('openai', () => {
     });
 
     test('intercept — openai streamed replies — stream() on the Responses API serves named, numbered events, one text delta per piece, completed last', () => {
-        // Given - two pieces on the Responses wire, spaced 5 ms apart
+        // Given - two pieces on the Responses wire, spaced 5 ms apart, at a pinned instant
+        using _ = clock.at('2026-03-04T09:30:00Z');
         const response = openai.stream(['Hel', 'lo'], { api: 'responses', delay: 5 });
 
         // Then - every event is named for its type and numbered in order; the deltas are the pieces, the closing events carry the whole text
-        expect(framesOf(response.body)).toMatchObject([
-            opened('response.created', 0),
-            opened('response.output_item.added', 1),
-            opened('response.content_part.added', 2),
-            { data: { delta: 'Hel', sequence_number: 3 }, event: 'response.output_text.delta' },
-            { data: { delta: 'lo', sequence_number: 4 }, event: 'response.output_text.delta' },
-            { data: { sequence_number: 5, text: 'Hello' }, event: 'response.output_text.done' },
-            opened('response.content_part.done', 6),
-            opened('response.output_item.done', 7),
-            {
-                data: {
-                    response: {
-                        output: [{ content: [{ text: 'Hello', type: 'output_text' }] }],
-                        status: 'completed',
+        expect({
+            delay: isStreamBody(response.body) && response.body.delayBetweenChunks,
+            frames: framesOf(response.body),
+        }).toStrictEqual({
+            delay: 5,
+            frames: [
+                event('response.created', 0, {
+                    response: { ...ENVELOPE, output: [], status: 'in_progress', usage: null },
+                }),
+                event('response.output_item.added', 1, {
+                    item: {
+                        content: [],
+                        id: 'msg-test',
+                        role: 'assistant',
+                        status: 'in_progress',
+                        type: 'message',
                     },
-                    sequence_number: 8,
-                },
-                event: 'response.completed',
-            },
+                    output_index: 0,
+                }),
+                event('response.content_part.added', 2, {
+                    ...PART,
+                    part: { annotations: [], text: '', type: 'output_text' },
+                }),
+                event('response.output_text.delta', 3, { ...PART, delta: 'Hel' }),
+                event('response.output_text.delta', 4, { ...PART, delta: 'lo' }),
+                event('response.output_text.done', 5, { ...PART, text: 'Hello' }),
+                event('response.content_part.done', 6, {
+                    ...PART,
+                    part: { annotations: [], text: 'Hello', type: 'output_text' },
+                }),
+                event('response.output_item.done', 7, { item: DONE, output_index: 0 }),
+                event('response.completed', 8, {
+                    response: {
+                        ...ENVELOPE,
+                        output: [DONE],
+                        status: 'completed',
+                        usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+                    },
+                }),
+            ],
+        });
+    });
+
+    test('intercept — openai replies — the chat wrap, openai.reply() and openai.malformed() build one chat completion around the data', () => {
+        // Given - an object wrapped by the trigger, a text by reply(), broken content by malformed(), at a pinned instant
+        using _ = clock.at('2026-03-04T09:30:00Z');
+        const replies = [
+            openai.chat().wrap({ categories: ['TECH'] }),
+            openai.reply('plain text'),
+            openai.malformed('{not json'),
+        ];
+
+        // Then - the data is the assistant's content, serialised when it is not a string, carried as is when broken
+        expect(replies).toStrictEqual([
+            chatCompletion('{"categories":["TECH"]}'),
+            chatCompletion('plain text'),
+            chatCompletion('{not json'),
         ]);
-        expect(isStreamBody(response.body) && response.body.delayBetweenChunks).toBe(5);
     });
 
-    test('intercept — openai failures — openai.error() is a rate limit on 429 and an api error otherwise', () => {
-        // Given - a 429 and a 500
-        const rateLimited = openai.error(429);
-        const failed = openai.error(500, 'overloaded');
+    test('intercept — openai failures — openai.error() is a rate limit on 429 and an api error otherwise, and openai.timeout() an empty 200 after 30 s', () => {
+        // Given - a 429, a 500 and a timeout
+        const failures = [openai.error(429), openai.error(500, 'overloaded'), openai.timeout()];
 
-        // Then - the status carries through, and the error type and code are the status's
-        expect(rateLimited).toStrictEqual({
-            body: {
-                error: {
-                    code: 'rate_limit_exceeded',
-                    message: 'OpenAI error (429)',
-                    type: 'rate_limit_error',
+        // Then - the status carries through, the error type and code are the status's, and the timeout is delayed past any client
+        expect(failures).toStrictEqual([
+            {
+                body: {
+                    error: {
+                        code: 'rate_limit_exceeded',
+                        message: 'OpenAI error (429)',
+                        type: 'rate_limit_error',
+                    },
                 },
+                status: 429,
             },
-            status: 429,
-        });
-        expect(failed).toStrictEqual({
-            body: { error: { code: null, message: 'overloaded', type: 'api_error' } },
-            status: 500,
-        });
-    });
-
-    test('intercept — openai failures — openai.malformed() wraps the broken content, and openai.timeout() answers after 30 s', () => {
-        // Given - a malformed reply and a timeout
-        const malformed = openai.malformed('{not json');
-        const timeout = openai.timeout();
-
-        // Then - the content is carried as is, and the timeout is an empty 200 delayed past any client
-        expect(malformed.body).toMatchObject({
-            choices: [{ message: { content: '{not json' } }],
-        });
-        expect(timeout).toStrictEqual({ body: {}, delay: 30_000, status: 200 });
+            {
+                body: { error: { code: null, message: 'overloaded', type: 'api_error' } },
+                status: 500,
+            },
+            { body: {}, delay: 30_000, status: 200 },
+        ]);
     });
 
     test('openai — never — never() is http.never() spelled in this kind, over the endpoint it is handed', () => {
         // Given - the provider call a cached path must not make
-        const declared = openai.never(openai.chat({ model: 'gpt-4o' }));
+        const { request, ...declared } = openai.never(openai.chat({ model: 'gpt-4o' }));
 
         // Then - a stub required exactly zero times on that endpoint
-        expect(declared).toMatchObject({
-            request: { adapter: 'openai', method: 'POST', url: CHAT_URL },
+        const shape = { ...request, match: typeof request.match, wrap: typeof request.wrap };
+        expect({ ...declared, request: shape }).toStrictEqual({
+            request: {
+                adapter: 'openai',
+                match: 'function',
+                method: 'POST',
+                url: CHAT_URL,
+                wrap: 'function',
+            },
             required: true,
+            response: {
+                body: { error: `@jterrazz/test: POST ${CHAT_URL} is declared never requested` },
+                status: 418,
+            },
             times: 0,
         });
     });

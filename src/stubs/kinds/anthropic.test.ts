@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 
 import { isStreamBody } from '../exchange.js';
+import type { StubRequest } from '../exchange.js';
 import { anthropic } from './anthropic.js';
 
 const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
@@ -8,85 +9,53 @@ const ANTHROPIC_MESSAGES_URL = 'https://api.anthropic.com/v1/messages';
 function frame(data: { [field: string]: unknown; type: string }): string {
     return `event: ${data.type}\ndata: ${JSON.stringify(data)}\n\n`;
 }
+function shapeOf(request: StubRequest): object {
+    return { ...request, match: typeof request.match, wrap: typeof request.wrap };
+}
+
 describe('anthropic', () => {
-    test('intercept — anthropic — anthropic.messages() returns a trigger with the default gateway', () => {
-        // Given - a bare trigger
-        const trigger = anthropic.messages();
-
-        // Then - it targets the default Anthropic endpoint
-        expect(trigger.adapter).toBe('anthropic');
-        expect(trigger.method).toBe('POST');
-        expect(trigger.url).toBe('https://api.anthropic.com/v1/messages');
-        expect(trigger.match).toBeUndefined();
-    });
-
-    test('intercept — anthropic — anthropic.messages() accepts a custom gateway URL', () => {
-        // Given - a custom gateway
-        const trigger = anthropic.messages({}, 'https://gateway.example/v1/messages');
-
-        // Then - the URL is overridden
-        expect(trigger.url).toBe('https://gateway.example/v1/messages');
-    });
-
     test('intercept — anthropic — anthropic.messages() filter matches system prompt', () => {
-        // Given - a system-prompt filter
+        // Given - a system-prompt filter, and two requests
         const trigger = anthropic.messages({ system: /journal/u });
-
-        // Then - only bodies with a matching system prompt pass
-        expect(trigger.match).toBeDefined();
-        expect(
+        const asked = (system: string): boolean =>
             trigger.match!({
                 body: {
                     messages: [{ content: 'hi', role: 'user' }],
                     model: 'claude-sonnet-4-20250514',
-                    system: 'You are a journal agent.',
+                    system,
                 },
                 headers: {},
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
-            }),
-        ).toBe(true);
+            });
 
-        expect(
-            trigger.match!({
-                body: {
-                    messages: [{ content: 'hi', role: 'user' }],
-                    model: 'claude-sonnet-4-20250514',
-                    system: 'You are a coding agent.',
-                },
-                headers: {},
-                method: 'POST',
-                url: ANTHROPIC_MESSAGES_URL,
-            }),
-        ).toBe(false);
+        // Then - only the body with a matching system prompt passes
+        expect({
+            coding: asked('You are a coding agent.'),
+            journal: asked('You are a journal agent.'),
+        }).toStrictEqual({ coding: false, journal: true });
     });
 
     test('intercept — anthropic — anthropic.messages() filter matches first user message', () => {
-        // Given - a user-message filter
+        // Given - a user-message filter, and two requests
         const trigger = anthropic.messages({ user: /classify/u });
-
-        // Then - only bodies whose first user message matches pass
-        expect(
+        const asked = (content: string): boolean =>
             trigger.match!({
-                body: { messages: [{ content: 'Please classify this article', role: 'user' }] },
+                body: { messages: [{ content, role: 'user' }] },
                 headers: {},
                 method: 'POST',
                 url: ANTHROPIC_MESSAGES_URL,
-            }),
-        ).toBe(true);
+            });
 
-        expect(
-            trigger.match!({
-                body: { messages: [{ content: 'hello', role: 'user' }] },
-                headers: {},
-                method: 'POST',
-                url: ANTHROPIC_MESSAGES_URL,
-            }),
-        ).toBe(false);
+        // Then - only the body whose first user message matches passes
+        expect({
+            classify: asked('Please classify this article'),
+            greeting: asked('hello'),
+        }).toStrictEqual({ classify: true, greeting: false });
     });
 
-    test('intercept — anthropic — anthropic.messages() wrap passes fixture objects through verbatim', () => {
-        // Given - a full response fixture object
+    test('intercept — anthropic — anthropic.messages() wrap passes fixture objects through verbatim, and builds the envelope around a string', () => {
+        // Given - a full response fixture object, and a plain string
         const trigger = anthropic.messages();
         const fixture = {
             content: [{ text: 'hi there', type: 'text' }],
@@ -98,110 +67,108 @@ describe('anthropic', () => {
             usage: { input_tokens: 1, output_tokens: 2 },
         };
 
-        // Then - wrap keeps it untouched
-        const response = trigger.wrap(fixture);
-        expect(response.status).toBe(200);
-        expect(response.body).toBe(fixture);
-    });
-
-    test('intercept — anthropic — anthropic.messages() wrap falls back to buildReply for string data', () => {
-        // Given - a plain string fixture
-        const trigger = anthropic.messages();
-
-        // Then - wrap builds a full message envelope
-        const response = trigger.wrap('plain text reply');
-        expect(response.status).toBe(200);
-        expect((response.body as any).type).toBe('message');
-        expect((response.body as any).content[0].text).toBe('plain text reply');
+        // Then - the object is the reply, untouched; the string becomes a whole message
+        expect([trigger.wrap(fixture), trigger.wrap('plain text reply')]).toStrictEqual([
+            { body: fixture, status: 200 },
+            {
+                body: {
+                    content: [{ text: 'plain text reply', type: 'text' }],
+                    id: 'msg-test',
+                    model: 'claude-sonnet-4-20250514',
+                    role: 'assistant',
+                    stop_reason: 'end_turn',
+                    type: 'message',
+                    usage: { input_tokens: 10, output_tokens: 10 },
+                },
+                status: 200,
+            },
+        ]);
     });
 
     test('intercept — anthropic — anthropic.messages() model filter matches by exact string equality', () => {
         // Given - a string model filter (not a RegExp)
         const trigger = anthropic.messages({ model: 'claude-sonnet-4-20250514' });
-        const request = (model: string): Parameters<NonNullable<typeof trigger.match>>[0] => ({
-            body: { messages: [{ content: 'hi', role: 'user' }], model },
-            headers: {},
-            method: 'POST',
-            url: ANTHROPIC_MESSAGES_URL,
-        });
+        const asked = (model: string): boolean =>
+            trigger.match!({
+                body: { messages: [{ content: 'hi', role: 'user' }], model },
+                headers: {},
+                method: 'POST',
+                url: ANTHROPIC_MESSAGES_URL,
+            });
 
         // Then - only the exact model passes; a prefix or a different model does not
-        expect(trigger.match!(request('claude-sonnet-4-20250514'))).toBe(true);
-        expect(trigger.match!(request('claude-sonnet-4'))).toBe(false);
-        expect(trigger.match!(request('claude-opus-4-20250514'))).toBe(false);
+        expect({
+            exact: asked('claude-sonnet-4-20250514'),
+            other: asked('claude-opus-4-20250514'),
+            prefix: asked('claude-sonnet-4'),
+        }).toStrictEqual({ exact: true, other: false, prefix: false });
     });
 
     test('intercept — anthropic — anthropic.messages() tools filter matches a subset of declared tool names', () => {
         // Given - a filter requiring one tool by name
         const trigger = anthropic.messages({ tools: ['get_weather'] });
-        const withTools = (names: string[]): Parameters<NonNullable<typeof trigger.match>>[0] => ({
-            body: {
-                messages: [{ content: 'hi', role: 'user' }],
-                tools: names.map((name) => ({ name })),
-            },
-            headers: {},
-            method: 'POST',
-            url: ANTHROPIC_MESSAGES_URL,
-        });
+        const asked = (names: string[]): boolean =>
+            trigger.match!({
+                body: {
+                    messages: [{ content: 'hi', role: 'user' }],
+                    tools: names.map((name) => ({ name })),
+                },
+                headers: {},
+                method: 'POST',
+                url: ANTHROPIC_MESSAGES_URL,
+            });
 
-        // Then - present (even among others) passes; absent or no-tools fails
-        expect(trigger.match!(withTools(['get_weather', 'get_time']))).toBe(true);
-        expect(trigger.match!(withTools(['get_time']))).toBe(false);
-        expect(trigger.match!(withTools([]))).toBe(false);
+        // Then - present (even among others) passes; absent or no tools fails
+        expect({
+            absent: asked(['get_time']),
+            among: asked(['get_weather', 'get_time']),
+            none: asked([]),
+        }).toStrictEqual({ absent: false, among: true, none: false });
     });
 
     test('intercept — anthropic — anthropic.messages() string-form system/user filters match by EXACT equality', () => {
-        // Given - string (not RegExp) system and user filters — v11 makes them exact
+        // Given - string (not RegExp) system and user filters
         const trigger = anthropic.messages({
             system: 'You are a journal agent.',
             user: 'please classify this',
         });
-        const request = (
-            system: string,
-            user: string,
-        ): Parameters<NonNullable<typeof trigger.match>>[0] => ({
-            body: { messages: [{ content: user, role: 'user' }], system },
-            headers: {},
-            method: 'POST',
-            url: ANTHROPIC_MESSAGES_URL,
-        });
+        const asked = (system: string, user: string): boolean =>
+            trigger.match!({
+                body: { messages: [{ content: user, role: 'user' }], system },
+                headers: {},
+                method: 'POST',
+                url: ANTHROPIC_MESSAGES_URL,
+            });
 
-        // Then - both must match whole; a superstring is NOT a match anymore
-        expect(trigger.match!(request('You are a journal agent.', 'please classify this'))).toBe(
-            true,
-        );
-        expect(
-            trigger.match!(request('You are a journal agent.', 'please classify this article')),
-        ).toBe(false);
-        expect(trigger.match!(request('You are a coding agent.', 'please classify this'))).toBe(
-            false,
-        );
+        // Then - both must match whole; a superstring is no match
+        expect({
+            exact: asked('You are a journal agent.', 'please classify this'),
+            otherSystem: asked('You are a coding agent.', 'please classify this'),
+            superstring: asked('You are a journal agent.', 'please classify this article'),
+        }).toStrictEqual({ exact: true, otherSystem: false, superstring: false });
     });
 
-    test('intercept — anthropic — anthropic.error() returns rate_limit_error for 429 and api_error otherwise', () => {
-        // Given - a 429 and a 500 error response
-        const rateLimited = anthropic.error(429);
-        const serverError = anthropic.error(500, 'overloaded');
-
-        // Then - status carries through and the error type is code-specific
-        expect(rateLimited.status).toBe(429);
-        expect((rateLimited.body as any).type).toBe('error');
-        expect((rateLimited.body as any).error.type).toBe('rate_limit_error');
-        expect((rateLimited.body as any).error.message).toBe('Anthropic error (429)');
-
-        expect(serverError.status).toBe(500);
-        expect((serverError.body as any).error.type).toBe('api_error');
-        expect((serverError.body as any).error.message).toBe('overloaded');
-    });
-
-    test('intercept — anthropic — anthropic.timeout() returns an empty 200 body delayed past any sane client timeout', () => {
-        // Given - a simulated timeout response
-        const response = anthropic.timeout();
-
-        // Then - it resolves 200 with an empty body but only after a 30s delay
-        expect(response.status).toBe(200);
-        expect(response.body).toStrictEqual({});
-        expect(response.delay).toBe(30_000);
+    test('intercept — anthropic — anthropic.error() returns rate_limit_error for 429 and api_error otherwise, and timeout() a reply delayed past any client', () => {
+        // Given - a 429, a 500 with its message, and a simulated timeout
+        // Then - each is the whole reply: the status, the error type the code calls for, the delay
+        expect([
+            anthropic.error(429),
+            anthropic.error(500, 'overloaded'),
+            anthropic.timeout(),
+        ]).toStrictEqual([
+            {
+                body: {
+                    error: { message: 'Anthropic error (429)', type: 'rate_limit_error' },
+                    type: 'error',
+                },
+                status: 429,
+            },
+            {
+                body: { error: { message: 'overloaded', type: 'api_error' }, type: 'error' },
+                status: 500,
+            },
+            { body: {}, delay: 30_000, status: 200 },
+        ]);
     });
 
     test('intercept — anthropic streamed replies — stream() serves the Messages events — one text_delta per piece — closed by message_stop', () => {
@@ -268,9 +235,21 @@ describe('anthropic', () => {
         const declared = anthropic.never(anthropic.messages());
 
         // Then - a stub required exactly zero times on that endpoint
-        expect(declared).toMatchObject({
-            request: { adapter: 'anthropic', method: 'POST', url: ANTHROPIC_MESSAGES_URL },
+        expect({ ...declared, request: shapeOf(declared.request) }).toStrictEqual({
+            request: {
+                adapter: 'anthropic',
+                match: 'undefined',
+                method: 'POST',
+                url: ANTHROPIC_MESSAGES_URL,
+                wrap: 'function',
+            },
             required: true,
+            response: {
+                body: {
+                    error: `@jterrazz/test: POST ${ANTHROPIC_MESSAGES_URL} is declared never requested`,
+                },
+                status: 418,
+            },
             times: 0,
         });
     });

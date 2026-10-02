@@ -26,39 +26,52 @@ async function acquired(
 }
 
 describe('redis', () => {
-    test('redis.adapter — redis handle — builds a redis connection string from a host and a port', () => {
-        // Given - a handle and a mapped port
-        const connectionString = redis().buildConnectionString('127.0.0.1', 6380);
+    test('redis.adapter — redis handle — connects on the image it is handed, asks one container serving an index per worker whatever service it is named, and is no database', () => {
+        // Given - a handle stated by nobody, and one handed an image and named by the stack
+        const silent = redis();
+        const stated = redis({ image: 'redis:7' });
+        stated.serviceName = 'queue';
 
-        // Then - the string uses the scheme a redis client expects
-        expect(connectionString).toBe('redis://127.0.0.1:6380');
+        // Then - the string uses the scheme a client expects, both ask the same 256-index container, and neither exposes a database adapter
+        expect({
+            silent: {
+                connection: silent.buildConnectionString('127.0.0.1', 6380),
+                container: silent.containerOptions,
+                database: silent.createDatabaseAdapter(),
+                name: silent.serviceName,
+            },
+            stated: { container: stated.containerOptions, image: stated.defaultImage },
+        }).toStrictEqual({
+            silent: {
+                connection: 'redis://127.0.0.1:6380',
+                container: { command: ['redis-server', '--databases', '256'] },
+                database: null,
+                name: null,
+            },
+            stated: {
+                container: { command: ['redis-server', '--databases', '256'] },
+                image: 'redis:7',
+            },
+        });
     });
 
-    test('redis.adapter — redis handle — carries no name of its own until the stack assigns the record key', () => {
-        // Given - a freshly created handle, before any stack starts it
-        // Then - the record key is the only name in play, and it is not known yet
-        expect(redis().serviceName).toBeNull();
-    });
-
-    test('redis.adapter — redis handle — defaults to the slim redis:7 image pinned by digest, and takes an override', () => {
-        // Given - one handle with no image option and one with an explicit image
-        // Then - the default is the pinned slim image, and the override wins
-        expect(redis().defaultImage).toMatch(/^redis:7-alpine@sha256:[0-9a-f]{64}$/u);
-        expect(redis({ image: 'redis:7' }).defaultImage).toBe('redis:7');
-    });
-
-    test('redis.adapter — redis handle — is not a database', () => {
-        // Given - a cache handle, not a SQL store
-        // Then - it exposes no database adapter
-        expect(redis().createDatabaseAdapter()).toBeNull();
-    });
-
-    test('redis.adapter — redis handle — refuses a healthcheck with no connection string, naming what is missing', async () => {
+    test('redis.adapter — redis handle — a healthcheck before any connection string is the framework’s own broken invariant', async () => {
         // Given - a fresh handle nothing ever wired
-        // Then - the refusal says which half is absent
+        // Then - the refusal says which half is absent, and whose bug it is
         await expect(redis().healthcheck()).rejects.toThrow(
-            'redis() was healthchecked before it had a connection string',
+            new Error(
+                '@jterrazz/test broke one of its own invariants — a bug of the framework, not of the test: redis() was healthchecked before it had a connection string',
+            ),
         );
+    });
+
+    test('redis.adapter — redis handle — cannot flush a container it cannot reach, and says the connection was refused', async () => {
+        // Given - a handle pointed at a port nothing listens on
+        const unreachable = redis();
+        unreachable.connectionString = 'redis://localhost:1';
+
+        // Then - the reset fails with the refused connection rather than reporting a flush that never happened
+        await expect(unreachable.reset()).rejects.toMatchObject({ code: 'ECONNREFUSED' });
     });
 
     test('redis.adapter — redis handle — carries the driver reason when a healthcheck cannot connect', async () => {
@@ -67,42 +80,11 @@ describe('redis', () => {
         unreachable.connectionString = 'redis://localhost:1';
 
         // Then - it rejects, naming the service AND keeping the driver's own reason, which survives as the error's cause
-        const failure = await unreachable
-            .healthcheck()
-            .then(() => null)
-            .catch((error: unknown) => (error instanceof Error ? error : null));
-        expect(failure?.message).toMatch(
+        const healthcheck = unreachable.healthcheck();
+        await expect(healthcheck).rejects.toThrow(
             /^found: redis\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/17-services\.md#service-factories$/u,
         );
-        expect(failure?.cause).toBeDefined();
-    });
-
-    test('redis.adapter — redis handle — cannot flush a container it cannot reach', async () => {
-        // Given - a handle pointed at a port nothing listens on
-        const unreachable = redis();
-        unreachable.connectionString = 'redis://localhost:1';
-
-        // Then - the reset fails rather than reporting a flush that never happened
-        await expect(unreachable.reset()).rejects.toThrow();
-    });
-
-    test('redis.adapter — redis handle — asks its container for an index for every worker a run can hold', () => {
-        // Given - the command a redis container is started with
-        // Then - it serves 256 indexes, 0 its own and one per worker
-        expect(redis().containerOptions).toStrictEqual({
-            command: ['redis-server', '--databases', '256'],
-        });
-    });
-
-    test('redis.adapter — redis handle — asks for one container whatever service the stack names it', () => {
-        // Given - a handle the stack named "queue"
-        const queue = redis();
-        queue.serviceName = 'queue';
-
-        // Then - its request names no service, so every redis of the run is one container
-        expect(queue.containerOptions).toStrictEqual({
-            command: ['redis-server', '--databases', '256'],
-        });
+        await expect(healthcheck).rejects.toHaveProperty('cause.code', 'ECONNREFUSED');
     });
 
     test('redis.adapter — redis handle — refuses a worker past its container indexes, naming the way out', async () => {

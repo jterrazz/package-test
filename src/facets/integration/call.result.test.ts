@@ -1,75 +1,72 @@
 import { describe, expect, expectTypeOf, test } from 'vitest';
 
-import { JsonAccessor } from '../../expectations/text/json.js';
+import type { JsonAccessor } from '../../expectations/text/json.js';
 import { TextAccessor } from '../../expectations/text/text.js';
 import { CallResult } from './call.result.js';
-import type { CallValue } from './call.result.js';
+import type { CallOutcome, CallValue } from './call.result.js';
 
-function resultOf<Returned>(value: unknown): CallResult<Returned> {
-    return new CallResult<Returned>({
+type Read = { error: string; value: { json: unknown } | { stream: string } };
+
+function readOf(outcome: CallOutcome): Read {
+    const result = new CallResult<null | object | string>({
         config: {},
-        outcome: { error: undefined, threw: false, value },
+        outcome,
         testDir: import.meta.dirname,
     });
+    const { value } = result;
+    return {
+        error: result.error.text,
+        value: value instanceof TextAccessor ? { stream: value.text } : { json: value.value },
+    };
 }
 
+const returned = (value: unknown): CallOutcome => ({ error: undefined, threw: false, value });
+
 describe('CallResult', () => {
-    test('callResult — the accessor the value is read through — reads a string as a stream', () => {
+    test('callResult — the accessor the value is read through — reads a string as a stream, and no error', () => {
         // Given - a call that returned text
-        const result = resultOf<string>('hello');
-
         // Then - the stream subject, whose reading is the text itself
-        expect(result.value).toBeInstanceOf(TextAccessor);
-        expect(result.value.text).toBe('hello');
+        expect(readOf(returned('hello'))).toStrictEqual({ error: '', value: { stream: 'hello' } });
     });
 
-    test('callResult — the accessor the value is read through — reads anything else as JSON', () => {
-        // Given - a call that returned an object
-        const result = resultOf<{ ok: boolean }>({ ok: true });
-
+    test('callResult — the accessor the value is read through — reads anything else as JSON, and no error', () => {
+        // Given - a call that returned an object, and one that returned null
         // Then - the JSON subject, whose reading is the value
-        expect(result.value).toBeInstanceOf(JsonAccessor);
-        expect(result.value.value).toStrictEqual({ ok: true });
+        expect([readOf(returned({ ok: true })), readOf(returned(null))]).toStrictEqual([
+            { error: '', value: { json: { ok: true } } },
+            { error: '', value: { json: null } },
+        ]);
     });
 
-    test('callResult — the accessor the value is read through — reads a subject that MAY be a string on the value in hand', () => {
-        // Given - one subject typed `string | undefined`, answering each way in turn
-        const text = resultOf<string | undefined>('hello');
-        const absent = resultOf<string | undefined>(null);
-
-        // Then - the accessor follows the value, and the type says both are possible
-        expect(text.value).toBeInstanceOf(TextAccessor);
-        expect(absent.value).toBeInstanceOf(JsonAccessor);
+    test('callResult — the accessor the value is read through — types exactly-string as the stream, never-string as JSON, and maybe-string as either', () => {
+        // Given - the three shapes a call's return type takes
+        // Then - only the ambiguous one is a union for the test to narrow
+        expectTypeOf<CallValue<string>>().toEqualTypeOf<TextAccessor>();
+        expectTypeOf<CallValue<number>>().toEqualTypeOf<JsonAccessor<number>>();
         expectTypeOf<CallValue<string | undefined>>().toEqualTypeOf<
             JsonAccessor<undefined> | TextAccessor
         >();
     });
 
-    test('callResult — the accessor the value is read through — types exactly-string as the stream and never-string as JSON', () => {
-        // Given - the two unambiguous shapes
-        // Then - neither is a union: there is nothing for the test to narrow
-        expectTypeOf<CallValue<string>>().toEqualTypeOf<TextAccessor>();
-        expectTypeOf<CallValue<number>>().toEqualTypeOf<JsonAccessor<number>>();
-    });
-
     test('callResult — the accessor the value is read through — a value crosses as the JSON it serialises to, whatever the type claims', () => {
         // Given - a call that returned a Map, which JSON has no shape for
-        const result = resultOf<Map<string, number>>(new Map([['a', 1]]));
-
         // Then - what arrives is plain JSON: a subject answering one of those projects it inside the call
-        expect(result.value.value).toStrictEqual({});
+        const map = new Map([['a', 1]]);
+        expect(readOf(returned(map))).toStrictEqual({
+            error: '',
+            value: { json: {} },
+        });
     });
 
-    test('callResult — the accessor the value is read through — reads a call that threw as the empty value, on `error`', () => {
-        // Given - a call that refused
-        const result = new CallResult<string>({
-            config: {},
-            outcome: { error: new Error('nope'), threw: true, value: null },
-            testDir: import.meta.dirname,
-        });
-
-        // Then - there was no value to choose an accessor on, so it is the JSON reading of nothing; what the call produced is the refusal, and that is `error`
-        expect(result.value).toBeInstanceOf(JsonAccessor);
-        expect(result.error.text).toBe('nope');
+    test('callResult — the accessor the value is read through — reads a call that threw as the empty value, its refusal on `error`', () => {
+        // Given - a call that refused with an error, and one that threw a bare value
+        // Then - there was no value to choose an accessor on, so it is the JSON reading of nothing; what the call produced is the refusal
+        expect([
+            readOf({ error: new Error('nope'), threw: true, value: null }),
+            readOf({ error: 'declined', threw: true, value: 'ignored' }),
+        ]).toStrictEqual([
+            { error: 'nope', value: { json: null } },
+            { error: 'declined', value: { json: null } },
+        ]);
     });
 });
