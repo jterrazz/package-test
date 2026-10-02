@@ -6,7 +6,6 @@ export type {
     MobileElementKind,
     MobileElementMatch,
     MobileScenario,
-    MobileTarget,
     MobileVisitor,
     ScreenNode,
 } from './device/device.port.js';

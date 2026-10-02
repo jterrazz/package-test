@@ -85,7 +85,6 @@ dist/index.d.ts:
     MobileScenario
     MobileSpecification
     MobileSpecificationOptions
-    MobileTarget
     MobileVisitor
     MockOfOptions
     MockPort

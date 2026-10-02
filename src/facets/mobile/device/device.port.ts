@@ -1,4 +1,3 @@
-import type { Target } from '../../../visitor/targets/target.js';
 import type { VisitorVerbs } from '../../../visitor/verbs.js';
 
 export type MobileDevice = {
@@ -12,9 +11,6 @@ export type MobileDevice = {
 
 /** The element kinds a mobile screen designates, each compiled to an iOS predicate; every other kind is refused. */
 export type MobileElementKind = 'button' | 'field' | 'testId' | 'text';
-
-/** The shared element target, under the mobile surface's name. */
-export type MobileTarget = Target;
 
 /** One candidate of an ambiguous target, as the refusal lists it. */
 export type MobileElementMatch = {
