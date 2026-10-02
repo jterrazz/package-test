@@ -11,7 +11,6 @@ describe('pages', () => {
         // Then - a diagnostic's `read:` and a README link resolve inside node_modules, where the consumer reads them
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
-            docs/01-architecture.md: held
             docs/05-getting-started.md: held
             docs/06-setting-up.md: held
             docs/07-module-tests.md: held
