@@ -200,6 +200,13 @@ const server = createServer(async (request, response) => {
         response.end(await greetingPage());
         return;
     }
+    if (request.url === '/tenant') {
+        response.writeHead(200, { 'content-type': 'text/html; charset=utf-8' });
+        response.end(
+            `<!doctype html><html lang="en"><head><title>Fixture — Tenant</title></head><body><h1>Tenant</h1><p>${request.headers['x-tenant'] ?? 'none'}</p></body></html>`,
+        );
+        return;
+    }
     if (request.url === '/old') {
         response.writeHead(308, { location: '/' });
         response.end();
