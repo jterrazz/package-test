@@ -2,7 +2,7 @@
 
 What proves a change here: this package specifies itself with itself. The suites under `specs/` are written with `@jterrazz/test` against fixture apps, the module tests sit beside the modules they cover, and a family of meta-tests runs the framework on its own output. This chapter says which suite answers for what, and what a change owes each of them.
 
-**The suffix says the kind.** `.test.ts` is the UNIT's word and sits beside the module it covers; `.test.tsx` is the same law for a rendered unit; `.spec.ts` is the ASSEMBLED product's word and lives under `specs/<facet>/`; a literate document stays `<case>.spec.yaml`. `file-suffix-matches-place` holds both directions and its `--fix` renames with `git mv`, so a reader can tell what a file proves without opening it.
+The suffix says the kind, as in any consumer ([05 § Which kind of test](05-getting-started.md#which-kind-of-test)); `file-suffix-matches-place` holds it, and its `--fix` renames with `git mv`.
 
 | Ground          | Where                                                         | Proves                                                                                  |
 | --------------- | ------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
