@@ -73,4 +73,18 @@ describe('service-database', () => {
             ].join('\n'),
         );
     });
+
+    test('a seed handed a file that is not a .sql one is refused naming the file it reads', () => {
+        // Given - a caller the types do not reach, seeding a csv where the seed reads SQL
+        // Then - it is refused before anything runs, with the `.sql` file to write
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a csv is what the type refuses; this test IS the caller the type does not reach
+        expect(() => cli.seed(file('./_fixtures/users.csv') as never)).toThrow(
+            [
+                'found: seed(file("./_fixtures/users.csv")), a file not ending in .sql',
+                'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
+                "fix: name the .sql file seed() reads: seed(file('./_seeds/rows.sql'))",
+                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+        );
+    });
 });
