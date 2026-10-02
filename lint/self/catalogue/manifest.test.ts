@@ -11,7 +11,7 @@ import {
     consumerRows,
     PROCESS_RULES,
     RUNTIME_RULES,
-    STATIQUE_RULES,
+    STATIC_RULES,
     TOOLCHAIN_RULES,
     TYPE_ROWS,
     UPSTREAM_RULES,
@@ -32,7 +32,7 @@ import {
     SELF_CHAPTER,
     SELF_CHECKER_PASSES,
     SELF_PROCESS_RULES,
-    SELF_STATIQUE_RULES,
+    SELF_STATIC_RULES,
     SELF_TOOLCHAIN_RULES,
     selfRows,
 } from './manifest.js';
@@ -63,10 +63,10 @@ function namespaceOf(id: string): string {
     return id in selfPlugin.rules ? 'jterrazz-self' : 'jterrazz';
 }
 
-const STATIQUE_ROWS = [...STATIQUE_RULES, ...SELF_STATIQUE_RULES];
+const STATIC_ROWS = [...STATIC_RULES, ...SELF_STATIC_RULES];
 
-function statiqueRowsOf(audience: string): string[] {
-    return STATIQUE_ROWS.filter((row) => row.audience === audience)
+function staticRowsOf(audience: string): string[] {
+    return STATIC_ROWS.filter((row) => row.audience === audience)
         .map((row) => row.name)
         .toSorted();
 }
@@ -342,22 +342,22 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — every shipped plugin rule carries a statique meta.docs entry', () => {
+    test('conventions catalogue — completeness (meta-test) — every shipped plugin rule carries a static meta.docs entry', () => {
         // Given - each rule of either plugin, and the manifest read by rule id
-        const docsById = new Map(STATIQUE_ROWS.map((row) => [row.name, row]));
+        const docsById = new Map(STATIC_ROWS.map((row) => [row.name, row]));
         for (const [id, rule] of Object.entries(allRules)) {
-            // Then - it attaches its manifest doc as meta.docs (channel statique)
+            // Then - it attaches its manifest doc as meta.docs (channel static)
             expect(rule.meta?.docs, `rule ${id} is missing meta.docs`).toBeDefined();
             expect(rule.meta?.docs).toBe(docsById.get(id));
-            expect(rule.meta?.docs?.channel).toBe('statique');
+            expect(rule.meta?.docs?.channel).toBe('static');
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — the statique docs cover exactly the rules of the plugin their audience loads', () => {
-        // Given - the statique docs, split by audience, and the two plugin maps
+    test('conventions catalogue — completeness (meta-test) — the static docs cover exactly the rules of the plugin their audience loads', () => {
+        // Given - the static docs, split by audience, and the two plugin maps
         // Then - a consumer row is a rule of the published plugin, a self row one of the self plugin, and neither plugin registers a rule of the other audience
-        expect(statiqueRowsOf('consumer')).toStrictEqual(Object.keys(plugin.rules).toSorted());
-        expect(statiqueRowsOf('self')).toStrictEqual(Object.keys(selfPlugin.rules).toSorted());
+        expect(staticRowsOf('consumer')).toStrictEqual(Object.keys(plugin.rules).toSorted());
+        expect(staticRowsOf('self')).toStrictEqual(Object.keys(selfPlugin.rules).toSorted());
     });
 
     test('conventions catalogue — completeness (meta-test) — every checker-channel manifest entry maps to a pass of the checker its audience runs', () => {
@@ -393,13 +393,14 @@ describe('manifest', () => {
             'qui',
             'règle',
             'sous',
+            'statique',
             'toute',
             'une spec',
         ];
 
-        // Then - every sentence the catalogue publishes is English
+        // Then - every sentence and channel name the catalogue publishes is English
         for (const entry of allRows) {
-            const sentences = `${entry.sentence} ${entry.rationale} ${entry.fix}`;
+            const sentences = `${entry.channel} ${entry.sentence} ${entry.rationale} ${entry.fix}`;
             for (const token of FRENCH) {
                 expect(
                     carries(sentences, token),
@@ -440,8 +441,8 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — completeness (meta-test) — a statique row that states a role gate has one', () => {
-        // Given - every statique row whose reach is one KIND of file — `tests` and `all` are out, because a rule gated on a SHAPE (a `.fixture()` literal, a `.trigger()` name) looks at every file and finds that shape only in a test, which is what its convention says
+    test('conventions catalogue — completeness (meta-test) — a static row that states a role gate has one', () => {
+        // Given - every static row whose reach is one KIND of file — `tests` and `all` are out, because a rule gated on a SHAPE (a `.fixture()` literal, a `.trigger()` name) looks at every file and finds that shape only in a test, which is what its convention says
         const ROLE_REACH = new Set([
             'component',
             'config',
@@ -455,7 +456,7 @@ describe('manifest', () => {
 
         // Then - its rule asks the file's role (`identityOf`, or the predicate that reads it): a row naming ONE kind while the implementation reads none is a sentence, and `test-id-states-what-is-missing` was one — any file with a `.visit/.render/.open` scenario was judged
         for (const entry of allRows) {
-            if (entry.channel !== 'statique' || !ROLE_REACH.has(entry.reach)) {
+            if (entry.channel !== 'static' || !ROLE_REACH.has(entry.reach)) {
                 continue;
             }
             const source = read(ruleFileOf(entry));
@@ -473,7 +474,7 @@ describe('manifest', () => {
             'meta',
             'process',
             'runtime',
-            'statique',
+            'static',
             'toolchain',
             'type',
             'upstream',
@@ -604,7 +605,7 @@ describe('manifest', () => {
             string,
             (entry: { audience?: string; name: string; upstream?: string }) => boolean,
         ][] = [
-            ['statique', (entry) => pluginRules.has(entry.name)],
+            ['static', (entry) => pluginRules.has(entry.name)],
             [
                 'toolchain',
                 (entry) =>

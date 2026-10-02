@@ -24,7 +24,7 @@ function row(name: string, channel: Row['channel']): Row {
 }
 
 describe('unpositionedRules', () => {
-    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — each statique and checker row of the catalogue states the line and column of a finding in a spec of its own', () => {
+    test('positions — every static rule proves where it reports (meta-test `every-position-proven`) — each static and checker row of the catalogue states the line and column of a finding in a spec of its own', () => {
         // Given - every row of both catalogues
 
         // Then - none is left without a case that pins its position
@@ -59,11 +59,11 @@ describe('unpositionedRules', () => {
             "expect(result.report).not.toMatch('');",
         );
         const rows = [
-            row('golden-at-a-position', 'statique'),
+            row('golden-at-a-position', 'static'),
             row('pass-at-a-position', 'checker'),
-            row('through-the-rule-tester', 'statique'),
-            row('hand-rolled-tester', 'statique'),
-            row('report-never-goldened', 'statique'),
+            row('through-the-rule-tester', 'static'),
+            row('hand-rolled-tester', 'static'),
+            row('report-never-goldened', 'static'),
             row('no-spec-at-all', 'checker'),
             row('judged-at-runtime', 'runtime'),
         ];

@@ -8,7 +8,7 @@ export type RowDocs<Family extends string = string> = Omit<RuleDocs, 'family' | 
         | 'meta'
         | 'process'
         | 'runtime'
-        | 'statique'
+        | 'static'
         | 'toolchain'
         | 'type'
         | 'upstream';

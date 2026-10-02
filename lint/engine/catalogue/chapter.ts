@@ -3,7 +3,7 @@ import { anchor, cell, markdownTable } from '@jterrazz/typescript/rules';
 import type { Row } from './row.js';
 
 const CHANNEL_ORDER: Record<Row['channel'], number> = {
-    statique: 0,
+    static: 0,
     upstream: 1,
     toolchain: 2,
     checker: 3,
@@ -19,7 +19,7 @@ function counts(published: Row[]): Record<Row['channel'], number> {
         meta: 0,
         process: 0,
         runtime: 0,
-        statique: 0,
+        static: 0,
         toolchain: 0,
         type: 0,
         upstream: 0,
@@ -62,7 +62,7 @@ export function catalogueBody(published: Row[], families: Record<string, string>
     const c = counts(published);
     // A channel with no rows yet is not announced with a zero: a reader would go looking for it.
     const named = [
-        [c.statique, '**statique** (oxlint rules)'],
+        [c.static, '**static** (oxlint rules)'],
         [c.upstream, '**upstream** (options set on an upstream rule)'],
         [c.toolchain, '**toolchain** (the preset @jterrazz/typescript runs)'],
         [c.checker, '**checker** (bundled passes)'],

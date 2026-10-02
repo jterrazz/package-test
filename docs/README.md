@@ -69,7 +69,6 @@ The disk a subject reads is laid by its chain — `.fixture()` and `.link()` on 
 | ratchet     | A count of debt kept in `jterrazz.baseline.json` that may only fall: an unreached route, a convention not yet followed. A run that raises it fails, and `TEST_UPDATE=1` records a fall |
 | specimen    | A small sample app a testing tool keeps under `specs/_shared/_fixtures/` to test itself against. Only a repository that tests a testing tool has one                                   |
 | door        | Where a test file may sit: beside its module (a unit), under `specs/<kind>/` (an assembled product), or in a repository suite (the third door)                                         |
-| statique    | French for "static": the catalogue's name for the rules of the oxlint plugin, which read one file's code                                                                               |
 
 The examples use made-up products: `shoply`, a shop CLI; a news app with an events feed; and hosts under `.test` and `.example`, which never resolve on the internet.
 

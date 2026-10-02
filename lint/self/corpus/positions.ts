@@ -4,7 +4,7 @@ import { join } from 'node:path';
 
 import type { Row } from '../../engine/catalogue/row.js';
 
-const STATIC_CHANNELS: ReadonlySet<string> = new Set(['checker', 'statique']);
+const STATIC_CHANNELS: ReadonlySet<string> = new Set(['checker', 'static']);
 
 const RULE_ROOTS = ['lint/consumer/rules', 'lint/self/rules'];
 

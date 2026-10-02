@@ -5,7 +5,7 @@ import type { Row as CatalogueRow } from '../../engine/catalogue/row.js';
 import {
     ARCHITECTURE_META_ROWS,
     ARCHITECTURE_PASSES,
-    ARCHITECTURE_STATIQUE_RULES,
+    ARCHITECTURE_STATIC_RULES,
     ARCHITECTURE_TOOLCHAIN_RULES,
 } from './architecture.js';
 import type { SelfFamily } from './families.js';
@@ -17,7 +17,7 @@ type Row = CatalogueRow<SelfFamily>;
 /** A self rule has no row in the public catalogue, so its message routes here. */
 export const SELF_CHAPTER = 'docs/03-testing.md';
 
-export const SELF_STATIQUE_RULES: Row[] = [...ARCHITECTURE_STATIQUE_RULES];
+export const SELF_STATIC_RULES: Row[] = [...ARCHITECTURE_STATIC_RULES];
 
 export const SELF_TOOLCHAIN_RULES: Row[] = [...ARCHITECTURE_TOOLCHAIN_RULES];
 
@@ -109,7 +109,7 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'Every `statique` and `checker` row proves WHERE it reports, in a spec of its own: a report golden of its `specs/lint/<rule>/` folder naming the rule at a `line:col`, or a `ruleTester()` case of its unit test, which states the `line` and `column` of every error. A row with none cannot enter the catalogue.',
+            'Every `static` and `checker` row proves WHERE it reports, in a spec of its own: a report golden of its `specs/lint/<rule>/` folder naming the rule at a `line:col`, or a `ruleTester()` case of its unit test, which states the `line` and `column` of every error. A row with none cannot enter the catalogue.',
         facet: 'model',
         family: 'catalogue',
         fix: 'Golden the finding whole — its `path:line:col` included — or state `line` in the RuleTester case that reports it.',
@@ -122,7 +122,7 @@ export const META_ROWS: Row[] = [
         audience: 'self',
         channel: 'meta',
         sentence:
-            'No catalogue sentence has gone back to French — a deny-list of the tokens the manifest actually carried.',
+            'No catalogue sentence, channel name or family title has gone back to French — a deny-list of the tokens the manifest actually carried.',
         facet: 'model',
         family: 'catalogue',
         fix: 'Write the row in English, like every sentence the catalogue publishes.',
@@ -228,7 +228,7 @@ export const SELF_PROCESS_RULES: Row[] = [
 ];
 
 export const selfRows: Row[] = byName([
-    ...SELF_STATIQUE_RULES,
+    ...SELF_STATIC_RULES,
     ...SELF_TOOLCHAIN_RULES,
     ...SELF_CHECKER_PASSES,
     ...META_ROWS,

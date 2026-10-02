@@ -84,7 +84,7 @@ There are THREE composition roots and none names a layer. `src/index.ts` is node
 
 A convention this package states is held by a **channel**, and every row of the catalogue names exactly one of eight. The guiding aim is that most enforcement is programmatic, not review-borne.
 
-- **statique** — the `jterrazz/*` oxlint plugin: one file per rule under `lint/consumer/rules/<family>/`, the folder of its catalogue family — AST analysis, one diagnostic per file.
+- **static** — the `jterrazz/*` oxlint plugin: one file per rule under `lint/consumer/rules/<family>/`, the folder of its catalogue family — AST analysis, one diagnostic per file.
 - **upstream** — a convention an oxlint vitest-plugin rule already holds, set as an OPTION by the `test()` preset rather than duplicated as a rule of ours ([ADR-005](decisions/005-the-doubles-ladder-is-closed.md)).
 - **toolchain** — the import and naming rules the `test()` preset hands `@jterrazz/typescript`'s dependency-cruiser and ls-lint passes, printed as `architecture/<rule>` and `names/<rule>`: a project that declares the preset in its `jterrazz.config.ts` is held to them by `typescript check`.
 - **checker** — passes of the `jterrazz-test-check` binary reading what an AST cannot: the `{{token}}` grammar of `_requests/` and `_expected/` fixtures, the `<case>.spec.yaml` document family, cross-file analyses that cross a `*.specification.ts` with its tests, and the member pass that judges a package rather than a tree.

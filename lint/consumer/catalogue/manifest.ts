@@ -12,10 +12,10 @@ type Row = CatalogueRow<Family>;
 /** The `consumer` rows, one list per channel: the one source the catalogue, the plugin's messages and the checker's findings read. `self` rows are `self/catalogue/manifest.ts`'s, which no published bundle imports. Pure data, so the lint layer stays free of the runtime (the layer map). */
 
 /** Each rule file attaches its entry as `meta.docs`. A convention oxlint's own `vitest` plugin enforces belongs there, not here. */
-export const STATIQUE_RULES: Row[] = [
+export const STATIC_RULES: Row[] = [
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A runner is created only in a `*.specification.ts(x)` file under `specs/`: calling `specification.*` anywhere else is an error. The `.tsx` spelling is the same file with a `wrap` written in JSX. A `component`-role file is out of reach: a rendered unit starts nothing.',
         facet: 'model',
@@ -28,7 +28,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Seven constructors and only seven: `specification.api()`, `specification.job()`, `specification.cli(bin)`, `specification.integration()`, `specification.website()`, `specification.mobile()`, `specification.lint()`. Any other member (`.app`, `.http`, `.stack`…) is an error. A rendered component starts nothing: it is a chain, not a member of this record.',
         facet: 'model',
@@ -41,7 +41,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "The return is destructured under the constructor's canonical name, unaliased (`{ api, cleanup, docker }`); renaming (`{ api: myApi }`) is an error.",
         facet: 'model',
@@ -53,7 +53,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'The specification file passes `cleanup` to `afterAll`; a `cleanup` destructured but never handed over is an error.',
         facet: 'model',
@@ -65,7 +65,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A `root` pointing at the directory the automatic walk would have found is redundant → error.',
         facet: 'model',
@@ -78,7 +78,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A `// When -` marker is optional; written, it sits after `// Given -` and before `// Then -`.',
         facet: 'model',
@@ -91,7 +91,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A marker is exactly one line: a `//` comment directly under one, at the same indentation, is a wrapped marker and an error. A tool’s directive is not a sentence — a linter’s `-disable`/`-enable`, a formatter’s `-ignore`, a `@ts-` pragma and a coverage line stand where they are.',
         facet: 'model',
@@ -104,7 +104,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A setting every chain of a spec file states alike — the same `.clock(…)`, the same `.headers(…)`, the same `.env(…)`, per runner handle — is the file’s, stated once on a view of the facet: `const events = api.with({ clock: '…' })` → error at the first chain. A file of one chain is not judged; a seed and a stub are a test’s Given, never a setting.",
         facet: 'model',
@@ -117,7 +117,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `test.each` table is judged ONCE, on the table, not once per row. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
         facet: 'model',
@@ -130,7 +130,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "`.env({ <SERVICE>_URL: ….connectionString })` repeats the framework's own injection → error.",
         facet: 'cli',
@@ -143,7 +143,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             '`.trigger(name)` takes a stable kebab-case identifier; a non-kebab-case `name` is an error.',
         facet: 'job',
@@ -156,7 +156,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A `specification.cli(bin)` whose binary resolves inside a dependency's `node_modules/.bin` tests the third-party tool, not the product command → error (a suppression with a reason is accepted). Reach: a specification file — a runner created anywhere else is `runner-in-specification-file`'s.",
         facet: 'cli',
@@ -169,7 +169,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A specs tree DECLARES its shape through the `depth` option: `facet-domain` (the default — a test at facet/domain depth), `facet` (a test at the facet root OR one domain folder down, never deeper), `mirror` (a test at any depth ≥ 1, named after its directory), `off`. In every mode, `off` included, a `*.specification.ts` sits at the ROOT of its facet — the one place a runner lives. Under `facet-domain` and `facet`, a `.spec.ts` of the api or cli facet sits as deep as its subject’s standard name — a route’s resource and action (`events/list/`), a command’s words (`db/migrate/`) — which `spec-in-subject-folder` judges. A first-level folder that is no facet — a repository suite, `surface/` or `lint/` — is judged by the same depth as a facet is. In every mode, `off` included: a directory named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` is GROUND, and `_setup/` holds the code that prepares specs — no spec lives inside either. One exception, and only one: a reserved folder may hold CODE, and a `<module>.test.ts` sitting BESIDE the `<module>.ts` it tests is legal there (that is `test-beside-its-module`). A test with no neighbouring module, or a `*.specification.ts`, is still a violation. `specs/_shared/` is the one folder the specs root keeps beside its facets, holding what the facets share, so a spec or a specification under it is refused in every mode. A first-level folder is a facet, `_shared/`, or a repository suite, which holds tests of its own — one test is enough: a module in one that is none of the three (a `support/` of helpers and mocks), a runner included, is refused in every mode, `off` included — a runner lives at the root of the facet it builds, a test helper in the `_setup/` of the lowest folder its tests share, a fixture under `specs/_shared/_fixtures/`. A `.test.tsx` is out of reach: a rendered unit is specified beside its component, never in a facet/domain tree — `test-beside-its-module` holds its neighbourhood.',
         facet: 'model',
@@ -181,7 +181,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Outside `specs/**/_setup/stubs/`, an import resolving into a kind folder (`_setup/stubs/<kind>/…`, `<kind>` a stub builder the package exports: `http`, `openai`, `anthropic`) is an error: a test imports only the `*.stubs.ts` facades.',
         facet: 'model',
@@ -194,7 +194,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Inside a kind folder of `_setup/stubs/`, every `*.request.ts` — the exact request a unit matches — has a `<stem>.ts` sibling, the stem the name up to the FIRST dot (`classify-article.request.ts` → `classify-article.ts`). Orphan data is an error, reported on the orphan itself. A payload a unit serves is data, so it sits in the ground beside the `_setup/` (`_fixtures/<name>.json`), which `_setup/` never holds (`reserved-folder-in-closed-list`).',
         facet: 'model',
@@ -207,7 +207,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             '`_requests/` holds what a spec SENDS: a whole request as a `.http` (`request()`), or a body a verb sends (`post`/`put`/`patch` with a `file()`) — a `.json`, a `.txt`, any format the app reads. Every file there carries its extension; a file with none is an error.',
         facet: 'api',
@@ -220,7 +220,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Under `specs/**/_setup/stubs/`: the ROOT carries only `*.stubs.ts` facades and one folder per stub KIND — a stub builder the package exports: `http` | `openai` | `anthropic`, the closed list its exports decide. A facade exports its builders and sets BY NAME — the world and its scenarios — and one that exports nothing is an error; a default export is not required, and when a facade has one it is a composition: built by `defineStubs(...)`, a composition re-export, a scenario of a sibling facade — a name imported from a `*.stubs` module, or a call to it — or a call to a builder of the file declared to return `Stubs` (no type is read, so a builder is judged by where it comes from or what it declares). A unit stub is `<kind>/<kebab-name>.ts` with an `export default defineStub(...)` (or a factory returning one), and it calls only its own folder’s builder: a `<kind>.…` of another kind the file imports from the package — by name, or through a namespace import (`t.<kind>.…`), in its request, its reply or anywhere else — is an error. A kind folder is flat — a file nested below it is an error — and a folder under the root that is no kind is an error at each unit it holds; each file is judged on its own, and a file that is no module is `reserved-folder-in-closed-list`’s.',
         facet: 'model',
@@ -233,7 +233,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A golden `file()`'s path carries its extension (`toMatch(file('./_expected/help.txt'))`, `'./_expected/<case>.aria.yaml'` for an ARIA tree); a golden file with no extension is an error. A tree golden is `toMatch(directory(…))`, whose path ends in `/`.",
         facet: 'model',
@@ -246,7 +246,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence: '`_seeds/` holds `*.sql` files only; any other file is an error.',
         facet: 'model',
         family: 'services',
@@ -257,7 +257,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "The verb and the ground folder agree: `seed()` reads `_seeds/`, `request()` and a request body (`post`/`put`) read `_requests/`, `fixture()` reads `_fixtures/`, a golden `toMatch(file|directory(…))` reads `_expected/`, and `run()` reads a document beside the test, under no ground folder — or under `_fixtures/` for a document that is an input a negative spec runs. The same four folders under the specs root's `_shared/` hold what several leaves share, so a shared seed is `<specs>/_shared/_seeds/x.sql` (`../../_shared/_seeds/x.sql`), never `<specs>/_shared/_fixtures/_seeds/x.sql` — the role folder under `_shared/` is the first ground folder the path passes through, and it is the one judged. The first ground folder a literal path passes through is the one judged, whether the `file()`/`directory()` is handed to the verb inline or bound first to a `const` of the same file (the nearest declaration of the name, as the language resolves it); a `let`, a parameter or a computed path is out of reach, and a document's `fixture:` is held to `_fixtures/` by its grammar (`document-follows-its-grammar`).",
         facet: 'model',
@@ -270,7 +270,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "`file()` and `directory()` are called in a test or spec file — a `.test.ts(x)`, a `.spec.ts`, a type test — and nowhere else: a shared helper module, a specification file or a stub takes a `file()` as a parameter and never builds one. The call is recognised by its import from the framework's entry, an alias included.",
         facet: 'model',
@@ -283,7 +283,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A test file — a `.spec.ts`, a `.test.ts`, a `.test.tsx` — holds one top-level `describe`, titled with what the file is about, and every test inside it. A spec file's title is its aspect: `pagination.spec.ts` → `describe('pagination', …)`. A colocated test's is its subject, read from the module beside it (`<base>.ts`, `<base>.tsx`): the name its default export declares; else its one value export; else the value export spelling the base name in camelCase or PascalCase, or the base less its role suffix (`request.action` → `request`); else the base name — `locale-note.test.tsx` beside `export function LocaleNote` → `describe('LocaleNote', …)`. A `describe.each` names its rows, so its title starts with that name, `'pagination — page %s'`; a subject keeps its case, the `test()` preset exempting the top-level `describe` from `vitest/prefer-lowercase-title` (`ignoreTopLevelDescribe`). A file with no `describe` is refused at its first test, a second `describe` or a test beside the one at itself, a title naming anything else at the title; a file that declares no test through `describe`/`test`/`it` (a rule tester's cases, a type test) is out of reach.",
         facet: 'model',
@@ -296,7 +296,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A spec file is named for its aspect: kebab-case (`not-found.spec.ts`), and never a name that says the file holds what fit nowhere else — `misc`, `other`, `basic`, `general`, `more`, `edge-cases`, `tests`, `main`.',
         facet: 'model',
@@ -309,7 +309,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A spec file holds at most 400 lines; a longer one is refused at its first line, the message grouping its tests by the prefix of their titles — where the cut usually goes. A file already past it is recorded on the ratchet and may only shrink.',
         facet: 'model',
@@ -322,7 +322,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A test body spans at most 60 lines of gestures — the function a `test(…)`/`it(…)` runs, from the line it opens on to the line it closes on, blank lines and comments included, less the lines a `toMatch(<value>)` argument holds past the one it opens on: the claim is capped by `ground-shared-or-inline`, not here; a longer one is refused at the function. A body already past it is recorded on the ratchet and may only shrink.',
         facet: 'model',
@@ -335,7 +335,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "No sampled value under an oracle: `new Date()` (no argument), `Date.now()`, `performance.now()`, `Math.random()` and `randomUUID()` are an error as a direct argument of `expect` or of its matcher, and anywhere inside a structural matcher's expected shape. A test that pins the clock (`clock.at`, `clock.advance`) is out of reach — the reading is then the constant it chose — and so is a `*.specification.ts(x)`, where a runner legitimately samples at startup.",
         facet: 'model',
@@ -348,7 +348,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A sampled value anywhere in a test callback is an error — the wider net around `no-sampled-value-in-expectation`, silent where `no-sampled-value-in-expectation` already refuses, on a name built in a template literal, and on a `new Date()` or `Date.now()` after a `using _ = clock.at(<instant>)` or `clock.run(<instant>)` in the same block, where the reading is the pinned instant — a pin fakes `Date` alone, so `Math.random()`, `randomUUID()` and `performance.now()` stay samples under it, and an argument-less `clock.run()` pins no instant. A `*.specification.ts(x)` is out of reach.',
         facet: 'model',
@@ -361,7 +361,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A module test whose every assertion reads the call log of a double it built itself (`mockOf`, `vi.fn`, `vi.spyOn`) is an error. The reach is the `module` role: on a component a callback prop IS the contract with its parent. It is an error, and not an error, because one subject answers this way honestly — one whose PRODUCT is a call it was handed (a listener, an output port) — and the shape is the same one either way.',
         facet: 'model',
@@ -374,7 +374,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'An `expect()` in a test is not called inside a loop — a `for`, a `for…of`, a `for…in`, a `while`, a `do…while` — nor inside the callback of an array iteration — `forEach`, `map`, `flatMap`, `filter`, `every`, `some`, `find`, `reduce` — in the same function: a loop runs its assertion once per element, and not at all over an empty collection. `vitest/no-conditional-expect` holds the other assertion that may not run, one under a condition.',
         facet: 'model',
@@ -387,7 +387,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "Under `specs/`, vitest's `expect` is called in a test file alone — a `*.spec.ts`, a `*.test.ts(x)`, a `*.test-d.ts`: a `_setup/` module, a test adapter, a stub or a `*.specification.ts` that asserts is refused at the call. The binding is what is read — `expect` imported from `vitest` under any local name, statically or by `await import('vitest')`, `<namespace>.expect` on a namespace of `vitest`, and `expect.soft`, `expect.poll` on either — so a method or a local of that name is not.",
         facet: 'model',
@@ -400,7 +400,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A test whose ONE assertion is an existence check (`toBeDefined`, `not.toBeNull`, `not.toBeUndefined` or a bare `toHaveBeenCalled`) is an error. Beside a real assertion the same check is a precondition and stays silent, `expect.soft` counts as an assertion, and a NEGATED bare matcher (`not.toHaveBeenCalled`) is a precise proof rather than a loose one. `toBeTruthy` and a bare `toThrow` are refused wherever they stand, by `vitest/prefer-strict-boolean-matchers` and `vitest/require-to-throw-message`.',
         facet: 'model',
@@ -413,7 +413,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'Three probes (`threshold`, default 3) on one goldenable subject — `stdout`, `stderr`, `content`, `head`, `meta()`, `canonical`, `alternates`, `tree`, `html` — with no `toMatch(file(…))` on it is an error. A negated probe states an absence no golden can carry and is not counted; `value` and `error` are single readings and are not goldenable subjects.',
         facet: 'model',
@@ -426,7 +426,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A test that reads a response, a json or a table — `<result>.response`, `<result>.json`, `<result>.table('<name>')` of a result it awaited — compares it WHOLE, once: `toMatch` handed the whole result written in place or its golden, or a table's `toBeEmpty()`. A precise assertion on one of its properties (`expect(result.json.value.total).toBe(1)`) is allowed only IN ADDITION → error on the first read of a result no whole comparison reaches. A negation, a RegExp and a read through a helper are no whole comparison; a result read through a helper, a computed table name, or a comparison made in a helper is out of reach, and the rule stays silent. A read whose value is only CARRIED into a later request of the same test — every use of it, through the names and helpers it passes, ends in the arguments of a chain off a handle the test awaits, in place or through the name that holds it (a path, `params`, a body, a header), as the cursor a page hands back — claims nothing and owes no comparison; one `expect(…)` of that value makes it a read again, and the result the test does claim is still compared whole.",
         facet: 'model',
@@ -439,7 +439,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A file-level `const` a spec hands to a matcher as the expected value serves two tests or more; read by one test, it is an error at its declaration. A constant read outside every test (by a helper) counts as shared, and an exported one is out of reach.',
         facet: 'model',
@@ -452,7 +452,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A spec imports no expectation: a name imported from another module of its specs tree — neither its `*.specification` runner nor a module under `stubs/` — and handed to a matcher as the expected value, itself or a member of it, is an error at the argument. A helper is CALLED, and what it builds is the test’s own; a module outside the specs tree is the product’s, and a spec may compare against its data (`package.json`’s version, a constant the product exports); `no-test-to-test-import` already refuses importing a test file at all.',
         facet: 'model',
@@ -465,7 +465,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A `transform` that only rewrites into equivalents of the standard tokens duplicates the grammar → error.',
         facet: 'model',
@@ -478,7 +478,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "`expect(x.raw).toContain` compares the stream as it was captured → error. A stream compared as a value reads `x.text` — ANSI stripped, the runner's `transform` applied, the text a golden compares. A RegExp argument is exempt: a pattern carries no token grammar to lose.",
         facet: 'model',
@@ -491,7 +491,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A capture ref (`match.ref`, `{{kind#ref}}`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → error.',
         facet: 'model',
@@ -504,7 +504,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A golden `toMatch(file(…))`/`toMatch(directory(…))`, or a `toMatch(<value>)` on a result (the value written in place, rewritten in the test), whose FAILURE is the subject of the test must carry `{ frozen: true }` → otherwise `TEST_UPDATE=1` silently rewrites the deliberately-wrong expectation instead of throwing → error. Two shapes: the exact wrapper (`expect(() => …).toThrow()` / `expect(…).rejects.toThrow()`) and the bounded heuristic — a golden inside a helper whose body also asserts a throw, which is where a helper owning the try/catch puts it.',
         facet: 'model',
@@ -517,7 +517,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A test whose ONLY assertions are HTTP status probes (`expect(X.status).toBe(N)` / `.toEqual(N)`, N a numeric literal 100–599) → error: this case wants a full golden (`expect(result.response).toMatch(file('./_expected/case.http'))`). A status probe BESIDE a real assertion (a whole-result `toMatch`, a table's rows, `toContain`…) stays silent (a legitimate scalpel).",
         facet: 'api',
@@ -530,7 +530,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A `vitest.config.*` default-exports `defineSpecConfig(...)`; the call is resolved through an `export default <Identifier>` declarator, through a `satisfies`/`as` annotation, and through one `mergeConfig(defineSpecConfig(…), …)` — vitest’s own way of layering over the preset.',
         facet: 'model',
@@ -543,7 +543,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A project literal collecting `specs/<facet>/` is named `<facet>`, and one named for a facet is rooted there; `unit` collects outside `specs/`. What an include collects is read from the GLOB and the config’s own place in its package, never from the absolute path. Any other name is out of reach — a repository suite names its projects as it likes.',
         facet: 'model',
@@ -556,7 +556,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A test file declares no simulated DOM: the `@vitest-environment happy-dom|jsdom` pragma is an error. Reach: the roles that RUN a test (`module`, `component`, `specification`) — a project config is `no-simulated-dom-in-config`’s.',
         facet: 'component',
@@ -569,7 +569,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A browser project comes from `component()`: in a vitest config, a `browser` key under `test` that is not inside a `component(...)` call is an error. A `browser` key elsewhere (a `define`, an env registration) is not a project block and stays out of reach.',
         facet: 'component',
@@ -582,7 +582,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'An `include` glob of a PROJECT — an object under `test` or in `projects`, never `optimizeDeps.include` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is an error.',
         facet: 'model',
@@ -595,7 +595,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             '`literate.specification`, resolved from the config directory, names a file that exists. The config directory is what the path is read against; a project that moves Vite’s `root` states its door relative to the config all the same.',
         facet: 'cli',
@@ -608,7 +608,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A test writes the process environment through `vi.stubEnv` alone: a raw assignment onto a variable of it (named or computed), a replacement of `process.env` itself, and a `delete` of one of its variables are each an error; a `*.specification.ts(x)` is out of reach by role.',
         facet: 'model',
@@ -621,7 +621,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A production module never reaches test material. A production module is every source module that is no test material itself — `src/`, `lint/`, `bin/`, `scripts/` and a project's root modules alike — but a tool's config (`*.config.*`) and a module under a separate test root (`__tests__/`, a root `test/` or `tests/`, `test-beside-its-module`'s); test material is a test package (`@jterrazz/test`, `vitest`, `@vitest/*`, `vitest-mock-extended`, `vitest-browser-*`, `msw`, `@testing-library/*`, `playwright`, `playwright-core`, `@playwright/test`), a `*.test.*`, `*.test-d.*`, `*.spec.*`, `*.specification.*` or `*.fixtures.*` module, anything under a `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` folder or under `specs/`, and a stub — a `*.stubs.ts` facade and the `stubs/` folder that holds one. Every form reaches: an import, `import type`, a re-export (`export *` included), `import()`, `require()`, `require.resolve()`, `import.meta.resolve()`, a type's `import('…')`; a specifier resolving there through a tsconfig `paths` alias (its `extends` chain followed) or a `#…` entry of the package's `imports`; a path the module builds from where it sits (`new URL('…', import.meta.url)`, `join(import.meta.dirname, …)`, a template opening on `__dirname`) or reads (`readFileSync('./…')`); and a module that is not production reaching it in turn, in any of these forms, read from its parsed program — a production module on the way is judged for its own references. The four ground names mean ground wherever a test stands on a file, beside a module as much as under `specs/`. Two exceptions: `@jterrazz/test/oxlint`, the zero-runtime lint entry; and a test package the unit's `jterrazz.config.ts` names under `test.production.allow`, each with the reason its product runs it (`{ playwright: 'the gate drives a browser in production' }`) — an entry with no reason leaves the list unread.",
         facet: 'model',
@@ -634,7 +634,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A module test touches no DOM global: `document`, `window`, `navigator`, `HTMLElement` referenced in VALUE position in a `module`-role file OUTSIDE `specs/` is an error. A name in type position (`x as HTMLElement`) and a `typeof window` guard reach no document and stay out of reach.',
         facet: 'component',
@@ -647,7 +647,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "The test of `<file>.ts` is `<file>.test.ts` beside it; a misnamed `.test.ts`, a `__tests__/` directory or a package's `tests/` or `test/` root is an error. A RENDERED unit answers to the same law wherever it lives: a `.test.tsx` is the neighbour of the `.tsx` it renders, or of the `.ts` of the hook or DOM function whose Host it carries. A `module`-role file under a `specs/` tree is a repository suite — it covers a tree, so it has no neighbour to miss.",
         facet: 'model',
@@ -660,7 +660,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
         facet: 'model',
@@ -673,7 +673,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "No arbitrary sleep (`setTimeout`/`setInterval`/`Atomics.wait`, or a `node:timers/promises` import) in any test file — synchronisation is `see()`/`gone()` inside a scenario and `waitUntil(predicate)` everywhere else. A timer inside a test DOUBLE's implementation is out of reach: the double is staging the world, not the test waiting on it. A double is a factory call (`vi.fn(…)`, `mockImplementation(…)`, a `mockOf` handler) or a function-valued PROPERTY of an object literal, which is the plainest double there is — `const git: GitGateway = { cloneRepository: async () => … }`, where the object itself is the double.",
         facet: 'model',
@@ -686,7 +686,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A `beforeEach`/`beforeAll` in a test file is an error: the Given is built in the test. An `afterEach`/`afterAll` gives back what the tests took — a temp directory removed, a server stopped, a mock restored — and stands.',
         facet: 'model',
@@ -699,7 +699,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A scenario (`.visit()` on website, `.open()` on mobile, `.render()` on component) is the When: the visitor acts and the capture reflects the settled state; no `expect()` in the callback — assertions live in the Then, on the returned result.',
         facet: 'model',
@@ -712,7 +712,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             "In a test file, a scenario's elements are user-facing (`button`, `link`, `field`, `heading`, `content`; on mobile `button`, `field`, `content`). `testId()` is the one escape hatch, and the line STATES what the element lacks: a `// testId: <what is missing>` comment on the call's own line or the one directly above. It is an invariant, not a rationale.",
         facet: 'model',
@@ -725,7 +725,7 @@ export const STATIQUE_RULES: Row[] = [
     },
     {
         audience: 'consumer',
-        channel: 'statique',
+        channel: 'static',
         sentence:
             'A scenario under `specs/` that ACTS (`click`, `fill`, `select`, `check`, `press`, `tap`, `rerender`) on the visitor it was handed ends on `visitor.see(…)`, `visitor.gone(…)` or `visitor.unmount()` — through the block, branch, loop or `.then()` it ends in. A scenario that only reads is out of reach, and so is a component test, whose action often produces a CALL rather than a screen.',
         facet: 'model',
@@ -1707,7 +1707,7 @@ export const PROCESS_RULES: Row[] = [
 ];
 
 export const consumerRows: Row[] = byName([
-    ...STATIQUE_RULES,
+    ...STATIC_RULES,
     ...UPSTREAM_RULES,
     ...TOOLCHAIN_RULES,
     ...TYPE_ROWS,
@@ -1718,6 +1718,6 @@ export const consumerRows: Row[] = byName([
 
 export const recommendedRules: Readonly<Record<string, 'error'>> = Object.fromEntries(
     consumerRows
-        .filter(({ channel }) => channel === 'statique')
+        .filter(({ channel }) => channel === 'static')
         .map(({ name }) => [`jterrazz/${name}`, 'error']),
 );
