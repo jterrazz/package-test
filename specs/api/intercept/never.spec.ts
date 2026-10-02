@@ -38,7 +38,7 @@ describe('never', () => {
         );
     });
 
-    test('a provider never stub the action reaches rejects it, as an http one does', async () => {
+    test('a provider stub declared never fails the run when the action calls it, as an http never stub does', async () => {
         // Given - the chat completions endpoint declared never requested, and an action that asks it
         const chain = api.intercept(openai.never(openai.chat())).get('/assistant/openai-chat');
 
