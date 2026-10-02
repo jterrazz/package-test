@@ -1,4 +1,4 @@
-.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links
+.PHONY: install build lint fix test test-merge test-changed check test-mobile check-links mutation
 
 node_modules/.install: package-lock.json
 	npm ci
@@ -56,3 +56,7 @@ test-mobile: build
 check-links:
 	@command -v lychee > /dev/null || { echo "check-links: lychee is not installed on this machine — brew install lychee"; exit 1; }
 	lychee --no-progress README.md docs skills
+
+# Rewrites the sources in place for its whole run, so nothing else runs beside it; a measure, never a verdict: `check` never calls it.
+mutation: build
+	npx stryker run

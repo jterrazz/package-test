@@ -2,6 +2,8 @@ node_modules/
 .idea
 .DS_Store
 .artifacts/
+# The setup files Stryker's vitest runner writes at the root, and leaves behind when a run stops early.
+stryker-setup-*.js
 dist
 # Turborepo's per-task log, at a path it offers no key to move.
 .turbo

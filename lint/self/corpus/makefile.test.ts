@@ -8,17 +8,17 @@ import { MAKE_TARGETS, makefileAt, makeTargets } from './makefile.js';
 
 const MOBILE_TARGET = 'test-mobile';
 
-const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge', 'check-links'];
+const BESIDE_TARGETS = [MOBILE_TARGET, 'test-changed', 'test-merge', 'check-links', 'mutation'];
 
 const ROOT = resolve(import.meta.dirname, '../../..');
 
 describe('makefile', () => {
-    test('the Makefile — the six targets a repository answers — this repository declares the six, and the four beside them, each phony', () => {
+    test('the Makefile — the six targets a repository answers — this repository declares the six, and the five beside them, each phony', () => {
         // Given - this repository's Makefile
         const targets = makefileAt(ROOT);
         const verbs = [...MAKE_TARGETS, ...BESIDE_TARGETS].toSorted();
 
-        // Then - the verbs are the six plus the four no flow speaks; the one other rule is the install stamp, a file
+        // Then - the verbs are the six plus the five no flow speaks; the one other rule is the install stamp, a file
         expect(targets.get('.PHONY')?.prerequisites.toSorted()).toStrictEqual(verbs);
         expect(
             [...targets.keys()]
