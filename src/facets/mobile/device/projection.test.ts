@@ -16,7 +16,7 @@ describe('projectScreen', () => {
                 { label: 'Articles', type: 'Other' },
                 { label: 'Conflit militaire États-Unis Iran 2026', type: 'Button' },
                 { label: "Guerre d'Ukraine", type: 'Button' },
-                { label: 'Enquête Fauci COVID-19', type: 'Button' },
+                { label: 'Jazz night at the harbour', type: 'Button' },
                 { label: "Cyberattaque sur systèmes d'eau Minnesota", type: 'Button' },
             ],
             label: 'SigNews',
@@ -64,7 +64,7 @@ describe('projectScreen', () => {
             'Articles',
             'Conflit militaire États-Unis Iran 2026',
             "Guerre d'Ukraine",
-            'Enquête Fauci COVID-19',
+            'Jazz night at the harbour',
         ]);
     });
 

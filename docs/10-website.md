@@ -313,13 +313,15 @@ What the stub serves is declared per chain, as [stubs](17-stubs.md) — the feat
 ```typescript
 import newsroom from './_setup/stubs/newsroom.stubs.js';
 
-test('renders the events feed from the declared backend', async () => {
-    // Given - the backend under stub for this chain
-    const result = await website.intercept(newsroom).visit('/events');
+describe('declared backend', () => {
+    test('renders the events feed from the declared backend', async () => {
+        // Given - the backend under stub for this chain
+        const result = await website.intercept(newsroom).visit('/events');
 
-    // Then - the page rendered what the stub declared
-    expect(result.content.text).toContain('Enquête Fauci COVID-19');
-    expect(result.errors.text).toBe('');
+        // Then - the page rendered what the stub declared
+        expect(result.content.text).toContain('Jazz night at the harbour');
+        expect(result.errors.text).toBe('');
+    });
 });
 ```
 

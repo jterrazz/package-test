@@ -6,7 +6,7 @@ Use it when the subject under test is an installed native app. For a browser-ren
 
 ## What it specifies
 
-A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([09](09-component.md) states the boundary and the spike that would move it).
+A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([09](09-component.md) states the boundary and what would move it).
 
 ## The constructor
 
@@ -145,8 +145,8 @@ A scenario is the interaction that happens **before** the capture — the open's
 test('bookmarks an event from its detail screen', async () => {
     // Given - a visitor on the events feed
     const result = await mobile.open('news://events', async (visitor) => {
-        // When - they open the Fauci event and bookmark it
-        await visitor.tap(button('Enquête Fauci COVID-19'));
+        // When - they open the concert and bookmark it
+        await visitor.tap(button('Jazz night at the harbour'));
         await visitor.see(content('12 rapports publiés'));
         await visitor.tap(button('Bookmark'));
     });
@@ -191,7 +191,7 @@ await visitor.tap(within(testId('event-list'), button('Bookmark')));
     "label": "SigNews",
     "children": [
         { "type": "StaticText", "label": "Signals" },
-        { "type": "Button", "label": "Enquête Fauci COVID-19" },
+        { "type": "Button", "label": "Jazz night at the harbour" },
         { "type": "TextField", "label": "Email", "value": "a@b.test", "identifier": "email-field" }
     ]
 }

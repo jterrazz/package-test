@@ -1,6 +1,6 @@
 # 12 — API specs (`specification.api`)
 
-`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the services the runner started in real containers — so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world.
+`specification.api()` tests an HTTP API through real requests. Your app runs **in this process**, built by the `server` factory from the real services the runner started — so a request reaches it without a socket, and a stub, a clock and a golden all mean something because the app shares this process's world.
 
 Use it when the subject under test is an HTTP surface. For background pipelines use [job](13-job.md); for binaries use [cli](14-cli.md).
 
@@ -10,16 +10,16 @@ An api spec answers one question: **given this state and this request, what does
 
 ### The app runs in THIS process
 
-| Aspect             | What it means                                                               |
-| ------------------ | --------------------------------------------------------------------------- |
-| Your app           | In-process, built by `server(services)` — no container, no socket           |
-| Services           | Real containers, started by testcontainers from each handle's own defaults  |
-| What it proves     | Application logic against real databases, caches and processes              |
-| Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`) |
+| Aspect             | What it means                                                                                          |
+| ------------------ | ------------------------------------------------------------------------------------------------------ |
+| Your app           | In-process, built by `server(services)` — no container, no socket                                      |
+| Real services      | Containers for `postgres()` and `redis()`, a file copy for `sqlite()`, a child process for `process()` |
+| What it proves     | Application logic against real databases, caches and processes                                         |
+| Parallel isolation | Per-worker schema / db-index / file copy (rule `state-isolated-per-worker`)                            |
 
 Because the app shares this process, three things the framework offers are real here and nowhere else: `.intercept()` (msw runs in-process), `.clock()` (it pins the `Date` the app reads), and a golden of the response the app actually built. What the SHIPPED artefact does — its Dockerfile, its wiring, its networking — is a deployment probe, and this facet does not claim it.
 
-`docker/<service>/init.sql` runs when the corresponding service starts, under the kebab-case of its record key. See [services](18-services.md).
+A `postgres()` service runs `docker/<service>/init.sql` when it starts, under the kebab-case of its record key; `sqlite()` takes its schema from its own `init` or `prismaSchema` option instead ([18 — Services](18-services.md#dockerserviceinitsql)).
 
 ## The constructor
 
@@ -76,12 +76,19 @@ Without `root`, the framework finds the package being tested by walking up from 
 Stubs are **strict** (rule `network-strict-after-first-stub`): once a chain declares one, an outgoing request no stub answers fails the spec ([17 § Strict by construction](17-stubs.md#strict-by-construction)). `.intercept()` and `.clock()` both work because the app runs in THIS process: msw intercepts its outgoing requests, and the pinned `Date` is the one it reads.
 
 ```typescript
-test('serves french content', async () => {
-    // Given - headers inline
-    const result = await api.headers({ 'Accept-Language': 'fr' }).get('/welcome');
+describe('language', () => {
+    test('serves french content', async () => {
+        // Given - headers inline
+        const result = await api.headers({ 'Accept-Language': 'fr' }).get('/welcome');
 
-    // Then
-    expect(result.response.body).toEqual({ message: 'Bienvenue' });
+        // Then - the whole response
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
+
+            {"message": "Bienvenue"}
+        `);
+    });
 });
 ```
 
@@ -90,12 +97,14 @@ test('serves french content', async () => {
 Databases are **reset at the start of every chain**. A spec never depends on a previous spec, and there is no "flow" mode — sequential scenarios are expressed through seeds:
 
 ```typescript
-test('starts clean between specs', async () => {
-    // Given - nothing (every chain resets the databases: one spec = ONE action)
-    const result = await api.get('/orders');
+describe('isolation', () => {
+    test('starts clean between specs', async () => {
+        // Given - nothing (every chain resets the databases: one spec = ONE action)
+        const result = await api.get('/orders');
 
-    // Then
-    await expect(result.table('orders', { database: 'db' })).toBeEmpty();
+        // Then
+        await expect(result.table('orders', { database: 'db' })).toBeEmpty();
+    });
 });
 ```
 
@@ -241,21 +250,21 @@ describe('analytics', () => {
         // Then - {{uuid#order}} appears 3 times (Location header included) → all equal
         expect(result.response).toMatch(file('./_expected/order-created.http'));
     });
-});
 
-test('links the analytics event to the created order', async () => {
-    // Given
-    const result = await api
-        .seed(file('./_seeds/catalog.sql'), { database: 'db' })
-        .request(file('./_requests/new-order.http'));
+    test('links the analytics event to the created order', async () => {
+        // Given
+        const result = await api
+            .seed(file('./_seeds/catalog.sql'), { database: 'db' })
+            .request(file('./_requests/new-order.http'));
 
-    // Then - same id on both sides, without ever knowing its value
-    await expect(result.table('orders', { database: 'db' })).toMatch([
-        [match.ref('order'), 'pending', '{{number}}', '{{iso8601}}'],
-    ]);
-    await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
-        [1, match.ref('order'), 'order_created'],
-    ]);
+        // Then - same id on both sides, without ever knowing its value
+        await expect(result.table('orders', { database: 'db' })).toMatch([
+            [match.ref('order'), 'pending', '{{number}}', '{{iso8601}}'],
+        ]);
+        await expect(result.table('events', { database: 'analyticsDb' })).toMatch([
+            [1, match.ref('order'), 'order_created'],
+        ]);
+    });
 });
 ```
 
@@ -309,12 +318,12 @@ A route no test reached fails the run, each one named. The count is a ratchet, h
 
 A run is judged, and `TEST_UPDATE=1` records, only when it is green and whole. Otherwise it prints a line and records nothing:
 
-| The run                                                                       | Prints                                                   | Why                                                                                                                                                                              |
-| ----------------------------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| a file of it failed                                                           | `api routes: not judged`, with the count of failed files | a failed file may not have sent its requests; `TEST_UPDATE=1` refuses and keeps the entry                                                                                        |
-| a shard (`vitest --shard`)                                                    | `api routes: not judged`                                 | its requests are a part of the run's; it writes its ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/`                                                                 |
-| a merge (`vitest --merge-reports`)                                            | nothing                                                  | a merge runs no global setup; this package's own split judges its routes after the merge, over every shard's ledgers ([03 — Testing § What CI runs](03-testing.md#what-ci-runs)) |
-| partial — some test files (`vitest --changed`, a file filter) or tests (`-t`) | `api routes: not judged — a partial run …`               | it reached only some routes; a shard that `-t` filters marks its ledger folder partial, so its split is not judged at the merge                                                  |
+| The run                                                                       | Prints                                                   | Why                                                                                                                                                                                                                                      |
+| ----------------------------------------------------------------------------- | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| a file of it failed                                                           | `api routes: not judged`, with the count of failed files | a failed file may not have sent its requests; `TEST_UPDATE=1` refuses and keeps the entry                                                                                                                                                |
+| a shard (`vitest --shard`)                                                    | `api routes: not judged`                                 | its requests are a part of the run's; it writes its ledgers to `.artifacts/vitest/routes/shard-<index>-<count>/`                                                                                                                         |
+| a merge (`vitest --merge-reports`)                                            | nothing                                                  | a merge runs no global setup; this package's own split judges its routes after the merge, over every shard's ledgers ([03 — Testing § What CI runs](https://github.com/jterrazz/package-test/blob/main/docs/03-testing.md#what-ci-runs)) |
+| partial — some test files (`vitest --changed`, a file filter) or tests (`-t`) | `api routes: not judged — a partial run …`               | it reached only some routes; a shard that `-t` filters marks its ledger folder partial, so its split is not judged at the merge                                                                                                          |
 
 #### An app that is not Hono
 
@@ -336,7 +345,7 @@ A route the app takes on any method — `app.all('/mcp', …)` — is one the me
 
 The list is judged whenever the app exposes a route table of its own, an OpenAPI document declared or not; a `server` that is not the Hono app exposes none, and leaves the list unjudged.
 
-The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](decisions/007-compose-mode-leaves-the-package.md).
+The app runs in THIS process, always: there is no second mode, no container binding and no `TEST_MODE`. Why compose mode left, and what was weighed against keeping it: [ADR-007](https://github.com/jterrazz/package-test/blob/main/docs/decisions/007-compose-mode-leaves-the-package.md).
 
 ## Pitfalls
 

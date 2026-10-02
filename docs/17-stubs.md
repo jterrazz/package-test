@@ -17,9 +17,11 @@ import { defineStub, http } from '@jterrazz/test';
 
 export default defineStub({
     request: http.get('/articles/{{uuid}}'),
-    response: http.json({ id: 'a-1', title: 'Fauci and the lab leak' }),
+    response: http.json({ id: 'a-1', title: 'The library opens on Sundays' }),
 });
 ```
+
+The request is written as a path, so it matches that path on any origin: the app's real host, wherever its config points, does not matter. A full URL (`'https://news.example/articles/{{uuid}}'`) matches that origin alone ([§ `http.*`](#http--any-url)).
 
 | Field       | Meaning                                                                                                                                                                         |
 | ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -70,26 +72,28 @@ The other half of a call count is zero. `http.never(request)` is the stub `requi
 
 ```typescript
 import { http } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 
-test('a preview never places the order', async () => {
-    // Given - the shop's order endpoint declared never requested
-    const result = await api
-        .intercept(http.never(http.post('https://shop.test/orders')))
-        .post('/orders/preview', { items: ['book'] });
+describe('preview', () => {
+    test('a preview never places the order', async () => {
+        // Given - the shop's order endpoint declared never requested
+        const result = await api
+            .intercept(http.never(http.post('https://shop.test/orders')))
+            .post('/orders/preview', { items: ['book'] });
 
-    // Then - the preview answered without reaching the shop
-    expect(result.response).toMatch(`
-        HTTP/1.1 200 OK
-        content-type: application/json
+        // Then - the preview answered without reaching the shop
+        expect(result.response).toMatch(`
+            HTTP/1.1 200 OK
+            content-type: application/json
 
-        {
-            "items": ["book"],
-            "placed": false
-        }
-    `);
+            {
+                "items": ["book"],
+                "placed": false
+            }
+        `);
+    });
 });
 ```
 
@@ -214,20 +218,22 @@ Every facet that reaches the network takes the same three forms:
 
 ```typescript
 import { http } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { api } from '../api.specification.js';
 import { newsroom } from './_setup/stubs/newsroom.stubs.js';
 
-test('serves the declared world', async () => {
-    // Given - a one-off inline pair alongside the feature's world
-    const result = await api
-        .intercept(newsroom)
-        .intercept(http.any(/analytics\.example/), http.json({ ok: true }))
-        .get('/report');
+describe('report', () => {
+    test('serves the declared world', async () => {
+        // Given - a one-off inline pair alongside the feature's world
+        const result = await api
+            .intercept(newsroom)
+            .intercept(http.any(/analytics\.example/), http.json({ ok: true }))
+            .get('/report');
 
-    // Then - the report rendered
-    expect(result.status).toBe(200);
+        // Then - the report rendered
+        expect(result.status).toBe(200);
+    });
 });
 ```
 
@@ -239,15 +245,20 @@ A module test has no runner and therefore no chain to hang stubs on, and its sub
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-test('reads the rate off the provider', async () => {
-    // Given - the one call this module makes, declared for the block
-    await using _ = await intercept(http.get('https://rates.test/eur'), http.json({ rate: 1.07 }));
+describe('rate provider', () => {
+    test('reads the rate off the provider', async () => {
+        // Given - the one call this module makes, declared for the block
+        await using _ = await intercept(
+            http.get('https://rates.test/eur'),
+            http.json({ rate: 1.07 }),
+        );
 
-    // Then - the module answers with what the provider replied
-    const response = await fetch('https://rates.test/eur');
-    await expect(response.json()).resolves.toStrictEqual({ rate: 1.07 });
+        // Then - the module answers with what the provider replied
+        const response = await fetch('https://rates.test/eur');
+        await expect(response.json()).resolves.toStrictEqual({ rate: 1.07 });
+    });
 });
 ```
 
@@ -383,18 +394,20 @@ A subject that reads a reply AS IT LANDS — a token-by-token render, a progress
 
 ```typescript
 import { http, intercept } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-test('renders a streamed reply as its pieces land', async () => {
-    // Given - a provider answering in three pieces, ten milliseconds apart
-    await using _ = await intercept(
-        http.get('https://tokens.test/stream'),
-        http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 }),
-    );
+describe('streamed reply', () => {
+    test('renders a streamed reply as its pieces land', async () => {
+        // Given - a provider answering in three pieces, ten milliseconds apart
+        await using _ = await intercept(
+            http.get('https://tokens.test/stream'),
+            http.stream(['Hel', 'lo, ', 'world'], { contentType: 'text/plain', delay: 10 }),
+        );
 
-    // Then - the reader sees them in that order
-    const response = await fetch('https://tokens.test/stream');
-    await expect(response.text()).resolves.toBe('Hello, world');
+        // Then - the reader sees them in that order
+        const response = await fetch('https://tokens.test/stream');
+        await expect(response.text()).resolves.toBe('Hello, world');
+    });
 });
 ```
 

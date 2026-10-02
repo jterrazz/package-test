@@ -8,16 +8,24 @@ A value a test samples — `Date.now()`, `new Date()`, `Math.random()`, `randomU
 
 ```typescript
 import { clock } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
-test('stamps the moment the receipt was issued', () => {
-    // Given - the calendar pinned for this scope
-    using _ = clock.at('2026-03-04T09:30:00Z');
+function issueReceipt(total: number): { issuedAt: string; total: number } {
+    return { issuedAt: new Date().toISOString(), total };
+}
 
-    // Then - the stamp is the stated instant
-    expect(new Date().toISOString()).toBe('2026-03-04T09:30:00.000Z');
+describe('issueReceipt', () => {
+    test('stamps the moment the receipt was issued', () => {
+        // Given - the calendar pinned for this scope
+        using _ = clock.at('2026-03-04T09:30:00Z');
+
+        // Then - the stamp is the stated instant
+        expect(issueReceipt(42)).toEqual({ issuedAt: '2026-03-04T09:30:00.000Z', total: 42 });
+    });
 });
 ```
+
+The expectation compares what the subject returned, and the instant is a value the test wrote. A test that pins the clock may also read `new Date()` itself, since under the pin that reading is the constant it chose, but such a test checks the clock rather than the subject.
 
 | Form                | Pins                           | For                                                                         |
 | ------------------- | ------------------------------ | --------------------------------------------------------------------------- |
@@ -78,7 +86,7 @@ When a subject needs something it does not own, take the FIRST rung that fits. T
 | `toMatchSnapshot()`                              | a golden, `toMatch(file('./_expected/…'))` |
 | `vi.mock()` of your own module                   | inject the port, and double it             |
 
-A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([24 — Linting § Deviating from a rule](24-linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](decisions/005-the-doubles-ladder-is-closed.md).
+A native module a project genuinely cannot inject is the one exception, allowed per specifier with a reason in the `no-module-mock` options ([24 — Linting § Deviating from a rule](24-linting.md#deviating-from-a-rule)). Why the ladder is closed: [ADR-005](https://github.com/jterrazz/package-test/blob/main/docs/decisions/005-the-doubles-ladder-is-closed.md).
 
 ### `mockOf()`
 
@@ -86,7 +94,7 @@ A native module a project genuinely cannot inject is the one exception, allowed 
 
 ```typescript
 import { mockOf } from '@jterrazz/test';
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 type PaymentGateway = { charge(amount: number): Promise<string> };
 
@@ -94,14 +102,16 @@ async function checkout(gateway: PaymentGateway, total: number): Promise<string>
     return `receipt for ${await gateway.charge(total)}`;
 }
 
-test('charges the gateway once for the order total', async () => {
-    // Given - a gateway that accepts every charge
-    const gateway = mockOf<PaymentGateway>();
-    gateway.charge.mockResolvedValue('ch_1');
+describe('checkout', () => {
+    test('charges the gateway once for the order total', async () => {
+        // Given - a gateway that accepts every charge
+        const gateway = mockOf<PaymentGateway>();
+        gateway.charge.mockResolvedValue('ch_1');
 
-    // Then - the receipt names the charge, and the gateway was asked for the total
-    await expect(checkout(gateway, 42)).resolves.toBe('receipt for ch_1');
-    expect(gateway.charge).toHaveBeenCalledWith(42);
+        // Then - the receipt names the charge, and the gateway was asked for the total
+        await expect(checkout(gateway, 42)).resolves.toBe('receipt for ch_1');
+        expect(gateway.charge).toHaveBeenCalledWith(42);
+    });
 });
 ```
 

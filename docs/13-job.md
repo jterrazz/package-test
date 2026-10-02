@@ -149,17 +149,19 @@ The full builder catalogue lives in [stubs](17-stubs.md).
 A job that throws rejects `.trigger()` with its own error, and what it wrote before the throw stays in the database — read it from the service handle, since a rejected chain hands back no result. That is why the constructor above hoists `analyticsDb` out of the record: a handle declared on its own is one a test can import and query.
 
 ```typescript
-import { expect, test } from 'vitest';
+import { describe, expect, test } from 'vitest';
 
 import { analyticsDb, job } from '../job.specification.js';
 
-test('a crashed job leaves what it wrote first', async () => {
-    // Given - a job that writes one row, then throws
-    const run = job.trigger('crash-after-insert');
+describe('crash', () => {
+    test('a crashed job leaves what it wrote first', async () => {
+        // Given - a job that writes one row, then throws
+        const run = job.trigger('crash-after-insert');
 
-    // Then - its error, and the row it wrote before it
-    await expect(run).rejects.toThrow('crash-after-insert: boom');
-    await expect(analyticsDb.query('events', ['type'])).resolves.toStrictEqual([['pre_crash']]);
+        // Then - its error, and the row it wrote before it
+        await expect(run).rejects.toThrow('crash-after-insert: boom');
+        await expect(analyticsDb.query('events', ['type'])).resolves.toStrictEqual([['pre_crash']]);
+    });
 });
 ```
 

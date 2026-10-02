@@ -2,7 +2,7 @@
 
 `component` tests one thing that draws itself — a React component, a React hook through a small host component written in the test, or a plain DOM function — rendered in a real headless Chromium through Vitest Browser Mode. It lives beside its code as `<file>.test.tsx`, starts nothing, and so has no constructor: the test calls the exported `component` chain directly.
 
-For a whole served page, use [10 — Website specs](10-website.md); for a module that draws nothing, a [module test](07-module-tests.md). Why a real browser rather than a simulated DOM: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
+For a whole served page, use [10 — Website specs](10-website.md); for a module that draws nothing, a [module test](07-module-tests.md). Why a real browser rather than a simulated DOM: [ADR-003](https://github.com/jterrazz/package-test/blob/main/docs/decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
 
 ## What it specifies
 
@@ -24,12 +24,12 @@ The suffix decides which project collects the file and therefore which rules jud
 
 The subject is a unit that draws itself IN A BROWSER, which leaves four neighbours outside the facet — each with a route, so none of them is a hole.
 
-| Not this                               | Because                                                                              | Route                                                         |
-| -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
-| A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until the `react-native-web` spike says otherwise |
-| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [10 — Website specs](10-website.md)          |
-| A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                         |
-| A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                       |
+| Not this                               | Because                                                                              | Route                                                                                     |
+| -------------------------------------- | ------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------- |
+| A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until an experiment rendering it through `react-native-web` shows it can move |
+| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [10 — Website specs](10-website.md)                                      |
+| A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                                                     |
+| A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                                                   |
 
 **What runs under node stays there.** In a page, each node-only name the entry publishes — the seven constructors, the services, the docker accessors, the results that walk a disk — refuses where it is called: a page has no filesystem, no child process and no socket.
 
@@ -45,7 +45,7 @@ Every other facet starts something — a server, a database, a binary, a simulat
 | The stubs, the wrapper, the instant, the page size | one test's | the chain: `.intercept()`, `.wrap()`, `.clock()`, `.viewport()` |
 
 ```typescript
-// apps/console/vitest.config.ts
+// apps/web/vitest.config.ts
 import { component, defineSpecConfig, unit } from '@jterrazz/test/vitest';
 
 export default defineSpecConfig({
@@ -58,7 +58,7 @@ export default defineSpecConfig({
 });
 ```
 
-**A relative `vite` or `wrap` is the CONFIG's path, never the cwd's.** Both are resolved against the directory of the config that called `component()`, so the two paths above mean `apps/console/web/…` whoever loaded the file — the runner from the app, knip and `typescript check` from the repository root, where every config of a repository is read. State `root` when the anchor cannot be read that way: a call written outside the config it configures (a shared config factory), or a runner started in another tree entirely (`vitest --config apps/console/vitest.config.ts` from the root).
+**A relative `vite` or `wrap` is the CONFIG's path, never the cwd's.** Both are resolved against the directory of the config that called `component()`, so the two paths above mean `apps/web/web/…` whoever loaded the file — the runner from the app, knip and `typescript check` from the repository root, where every config of a repository is read. State `root` when the anchor cannot be read that way: a call written outside the config it configures (a shared config factory), or a runner started in another tree entirely (`vitest --config apps/web/vitest.config.ts` from the root).
 
 `wrap` is a MODULE PATH whose default export is `(ui) => ReactNode` — a page imports a URL, not a function, so the providers cross as a setup file the project generates under `.artifacts/`. A router does not belong here: which routes exist is a test's Given, and it goes on the chain.
 
@@ -171,7 +171,7 @@ The ARIA tree is the golden a rendered surface wants: it is the outline a screen
 ```tsx
 import { button, component, dialog, focused } from '@jterrazz/test';
 import { useState } from 'react';
-import { expect, test, vi } from 'vitest';
+import { describe, expect, test, vi } from 'vitest';
 
 // The Given of a hook spec is a Host, written HERE: the component carrying the
 // States the test needs is part of the test, not of the app.
@@ -204,20 +204,22 @@ function Host({ onClose }: { onClose: () => void }) {
     );
 }
 
-test('gives the keyboard back to whatever opened it', async () => {
-    // Given - a dialog opened from a button and then dismissed
-    const onClose = vi.fn<() => void>();
+describe('focus', () => {
+    test('gives the keyboard back to whatever opened it', async () => {
+        // Given - a dialog opened from a button and then dismissed
+        const onClose = vi.fn<() => void>();
 
-    await component.render(<Host onClose={onClose} />, async (visitor) => {
-        await visitor.click(button('Open'));
-        await visitor.see(dialog('Host'));
-        await visitor.click(button('Close'));
-        await visitor.gone(dialog('Host'));
-        await visitor.see(focused(button('Open')));
+        await component.render(<Host onClose={onClose} />, async (visitor) => {
+            await visitor.click(button('Open'));
+            await visitor.see(dialog('Host'));
+            await visitor.click(button('Close'));
+            await visitor.gone(dialog('Host'));
+            await visitor.see(focused(button('Open')));
+        });
+
+        // Then - the owner heard the dismissal exactly once
+        expect(onClose).toHaveBeenCalledOnce();
     });
-
-    // Then - the owner heard the dismissal exactly once
-    expect(onClose).toHaveBeenCalledOnce();
 });
 ```
 

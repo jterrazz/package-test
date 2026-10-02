@@ -22,7 +22,7 @@ export const EVENTS_SCREEN_SOURCE = `<?xml version="1.0" encoding="UTF-8"?>
             <XCUIElementTypeButton type="XCUIElementTypeButton" name="Conflit militaire États-Unis Iran 2026" label="Conflit militaire États-Unis Iran 2026" enabled="true" visible="true" accessible="true" x="20" y="211" width="362" height="60" index="0" traits="Button"/>
             <XCUIElementTypeOther type="XCUIElementTypeOther" enabled="true" visible="true" accessible="false" x="20" y="271" width="362" height="1" index="1" traits=""/>
             <XCUIElementTypeButton type="XCUIElementTypeButton" name="Guerre d'Ukraine" label="Guerre d'Ukraine" enabled="true" visible="true" accessible="true" x="20" y="392" width="362" height="60" index="6" traits="Button"/>
-            <XCUIElementTypeButton type="XCUIElementTypeButton" name="Enquête Fauci COVID-19" label="Enquête Fauci COVID-19" enabled="true" visible="true" accessible="true" x="20" y="573" width="362" height="60" index="12" traits="Button"/>
+            <XCUIElementTypeButton type="XCUIElementTypeButton" name="Jazz night at the harbour" label="Jazz night at the harbour" enabled="true" visible="true" accessible="true" x="20" y="573" width="362" height="60" index="12" traits="Button"/>
             <XCUIElementTypeButton type="XCUIElementTypeButton" name="Cyberattaque sur systèmes d'eau Minnesota" label="Cyberattaque sur systèmes d'eau Minnesota" enabled="true" visible="false" accessible="true" x="20" y="935" width="362" height="60" index="24" traits="Button"/>
           </XCUIElementTypeOther>
         </XCUIElementTypeScrollView>
