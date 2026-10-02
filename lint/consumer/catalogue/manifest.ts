@@ -1426,6 +1426,19 @@ export const TYPE_ROWS: Row[] = [
             'One vocabulary across three facets is memorable only while each facet refuses the words it cannot mean.',
         reach: 'tests',
     },
+    {
+        audience: 'consumer',
+        channel: 'type',
+        sentence:
+            '`jterrazz.config.ts` takes a `test` section, typed by `@jterrazz/test`: `routes`, a path to an OpenAPI document; `collections` and `methodless`, lists of route segments and paths; `production.allow`. A key the package does not read is refused, and so is a list written as one word.',
+        facet: 'model',
+        family: 'setup',
+        fix: "Write only the keys `@jterrazz/test` reads, lists as lists: `test: { collections: ['data'] }`.",
+        name: 'test-settings-section',
+        rationale:
+            'A key nothing reads is a setting that silently does nothing, and the compiler is the one reader that sees the whole file before a run does.',
+        reach: 'config',
+    },
 ];
 
 /** One owner per convention (ADR-005); a core rule whose options other owners already set is the exception, since an override replaces options rather than merging them. */

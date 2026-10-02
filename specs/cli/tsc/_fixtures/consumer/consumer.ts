@@ -1,4 +1,5 @@
 /* oxlint-disable jterrazz/runner-in-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
+import { defineConfig } from '@jterrazz/typescript/config';
 import { expect } from 'vitest';
 
 import { directory, file, mockOf, postgres, specification } from '@jterrazz/test';
@@ -229,3 +230,15 @@ export async function assertedSubjectMatcherRows(): Promise<void> {
     expect(result.response).toMatch(file('./_expected/order.http'));
     expect(out.json).toMatch(file('./_expected/out.json'));
 }
+
+// test-settings-section — `jterrazz.config.ts` takes a `test` section, holding what `@jterrazz/test` reads and nothing else.
+export const testSettingsRows = [
+    defineConfig({ test: {} }),
+    defineConfig({ test: { routes: './openapi.yaml' } }),
+    defineConfig({ test: { collections: ['data', 'people'] } }),
+    defineConfig({ test: { methodless: ['/mcp'] } }),
+    // @ts-expect-error test-settings-section — the collections are a list, never one word [`Type 'string' is not assignable to type 'readonly string[]'`]
+    defineConfig({ test: { collections: 'data' } }),
+    // @ts-expect-error test-settings-section — the section reads what it declares, and nothing else [`'coverage' does not exist in type 'TestSettings'`]
+    defineConfig({ test: { coverage: 80 } }),
+];
