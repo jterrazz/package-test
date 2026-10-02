@@ -4,11 +4,9 @@ import { resolve } from 'node:path';
 export const RETIRED_SPELLINGS = ['toMatchRows', 'runFile', '$FIXTURES/'];
 
 export const NEGATIVE_INPUTS = [
-    'lint/engine/project/relative-path.test.ts',
     'lint/engine/project/spec-document.test.ts',
     'lint/self/corpus/retired-spellings.test.ts',
     'lint/self/corpus/retired-spellings.ts',
-    'src/disk/fs-fixtures.adapter.test.ts',
 ];
 
 const ROOTS = ['README.md', 'docs', 'lint', 'skills', 'specs', 'src'];

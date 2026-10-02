@@ -543,16 +543,6 @@
             "count": 1
         }
     },
-    "src/disk/fixture.capability.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
-    "src/disk/fs-fixtures.adapter.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        }
-    },
     "src/expectations/command/cli.result.ts": {
         "import/no-cycle": {
             "count": 1
@@ -680,11 +670,6 @@
             "count": 1
         }
     },
-    "src/expectations/in-place/in-place-setup.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
-        }
-    },
     "src/expectations/in-place/in-place.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 1
@@ -704,11 +689,6 @@
         },
         "typescript/strict-boolean-expressions": {
             "count": 3
-        }
-    },
-    "src/expectations/text/text-subject.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
         }
     },
     "src/expectations/text/text.ts": {
@@ -914,14 +894,6 @@
             "count": 1
         }
     },
-    "src/facets/specification.test.ts": {
-        "jterrazz/given-in-the-test": {
-            "count": 1
-        },
-        "jterrazz/no-status-only-test": {
-            "count": 1
-        }
-    },
     "src/facets/website/browser/playwright.adapter.ts": {
         "max-lines": {
             "count": 1
@@ -1018,11 +990,6 @@
             "count": 2
         }
     },
-    "src/services/redis/redis.adapter.test.ts": {
-        "vitest/require-to-throw-message": {
-            "count": 1
-        }
-    },
     "src/services/redis/redis.adapter.ts": {
         "typescript/no-explicit-any": {
             "count": 1
@@ -1032,11 +999,6 @@
         },
         "typescript/strict-boolean-expressions": {
             "count": 2
-        }
-    },
-    "src/services/seed/seed.capability.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 4
         }
     },
     "src/services/sqlite/sqlite.adapter.test.ts": {
@@ -1161,23 +1123,8 @@
         }
     },
     "src/stubs/kinds/anthropic.test.ts": {
-        "typescript/no-explicit-any": {
-            "count": 7
-        },
         "typescript/no-non-null-assertion": {
-            "count": 13
-        },
-        "typescript/no-unsafe-member-access": {
-            "count": 7
-        },
-        "typescript/no-unsafe-type-assertion": {
-            "count": 7
-        },
-        "unicorn/consistent-function-scoping": {
-            "count": 3
-        },
-        "vitest/max-expects": {
-            "count": 2
+            "count": 5
         }
     },
     "src/stubs/kinds/anthropic.ts": {
