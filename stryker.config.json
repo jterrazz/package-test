@@ -10,6 +10,7 @@
         "lint/**/*.ts",
         "!**/*.test.ts",
         "!**/*.test-d.ts",
+        "!**/*.fixtures.ts",
         "!**/_fixtures/**",
         "!**/_expected/**"
     ],
