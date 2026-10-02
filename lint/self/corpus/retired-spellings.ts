@@ -9,7 +9,6 @@ export const NEGATIVE_INPUTS = [
     'lint/self/corpus/retired-spellings.test.ts',
     'lint/self/corpus/retired-spellings.ts',
     'src/disk/fs-fixtures.adapter.test.ts',
-    'src/chain/paths/spec-path.test.ts',
 ];
 
 const ROOTS = ['README.md', 'docs', 'lint', 'skills', 'specs', 'src'];

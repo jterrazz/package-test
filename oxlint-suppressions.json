@@ -528,11 +528,6 @@
             "count": 3
         }
     },
-    "src/chain/paths/spec-path.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 6
-        }
-    },
     "src/chain/paths/spec-path.ts": {
         "typescript/no-unsafe-type-assertion": {
             "count": 2
@@ -813,11 +808,6 @@
         },
         "typescript/no-non-null-assertion": {
             "count": 2
-        }
-    },
-    "src/facets/cli/documents/run.action.test.ts": {
-        "typescript/no-unsafe-type-assertion": {
-            "count": 1
         }
     },
     "src/facets/cli/process/exec.adapter.test.ts": {

@@ -146,6 +146,8 @@ function checkerRowsOf(audience: string): string[] {
 /** Files probing the CLI boundary, plus the `output-asserted-as-a-golden` kitchen-sink, sit outside the rule↔fixture inventory. */
 const CLI_CONTRACT_SPECS = new Set(['kitchen-sink']);
 
+const FACET_CONTRACT_SPECS = new Set(['linters', 'rule-tester']);
+
 /** Whole words only: `qui` is inside "required", `est` inside "test". */
 function carries(text: string, token: string): boolean {
     return new RegExp(String.raw`(?<![\p{L}'’])${token}(?![\p{L}'’])`, 'u').test(
@@ -693,15 +695,16 @@ describe('manifest', () => {
         // Given - each E2E spec id, and the meta rows that have a spec of their own
         const metaRows = new Set(META_ROWS.map((row) => row.name));
         for (const id of e2eSpecIds) {
-            // Then - it is a shipped rule, a known checker pass, a rule handed to the toolchain, a meta row, or A CLI-contract probe
+            // Then - it is a shipped rule, a known checker pass, a rule handed to the toolchain, a meta row, a CLI-contract probe or the lint facet's own contract
             expect(
                 pluginRules.has(id) ||
                     CHECKER_PASS_IDS.has(id) ||
                     SELF_PASSES.has(id) ||
                     TOOLCHAIN_ROWS.has(id) ||
                     CLI_CONTRACT_SPECS.has(id) ||
+                    FACET_CONTRACT_SPECS.has(id) ||
                     metaRows.has(id),
-                `${id} maps to no rule, pass, toolchain row, meta row, or CLI-contract spec`,
+                `${id} maps to no rule, pass, toolchain row, meta row, CLI-contract or facet-contract spec`,
             ).toBe(true);
         }
     });

@@ -1,0 +1,6 @@
+description: greets the one it is handed
+runs:
+    - command: hello
+      exit: 0
+      stdout: |
+          hello

@@ -203,4 +203,20 @@ describe('refusals', () => {
             'fix: serve a registered server: echo',
         );
     });
+
+    test('a file that is not a `.spec.yaml` document is refused before it is read', async () => {
+        // Given - a json the chain is handed where a document is run
+        const answers = file('./_fixtures/workdir-answers/answers/dashboard/posts.json');
+
+        // Then - the refusal names the extension a document carries
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a json is what the type refuses; this test IS the caller the type does not reach
+        await expect(cli.run(answers as never)).rejects.toThrow(
+            [
+                'found: run(file("./_fixtures/workdir-answers/answers/dashboard/posts.json")), a file not ending in .spec.yaml',
+                'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
+                "fix: name the .spec.yaml file run() reads: run(file('./case.spec.yaml'))",
+                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+        );
+    });
 });

@@ -1,0 +1,8 @@
+{
+    "name": "consumer",
+    "private": true,
+    "type": "module",
+    "devDependencies": {
+        "@jterrazz/test": "17.0.0"
+    }
+}

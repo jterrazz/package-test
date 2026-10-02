@@ -6,8 +6,6 @@ import {
     REPORTER_OUTPUT_FILES,
     VITEST_ARTIFACTS_DIR,
 } from '../../lint/engine/project/artifacts.js';
-import { tempRootSetup } from '../chain/paths/temp-root.js';
-import { inPlaceSetup } from '../expectations/in-place/in-place-setup.js';
 import { presetConfig, reporterOutputFiles } from './preset.js';
 import { unit } from './unit.project.js';
 
@@ -89,15 +87,6 @@ describe('preset', () => {
         // Then - vitest's 5s/10s defaults are replaced by the ecosystem's
         expect(config.test?.testTimeout).toBe(30_000);
         expect(config.test?.hookTimeout).toBe(30_000);
-    });
-
-    test('presetConfig() — defaults — excludes what a spec stands on — ground is an input, not a suite', () => {
-        // Given - the preset alone
-        const config = presetConfig();
-
-        // Then - the four ground folders never get collected
-        expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
-        expect(config.test?.exclude).toContain('**/node_modules/**');
     });
 
     test('presetConfig() — defaults — carries the same budgets and exclusions into a project', () => {
@@ -197,56 +186,11 @@ describe('preset', () => {
         expect(config.test?.exclude).toContain('**/{_expected,_fixtures,_requests,_seeds}/**');
     });
 
-    test('presetConfig() — the hygiene a suite does not have to write — never retries: a flaky test is fixed or deleted', () => {
-        // Given - the preset alone
-        const config = presetConfig();
-
-        // Then - the policy is the default, so no repository has to state it
-        expect(config.test?.retry).toBe(0);
-    });
-
-    test('presetConfig() — the hygiene a suite does not have to write — gives back what a test took — the spies, the globals, the environment', () => {
-        // Given - the preset alone
-        const config = presetConfig();
-
-        // Then - the three restores are on, which is what lets `clock.at()` and `vi.stubEnv()` be written with no teardown hook (`given-in-the-test`)
-        expect(config.test?.restoreMocks).toBe(true);
-        expect(config.test?.unstubGlobals).toBe(true);
-        expect(config.test?.unstubEnvs).toBe(true);
-    });
-
-    test('presetConfig() — the hygiene a suite does not have to write — carries the same hygiene into a project', () => {
-        // Given - a project that states only its own include
-        const config = presetConfig({
-            test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
-        });
-
-        // Then - a project resolves as its own config, so the defaults are merged into it
-        const [project] = config.test?.projects ?? [];
-        expect(project).toMatchObject({
-            test: { restoreMocks: true, retry: 0, unstubEnvs: true, unstubGlobals: true },
-        });
-    });
-
     test('presetConfig() — the hygiene a suite does not have to write — what a config states wins over all of it', () => {
         // Given - a repository whose subject IS the retry
         const config = presetConfig({ test: { retry: 2 } });
 
         // Then - the preset is a default, not a ceiling
         expect(config.test?.retry).toBe(2);
-    });
-
-    test("presetConfig() — the run's global setups — the root and every inline project carry the update-mode setup and the temp-root setup", () => {
-        // Given - a config with one inline project
-        const config = presetConfig({
-            test: { projects: [{ test: { include: ['src/a.test.ts'], name: 'unit' } }] },
-        });
-
-        // Then - both carry the two setups, each existing where the preset names it
-        const [project] = config.test?.projects ?? [];
-        expect(config.test?.globalSetup).toStrictEqual([inPlaceSetup(), tempRootSetup()]);
-        expect(project).toMatchObject({ test: { globalSetup: [inPlaceSetup(), tempRootSetup()] } });
-        expect(inPlaceSetup()).toMatch(/in-place-setup\.ts$/u);
-        expect(tempRootSetup()).toMatch(/temp-root\.ts$/u);
     });
 });

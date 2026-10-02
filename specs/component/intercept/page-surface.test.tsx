@@ -1,10 +1,30 @@
-import { component, content, http, intercept, mockOf, required, waitUntil } from '@jterrazz/test';
+import {
+    component,
+    content,
+    http,
+    intercept,
+    mockOf,
+    postgres,
+    ProcessHandle,
+    required,
+    waitUntil,
+} from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { SurfacePanel } from './page-surface.js';
 import type { SurfacePort } from './page-surface.js';
 
 /** Run on the page's own runtime rather than compared by name with the node build. `intercept()` serves a test with no chain: a render declares its network on the chain. */
+
+const nodeOnly = (binding: string): Error =>
+    new Error(
+        [
+            `found: ${binding} runs under node, and was called in a page`,
+            'why: A page has no filesystem, no child process and no socket.',
+            'fix: specify it from a test collected by a node project (unit/api/job/cli/website/mobile); a rendered thing is a `.test.tsx` beside its component',
+            'read: docs/07-component.md#what-it-does-not-do',
+        ].join('\n'),
+    );
 
 describe('SurfacePanel', () => {
     test('the module-scope double answers the page, from its own worker', async () => {
@@ -67,5 +87,14 @@ describe('SurfacePanel', () => {
             { interval: 1, why: 'the third reading' },
         );
         expect(required(readings, 'the reading count')).toBe(3);
+    });
+
+    test('a binding only node can run is refused where the page calls it, saying where it runs', () => {
+        // Given - a service and a node-only class, reached from the page entry
+        // Then - each is refused at the call, the class when it is constructed rather than when it is named
+        expect(() => postgres()).toThrow(nodeOnly('postgres()'));
+        expect(() => new ProcessHandle({ command: 'node server.mjs', ready: /ready/u })).toThrow(
+            nodeOnly('ProcessHandle'),
+        );
     });
 });

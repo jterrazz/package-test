@@ -2,6 +2,7 @@ import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { tally } from '../_fixtures/orders/tally.js';
+import { integration as withDatabase } from '../integration.specification.js';
 import { integration } from '../pure.specification.js';
 
 /** Golden names in a template literal: the shape `no-unused-ground` must read as a reference rather than silence. */
@@ -28,5 +29,20 @@ describe('table', () => {
         // Then - `.call<T>()` carries T through, so the field is read inline rather than frozen into a file for the sake of one boolean
         expect(result.value.value.ok).toBe(true);
         expect(result.value.value.seen).toBe(3);
+    });
+
+    test('with one database, a table read that names it is refused as redundant', async () => {
+        // Given - a call against the integration runner, whose specification declares one database
+        const result = await withDatabase.call(() => 'called');
+
+        // Then - naming the lone database is refused before any query
+        expect(() => result.table('orders', { database: 'db' })).toThrow(
+            [
+                'found: table() names a database, and "db" is the only one declared',
+                'why: With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
+                "fix: delete { database: 'db' }",
+                'read: docs/19-linting.md#database-named-only-when-several-at-runtime',
+            ].join('\n'),
+        );
     });
 });
