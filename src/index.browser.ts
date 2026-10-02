@@ -15,9 +15,6 @@ import type { sqlite as sqliteFn } from './services/sqlite/sqlite.adapter.js';
 export type * from './index.js';
 
 export { component } from './facets/component/component.face.browser.js';
-
-export { intercept } from './stubs/delivery/browser-page/intercept.js';
-
 /** The seven constructors, present and refusing in a page. */
 export const specification: Specification = {
     api: () => refuse('specification.api()'),
@@ -28,23 +25,22 @@ export const specification: Specification = {
     mobile: () => refuse('specification.mobile()'),
     website: () => refuse('specification.website()'),
 };
-
 export const ruleTester: typeof ruleTesterFn = () => refuse('ruleTester()');
+
 export const process: typeof processFn = () => refuse('process()');
 export const ProcessHandle: typeof ProcessHandleClass = nodeOnlyClass('ProcessHandle');
 export const postgres: typeof postgresFn = () => refuse('postgres()');
 export const redis: typeof redisFn = () => refuse('redis()');
 export const sqlite: typeof sqliteFn = () => refuse('sqlite()');
-
-export { text } from './expectations/text/text-subject.browser.js';
-
 export { directory, file } from './chain/paths/spec-path.js';
 export { anthropic } from './stubs/kinds/anthropic.js';
 export { http } from './stubs/kinds/http.js';
 export { openai } from './stubs/kinds/openai.js';
 export { defineStub, defineStubs } from './stubs/stub.js';
+export { intercept } from './stubs/delivery/browser-page/intercept.js';
 export { clock } from './clock/clock.js';
 export { mockOf } from './mocks/mock-of.js';
+
 export {
     button,
     content,
@@ -71,6 +67,8 @@ export {
     within,
 } from './visitor/targets/landmarks.js';
 export { disabled, enabled, focused, selected, valued } from './visitor/targets/modifiers.js';
+
 export { match, Matcher } from './expectations/tokens/match.js';
+export { text } from './expectations/text/text-subject.browser.js';
 export { required } from './expectations/conditions/required.js';
 export { waitUntil } from './expectations/conditions/wait-until.js';

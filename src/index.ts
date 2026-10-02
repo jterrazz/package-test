@@ -9,7 +9,6 @@ export type * from './facets/lint/lint.face.js';
 export { ruleTester } from './facets/lint/lint.face.js';
 export type * from './facets/mobile/mobile.face.js';
 export type * from './facets/website/website.face.js';
-
 export type { ChainContext } from './chain/context/with.capability.js';
 export type { TestSettings } from '../lint/engine/project/settings.js';
 
@@ -22,7 +21,6 @@ export {
     type FileAt,
     type RelativePath,
 } from './chain/paths/spec-path.js';
-
 export { anthropic } from './stubs/kinds/anthropic.js';
 export {
     http,
