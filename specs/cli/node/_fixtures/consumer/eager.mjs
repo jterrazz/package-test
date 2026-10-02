@@ -17,4 +17,5 @@ for (const url of urls) {
         names.add(scope.startsWith('@') ? `${scope}/${name}` : scope);
     }
 }
+names.delete('@jterrazz/test');
 process.stdout.write(`${[...names].toSorted().join('\n')}\n`);
