@@ -11,7 +11,13 @@ import {
 } from './closure.ts';
 
 const installed = join(process.cwd(), 'node_modules');
-const packed = process.env.PACKED_PACKAGE ?? '';
+const packed = process.env.PACKED_PACKAGE ?? unpacked();
+
+function unpacked(): never {
+    throw new Error(
+        'PACKED_PACKAGE is unset: the packed specification hands it the tarball specs/cli/_setup/packed/per-run.ts unpacked',
+    );
+}
 
 function install(): void {
     cpSync(packed, join(installed, '@jterrazz', 'test'), { recursive: true });
