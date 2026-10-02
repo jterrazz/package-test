@@ -241,7 +241,6 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
             'src/chain/context/headers.capability.ts',
-            'src/chain/define-facet.ts',
             'src/chain/paths/resolved-spec-path.ts',
             'src/clock/clock.capability.ts',
             'src/clock/instant.ts',
