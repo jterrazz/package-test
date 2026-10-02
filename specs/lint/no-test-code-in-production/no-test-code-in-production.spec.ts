@@ -54,4 +54,18 @@ describe('no-test-code-in-production', () => {
                 read: docs/19-linting.md#no-test-code-in-production
         `);
     });
+
+    test('an alias a tsconfig maps is resolved even when the base it extends does not resolve', async () => {
+        // Given - a tsconfig extending a file that is not there, its own paths mapping `~/` to src/, and production code importing ground through the alias
+        const result = await lint.fixture(directory('./_fixtures/unresolved-base/')).run();
+
+        // Then - the import is refused at its line, the missing base read as nothing
+        expect(result.report).toMatch(`
+            src/service.ts:1:23  jterrazz(no-test-code-in-production)
+                found: production code references "~/_fixtures/users.js", ground (_fixtures/users.ts)
+                why: A production module never reaches test material.
+                fix: move the reference into a test — specs, \`*.test.ts\`, \`*.fixtures.ts\` or \`*.specification.ts\` — or move what production needs out of the test material
+                read: docs/19-linting.md#no-test-code-in-production
+        `);
+    });
 });
