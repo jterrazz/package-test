@@ -1,4 +1,4 @@
-import { http } from '@jterrazz/test';
+import { http, openai } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
 import { api, QUOTES_URL } from '../intercepts.specification.js';
@@ -35,6 +35,22 @@ describe('never', () => {
         );
         await expect(chain).rejects.toThrow(
             `- POST ${QUOTES_URL} — reached by POST ${QUOTES_URL}?lang=en`,
+        );
+    });
+
+    test('a provider never stub the action reaches rejects it, as an http one does', async () => {
+        // Given - the chat completions endpoint declared never requested, and an action that asks it
+        const chain = api.intercept(openai.never(openai.chat())).get('/assistant/openai-chat');
+
+        // Then - the call that happened is the failure
+        await expect(chain).rejects.toThrow(
+            [
+                'found: a route the chain declared never requested was reached:',
+                '  - POST https://api.openai.com/v1/chat/completions — reached by POST https://api.openai.com/v1/chat/completions',
+                "why: A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
+                'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
+                'read: docs/16-stubs.md#never--a-call-that-must-not-happen',
+            ].join('\n'),
         );
     });
 });
