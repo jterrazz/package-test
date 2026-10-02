@@ -47,7 +47,7 @@ npx vitest --run --project component  # the same chromium, a mounted unit at a t
 
 **The mobile tree runs two ways, and the specs are the same both times.** `specs/mobile/` drives Specimen, a small native app. In every run — `make check`, CI — its runner connects to the protocol double in `specs/_shared/_setup/appium/`: a WebDriver server that answers like Appium's XCUITest driver, drawing the app from its description as data (`specs/_shared/_fixtures/specimen-mobile/specimen.ts`). Before a release, or when the appium adapter or the double changes, `make test-mobile` runs the same files against a real iOS simulator and the same app in SwiftUI; no CI job runs it, because CI provisions no simulator. The double proves the facet over the protocol, and only the simulator proves the double tells the truth about a device: a spec green on one and red on the other is a gap in the double. What the target does and needs is `specs/_shared/_fixtures/specimen-mobile/README.md`'s.
 
-A second hole is the RENDERER's, and it is not this repository's to close: a React Native screen never reaches the real Chromium the component facet mounts in, so jest stays on that surface until the `react-native-web` spike says otherwise — [09 — Component specs](09-component.md) lists it with the other three shapes the facet does not take.
+A second hole is the RENDERER's, and it is not this repository's to close: a React Native screen never reaches the real Chromium the component facet mounts in, so jest stays on that surface until an experiment rendering it through `react-native-web` shows it can move — [09 — Component specs](09-component.md) lists it with the other three shapes the facet does not take.
 
 ## How a spec tree is laid out
 
@@ -605,9 +605,31 @@ It is aimed at named files, not at a whole project. A rule test declares its cas
 
 One flake is known and not reproduced. In a whole-suite run under `--coverage`, the first few component files have failed on `import('vitest-browser-react')` with a SyntaxError whose token varies (`':'`, `'}'`, `Illegal return statement`, `Undefined label 'a'`), and every later file passed. The page parsed a slice of react-dom's client chunk, not a broken file: fifty-two repeated runs, a probe parsing every optimised dependency the server sent, and `DEBUG=vite:deps` over all of them found no malformed response and no re-optimisation mid-run — so `optimizeDeps.noDiscovery` is not the fix, and would cost a consumer its undeclared CommonJS dependencies. What is left is in the browser (a module compiled while the coverage mode switches) or outside the tree (another process installing or running in the same clone). If it recurs, keep the log, the listing of Vite's dependency cache with its `_metadata.json`, and whether another process ran in the clone.
 
+## Probing the container sweep
+
+[18 — Services § Reused across runs](18-services.md#reused-across-runs-locally) states what the services setup's sweep removes. The probe, run from this repository after `npm run build`, sets up a run that holds the reaper, a run killed with its redis running, and an ended container of a session nobody holds — the next setup's sweep leaves none of them.
+
+```bash
+image=redis:7-alpine
+node --input-type=module -e "const { GenericContainer } = await import('testcontainers'); await new GenericContainer('$image').start(); setInterval(() => {}, 1000)" &
+holder=$!
+sleep 10   # until the holder's container runs
+node --input-type=module -e "
+const { default: setup } = await import('./dist/services-setup.js');
+let url; await setup({ provide: (_, served) => { url = served; } }, async () => {});
+await fetch(url + '/containers', { method: 'POST', body: JSON.stringify({ image: '$image', port: 6379 }) });
+process.kill(process.pid, 'SIGKILL');"
+docker run -d --label org.testcontainers.session-id=probe-gone "$image" true
+docker ps -a --filter label=com.jterrazz.test.owner   # the killed run's redis, running
+node --input-type=module -e "await (await import('./dist/services-setup.js')).prepareDocker()"
+docker ps -a --filter label=com.jterrazz.test.owner   # empty
+docker ps -a --filter label=org.testcontainers.session-id=probe-gone   # empty
+kill $holder
+```
+
 ## What CI runs
 
-The workflow is `.github/workflows/validate.yaml`, on every push to `main` and every pull request, delegating to the estate's shared `validate.yaml`. It restores `.artifacts/`, then runs `make build`, `make lint` and `make test` in that order, with chromium provisioned because the website specs drive a real browser. The same three targets are what a local run owes before a push; the ordering is not decorative, since lint loads what build produced.
+The workflow is `.github/workflows/validate.yaml`, on every push to `main` and every pull request, delegating to the shared `validate.yaml` of [jterrazz-actions](https://github.com/jterrazz/jterrazz-actions). It restores `.artifacts/`, then runs `make build`, `make lint` and `make test` in that order, with chromium provisioned because the website specs drive a real browser. The same three targets are what a local run owes before a push; the ordering is not decorative, since lint loads what build produced.
 
 **`make test` carries the floor.** It runs the suite WITH coverage and then `npm run coverage:check`, so the ratchet is judged on every push rather than trusted to whoever remembered to type `make check` — a gate CI never runs is a courtesy, not a gate. `make check` is still the whole verdict locally: build, lint, then that same target.
 

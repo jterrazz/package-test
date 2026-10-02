@@ -10,12 +10,12 @@ All four import from the package root (rule `no-unpublished-subpath`):
 import { postgres, process, redis, sqlite } from '@jterrazz/test';
 ```
 
-| Factory      | Backing                                            | Options                                                       | Connection string shape               |
-| ------------ | -------------------------------------------------- | ------------------------------------------------------------- | ------------------------------------- |
-| `postgres()` | Docker container                                   | `image`, `env`                                                | `postgresql://user:pass@host:port/db` |
-| `redis()`    | Docker container                                   | `image`                                                       | `redis://host:port`                   |
-| `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`)   | `file:/…/….sqlite`                    |
-| `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout` | `http://127.0.0.1:port`               |
+| Factory      | Backing                                            | Options                                                                         | Connection string shape               |
+| ------------ | -------------------------------------------------- | ------------------------------------------------------------------------------- | ------------------------------------- |
+| `postgres()` | Docker container                                   | `image`, `env`                                                                  | `postgresql://user:pass@host:port/db` |
+| `redis()`    | Docker container                                   | `image`                                                                         | `redis://host:port`                   |
+| `sqlite()`   | **No Docker** — a template file copied per worker  | `init` (SQL file) or `prismaSchema` (runs `prisma db push`), paths from the cwd | `file:/…/….sqlite`                    |
+| `process()`  | **No Docker** — a child process the framework owns | `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`                   | `http://127.0.0.1:port`               |
 
 **Each factory names its own optional peer**, and names it at startup rather than at install time: `postgres()` and `redis()` need `testcontainers` (and `pg` / `redis` for the driver a table read uses), `sqlite()` needs `better-sqlite3`, and `process()` needs nothing but node. A project that declares none of them installs none of them — the drivers are optional peers since 16.0, each loaded lazily by the one adapter under `services/` that owns it ([06 — Setting up](06-setting-up.md#what-to-install)). The refusal, when one is missing, names the service that asked, the peer, the install command of the package manager the project's own lockfile names, and — under pnpm — the `onlyBuiltDependencies` line a native binding also needs before it is built at all.
 
@@ -102,7 +102,7 @@ export const { cleanup, website } = await specification.website({
     }
     ```
 
-In CLI mode, the record additionally drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule `service-urls-injected` — see [CLI specs](14-cli.md#auto-injected-connection-urls)).
+In a cli spec, the record also drives env injection into the child process: `<KEY>_URL` per service — the key uppercased to **CONSTANT_CASE** at camelCase boundaries (`analyticsDb` → `ANALYTICS_DB_URL`) — plus `DATABASE_URL` / `REDIS_URL` when unambiguous (rule `service-urls-injected` — see [CLI specs](14-cli.md#auto-injected-connection-urls)).
 
 ### The `database:` rule
 
@@ -127,6 +127,8 @@ docker/
 └── analytics-db/
     └── init.sql            # schema for the "analytics-db" service
 ```
+
+This convention is `postgres()`'s alone: `redis()` takes no init script, and `sqlite()` names its schema with its own `init` or `prismaSchema` option ([below](#sqlite-without-docker)).
 
 - `docker/<service>/init.sql` builds the service's **template database** — matched by the **kebab-case of the record key**, so the analytics schema above belongs to `analytics-db/` (the folder `analyticsDb` names).
 - The template is built ONCE per container: its name is the script's digest, one worker builds it under an advisory lock while the others wait and then find it, and each worker then takes `CREATE DATABASE … TEMPLATE` — a copy of the finished schema, whatever the script did to build it. A script that fails leaves no template behind, and the error names the script.
@@ -157,27 +159,9 @@ The host in the label is `os.hostname()`, which on macOS follows the network the
 
 The same sweep covers a reaper that is gone. It runs with auto-remove, so a runtime that stops every container, or a `docker stop` of them all, takes it away and leaves the session's containers stopped behind it. A container that carries a testcontainers session, has ended, and whose session no running reaper holds is removed too — whichever package or version started it.
 
-The probe, from a built tree: a run that holds the reaper, a run killed with its redis running, and an ended container of a session nobody holds — the next setup's sweep leaves none of them.
+### Cleaning up leftover containers
 
-```bash
-image=redis:7-alpine
-node --input-type=module -e "const { GenericContainer } = await import('testcontainers'); await new GenericContainer('$image').start(); setInterval(() => {}, 1000)" &
-holder=$!
-sleep 10   # until the holder's container runs
-node --input-type=module -e "
-const { default: setup } = await import('./dist/services-setup.js');
-let url; await setup({ provide: (_, served) => { url = served; } }, async () => {});
-await fetch(url + '/containers', { method: 'POST', body: JSON.stringify({ image: '$image', port: 6379 }) });
-process.kill(process.pid, 'SIGKILL');"
-docker run -d --label org.testcontainers.session-id=probe-gone "$image" true
-docker ps -a --filter label=com.jterrazz.test.owner   # the killed run's redis, running
-node --input-type=module -e "await (await import('./dist/services-setup.js')).prepareDocker()"
-docker ps -a --filter label=com.jterrazz.test.owner   # empty
-docker ps -a --filter label=org.testcontainers.session-id=probe-gone   # empty
-kill $holder
-```
-
-The label lists every container the package started, and the reused ones, which carry no session and no sweep touches, are removed by hand:
+The label lists every container the package started. The reused ones carry no session and no sweep touches them, so they are removed by hand:
 
 ```bash
 docker ps -a --filter label=com.jterrazz.test=true
@@ -219,7 +203,9 @@ export const { cli, cleanup } = await specification.cli('shoply', {
 
 `sqlite()` builds a template database once (from `init` SQL or by running `prisma db push` on `prismaSchema`), then hands each worker its own copy. `.seed()` and `result.table()` work identically to Postgres.
 
-`prismaSchema` is resolved against the **current working directory** and passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
+`init` and `prismaSchema` are both resolved against the **current working directory**, the folder vitest runs from — the project root when you run it as [05](05-getting-started.md#5-run-it) does — never against the specification file. They name a file of the project, the schema the app itself ships, not ground a test stands on, so they take a bare path rather than `file()`, which resolves against the file that calls it.
+
+`prismaSchema` is passed to the CLI as `npx prisma db push --force-reset --schema <absolute path>` — the schema is named explicitly, so it does not have to be the one Prisma would discover from a `prisma.config.ts` at the cwd. Declare no `prismaSchema` and the bare invocation runs, leaving discovery to Prisma.
 
 ### Where the template lives
 
@@ -237,6 +223,7 @@ Two more properties fall out of it: the winner builds on a private path and **re
 
 ## Pitfalls
 
+- **Importing `process` and reading `process.env` in one file.** The factory shadows Node's global `process`, so `process.env.CI` in that file reads a property of the factory and fails. Alias the factory — `import { process as service } from '@jterrazz/test'` — or read the environment through `import { env } from 'node:process'`.
 - **Naming the `init.sql` folder after the raw record key.** The folder is the key's **kebab-case** form: key `analyticsDb` reads `docker/analytics-db/init.sql`, not `docker/analyticsDb/`.
 - **Sharing state across specs "because the container is shared".** The container is shared; the data is not — chains reset databases (rule `sequence-expressed-by-seeding`), and workers are isolated (rule `state-isolated-per-worker`).
 - **Passing `root` that auto-discovery would have found.** Redundant override (rule `no-redundant-root`).
