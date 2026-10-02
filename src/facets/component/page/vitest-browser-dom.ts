@@ -38,73 +38,70 @@ function answersSearch(scope: LocatorSelectors): scope is SearchScope {
 }
 
 /** A `<search>` takes its accessible name from its author alone. */
-function locateSearch(scope: LocatorSelectors, element: Target, exact: boolean): Locator {
+function locateSearch(scope: LocatorSelectors, target: Target, exact: boolean): Locator {
     const byRole =
-        element.name === undefined
+        target.name === undefined
             ? scope.getByRole('search', { exact })
-            : scope.getByRole('search', { exact, name: element.name });
+            : scope.getByRole('search', { exact, name: target.name });
     if (!answersSearch(scope)) {
         return byRole;
     }
     const byElement = scope.getBySearchElement();
     return byRole.or(
-        element.name === undefined
+        target.name === undefined
             ? byElement
-            : byElement.and(scope.getByLabelText(element.name, { exact })),
+            : byElement.and(scope.getByLabelText(target.name, { exact })),
     );
 }
 
 /** No `.first()`: taking the first match is the silent wrong-element bug `target-matches-one-element` prevents. */
-export function locate(root: LocatorSelectors, element: Target): Locator {
-    const scope: LocatorSelectors = element.scope ? locate(root, element.scope) : root;
+export function locate(root: LocatorSelectors, target: Target): Locator {
+    const scope: LocatorSelectors = target.scope ? locate(root, target.scope) : root;
     // An absent `exact` is the default, not a choice.
-    const exact = element.exact ?? true;
-    const name = element.name ?? '';
-    if (element.kind === 'field') {
+    const exact = target.exact ?? true;
+    const name = target.name ?? '';
+    if (target.kind === 'field') {
         let field = scope.getByLabelText(name, { exact });
         for (const role of FIELD_ROLES) {
             field = field.or(scope.getByRole(role, { exact, name }));
         }
         return field;
     }
-    if (element.kind === 'testId') {
+    if (target.kind === 'testId') {
         return scope.getByTestId(name);
     }
-    if (element.kind === 'text') {
+    if (target.kind === 'text') {
         return scope.getByText(name, { exact });
     }
-    if (element.kind === 'search') {
-        return locateSearch(scope, element, exact);
+    if (target.kind === 'search') {
+        return locateSearch(scope, target, exact);
     }
     // Every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
-        element.kind,
-        element.name === undefined ? { exact } : { exact, name: element.name },
+        target.kind,
+        target.name === undefined ? { exact } : { exact, name: target.name },
     );
 }
 
-function ambiguousLevel(element: Target): Target {
-    for (const level of scopeChain(element).slice(0, -1)) {
+function ambiguousLevel(target: Target): Target {
+    for (const level of scopeChain(target).slice(0, -1)) {
         if (locate(page, level).elements().length > 1) {
             return level;
         }
     }
-    return element;
+    return target;
 }
 
 /** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
-export async function act<T>(
-    element: Target,
-    action: (locator: Locator) => Promise<T>,
-): Promise<T> {
-    const locator = locate(page, element);
+export async function act<T>(target: Target, action: (locator: Locator) => Promise<T>): Promise<T> {
+    const locator = locate(page, target);
     try {
         return await action(locator);
     } catch (error) {
         if (locator.elements().length <= 1) {
             throw error;
         }
-        const culprit = ambiguousLevel(element);
+        const culprit = ambiguousLevel(target);
         const matches = candidatesOf(locate(page, culprit).elements(), CANDIDATE_LIMITS);
         const url = globalThis.location.href;
         throw ambiguousTargetError({ target: culprit, matches, url });
@@ -112,8 +109,8 @@ export async function act<T>(
 }
 
 /** A collapsed select's options have no box: visibility would answer "no" for every one. */
-function byPresence(element: Target): boolean {
-    return element.kind === 'option';
+function byPresence(target: Target): boolean {
+    return target.kind === 'option';
 }
 
 function valueOf(node: Element | null): string | undefined {
@@ -124,21 +121,21 @@ function valueOf(node: Element | null): string | undefined {
         : undefined;
 }
 
-function isGone(locator: Locator, element: Target): boolean {
+function isGone(locator: Locator, target: Target): boolean {
     const node = locator.query();
-    if (element.focused === true) {
+    if (target.focused === true) {
         return node !== document.activeElement;
     }
-    if (element.disabled !== undefined) {
-        return node === null || node.matches(':disabled') !== element.disabled;
+    if (target.disabled !== undefined) {
+        return node === null || node.matches(':disabled') !== target.disabled;
     }
-    if (element.selected !== undefined) {
-        return node === null || node.matches(':checked') !== element.selected;
+    if (target.selected !== undefined) {
+        return node === null || node.matches(':checked') !== target.selected;
     }
-    if (element.value !== undefined) {
-        return node === null || valueOf(node) !== element.value;
+    if (target.value !== undefined) {
+        return node === null || valueOf(node) !== target.value;
     }
-    return node === null || (byPresence(element) ? false : !node.checkVisibility());
+    return node === null || (byPresence(target) ? false : !node.checkVisibility());
 }
 
 /** What is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. */
@@ -162,35 +159,35 @@ function keystroke(key: string): string {
 
 export function componentVerbs(surface: MountedSurface): ComponentVisitor {
     return {
-        check: async (element) => {
-            await act(element, async (locator) => {
+        check: async (target) => {
+            await act(target, async (locator) => {
                 const node = locator.element();
                 if (!(node instanceof HTMLInputElement) || !node.checked) {
                     await locator.click();
                 }
             });
         },
-        click: async (element) => {
-            await act(element, async (locator) => {
+        click: async (target) => {
+            await act(target, async (locator) => {
                 await locator.click();
             });
         },
-        fill: async (element, value) => {
-            await act(element, async (locator) => {
+        fill: async (target, value) => {
+            await act(target, async (locator) => {
                 await locator.fill(value);
             });
         },
-        gone: async (element) => {
-            await act(element, async (locator) => {
+        gone: async (target) => {
+            await act(target, async (locator) => {
                 // Polled: `expect.element` refuses a locator matching nothing, the commonest way to be gone.
                 await polling(
-                    () => isGone(locator, element),
-                    `${asWritten(element)} is still on the screen`,
+                    () => isGone(locator, target),
+                    `${asWritten(target)} is still on the screen`,
                 ).toBeTruthy();
             });
         },
-        hover: async (element) => {
-            await act(element, async (locator) => {
+        hover: async (target) => {
+            await act(target, async (locator) => {
                 await locator.hover();
             });
         },
@@ -198,41 +195,41 @@ export function componentVerbs(surface: MountedSurface): ComponentVisitor {
             await userEvent.keyboard(keystroke(key));
         },
         rerender: surface.rerender,
-        see: async (element) => {
-            await act(element, async (locator) => {
-                if (element.focused === true) {
+        see: async (target) => {
+            await act(target, async (locator) => {
+                if (target.focused === true) {
                     await expect.element(locator).toHaveFocus();
                     return;
                 }
-                if (element.disabled === true) {
+                if (target.disabled === true) {
                     await expect.element(locator).toBeDisabled();
                     return;
                 }
-                if (element.disabled === false) {
+                if (target.disabled === false) {
                     await expect.element(locator).toBeEnabled();
                     return;
                 }
-                if (element.selected !== undefined) {
+                if (target.selected !== undefined) {
                     // No matcher answers for an `<option>`: `:checked` is what CSS gives a selected one.
                     await polling(
                         () => locator.query()?.matches(':checked') === true,
-                        `${asWritten(element)} is not the selected one`,
-                    ).toBe(element.selected);
+                        `${asWritten(target)} is not the selected one`,
+                    ).toBe(target.selected);
                     return;
                 }
-                if (element.value !== undefined) {
-                    await expect.element(locator).toHaveValue(element.value);
+                if (target.value !== undefined) {
+                    await expect.element(locator).toHaveValue(target.value);
                     return;
                 }
-                if (byPresence(element)) {
+                if (byPresence(target)) {
                     await expect.element(locator).toBeInTheDocument();
                     return;
                 }
                 await expect.element(locator).toBeVisible();
             });
         },
-        select: async (element, option) => {
-            await act(element, async (locator) => {
+        select: async (target, option) => {
+            await act(target, async (locator) => {
                 await locator.selectOptions(option);
             });
         },

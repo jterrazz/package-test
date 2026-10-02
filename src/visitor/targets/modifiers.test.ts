@@ -7,18 +7,18 @@ import { button, field, link, option } from './roles.js';
 describe('modifiers', () => {
     test('focused — modifies a target rather than replacing it', () => {
         // Given - the button a dialog should hand the keyboard back to
-        const element = focused(button('Open'));
+        const target = focused(button('Open'));
 
         // Then - the target is the same one, asked about its focus
-        expect(element).toStrictEqual({ focused: true, kind: 'button', name: 'Open' });
+        expect(target).toStrictEqual({ focused: true, kind: 'button', name: 'Open' });
     });
 
     test('focused — survives scoping, so the keyboard can be asserted inside a landmark', () => {
         // Given - a focused link designated inside the nav
-        const element = within(navigation(), focused(link('Articles')));
+        const target = within(navigation(), focused(link('Articles')));
 
         // Then - both the scope and the modifier travel with it
-        expect(element).toStrictEqual({
+        expect(target).toStrictEqual({
             focused: true,
             kind: 'link',
             name: 'Articles',
@@ -43,10 +43,10 @@ describe('modifiers', () => {
 
     test('disabled / enabled — survive scoping, so enablement can be asserted inside a landmark', () => {
         // Given - a disabled button designated inside a form
-        const element = within(main(), disabled(button('Publish')));
+        const target = within(main(), disabled(button('Publish')));
 
         // Then - both the scope and the modifier travel with it
-        expect(element).toStrictEqual({
+        expect(target).toStrictEqual({
             disabled: true,
             kind: 'button',
             name: 'Publish',
@@ -56,10 +56,10 @@ describe('modifiers', () => {
 
     test('option / selected — modifies the option a field is on rather than replacing it', () => {
         // Given - the chosen channel, named inside the field that holds it
-        const element = within(field('Channel'), selected(option('LinkedIn')));
+        const target = within(field('Channel'), selected(option('LinkedIn')));
 
         // Then - the scope and the state travel on the one target
-        expect(element).toStrictEqual({
+        expect(target).toStrictEqual({
             kind: 'option',
             name: 'LinkedIn',
             scope: { kind: 'field', name: 'Channel' },
@@ -69,10 +69,10 @@ describe('modifiers', () => {
 
     test('valued — carries the value the field must hold', () => {
         // Given - the title a form was filled with
-        const element = valued(field('Title'), 'Launch teaser');
+        const target = valued(field('Title'), 'Launch teaser');
 
         // Then - the target is the same one, asked about its value
-        expect(element).toStrictEqual({
+        expect(target).toStrictEqual({
             kind: 'field',
             name: 'Title',
             value: 'Launch teaser',
@@ -81,9 +81,9 @@ describe('modifiers', () => {
 
     test('valued — states an empty value as emptiness, not as an absent modifier', () => {
         // Given - the field a reset left behind
-        const element = valued(field('Title'), '');
+        const target = valued(field('Title'), '');
 
         // Then - the empty string is the value asked about
-        expect(element.value).toBe('');
+        expect(target.value).toBe('');
     });
 });

@@ -7,50 +7,50 @@ import { content, link } from './roles.js';
 describe('asWritten', () => {
     test('asWritten — renders a target as the source that would build it', () => {
         // Given - a plain named target
-        const element = link('Articles');
+        const target = link('Articles');
 
         // Then - the error speaks the caller's vocabulary, not playwright's
-        expect(asWritten(element)).toBe('link("Articles")');
+        expect(asWritten(target)).toBe('link("Articles")');
     });
 
     test('asWritten — renders the exact option', () => {
         // Given - a target asking for a whole-name match
-        const element = link('Articles', { exact: true });
+        const target = link('Articles', { exact: true });
 
         // Then - the option is echoed as written
-        expect(asWritten(element)).toBe('link("Articles", { exact: true })');
+        expect(asWritten(target)).toBe('link("Articles", { exact: true })');
     });
 
     test('asWritten — renders an anonymous landmark without arguments', () => {
         // Given - a landmark carrying no accessible name
-        const element = main();
+        const target = main();
 
         // Then - no empty string is invented for it
-        expect(asWritten(element)).toBe('main()');
+        expect(asWritten(target)).toBe('main()');
     });
 
     test('asWritten — renders a scope as the within() call that produced it', () => {
         // Given - a scoped target
-        const element = within(navigation(), link('Articles'));
+        const target = within(navigation(), link('Articles'));
 
         // Then - the rendering round-trips to source the author could paste
-        expect(asWritten(element)).toBe('within(navigation(), link("Articles"))');
+        expect(asWritten(target)).toBe('within(navigation(), link("Articles"))');
     });
 
     test('asWritten — renders a nested scope outside-in', () => {
         // Given - a target scoped twice
         const inner = within(region('Series'), link('Part 2'));
-        const element = within(main(), inner);
+        const target = within(main(), inner);
 
         // Then - the chain reads from the outermost container inward
-        expect(asWritten(element)).toBe('within(within(main(), region("Series")), link("Part 2"))');
+        expect(asWritten(target)).toBe('within(within(main(), region("Series")), link("Part 2"))');
     });
 
     test('asWritten — speaks content() for the text kind', () => {
         // Given - a target built by content(), whose kind is text
-        const element = content('Hello');
+        const target = content('Hello');
 
         // Then - the author's function is named, never the kind
-        expect(asWritten(element)).toBe('content("Hello")');
+        expect(asWritten(target)).toBe('content("Hello")');
     });
 });

@@ -66,19 +66,19 @@ function isMobileKind(kind: Target['kind']): kind is MobileElementKind {
 }
 
 /** Landmarks have no XCUITest analog: the boundary is refused, not approximated. */
-function compilePredicate(element: Target, options?: { anyVisibility?: boolean }): string {
-    if (!isMobileKind(element.kind)) {
+function compilePredicate(target: Target, options?: { anyVisibility?: boolean }): string {
+    if (!isMobileKind(target.kind)) {
         throw new Error(
             refusal('no-landmark-on-mobile', {
                 fix: `scope with within(testId('…'), …) — any target works as the scope`,
-                found: `${asWritten(element)}, a landmark — an iOS screen has no '${element.kind}' region`,
+                found: `${asWritten(target)}, a landmark — an iOS screen has no '${target.kind}' region`,
             }),
         );
     }
-    const name = escapePredicate(element.name ?? '');
-    return PREDICATES[element.kind]({
+    const name = escapePredicate(target.name ?? '');
+    return PREDICATES[target.kind]({
         contains: (attribute) =>
-            element.exact === false
+            target.exact === false
                 ? `${attribute} CONTAINS '${name}'`
                 : `${attribute} == '${name}'`,
         name,
@@ -89,12 +89,12 @@ function compilePredicate(element: Target, options?: { anyVisibility?: boolean }
 /** `$$` answers a chainable typed as its array: the one await of it lives here. */
 async function matching(
     scope: MatchScope,
-    element: Target,
+    target: Target,
     options?: { anyVisibility?: boolean },
 ): Promise<ElementList> {
     /* oxlint-disable typescript/await-thenable -- webdriverio's chainable is TYPED as the array it resolves to and is a promise at runtime: the await is what runs the query */
     /* oxlint-disable typescript/return-await -- same reason: the value returned is a promise, whatever its type says */
-    return await scope.$$(`-ios predicate string:${compilePredicate(element, options)}`);
+    return await scope.$$(`-ios predicate string:${compilePredicate(target, options)}`);
     /* oxlint-enable typescript/return-await */
     /* oxlint-enable typescript/await-thenable */
 }
@@ -180,15 +180,15 @@ export class AppiumAdapter implements DevicePort {
     /** `see()` acts on nothing, so any visible match satisfies it: XCUITest trees duplicate labels across container and child. */
     private createVisitor(driver: Driver): MobileVisitor {
         return {
-            fill: async (element, value) => {
-                const match = await this.resolveOne(driver, element, 'fill', 'one');
+            fill: async (target, value) => {
+                const match = await this.resolveOne(driver, target, 'fill', 'one');
                 await match.setValue(value);
             },
-            see: async (element) => {
-                await this.resolveOne(driver, element, 'see', 'any');
+            see: async (target) => {
+                await this.resolveOne(driver, target, 'see', 'any');
             },
-            tap: async (element) => {
-                const match = await this.resolveOne(driver, element, 'tap', 'one');
+            tap: async (target) => {
+                const match = await this.resolveOne(driver, target, 'tap', 'one');
                 await match.click();
             },
         };
@@ -197,11 +197,11 @@ export class AppiumAdapter implements DevicePort {
     /** Scopes stay strict in both modes; the chain resolves outside-in, so an ambiguous scope names itself. */
     private async resolveOne(
         driver: Driver,
-        element: Target,
+        target: Target,
         verb: string,
         cardinality: 'any' | 'one',
     ): Promise<DriverElement> {
-        const chain = scopeChain(element);
+        const chain = scopeChain(target);
         const deadline = Date.now() + this.actionTimeoutMs;
 
         /* The scroll fallback takes an expensive unfiltered snapshot: once, on the first miss. */
@@ -215,7 +215,7 @@ export class AppiumAdapter implements DevicePort {
                 return resolved;
             }
             if (Date.now() > deadline) {
-                throw await this.timeoutError(driver, element, verb);
+                throw await this.timeoutError(driver, target, verb);
             }
             await delay(POLL_INTERVAL_MS);
         }
@@ -289,7 +289,7 @@ export class AppiumAdapter implements DevicePort {
         }
     }
 
-    private async timeoutError(driver: Driver, element: Target, verb: string): Promise<Error> {
+    private async timeoutError(driver: Driver, target: Target, verb: string): Promise<Error> {
         let excerpt = '';
         try {
             const source = await driver.getPageSource();
@@ -309,7 +309,7 @@ export class AppiumAdapter implements DevicePort {
         return new Error(
             refusal({
                 fix: 'designate what this screen shows, or raise `timeouts.action` for a slow build',
-                found: `${verb}(${asWritten(element)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
+                found: `${verb}(${asWritten(target)}) timed out after ${this.actionTimeoutMs}ms — no visible match.${excerpt}`,
                 read: 'docs/09-mobile.md#declared-timeouts',
                 why: 'A mobile verb waits for one visible match, within the declared action budget.',
             }),

@@ -49,28 +49,28 @@ const FIELD_ROLES = [
 ] as const;
 
 /** No `.first()`: playwright's strict mode is the mechanism behind `target-matches-one-element`. */
-function locate(root: MatchScope, element: Target): Locator {
-    const scope: MatchScope = element.scope ? locate(root, element.scope) : root;
+function locate(root: MatchScope, target: Target): Locator {
+    const scope: MatchScope = target.scope ? locate(root, target.scope) : root;
     // `exact` is the framework's default, not playwright's.
-    const exact = element.exact ?? true;
-    const name = element.name ?? '';
-    if (element.kind === 'field') {
+    const exact = target.exact ?? true;
+    const name = target.name ?? '';
+    if (target.kind === 'field') {
         let field = scope.getByLabel(name, { exact });
         for (const role of FIELD_ROLES) {
             field = field.or(scope.getByRole(role, { exact, name }));
         }
         return field;
     }
-    if (element.kind === 'testId') {
+    if (target.kind === 'testId') {
         return scope.getByTestId(name);
     }
-    if (element.kind === 'text') {
+    if (target.kind === 'text') {
         return scope.getByText(name, { exact });
     }
     // Every other kind is an ARIA role named after itself: one branch answers for all.
     return scope.getByRole(
-        element.kind,
-        element.name === undefined ? { exact } : { exact, name: element.name },
+        target.kind,
+        target.name === undefined ? { exact } : { exact, name: target.name },
     );
 }
 
@@ -82,47 +82,47 @@ function isStrictViolation(error: unknown): boolean {
 /** The ambiguous level is found first: a scope matching several landmarks is the real fault. */
 async function act<T>(
     page: Page,
-    element: Target,
+    target: Target,
     action: (locator: Locator) => Promise<T>,
 ): Promise<T> {
     try {
-        return await action(locate(page, element));
+        return await action(locate(page, target));
     } catch (error) {
         if (!isStrictViolation(error)) {
             throw error;
         }
-        const culprit = await findAmbiguousLevel(page, element);
+        const culprit = await findAmbiguousLevel(page, target);
         const matches = await locate(page, culprit).evaluateAll(candidatesOf, CANDIDATE_LIMITS);
         throw ambiguousTargetError({ target: culprit, matches, url: page.url() });
     }
 }
 
-async function findAmbiguousLevel(page: Page, element: Target): Promise<Target> {
-    for (const level of scopeChain(element).slice(0, -1)) {
+async function findAmbiguousLevel(page: Page, target: Target): Promise<Target> {
+    for (const level of scopeChain(target).slice(0, -1)) {
         if ((await locate(page, level).count()) > 1) {
             return level;
         }
     }
-    return element;
+    return target;
 }
 
 /** A second locator condition keeps playwright's retry; `toBeFocused()` lives in `@playwright/test`, which this package does not carry. */
-function stateOnly(page: Page, locator: Locator, element: Target): Locator | null {
-    if (element.focused === true) {
+function stateOnly(page: Page, locator: Locator, target: Target): Locator | null {
+    if (target.focused === true) {
         return locator.and(page.locator(':focus'));
     }
-    if (element.disabled !== undefined) {
-        return locator.and(page.locator(element.disabled ? ':disabled' : ':enabled'));
+    if (target.disabled !== undefined) {
+        return locator.and(page.locator(target.disabled ? ':disabled' : ':enabled'));
     }
-    if (element.selected !== undefined) {
-        return locator.and(page.locator(element.selected ? ':checked' : ':not(:checked)'));
+    if (target.selected !== undefined) {
+        return locator.and(page.locator(target.selected ? ':checked' : ':not(:checked)'));
     }
     return null;
 }
 
 /** A collapsed select's options have no box until opened. */
-function byPresence(element: Target): boolean {
-    return element.kind === 'option';
+function byPresence(target: Target): boolean {
+    return target.kind === 'option';
 }
 
 async function currentValue(locator: Locator): Promise<null | string> {
@@ -138,8 +138,8 @@ async function currentValue(locator: Locator): Promise<null | string> {
 }
 
 /** A poll: a value is a property, and a locator's CSS reads the attribute, which a controlled input never moves. */
-async function waitForValue(locator: Locator, element: Target, wanted: boolean): Promise<void> {
-    const value = element.value ?? '';
+async function waitForValue(locator: Locator, target: Target, wanted: boolean): Promise<void> {
+    const value = target.value ?? '';
     const deadline = Date.now() + VALUE_TIMEOUT_MS;
     for (;;) {
         // oxlint-disable-next-line eslint/no-await-in-loop -- a poll asks, waits, asks again: the rounds are sequential by definition and there is nothing to run in parallel
@@ -151,7 +151,7 @@ async function waitForValue(locator: Locator, element: Target, wanted: boolean):
             throw new Error(
                 refusal({
                     fix: 'correct the value the scenario states, or what the page puts in the field',
-                    found: `${asWritten(element)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
+                    found: `${asWritten(target)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
                     read: 'docs/13-visitor.md#see-and-gone-are-the-synchronization',
                     why: 'A verb waits for what it states to hold, within its budget, and never sleeps.',
                 }),
@@ -164,62 +164,62 @@ async function waitForValue(locator: Locator, element: Target, wanted: boolean):
 
 function createVisitor(page: Page, baseUrl: string): WebsiteVisitor {
     return {
-        check: async (element) => {
-            await act(page, element, async (locator) => {
+        check: async (target) => {
+            await act(page, target, async (locator) => {
                 await locator.check();
             });
         },
-        click: async (element) => {
-            await act(page, element, async (locator) => {
+        click: async (target) => {
+            await act(page, target, async (locator) => {
                 await locator.click();
             });
         },
-        fill: async (element, value) => {
-            await act(page, element, async (locator) => {
+        fill: async (target, value) => {
+            await act(page, target, async (locator) => {
                 await locator.fill(value);
             });
         },
         goto: async (path) => {
             await page.goto(`${baseUrl}${path}`, { waitUntil: 'load' });
         },
-        hover: async (element) => {
-            await act(page, element, async (locator) => {
+        hover: async (target) => {
+            await act(page, target, async (locator) => {
                 await locator.hover();
             });
         },
         press: async (key) => {
             await page.keyboard.press(key);
         },
-        gone: async (element) => {
-            await act(page, element, async (locator) => {
-                if (element.value !== undefined) {
-                    await waitForValue(locator, element, false);
+        gone: async (target) => {
+            await act(page, target, async (locator) => {
+                if (target.value !== undefined) {
+                    await waitForValue(locator, target, false);
                     return;
                 }
-                const narrowed = stateOnly(page, locator, element);
+                const narrowed = stateOnly(page, locator, target);
                 if (narrowed !== null) {
                     await narrowed.waitFor({ state: 'detached' });
                     return;
                 }
-                await locator.waitFor({ state: byPresence(element) ? 'detached' : 'hidden' });
+                await locator.waitFor({ state: byPresence(target) ? 'detached' : 'hidden' });
             });
         },
-        see: async (element) => {
-            await act(page, element, async (locator) => {
-                if (element.value !== undefined) {
-                    await waitForValue(locator, element, true);
+        see: async (target) => {
+            await act(page, target, async (locator) => {
+                if (target.value !== undefined) {
+                    await waitForValue(locator, target, true);
                     return;
                 }
-                const narrowed = stateOnly(page, locator, element);
+                const narrowed = stateOnly(page, locator, target);
                 if (narrowed !== null) {
                     await narrowed.waitFor({ state: 'attached' });
                     return;
                 }
-                await locator.waitFor({ state: byPresence(element) ? 'attached' : 'visible' });
+                await locator.waitFor({ state: byPresence(target) ? 'attached' : 'visible' });
             });
         },
-        select: async (element, option) => {
-            await act(page, element, async (locator) => await locator.selectOption(option));
+        select: async (target, option) => {
+            await act(page, target, async (locator) => await locator.selectOption(option));
         },
     };
 }
