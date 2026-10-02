@@ -204,6 +204,23 @@ Today **229 modules** have no sibling test, and every one of them is claimed:
 A new module that matches no kind fails the meta-test, which is the moment to
 write the test — not six months later, when a coverage number moved.
 
+## The mutants no test kills
+
+`make mutation` measures the module tests alone ([02 — Developing](02-developing.md)); the specs, which drive the build, were measured once, in October 2026, by handing each mutant to every process they spawn. When the module tests that restated a spec went, 698 mutants they had killed were left to the specs: the specs killed 654, and a spec or a lint case was written for each real gap among the rest. What stays alive is listed here, one reason each, so the mutation ratchet starts from a baseline that says why.
+
+| Survivor                                                  | Mutants | Why no test kills it                                                                                                                                                  |
+| --------------------------------------------------------- | ------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `src/facets/cli/documents/literate-plugin.ts:59-92`       | 9       | the Vite plugin runs in Vitest's main process while it collects `.spec.yaml` documents, which no mutant switch of a test reaches; every literate spec runs through it |
+| `src/chain/refusals/node-only.ts:3-9`                     | 6       | it throws only in a page, from the browser build the component project runs in a real browser, out of the measure's reach                                             |
+| `src/facets/component/viewport/viewport.capability.ts:27` | 3       | the component chain arms it in the page, out of the measure's reach                                                                                                   |
+| `src/expectations/in-place/in-place.ts:192`               | 2       | a deferred in-place rewrite runs in the nested Vitest that `specs/cli/to-match/in-place.spec.ts` starts, which kills it; the measure does not instrument a nested run |
+| `src/facets/mobile/session/mobile-session.ts:22`          | 1       | a global setup, run in Vitest's main process, and only beside a simulator                                                                                             |
+| `lint/engine/project/tree.ts:83`                          | 1       | equivalent: a specs root that is not on disk holds no file, so a stray root changes no finding                                                                        |
+| `src/visitor/targets/roles.ts:17`                         | 1       | equivalent: every reader of a target asks whether its `name` is undefined, so an absent name and an undefined one read the same                                       |
+| `src/chain/paths/resolved-spec-path.ts:6`                 | 1       | equivalent through the surface: every path it resolves comes from a `file()` or `directory()` that refused a path not relative already                                |
+| `src/stubs/kinds/openai.ts:186`                           | 1       | equivalent: no module reads a stub request's `adapter`                                                                                                                |
+| `lint/engine/testing/subject.fixtures.ts:9`               | 1       | test material: a `.fixtures.ts` builds trees for module tests and never ships                                                                                         |
+
 ## The capability matrix
 
 The catalogue in [19 — Linting](19-linting.md) answers "which conventions are
