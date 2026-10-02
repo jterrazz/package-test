@@ -72,7 +72,7 @@ export function requireBuiltPeer(peer: string, what: string, use: () => void): v
             refusal({
                 fix: build,
                 found: `${what} found \`${peer}\`, and its native binding is not built`,
-                read: 'docs/04-operating.md#what-a-consumer-must-bring',
+                read: 'docs/06-setting-up.md#what-to-install',
                 why: `A native peer is built by its install script, and ${name} runs a dependency's install script only once it is told to.`,
             }),
             { cause: error },

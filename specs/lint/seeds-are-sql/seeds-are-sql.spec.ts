@@ -22,12 +22,12 @@ describe('seeds-are-sql', () => {
                 found: \`_seeds/state.json\` is not a \`.sql\` file
                 why: \`_seeds/\` holds \`*.sql\` files only; any other file is an error.
                 fix: move it to \`_fixtures/\` and lay it with \`.fixture(file(…))\`; \`_seeds/\` holds database state only
-                read: docs/19-linting.md#seeds-are-sql
+                read: docs/24-linting.md#seeds-are-sql
             specs/app/widget/widget.test.ts:7:1  jterrazz(no-status-only-test)
                 found: the test's only assertions probe the HTTP status
                 why: A test whose ONLY assertions are HTTP status probes (\`expect(X.status).toBe(N)\` / \`.toEqual(N)\`, N a numeric literal 100–599) → error: this case wants a full golden (\`expect(result.response).toMatch(file('./_expected/case.http'))\`).
                 fix: compare the whole response, \`\`expect(result.response).toMatch(\`HTTP/1.1 …\`)\`\` (\`TEST_UPDATE=1\` fills an empty one), and keep the status probe beside it only if the status is the point
-                read: docs/19-linting.md#no-status-only-test
+                read: docs/24-linting.md#no-status-only-test
         `);
     });
 });

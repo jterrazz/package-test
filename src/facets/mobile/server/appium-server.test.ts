@@ -66,7 +66,7 @@ describe('appium-server', () => {
                 "found: specification.mobile() names the device 'iPad Pro', and the run's Appium server drives 'iPhone 17' (26.5) [SIM-17], the device its mobile({ device }) project declares",
                 'why: The run’s setup booted the project’s device alone.',
                 'fix: name that device, or declare no device on mobile() so each file serves its own',
-                'read: docs/09-mobile.md#one-session-per-run',
+                'read: docs/11-mobile.md#one-session-per-run',
             ].join('\n'),
         );
         expect(() => runDevice({ name: 'iPhone 17', os: '18.0' }, run)).toThrow(

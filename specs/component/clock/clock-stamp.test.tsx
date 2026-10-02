@@ -26,7 +26,7 @@ describe('ClockStamp', () => {
                 'found: clock.at("soon"), and "soon" is not an instant',
                 'why: A clock is pinned at an instant, written as an ISO-8601 string.',
                 "fix: pass an ISO-8601 string: clock.at('2026-03-04T09:30:00Z')",
-                'read: docs/05-module-tests.md#time',
+                'read: docs/19-time-and-doubles.md#the-clock',
             ].join('\n'),
         );
     });

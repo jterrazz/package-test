@@ -14,7 +14,7 @@ describe('no-raw-bypass', () => {
                 found: \`expect(x.raw).toContain(…)\` asserts on the stream as captured
                 why: \`expect(x.raw).toContain\` compares the stream as it was captured → error.
                 fix: compare \`x.text\` — ANSI stripped, \`transform\` applied, the text an expectation compares
-                read: docs/19-linting.md#no-raw-bypass
+                read: docs/24-linting.md#no-raw-bypass
         `);
     });
 

@@ -12,7 +12,7 @@ import type { Route } from './routes.js';
 export const UNKNOWN_TABLE: Lesson = {
     fix: "hand `server` the Hono app itself (its `app.routes` is the table), or declare the routes as an OpenAPI document: `test: { routes: './openapi.yaml' }` in jterrazz.config.ts",
     found: 'api routes: an app specification.api() started exposes no route table',
-    read: 'docs/10-api.md#an-app-that-is-not-hono',
+    read: 'docs/12-api.md#an-app-that-is-not-hono',
     why: 'A route is judged reached against the table the app declares.',
 };
 
@@ -25,7 +25,7 @@ export type RunScope = 'partial' | 'shard' | 'whole';
 export type RouteRun = { failed: number; scope: RunScope; update: boolean };
 
 export const SHARD_UNJUDGED =
-    "api routes: not judged — a shard's ledgers are a part of the run's; the route ratchet is judged only over every shard's ledgers (docs/10)";
+    "api routes: not judged — a shard's ledgers are a part of the run's; the route ratchet is judged only over every shard's ledgers (docs/12)";
 
 export const PARTIAL_UNJUDGED =
     'api routes: not judged — a partial run (--changed, a file filter or -t) reaches only some routes';
@@ -86,7 +86,7 @@ function unjudgedRun({ failed, scope, update }: RouteRun): RouteVerdict | undefi
               failure: {
                   fix: 'make the run green, then record with TEST_UPDATE=1',
                   found: `api routes: not recorded — ${why}`,
-                  read: 'docs/10-api.md#when-a-run-is-not-judged',
+                  read: 'docs/12-api.md#when-a-run-is-not-judged',
                   why: 'The route ratchet is recorded only from a run that is green and whole.',
               },
           }
@@ -97,7 +97,7 @@ function methodlessDrifted(drift: string[]): Lesson {
     return {
         fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
         found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
-        read: 'docs/10-api.md#a-route-taken-on-any-method',
+        read: 'docs/12-api.md#a-route-taken-on-any-method',
         why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
     };
 }
@@ -107,13 +107,13 @@ function ratchetMoved(missing: number, held: number, named: string): Lesson {
         ? {
               fix: 'send each from a spec, or record them with TEST_UPDATE=1',
               found: `api routes: ${missing} declared route(s) no test reached, and the ratchet holds ${held}:\n${named}`,
-              read: 'docs/10-api.md#the-ratchet',
+              read: 'docs/12-api.md#the-ratchet',
               why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
           }
         : {
               fix: 'the debt fell: record it with TEST_UPDATE=1',
               found: `api routes: ${missing} declared route(s) no test reached, below the ${held} the ratchet holds`,
-              read: 'docs/10-api.md#the-ratchet',
+              read: 'docs/12-api.md#the-ratchet',
               why: 'The ratchet is exact in both directions.',
           };
 }

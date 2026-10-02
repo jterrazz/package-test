@@ -7,7 +7,7 @@ import { cli } from '../cli.specification.js';
 
 const WHY =
     'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.';
-const READ = 'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime';
+const READ = 'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime';
 
 describe('refused', () => {
     test('a path that is not relative to the spec file is refused before the chain holds it, naming the form to write', () => {

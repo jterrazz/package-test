@@ -22,7 +22,7 @@ describe('no-runner-alias', () => {
                 found: \`{ cli: myCli }\` renames the handle
                 why: The return is destructured under the constructor's canonical name, unaliased (\`{ api, cleanup, docker }\`); renaming (\`{ api: myApi }\`) is an error.
                 fix: destructure \`{ cli }\`, and rename at the import site if a local name must differ
-                read: docs/19-linting.md#no-runner-alias
+                read: docs/24-linting.md#no-runner-alias
         `);
     });
 });

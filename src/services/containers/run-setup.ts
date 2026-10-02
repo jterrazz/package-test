@@ -28,7 +28,7 @@ export async function prepareDocker(): Promise<void> {
             refusal({
                 fix: 'start Docker (Docker Desktop, OrbStack, colima…) and run again',
                 found: `a declared service asked for Docker, and ${DOCKER_ABSENT} (${reason})`,
-                read: 'docs/17-services.md#one-container-per-run',
+                read: 'docs/18-services.md#one-container-per-run',
                 why: 'A declared service runs in a container, so a project that declares one needs a Docker daemon.',
             }),
             { cause: error },
@@ -89,7 +89,7 @@ function settled(prepare: () => Promise<void>): () => Promise<void> {
                       refusal({
                           fix: 'restart the Docker runtime, or reinstall the `testcontainers` peer',
                           found: `preparing Docker threw ${String(error)}, which is no Error`,
-                          read: 'docs/04-operating.md#what-a-consumer-must-bring',
+                          read: 'docs/06-setting-up.md#what-to-install',
                           why: 'A service starts only on a Docker runtime that answers, through the peer that drives it.',
                       }),
                   );

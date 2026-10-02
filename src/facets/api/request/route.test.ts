@@ -33,7 +33,7 @@ describe('route', () => {
             'found: .get("/events/:id") names :id and is handed no params\n' +
                 'why: A request written as its route template is handed exactly the parameters the template names.\n' +
                 'fix: write .get("/events/:id", { params: { id: … } })\n' +
-                'read: docs/19-linting.md#route-written-as-template-at-runtime',
+                'read: docs/24-linting.md#route-written-as-template-at-runtime',
         );
     });
 

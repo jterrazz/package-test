@@ -144,7 +144,7 @@ export class CliResult extends BaseResult {
                 refusal({
                     fix: 'pass `docker: { envVar, nameLabel, testRunLabel }` in the specification.cli() options',
                     found: `CliResult.${member}, and the runner was not configured with a docker option`,
-                    read: 'docs/12-cli.md#docker-aware-mode',
+                    read: 'docs/14-cli.md#docker-aware-mode',
                     why: 'A CLI result reads the containers its run spawned only under Docker-aware mode.',
                 }),
             );

@@ -22,7 +22,7 @@ describe('trigger-name-in-kebab-case', () => {
                 found: the job name "NightlyReport" is not kebab-case
                 why: \`.trigger(name)\` takes a stable kebab-case identifier; a non-kebab-case \`name\` is an error.
                 fix: rename the job "nightly-report", in the app and in its tests alike
-                read: docs/19-linting.md#trigger-name-in-kebab-case
+                read: docs/24-linting.md#trigger-name-in-kebab-case
         `);
     });
 });

@@ -14,15 +14,16 @@ A declarative testing framework for HTTP APIs, background jobs, CLIs, rendered w
 
 The corpus is `docs/` + `README.md`, mapped by [`docs/README.md`](docs/README.md). Do not duplicate it — link to it.
 
-| Developing the package…                           | Read                                                           |
-| ------------------------------------------------- | -------------------------------------------------------------- |
-| The layers, the runner model, the channels        | [`docs/01-architecture.md`](docs/01-architecture.md)           |
-| The loop, which file a change opens, what it owes | [`docs/02-developing.md`](docs/02-developing.md)               |
-| The projects, the spec tree, the meta-tests       | [`docs/03-testing.md`](docs/03-testing.md)                     |
-| The npm release and what ships                    | [`docs/04-operating.md`](docs/04-operating.md)                 |
-| The principles, and what review must judge        | [`docs/18-conventions.md`](docs/18-conventions.md)             |
-| Rule ids, channels, the generated catalogue       | [`docs/19-linting.md`](docs/19-linting.md)                     |
-| Anything else: a facet, the vocabulary, stubs, …  | [`docs/README.md`](docs/README.md), which owns the chapter map |
+| Developing the package…                            | Read                                                                                                         |
+| -------------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| The layers, the runner model, the channels         | [`docs/01-architecture.md`](docs/01-architecture.md)                                                         |
+| The loop, which file a change opens, what it owes  | [`docs/02-developing.md`](docs/02-developing.md)                                                             |
+| The projects, the spec tree, the meta-tests        | [`docs/03-testing.md`](docs/03-testing.md)                                                                   |
+| The npm release and what ships                     | [`docs/04-operating.md`](docs/04-operating.md)                                                               |
+| What a consumer installs, configures, writes first | [`docs/05-getting-started.md`](docs/05-getting-started.md), [`docs/06-setting-up.md`](docs/06-setting-up.md) |
+| The principles, and what review must judge         | [`docs/23-conventions.md`](docs/23-conventions.md)                                                           |
+| Rule ids, channels, the generated catalogue        | [`docs/24-linting.md`](docs/24-linting.md)                                                                   |
+| Anything else: a facet, the vocabulary, stubs, …   | [`docs/README.md`](docs/README.md), which owns the chapter map                                               |
 
 Decisions this package alone took are in `docs/decisions/`. The agent-facing skill is `skills/jterrazz-test/SKILL.md` — a short, hand-written routing page, not a second copy.
 
@@ -49,4 +50,4 @@ npm run docs                      # regenerate the generated tables and the sche
 - **A discovery grows a guard, in the same change** (rule `discovery-grows-a-guard`) — see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **Never edit a generated table** — `npm run docs` writes them; see [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
 - **What lands with the change that makes it true** — the guard, the regenerated tables, the falsified chapter, the skill — is stated once, in [02 § What a change owes](docs/02-developing.md#what-a-change-owes).
-- **A rule belongs in the code, a principle in the constitution.** `lint/consumer/catalogue/manifest.ts` (or `lint/self/catalogue/manifest.ts`) for the first, `docs/18-conventions.md` for the second; neither ever holds a copy of the other.
+- **A rule belongs in the code, a principle in the constitution.** `lint/consumer/catalogue/manifest.ts` (or `lint/self/catalogue/manifest.ts`) for the first, `docs/23-conventions.md` for the second; neither ever holds a copy of the other.

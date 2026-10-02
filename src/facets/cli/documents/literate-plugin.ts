@@ -32,7 +32,7 @@ export function grammarRefusal(error: SpecSyntaxError, displayPath: string): Err
         refusal({
             fix: 'write the key the grammar names; the reason prints the accepted set',
             found: `${displayPath}:${error.line}: ${error.reason}`,
-            read: 'docs/19-linting.md#document-follows-its-grammar',
+            read: 'docs/24-linting.md#document-follows-its-grammar',
             why: 'A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
         }),
         { cause: error },

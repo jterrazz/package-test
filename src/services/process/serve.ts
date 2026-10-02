@@ -113,7 +113,7 @@ export class ServedProcess {
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
                     found: `specification.${this.facet}(): the server command exited before it was ready.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
-                    read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                    read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process is handed to the chain once it is ready, and one that exits never is.',
                 }),
             );
@@ -132,7 +132,7 @@ export class ServedProcess {
                             refusal({
                                 fix: 'capture the port alone in the pattern’s one group, e.g. /listening on (\\d+)/',
                                 found: `specification.${this.facet}(): the ready pattern ${String(banner)} matched, and its capture group is not a port ("${found[1]}").\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
-                                read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                                read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                                 why: 'A RegExp `ready` is read over the output, and its one capture group is the port.',
                             }),
                         );
@@ -149,7 +149,7 @@ export class ServedProcess {
                         refusal({
                             fix: 'correct the pattern to what the server prints, or raise `timeout`',
                             found: `specification.${this.facet}(): the server did not print ${String(banner)} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
-                            read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                            read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                             why: 'A process is ready once its output matches `ready`, within `timeout`.',
                         }),
                     );
@@ -176,7 +176,7 @@ export class ServedProcess {
                         refusal({
                             fix: 'correct `ready` to a path the server answers, have it listen on `PORT`, or raise `timeout`',
                             found: `specification.${this.facet}(): the server did not answer on ${readyUrl} within ${timeout}ms.\nCommand: ${this.options.command}\nOutput:\n${this.output}`,
-                            read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                            read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                             why: 'A process is ready once its `ready` path answers, within `timeout`.',
                         }),
                     );
@@ -209,7 +209,7 @@ export class ServedProcess {
                 refusal({
                     fix: 'run the command by hand and correct what its output names',
                     found: `specification.${this.facet}(): \`before\` exited ${outcome.status ?? 'without a status'}.\nCommand: ${before}\nOutput:\n${(outcome.stdout ?? '') + (outcome.stderr ?? '')}`,
-                    read: 'docs/17-services.md#process--the-one-shape-an-external-process-takes',
+                    read: 'docs/18-services.md#process--the-one-shape-an-external-process-takes',
                     why: 'A process’s `before` must exit 0 before the process starts.',
                 }),
             );

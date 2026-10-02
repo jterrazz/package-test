@@ -14,7 +14,7 @@ describe('undeclared-backend', () => {
                 'found: .intercept(), and this runner has no declared backend',
                 'why: A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                 "fix: add `backend` to the specification options: specification.website({ …, backend: { env: 'API_URL' } })",
-                'read: docs/08-website.md#declared-backend',
+                'read: docs/10-website.md#declared-backend',
             ].join('\n'),
         );
     });

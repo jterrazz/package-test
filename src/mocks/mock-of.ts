@@ -7,7 +7,7 @@ export type MockOfOptions = {
     deep?: boolean;
 };
 
-/** A typed double for an injected port, the doubles ladder's fourth rung (docs/18). */
+/** A typed double for an injected port, the doubles ladder's fourth rung (docs/23). */
 export function mockOf<T extends object>(options: { deep: false }): MockProxy<T>;
 export function mockOf<T extends object>(options?: MockOfOptions): DeepMockProxy<T>;
 export function mockOf<T extends object>(options?: MockOfOptions): DeepMockProxy<T> | MockProxy<T> {

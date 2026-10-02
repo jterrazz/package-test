@@ -30,7 +30,7 @@ describe('test-beside-its-module', () => {
                 found: a module test with no neighbour "util.ts"
                 why: The test of \`<file>.ts\` is \`<file>.test.ts\` beside it; a misnamed \`.test.ts\`, a \`__tests__/\` directory or a package's \`tests/\` or \`test/\` root is an error.
                 fix: move it next to the module it tests; a test needing more than its module is a spec — move it under \`specs/\` as a \`.spec.ts\`
-                read: docs/19-linting.md#test-beside-its-module
+                read: docs/24-linting.md#test-beside-its-module
         `);
     });
 });

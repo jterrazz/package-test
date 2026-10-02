@@ -22,22 +22,22 @@ describe('paths-named-in-the-test', () => {
                 found: \`file()\` called outside a test
                 why: \`file()\` and \`directory()\` are called in a test or spec file — a \`.test.ts(x)\`, a \`.spec.ts\`, a type test — and nowhere else: a shared helper module, a specification file or a stub takes a \`file()\` as a parameter and never builds one.
                 fix: take the \`file()\` as a parameter, and build it in the test that stands on it
-                read: docs/19-linting.md#paths-named-in-the-test
+                read: docs/24-linting.md#paths-named-in-the-test
             specs/api/orders/_setup/stubs/http/stock.ts:1:1  jterrazz(stubs-root-holds-facades-and-kinds)
                 found: the stub unit "stock.ts" has no default export
                 why: Under \`specs/**/_setup/stubs/\`: the ROOT carries only \`*.stubs.ts\` facades and one folder per stub KIND — a stub builder the package exports: \`http\` | \`openai\` | \`anthropic\`, the closed list its exports decide.
                 fix: default-export \`defineStub(…)\`, or a factory returning one
-                read: docs/19-linting.md#stubs-root-holds-facades-and-kinds
+                read: docs/24-linting.md#stubs-root-holds-facades-and-kinds
             specs/api/orders/_setup/stubs/http/stock.ts:4:12  jterrazz(paths-named-in-the-test)
                 found: \`file()\` called outside a test
                 why: \`file()\` and \`directory()\` are called in a test or spec file — a \`.test.ts(x)\`, a \`.spec.ts\`, a type test — and nowhere else: a shared helper module, a specification file or a stub takes a \`file()\` as a parameter and never builds one.
                 fix: take the \`file()\` as a parameter, and build it in the test that stands on it
-                read: docs/19-linting.md#paths-named-in-the-test
+                read: docs/24-linting.md#paths-named-in-the-test
             specs/api/orders/seeded.ts:5:21  jterrazz(paths-named-in-the-test)
                 found: \`file()\` called outside a test
                 why: \`file()\` and \`directory()\` are called in a test or spec file — a \`.test.ts(x)\`, a \`.spec.ts\`, a type test — and nowhere else: a shared helper module, a specification file or a stub takes a \`file()\` as a parameter and never builds one.
                 fix: take the \`file()\` as a parameter, and build it in the test that stands on it
-                read: docs/19-linting.md#paths-named-in-the-test
+                read: docs/24-linting.md#paths-named-in-the-test
         `);
     });
 });

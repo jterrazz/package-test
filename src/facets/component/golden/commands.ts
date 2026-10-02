@@ -50,7 +50,7 @@ const inPlaceWrite: BrowserCommand<[string, string], string> = (context, stack, 
             refusal({
                 fix: 'call toMatch() from the test file itself, or compare to a golden file: toMatch(file(…))',
                 found: 'update mode: no frame of this toMatch call is the test file — the value in place has nowhere to be written',
-                read: 'docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                read: 'docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten in the test that states it.',
             }),
         );

@@ -14,7 +14,7 @@ describe('no-single-use-ref', () => {
                 found: the capture ref "order" is used once in this spec
                 why: A capture ref (\`match.ref\`, \`{{kind#ref}}\`) appearing exactly once in the whole file (code plus the golden files it references) is named for nothing → error.
                 fix: use the plain token or matcher; a ref earns its name by asserting equality across two places
-                read: docs/19-linting.md#no-single-use-ref
+                read: docs/24-linting.md#no-single-use-ref
         `);
     });
 

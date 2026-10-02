@@ -11,7 +11,7 @@ describe('lint.handle', () => {
 
         // Then - the refusal names the anchor it searched and the peer to install
         expect(() => oxlintBinary([anchor])).toThrow(
-            `found: specification.lint() runs oxlint, and none resolves from ${anchor}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint — an optional peer of @jterrazz/test — beside the project\nread: docs/21-lint.md#options`,
+            `found: specification.lint() runs oxlint, and none resolves from ${anchor}\nwhy: A plugin and a config are run by the real oxlint, the one a project lints with.\nfix: install oxlint — an optional peer of @jterrazz/test — beside the project\nread: docs/16-lint.md#options`,
         );
     });
 });

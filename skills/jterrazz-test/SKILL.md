@@ -7,11 +7,11 @@ metadata:
 
 # `@jterrazz/test`
 
-What to decide BEFORE writing a test. Everything else — every option, every matcher, every rule — is in the chapter this page sends you to, and the types say the API. Before the kind, whether the test earns its place: end to end through the public surface, a published package from its packed tarball; a module test only for a pure algorithm or a failure no end-to-end path provokes ([docs/18 § Which test earns its place](../../docs/18-conventions.md#which-test-earns-its-place)).
+What to decide BEFORE writing a test. Everything else — every option, every matcher, every rule — is in the chapter this page sends you to, and the types say the API. Before the kind, whether the test earns its place: end to end through the public surface, a published package from its packed tarball; a module test only for a pure algorithm or a failure no end-to-end path provokes ([docs/23 § Which test earns its place](../../docs/23-conventions.md#which-test-earns-its-place)).
 
 ## Which kind — ask the fork first
 
-Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([docs/18 § The fork](../../docs/18-conventions.md#the-fork--which-kind-of-test-this-is) carries the table, and a meta-test holds this list to it).
+Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([docs/05 § Which kind of test](../../docs/05-getting-started.md#which-kind-of-test) carries the table, and a meta-test holds this list to it).
 
 1. A whole served page in a browser? → **website**, `specs/website/<domain>/<aspect>.spec.ts`
 2. A component (React, a DOM function, a hook)? → **component**, `<file>.test.tsx` beside `<file>.tsx`
@@ -24,7 +24,7 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 9. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
 10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
-The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60. A colocated `.test.ts(x)` holds one `describe` too, titled with its subject — the export of the module beside it (`describe('LocaleNote', …)`). `make fix` splits, moves and retitles ([docs/18](../../docs/18-conventions.md#one-file-one-subject)).
+The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60. A colocated `.test.ts(x)` holds one `describe` too, titled with its subject — the export of the module beside it (`describe('LocaleNote', …)`). `make fix` splits, moves and retitles ([docs/23](../../docs/23-conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 
@@ -79,7 +79,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 | `expect(x).toMatch(file('./_expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                                                     |
 | `await expect(result.filesystem).toMatch(directory('./_expected/tree/'))` | a golden tree                                                                            |
 
-`toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` — each verb reads its own, and the same four under the specs root's one `_shared/` folder (`specs/_shared/_fixtures/`, `specs/_shared/_seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it. A package needs no disk at all when the spec's own project installed it: `.link('@acme/sdk')` links the package the spec's own project installed, found as Node finds it from the spec ([`.link()`](../../docs/12-cli.md#link--a-package-the-working-directory-resolves)); `directory()` is for a stub install, a broken one, an older version.
+`toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` — each verb reads its own, and the same four under the specs root's one `_shared/` folder (`specs/_shared/_fixtures/`, `specs/_shared/_seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it. A package needs no disk at all when the spec's own project installed it: `.link('@acme/sdk')` links the package the spec's own project installed, found as Node finds it from the spec ([`.link()`](../../docs/14-cli.md#link--a-package-the-working-directory-resolves)); `directory()` is for a stub install, a broken one, an older version.
 
 ## Pitfalls
 
@@ -92,7 +92,7 @@ What a test stands on is named by one of two calls, with the path relative to th
 - **An `expect` in a helper or a loop** — a `_setup/` module, a test adapter or a `*.specification.ts` returns what it reads, and the test asserts it (`no-expect-outside-a-test`); a loop asserts nothing over an empty collection, so compare the collection whole or state the cases with `test.each` (`no-expect-in-a-loop`).
 - **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
 - **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (the types say which: `typescript/no-floating-promises`, `typescript/await-thenable`).
-- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits. A call that must not happen is `.intercept(http.never(http.post(url)))` — `http.unreachable()` and an empty error say it failed, not that it never happened. A request that must NOT carry a header is matched by `http.get(url, { without: { headers: ['authorization'] } })` — a `headers` subset proves presence only ([`http.*`](../../docs/16-stubs.md#http--any-url)).
+- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits. A call that must not happen is `.intercept(http.never(http.post(url)))` — `http.unreachable()` and an empty error say it failed, not that it never happened. A request that must NOT carry a header is matched by `http.get(url, { without: { headers: ['authorization'] } })` — a `headers` subset proves presence only ([`http.*`](../../docs/17-stubs.md#http--any-url)).
 - **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
 - **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a stub stays on its test's chain.
 
@@ -100,20 +100,20 @@ What a test stands on is named by one of two calls, with the path relative to th
 
 | The test you are writing                    | Chapter                                                  |
 | ------------------------------------------- | -------------------------------------------------------- |
-| module                                      | [docs/05-module-tests.md](../../docs/05-module-tests.md) |
-| integration                                 | [docs/06-integration.md](../../docs/06-integration.md)   |
-| component                                   | [docs/07-component.md](../../docs/07-component.md)       |
-| website                                     | [docs/08-website.md](../../docs/08-website.md)           |
-| mobile                                      | [docs/09-mobile.md](../../docs/09-mobile.md)             |
-| api                                         | [docs/10-api.md](../../docs/10-api.md)                   |
-| job                                         | [docs/11-job.md](../../docs/11-job.md)                   |
-| cli                                         | [docs/12-cli.md](../../docs/12-cli.md)                   |
-| a cli `<case>.spec.yaml`                    | [docs/20-documents.md](../../docs/20-documents.md)       |
-| lint — a rule over a tree, or alone         | [docs/21-lint.md](../../docs/21-lint.md)                 |
-| naming an element on any surface that draws | [docs/13-visitor.md](../../docs/13-visitor.md)           |
-| a matcher, sync or awaited                  | [docs/14-assertions.md](../../docs/14-assertions.md)     |
-| a `{{token}}`, or update mode               | [docs/15-tokens.md](../../docs/15-tokens.md)             |
-| what the network replies                    | [docs/16-stubs.md](../../docs/16-stubs.md)               |
-| a database, a cache, a process              | [docs/17-services.md](../../docs/17-services.md)         |
-| a rule id, or wiring the `test()` preset    | [docs/19-linting.md](../../docs/19-linting.md)           |
+| module                                      | [docs/07-module-tests.md](../../docs/07-module-tests.md) |
+| integration                                 | [docs/08-integration.md](../../docs/08-integration.md)   |
+| component                                   | [docs/09-component.md](../../docs/09-component.md)       |
+| website                                     | [docs/10-website.md](../../docs/10-website.md)           |
+| mobile                                      | [docs/11-mobile.md](../../docs/11-mobile.md)             |
+| api                                         | [docs/12-api.md](../../docs/12-api.md)                   |
+| job                                         | [docs/13-job.md](../../docs/13-job.md)                   |
+| cli                                         | [docs/14-cli.md](../../docs/14-cli.md)                   |
+| a cli `<case>.spec.yaml`                    | [docs/15-documents.md](../../docs/15-documents.md)       |
+| lint — a rule over a tree, or alone         | [docs/16-lint.md](../../docs/16-lint.md)                 |
+| naming an element on any surface that draws | [docs/20-visitor.md](../../docs/20-visitor.md)           |
+| a matcher, sync or awaited                  | [docs/21-assertions.md](../../docs/21-assertions.md)     |
+| a `{{token}}`, or update mode               | [docs/22-tokens.md](../../docs/22-tokens.md)             |
+| what the network replies                    | [docs/17-stubs.md](../../docs/17-stubs.md)               |
+| a database, a cache, a process              | [docs/18-services.md](../../docs/18-services.md)         |
+| a rule id, or wiring the `test()` preset    | [docs/24-linting.md](../../docs/24-linting.md)           |
 | anything else — the API is the types        | [docs/README.md](../../docs/README.md), the manual's map |

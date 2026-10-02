@@ -14,7 +14,7 @@ describe('cli-runs-the-product-binary', () => {
                 found: \`specification.cli()\` points at a third-party binary under \`node_modules/.bin\`
                 why: A \`specification.cli(bin)\` whose binary resolves inside a dependency's \`node_modules/.bin\` tests the third-party tool, not the product command → error (a suppression with a reason is accepted).
                 fix: point it at the product's own command (\`bin/<product>\`), or suppress with a reason when the product genuinely is this binary
-                read: docs/19-linting.md#cli-runs-the-product-binary
+                read: docs/24-linting.md#cli-runs-the-product-binary
         `);
     });
 

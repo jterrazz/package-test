@@ -93,7 +93,7 @@ export function runDevice(device: MobileDevice | undefined, run: RunServer): Mob
             refusal({
                 fix: 'name that device, or declare no device on mobile() so each file serves its own',
                 found: `specification.mobile() names the device ${named(device)}, and the run's Appium server drives ${named({ ...run.device, udid: run.udid })}, the device its mobile({ device }) project declares`,
-                read: 'docs/09-mobile.md#one-session-per-run',
+                read: 'docs/11-mobile.md#one-session-per-run',
                 why: 'The run’s setup booted the project’s device alone.',
             }),
         );
@@ -112,7 +112,7 @@ export async function reachAppium(
                 refusal({
                     fix: 'name the simulator with `device: { name }`',
                     found: `specification.mobile() names no device to ask the Appium server at ${declared.url} for`,
-                    read: 'docs/09-mobile.md#a-declared-appium-server',
+                    read: 'docs/11-mobile.md#a-declared-appium-server',
                     why: 'A declared server is handed its device by capabilities.',
                 }),
             );
@@ -128,7 +128,7 @@ export async function reachAppium(
             refusal({
                 fix: "name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
                 found: 'specification.mobile() names no device, and no mobile({ device }) project serves one',
-                read: 'docs/09-mobile.md#one-session-per-run',
+                read: 'docs/11-mobile.md#one-session-per-run',
                 why: 'A mobile spec drives one simulator, named by the runner or by its project.',
             }),
         );

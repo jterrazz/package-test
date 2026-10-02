@@ -162,6 +162,6 @@ describe('ambiguous', () => {
 
         // Then - an agent reading the failure reads the rule, and where it is whole
         expect(message).toContain(`why: ${REFUSAL_WHY['target-matches-one-element']}`);
-        expect(message).toContain('read: docs/19-linting.md#target-matches-one-element');
+        expect(message).toContain('read: docs/24-linting.md#target-matches-one-element');
     });
 });

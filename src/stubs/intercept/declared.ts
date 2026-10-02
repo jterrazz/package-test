@@ -21,7 +21,7 @@ export function declared(
             refusal({
                 fix: `pass a stub — defineStub({ request, response }) — or the inline pair ${call}(request, response)`,
                 found: `${call}(request), a bare request with no response`,
-                read: 'docs/16-stubs.md#using-them-intercept',
+                read: 'docs/17-stubs.md#using-them-intercept',
                 why: 'A stub is a request and its response: a request alone answers nothing.',
             }),
         );

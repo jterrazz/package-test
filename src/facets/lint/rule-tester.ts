@@ -47,7 +47,7 @@ function refuseUnpositioned(name: string, cases: PositionedCases): void {
                 refusal({
                     fix: 'state each error as an object carrying its `line` and `column`',
                     found: `${name}: invalid case ${String(index)}, ${unplaced}`,
-                    read: 'docs/21-lint.md#a-rule-alone-ruletester',
+                    read: 'docs/16-lint.md#a-rule-alone-ruletester',
                     why: 'A rule proves where it reports, not only that it did: an error with no position passes for a report on any node.',
                 }),
             );

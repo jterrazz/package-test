@@ -84,7 +84,7 @@ export function selectSimulator(
             refusal({
                 fix: 'name one of the available devices, or create the simulator in Xcode',
                 found: `specification.mobile(): no simulator matches ${wanted}.\navailable devices:\n${formatListing(available)}`,
-                read: 'docs/09-mobile.md#options',
+                read: 'docs/11-mobile.md#options',
                 why: 'Resolution refuses rather than guesses: a device names exactly one simulator.',
             }),
         );
@@ -94,7 +94,7 @@ export function selectSimulator(
             refusal({
                 fix: 'add `os:` or `udid:` to pick one',
                 found: `specification.mobile(): ${matches.length} simulators match ${wanted}.\nmatched:\n${formatListing(matches)}`,
-                read: 'docs/09-mobile.md#options',
+                read: 'docs/11-mobile.md#options',
                 why: 'Resolution refuses rather than guesses: a device names exactly one simulator.',
             }),
         );
@@ -124,7 +124,7 @@ export async function ensureBooted(udid: string): Promise<void> {
                 refusal({
                     fix: 'boot it by hand (`xcrun simctl boot <udid>`) and correct what simctl names',
                     found: `specification.mobile(): could not boot simulator ${udid}.\n${message}`,
-                    read: 'docs/09-mobile.md#requirements--what-the-machine-must-have',
+                    read: 'docs/11-mobile.md#requirements--what-the-machine-must-have',
                     why: 'A mobile spec runs on a simulator the machine can boot.',
                 }),
                 { cause: error },

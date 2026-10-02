@@ -16,7 +16,7 @@ describe('file-suffix-matches-place', () => {
                 found: "rm.spec.yaml" repeats its directory "rm/"
                 why: The suffix says the kind, and the tree agrees with it.
                 fix: name it for what this case proves, not where it sits
-                read: docs/19-linting.md#file-suffix-matches-place
+                read: docs/24-linting.md#file-suffix-matches-place
         `);
     });
 
@@ -42,12 +42,12 @@ describe('file-suffix-matches-place', () => {
                 found: a test under the \`api\` facet that reaches no runner
                 why: A test under \`specs/<facet>/\`, where the facet root holds a \`*.specification.ts(x)\`, imports that module or constructs a runner itself.
                 fix: import \`{ api }\` from \`api.specification.js\` and drive the product through it, or move the module test beside its module
-                read: docs/19-linting.md#facet-test-uses-its-runner
+                read: docs/24-linting.md#facet-test-uses-its-runner
             specs/api/users/creation.test.ts:1:1  jterrazz-check(file-suffix-matches-place)
                 found: a \`.test.ts\` under \`specs/api/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
                 fix: rename it \`api/users/creation.spec.ts\` — \`make fix\` does it with \`git mv\`
-                read: docs/19-linting.md#file-suffix-matches-place
+                read: docs/24-linting.md#file-suffix-matches-place
         `);
     });
 
@@ -63,7 +63,7 @@ describe('file-suffix-matches-place', () => {
                 found: a \`.test.ts\` under \`specs/\`, where a file specifies the assembled product
                 why: The suffix says the kind, and the tree agrees with it.
                 fix: rename it \`operator/manifest/manifest.spec.ts\` — \`make fix\` does it with \`git mv\`
-                read: docs/19-linting.md#file-suffix-matches-place
+                read: docs/24-linting.md#file-suffix-matches-place
         `);
     });
 
@@ -79,7 +79,7 @@ describe('file-suffix-matches-place', () => {
                 found: a \`.spec.ts\` at the project's root, outside every \`specs/\` tree
                 why: The suffix says the kind, and the tree agrees with it.
                 fix: move it under \`specs/<facet>/\`, or rename it \`creation.test.ts\` beside the module it covers
-                read: docs/19-linting.md#file-suffix-matches-place
+                read: docs/24-linting.md#file-suffix-matches-place
         `);
     });
 });

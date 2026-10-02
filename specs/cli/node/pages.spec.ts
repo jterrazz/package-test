@@ -12,25 +12,26 @@ describe('pages', () => {
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             docs/01-architecture.md: held
-            docs/02-developing.md: held
-            docs/04-operating.md: held
-            docs/05-module-tests.md: held
-            docs/06-integration.md: held
-            docs/07-component.md: held
-            docs/08-website.md: held
-            docs/09-mobile.md: held
-            docs/10-api.md: held
-            docs/11-job.md: held
-            docs/12-cli.md: held
-            docs/13-visitor.md: held
-            docs/14-assertions.md: held
-            docs/15-tokens.md: held
-            docs/16-stubs.md: held
-            docs/17-services.md: held
-            docs/18-conventions.md: held
-            docs/19-linting.md: held
-            docs/20-documents.md: held
-            docs/21-lint.md: held
+            docs/05-getting-started.md: held
+            docs/06-setting-up.md: held
+            docs/07-module-tests.md: held
+            docs/08-integration.md: held
+            docs/09-component.md: held
+            docs/10-website.md: held
+            docs/11-mobile.md: held
+            docs/12-api.md: held
+            docs/13-job.md: held
+            docs/14-cli.md: held
+            docs/15-documents.md: held
+            docs/16-lint.md: held
+            docs/17-stubs.md: held
+            docs/18-services.md: held
+            docs/19-time-and-doubles.md: held
+            docs/20-visitor.md: held
+            docs/21-assertions.md: held
+            docs/22-tokens.md: held
+            docs/23-conventions.md: held
+            docs/24-linting.md: held
             docs/README.md: held
         `);
     });

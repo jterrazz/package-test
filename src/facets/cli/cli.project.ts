@@ -21,7 +21,7 @@ export type LiterateDoor = {
 /** `cli()` — a binary, and the documents that specify it. */
 export type CliProjectOptions = FacetProjectOptions & LiterateDoor;
 
-/** A cli project: the facet's `.spec.ts` files and its documents (docs/20); the plugin's glob joins this project's include, never the root config. */
+/** A cli project: the facet's `.spec.ts` files and its documents (docs/15); the plugin's glob joins this project's include, never the root config. */
 export function cli(options: CliProjectOptions = {}): TestProjectInlineConfiguration {
     const { literate: door, ...common } = options;
     const project = facetProject('cli', common);

@@ -152,7 +152,7 @@ async function waitForValue(locator: Locator, target: Target, wanted: boolean): 
                 refusal({
                     fix: 'correct the value the scenario states, or what the page puts in the field',
                     found: `${asWritten(target)} ${wanted ? 'never held' : 'still holds'} ${JSON.stringify(value)}${actual === null ? ' (it is not on the page)' : `, it holds ${JSON.stringify(actual)}`}`,
-                    read: 'docs/13-visitor.md#see-and-gone-are-the-synchronization',
+                    read: 'docs/20-visitor.md#see-and-gone-are-the-synchronization',
                     why: 'A verb waits for what it states to hold, within its budget, and never sleeps.',
                 }),
             );

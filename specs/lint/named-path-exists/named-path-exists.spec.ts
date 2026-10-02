@@ -32,12 +32,12 @@ describe('named-path-exists', () => {
                 found: fixture: "./_fixtures/shop/" names nothing — widget/_fixtures/shop does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create widget/_fixtures/shop, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             specs/widget/case.spec.yaml:4:1  jterrazz-check(named-path-exists)
                 found: fixture: "./_fixtures/config.json" names nothing — widget/_fixtures/config.json does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create widget/_fixtures/config.json, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
         `);
     });
 
@@ -51,7 +51,7 @@ describe('named-path-exists', () => {
                 found: file('../_fixtures/missing.json') names nothing — _shared/_fixtures/missing.json does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create _shared/_fixtures/missing.json, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
         `);
     });
 
@@ -67,37 +67,37 @@ describe('named-path-exists', () => {
                 found: './_fixtures/workspace/' names nothing — src/report/_fixtures/workspace does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_fixtures/workspace, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:10:21  jterrazz-check(named-path-exists)
                 found: './_expected/log.txt' names nothing — src/report/_expected/log.txt does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_expected/log.txt, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:13:42  jterrazz-check(named-path-exists)
                 found: '_expected', 'x.txt' names nothing — src/report/_expected/x.txt does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_expected/x.txt, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:14:46  jterrazz-check(named-path-exists)
                 found: '..', '_fixtures', 'gone' names nothing — src/_fixtures/gone does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/_fixtures/gone, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:15:32  jterrazz-check(named-path-exists)
                 found: './_expected/legacy.txt' names nothing — src/report/_expected/legacy.txt does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_expected/legacy.txt, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:16:35  jterrazz-check(named-path-exists)
                 found: '_seeds', 'rows.sql' names nothing — src/report/_seeds/rows.sql does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_seeds/rows.sql, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             src/report/report.test.ts:25:41  jterrazz-check(named-path-exists)
                 found: file('./_expected/total.json') names nothing — src/report/_expected/total.json does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create src/report/_expected/total.json, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
         `);
     });
 
@@ -111,17 +111,17 @@ describe('named-path-exists', () => {
                 found: '_expected', 'gone.txt' names nothing — cli/build/_expected/gone.txt does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create cli/build/_expected/gone.txt, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             specs/cli/build/build.spec.ts:14:48  jterrazz-check(named-path-exists)
                 found: directory('./_fixtures/shop/') names nothing — cli/build/_fixtures/shop does not exist
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: create cli/build/_fixtures/shop, or correct the path
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
             specs/cli/build/build.spec.ts:18:40  jterrazz-check(named-path-exists)
                 found: file('./_expected/out') names a directory
                 why: Every \`file()\` and \`directory()\` a test names with a literal path — a spec under \`specs/\` and a module test beside its module alike — and every path a document's \`fixture:\` names — names an entry that exists — inside a git work tree, one git does not ignore — of the kind the wrapper says, resolved from the test file's directory: a missing or ignored path, a \`file()\` naming a directory or a \`directory()\` naming a file is an error, reported where the path is written.
                 fix: write directory('./_expected/out/')
-                read: docs/19-linting.md#named-path-exists
+                read: docs/24-linting.md#named-path-exists
         `);
     });
 });

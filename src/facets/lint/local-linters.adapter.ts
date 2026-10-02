@@ -35,7 +35,7 @@ function unreported(linter: string, output: string): Error {
         refusal({
             fix: `run ${linter} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses`,
             found: `${linter} failed and reported no diagnostic: ${output.trim().split('\n').slice(0, 5).join(' / ')}`,
-            read: 'docs/21-lint.md#what-run-runs',
+            read: 'docs/16-lint.md#what-run-runs',
             why: 'A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.',
         }),
     );
@@ -123,7 +123,7 @@ export function localLinters(linters: Linters): LintPort {
                     refusal({
                         fix: 'name the plugins, or the `config`, the rules run under — or drop the `.rules()` call',
                         found: `.rules() states ${Object.keys(run.rules).join(', ')}, and the specification runs no oxlint`,
-                        read: 'docs/21-lint.md#the-chain',
+                        read: 'docs/16-lint.md#the-chain',
                         why: 'Rules are run by oxlint alone, and rules no linter reads would judge nothing and say nothing.',
                     }),
                 );

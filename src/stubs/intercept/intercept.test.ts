@@ -119,7 +119,7 @@ describe('interceptThrough', () => {
                     'found: intercept(): `origin` is `console.test`, not an absolute URL',
                     'why: `origin` states where a relative request resolves, so it is an absolute URL.',
                     "fix: state an absolute URL: intercept(stubs, { origin: 'http://console.test' })",
-                    'read: docs/16-stubs.md#intercept--the-same-double-with-no-chain',
+                    'read: docs/17-stubs.md#intercept--the-same-double-with-no-chain',
                 ].join('\n'),
             ),
         );

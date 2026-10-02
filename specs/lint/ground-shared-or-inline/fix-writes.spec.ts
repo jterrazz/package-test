@@ -44,7 +44,7 @@ describe('fix-writes', () => {
                 found: api/users/_expected/twice.http, read by this test alone
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
                 fix: write it here, the value \`toMatch\` compares, and delete the file — \`make fix\` inlines it
-                read: docs/19-linting.md#ground-shared-or-inline
+                read: docs/24-linting.md#ground-shared-or-inline
         `);
         await expect(result.directory()).toMatch(directory('./_expected/single-use/'));
     });

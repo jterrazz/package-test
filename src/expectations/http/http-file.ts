@@ -50,7 +50,7 @@ export function parseHeaders(headerLines: string[], fileName: string): Record<st
                 refusal({
                     fix: 'write the header as `Name: value`',
                     found: `${fileName}: the header line "${line}" has no colon`,
-                    read: 'docs/10-api.md#http-request-files--full-format',
+                    read: 'docs/12-api.md#http-request-files--full-format',
                     why: 'An `.http` file’s header is a `Name: value` line.',
                 }),
             );
@@ -137,7 +137,7 @@ export function parseResponseFile(
             refusal({
                 fix: 'start the response file with its status line: "HTTP/1.1 200 OK"',
                 found: `${fileName}: the first line is "${startLine}"`,
-                read: 'docs/10-api.md#http-request-files--full-format',
+                read: 'docs/12-api.md#http-request-files--full-format',
                 why: 'A response file opens on `HTTP/1.1 <status>`.',
             }),
         );

@@ -16,7 +16,7 @@ describe('database-named-only-when-several', () => {
                 found: \`.seed()\` with no \`{ database }\`, while 2 SQL databases are declared
                 why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests.
                 fix: pass \`.seed(…, { database: '<key>' })\`, naming one of the 2 databases the services record declares
-                read: docs/19-linting.md#database-named-only-when-several
+                read: docs/24-linting.md#database-named-only-when-several
         `);
     });
 
@@ -42,7 +42,7 @@ describe('database-named-only-when-several', () => {
                 found: \`.seed()\` passes \`{ database }\`, while a single SQL database is declared
                 why: With ≥ 2 databases, \`database:\` is required on every \`.seed()\`/\`.table()\`; with exactly one it is forbidden — checked by crossing the \`services:\` record with the calls in the tests.
                 fix: delete the \`{ database }\` option of \`.seed()\`
-                read: docs/19-linting.md#database-named-only-when-several
+                read: docs/24-linting.md#database-named-only-when-several
         `);
     });
 

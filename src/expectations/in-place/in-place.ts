@@ -222,7 +222,7 @@ export function writeInPlace(
             refusal({
                 fix: 'call `.toMatch(` on the expect() written at that line, not through an alias',
                 found: `update mode: no toMatch( stands at ${site.file}:${site.line}:${site.column} — the value in place cannot be written`,
-                read: 'docs/15-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
+                read: 'docs/22-tokens.md#a-value-written-in-place-is-rewritten-in-the-test',
                 why: 'A value written in place is rewritten where its `toMatch(` stands.',
             }),
         );

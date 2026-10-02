@@ -103,7 +103,7 @@ export class StubQueue {
             refusal({
                 fix: 'correct each outcome in turn, by its own fix',
                 found: `${errors.length} outcomes of one action, each with its own refusal:\n\n${reports}`,
-                read: 'docs/16-stubs.md#strict-by-construction',
+                read: 'docs/17-stubs.md#strict-by-construction',
                 why: 'A reached never stub, an unmatched request and an unmet required stub are independent facts about one action, so all are reported at once.',
             }),
         );
@@ -122,7 +122,7 @@ export class StubQueue {
             refusal({
                 fix: 'take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
                 found: `a route the chain declared never requested was reached:\n${lines.join('\n')}`,
-                read: 'docs/16-stubs.md#never--a-call-that-must-not-happen',
+                read: 'docs/17-stubs.md#never--a-call-that-must-not-happen',
                 why: "A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
             }),
         );
@@ -154,7 +154,7 @@ export class StubQueue {
             refusal({
                 fix: 'the code no longer makes the call, or the stub no longer describes it: correct the one that drifted',
                 found: `required stub(s) never satisfied during the chain:\n${unmet.join('\n')}`,
-                read: 'docs/16-stubs.md#required-is-verified-per-terminal-action',
+                read: 'docs/17-stubs.md#required-is-verified-per-terminal-action',
                 why: 'A required stub states the call MUST happen, within the terminal action it is declared for.',
             }),
         );

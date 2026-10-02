@@ -16,7 +16,7 @@ describe('document-description-unique', () => {
                 found: "builds the widget", already the description of widget/builds.spec.yaml
                 why: Two \`<case>.spec.yaml\` documents in one directory do not share a \`description:\`.
                 fix: retitle one of the two for what it proves apart from the other
-                read: docs/19-linting.md#document-description-unique
+                read: docs/24-linting.md#document-description-unique
         `);
     });
 

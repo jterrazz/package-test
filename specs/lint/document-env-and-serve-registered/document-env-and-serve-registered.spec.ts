@@ -16,12 +16,12 @@ describe('document-env-and-serve-registered', () => {
                 found: env: "frozn", which no specification registers
                 why: A document's bare \`env:\` words and \`serve:\` names are keys of the \`env\`/\`serve\` objects of a \`specification.cli(…)\` in the nearest directory carrying \`*.specification.ts\` files (literals read statically; ignored otherwise).
                 fix: name one of frozen, or register "frozn" in \`specification.cli({ env })\`
-                read: docs/19-linting.md#document-env-and-serve-registered
+                read: docs/24-linting.md#document-env-and-serve-registered
             specs/widget/builds.spec.yaml:5:1  jterrazz-check(document-env-and-serve-registered)
                 found: serve: "dashbord", which no specification registers
                 why: A document's bare \`env:\` words and \`serve:\` names are keys of the \`env\`/\`serve\` objects of a \`specification.cli(…)\` in the nearest directory carrying \`*.specification.ts\` files (literals read statically; ignored otherwise).
                 fix: name one of api, or register "dashbord" in \`specification.cli({ serve })\`
-                read: docs/19-linting.md#document-env-and-serve-registered
+                read: docs/24-linting.md#document-env-and-serve-registered
         `);
     });
 

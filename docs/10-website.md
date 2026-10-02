@@ -1,12 +1,12 @@
-# 08 — Website specs (`specification.website`)
+# 10 — Website specs (`specification.website`)
 
 `specification.website()` tests a rendered website — its raw HTTP surface (redirects, robots.txt, headers) and its rendered surface (title, head metadata, JSON-LD, console, and full user scenarios) — through a real chromium instance. It starts the site itself, or targets one already running.
 
-Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](10-api.md); for a binary use [cli](12-cli.md).
+Use it when the subject under test is a browser-rendered page. For a JSON/HTTP API surface use [api](12-api.md); for a binary use [cli](14-cli.md).
 
 ## What it specifies
 
-A website spec answers one question: **given this backend and this visitor, what does the served site put on the screen, and what does it report to the console?** The subject is the assembled product met through an address — a running server the runner started, or a deployment already up — and everything it reads is what a visitor can see: the rendered text, the accessibility tree, the document head, the console. A single rendered unit inside that page is a component spec ([07](07-component.md)); a route module or a loader behind it is a module test ([05](05-module-tests.md)).
+A website spec answers one question: **given this backend and this visitor, what does the served site put on the screen, and what does it report to the console?** The subject is the assembled product met through an address — a running server the runner started, or a deployment already up — and everything it reads is what a visitor can see: the rendered text, the accessibility tree, the document head, the console. A single rendered unit inside that page is a component spec ([09](09-component.md)); a route module or a loader behind it is a module test ([07](07-module-tests.md)).
 
 ## The constructor
 
@@ -43,17 +43,17 @@ export const { cleanup, website } = await specification.website({
 | `root`      | **Project-root override** (rule `no-redundant-root`): the cwd of the `server` command. Auto-discovered from the calling file when absent. Not a fixtures root                                                                                                       |
 | `transform` | **Escape hatch only** (rule `no-transform-duplicating-tokens`): a normaliser applied to every compared reading — the head projection and the json-ld among them — before the comparison, for framework noise no token can name. It never mutates what the page said |
 
-`server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
+`server` is a `ProcessOptions`, whatever of the three forms states it — `command`, `ready`, `port`, `cwd`, `env`, `before`, `timeout`. That shape has one owner, and it is not this chapter: [18 — Services § `process()`](18-services.md#process--the-one-shape-an-external-process-takes) holds every field, because a website's server is an external process like any other the framework owns.
 
-The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)), its own children with it.
+The chosen port is injected as `PORT` — the command reads it the same way it would in production. If the process never answers on `ready` within `timeout`, or exits first, `specification.website()` fails with the command's captured output attached. On teardown the child is ended the way every `process()` is ([18 — Services § `process()`](18-services.md#process--the-one-shape-an-external-process-takes)), its own children with it.
 
 The handle destructures to `{ website, cleanup, url }` (rule `no-runner-alias`) — no `docker`: a browser is not a container. `url` is the resolved base URL — the one the server started on, or the `url` option with its trailing slash trimmed.
 
 ### Services beside the site
 
-A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([17 — Services](17-services.md)) — started before the site, in declaration order, and stopped with the specification.
+A site under test is rarely alone: it reads a database, or it calls an API that must be up before the first page is requested. `services` is that record — the same one every other facet takes ([18 — Services](18-services.md)) — started before the site, in declaration order, and stopped with the specification.
 
-That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example — a `next dev` beside the API it calls and that API's database — is [17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)'s.
+That is why `server` may be a FUNCTION of the record: the site is handed the URL of the thing it was started beside, resolved once that thing is listening rather than guessed at config time. The example — a `next dev` beside the API it calls and that API's database — is [18 — Services § `process()`](18-services.md#process--the-one-shape-an-external-process-takes)'s.
 
 A declared database is not seeded by the chain — a website chain has no `.seed()`. It is seeded by whatever owns it: the service's own `docker/<service>/init.sql`, or a `before:` command on the `process()` that migrates it.
 
@@ -132,9 +132,9 @@ test('subscribes through the form and captures the final state', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result. Splitting interaction from assertion keeps the setup → action → result grammar intact, and keeps scenarios replayable independent of what they're checked against.
 
-The visitor's verbs and the words it names elements with are [13 — The visitor](13-visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
+The visitor's verbs and the words it names elements with are [20 — The visitor](20-visitor.md)'s, whole: `click` `fill` `press` `select` `check` `hover` `goto` `see` `gone`, the targets and the landmarks, the `focused` / `disabled` / `selected` / `valued` modifiers, `within()`, exact names and `testId()`. One vocabulary, three surfaces — this chapter adds none of its own and redefines none of them. Two things are website-specific and stated there: `goto(path)` navigates within the site under test, and the ARIA landmarks are this facet's and the component facet's, never the device's.
 
-Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [13 — The visitor § Designating exactly one element](13-visitor.md#designating-exactly-one-element).
+Designating exactly one element is rule `target-matches-one-element`, and the refusal it prints — the candidates, the accessible name each matched on, and what each suggested fix LEAVES — is [20 — The visitor § Designating exactly one element](20-visitor.md#designating-exactly-one-element).
 
 Navigating within a scenario changes what the capture describes:
 
@@ -169,7 +169,7 @@ test('sends chain headers on the raw exchange', async () => {
 
 ### Setup: `website.with({ clock, headers })`
 
-The clock and the headers a whole FILE shares are stated once, on a view of the facet whose every chain starts with them — `const french = website.with({ headers: { 'Accept-Language': 'fr' } })` — and a chain's own setup merges over it ([18](18-conventions.md#what-a-file-shares)).
+The clock and the headers a whole FILE shares are stated once, on a view of the facet whose every chain starts with them — `const french = website.with({ headers: { 'Accept-Language': 'fr' } })` — and a chain's own setup merges over it ([23](23-conventions.md#what-a-file-shares)).
 
 ### Setup: `.clock()`
 
@@ -185,7 +185,7 @@ test('stamps the moment the page was opened', async () => {
 });
 ```
 
-A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
+A `.fetch()` opens no page, so it has no clock to pin: the chain refuses the pairing rather than ignoring it. Assert the moment of a raw exchange with a `{{iso8601}}` token in its golden. The primitive behind the setup is [19 — Time and doubles § The clock](19-time-and-doubles.md#the-clock).
 
 ## The result
 
@@ -308,7 +308,7 @@ afterAll(cleanup);
 
 `backend` requires `server` mode — with `url` it refuses (the type already forbids the combination): a deployed site cannot be pointed at a local stub. The **ownership boundary**: the framework owns the server child, so it injects the env var itself — that is the whole wiring.
 
-What the stub serves is declared per chain, as [stubs](16-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
+What the stub serves is declared per chain, as [stubs](17-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
 import newsroom from './_setup/stubs/newsroom.stubs.js';
@@ -373,9 +373,9 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 
 - **Passing both `server` and `url`, or neither.** The options type makes the invalid combinations inexpressible — the compiler rejects them before anything runs.
 - **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.visit()` promise resolves to.
-- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, `target-matches-one-element`'s fix — [13 § `testId()`](13-visitor.md#testid--the-one-escape-hatch).
+- **Reaching for `testId()` first, or to escape an ambiguity.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks; an ambiguity is scoped with `within()`, `target-matches-one-element`'s fix — [20 § `testId()`](20-visitor.md#testid--the-one-escape-hatch).
 - **Using `see()` to prove something went away.** It cannot: an element that never appeared and one that disappeared read the same to it. `gone(element)` is the absence primitive.
-- **Snapshotting the tree to prove focus.** The tree carries none — [13 § Modifiers](13-visitor.md#modifiers) says what does, and what a golden may pin instead.
+- **Snapshotting the tree to prove focus.** The tree carries none — [20 § Modifiers](20-visitor.md#modifiers) says what does, and what a golden may pin instead.
 - **Calling `.visit()` without playwright installed.** The error names the exact fix — `npm install -D playwright && npx playwright install chromium` — there is no silent fallback.
 - **Expecting `.fetch()` to follow redirects.** It never does — the 3xx status and `location` header ARE the result; chase the target with a second `.fetch()` if the spec needs to.
 - **Assuming `external` defaults the same way in both modes.** It flips with the constructor mode: `'block'` with `server`, `'allow'` with `url` — pass it explicitly to override.
@@ -385,4 +385,4 @@ No `_seeds/` or `_requests/` — a website chain has no `.seed()` setup and no r
 
 ## Related
 
-[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [09 — Mobile specs](09-mobile.md) · [07 — Component specs](07-component.md)
+[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [11 — Mobile specs](11-mobile.md) · [09 — Component specs](09-component.md)

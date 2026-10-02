@@ -51,8 +51,8 @@ describe('skill', () => {
         });
     });
 
-    test('the skill asks the fork the constitution states (meta-test) — the same kinds, in the same order, each at the place the generated fork names', () => {
-        // Given - the skill's hand-kept fork, and the one chapter 18 is generated from
+    test('the skill asks the fork chapter 05 states (meta-test) — the same kinds, in the same order, each at the place the generated fork names', () => {
+        // Given - the skill's hand-kept fork, and the one chapter 05 is generated from
         const answers = [...readFileSync(SKILL, 'utf8').matchAll(SKILL_FORK_LINE)].map((match) => ({
             kind: match.groups?.kind,
             path: match.groups?.path ?? '',

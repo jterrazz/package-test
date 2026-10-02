@@ -47,7 +47,7 @@ describe('postgres', () => {
         // Then - it rejects, naming the service AND keeping the driver's own reason, which survives as the error's cause
         const healthcheck = unreachable.healthcheck();
         await expect(healthcheck).rejects.toThrow(
-            /^found: postgres\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/17-services\.md#service-factories$/u,
+            /^found: postgres\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/18-services\.md#service-factories$/u,
         );
         await expect(healthcheck).rejects.toHaveProperty('cause.code', 'ECONNREFUSED');
     });

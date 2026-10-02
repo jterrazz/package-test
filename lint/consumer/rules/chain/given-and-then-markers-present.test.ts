@@ -81,7 +81,7 @@ ruleTester().run('given-and-then-markers-present', givenAndThenMarkersPresent, {
                 doThing();
             });`,
         },
-        // A table narrated ONCE, on the table — the form chapter 05 shows.
+        // A table narrated ONCE, on the table — the form chapter 07 shows.
         {
             code: `test.each([
                 { expected: "fresh", label: "a fresher post of equal score" },

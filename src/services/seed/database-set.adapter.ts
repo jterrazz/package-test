@@ -26,7 +26,7 @@ export function databaseSet(config: ServicesConfig): SeedPort {
                         refusal({
                             fix: `name a declared database: ${[...config.databases.keys()].join(', ')}`,
                             found: `seed() targets the database "${database}", and none is declared under that key`,
-                            read: 'docs/17-services.md#the-database-rule',
+                            read: 'docs/18-services.md#the-database-rule',
                             why: '`database:` names a key of the services record.',
                         }),
                     );
@@ -38,7 +38,7 @@ export function databaseSet(config: ServicesConfig): SeedPort {
                     refusal({
                         fix: 'declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
                         found: 'seed(), and no database is declared',
-                        read: 'docs/17-services.md#the-database-rule',
+                        read: 'docs/18-services.md#the-database-rule',
                         why: 'A seed writes into a declared database.',
                     }),
                 );

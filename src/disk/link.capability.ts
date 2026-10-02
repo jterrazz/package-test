@@ -27,7 +27,7 @@ function requirePackageName(name: unknown, linked: readonly Linked[]): string {
             refusal({
                 fix: "name it as a package.json `dependencies` key does: link('@scope/name') or link('name')",
                 found: `link(${JSON.stringify(name)}), no package name`,
-                read: 'docs/12-cli.md#link--a-package-the-working-directory-resolves',
+                read: 'docs/14-cli.md#link--a-package-the-working-directory-resolves',
                 why: 'The name is where the package lands, `node_modules/<name>`, and what the binary imports it by.',
             }),
         );
@@ -37,7 +37,7 @@ function requirePackageName(name: unknown, linked: readonly Linked[]): string {
             refusal({
                 fix: `link ${name} once, from the one source the binary should resolve`,
                 found: `link(${JSON.stringify(name)}), stated twice on one chain`,
-                read: 'docs/12-cli.md#link--a-package-the-working-directory-resolves',
+                read: 'docs/14-cli.md#link--a-package-the-working-directory-resolves',
                 why: 'A name resolves to one package: a second link of it would silently replace the first.',
             }),
         );

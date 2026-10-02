@@ -1,4 +1,4 @@
-# 15 — Tokens: dynamic values in fixtures
+# 22 — Tokens: dynamic values in fixtures
 
 Real systems generate UUIDs, timestamps, ports, and paths. The framework handles them with **one unified token grammar** (rule `no-unknown-token`): the same `{{token}}` vocabulary works in every fixture file, and the same vocabulary is available in code as `match.*`. The vocabulary is fixed — 21 tokens, defined, tested, and documented in the package — and an unknown token in a fixture is an error, not a silent literal.
 
@@ -9,7 +9,7 @@ Real systems generate UUIDs, timestamps, ports, and paths. The framework handles
 | HTTP responses | `_expected/*.http`                                          | **body and headers**                                                                                                                                                                                                           |
 | JSON snapshots | `_expected/*.json`                                          | any string value                                                                                                                                                                                                               |
 | Text snapshots | `_expected/*.txt` (and other text files under `_expected/`) | anywhere in the text                                                                                                                                                                                                           |
-| Spec documents | `<case>.spec.yaml`, beside the spec ([20](20-documents.md)) | what a document asserts — a run's streams and `files:` texts, a response's status, headers and body, a table's cells, a job's `error:` — **never the description, a command, a request or a body**, which are prose and inputs |
+| Spec documents | `<case>.spec.yaml`, beside the spec ([15](15-documents.md)) | what a document asserts — a run's streams and `files:` texts, a response's status, headers and body, a table's cells, a job's `error:` — **never the description, a command, a request or a body**, which are prose and inputs |
 
 ```http
 ### _expected/order-created.http — tokens in a header AND the body
@@ -168,7 +168,7 @@ The same preservation and `{{workdir}}` substitution apply identically across ev
 
 A `toMatch(<value>)` is rewritten where it stands, in the test file, the gesture vitest's `toMatchInlineSnapshot` makes: the call is found from the stack of the assertion, and its argument — up to its comma or its closing parenthesis, whatever template, string or nested call it holds — is replaced by the actual result, merged with the tokens the old value had where the result still matches them. A text is written as a template literal indented one level deeper than its call, a json as its JSON, a table one row per line. An empty value — `toMatch('')` — is the one an author leaves to be recorded: outside update mode it fails naming the run that fills it. A value that matches is never touched, and neither is a `{ frozen: true }` one or a `.not` — a negation asserts a mismatch, and records nothing. Every rewrite of one file during a run is laid on the source the run loaded, so a second rewrite lands where its stack says even when a first one moved the lines below it. Under the preset the test file is written when the run ENDS, after its report: vitest frames a failure by reading the file on disk at the line the run loaded, so a file rewritten mid-run would frame a later failure at another test's code. The preset's global setup hands each project a pending folder under `.artifacts/vitest/in-place/` and writes what waits there once the report is printed — in watch mode, when the watcher exits; a run outside the preset writes each file at once. A component's value is rewritten the same way through a server command, the page's stack mapped back to the test's source by the browser server. What update mode writes is code the formatter has not seen: `make fix` gives it the repository's quotes.
 
-This is why `transform` on `specification.cli` is only an escape hatch (rule `no-transform-duplicating-tokens`): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is refused by `no-transform-duplicating-tokens` ([no-transform-duplicating-tokens](19-linting.md#no-transform-duplicating-tokens)).
+This is why `transform` on `specification.cli` is only an escape hatch (rule `no-transform-duplicating-tokens`): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is refused by `no-transform-duplicating-tokens` ([no-transform-duplicating-tokens](24-linting.md#no-transform-duplicating-tokens)).
 
 ### Frozen fixtures — opting a negative fixture out of the rewrite
 
@@ -251,4 +251,4 @@ accept native JSON numbers.
 
 ## Related
 
-[14 — Assertions](14-assertions.md) · [10 — API specs](10-api.md) · [12 — CLI specs](12-cli.md)
+[21 — Assertions](21-assertions.md) · [12 — API specs](12-api.md) · [14 — CLI specs](14-cli.md)

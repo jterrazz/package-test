@@ -104,7 +104,7 @@ describe('fsLinks', () => {
         expect(laying).toThrow(
             `found: link('@acme/greeter'): ${resolve(workDir, 'node_modules')} is a file, not a folder`,
         );
-        expect(laying).toThrow('docs/12-cli.md#link--a-package-the-working-directory-resolves');
+        expect(laying).toThrow('docs/14-cli.md#link--a-package-the-working-directory-resolves');
     });
 
     test('fsLinks — a bare name — links the package the spec’s project resolves', () => {

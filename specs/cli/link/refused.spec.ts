@@ -4,7 +4,7 @@ import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
 
-const READ = 'read: docs/12-cli.md#link--a-package-the-working-directory-resolves';
+const READ = 'read: docs/14-cli.md#link--a-package-the-working-directory-resolves';
 
 describe('refused', () => {
     test('a bare name no node_modules above the spec holds is refused before the binary runs', async () => {
@@ -58,7 +58,7 @@ describe('refused', () => {
                 "found: link('@acme/greeter', file(\"./_fixtures/greeter/package.json\")), a file where a package's directory is read",
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: name the package's directory: link('@acme/greeter', directory('./_fixtures/greeter/'))",
-                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
     });

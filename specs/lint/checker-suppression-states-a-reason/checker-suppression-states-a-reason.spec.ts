@@ -16,7 +16,7 @@ describe('checker-suppression-states-a-reason', () => {
                 found: a checker suppression that does not say why
                 why: Every \`checker-disable-next-line\` / \`checker-disable-line\` directive carries \`-- <reason>\`, wherever a checker pass can be silenced: a test, a document, a fixture under ground.
                 fix: end the directive with its reason: \`checker-disable-next-line database-named-only-when-several -- <why this line is the exception>\`
-                read: docs/19-linting.md#checker-suppression-states-a-reason
+                read: docs/24-linting.md#checker-suppression-states-a-reason
         `);
     });
 

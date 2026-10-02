@@ -38,8 +38,8 @@ export function scenarioFailure(
             found: `the ${verb} scenario failed:\n  ${message.replaceAll('\n', '\n  ')}${suffix}`,
             read:
                 verb === 'visit'
-                    ? 'docs/08-website.md#visit-scenarios--the-when'
-                    : 'docs/09-mobile.md#open-scenarios--the-when',
+                    ? 'docs/10-website.md#visit-scenarios--the-when'
+                    : 'docs/11-mobile.md#open-scenarios--the-when',
             why: `${verb === 'visit' ? 'A' : 'An'} ${verb} scenario drives the ${surface} step by step, and the first step that fails ends it.`,
         }),
         { cause: error },

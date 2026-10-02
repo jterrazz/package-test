@@ -31,7 +31,7 @@ export async function waitUntil(
                 refusal({
                     fix: 'raise the budget if the wait is legitimate, or wait on what actually changes',
                     found: `waitUntil(): ${options.why ?? 'the condition'} did not hold within ${timeout}ms`,
-                    read: 'docs/14-assertions.md#two-helpers-that-are-not-matchers',
+                    read: 'docs/21-assertions.md#two-helpers-that-are-not-matchers',
                     why: '`waitUntil()` waits on a condition, within a budget.',
                 }),
             );

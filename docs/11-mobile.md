@@ -1,12 +1,12 @@
-# 09 — Mobile specs (`specification.mobile`)
+# 11 — Mobile specs (`specification.mobile`)
 
 `specification.mobile()` tests a native app on the iOS simulator — its screens (the accessibility tree a user's assistive tech sees) and its flows (tap, fill, see) — through a real XCUITest session driven by appium. It resolves and boots the simulator itself, and starts the appium server from the caller project — unless it is pointed at an Appium server someone else runs.
 
-Use it when the subject under test is an installed native app. For a browser-rendered page use [website](08-website.md); for a JSON/HTTP API surface use [api](10-api.md).
+Use it when the subject under test is an installed native app. For a browser-rendered page use [website](10-website.md); for a JSON/HTTP API surface use [api](12-api.md).
 
 ## What it specifies
 
-A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([07](07-component.md) states the boundary and the spike that would move it).
+A mobile spec answers one question: **given this backend and this visitor, what does the native app draw on a simulator, and what does the screen read like to someone who cannot see it?** The subject is the installed app met through a deep link, driven by the accessibility tree the platform publishes. A React Native component rendered off a device is jest's for now, not this facet's ([09](09-component.md) states the boundary and the spike that would move it).
 
 ## The constructor
 
@@ -45,7 +45,7 @@ afterAll(cleanup);
 
 Resolution refuses rather than guesses: zero matches and several matches both fail with the full `simctl` device listing, so the fix never needs an Xcode round-trip. A shut-down simulator is booted (`simctl boot` + `bootstatus`); an already-booted one is reused as-is.
 
-**`services` is where Metro goes.** A dev build loads its JavaScript from a bundler. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([17 — Services](17-services.md#process--the-one-shape-an-external-process-takes)):
+**`services` is where Metro goes.** A dev build loads its JavaScript from a bundler. It is a `process()` like any other external process the framework owns, started before the app is ever launched and stopped with the specification ([18 — Services](18-services.md#process--the-one-shape-an-external-process-takes)):
 
 ```typescript
 import { process, specification } from '@jterrazz/test';
@@ -59,7 +59,7 @@ export const { cleanup, mobile, udid } = await specification.mobile({
 });
 ```
 
-Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server is ended the way every `process()` is ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)).
+Without a declared `appium`, and unless the run already serves one ([One session per run](#one-session-per-run)), the server is spawned from the caller project's `node_modules/.bin/appium` on a free port and polled on `/status` until ready. On teardown the runner's driver session ends and the server is ended the way every `process()` is ([18 — Services § `process()`](18-services.md#process--the-one-shape-an-external-process-takes)).
 
 The handle destructures to `{ mobile, cleanup, udid }` (rule `no-runner-alias`) — `udid` is the resolved simulator, handy for shelling out to `simctl` in a debugging session; under a declared `appium` server it is the `device.udid` you named, or absent. With the `backend` option it additionally carries `backendUrl`.
 
@@ -158,13 +158,13 @@ test('bookmarks an event from its detail screen', async () => {
 
 **No `expect()` inside a scenario (rule `no-expect-in-scenario`).** A scenario is pure interaction — assertions live in the Then, on the returned result.
 
-The visitor's vocabulary is [13 — The visitor](13-visitor.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this chapter's, and it is three things.
+The visitor's vocabulary is [20 — The visitor](20-visitor.md)'s, the same one the website and component facets name things with — there is no CSS, no XPath and no raw predicate surface. What a device does with it is this chapter's, and it is three things.
 
-**The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here ([13 § Verbs](13-visitor.md#verbs) says why). Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality. Actionability includes **scroll-into-view**: when a target matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
+**The verbs are three.** `tap(element)` is the device's word for a click, `fill(element, value)` fills a text field, and `see(element)` is the only synchronization primitive. There is no `gone()` here ([20 § Verbs](20-visitor.md#verbs) says why). Every verb polls until at least one visible match exists (default 30 s, sized for a cold app boot), then enforces the verb's cardinality. Actionability includes **scroll-into-view**: when a target matches nothing visible but an off-screen element exists, the adapter scrolls it into view once (directly by element id) and keeps polling — elements buried in very heavy screens (a full-page WebView) may still be out of reach, so prefer a deep link then.
 
-**Four targets reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [13 — The visitor](13-visitor.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule `test-id-states-what-is-missing`'s escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
+**Four targets reach a screen** — `button(name)` (accessible label, `XCUIElementTypeButton`), `field(label)` (accessible name or value, text and secure-text fields), `content(text)` (any element whose label or value IS the text — the whole-name default of [20 — The visitor](20-visitor.md#a-name-designates-the-accessible-name-whole), compiled to `==`; `{ exact: false }` compiles to `CONTAINS`) and `testId(id)` (the accessibility identifier, rule `test-id-states-what-is-missing`'s escape hatch, with the line saying what the element lacks). The link, heading, dialog, table and option roles, the landmarks and the state modifiers are not part of a device's tree: passing one to a mobile verb refuses at runtime with a message naming the boundary.
 
-**`target-matches-one-element` is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous target and print the candidates with their accessibility identifiers; `see()` does not — [13 — The visitor § `see()` and `gone()`](13-visitor.md#see-and-gone-are-the-synchronization) says why, once.
+**`target-matches-one-element` is relaxed for `see()` alone.** `tap` and `fill` refuse an ambiguous target and print the candidates with their accessibility identifiers; `see()` does not — [20 — The visitor § `see()` and `gone()`](20-visitor.md#see-and-gone-are-the-synchronization) says why, once.
 
 A mobile scope is any target, most often a `testId()` on the containing view, because iOS has no landmarks:
 
@@ -209,13 +209,13 @@ test('renders the events feed', async () => {
 });
 ```
 
-The tree describes the **whole mounted hierarchy**, including rows below the fold; `result.content` carries only what is visible. Volatile parts (dates, counters) are covered by the usual `{{token}}` grammar ([15 — Tokens](15-tokens.md)); generate with `TEST_UPDATE=1`.
+The tree describes the **whole mounted hierarchy**, including rows below the fold; `result.content` carries only what is visible. Volatile parts (dates, counters) are covered by the usual `{{token}}` grammar ([22 — Tokens](22-tokens.md)); generate with `TEST_UPDATE=1`.
 
 ## Unique here
 
 ### Declared backend
 
-A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](16-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
+A native app usually talks to an API. The `backend` option starts a small **stub backend** (plain `node:http`, no extra dependency) with the runner; what it serves is declared per chain, as [stubs](17-stubs.md) — the feature's `_setup/stubs/` facade, exactly the form `api`/`job` use:
 
 ```typescript
 // specs/mobile/mobile.specification.ts
@@ -249,7 +249,7 @@ describe('feed', () => {
 
 **The ownership boundary.** The framework owns the simulator and the appium server it started — it does NOT own the JS bundler: Metro belongs to the caller's repo, exactly like `next build` belongs to a website's. So nothing is injected anywhere; the handle exposes `backendUrl` and **the caller wires it into its own bundler env** (e.g. `EXPO_PUBLIC_API_URL=<backendUrl> npx expo start`). This is why `port` exists: Metro inlines `EXPO_PUBLIC_*` values at bundle-serve time, and a stable port lets a warm Metro survive between runs instead of re-bundling against a fresh URL.
 
-The stub backend behaves exactly as on the website facet ([08 — Website specs](08-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared stub is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero stubs leaves the stub unguarded.
+The stub backend behaves exactly as on the website facet ([10 — Website specs](10-website.md#declared-backend)): it **resets between chains** (one chain = one terminal action); selection is the shared queue (first non-exhausted match wins, no `times` = unlimited); a request matching no declared stub is answered **501 and recorded**, and the `.open()` then **throws** an error enumerating every unmatched request (method, path, count) — screenshots and other failure evidence are captured first, as always. A chain with zero stubs leaves the stub unguarded.
 
 ### Evidence on failure
 
@@ -289,7 +289,7 @@ No `_seeds/` or `_requests/` — a mobile chain has no `.seed()` and no request-
 - **Using `expect()` inside a scenario callback.** Forbidden (rule `no-expect-in-scenario`) — the scenario is the When; assertions belong on the result the `.open()` promise resolves to.
 - **The first session builds WebDriverAgent (~40 s, once per simulator).** Subsequent sessions on a warm simulator are seconds. Budget the first run; do not "fix" it with retries.
 - **Passing a landmark (`main()`, `navigation()`) to a mobile verb.** They are website concepts — iOS has no ARIA regions; the runtime refusal points at `within(testId('…'), …)` as the scoping tool.
-- **Reaching for `testId()` first.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks — [13 § `testId()`](13-visitor.md#testid--the-one-escape-hatch).
+- **Reaching for `testId()` first.** It is the last rung, and `test-id-states-what-is-missing` refuses it without the line naming what the element lacks — [20 § `testId()`](20-visitor.md#testid--the-one-escape-hatch).
 - **Expecting `.open()` to preserve app state between specs.** It never does — every open terminates and relaunches the app; a flow that spans screens belongs in ONE scenario.
 - **Asserting on off-screen content with `result.content`.** `content` carries only _visible_ texts; the mounted-but-offscreen rows live in `result.screen`. Use the golden for the whole list, `content` for what the user currently sees.
 - **Calling `specification.mobile()` without appium installed.** The error names the exact fix — `npm install -D appium webdriverio && npx appium driver install xcuitest` — there is no silent fallback.
@@ -300,4 +300,4 @@ No `_seeds/` or `_requests/` — a mobile chain has no `.seed()` and no request-
 
 ## Related
 
-[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [08 — Website specs](08-website.md)
+[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [10 — Website specs](10-website.md)

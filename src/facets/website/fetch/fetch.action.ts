@@ -56,7 +56,7 @@ export const rawFetch = defineAction<
                 refusal({
                     fix: 'assert the moment with a token ({{iso8601}}) in the golden, or visit the page',
                     found: '.clock() on a chain ending in .fetch(), which opens no page',
-                    read: 'docs/08-website.md#setup-clock',
+                    read: 'docs/10-website.md#setup-clock',
                     why: '.clock() pins the clock of a page, and .fetch() is one raw HTTP exchange.',
                 }),
             );

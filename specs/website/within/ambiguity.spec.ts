@@ -36,7 +36,7 @@ describe('ambiguity', () => {
         expect(message).toContain('in <nav>');
         expect(message).toContain('in <footer>');
         expect(message).toContain('within(navigation(), link("Articles"))');
-        expect(message).toContain('read: docs/19-linting.md#target-matches-one-element');
+        expect(message).toContain('read: docs/24-linting.md#target-matches-one-element');
     });
 
     test('names a candidate inside a `<search>` element by its landmark', async () => {

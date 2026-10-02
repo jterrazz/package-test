@@ -13,7 +13,7 @@
     // Knip's oxlint plugin reads `oxlint.config.ts` and asks this package to
     // Declare every lint plugin the composed rulebook names. They are
     // `@jterrazz/typescript`'s: this config composes its fragments and holds no
-    // Opinion of its own about them (docs/19-linting.md § Enabling the plugin).
+    // Opinion of its own about them (docs/06-setting-up.md § Turning the conventions on).
     "oxlint": false,
     // `make` is the system's, never a dependency: the Makefile's meta-test runs
     // It to prove what `fix` does when a fixer fails.

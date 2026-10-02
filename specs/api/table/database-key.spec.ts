@@ -28,7 +28,7 @@ describe('database-key', () => {
                 'found: table() names no database, and 2 databases are declared ("analyticsDb", "db")',
                 'why: With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
                 "fix: pass the database it reads: { database: 'analyticsDb' }, or another declared key",
-                'read: docs/19-linting.md#database-named-only-when-several-at-runtime',
+                'read: docs/24-linting.md#database-named-only-when-several-at-runtime',
             ].join('\n'),
         );
     });

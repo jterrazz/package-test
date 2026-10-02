@@ -22,7 +22,7 @@ describe('no-sampled-value-in-expectation', () => {
                 found: a sampled value under \`expect\`
                 why: No sampled value under an oracle: \`new Date()\` (no argument), \`Date.now()\`, \`performance.now()\`, \`Math.random()\` and \`randomUUID()\` are an error as a direct argument of \`expect\` or of its matcher, and anywhere inside a structural matcher's expected shape.
                 fix: pin it with \`clock.at('2026-01-01T00:00:00Z')\`, or match it with an \`iso8601\` token or \`match.uuid\`
-                read: docs/19-linting.md#no-sampled-value-in-expectation
+                read: docs/24-linting.md#no-sampled-value-in-expectation
         `);
     });
 });

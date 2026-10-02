@@ -22,12 +22,12 @@ describe('project-named-for-its-facet', () => {
                 found: \`specs/api/**/*.spec.ts\` matches no file, though its folder exists
                 why: An \`include\` glob of a PROJECT — an object under \`test\` or in \`projects\`, never \`optimizeDeps.include\` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is an error.
                 fix: point the glob at the suffix the files carry now (\`.spec.ts\` after a rename), or delete it
-                read: docs/19-linting.md#include-points-at-a-folder
+                read: docs/24-linting.md#include-points-at-a-folder
             vitest.config.ts:5:59  jterrazz(project-named-for-its-facet)
                 found: the project \`http\` collects \`specs/api/**\`
                 why: A project literal collecting \`specs/<facet>/\` is named \`<facet>\`, and one named for a facet is rooted there; \`unit\` collects outside \`specs/\`.
                 fix: name it \`api\`, so \`--project api\` means the same in every repository
-                read: docs/19-linting.md#project-named-for-its-facet
+                read: docs/24-linting.md#project-named-for-its-facet
         `);
     });
 });

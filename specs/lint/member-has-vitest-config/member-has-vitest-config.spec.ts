@@ -30,7 +30,7 @@ describe('member-has-vitest-config', () => {
                 found: packages/tested-no-config has no vitest.config.ts — vitest's 5 s budget and an unexcluded \`_fixtures/\` are running its tests
                 why: Every workspace member with tests OF ITS OWN (a \`test\` script that does not delegate to members, or a \`*.test.ts(x)\` outside another package’s tree) declares a vitest config (\`vitest.config.*\`).
                 fix: write packages/tested-no-config/vitest.config.ts: \`export default defineSpecConfig()\`, from \`@jterrazz/test/vitest\`
-                read: docs/19-linting.md#member-has-vitest-config
+                read: docs/24-linting.md#member-has-vitest-config
         `);
     });
 });

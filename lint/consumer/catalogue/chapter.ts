@@ -1,6 +1,6 @@
 import type { Markers } from '@jterrazz/typescript/rules';
 
-export const CATALOGUE_CHAPTER = 'docs/19-linting.md';
+export const CATALOGUE_CHAPTER = 'docs/24-linting.md';
 
 export const CATALOGUE_MARKERS: Markers = {
     end: '<!-- /GENERATED:catalogue -->',

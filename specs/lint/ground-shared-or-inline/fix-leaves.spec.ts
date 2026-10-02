@@ -102,7 +102,7 @@ describe('fix-leaves', () => {
                 found: an expectation of 162 lines written in the test, past the _expected/ cap of 150
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
                 fix: a string has no golden: wrap it — \`expect(text(message)).toMatch(file('./_expected/a-long-message.txt'))\` — or compare the result it came from to its file; by hand: the fixer never writes a string's comparison to a file
-                read: docs/19-linting.md#ground-shared-or-inline
+                read: docs/24-linting.md#ground-shared-or-inline
         `);
         expect(result.file('specs/widget/_expected').exists).toBe(false);
         expect(result.file('specs/widget/widget.test.ts').content).toContain(
@@ -122,17 +122,17 @@ describe('fix-leaves', () => {
                 found: a request of 31 lines written in the test, past the _requests/ cap of 30
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
                 fix: move it to a file under ./_requests/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only
-                read: docs/19-linting.md#ground-shared-or-inline
+                read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/create/created.spec.ts:48:38  jterrazz-check(ground-shared-or-inline)
                 found: a request of 33 lines written in the test, past the _requests/ cap of 30
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
                 fix: move it to a file under ./_requests/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only
-                read: docs/19-linting.md#ground-shared-or-inline
+                read: docs/24-linting.md#ground-shared-or-inline
             specs/api/users/create/created.spec.ts:91:33  jterrazz-check(ground-shared-or-inline)
                 found: an expectation of 156 lines written in the test, past the _expected/ cap of 150
                 why: A ground file exists only if it is shared, and a value lives in a test only while it stays short.
                 fix: move it to a file under ./_expected/ and name it with file() — by hand: the fixer reads a string, a template or a JSON value only
-                read: docs/19-linting.md#ground-shared-or-inline
+                read: docs/24-linting.md#ground-shared-or-inline
         `);
         await expect(result.directory()).toMatch(directory('./_expected/past-cap-unreadable/'));
     });

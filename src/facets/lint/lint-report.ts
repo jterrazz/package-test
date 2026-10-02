@@ -22,7 +22,7 @@ export function diagnosticsOf(text: string): Diagnostic[] {
             refusal({
                 fix: 'run oxlint with --format=unix or --format=agent: without it, oxlint picks its renderer off the environment',
                 found: `a report in oxlint's graphical rendering (${graphical.trim()})`,
-                read: 'docs/21-lint.md#the-report',
+                read: 'docs/16-lint.md#the-report',
                 why: 'A report is read one line per diagnostic.',
             }),
         );

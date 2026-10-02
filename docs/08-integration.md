@@ -1,4 +1,4 @@
-# 06 — Integration specs: a module against the real thing
+# 08 — Integration specs: a module against the real thing
 
 `specification.integration()` specifies a MODULE — not an entry. No HTTP, no binary, no page: the subject is a function, and it is called. What makes it a spec rather than a module test beside its code is what it stands on — a real database, a declared stub, a golden — and that is exactly the fork this facet closes.
 
@@ -40,7 +40,7 @@ describe('orders', () => {
 
 ## What it specifies
 
-Three questions decide, in order ([18 — Conventions](18-conventions.md)):
+Three questions decide, in order ([23 — Conventions](23-conventions.md)):
 
 1. Does the subject answer HTTP, run as a binary, render a page or a screen? Then it is that facet's, not this one.
 2. Does it need a real service — a database, a cache, a process — or is its oracle a GOLDEN file? Then it is an integration spec.
@@ -59,13 +59,13 @@ The handle is `{ integration, cleanup }`, destructured with those names (rule `n
 
 ## The chain
 
-Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
+Setups: `.seed()`, `.intercept()`, `.clock()`, and `integration.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([23](23-conventions.md#what-a-file-shares)). Terminal action: `.call(subject)` (rule `one-terminal-action-per-chain`).
 
 | Setup                              | Means                                                                                                  |
 | ---------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `.seed(file('./_seeds/rows.sql'))` | run that `.sql` file, named from the spec file, before the call; `{ database }` targets one of several |
-| `.intercept(stubs)`                | declare what the outside world replies ([16](16-stubs.md))                                             |
-| `.clock('2026-03-04T09:30:00Z')`   | pin the module's `Date` for this chain ([18](18-conventions.md#time--one-primitive-two-depths))        |
+| `.intercept(stubs)`                | declare what the outside world replies ([17](17-stubs.md))                                             |
+| `.clock('2026-03-04T09:30:00Z')`   | pin the module's `Date` for this chain ([19](19-time-and-doubles.md#the-clock))                        |
 
 `.call(subject)` hands the STARTED services record to the subject, so the module is built with the real connection strings rather than with a double:
 
@@ -113,7 +113,7 @@ That is what keeps a spec of a refusal the same size as a spec of a success, and
 const result = await integration.call(async () => Object.fromEntries(await loadIndex()));
 ```
 
-Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./_expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([15](15-tokens.md), [14](14-assertions.md)).
+Both accessors are the package's ordinary subjects, compared whole: to the value written in place — `toMatch({ … })` for a json, `toMatch('…')` for a text — or to `file('./_expected/<name>.json')` when several tests share it; the `{{token}}` grammar for what moves, `{ frozen }`, and `TEST_UPDATE=1`, which writes the value into the test ([22](22-tokens.md), [21](21-assertions.md)).
 
 A call that a declared stub never accepted fails the CHAIN rather than becoming `result.error`: a refusal the module chose is the subject's behaviour, an undeclared outgoing call is the spec's own mistake (rule `network-strict-after-first-stub`).
 
@@ -183,4 +183,4 @@ specs/integration/
 
 ## Related
 
-[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md) · [18 — Conventions](18-conventions.md)
+[12 — API specs](12-api.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md) · [23 — Conventions](23-conventions.md)

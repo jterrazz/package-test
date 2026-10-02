@@ -13,7 +13,7 @@ await runChecker(
         held: {
             lower: 'jterrazz-test-check --fix',
             passes: ['conventions'],
-            read: 'docs/19-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
+            read: 'docs/24-linting.md#the-ratchet-the-test-section-of-jterrazzbaselinejson',
             record: 'jterrazz-test-check baseline',
             section: 'test',
             summarised: true,

@@ -83,7 +83,7 @@ describe('refusals', () => {
             specs/cli/run/_fixtures/wrong-stdout.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
             fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
-            read: docs/20-documents.md#failure-and-update`);
+            read: docs/15-documents.md#failure-and-update`);
     });
 
     test('a wrong exit code names both codes and what stderr carried', async () => {
@@ -109,7 +109,7 @@ describe('refusals', () => {
             specs/cli/run/_fixtures/wrong-exit.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
             fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
-            read: docs/20-documents.md#failure-and-update`);
+            read: docs/15-documents.md#failure-and-update`);
     });
 
     test('failing files: assertions render as path, expected and got', async () => {
@@ -133,7 +133,7 @@ describe('refusals', () => {
             specs/cli/run/_fixtures/wrong-files.spec.yaml:3
             why: A spec document states what its runs produce: the exit code and the streams, whole.
             fix: correct the command, or run with TEST_UPDATE=1 to rewrite the runs — the exit code and the streams, and nothing else
-            read: docs/20-documents.md#failure-and-update`);
+            read: docs/15-documents.md#failure-and-update`);
     });
 
     test('the stack carries ONE frame, on the run that failed', async () => {
@@ -159,7 +159,7 @@ describe('refusals', () => {
                 'found: specs/cli/run/_fixtures/unknown-key.spec.yaml:2: unknown key "when:" in a spec document — known keys: description, fixture, env, serve, runs',
                 'why: A spec document follows one grammar, read by the parser the runner and the linter share: closed keys, `description:` and `runs:` required, `command:` and `exit:` in every run.',
                 'fix: write the key the grammar names; the reason prints the accepted set',
-                'read: docs/19-linting.md#document-follows-its-grammar',
+                'read: docs/24-linting.md#document-follows-its-grammar',
             ].join('\n'),
         );
         expect(frames(error)).toStrictEqual([
@@ -215,7 +215,7 @@ describe('refusals', () => {
                 'found: run(file("./_fixtures/workdir-answers/answers/dashboard/posts.json")), a file not ending in .spec.yaml',
                 'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
                 "fix: name the .spec.yaml file run() reads: run(file('./case.spec.yaml'))",
-                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
     });

@@ -62,7 +62,7 @@ export const exec = defineAction<
                 refusal({
                     fix: "name at least one command: .exec(['build', 'test'])",
                     found: '.exec([]), a sequence of no command',
-                    read: 'docs/12-cli.md#sequences-array-form',
+                    read: 'docs/14-cli.md#sequences-array-form',
                     why: 'A sequence runs its commands in order, and runs at least one.',
                 }),
             );
@@ -72,7 +72,7 @@ export const exec = defineAction<
                 refusal({
                     fix: 'wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
                     found: '.exec([…], { waitFor/timeout }), options on a command sequence',
-                    read: 'docs/12-cli.md#long-running-processes-waitfor--timeout',
+                    read: 'docs/14-cli.md#long-running-processes-waitfor--timeout',
                     why: '`waitFor` and `timeout` wait on one long-running process.',
                 }),
             );

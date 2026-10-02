@@ -14,7 +14,7 @@ describe('negative-golden-frozen', () => {
                 found: a golden matcher whose mismatch is the subject, with no \`{ frozen: true }\`
                 why: A golden \`toMatch(file(…))\`/\`toMatch(directory(…))\`, or a \`toMatch(<value>)\` on a result (the value written in place, rewritten in the test), whose FAILURE is the subject of the test must carry \`{ frozen: true }\` → otherwise \`TEST_UPDATE=1\` silently rewrites the deliberately-wrong expectation instead of throwing → error.
                 fix: pass \`{ frozen: true }\` as its last argument, so \`TEST_UPDATE=1\` never rewrites the deliberately wrong expectation
-                read: docs/19-linting.md#negative-golden-frozen
+                read: docs/24-linting.md#negative-golden-frozen
         `);
     });
 

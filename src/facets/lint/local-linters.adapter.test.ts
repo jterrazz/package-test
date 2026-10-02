@@ -33,7 +33,7 @@ describe('localLinters', () => {
 
         // Then - the four-part refusal names the checker and what it printed
         await expect(linted).rejects.toThrow(
-            `found: node ${checker} failed and reported no diagnostic: something went wrong\nwhy: A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.\nfix: run node ${checker} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses\nread: docs/21-lint.md#what-run-runs`,
+            `found: node ${checker} failed and reported no diagnostic: something went wrong\nwhy: A linter that fails without a diagnostic judged nothing, and an empty report would read as a clean tree.\nfix: run node ${checker} on the fixture by hand and correct what stops it — a plugin that does not load, a config it refuses\nread: docs/16-lint.md#what-run-runs`,
         );
     });
 

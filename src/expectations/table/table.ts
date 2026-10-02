@@ -40,7 +40,7 @@ export class TableAccessor {
                 refusal({
                     fix: 'name a table the database holds, or create it in the init script or a seed',
                     found: `table "${this.name}" has no columns: the database holds no such table`,
-                    read: 'docs/14-assertions.md#resulttablename--database---database-tables-api-job-cli',
+                    read: 'docs/21-assertions.md#resulttablename--database---database-tables-api-job-cli',
                     why: 'A table is read from the database that holds it.',
                 }),
             );

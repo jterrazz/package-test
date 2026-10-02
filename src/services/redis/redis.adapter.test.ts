@@ -82,7 +82,7 @@ describe('redis', () => {
         // Then - it rejects, naming the service AND keeping the driver's own reason, which survives as the error's cause
         const healthcheck = unreachable.healthcheck();
         await expect(healthcheck).rejects.toThrow(
-            /^found: redis\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/17-services\.md#service-factories$/u,
+            /^found: redis\(\) did not answer its healthcheck: \S.*\nwhy: A declared service is handed to the chain once it answers its healthcheck\.\nfix: check the container is running and reachable \(`docker ps`\), and run again\nread: docs\/18-services\.md#service-factories$/u,
         );
         await expect(healthcheck).rejects.toHaveProperty('cause.code', 'ECONNREFUSED');
     });
@@ -98,7 +98,7 @@ describe('redis', () => {
                 'found: redis: worker 64 has no database index for "redis"',
                 'why: A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
                 'fix: run with fewer workers (--maxWorkers): a container serves 63',
-                'read: docs/17-services.md#per-worker-isolation',
+                'read: docs/18-services.md#per-worker-isolation',
             ].join('\n'),
         );
     });
@@ -126,7 +126,7 @@ describe('redis', () => {
                 'found: redis: worker 60 has no database index for "e"',
                 'why: A redis container’s indexes are shared out four per worker, so its workers and their services are counted.',
                 'fix: declare fewer redis services: a worker holds 4 at once',
-                'read: docs/17-services.md#per-worker-isolation',
+                'read: docs/18-services.md#per-worker-isolation',
             ].join('\n'),
         );
     });

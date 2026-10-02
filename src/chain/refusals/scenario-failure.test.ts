@@ -6,7 +6,7 @@ import { scenarioFailure } from './scenario-failure.js';
 const AMBIGUOUS = refusal({
     fix: 'designate one of them',
     found: 'button("Save") matched 2 elements',
-    read: 'docs/08-website.md#visit-scenarios--the-when',
+    read: 'docs/10-website.md#visit-scenarios--the-when',
     why: 'A target names one element.',
 });
 
@@ -21,7 +21,7 @@ describe('scenarioFailure', () => {
                 'found: button("Save") matched 2 elements\nEvidence: /tmp/evidence/page.png',
                 'why: A target names one element.',
                 'fix: designate one of them',
-                'read: docs/08-website.md#visit-scenarios--the-when',
+                'read: docs/10-website.md#visit-scenarios--the-when',
             ].join('\n'),
         );
     });
@@ -36,7 +36,7 @@ describe('scenarioFailure', () => {
                 'found: the open scenario failed:\n  tap failed\n  no such element',
                 'why: An open scenario drives the screen step by step, and the first step that fails ends it.',
                 'fix: correct the step that failed, or the screen it drives',
-                'read: docs/09-mobile.md#open-scenarios--the-when',
+                'read: docs/11-mobile.md#open-scenarios--the-when',
             ].join('\n'),
         );
     });

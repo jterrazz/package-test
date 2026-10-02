@@ -12,7 +12,7 @@ describe('unknown-job', () => {
                 'found: .trigger("nope"), and no job is registered under that name',
                 'why: A job is triggered by the name it is registered under.',
                 'fix: trigger a registered job: sync-events, crash-after-insert, enrich-from-api, stamp-now',
-                'read: docs/11-job.md#options',
+                'read: docs/13-job.md#options',
             ].join('\n'),
         );
     });
@@ -25,7 +25,7 @@ describe('unknown-job', () => {
                 'found: .trigger("report-refresh"), and no job is registered',
                 'why: A job is triggered by the name it is registered under.',
                 'fix: register the jobs with the `jobs` option of specification.job()',
-                'read: docs/11-job.md#options',
+                'read: docs/13-job.md#options',
             ].join('\n'),
         );
     });

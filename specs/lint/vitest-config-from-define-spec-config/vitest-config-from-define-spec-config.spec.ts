@@ -22,12 +22,12 @@ describe('vitest-config-from-define-spec-config', () => {
                 found: a vitest config that does not default-export \`defineSpecConfig(…)\`
                 why: A \`vitest.config.*\` default-exports \`defineSpecConfig(...)\`; the call is resolved through an \`export default <Identifier>\` declarator, through a \`satisfies\`/\`as\` annotation, and through one \`mergeConfig(defineSpecConfig(…), …)\` — vitest’s own way of layering over the preset.
                 fix: wrap it: \`export default defineSpecConfig({ … })\`, from \`@jterrazz/test/vitest\` — the budgets, the artefact directory and the ground exclusion are the preset's
-                read: docs/19-linting.md#vitest-config-from-define-spec-config
+                read: docs/24-linting.md#vitest-config-from-define-spec-config
             vitest.config.ts:5:19  jterrazz(include-points-at-a-folder)
                 found: \`src/**/*.test.ts\` collects nothing: the folder \`src\` does not exist
                 why: An \`include\` glob of a PROJECT — an object under \`test\` or in \`projects\`, never \`optimizeDeps.include\` and its kin — whose static prefix (the segments before the first wildcard, brace or bracket), resolved from the config, is not a directory is an error.
                 fix: point the glob at the folder that holds the suite, or delete it
-                read: docs/19-linting.md#include-points-at-a-folder
+                read: docs/24-linting.md#include-points-at-a-folder
         `);
     });
 });

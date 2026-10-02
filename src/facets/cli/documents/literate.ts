@@ -80,7 +80,7 @@ function resolveUnderWorkDir(path: string, workDir: string, context: FailureCont
             refusal({
                 fix: 'name a relative path under the working directory',
                 found: `${context.displayPath}: files: "${path}" leaves the working directory`,
-                read: 'docs/20-documents.md#files--what-the-run-left-behind',
+                read: 'docs/15-documents.md#files--what-the-run-left-behind',
                 why: 'A `files:` key is a relative path under the working directory.',
             }),
         );
@@ -157,7 +157,7 @@ function failure(
                 '',
                 `${context.displayPath}:${run.commandLine}`,
             ].join('\n'),
-            read: 'docs/20-documents.md#failure-and-update',
+            read: 'docs/15-documents.md#failure-and-update',
             why: 'A spec document states what its runs produce: the exit code and the streams, whole.',
         }),
     );
@@ -253,7 +253,7 @@ async function startServers(
                             ? 'register it in the `serve` option of specification.cli()'
                             : `serve a registered server: ${known.join(', ')}`,
                     found: `${displayPath}:${entry.line}: serve: "${entry.name}" is not registered`,
-                    read: 'docs/12-cli.md#registration--once-per-app',
+                    read: 'docs/14-cli.md#registration--once-per-app',
                     why: 'A document serves what the app registered once, in the options of specification.cli().',
                 }),
             );
@@ -292,7 +292,7 @@ function documentEnv(document: SpecDocument, config: CliConfig, displayPath: str
                                 ? 'register it in the `env` option of specification.cli(), or write it inline: KEY=value'
                                 : `name a registered set: ${known.join(', ')}, or write it inline: KEY=value`,
                         found: `${displayPath}:${token.line}: env: "${token.name}" is not a registered env set`,
-                        read: 'docs/12-cli.md#registration--once-per-app',
+                        read: 'docs/14-cli.md#registration--once-per-app',
                         why: 'A bare word under `env:` names a set the app registered once, in the options of specification.cli().',
                     }),
                 );

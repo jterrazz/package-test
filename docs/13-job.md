@@ -1,12 +1,12 @@
-# 11 — Job specs (`specification.job`)
+# 13 — Job specs (`specification.job`)
 
 `specification.job()` tests background pipelines — cron jobs, queue consumers, nightly reports — by triggering them in-process against real databases and stubbed external providers. No HTTP server is involved: the subject under test is _what a job writes_, not what an endpoint returns.
 
-Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](10-api.md).
+Use it when the behaviour you care about starts with "when the job runs…". If the behaviour starts with an HTTP request, use [api](12-api.md).
 
 ## What it specifies
 
-A job spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([05](05-module-tests.md)); what the pipeline leaves in a database is this chapter's.
+A job spec answers one question: **when this name is triggered, what does the pipeline do to the world it was handed?** The subject is the assembled job — its handler, its services, the network it reaches — met through the one door the scheduler would use, `.trigger(name)`. What a single pure function inside that pipeline returns is a module test's ([07](07-module-tests.md)); what the pipeline leaves in a database is this chapter's.
 
 A job spec exercises your job function directly, wired to real containers. The pipeline has no network surface of its own, and testing the scheduler that invokes it is out of scope — the job IS the subject, and the trigger name is how a spec reaches it.
 
@@ -33,7 +33,7 @@ afterAll(cleanup);
 
 | Option     | Required                     | Description                                                                                                       |
 | ---------- | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](10-api.md), see [services](17-services.md)            |
+| `services` | yes (if the jobs need infra) | Named record of service factories — same semantics as [api](12-api.md), see [services](18-services.md)            |
 | `jobs`     | yes                          | `(services) => Job[]`, or a static array. Each is a named, triggerable job (rule `server-sees-declared-services`) |
 | `root`     | no                           | Root-resolution override, same walk-up rule as everywhere (rule `no-redundant-root`)                              |
 
@@ -41,9 +41,9 @@ There is **no `server`** option: jobs run in-process by definition, and the reco
 
 ## The chain
 
-Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([18](18-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
+Setups: `.seed(file('./_seeds/<name>.sql'))`, `.intercept()`, `.clock()`, and `job.with({ clock })` — a view whose every chain starts at the instant the whole file shares ([23](23-conventions.md#what-a-file-shares)). Terminal action: `.trigger(name)` (rule `one-terminal-action-per-chain`). No `.headers()` — there is no request.
 
-`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [18 — Conventions § Time](18-conventions.md#time--one-primitive-two-depths).
+`.clock('2026-03-04T09:30:00Z')` pins the job's own `Date` for the chain and releases it when the action resolves — a nightly report that stamps a window, an expiry the job computes. The primitive and its second depth are [19 — Time and doubles § The clock](19-time-and-doubles.md#the-clock).
 
 ```typescript
 // specs/job/nightly-report/pipeline.spec.ts — the job, and the aspect this file asks of it
@@ -68,9 +68,9 @@ describe('pipeline', () => {
 });
 ```
 
-Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](16-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
+Everything a pipeline reads from the outside world is declared: seeds set the database state, stubs pin the external providers (OpenAI, Anthropic, arbitrary HTTP — see [stubs](17-stubs.md)). Databases reset at the start of every chain, exactly as for API specs (rules `one-terminal-action-per-chain`, `sequence-expressed-by-seeding`).
 
-Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, an outgoing request no stub answers fails the spec ([16 § Strict by construction](16-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
+Because jobs run in-process by definition, `.intercept()` is always available. It is **strict** (rule `network-strict-after-first-stub`): once a chain declares one stub, an outgoing request no stub answers fails the spec ([17 § Strict by construction](17-stubs.md#strict-by-construction)). A chain with no stubs is not network-guarded.
 
 ### Seeding and sequences for pipelines
 
@@ -104,7 +104,7 @@ The number in `times` IS the assertion: it says the job retries exactly once. A 
 | --------------------------- | ---------------------------------------------------------------------------- |
 | `result.table(name, opts?)` | Table subject, compared whole — `toMatch(<rows>)` / `toBeEmpty()`, `await`ed |
 
-Whether `.seed()` and `.table()` name a database is [17 § The `database:` rule](17-services.md#the-database-rule).
+Whether `.seed()` and `.table()` name a database is [18 § The `database:` rule](18-services.md#the-database-rule).
 
 ## Unique here
 
@@ -142,7 +142,7 @@ The three failure families:
 | `openai.timeout()` / `anthropic.timeout()`                             | A provider that never answers within the job's timeout |
 | `openai.malformed('…')`                                                | A 200 whose body violates the provider schema          |
 
-The full builder catalogue lives in [stubs](16-stubs.md).
+The full builder catalogue lives in [stubs](17-stubs.md).
 
 ### A crash is read by its rejection
 
@@ -174,4 +174,4 @@ test('a crashed job leaves what it wrote first', async () => {
 
 ## Related
 
-[10 — API specs](10-api.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [17 — Services](17-services.md)
+[12 — API specs](12-api.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [18 — Services](18-services.md)

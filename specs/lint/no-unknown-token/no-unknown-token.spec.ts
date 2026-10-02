@@ -14,7 +14,7 @@ describe('no-unknown-token', () => {
                 found: the unknown token {{userid}}
                 why: Every \`{{token}}\` in an \`_expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error.
                 fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir
-                read: docs/19-linting.md#no-unknown-token
+                read: docs/24-linting.md#no-unknown-token
         `);
     });
 
@@ -28,7 +28,7 @@ describe('no-unknown-token', () => {
                 found: the unknown token {{widget}}
                 why: Every \`{{token}}\` in an \`_expected/\` fixture — or in an expected stream of a \`<case>.spec.yaml\` document — belongs to the frozen vocabulary; an unknown token is an error.
                 fix: write one of the tokens the vocabulary has, between double braces: any, base64, date, duration, email, float, hex, int, ip, iso8601, number, path, port, semver, sha, string, time, ulid, url, uuid, workdir
-                read: docs/19-linting.md#no-unknown-token
+                read: docs/24-linting.md#no-unknown-token
         `);
     });
 

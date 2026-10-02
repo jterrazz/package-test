@@ -53,7 +53,7 @@ function pluginPath(plugin: string, callerDir: string, root: string): string {
             refusal({
                 fix: `install ${plugin}, or name the plugin by its path from the specification's folder`,
                 found: `plugins: ['${plugin}'], which resolves from no node_modules under ${root}`,
-                read: 'docs/21-lint.md#options',
+                read: 'docs/16-lint.md#options',
                 why: 'A plugin is loaded by the oxlint the facet runs, from the path it resolves to.',
             }),
         );
@@ -90,7 +90,7 @@ export function oxlintBinary(anchors: readonly string[]): string {
         refusal({
             fix: 'install oxlint — an optional peer of @jterrazz/test — beside the project',
             found: `specification.lint() runs oxlint, and none resolves from ${anchors.join(', ')}`,
-            read: 'docs/21-lint.md#options',
+            read: 'docs/16-lint.md#options',
             why: 'A plugin and a config are run by the real oxlint, the one a project lints with.',
         }),
     );
@@ -108,7 +108,7 @@ export async function startLint(options: LintSpecificationOptions): Promise<Lint
             refusal({
                 fix: 'name the plugins, the config, the checkers or the presets the specification lints with — `presets: []` for the base preset alone',
                 found: 'specification.lint() with no plugin, no config, no checker and no presets',
-                read: 'docs/21-lint.md#options',
+                read: 'docs/16-lint.md#options',
                 why: 'A lint specification runs the linters it names, and one that names none judges nothing.',
             }),
         );

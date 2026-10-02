@@ -122,7 +122,7 @@ export const STATIQUE_RULES: Row[] = [
             'Every test carries `// Given -` then `// Then -` (both, in that order); a Given declared after a Then is an error. A `test.each` table is judged ONCE, on the table, not once per row. A `<case>.spec.yaml` document has no comments: its narration is its `description:`.',
         facet: 'model',
         family: 'chain',
-        fix: 'Write the two markers, in order, as sentences about the subject — not about the code (chapter 18 § The narration).',
+        fix: 'Write the two markers, in order, as sentences about the subject — not about the code (chapter 23 § The narration).',
         name: 'given-and-then-markers-present',
         rationale:
             "Given/Then narration makes a test's intent readable without reading its assertions.",
@@ -301,7 +301,7 @@ export const STATIQUE_RULES: Row[] = [
             'A spec file is named for its aspect: kebab-case (`not-found.spec.ts`), and never a name that says the file holds what fit nowhere else — `misc`, `other`, `basic`, `general`, `more`, `edge-cases`, `tests`, `main`.',
         facet: 'model',
         family: 'layout',
-        fix: 'Rename the file for the question its tests ask of the subject — `pagination`, `filters`, `sorting`, `language`, `validation`, `not-found`, `auth`, `shape` are the api vocabulary chapter 18 advises.',
+        fix: 'Rename the file for the question its tests ask of the subject — `pagination`, `filters`, `sorting`, `language`, `validation`, `not-found`, `auth`, `shape` are the api vocabulary chapter 23 advises.',
         name: 'spec-named-for-its-aspect',
         rationale:
             'The folder names the subject; the file name is the only place the question asked of it is written, and a catch-all name answers none — the next test lands there because it fits nowhere, and the file grows until it holds everything.',
@@ -665,7 +665,7 @@ export const STATIQUE_RULES: Row[] = [
             "A test doubles a PORT, never a module: `vi.mock`/`vi.doMock` of a specifier outside the `modules` allow-list — each entry `{ module, reason }`, and an entry with no reason clears nothing — a `__mocks__/` or `__fixtures__/` directory, and — in a `module`-role test — importing a data asset (`.json`, `.sql`, `.yaml`, …) are all errors. The specifier is read in BOTH spellings — `vi.mock('<spec>')` and the `vi.mock(import('<spec>'))` form `vitest/prefer-import-in-mock` requires — so an allow-listed module has a green spelling under both rules. A dotted specifier (`./dashboard.post`) is still code.",
         facet: 'model',
         family: 'world',
-        fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module as `{ module, reason }` (chapter 05 § Doubles).",
+        fix: "Double the port with `mockOf<Port>()`, keep a module test's payload in a sibling `<file>.fixtures.ts` and a spec's in `_fixtures/`, and allow-list a native module as `{ module, reason }` (chapter 07 § Doubles).",
         name: 'no-module-mock',
         rationale:
             'A module test that reaches for a real file or a module mock is describing an assembled product, and that has a facet of its own.',
@@ -1118,7 +1118,7 @@ export const CHECKER_PASSES: Row[] = [
         audience: 'consumer',
         channel: 'checker',
         sentence:
-            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 18 carries.",
+            "A literal ISO-8601 timestamp or uuid in an expected stream of a `<case>.spec.yaml` → error, unless the same value appears in a `fixture:`, the document's sibling `_fixtures/`, a `stdin:`, a command argument or an `env:`/`serve:` value of the same document (it is then pinned, not volatile). Under `_expected/` the same class waits for `no-unseeded-value-in-golden`, whose criterion chapter 23 carries.",
         facet: 'cli',
         family: 'expectations',
         fix: 'Token it, or seed it — a value the document pins is a value it may assert.',
@@ -1665,7 +1665,7 @@ export const RUNTIME_RULES: Row[] = [
     {
         audience: 'consumer',
         channel: 'runtime',
-        sentence: `${REFUSAL_WHY['seam-is-an-optional-peer']} A page, a screen, a component and each service load theirs lazily, the first time a spec needs it, and a missing one is refused where it was needed, naming the peer and the install command — the package manager the project's lockfile names, for a service ([04 — Operating](04-operating.md#what-a-consumer-must-bring)).`,
+        sentence: `${REFUSAL_WHY['seam-is-an-optional-peer']} A page, a screen, a component and each service load theirs lazily, the first time a spec needs it, and a missing one is refused where it was needed, naming the peer and the install command — the package manager the project's lockfile names, for a service ([06 — Setting up](06-setting-up.md#what-to-install)).`,
         facet: 'model',
         family: 'setup',
         fix: 'Install the peer the refusal names, with the command it gives.',

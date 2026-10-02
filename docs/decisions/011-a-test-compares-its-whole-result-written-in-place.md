@@ -44,13 +44,13 @@ TypeScript, with the whole result written in the test:
 - **The api and job documents are retired**: grammar, runner, schema kinds and
   chapter sections. The cli and lint-rule documents stay: their output is
   written inline, and their fixtures are real trees
-  ([20 — Spec documents](../20-documents.md)).
+  ([15 — Spec documents](../15-documents.md)).
 - **Route coverage reads the app's own route table** at the end of the api
   run, with a declared OpenAPI file as the fallback for an app that exposes
-  none ([10 — API § Route coverage](../10-api.md#route-coverage)).
+  none ([12 — API § Route coverage](../12-api.md#route-coverage)).
 
-The laws are [14 — Assertions](../14-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)'s
-and [18 — Conventions § The naming recap](../18-conventions.md#the-naming-recap)'s.
+The laws are [21 — Assertions](../21-assertions.md#one-verb-compares-a-whole-result-and-its-argument-says-where-the-expectation-lives)'s
+and [23 — Conventions § The naming recap](../23-conventions.md#the-naming-recap)'s.
 
 ## Consequences
 

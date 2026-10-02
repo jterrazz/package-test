@@ -22,7 +22,7 @@ describe('literate-specification-exists', () => {
                 found: \`literate.specification\` names \`./specs/cli/cli.specification.ts\`, which resolves to no file
                 why: \`literate.specification\`, resolved from the config directory, names a file that exists.
                 fix: point it at the \`*.specification.ts\` exporting the runner the documents run on — \`./specs/cli/cli.specification.ts\` by convention
-                read: docs/19-linting.md#literate-specification-exists
+                read: docs/24-linting.md#literate-specification-exists
         `);
     });
 });

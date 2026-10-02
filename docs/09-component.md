@@ -1,8 +1,8 @@
-# 07 — Component specs (`component`)
+# 09 — Component specs (`component`)
 
-`component` specifies a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless Chromium, the same browser [08 — Website specs](08-website.md) already drives through the same `playwright` peer.
+`component` specifies a rendered UNIT — a React component, a React hook through a Host written in the test, or a plain DOM function — in a real headless Chromium, the same browser [10 — Website specs](10-website.md) already drives through the same `playwright` peer.
 
-Use it when the subject is one thing that draws itself. For a whole served page use [website](08-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
+Use it when the subject is one thing that draws itself. For a whole served page use [website](10-website.md); for a module that draws nothing, a module test beside it needs no runner at all.
 
 Why a facet on Vitest Browser Mode, and what was weighed against it: [ADR-003](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md).
 
@@ -39,7 +39,7 @@ The subject is a unit that draws itself IN A BROWSER, which leaves four neighbou
 | Not this                               | Because                                                                              | Route                                                         |
 | -------------------------------------- | ------------------------------------------------------------------------------------ | ------------------------------------------------------------- |
 | A React Native screen                  | The renderer is a real Chromium, and a native view never reaches one                 | jest stays, until the `react-native-web` spike says otherwise |
-| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [08 — Website specs](08-website.md)          |
+| An `.astro` page                       | A page is the assembled product, met through an address                              | a website spec — [10 — Website specs](10-website.md)          |
 | A React island inside an `.astro` page | The island is a rendered unit; only the file around it is not                        | a `.test.tsx` beside the island, here                         |
 | A Next.js server component             | It renders on the server and reads what the server reads — there is no tree to mount | a website spec, through the served page                       |
 
@@ -147,14 +147,14 @@ Every setup returns a NEW chain, so the handle a spec imports never carries the 
 | `.render(<X />, scenario?)` | A React tree                                                                  |
 | `.render((container) => …)` | A DOM function, handed a fresh container; its optional return is the teardown |
 
-The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [13 — The visitor § Verbs](13-visitor.md#verbs) — plus the two only a parent has:
+The scenario is the When, and assertions stay in the Then (rule `no-expect-in-scenario`). Its verbs are the page's — `click` `fill` `check` `select` `hover` `press` `see` `gone`, each owned and described by [20 — The visitor § Verbs](20-visitor.md#verbs) — plus the two only a parent has:
 
 | Verb           | Description                                               |
 | -------------- | --------------------------------------------------------- |
 | `rerender(ui)` | What a PARENT does: new props, same mount                 |
 | `unmount()`    | What a parent does when it takes the thing off the screen |
 
-`goto()` does not exist here, because a component has no address. The visitor's vocabulary is the page's too, modifiers included — [13 — The visitor § Modifiers](13-visitor.md#modifiers) owns them all, with the `target-matches-one-element` refusal and the exact-name rule.
+`goto()` does not exist here, because a component has no address. The visitor's vocabulary is the page's too, modifiers included — [20 — The visitor § Modifiers](20-visitor.md#modifiers) owns them all, with the `target-matches-one-element` refusal and the exact-name rule.
 
 ## The result
 
@@ -166,7 +166,7 @@ The scenario is the When, and assertions stay in the Then (rule `no-expect-in-sc
 | `result.console` | `RenderedText` | Every console message, one `[type] text` line per message, and every uncaught exception as ONE `[error] Uncaught …` line                               |
 | `result.errors`  | `RenderedText` | Console errors only, plus any uncaught page error, once (`Uncaught Error: …`)                                                                          |
 
-`toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [14 — Assertions](14-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
+`toMatch(file(…))` is **awaited** on all five, because each is a `RenderedText` — a `TextAccessor` whose golden lives on the node side: a golden captured inside a page is read back through a server command, so the file crosses from the page to the node side. Which matchers are IO — and therefore awaited — is [21 — Assertions](21-assertions.md)'s to state; a directory subject is the other one, and it is awaited for the same kind of reason (it walks a disk).
 
 ```typescript
 await expect(result.tree).toMatch(file('./_expected/two-of-two-hundred.aria.yaml'));
@@ -174,7 +174,7 @@ expect(result.html.text).toContain('row row--live');
 expect(result.errors.text).toBe('');
 ```
 
-The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [08 — Website specs](08-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([15 — Tokens](15-tokens.md)).
+The ARIA tree is the golden a rendered surface wants: it is the outline a screen reader walks, it is deterministic where a screenshot is not, and it is the SAME dialect [10 — Website specs](10-website.md) produces for a whole page. Goldens live in `_expected/` beside the test and are written by `TEST_UPDATE=1`, exactly as everywhere else ([22 — Tokens](22-tokens.md)).
 
 ## Unique here
 
@@ -242,7 +242,7 @@ const result = await component.render((container) => {
 ```
 
 - **A router is a test's Given.** A screen that renders `<Link>` or reads `useParams()` throws without a router. `createRoutesStub([...])` on `.wrap()` is that Given — React Router's own guidance, and the fork's: a route module is a website spec, a presentation component is a component spec, a loader is a module test.
-- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's `network-strict-after-first-stub` stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([16](16-stubs.md#intercept--the-same-double-with-no-chain)).
+- **Strictness is total.** A component that fetches something no stub declared fails the render, naming the request — including a component given NO stub at all, which is how "this subject has no network" is said. The request is the failure the render reports even when the scenario then failed for want of what it asked for: the cause, not the symptom. There is no bypass and no default handler. The api facet's `network-strict-after-first-stub` stops at a known scope because it shares a process with everything else the test does; a page does not, so here it is total. It follows that a module-scope `intercept()` opened around a `.render()` is shadowed: the render's own registration is installed last and answers everything. Declare a render's network on the chain; `intercept()` in a `.test.tsx` is for code the test calls itself ([17](17-stubs.md#intercept--the-same-double-with-no-chain)).
 - **The clock is the page's.** `.clock(iso)` pins `Date` and nothing else: faking the page's timers would stop React's scheduler and nothing would ever render.
 
 ## Pitfalls
@@ -251,12 +251,12 @@ const result = await component.render((container) => {
 - **Writing a `*.specification.ts` for it.** There is nothing to start. The project holds what every render shares; the chain holds what one test needs.
 - **Hand-rolling `browser:` in a config.** Rule `browser-project-from-component` refuses it: the provider is pinned to the runner's EXACT version, the service worker is served from the framework's own install, the JSX transform follows the Vite in use, and a cold dependency cache must be pre-bundled or the first run reloads the tester under the test. `component()` owns all four.
 - **Putting a rendered test in a `.test.ts`.** Rule `no-dom-in-module-test` refuses the DOM globals it would need. Rename it `.test.tsx` beside its component; the project that collects it opens a browser.
-- **Asserting focus with a golden.** The tree carries no focus — [13 § Modifiers](13-visitor.md#modifiers) says what asserts it.
+- **Asserting focus with a golden.** The tree carries no focus — [20 § Modifiers](20-visitor.md#modifiers) says what asserts it.
 - **Expecting `toMatch(file(…))` to be synchronous here.** It is not: `await expect(result.tree).toMatch(file('./_expected/….aria.yaml'))`. A bare call still runs the assertion, but off the test's lifetime: a failure surfaces as an `Unhandled Errors` entry attributed to no test, the test itself is reported PASSED, and the run exits non-zero anyway. Under `TEST_UPDATE=1` the write happens outside the test too.
-- **Reading the `target-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [13 — The visitor § A name designates the accessible name WHOLE](13-visitor.md#a-name-designates-the-accessible-name-whole)'s.
+- **Reading the `target-matches-one-element` refusal as a suggestion.** When two elements carry the SAME whole name, the refusal names the accessible name each candidate matched on and offers a landmark; read that before scoping, because the landmark it offers is the one that narrows, not necessarily the one you meant. Exact-by-default and its `{ exact: false }` escape are [20 — The visitor § A name designates the accessible name WHOLE](20-visitor.md#a-name-designates-the-accessible-name-whole)'s.
 - **Pointing `wrap` at a router.** `wrap` is the app's frame, around every render of the project. Which routes exist changes per test, so it belongs on the chain.
 - **Giving the project the app's whole Vite config and expecting the app's root.** Only the pipeline is adopted; the project's root stays the directory of `vitest.config.ts`, which is what makes its `include` globs mean what they say.
 
 ## Related
 
-[02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [16 — Stubs](16-stubs.md) · [18 — Conventions](18-conventions.md) · [08 — Website specs](08-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)
+[02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [17 — Stubs](17-stubs.md) · [23 — Conventions](23-conventions.md) · [10 — Website specs](10-website.md) · [ADR-003 — a rendered component is a facet on Vitest Browser Mode](decisions/003-a-rendered-component-is-a-facet-on-vitest-browser-mode.md)

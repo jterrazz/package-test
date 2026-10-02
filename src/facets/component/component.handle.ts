@@ -6,7 +6,7 @@ function refuse(): never {
         refusal({
             fix: "collect `*.test.tsx` with the `component()` project: import { component } from '@jterrazz/test/vitest' and add it to `test.projects`",
             found: 'component, called under node',
-            read: 'docs/07-component.md#the-constructor-there-is-none',
+            read: 'docs/09-component.md#the-constructor-there-is-none',
             why: 'A component renders in a browser: under node the page, the pointer and the accessibility tree do not exist.',
         }),
     );

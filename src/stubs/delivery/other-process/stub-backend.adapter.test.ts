@@ -22,7 +22,7 @@ describe('stubBackend', () => {
                 'found: .intercept(), and this runner has no declared backend',
                 'why: A site or an app is served its stubs by a declared stub backend, the URL it reads in place of its API.',
                 "fix: add `backend` to the specification options: specification.mobile({ …, backend: { env: 'API_URL' } })",
-                'read: docs/09-mobile.md#declared-backend',
+                'read: docs/11-mobile.md#declared-backend',
             ].join('\n'),
         );
     });

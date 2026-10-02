@@ -12,9 +12,9 @@ Everything a spec needs imports from `@jterrazz/test`; the entries beside it are
 
 ## One kind of test, one example
 
-Which kind a test is, is the first question — [the fork](docs/18-conventions.md#the-fork--which-kind-of-test-this-is) asks it in nine lines and the answer fixes the folder, the constructor and the project.
+Which kind a test is, is the first question — [the fork](docs/05-getting-started.md#which-kind-of-test) asks it in nine lines and the answer fixes the folder, the constructor and the project.
 
-**A module** — beside its code, nothing started ([docs/05](docs/05-module-tests.md)):
+**A module** — beside its code, nothing started ([docs/07](docs/07-module-tests.md)):
 
 ```typescript
 // src/domain/ranking.test.ts
@@ -34,7 +34,7 @@ describe('rank', () => {
 });
 ```
 
-**An integration spec** — a module against the real thing, or against a golden ([docs/06](docs/06-integration.md)):
+**An integration spec** — a module against the real thing, or against a golden ([docs/08](docs/08-integration.md)):
 
 ```typescript
 // specs/integration/posts/find.spec.ts
@@ -57,7 +57,7 @@ describe('find', () => {
 });
 ```
 
-**A component** — a rendered unit in a real browser, beside its code ([docs/07](docs/07-component.md)):
+**A component** — a rendered unit in a real browser, beside its code ([docs/09](docs/09-component.md)):
 
 ```tsx
 // src/presentation/post-table.test.tsx
@@ -84,7 +84,7 @@ describe('PostTable', () => {
 });
 ```
 
-**A website** — the served page, driven in a browser ([docs/08](docs/08-website.md)):
+**A website** — the served page, driven in a browser ([docs/10](docs/10-website.md)):
 
 ```typescript
 // specs/website/subscribe/subscribe.spec.ts
@@ -109,7 +109,7 @@ describe('subscribe', () => {
 });
 ```
 
-**A mobile screen** — the installed app on a simulator ([docs/09](docs/09-mobile.md)):
+**A mobile screen** — the installed app on a simulator ([docs/11](docs/11-mobile.md)):
 
 ```typescript
 // specs/mobile/events/bookmark.spec.ts
@@ -133,7 +133,7 @@ describe('bookmark', () => {
 });
 ```
 
-**An API** — the assembled app, met through a complete HTTP exchange, the whole response written where the test reads it ([docs/10](docs/10-api.md)):
+**An API** — the assembled app, met through a complete HTTP exchange, the whole response written where the test reads it ([docs/12](docs/12-api.md)):
 
 ```typescript
 // specs/api/users/create/shape.spec.ts
@@ -158,7 +158,7 @@ describe('shape', () => {
 });
 ```
 
-**A job** — what a name triggers, in-process ([docs/11](docs/11-job.md)):
+**A job** — what a name triggers, in-process ([docs/13](docs/13-job.md)):
 
 ```typescript
 // specs/job/digest/daily-digest.spec.ts
@@ -181,7 +181,7 @@ describe('daily-digest', () => {
 });
 ```
 
-**A CLI** — the built binary, usually as a document ([docs/12](docs/12-cli.md)):
+**A CLI** — the built binary, usually as a document ([docs/14](docs/14-cli.md)):
 
 ```yaml
 # specs/cli/scaffold/new-project.spec.yaml
@@ -203,20 +203,20 @@ Everything is stated ONCE, in the chapter that owns it — a second copy here wo
 | Subject                                                          | Chapter                                                                                  |
 | ---------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
 | What the framework is, its trees, its channels, its five entries | [docs/01](docs/01-architecture.md)                                                       |
-| Installing it, the preset, the project helpers                   | [docs/02](docs/02-developing.md#vitest-config-the-preset)                                |
-| What a consumer must bring: the peers, Docker, the pinned pair   | [docs/04](docs/04-operating.md#what-a-consumer-must-bring)                               |
-| Each kind of test, one chapter, the same spine of sections       | [docs/05](docs/05-module-tests.md)–[docs/12](docs/12-cli.md), [docs/21](docs/21-lint.md) |
-| A cli session written as data: the `<case>.spec.yaml`            | [docs/20](docs/20-documents.md)                                                          |
-| The visitor: verbs, targets, `within`, exact names               | [docs/13](docs/13-visitor.md)                                                            |
-| Every matcher, by subject                                        | [docs/14](docs/14-assertions.md)                                                         |
-| The `{{token}}` grammar, `#ref` captures, update mode            | [docs/15](docs/15-tokens.md)                                                             |
-| Stubs, selection, provider builders, `intercept()`               | [docs/16](docs/16-stubs.md)                                                              |
-| Services, init scripts, per-worker isolation, `process()`        | [docs/17](docs/17-services.md)                                                           |
-| The conventions, and the catalogue that enforces them            | [docs/18](docs/18-conventions.md), [docs/19](docs/19-linting.md)                         |
+| Installing it, the preset, the project helpers                   | [docs/06](docs/06-setting-up.md#the-vitest-config)                                       |
+| What a consumer must bring: the peers, Docker, the pinned pair   | [docs/06](docs/06-setting-up.md#what-to-install)                                         |
+| Each kind of test, one chapter, the same spine of sections       | [docs/07](docs/07-module-tests.md)–[docs/14](docs/14-cli.md), [docs/16](docs/16-lint.md) |
+| A cli session written as data: the `<case>.spec.yaml`            | [docs/15](docs/15-documents.md)                                                          |
+| The visitor: verbs, targets, `within`, exact names               | [docs/20](docs/20-visitor.md)                                                            |
+| Every matcher, by subject                                        | [docs/21](docs/21-assertions.md)                                                         |
+| The `{{token}}` grammar, `#ref` captures, update mode            | [docs/22](docs/22-tokens.md)                                                             |
+| Stubs, selection, provider builders, `intercept()`               | [docs/17](docs/17-stubs.md)                                                              |
+| Services, init scripts, per-worker isolation, `process()`        | [docs/18](docs/18-services.md)                                                           |
+| The conventions, and the catalogue that enforces them            | [docs/23](docs/23-conventions.md), [docs/24](docs/24-linting.md)                         |
 
 The conventions are not prose alone: the package ships an oxlint plugin (`@jterrazz/test/oxlint`), a preset carrying all of it — the oxlint rules, the import and naming rules `@jterrazz/typescript`'s dependency-cruiser and ls-lint judge, the settings and the debt of its section (`test()`, from `@jterrazz/test/config`, listed in `jterrazz.config.ts`), and a `jterrazz-test-check` binary that reads the fixtures and cross-file relationships neither can. Every diagnostic teaches in four parts — what it found, why the convention holds, the fix for this case, and the catalogue row to read.
 
-Node 24, vitest 5 and `@jterrazz/typescript` 11 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/04](docs/04-operating.md#what-a-consumer-must-bring).
+Node 24, vitest 5 and `@jterrazz/typescript` 11 are the required peers; everything else — a browser, a database driver, a simulator — is an optional peer, loaded the first time a spec needs it and named in the refusal when it is not there. What to install, and when: [docs/06](docs/06-setting-up.md#what-to-install).
 
 ## Docs
 

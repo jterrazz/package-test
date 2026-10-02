@@ -22,7 +22,7 @@ describe('spec-file-within-line-limit', () => {
                 found: a spec file of 405 lines, over 400
                 why: A spec file holds at most 400 lines; a longer one is refused at its first line, the message grouping its tests by the prefix of their titles — where the cut usually goes.
                 fix: cut it along its tests’ groups — "pagination" (50) — one aspect per file
-                read: docs/19-linting.md#spec-file-within-line-limit
+                read: docs/24-linting.md#spec-file-within-line-limit
         `);
     });
 });

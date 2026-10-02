@@ -59,7 +59,7 @@ describe('spec-in-subject-folder', () => {
                 found: a spec of GET /orders, filed under api/orders/
                 why: A spec file about one subject sits in the subject’s standard folder, derived and never listed: \`GET /events\` → \`events/list/\`, \`GET /events/:id\` → \`events/get/\`, \`POST /events\` → \`events/create/\`, \`PUT|PATCH /events/:id\` → \`events/update/\`, \`DELETE /events/:id\` → \`events/delete/\`, a route under an item (\`GET /events/:id/timeline\`) its literal segments (\`events/timeline/\`), a singleton (\`GET /health\`) \`health/get/\`, a method-less route — one \`jterrazz.config.ts\` names so (\`test: { methodless: ['/mcp'] }\`), reached by whatever verb a test sends, and never split by it (\`one-subject-per-spec\`) — its segments (\`mcp/\`); a job its name (\`specs/job/<job>/\`), a cli command its first word (\`specs/cli/<word>/\`), or every leading word the \`commands\` list of the runner its chain's handle came from holds (\`specification.cli(bin, { commands: ['db', 'migrate'] })\` files \`db migrate\` under \`db/migrate/\`; the list written in the call or bound to a \`const\` of the runner's file).
                 fix: move it to api/orders/list/listing.spec.ts — \`make fix\` moves it, and the ground it stands on
-                read: docs/19-linting.md#spec-in-subject-folder
+                read: docs/24-linting.md#spec-in-subject-folder
         `);
     });
 });

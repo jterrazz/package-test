@@ -22,12 +22,12 @@ describe('spec-file-in-a-specs-tree', () => {
                 found: \`src/orders/listing.daily.spec.ts\` breaks ls-lint's \`.*.spec.ts: exists:0\`
                 why: A \`.spec.ts\` — the ASSEMBLED product — sits under a \`specs/\` tree; one in any other folder is an error at the file.
                 fix: move it under \`specs/<facet>/\`, or rename it \`.test.ts\` beside the module it covers
-                read: docs/19-linting.md#spec-file-in-a-specs-tree
+                read: docs/24-linting.md#spec-file-in-a-specs-tree
             src/orders/listing.spec.ts:1:1  names(spec-file-in-a-specs-tree)
                 found: \`src/orders/listing.spec.ts\` breaks ls-lint's \`.spec.ts: exists:0\`
                 why: A \`.spec.ts\` — the ASSEMBLED product — sits under a \`specs/\` tree; one in any other folder is an error at the file.
                 fix: move it under \`specs/<facet>/\`, or rename it \`.test.ts\` beside the module it covers
-                read: docs/19-linting.md#spec-file-in-a-specs-tree
+                read: docs/24-linting.md#spec-file-in-a-specs-tree
         `);
     });
 });

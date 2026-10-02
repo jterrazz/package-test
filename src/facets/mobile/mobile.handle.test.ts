@@ -49,7 +49,7 @@ describe('startMobile', () => {
                 'found: specification.mobile() names no device, and no mobile({ device }) project serves one',
                 'why: A mobile spec drives one simulator, named by the runner or by its project.',
                 "fix: name the simulator with `device: { name }`, or declare it once on the project, mobile({ device, root }), so every file drives the run's",
-                'read: docs/09-mobile.md#one-session-per-run',
+                'read: docs/11-mobile.md#one-session-per-run',
             ].join('\n'),
         );
     });

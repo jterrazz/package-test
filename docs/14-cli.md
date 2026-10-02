@@ -1,12 +1,12 @@
-# 12 — CLI specs (`specification.cli`)
+# 14 — CLI specs (`specification.cli`)
 
 `specification.cli(bin, options)` tests a command-line binary. Every spec runs the binary in a **fresh, empty temp directory**, captures stdout/stderr/exit code, and exposes the resulting filesystem — and, in Docker-aware mode, the containers the binary spawned. The CLI is always a local binary.
 
-Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](10-api.md).
+Use it when the subject under test is a process invocation. If the process serves HTTP, test that surface with [api](12-api.md).
 
 ## What it specifies
 
-A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([05](05-module-tests.md)). Most of them are written as documents rather than as code; [20 — Spec documents](20-documents.md#the-three-doors-one-runner) says when each door is right.
+A CLI spec answers one question: **given this file tree, this environment and this argv, what does the binary print, what does it exit with, and what does it leave on disk?** The subject is the built command met through a child process — never an imported function, which is a module test's ([07](07-module-tests.md)). Most of them are written as documents rather than as code; [15 — Spec documents](15-documents.md#the-three-doors-one-runner) says when each door is right.
 
 ## The constructor
 
@@ -75,7 +75,7 @@ test('dev server boots', async () => {
 
 - `waitFor` — a pattern; the promise resolves (exit code 0) as soon as it appears in **stdout or stderr** (both streams are watched). If the process exits before matching, the result carries a non-zero exit code (a clean exit-0 without the pattern is reported as `1`).
 - `timeout` — milliseconds; the process is killed when it elapses without a match, with exit code `124`. **Default: 10 000 ms** when `waitFor` is set without a `timeout`.
-- On resolution (match, exit, or timeout) the child is ended with the escalation every `process()` takes ([17 — Services § `process()`](17-services.md#process--the-one-shape-an-external-process-takes)).
+- On resolution (match, exit, or timeout) the child is ended with the escalation every `process()` takes ([18 — Services § `process()`](18-services.md#process--the-one-shape-an-external-process-takes)).
 - Termination targets the **whole process group**, not just the direct shell child: the process is spawned detached (its own group on POSIX) and signalled via the negative pid, so descendants — a `tsdown --watch` grandchild under a `dev` command, a background server the script forked — die with it instead of leaking past the spec. On platforms without group support (Windows), or when the group is already gone, it degrades to the direct child kill.
 - Passing either option marks the run as long-running; combining them with the array (sequence) form is an error.
 
@@ -101,7 +101,7 @@ Commands run sequentially in the same cwd; the sequence stops at the first failu
 
 Every spec gets a brand-new temp directory (`mkdtemp`) as its cwd. The runner never writes into your fixtures.
 
-That directory lives in the **OS temp dir**, inside the run's own temp root, and it stays there on purpose. It is scratch — created for one spec, removed once that spec's test has finished (at the run's end under `test.concurrent`, see [02 — Developing](02-developing.md#scratch-lives-in-the-runs-temp-root)) — not something the project produced, so it does not belong under `.artifacts/` with the caches a next run reuses (see [02 — Developing](02-developing.md#artefacts-live-under-artifacts)). Writing it inside the project would also change what a spec sees: a binary that walks up looking for a `package.json` would find yours instead of nothing.
+That directory lives in the **OS temp dir**, inside the run's own temp root, and it stays there on purpose. It is scratch — created for one spec, removed once that spec's test has finished (at the run's end under `test.concurrent`, see [06 — Setting up](06-setting-up.md#where-a-run-writes)) — not something the project produced, so it does not belong under `.artifacts/` with the caches a next run reuses (see [06 — Setting up](06-setting-up.md#where-a-run-writes)). Writing it inside the project would also change what a spec sees: a binary that walks up looking for a `package.json` would find yours instead of nothing.
 
 Two disjoint verbs shape a spec's state (rule `seeds-are-sql`): **`.fixture()` carries file state** (an isolated tree copied into the cwd), **`.seed()` carries database state** (SQL only). Any "transformation" you need is expressed declaratively, in the _shape_ of the fixture tree.
 
@@ -120,7 +120,7 @@ A directory's path ends in `/`, and the type refuses one that does not; a `file(
 | _(nothing)_                                                 | Empty directory                                                                                                     |
 | `.fixture(directory('../../_shared/_fixtures/base-shop/'))` | Spread a whole shared project into the cwd                                                                          |
 | `.fixture(file('./_fixtures/config.toml'))`                 | Copy the leaf's own `_fixtures/config.toml` into the cwd                                                            |
-| `.seed(file('./_seeds/users.sql'))`                         | SQL into a service database (the `database:` option: [17 § The `database:` rule](17-services.md#the-database-rule)) |
+| `.seed(file('./_seeds/users.sql'))`                         | SQL into a service database (the `database:` option: [18 § The `database:` rule](18-services.md#the-database-rule)) |
 
 ```typescript
 test('scaffolds a new shop', async () => {
@@ -176,7 +176,7 @@ test('isolates HOME per spec', async () => {
 - `'$WORKDIR'` expands to the spec's temp cwd — pin `HOME`, caches, config dirs onto isolated ground.
 - `null` **removes** a variable from the child env — shield the spec from the developer's shell.
 - Repeated `.env()` calls merge; later keys win.
-- `cli.with({ env })` is the environment a whole FILE shares: every chain of the view it hands back starts from it, and a chain's own `.env()` merges over it ([18](18-conventions.md#what-a-file-shares)). What every run of the binary needs, whichever file, is the runner's `defaults`.
+- `cli.with({ env })` is the environment a whole FILE shares: every chain of the view it hands back starts from it, and a chain's own `.env()` merges over it ([23](23-conventions.md#what-a-file-shares)). What every run of the binary needs, whichever file, is the runner's `defaults`.
 
 #### Auto-injected connection URLs
 
@@ -188,7 +188,7 @@ When the runner has `services`, the framework injects into the child env, automa
 | `DATABASE_URL` | Standard alias, only when the record has **exactly one** SQL database                                                                                  |
 | `REDIS_URL`    | Standard alias, only when the record has **exactly one** redis                                                                                         |
 
-`.env()` overrides any injected value; `null` removes it. Re-declaring what injection already provides (`.env({ DATABASE_URL: db.connectionString })`) is redundant — rule [`no-redundant-service-url`](19-linting.md#no-redundant-service-url) refuses it.
+`.env()` overrides any injected value; `null` removes it. Re-declaring what injection already provides (`.env({ DATABASE_URL: db.connectionString })`) is redundant — rule [`no-redundant-service-url`](24-linting.md#no-redundant-service-url) refuses it.
 
 ```typescript
 // One SQL database → DATABASE_URL and DB_URL both injected, no database: option (rule `database-named-only-when-several`)
@@ -228,7 +228,7 @@ test('deploys from a shaped workspace', async () => {
 
 #### Where a fixture lives
 
-A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span facets, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [18 — the naming recap](18-conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
+A fixture tree sits beside the one leaf that reads it, `./_fixtures/<name>/`, or — when several leaves share it — in the `_fixtures/` of the lowest folder they share, `specs/_shared/_fixtures/` when they span facets, reached by the path that climbs to it. That law holds for every reserved folder, `_setup/` included, and its owner is [23 — the naming recap](23-conventions.md#the-naming-recap), with the three rules that hold it (`no-reach-into-sibling-ground`, `no-duplicate-ground`, `ground-shared-or-inline`).
 
 ### `.link()` — a package the working directory resolves
 
@@ -256,7 +256,7 @@ A link is armed after every fixture, so it replaces a package a fixture laid und
 
 ### The chain never reaches a real system
 
-A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is `network-strict-after-first-stub`, in [stubs](16-stubs.md).
+A CLI spec is sandboxed the way an HTTP spec is, and for the same reason: what a chain proves must come out of its fixture, never out of the machine that happened to run it. A chain that shells out to a real `kubectl`, `helm` or `gh`, opens a network connection, or reads the operator's home directory is **a test escaping the sandbox, not extra realism** — it passes on the one laptop where those tools are installed and configured, fails everywhere else, and either way it proves something about that laptop rather than about the binary under test. The HTTP half of the same rule is `network-strict-after-first-stub`, in [stubs](17-stubs.md).
 
 The framework supplies the ground; the chain states the sandbox, in three verbs:
 
@@ -340,7 +340,7 @@ A served stub — a `serve:` server in a spec document — routes the same way o
 
 ## The result
 
-A CLI result carries the streams, the exit code, the files the run left and — under Docker-aware mode — the containers it touched. Every accessor and every matcher it accepts is [14 — Assertions](14-assertions.md)'s; what follows is the part only this facet has.
+A CLI result carries the streams, the exit code, the files the run left and — under Docker-aware mode — the containers it touched. Every accessor and every matcher it accepts is [21 — Assertions](21-assertions.md)'s; what follows is the part only this facet has.
 
 ### Streams, JSON, grep
 
@@ -374,15 +374,15 @@ test('lints a shop and reports per-file blocks', async () => {
 });
 ```
 
-`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison ([15 § Where tokens work](15-tokens.md#where-tokens-work)): `.text` is that comparable text — the runner's `transform` applied too — and `.raw` the capture as it was. Text operations are **closed** over the type: `.grep(pattern)` cuts the blank-line-separated blocks of the capture, its colour codes stripped and BEFORE the transform — so a pattern the transform removes still finds its block — and returns a `TextAccessor` (not a string) whose `.text` reads through the same transform, so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./_expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
+`result.stdout` / `result.stderr` are `TextAccessor` subjects — the universal text handle (stdout, stderr, container logs, file text): ANSI-stripped for every comparison ([22 § Where tokens work](22-tokens.md#where-tokens-work)): `.text` is that comparable text — the runner's `transform` applied too — and `.raw` the capture as it was. Text operations are **closed** over the type: `.grep(pattern)` cuts the blank-line-separated blocks of the capture, its colour codes stripped and BEFORE the transform — so a pattern the transform removes still finds its block — and returns a `TextAccessor` (not a string) whose `.text` reads through the same transform, so it chains (`result.stdout.grep(a).grep(b)`) and snapshots (`expect(result.stdout.grep('users.ts')).toMatch(file('./_expected/block.txt'))`). There is no `result.grep()` — the source is always explicit. `result.json` parses stdout as JSON (`.value` for the parsed object).
 
-**Tool output → snapshot per scoped use case (rule `output-asserted-as-a-golden`).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch(file('./_expected/<use-case>.txt'))` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](14-assertions.md).
+**Tool output → snapshot per scoped use case (rule `output-asserted-as-a-golden`).** For linter/compiler/CLI output, prefer a per-use-case fixture project + a full `expect(result.stdout).toMatch(file('./_expected/<use-case>.txt'))` snapshot (volatile parts covered by `{{duration}}` / `{{workdir}}` / `{{path}}` tokens, generated with `TEST_UPDATE=1`) over a cluster of greps. The fixture is the Given — no shared `beforeAll`. Keep `.grep()` for targeted presence/absence probes in large outputs. The full surface is in [assertions](21-assertions.md).
 
 ## Unique here
 
 ### Spec documents — `<case>.spec.yaml`
 
-Most cli cases are documents: a session written as data — the ground, the runs, what each printed and left on disk — collected as a test file of its own by the `cli()` project. The format is [20 — Spec documents](20-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
+Most cli cases are documents: a session written as data — the ground, the runs, what each printed and left on disk — collected as a test file of its own by the `cli()` project. The format is [15 — Spec documents](15-documents.md): its keys, its paths, the three doors that run it, failure and update. What stays here is what only this constructor owns: the words a document names its ground by.
 
 #### Registration — once per app
 
@@ -477,7 +477,7 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 - **Reaching for `.spawn()`.** It does not exist — `.exec(args, { waitFor, timeout })` is the unified execution method.
 - **Asserting on raw ANSI or absolute paths in snapshots.** ANSI is stripped by default; paths and timestamps belong to `{{workdir}}`, `{{path}}`, `{{iso8601}}` tokens in `_expected/*.txt` — `transform` is a last resort (rule `no-transform-duplicating-tokens`).
 - **Assigning a Docker-aware result without `await using`.** Error (rule `docker-exec-bound-with-await-using`) — that is the leak-cleanup mechanism.
-- **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule `service-urls-injected`'s auto-injection, and [`no-redundant-service-url`](19-linting.md#no-redundant-service-url) refuses it — override only to _change_ it, `null` to remove it.
+- **Re-declaring injected URLs.** `.env({ DATABASE_URL: … })` duplicates rule `service-urls-injected`'s auto-injection, and [`no-redundant-service-url`](24-linting.md#no-redundant-service-url) refuses it — override only to _change_ it, `null` to remove it.
 - **Letting the chain find the real binary.** Mounting a stub fixture without pinning `PATH` (or pinning it with the developer's own `PATH` on the tail) leaves the installed `kubectl`/`gh` reachable — the spec then tests the operator's machine. Pin `PATH` and `HOME` on `$WORKDIR`.
 - **Writing into fixture folders from a test.** The cwd is a copy; feature-local `_fixtures/` and the shared `specs/_shared/_fixtures/` pool are templates and stay pristine.
 - **Reaching for `.project()` or `seedHandlers`.** Both are gone — one verb copies files, `.fixture()`, handed a `file()` or a `directory()`, and `.seed()` is SQL-only (rule `seeds-are-sql`).
@@ -487,4 +487,4 @@ The runner handle also destructures to `{ cli, cleanup, docker }`. The `docker(c
 
 ## Related
 
-[20 — Spec documents](20-documents.md) · [02 — Developing](02-developing.md) · [14 — Assertions](14-assertions.md) · [15 — Tokens](15-tokens.md) · [17 — Services](17-services.md)
+[15 — Spec documents](15-documents.md) · [02 — Developing](02-developing.md) · [21 — Assertions](21-assertions.md) · [22 — Tokens](22-tokens.md) · [18 — Services](18-services.md)

@@ -22,7 +22,7 @@ describe('no-double-only-assertion', () => {
                 found: every assertion reads a double this test built
                 why: A module test whose every assertion reads the call log of a double it built itself (\`mockOf\`, \`vi.fn\`, \`vi.spyOn\`) is an error.
                 fix: assert the value the subject returned, or the state it left
-                read: docs/19-linting.md#no-double-only-assertion
+                read: docs/24-linting.md#no-double-only-assertion
         `);
     });
 });

@@ -1,39 +1,73 @@
-# @jterrazz/test — the corpus
+# @jterrazz/test — the manual
 
-The manual of this repository: what the framework is, how it is changed, what proves a change, how it is released, and one chapter per subject it holds. The vitrine is the root `README.md`; the brief a session opens first is the root `AGENTS.md`.
+How to test with `@jterrazz/test`, and how this repository is built. New here: read [05 — Getting started](05-getting-started.md), then the chapter of the kind of test you are writing. The vitrine is the root `README.md`; the brief an agent opens first is the root `AGENTS.md`.
 
-| Chapter                                     | Holds                                                                                                                                                                                  |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| [01 — Architecture](01-architecture.md)     | The runner model behind the seven constructors, the source trees and their edges, the eight enforcement channels, the five entries, what the tarball publishes                         |
-| [02 — Developing](02-developing.md)         | The repository's own loop and what a change owes; then install, first specs, the vitest preset and its helpers                                                                         |
-| [03 — Testing](03-testing.md)               | The vitest projects, the generated capability matrix, the layered reading, the coverage ratchet, the meta-test channel, the package's own rules, what CI runs                          |
-| [04 — Operating](04-operating.md)           | The npm release; the peers a consumer brings — required, optional, the provider's exact pin, the native seams; Node 24; the ARIA dialect                                               |
-| [05 — Module tests](05-module-tests.md)     | The exception kind: when a `*.test.ts` beside its module is kept, and what it may and may not do — `mockOf`, `vi.fn`, `clock`, `intercept`, `vi.stubEnv`, `*.fixtures.ts`, `test.each` |
-| [06 — Integration specs](06-integration.md) | `specification.integration()`: a module against real services or a golden — `.call()`, `value`/`error`, the `integration()` project                                                    |
-| [07 — Component specs](07-component.md)     | `component`: a rendered unit in Chromium — the chain, the visitor, `tree`/`html`, the `component()` project, the hook and DOM-function recipes                                         |
-| [08 — Website specs](08-website.md)         | `specification.website()`: `.fetch()` / `.visit()`, visit scenarios, declared backends, the `head` golden                                                                              |
-| [09 — Mobile specs](09-mobile.md)           | `specification.mobile()`: `.open()`, simulator resolution, open scenarios, the `screen` golden                                                                                         |
-| [10 — API specs](10-api.md)                 | `specification.api()`: options, the in-process app, `.http` request files, inline actions, seeds, intercepts, a case written whole, route coverage                                     |
-| [11 — Job specs](11-job.md)                 | `specification.job()`: in-process pipelines, `.trigger()`, provider error cases                                                                                                        |
-| [12 — CLI specs](12-cli.md)                 | `specification.cli()`: `.exec()`, `.env()`, fixtures and projects, `.link()`, the words a document is registered by, services, Docker-aware mode                                       |
-| [13 — The visitor](13-visitor.md)           | What acts on a screen: its verbs and `see()`, the targets they act on — modifiers, `within()`, `testId` — and the matching, `target-matches-one-element` and its evidence, exact names |
-| [14 — Assertions](14-assertions.md)         | The reference: every matcher, grouped by subject, sync/async rules, goldens named by path, diffs                                                                                       |
-| [15 — Tokens](15-tokens.md)                 | The `{{token}}` grammar: all 21 tokens, `#ref` captures, `match.*`, and update mode end to end                                                                                         |
-| [16 — Stubs](16-stubs.md)                   | `defineStub` / `defineStubs`, the facade layout, selection, provider builders, `intercept()` and its origin, streams, the browser transport                                            |
-| [17 — Services](17-services.md)             | `postgres` / `redis` / `sqlite` / `process`, the services record, init scripts, per-worker isolation, the optional peer each one names                                                 |
-| [18 — Conventions](18-conventions.md)       | The constitution: the principles, which test earns its place, the fork, the doubles ladder, the rule families, the backlog, what stays human, the naming recap                         |
-| [19 — Linting](19-linting.md)               | The oxlint plugin (`@jterrazz/test/oxlint`), the conventions checker, and the GENERATED catalogue of the rules a consumer meets                                                        |
-| [20 — Spec documents](20-documents.md)      | The `<case>.spec.yaml` format of the cli facet: one file one test, the keys, paths, the three doors, update                                                                            |
-| [21 — Lint specs](21-lint.md)               | `specification.lint()`: the rules a project ships over fixture trees — plugins, checkers, presets — `.run()`, the report, `ruleTester()`                                               |
+## Using the framework
 
-The decisions this package alone took stand in [`decisions/`](decisions/), numbered in the order they were taken, the mold `_template.md` beside them. Neither 03 nor `decisions/` ships in the tarball, so from inside an install read them in the repository, at <https://github.com/jterrazz/package-test/tree/main/docs> ([04 — Operating](04-operating.md#what-leaves-the-tree)). A decision that spans several repositories belongs to the corpus that spans them. The API is the types the package publishes; no page restates it.
+| Chapter                                       | Holds                                                                                                      |
+| --------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| [05 — Getting started](05-getting-started.md) | What the framework is and why, the five ideas behind it, a first spec, and which kind of test to write     |
+| [06 — Setting up a project](06-setting-up.md) | What to install, the vitest config and its project helpers, turning the conventions on, where a run writes |
 
-## How to read it
+### What is tested — one chapter per kind
 
-- **01 to 04 are the spine**, and they answer for the repository itself: what it is, how it is changed, what proves a change, how it ships.
-- **05 to 12 are the kinds of test, in the order the fork asks them.** A module test needs no runner and has no folder (05); everything below it is an assembled product met through an entry. Read 02, then the one chapter matching what you specify.
-- **13 to 17, and 20, are shared references.** The visitor's vocabulary reaches every rendered surface; assertions and the token grammar reach every facet; stubs apply wherever a facet meets the network, services wherever it has a database; the document format is the cli's. The kind chapters link into them and restate nothing.
-- **21 is the kind the enforcement chapters call for**: the rules a project ships, specified as a facet, read after 18 and 19.
-- **18 and 19 cover enforcement.** 18 is the constitution — the principles and the criteria no machine settles. 19 documents the static plugin and the checker, and carries the generated catalogue, sourced from `lint/consumer/catalogue/manifest.ts`. The chapters explain and illustrate; the constitution and the catalogue decide.
+| Chapter                                     | The subject                                                                            |
+| ------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [07 — Module tests](07-module-tests.md)     | One module, beside its code, nothing started — `<file>.test.ts`                        |
+| [08 — Integration specs](08-integration.md) | A module against real services, or against a golden — `specification.integration()`    |
+| [09 — Component specs](09-component.md)     | A rendered unit in a real Chromium, beside its code — the `component` chain            |
+| [10 — Website specs](10-website.md)         | A served page, fetched or driven in a browser — `specification.website()`              |
+| [11 — Mobile specs](11-mobile.md)           | A native app on an iOS simulator — `specification.mobile()`                            |
+| [12 — API specs](12-api.md)                 | An HTTP app, in-process, through complete requests — `specification.api()`             |
+| [13 — Job specs](13-job.md)                 | A pipeline triggered by name — `specification.job()`                                   |
+| [14 — CLI specs](14-cli.md)                 | A binary in a fresh working directory — `specification.cli()`                          |
+| [15 — Spec documents](15-documents.md)      | A CLI session written as data — the `<case>.spec.yaml` format                          |
+| [16 — Lint specs](16-lint.md)               | The rules a project ships, over fixture trees — `specification.lint()`, `ruleTester()` |
 
-Every kind chapter (05 to 12, and 21) is written on the same spine — **What it specifies · The constructor · The chain · The result · Unique here · Pitfalls · Related** — so the reader who learned one facet already knows where to look in the next. A chapter with no constructor or chain says so in that section's heading (05, 07), and a kind with something the spine has no place for adds one section for it: 05's rule table, 07's limits. All examples use the Given/Then comment convention the framework itself enforces (rule `given-and-then-markers-present`).
+### What surrounds the subject
+
+| Chapter                                         | Holds                                                                                  |
+| ----------------------------------------------- | -------------------------------------------------------------------------------------- |
+| [17 — Stubs](17-stubs.md)                       | The network, declared: `defineStub`, the builders, `.intercept()` and `intercept()`    |
+| [18 — Services](18-services.md)                 | Real databases, caches and processes: `postgres()`, `redis()`, `sqlite()`, `process()` |
+| [19 — Time and doubles](19-time-and-doubles.md) | `clock`, `mockOf()`, and the doubles ladder                                            |
+
+The disk a subject reads is laid by its chain — `.fixture()` and `.link()` on a CLI ([14](14-cli.md#file-state-is-the-shape-of-a-fixture-tree)) and a lint spec ([16](16-lint.md)) — and every path a test names is spelled with `file()` or `directory()` ([23 § The naming recap](23-conventions.md#the-naming-recap)).
+
+### Acting on a screen
+
+| Chapter                           | Holds                                                                                                                |
+| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| [20 — The visitor](20-visitor.md) | The verbs (`click`, `fill`, `see` …), the targets (`button()`, `field()` …), scoping, and how one element is matched |
+
+### Judging the result
+
+| Chapter                             | Holds                                                                      |
+| ----------------------------------- | -------------------------------------------------------------------------- |
+| [21 — Assertions](21-assertions.md) | Every result subject and its matchers, goldens, sync and async             |
+| [22 — Tokens](22-tokens.md)         | The `{{token}}` grammar for values that move, `#ref` captures, update mode |
+
+### The conventions
+
+| Chapter                               | Holds                                                                                                         |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| [23 — Conventions](23-conventions.md) | The principles: which test earns its place, one file one subject, the naming of a spec tree, what stays human |
+| [24 — Linting](24-linting.md)         | The oxlint plugin, the conventions checker, the ratchet, and the generated catalogue of every rule            |
+
+## Developing this repository
+
+| Chapter                                 | Holds                                                                                                    |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| [01 — Architecture](01-architecture.md) | The runner model, the source trees and their edges, the enforcement channels, what the tarball publishes |
+| [02 — Developing](02-developing.md)     | The loop, which file a change opens, what a change owes                                                  |
+| [03 — Testing](03-testing.md)           | The vitest projects, the generated capability matrix, coverage, the meta-tests, the package's own rules  |
+| [04 — Operating](04-operating.md)       | The npm release, what leaves the tree, the footprint in a project                                        |
+
+The decisions this package alone took are in [`decisions/`](decisions/), numbered in the order they were taken, beside the `_template.md` they follow. Neither 03 nor `decisions/` ships in the tarball: from inside an install, read them at <https://github.com/jterrazz/package-test/tree/main/docs>. The API itself is the types the package publishes, and no page restates it.
+
+## How the chapters are written
+
+- **One owner per fact.** Each fact is stated in one chapter; the others link to it.
+- **The kind chapters share one outline** — what it specifies, the constructor, the chain, the result, unique here, pitfalls — so the reader who learned one kind knows where to look in the next.
+- **Rules live in the code.** A rule's normative sentence is written in `lint/consumer/catalogue/manifest.ts` and generated into [24](24-linting.md); the chapters explain and illustrate, and the catalogue decides.
+- **Every example compiles.** A meta-test typechecks each block that imports only the framework, so a sample cannot drift from the API.

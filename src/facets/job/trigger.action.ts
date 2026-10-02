@@ -26,7 +26,7 @@ export const trigger = defineAction<'trigger', [name: string], BaseResult, Trigg
                     refusal({
                         fix: 'register the jobs with the `jobs` option of specification.job()',
                         found: `.trigger("${name}"), and no job is registered`,
-                        read: 'docs/11-job.md#options',
+                        read: 'docs/13-job.md#options',
                         why: 'A job is triggered by the name it is registered under.',
                     }),
                 );
@@ -38,7 +38,7 @@ export const trigger = defineAction<'trigger', [name: string], BaseResult, Trigg
                     refusal({
                         fix: `trigger a registered job: ${available}`,
                         found: `.trigger("${name}"), and no job is registered under that name`,
-                        read: 'docs/11-job.md#options',
+                        read: 'docs/13-job.md#options',
                         why: 'A job is triggered by the name it is registered under.',
                     }),
                 );

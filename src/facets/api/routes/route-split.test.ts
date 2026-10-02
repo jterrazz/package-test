@@ -59,7 +59,7 @@ describe('route-split', () => {
             failure: {
                 fix: 'send each from a spec, or record them with TEST_UPDATE=1',
                 found: 'api routes: 1 declared route(s) no test reached, and the ratchet holds 0:\n  DELETE /users/:id',
-                read: 'docs/10-api.md#the-ratchet',
+                read: 'docs/12-api.md#the-ratchet',
                 why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
             },
         });
@@ -74,7 +74,7 @@ describe('route-split', () => {
             failure: {
                 fix: 'send each from a spec, or record them with TEST_UPDATE=1',
                 found: 'api routes: 2 declared route(s) no test reached, and the ratchet holds 0:\n  GET /users/:id\n  DELETE /users/:id',
-                read: 'docs/10-api.md#the-ratchet',
+                read: 'docs/12-api.md#the-ratchet',
                 why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
             },
         });

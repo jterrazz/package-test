@@ -234,7 +234,7 @@ describe('StubQueue', () => {
                     `  - GET ${URL_A} — reached by GET ${URL_A}?page=2`,
                     "why: A never stub states the subject must not reach its route within the chain's terminal action, or the `intercept()` scope, it is declared for.",
                     'fix: take the call out of the path under test — or, if the call is now intended, replace the never stub with one that answers it',
-                    'read: docs/16-stubs.md#never--a-call-that-must-not-happen',
+                    'read: docs/17-stubs.md#never--a-call-that-must-not-happen',
                 ].join('\n'),
             ),
         );

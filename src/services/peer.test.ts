@@ -45,7 +45,7 @@ describe('peer', () => {
                 'found: redis() requires `redis`, and it is not installed',
                 'why: Every seam is an optional peer of @jterrazz/test, installed by the project that specifies through it.',
                 'fix: npm install -D redis',
-                'read: docs/19-linting.md#seam-is-an-optional-peer',
+                'read: docs/24-linting.md#seam-is-an-optional-peer',
             ].join('\n'),
         );
     });

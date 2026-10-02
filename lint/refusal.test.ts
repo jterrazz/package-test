@@ -17,11 +17,11 @@ describe('refusal', () => {
                 'found: file("out.txt"), a path that is not relative to the spec file',
                 `why: ${REFUSAL_WHY['disk-named-by-relative-path-at-runtime']}`,
                 "fix: start it with ./ or ../: file('./out.txt')",
-                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+                'read: docs/24-linting.md#disk-named-by-relative-path-at-runtime',
             ].join('\n'),
         );
         expect(lessonParts(message)?.read).toBe(
-            'docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+            'docs/24-linting.md#disk-named-by-relative-path-at-runtime',
         );
     });
 
@@ -30,7 +30,7 @@ describe('refusal', () => {
         const message = refusal({
             fix: "take one first: using _ = clock.at('2026-03-04T09:30:00Z')",
             found: 'clock.advance(), and no clock is pinned',
-            read: 'docs/05-module-tests.md#time',
+            read: 'docs/19-time-and-doubles.md#the-clock',
             why: 'A clock moves only once it is pinned.',
         });
 
@@ -40,7 +40,7 @@ describe('refusal', () => {
                 'found: clock.advance(), and no clock is pinned',
                 'why: A clock moves only once it is pinned.',
                 "fix: take one first: using _ = clock.at('2026-03-04T09:30:00Z')",
-                'read: docs/05-module-tests.md#time',
+                'read: docs/19-time-and-doubles.md#the-clock',
             ].join('\n'),
         );
     });

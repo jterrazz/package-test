@@ -22,7 +22,7 @@ describe('no-raw-env-write', () => {
                 found: the test writes the process environment directly
                 why: A test writes the process environment through \`vi.stubEnv\` alone: a raw assignment onto a variable of it (named or computed), a replacement of \`process.env\` itself, and a \`delete\` of one of its variables are each an error; a \`*.specification.ts(x)\` is out of reach by role.
                 fix: write \`vi.stubEnv('<NAME>', '<value>')\`, which restores itself; a CLI default belongs to \`specification.cli({ defaults })\`
-                read: docs/19-linting.md#no-raw-env-write
+                read: docs/24-linting.md#no-raw-env-write
         `);
     });
 });

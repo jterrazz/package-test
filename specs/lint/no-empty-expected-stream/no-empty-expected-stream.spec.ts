@@ -16,7 +16,7 @@ describe('no-empty-expected-stream', () => {
                 found: a stream that is only {{any}}
                 why: An expected stream whose whole content is \`{{any}}\` → error: the run executes and proves nothing.
                 fix: write what the command actually printed, tokens for what moves
-                read: docs/19-linting.md#no-empty-expected-stream
+                read: docs/24-linting.md#no-empty-expected-stream
         `);
     });
 

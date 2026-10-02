@@ -17,7 +17,7 @@ function methodlessDrift(...drift: string[]): { failure: Lesson } {
         failure: {
             fix: 'state in `test: { methodless }` exactly the routes the app takes on any method',
             found: `api routes: \`test: { methodless }\` in jterrazz.config.ts drifted from the app's table:\n${drift.join('\n')}`,
-            read: 'docs/10-api.md#a-route-taken-on-any-method',
+            read: 'docs/12-api.md#a-route-taken-on-any-method',
             why: '`test: { methodless }` names the routes the app takes on any method, which the checker files by their path, whatever verb a spec sends.',
         },
     };
@@ -49,7 +49,7 @@ describe('route-judge', () => {
             failure: {
                 fix: 'send each from a spec, or record them with TEST_UPDATE=1',
                 found: 'api routes: 2 declared route(s) no test reached, and the ratchet holds 0:\n  GET /users\n  DELETE /users/:id',
-                read: 'docs/10-api.md#the-ratchet',
+                read: 'docs/12-api.md#the-ratchet',
                 why: 'A route no test reached fails the run, beyond the count the ratchet holds.',
             },
         });
@@ -78,7 +78,7 @@ describe('route-judge', () => {
             failure: {
                 fix: 'the debt fell: record it with TEST_UPDATE=1',
                 found: 'api routes: 1 declared route(s) no test reached, below the 2 the ratchet holds',
-                read: 'docs/10-api.md#the-ratchet',
+                read: 'docs/12-api.md#the-ratchet',
                 why: 'The ratchet is exact in both directions.',
             },
         });
@@ -99,7 +99,7 @@ describe('route-judge', () => {
             failure: {
                 fix: 'make the run green, then record with TEST_UPDATE=1',
                 found: 'api routes: not recorded — 1 file(s) of the run failed, and a failed file may not have sent its requests',
-                read: 'docs/10-api.md#when-a-run-is-not-judged',
+                read: 'docs/12-api.md#when-a-run-is-not-judged',
                 why: 'The route ratchet is recorded only from a run that is green and whole.',
             },
         });

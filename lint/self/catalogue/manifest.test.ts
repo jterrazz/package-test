@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
 
 import { CATALOGUE_CHAPTER } from '../../consumer/catalogue/chapter.js';
 import { FAMILIES } from '../../consumer/catalogue/families.js';
-import { FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
+import { FORK_CHAPTER, FORK_MARKERS, forkTable } from '../../consumer/catalogue/fork.js';
 import {
     CHECKER_PASSES,
     consumerRows,
@@ -46,7 +46,7 @@ const withoutGenerated = (text: string): string =>
 const humanWords = (entry: { audience?: string }): string =>
     entry.audience === 'self'
         ? withoutGenerated(read('docs/03-testing.md'))
-        : ((read('docs/18-conventions.md').split('## What stays human')[1] ?? '').split(
+        : ((read('docs/23-conventions.md').split('## What stays human')[1] ?? '').split(
               '\n## ',
           )[0] ?? '');
 
@@ -282,22 +282,20 @@ const landingOf = (coordinate: Coordinate): string => {
 };
 
 describe('manifest', () => {
-    test('conventions catalogue — generation freshness (meta-test) — the docs/19 catalogue is byte-identical to a fresh generation', () => {
-        // Given - the committed docs/19-linting.md
-        const committed = read('docs/19-linting.md');
+    test('conventions catalogue — generation freshness (meta-test) — the docs/24 catalogue is byte-identical to a fresh generation', () => {
+        // Given - the committed docs/24-linting.md
+        const committed = read('docs/24-linting.md');
 
         // Then - re-splicing the generated catalogue changes nothing (run `npm run docs`)
-        expect(chapterAt(ROOT, 'docs/19-linting.md', committed)).toBe(committed);
+        expect(chapterAt(ROOT, 'docs/24-linting.md', committed)).toBe(committed);
     });
 
-    test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 18 is byte-identical to a fresh splice', () => {
-        // Given - the committed constitution
-        const committed = readFileSync(resolve(ROOT, 'docs/18-conventions.md'), 'utf8');
+    test('conventions catalogue — generation freshness (meta-test) — the fork table inside chapter 05 is byte-identical to a fresh splice', () => {
+        // Given - the committed getting-started chapter
+        const committed = readFileSync(resolve(ROOT, FORK_CHAPTER), 'utf8');
 
         // Then - splicing a fresh table changes nothing
-        expect(spliceBetween(committed, FORK_MARKERS, forkTable(), 'docs/18-conventions.md')).toBe(
-            committed,
-        );
+        expect(spliceBetween(committed, FORK_MARKERS, forkTable(), FORK_CHAPTER)).toBe(committed);
     });
 
     test('conventions catalogue — generation freshness (meta-test) — the docs/03 table of the self rows is byte-identical to a fresh generation', () => {
@@ -315,7 +313,7 @@ describe('manifest', () => {
         const published = read(CATALOGUE_CHAPTER);
         const own = read(SELF_CHAPTER);
 
-        // Then - a consumer row is anchored in docs/19 alone, a self row in docs/03 alone: a consumer never reads a rule that holds only this package
+        // Then - a consumer row is anchored in docs/24 alone, a self row in docs/03 alone: a consumer never reads a rule that holds only this package
         for (const entry of allRows) {
             const [home, away] = entry.audience === 'self' ? [own, published] : [published, own];
             expect(home, `${entry.name} is missing from its chapter`).toContain(anchor(entry.name));
@@ -326,12 +324,12 @@ describe('manifest', () => {
     });
 
     test('conventions catalogue — generation freshness (meta-test) — every anchor a rule message links to exists in the generated catalogue', () => {
-        // Given - every `docs/19-linting.md#<id>` a shipped rule's message carries
-        const generated = read('docs/19-linting.md');
+        // Given - every `docs/24-linting.md#<id>` a shipped rule's message carries
+        const generated = read('docs/24-linting.md');
         const links = new Set<string>();
         for (const rule of Object.values(plugin.rules)) {
             for (const message of Object.values(rule.meta?.messages ?? {})) {
-                for (const found of message.matchAll(/docs\/19-linting\.md#(?<id>[\w-]+)/gu)) {
+                for (const found of message.matchAll(/docs\/24-linting\.md#(?<id>[\w-]+)/gu)) {
                     links.add(found.groups?.id ?? '');
                 }
             }
@@ -340,7 +338,7 @@ describe('manifest', () => {
         // Then - each resolves to a row: a message that links nowhere is worse than one that links to the chapter, because it reads as a route
         expect(links.size).toBeGreaterThan(0);
         for (const id of links) {
-            expect(generated, `dead anchor docs/19-linting.md#${id}`).toContain(anchor(id));
+            expect(generated, `dead anchor docs/24-linting.md#${id}`).toContain(anchor(id));
         }
     });
 
@@ -709,10 +707,10 @@ describe('manifest', () => {
         }
     });
 
-    test('conventions catalogue — E2E inventory (meta-test) — the docs/15 token table matches TOKEN_KINDS exactly', () => {
+    test('conventions catalogue — E2E inventory (meta-test) — the docs/22 token table matches TOKEN_KINDS exactly', () => {
         // Given - the token reference table's first-column cells (`| `{{kind}}` |`)
         const documented = new Set(
-            read('docs/15-tokens.md')
+            read('docs/22-tokens.md')
                 .split('\n')
                 .map((line) => /^\|\s*`\{\{(?<kind>[a-z0-9]+)\}\}`\s*\|/u.exec(line)?.groups?.kind)
                 .filter((kind): kind is string => kind !== undefined),
