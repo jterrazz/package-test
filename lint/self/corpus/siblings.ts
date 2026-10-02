@@ -37,7 +37,12 @@ function sources(root: string): string[] {
 export function siblingless(root: string): string[] {
     const all = new Set(codeFiles(root));
     return sources(root)
-        .filter((path) => !all.has(path.replace(/\.(?<extension>tsx?)$/u, '.test.$<extension>')))
+        .filter(
+            (path) =>
+                !['test', 'test-d'].some((suffix) =>
+                    all.has(path.replace(/\.(?<extension>tsx?)$/u, `.${suffix}.$<extension>`)),
+                ),
+        )
         .toSorted();
 }
 
