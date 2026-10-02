@@ -36,7 +36,7 @@ export const sourceRootHoldsKnownEntries: NamesRule = {
                 Object.entries(ENTRIES).map(([extension, name]) => [extension, `regex:${name}`]),
             ),
         },
-        'src/*': { '.dir': `regex:${TREES.join('|')}` },
+        'src/*': { '.dir': `regex:(${TREES.join('|')})` },
         'src/*/*': { '.dir': 'regex:.+' },
     },
     name: 'source-root-holds-known-entries',
