@@ -86,6 +86,20 @@ describe('landmarks', () => {
         ]);
     });
 
+    test('scopeChain — keeps every level of a scope nested three deep', () => {
+        // Given - a link inside a nav, inside a named region, inside main
+        const inNavigation = within(navigation(), link('Part 2'));
+        const target = within(main(), within(region('Series'), inNavigation));
+
+        // Then - no level is lost, outermost first
+        expect(scopeChain(target).map(({ kind }) => kind)).toStrictEqual([
+            'main',
+            'region',
+            'navigation',
+            'link',
+        ]);
+    });
+
     test('scopeChain — answers an unscoped target with itself alone', () => {
         // Given - a bare link
         const target = link('Articles');

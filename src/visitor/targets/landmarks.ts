@@ -28,7 +28,7 @@ export const search: OptionallyNamedTargetFactory = optionallyNamed('search');
 /** Restrict a target to the inside of another: `click(within(navigation(), link('Articles')))`. */
 export const within = (scope: Target, target: Target): Target => ({
     ...target,
-    scope: target.scope ? { ...target.scope, scope } : scope,
+    scope: target.scope ? within(scope, target.scope) : scope,
 });
 
 export function scopeChain(target: Target): Target[] {
