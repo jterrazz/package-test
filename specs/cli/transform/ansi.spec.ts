@@ -1,3 +1,4 @@
+import { file } from '@jterrazz/test';
 import {
     existsSync,
     mkdirSync,
@@ -10,7 +11,6 @@ import {
 import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
-import { file } from '../../../src/index.js';
 import { cli as asymmetricCli } from '../asymmetric-transform-cli.specification.js';
 import { cli as transformCli } from '../transform-cli.specification.js';
 

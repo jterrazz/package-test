@@ -1,6 +1,6 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { lint } from '../lint.specification.js';
 
 /** `every-reach-proven` — the reach of a rule, proven on one project holding every path role, from a single oxlint run so the assertions are comparable. */

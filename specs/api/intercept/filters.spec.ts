@@ -1,6 +1,6 @@
+import { defineStub, http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { defineStub, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 
 describe('filters', () => {

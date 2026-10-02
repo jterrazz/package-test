@@ -1,6 +1,6 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
 function alive(pid: number): boolean {

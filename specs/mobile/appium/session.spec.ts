@@ -1,7 +1,7 @@
+import { directory } from '@jterrazz/test';
 import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { cli as vitestCli } from '../../cli/vitest-cli.specification.js';
 
 /** It prints the sessions it saw when the run is over. */

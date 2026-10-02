@@ -1,7 +1,7 @@
+import { directory, file } from '@jterrazz/test';
 import { join } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 function exportedTo(body: unknown): string {

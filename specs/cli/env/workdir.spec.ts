@@ -1,9 +1,9 @@
+import { directory } from '@jterrazz/test';
 import { mkdirSync, mkdtempSync, realpathSync, rmSync, symlinkSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 // A single SQL database: DB_URL and the unambiguous DATABASE_URL are both injected (`service-urls-injected`).
 

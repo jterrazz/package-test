@@ -1,6 +1,6 @@
+import { http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { http } from '../../../src/index.js';
 import { api, STREAM_URL } from '../intercepts.specification.js';
 import { chatHello, messagesHello, responsesHello } from './_setup/stubs/assistants.stubs.js';
 

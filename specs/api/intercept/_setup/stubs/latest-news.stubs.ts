@@ -1,4 +1,5 @@
-import { defineStubs } from '../../../../../src/index.js';
+import { defineStubs } from '@jterrazz/test';
+
 import latestNews from './http/latest-news.js';
 
 export default defineStubs(latestNews);

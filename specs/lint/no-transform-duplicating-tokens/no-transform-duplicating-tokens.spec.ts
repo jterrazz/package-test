@@ -1,6 +1,6 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { lint } from '../lint.specification.js';
 
 describe('no-transform-duplicating-tokens', () => {

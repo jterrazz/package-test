@@ -3,7 +3,7 @@
  * runner started: a job copying rows from one to the other, one crashing after
  * a write, one reaching out to an HTTP API, and one stamping the instant it ran.
  */
-import type { Job } from '../../../../src/index.js';
+import type { Job } from '@jterrazz/test';
 
 /** What a job of this specimen reads of a database the runner started. */
 type Database = { connectionString: string };

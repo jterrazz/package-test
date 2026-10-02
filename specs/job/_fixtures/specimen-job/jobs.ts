@@ -2,7 +2,7 @@
  * A specimen of the job facet declared as a STATIC array — no factory, no
  * services: one job recording that it ran, one refusing by its own name.
  */
-import type { Job } from '../../../../src/index.js';
+import type { Job } from '@jterrazz/test';
 
 /** Names of the static jobs that ran — observable from specs. */
 export const staticRuns: string[] = [];

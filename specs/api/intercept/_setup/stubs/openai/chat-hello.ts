@@ -1,4 +1,4 @@
-import { defineStub, openai } from '../../../../../../src/index.js';
+import { defineStub, openai } from '@jterrazz/test';
 
 export default defineStub({
     request: openai.chat(),

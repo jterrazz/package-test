@@ -1,6 +1,6 @@
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../src/index.js';
 import { job } from '../job.specification.js';
 
 describe('seeded-state', () => {

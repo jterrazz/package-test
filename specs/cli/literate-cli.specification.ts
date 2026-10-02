@@ -1,7 +1,6 @@
+import { specification } from '@jterrazz/test';
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
-
-import { specification } from '../../src/index.js';
 
 /** A document names its ground by word (`env`, `serve`); how that ground is built stays here, once. */
 const CLI_BIN = resolve(import.meta.dirname, './_fixtures/specimen-cli/cli.sh');

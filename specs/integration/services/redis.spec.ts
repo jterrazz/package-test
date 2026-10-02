@@ -1,6 +1,6 @@
+import { redis } from '@jterrazz/test';
 import { describe, expect, inject, test } from 'vitest';
 
-import { redis } from '../../../src/index.js';
 import { integration } from '../redis.specification.js';
 
 /* A probe flushing keys binds a fresh handle: the runner's handle holds a worker index (`state-isolated-per-worker`), and index 0 is the container's own, which no reset flushes. */

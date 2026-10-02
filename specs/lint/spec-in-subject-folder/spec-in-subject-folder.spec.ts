@@ -1,6 +1,6 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { lint as checker } from '../checker-lint.specification.js';
 
 describe('spec-in-subject-folder', () => {

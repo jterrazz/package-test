@@ -1,6 +1,6 @@
+import { directory } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory } from '../../../src/index.js';
 import { lint as self } from '../self-lint.specification.js';
 
 describe('error-is-a-refusal-or-an-invariant', () => {

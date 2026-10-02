@@ -1,6 +1,6 @@
+import { postgres, specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
-import { postgres, specification } from '../../src/index.js';
 import { databaseJobs } from './_fixtures/specimen-job/database-jobs.js';
 
 // The record key, kebab-cased, is the service name (`server-sees-declared-services`).

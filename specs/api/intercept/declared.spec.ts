@@ -1,6 +1,6 @@
+import { http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { http } from '../../../src/index.js';
 import { api as app } from '../api.specification.js';
 
 describe('declared', () => {

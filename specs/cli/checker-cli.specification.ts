@@ -1,7 +1,6 @@
+import { specification } from '@jterrazz/test';
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
-
-import { specification } from '../../src/index.js';
 
 const REPOSITORY = resolve(import.meta.dirname, '../..');
 

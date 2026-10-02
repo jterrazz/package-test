@@ -1,6 +1,6 @@
+import { postgres, redis, specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
-import { postgres, redis, specification } from '../../src/index.js';
 import { createApp } from '../_shared/_fixtures/specimen-api/app.js';
 
 export const { api, cleanup } = await specification.api({

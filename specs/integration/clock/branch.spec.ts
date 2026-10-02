@@ -1,6 +1,6 @@
+import { file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { file } from '../../../src/index.js';
 import { stamp } from '../_fixtures/orders/stamp.js';
 import { integration } from '../pure.specification.js';
 

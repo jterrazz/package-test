@@ -1,8 +1,8 @@
+import { file, specification } from '@jterrazz/test';
+import type { ApiSpecification } from '@jterrazz/test';
 import { Hono } from 'hono';
 import { describe, expect, test } from 'vitest';
 
-import { file, specification } from '../../../src/index.js';
-import type { ApiSpecification } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 describe('files', () => {

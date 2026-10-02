@@ -1,6 +1,6 @@
+import { directory, text } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory, text } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 async function catchMessage(assertion: () => Promise<unknown>): Promise<string> {

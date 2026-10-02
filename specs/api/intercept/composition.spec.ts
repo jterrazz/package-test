@@ -1,6 +1,6 @@
+import { defineStubs, http } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { defineStubs, http } from '../../../src/index.js';
 import { api, QUOTES_URL } from '../intercepts.specification.js';
 import latestNews from './_setup/stubs/latest-news.stubs.js';
 

@@ -1,9 +1,9 @@
+import { file, postgres } from '@jterrazz/test';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { resolve } from 'node:path';
 import { describe, expect, inject, test } from 'vitest';
 
-import { file, postgres } from '../../../src/index.js';
 import { integration } from '../integration.specification.js';
 
 const SPECIMEN_DOCKER = resolve(import.meta.dirname, '../../_shared/_fixtures/specimen-api/docker');

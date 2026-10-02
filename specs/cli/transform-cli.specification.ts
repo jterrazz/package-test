@@ -1,7 +1,6 @@
+import { specification } from '@jterrazz/test';
 import { resolve } from 'node:path';
 import { afterAll } from 'vitest';
-
-import { specification } from '../../src/index.js';
 
 /** ANSI is stripped by default: this runner observes the transform mechanism itself (`.raw` untouched, the golden never transformed). */
 const CLI_BIN = resolve(import.meta.dirname, './_fixtures/specimen-cli/cli.sh');

@@ -1,10 +1,10 @@
+import { file } from '@jterrazz/test';
+import type { DiskFile, RelativePath } from '@jterrazz/test';
 import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { relative, resolve } from 'node:path';
 import { describe, expect, onTestFinished, test, vi } from 'vitest';
 
-import { file } from '../../../src/index.js';
-import type { DiskFile, RelativePath } from '../../../src/index.js';
 import { cli } from '../literate-cli.specification.js';
 
 /** Every scenario runs through both doors, the plugin and `cli.run`; the `_fixtures/` twins are deliberately wrong and kept out of the plugin's glob. */

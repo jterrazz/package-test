@@ -1,6 +1,6 @@
+import { file, text } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { file, text } from '../../../src/index.js';
 import { api } from '../api.specification.js';
 
 /** Awaited, so it serves the sync matchers and the SQL-backed table ones alike. */

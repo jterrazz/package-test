@@ -1,6 +1,6 @@
+import { directory, text } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory, text } from '../../../src/index.js';
 import { cli as vitestCli } from '../vitest-cli.specification.js';
 
 /* The accessors and matchers are the subject here; the fixture CLI's output is the vehicle. */

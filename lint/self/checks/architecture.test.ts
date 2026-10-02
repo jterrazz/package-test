@@ -117,21 +117,23 @@ describe('ARCHITECTURE', () => {
         ]);
     });
 
-    test('a spec reaches the framework by its entry, never by its internals', () => {
-        // Given - specs reaching two internals, the entry, and their own app's source
+    test('a spec reaches the framework by its published name, never by its source', () => {
+        // Given - specs reaching an internal, the source entry, the published name, and their own app's source
         const violations = violationsIn({
             'specs/api/seed/seed.spec.ts': [
                 "import '../../../src/clock/clock.js';",
                 "import '../../../src/index.js';",
+                "import '@jterrazz/test';",
                 '',
             ].join('\n'),
             'specs/cli/run/run.test.ts':
                 "import '../../../src/expectations/tokens/match.js';\nimport './app/main.js';\n",
         });
 
-        // Then - each internal is named at the spec, and the entry and the app pass
+        // Then - the internal and the source entry are named at the spec; the published name and the app pass
         expect(violations).toStrictEqual([
             'specs/api/seed/seed.spec.ts → src/clock/clock.ts  no-framework-internals',
+            'specs/api/seed/seed.spec.ts → src/index.ts  no-framework-internals',
             'specs/cli/run/run.test.ts → src/expectations/tokens/match.ts  no-framework-internals',
         ]);
     });

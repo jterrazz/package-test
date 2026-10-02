@@ -1,6 +1,6 @@
+import { directory, file } from '@jterrazz/test';
 import { describe, expect, test } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 describe('under-document', () => {

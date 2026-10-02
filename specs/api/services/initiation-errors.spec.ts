@@ -1,12 +1,11 @@
+// Through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
+import { postgres, redis, specification } from '@jterrazz/test';
 /* oxlint-disable jterrazz/runner-in-specification-file -- negative constructor specs:
    every specification.api() call here MUST fail to start, so no runner can
    live in a *.specification.ts file (`runner-in-specification-file`'s sanctioned home is for runners that
    boot). The failure paths themselves are the behaviour under test. */
 import { resolve } from 'node:path';
 import { beforeAll, describe, expect, test, vi } from 'vitest';
-
-// Through the package entry: it wires the integration registry the constructors consume (`no-framework-internals`).
-import { postgres, redis, specification } from '../../../src/index.js';
 
 const stripAnsi = (text: string): string => text.replaceAll(/\[[0-9;]*m/gu, '');
 

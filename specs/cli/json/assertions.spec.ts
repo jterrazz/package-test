@@ -1,3 +1,4 @@
+import { directory, file } from '@jterrazz/test';
 import {
     existsSync,
     mkdirSync,
@@ -10,7 +11,6 @@ import {
 import { resolve } from 'node:path';
 import { describe, expect, test, vi } from 'vitest';
 
-import { directory, file } from '../../../src/index.js';
 import { cli } from '../cli.specification.js';
 
 const EXPECTED_DIR = resolve(import.meta.dirname, '_expected');

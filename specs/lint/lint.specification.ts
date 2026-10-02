@@ -1,8 +1,8 @@
+import { specification } from '@jterrazz/test';
 import { afterAll } from 'vitest';
 
 import { recommendedRules } from '../../dist/oxlint.js';
 import { selfPluginRules } from '../../dist/self-oxlint.js';
-import { specification } from '../../src/index.js';
 
 /** The two plugins as they ship, every rule on: `npm run build` first. */
 export const { cleanup, lint } = await specification.lint({
