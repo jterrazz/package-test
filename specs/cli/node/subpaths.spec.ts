@@ -10,16 +10,16 @@ describe('subpaths', () => {
             .fixture(directory('./_fixtures/consumer/'))
             .exec('node subpaths.mjs');
 
-        // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build imports — static, side-effect or dynamic — resolves under the browser condition
+        // Then - each subpath answers every condition it declares: node loads its builds, and every package the browser build's one module imports — static, side-effect or dynamic — resolves under the browser condition
         expect(result.exitCode).toBe(0);
         expect(result.stdout).toMatch(`
             @jterrazz/test (types) → ./dist/index.d.ts: held
-            @jterrazz/test (browser) → ./dist/browser/index.js: reaches 1 modules, imports msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
+            @jterrazz/test (browser) → ./dist/browser/index.js: reaches 1 module, imports msw, msw/browser, vitest, vitest-browser-react, vitest-mock-extended, vitest/browser, each resolved under the browser condition
             @jterrazz/test (import) → ./dist/index.js: loads, 49 names
             @jterrazz/test/vitest (types) → ./dist/vitest.d.ts: held
             @jterrazz/test/vitest (import) → ./dist/vitest.js: loads, 11 names
             @jterrazz/test/config (types) → ./dist/config.d.ts: held
-            @jterrazz/test/config (import) → ./dist/config.js: loads, 1 names
+            @jterrazz/test/config (import) → ./dist/config.js: loads, 1 name
             @jterrazz/test/oxlint (types) → ./dist/oxlint.d.ts: held
             @jterrazz/test/oxlint (import) → ./dist/oxlint.js: loads, 4 names
             @jterrazz/test/oxlint (types) → ./dist/oxlint.d.cts: held

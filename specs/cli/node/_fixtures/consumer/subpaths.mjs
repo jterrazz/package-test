@@ -16,6 +16,10 @@ function targetsOf(node, condition = 'default') {
     );
 }
 
+function counted(count, noun) {
+    return `${count} ${noun}${count === 1 ? '' : 's'}`;
+}
+
 async function load(specifier, condition, target) {
     const path = join(installed, target);
     if (!existsSync(path)) {
@@ -35,7 +39,7 @@ async function load(specifier, condition, target) {
             : target.endsWith('.json')
               ? (await import(specifier, { with: { type: 'json' } })).default
               : await import(specifier);
-    return `loads, ${Object.keys(loaded).length} names`;
+    return `loads, ${counted(Object.keys(loaded).length, 'name')}`;
 }
 
 for (const [subpath, node] of Object.entries(exports)) {

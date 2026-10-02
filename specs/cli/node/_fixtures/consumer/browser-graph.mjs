@@ -31,6 +31,6 @@ const unresolved = imported.filter((name) => {
 });
 process.stdout.write(
     unresolved.length === 0
-        ? `reaches ${modules.size} modules, imports ${imported.join(', ')}, each resolved under the browser condition`
+        ? `reaches ${modules.size} ${modules.size === 1 ? 'module' : 'modules'}, imports ${imported.join(', ')}, each resolved under the browser condition`
         : `imports ${unresolved.join(', ')}, which the install lacks under the browser condition`,
 );
