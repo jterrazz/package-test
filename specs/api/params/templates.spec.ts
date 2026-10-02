@@ -37,11 +37,13 @@ describe('templates', () => {
         );
     });
 
-    test('a template handed no values is refused, naming the parameter it holds', async () => {
-        // Given - a caller the types do not reach, sending a template without its params
-        const send = api.get as (path: string) => Promise<unknown>;
+    test('a template handed no values is refused, naming the parameter it holds, before the chain seeds anything', async () => {
+        // Given - a chain whose seed fails if it runs, sending a template without its params past the types
+        const send = api.seed(file('./_seeds/unknown-table.sql'), { database: 'db' }).get as (
+            path: string,
+        ) => Promise<unknown>;
 
-        // Then - refused rather than sent with `:id` as a literal segment
+        // Then - the template is refused, rather than sent with `:id` as a literal segment, and before the seed could fail
         await expect(send('/users/:id')).rejects.toThrow(
             [
                 'found: .get("/users/:id") names :id and is handed no params',
