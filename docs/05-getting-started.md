@@ -28,6 +28,8 @@ const result = await api.seed(file('./_seeds/two-users.sql')).get('/users');
 
 **5. Expectations on the whole result.** A result exposes what the action produced — `result.response`, `result.stdout`, `result.table('users')`, `result.tree` — and one matcher, `toMatch`, compares it whole: against a value written in the test, or `file('./_expected/…')` when several tests share it. Values that change between runs are written as tokens (`{{uuid}}`, `{{iso8601}}`), and `TEST_UPDATE=1` writes the expected values for you to review.
 
+The whole-value comparison is the framework's `toMatch` on a framework result (`result.response`, `result.stdout`). On a plain string such as `result.stdout.text`, `toMatch` is vitest's own substring or RegExp check ([21 — Assertions § Common mistakes](21-assertions.md#common-mistakes)).
+
 Everything a test stands on sits in a folder next to it whose name starts with `_`: `_seeds/` (SQL), `_requests/` (what is sent), `_fixtures/` (files the program reads), `_expected/` (what is compared), `_setup/` (helper code). The `_` marks a folder that is not a subject of the tests.
 
 ## A first spec
@@ -54,6 +56,8 @@ export default defineSpecConfig({
 ```
 
 `defineSpecConfig()` sets the shared defaults (timeouts, artefact paths, no retries). Each helper is a vitest project: `unit()` collects the `*.test.ts` files next to your modules, `api()` collects `specs/api/**/*.spec.ts`. [06 — Setting up](06-setting-up.md#the-vitest-config) lists every helper and default.
+
+This `api()`, from `@jterrazz/test/vitest`, only names a vitest project. The `api` you send requests with is a different thing: the runner that step 3 builds.
 
 ### 3. Build the runner, once per suite
 
@@ -111,6 +115,8 @@ The folder says what is tested (`users/list/` is `GET /users`), the file name sa
 ```bash
 npx vitest --run --project api
 ```
+
+The api project also checks route coverage: after the last test it names every route the app declares that no request reached, and a route left unreached fails the run, even on the first one. To accept that debt for now, run once with `TEST_UPDATE=1`: it records the count in `jterrazz.baseline.json`, which you commit, and the count can only go down from there ([12 — API specs § Route coverage](12-api.md#route-coverage)).
 
 To write the expected value instead of typing it, leave it empty — `toMatch('')` — and run once with `TEST_UPDATE=1`. The framework writes what came back into the test, with tokens where values move; you read the diff before you commit it ([22 — Tokens § Update mode](22-tokens.md#update-mode-tokens-are-preserved)).
 

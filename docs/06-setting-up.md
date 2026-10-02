@@ -8,7 +8,13 @@ What a project installs, how its `vitest.config.ts` is written, how it turns the
 npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
-**`vitest ^5` and `@jterrazz/typescript ^11` are the only required peers.** The framework registers its matchers into vitest and has no runner of its own. Its published types extend the toolchain's `JterrazzConfig` (`@jterrazz/typescript/config`), so a project that typechecks them needs the toolchain beside it.
+**`vitest ^5` and `@jterrazz/typescript ^11` are the only required peers.** The framework registers its matchers into vitest and has no runner of its own. The toolchain, [`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript), is required because the framework prints its refusals through the toolchain's rules kit and its published types extend the toolchain's `JterrazzConfig` (`@jterrazz/typescript/config`). Its lint conventions are a separate, opt-in step ([below](#turning-the-conventions-on)).
+
+### Project requirements
+
+- **ESM.** The package ships ES modules only, and every specification file awaits its constructor at the top level (`export const { api, cleanup } = await specification.api(…)`). Set `"type": "module"` in `package.json`, or name the config files `.mts` (`vitest.config.mts`).
+- **Node 24 or newer**, as `engines` states.
+- **A tsconfig that knows `using` and top-level await.** Tests pin time with `using _ = clock.at(…)` and dispose with `await using` ([19](19-time-and-doubles.md)), which need `target` and `lib` at `ES2022` or later for top-level await and `ESNext` for `using`, with `module` at `ESNext` or `NodeNext`. The toolchain's tsconfig presets set all of it: `"extends": "@jterrazz/typescript/tsconfig/node"`.
 
 **Everything else is an optional peer**, loaded the first time a test needs it. A project that tests no page, no component and no database installs none of them.
 
@@ -22,7 +28,7 @@ npm install -D @jterrazz/test @jterrazz/typescript vitest
 | A lint spec, `ruleTester()` | `oxlint`                                                                                                                                        |
 | Coverage                    | `@vitest/coverage-v8`                                                                                                                           |
 
-`msw`, which delivers stubbed network replies, is a direct dependency: nothing to install. An API spec hands your app to `server`; the adapter needs only an object with a `request()` method, so bring whichever web framework you use. Node 24 or newer is required, as `engines` states.
+`msw`, which delivers stubbed network replies, is a direct dependency: nothing to install. An API spec hands your app to `server`; the adapter needs only an object with a `request()` method, so bring whichever web framework you use.
 
 **A missing peer is named when it is needed.** A facet's refusal names the packages it lacks and the `npm install -D` that brings them. A service's refusal names the service that asked, the peer, and the install command of the package manager your lockfile names; under pnpm a native binding must also be listed to be built, and the message adds that line:
 
@@ -48,7 +54,7 @@ Three more constraints come from the peers themselves:
 - **Vite `^6.4 || ^7 || ^8`** for a component. `component()` reads the installed major and states the JSX transform on the key that version reads.
 - **The ARIA dialect of a `.aria.yaml` golden is Playwright's.** A Playwright major can reword a role line, and every committed tree golden then moves with it in one `TEST_UPDATE=1` run.
 
-Why vitest 5 alone, and why the native seams became optional peers: [ADR-008](decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md).
+Why vitest 5 alone, and why the native seams became optional peers: [ADR-008](https://github.com/jterrazz/package-test/blob/main/docs/decisions/008-vitest-5-node-24-and-the-native-seams-as-optional-peers.md).
 
 To try an unreleased build of the framework, install the tarball `npm pack` writes, never a `file:` link: a link makes the project resolve vitest's types twice, and the matchers then type on one copy and not the other.
 
@@ -76,7 +82,7 @@ What you pass is an ordinary vite/vitest config, merged over the defaults below:
 
 ### The project helpers
 
-There is one helper per kind: `unit()`, `integration()`, `component()`, `website()`, `mobile()`, `api()`, `job()`, `cli()` and `lint()`, all from `@jterrazz/test/vitest`. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a container server for `api()`, `job()` and `integration()`, a browser for `component()`, a simulator session for `mobile()`. Every helper accepts:
+There is one helper per kind: `unit()`, `integration()`, `component()`, `website()`, `mobile()`, `api()`, `job()`, `cli()` and `lint()`, all from `@jterrazz/test/vitest`. Each collects its folder — `specs/<kind>/**/*.spec.ts`, plus the `<case>.spec.yaml` documents for `cli()` — and carries what its kind needs: a browser for `component()`, a simulator session for `mobile()`, and for `api()`, `job()` and `integration()` a global setup that starts each service container once and shares it across every file and project of the run ([18 — Services § One container per run](18-services.md#one-container-per-run)). Docker is needed only by a spec that declares `postgres()` or `redis()`: with no Docker running, each such file fails with one sentence naming Docker, and every other file runs. Every helper accepts:
 
 | Option                | Does                                                                                                            |
 | --------------------- | --------------------------------------------------------------------------------------------------------------- |
@@ -141,6 +147,8 @@ import { defineConfig, typescript } from '@jterrazz/typescript/config';
 export default defineConfig({ presets: [typescript({ profile: 'node' }), test()] });
 ```
 
+`profile` is one of `node`, `next`, `astro`, `expo`, `bun` or `react`, and decides which lint rules apply — the toolchain's [Lint presets § The profiles](https://github.com/jterrazz/package-typescript/blob/main/docs/08-lint-presets.md#the-profiles).
+
 ```typescript
 // oxlint.config.ts
 import { defineConfig, fromPresets } from '@jterrazz/typescript/oxlint';
@@ -170,7 +178,7 @@ export default defineConfig(fromPresets(settings));
 ## Two rough edges of the toolchain's flow
 
 - **An `include` that names `.test.ts`** stops collecting the moment `--fix` renames a spec. The fix lists every glob or literal it broke, so update them in the same commit; `include-points-at-a-folder` holds the class afterwards.
-- **`typescript baseline` in an npm-hoisted workspace member** cannot resolve oxlint today; run it from a directory where `node_modules/.bin/oxlint` resolves. `@jterrazz/typescript`'s own `TODO.md` carries the ask.
+- **`typescript baseline` in an npm-hoisted workspace member** cannot resolve oxlint today; run it from a directory where `node_modules/.bin/oxlint` resolves.
 
 ## Pitfalls
 
@@ -181,4 +189,4 @@ export default defineConfig(fromPresets(settings));
 
 ## Related
 
-[05 — Getting started](05-getting-started.md) · [09 — Component specs](09-component.md) · [24 — Linting](24-linting.md) · [04 — Operating](04-operating.md)
+[05 — Getting started](05-getting-started.md) · [09 — Component specs](09-component.md) · [24 — Linting](24-linting.md) · [04 — Operating](https://github.com/jterrazz/package-test/blob/main/docs/04-operating.md)

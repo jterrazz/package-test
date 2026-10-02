@@ -39,7 +39,9 @@ describe('shape', () => {
 npm install -D @jterrazz/test @jterrazz/typescript vitest
 ```
 
-Node 24, vitest 5 and `@jterrazz/typescript` 11 are required. A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing — [Setting up a project](docs/06-setting-up.md#what-to-install).
+[`@jterrazz/typescript`](https://github.com/jterrazz/package-typescript) is the toolchain the framework is built for: one devDependency that builds, type-checks, lints and formats a project, run as `npx typescript check` and `npx typescript fix` (its bin is named `typescript`; it is not Microsoft's compiler package). It is a required peer ([why](docs/06-setting-up.md#what-to-install)), and its lint conventions are opt-in: a project that never lists the framework's preset in `jterrazz.config.ts` runs none of them, and writes its tests all the same.
+
+An ES module project on Node 24, vitest 5 and `@jterrazz/typescript` 11 is required ([Setting up § Project requirements](docs/06-setting-up.md#project-requirements)). A browser, a database driver or a simulator is installed only by a project that tests through it, and the error names the package when one is missing — [Setting up a project](docs/06-setting-up.md#what-to-install).
 
 ## What you can test
 
