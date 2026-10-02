@@ -1,117 +1,42 @@
-# 23 — Conventions: the constitution
+# 23 — Conventions
 
-This chapter is the **constitution**: the principles, the non-mechanizable criteria, and the design rationales behind the conventions. It is hand-maintained and stable.
+The conventions say where a test lives, what it compares, what it may stand on and how its files are named. Most of them are rules a machine checks, and each of those has its normative sentence in the code, generated into the catalogue of [24 — Linting](24-linting.md). This chapter holds the rest: the principles those rules come from, and the judgements no rule can make, which are review's.
 
-The **mechanized per-rule catalogue** does not live here — it is **generated from the code** (`lint/consumer/catalogue/manifest.ts`, where each rule carries its own normative text): the consumer rules into the [24 — Linting](24-linting.md) catalogue, the package's own into [03 — Testing § The package's own rules](03-testing.md#the-packages-own-rules).
+They bind every test file of a repository that lists the `test()` preset — a plain unit test that imports nothing of this package included.
 
-This is the **docs-as-code inversion**: the code is the source of truth for the mechanized rules (a rule and its normative text live together, so they cannot drift), and this constitution is the source of truth for the principles. There is **no duplication** — a machine-checkable rule is written once, in the code. The broader repo-layout doctrine this follows — a written corpus, thin injection layers, a compiler that projects; committed projections against CI-built presentations — is `jterrazz-studio`'s repo-structure chapter, its canonical home for every language.
+## Which test earns its place
 
-Guiding aim: **most enforcement is programmatic, not manual review.**
+The law is the estate's, and it is not restated here: [doctrine § A test earns its place](https://github.com/jterrazz/jterrazz-os/blob/main/home/_all/doctrine.md). This section is how it reads in a repository that tests with this package. [The fork](05-getting-started.md#which-kind-of-test) says which kind a test is; this says whether it should exist at all.
 
-Which CHANNEL holds a given rule — statique, toolchain, upstream, checker, runtime, process, and the meta-test and type channels that double them — is not this chapter's: it is [01 — Architecture](01-architecture.md), where the shape of the enforcement machinery is drawn. What follows is what the rules SAY and what a reviewer must judge.
+**End to end is the default.** A behaviour a user relies on is specified through the surface the user meets, on a facet under `specs/`, with the real engines — the app in-process, a declared service ([18](18-services.md)), a real Chromium, the built binary. A module test is the exception, and it is kept only when one of two criteria holds:
 
-## The rule families
+| Keep the module test when                                                                                           | Because                                                                                                 |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| the module is a pure algorithm — a parser, a matcher, a ranking — whose edge cases are cheaper at its own level     | each edge through the surface costs a whole chain, and at the module it costs one line of a `test.each` |
+| the failure it proves is one no end-to-end path can provoke honestly — a broken invariant, a race, a refused engine | reaching it from the surface would mean faking the engine, and the spec would then prove the fake       |
 
-The catalogue is organized by family. What each family judges is its section heading in the generated catalogue of [24 — Linting](24-linting.md), rendered from `lint/consumer/catalogue/families.ts`; that catalogue also carries the normative sentence and channel of every rule, and the chapters the table names illustrate each family's usage.
+**Every test file is given one verdict, and only one.**
 
-| Family         | Explained in                                                                         |
-| -------------- | ------------------------------------------------------------------------------------ |
-| `setup`        | [02](02-developing.md), [09](09-component.md), [12](12-api.md), [18](18-services.md) |
-| `chain`        | [12](12-api.md), [13](13-job.md), [14](14-cli.md)                                    |
-| `layout`       | [02](02-developing.md), [21](21-assertions.md)                                       |
-| `expectations` | [21](21-assertions.md), [22](22-tokens.md), [15](15-documents.md)                    |
-| `world`        | [17](17-stubs.md), [18](18-services.md)                                              |
-| `visitor`      | [20](20-visitor.md), [10](10-website.md), [11](11-mobile.md)                         |
-| `imports`      | [02](02-developing.md)                                                               |
-| `architecture` | below · [01](01-architecture.md) for this repo's own layer map                       |
-| `catalogue`    | [03](03-testing.md#the-packages-own-rules), this package's own rules                 |
+| Verdict     | When                                                                                                             | What is done                                                             |
+| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
+| keep-module | one of the two criteria above holds                                                                              | it stays beside its module                                               |
+| promote     | it proves something a user relies on, at the wrong level                                                         | the spec is written through the surface, then the module test is deleted |
+| delete      | it restates the implementation, repeats a spec, tests a private helper, or stays green when the behaviour breaks | it is deleted, not kept for the count                                    |
+| strengthen  | it earns its place, and its assertions probe a part of an outcome that can be compared whole                     | its oracle becomes the whole outcome                                     |
 
-## The reach of the conventions
+**A published package is specified from its artefact.** What a package publishes — every subpath of its `exports` map under each condition, the declarations a consumer compiles against, every bin — is proven against the tarball `npm pack` writes, installed in a fixture's `node_modules/` as a consumer installs it — the package beside what its `dependencies` and required peers reach and what the fixture's own manifest declares, never the checkout's whole install — and never against the checkout's `src/` or its own `dist/`: a file the `files` field leaves out, or an import the manifest does not declare, passes every spec that reads the checkout and fails every consumer. This package does it on `specs/cli/packed-cli.specification.ts` — `specs/cli/node/` loads every published subpath and resolves every package the browser build imports under the browser condition, `specs/cli/tsc/` compiles a consumer module against the installed `.d.ts` ([03 — Testing](03-testing.md#the-meta-test-channel)). The browser build is checked from the install for resolution only: it runs in the component project, which aliases `@jterrazz/test` to the checkout's `dist/browser/index.js`.
 
-The framework and the conventions do not have the same scope, and confusing the two is the commonest misreading of this constitution. `specification.*` — with its seeds, fixtures, stubs, goldens and containers — is for specifying a **surface** something is served through: an HTTP API, a background job, a CLI, a rendered page, a native screen. A plain unit test of a pure function has no such surface and needs none of it.
+**An assertion compares an outcome someone would care about**, whole when it can. That half is mechanized, in the `expectations` family of the catalogue ([24](24-linting.md)): `result-compared-whole`, `no-status-only-test`, `no-existence-only-assertion`, `no-probe-cluster`, `no-double-only-assertion`, `no-sampled-value-in-expectation`.
 
-A **rendered component** needs no RUNNER — nothing is started, so it has no constructor and no `*.specification.ts` — and it does need a real browser, a Vite pipeline and a network double, every one of which the framework owns. So the fork is the SUBJECT, not the amount of machinery: one unit — a module, a component — sits beside its code and is judged by its suffix (`<file>.test.ts`, `<file>.test.tsx`); the assembled product, reached through an entry, sits under `specs/`. [09 — Component specs](09-component.md) holds the rendered half.
+**Mutants measure a suite, not lines.** Full line coverage with surviving mutants proves only that the lines ran; a mutant that survives names the assertion that is missing or too weak. Mutation testing is a measure, run apart from the gate — this repository's is `make mutation` ([02 § The loop](02-developing.md#the-loop)).
 
-The conventions bind **every test file of the repository**, that plain unit test included, whether or not `@jterrazz/test` is imported in it. A test is a test: it sits beside the module it covers (`test-beside-its-module`), it narrates its Given then its Then (`given-and-then-markers-present`), it keeps its doubles out of `src/` (`no-module-mock`), and it stays honest under the hygiene floor — no committed `.only`/`.skip`, an assertion in every test, no two literal titles alike in a file, a lowercase title. That floor is oxlint's own `vitest` plugin, which `@jterrazz/typescript` turns on over the test globs in every profile; this package keeps only what the plugin has no counterpart for — the arbitrary-sleep ban (`no-sleep`), which reaches every test file, since a sleep beside a module waits as blindly as one under `specs/`, and the spec-document mirrors. Every one of these is mechanized, so its normative sentence lives in the catalogue ([24 — Linting](24-linting.md)) and not here.
+**Why no rule decides the verdict.** Whether a module is a pure algorithm, whether a failure is provokable from the surface, and whether a test repeats a spec are readings of the product, not shapes of a file: a rule would have to know every path the specs drive. What a machine can take is taken — the assertion rules above, and the surviving mutant, which is the evidence a verdict is argued from ([What stays human](#what-stays-human-and-why)).
 
-The reason for the wide reach: a repository has **one** way to write a test, so a reader moving between a sibling module test and a spec of a surface reads the same shape and the tooling has a single target. A rule that applied only to framework tests would leave the majority of test files — the plain ones — unguarded.
+## One way to write a test
 
-## The third door: a repository suite
+The framework's constructors serve a product reached through an entry — an API, a job, a binary, a page, a screen. The conventions reach further: they bind every test file of the repository, a plain unit test of a pure function included, whether or not it imports `@jterrazz/test`. A repository has one way to write a test, so a reader moving from a module test to an API spec reads the same shape, and a rule that judged only the framework's tests would leave most test files unguarded.
 
-Two doors carry every test the fork names: a UNIT sits beside the module it covers (`<file>.test.ts`, `test-beside-its-module`), and the ASSEMBLED product sits under `specs/<facet>/` and reaches the runner that folder promises (`<aspect>.spec.ts`, `file-suffix-matches-place` and `facet-test-uses-its-runner`). A few specifications have neither address, and they are not mistakes.
-
-### What has no address of its own
-
-What they specify is a REPOSITORY's own surface read as files: what its packed tarball carries, the links its shipped pages hold, the files a build is expected to write. There is no one module to sit beside — they resolve every module there is — and no runner to reach, since nothing is started. Put under a facet folder, `facet-test-uses-its-runner` refuses them ("reaches no runner"); put beside a module under `src/`, `test-beside-its-module` refuses them ("no neighbour `exports.ts` found"). Both refusals are right, and a legitimate file shape with no green position is a hole in the conventions, not a defect in the file.
-
-### The door, and the depth it is judged by
-
-**The third door is a FIRST-LEVEL folder under `specs/` that is not a facet name.** It is a repository suite: it covers a TREE rather than a product served through an entry. `file-suffix-matches-place`'s rename clause does not reach it, `facet-test-uses-its-runner` and `facet-folder-has-specification` do not reach it, and `specs-at-declared-depth`'s declared depth is what judges its shape.
-
-**`specs-at-declared-depth` judges a suite exactly as it judges a facet.** The suite folder is the first level and the tests sit one level down, in a folder named for what they cover: at the default depth, `specs/<suite>/<domain>/<aspect>.test.ts`. A test written straight into the suite folder is refused for the same reason one at a facet root is — the level that says what a file covers would be missing.
-
-**A suite is a door because it holds tests.** One test is enough: a first-level folder holding a single `.test.ts` is a suite, and legal. A first-level folder that holds none — a `support/` of helpers and mocks — is no suite, no facet and not `_shared/`, and `specs-at-declared-depth` refuses each module in it, a runner included, in every mode: a runner lives at the root of the facet it builds, a test helper in the `_setup/` of the lowest folder its tests share, a fixture under `specs/_shared/_fixtures/`.
-
-### The name the estate shares
-
-One suite carries a name the whole estate shares, because two repositories inventing two names for one idea is the drift a vocabulary exists to stop: a package's own published SURFACE is `surface/`. Every other suite is named for what it covers. The rules a repository ships are no suite: they are the lint facet's subject, and `specs/lint/` is that facet's folder ([16](16-lint.md)).
-
-```text
-specs/
-└── surface/                      # what the package publishes
-    └── package/
-        ├── tarball.test.ts       # the files `npm pack` writes, and none it should not
-        └── shipped-links.test.ts # every link a shipped page holds resolves
-```
-
-What a consumer DOES with the package — loading a subpath, compiling against its declarations, running its bin — is no suite's: it is a cli spec on the tarball installed as a consumer installs it ([Which test earns its place](#which-test-earns-its-place)).
-
-### The suffix, and the one thing the door does not license
-
-The files there carry `.test.ts` — the UNIT's word — because what they prove is read without assembling anything, and `unit()` is what collects them (`roots`, or `include` outright). A facet helper would put them in a project whose budget and services they never use.
-
-One thing the door does not license: a module test parked under `specs/` to escape `test-beside-its-module`. The question to ask of a file before it goes through is whether any single module could hold its test — if one could, that module is its address.
-
-## Process rules (review-borne)
-
-Three rules cannot be mechanized — they turn on judgement no single channel can settle. They are listed in the catalogue for completeness, but their full rationale lives here.
-
-### The folder follows the assets
-
-The grouping criterion: a test that owns **its own** asset directories (`_fixtures/`, `_expected/`, `_seeds/`, …) gets **its own** domain folder; specs **without local assets** (or sharing the `specs/_shared/_fixtures/` pool) group as sibling `<aspect>.spec.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `specs-at-declared-depth` checks only placement; which of the two shapes is right is the review call.
-
-Placement itself is **declared**, because a spec tree may legitimately have a shape this package cannot know:
-
-```jsonc
-"jterrazz/specs-at-declared-depth": ["error", { "depth": "facet-domain" }] // the default
-```
-
-| `depth`          | The tree                                                                                                                                                                                            |
-| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `'facet-domain'` | the default — `specs/<facet>/<domain>/<aspect>.spec.ts`, `*.specification.ts` at the facet root; an api or cli spec's domain is its subject's standard name, one folder or several (`events/list/`) |
-| `'facet'`        | the assets decide the folder — a spec at the facet root (`specs/<facet>/<aspect>.spec.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root                                 |
-| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a spec at any depth ≥ 1, named `<dir>/<dir>.spec.ts`                                                                   |
-| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                                                   |
-
-A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
-
-One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` is ground, never a facet, domain or suite folder**, so no spec lives inside one — and a domain named with one of the four words is refused. Depth is a shape a tree may choose; the ground/member split is the naming law recapped in [The naming recap](#the-naming-recap).
-
-Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [`test-beside-its-module`](#source-code-architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
-
-### `output-asserted-as-a-golden` — the whole result, not a cluster of greps
-
-**Every test compares its whole result.** A response, a json, a table, a tool's output (a linter, a compiler, a product CLI) is asserted as a **full snapshot per scoped use case** — written where the test reads it, ``expect(result.response).toMatch(`…`)``, or in a file when several tests share it — and a precise assertion on one property is allowed only beside it, stating what the case is about (`no-vitest-snapshot` mechanizes it for a response, a json and a table). Each case gets **its own fixture project** (its small valid/invalid files) — the fixture IS the Given, no shared `beforeAll` state — and the assertion is the whole snapshot (``expect(result.stdout).toMatch(`…`)`` + `exitCode`), volatile parts covered by tokens, written by `TEST_UPDATE=1` from an empty `toMatch('')`.
-
-`.grep()` / `toContain` remain the **scalpel** — targeted probes, never the default mode. They are legitimate only for:
-
-- **(a)** assertions of **absence**;
-- **(b)** output **cut at an arbitrary instant** (`waitFor`, a long-running process);
-- **(c)** **container-log probes**;
-- **(d)** asserting **rule ids** in the E2E lint specs (avoiding coupling to a third-party binary's exact format);
-- **(e)** probes into **third-party-formatted** output.
-
-Every other use is converted to a full snapshot. A single "kitchen-sink" project + full snapshot serves as the whole-surface regression net (it churns — that is its job). The static channel cannot tell a legitimate grep from a lazy one, hence the process channel. The mechanized boundary for a result (a response, a json or a table read and never compared whole) is `no-vitest-snapshot`, and a lone HTTP-status probe `no-status-only-test`; the negative-fixture guard is `negative-golden-frozen` (wrapped forms) plus a process rule for helper-routed residue.
+So every test sits where its kind says ([the fork](05-getting-started.md#which-kind-of-test)), narrates a Given then a Then, keeps its doubles out of `src/`, and never sleeps. The hygiene floor — no committed `.only` or `.skip`, an assertion in every test, no two titles alike in a file, a lowercase title — is oxlint's own `vitest` plugin, which `@jterrazz/typescript` turns on in every profile; this package adds only what that plugin has no rule for ([24 — Linting § What oxlint's own `vitest` plugin owns](24-linting.md#what-oxlints-own-vitest-plugin-owns)).
 
 ## One file, one subject
 
@@ -225,6 +150,83 @@ Two more hold what each path says. **The verb and the folder agree**: `seed()` r
 | Service keys    | name the service: the report prints the key, and its kebab-case form is the folder its init script sits in                                                                                                                                                                                                                                        |
 | Framework env   | `TEST_UPDATE`                                                                                                                                                                                                                                                                                                                                     |
 
+## The third door: a repository suite
+
+Two doors carry every test the fork names: a UNIT sits beside the module it covers (`<file>.test.ts`, `test-beside-its-module`), and the ASSEMBLED product sits under `specs/<facet>/` and reaches the runner that folder promises (`<aspect>.spec.ts`, `file-suffix-matches-place` and `facet-test-uses-its-runner`). A few specifications have neither address, and they are not mistakes.
+
+### What has no address of its own
+
+What they specify is a REPOSITORY's own surface read as files: what its packed tarball carries, the links its shipped pages hold, the files a build is expected to write. There is no one module to sit beside — they resolve every module there is — and no runner to reach, since nothing is started. Put under a facet folder, `facet-test-uses-its-runner` refuses them ("reaches no runner"); put beside a module under `src/`, `test-beside-its-module` refuses them ("no neighbour `exports.ts` found"). Both refusals are right, and a legitimate file shape with no green position is a hole in the conventions, not a defect in the file.
+
+### The door, and the depth it is judged by
+
+**The third door is a FIRST-LEVEL folder under `specs/` that is not a facet name.** It is a repository suite: it covers a TREE rather than a product served through an entry. `file-suffix-matches-place`'s rename clause does not reach it, `facet-test-uses-its-runner` and `facet-folder-has-specification` do not reach it, and `specs-at-declared-depth`'s declared depth is what judges its shape.
+
+**`specs-at-declared-depth` judges a suite exactly as it judges a facet.** The suite folder is the first level and the tests sit one level down, in a folder named for what they cover: at the default depth, `specs/<suite>/<domain>/<aspect>.test.ts`. A test written straight into the suite folder is refused for the same reason one at a facet root is — the level that says what a file covers would be missing.
+
+**A suite is a door because it holds tests.** One test is enough: a first-level folder holding a single `.test.ts` is a suite, and legal. A first-level folder that holds none — a `support/` of helpers and mocks — is no suite, no facet and not `_shared/`, and `specs-at-declared-depth` refuses each module in it, a runner included, in every mode: a runner lives at the root of the facet it builds, a test helper in the `_setup/` of the lowest folder its tests share, a fixture under `specs/_shared/_fixtures/`.
+
+### The name the estate shares
+
+One suite carries a name the whole estate shares, because two repositories inventing two names for one idea is the drift a vocabulary exists to stop: a package's own published SURFACE is `surface/`. Every other suite is named for what it covers. The rules a repository ships are no suite: they are the lint facet's subject, and `specs/lint/` is that facet's folder ([16](16-lint.md)).
+
+```text
+specs/
+└── surface/                      # what the package publishes
+    └── package/
+        ├── tarball.test.ts       # the files `npm pack` writes, and none it should not
+        └── shipped-links.test.ts # every link a shipped page holds resolves
+```
+
+What a consumer DOES with the package — loading a subpath, compiling against its declarations, running its bin — is no suite's: it is a cli spec on the tarball installed as a consumer installs it ([Which test earns its place](#which-test-earns-its-place)).
+
+### The suffix, and the one thing the door does not license
+
+The files there carry `.test.ts` — the UNIT's word — because what they prove is read without assembling anything, and `unit()` is what collects them (`roots`, or `include` outright). A facet helper would put them in a project whose budget and services they never use.
+
+One thing the door does not license: a module test parked under `specs/` to escape `test-beside-its-module`. The question to ask of a file before it goes through is whether any single module could hold its test — if one could, that module is its address.
+
+## Process rules (review-borne)
+
+Three rules cannot be mechanized — they turn on judgement no single channel can settle. They are listed in the catalogue for completeness, but their full rationale lives here.
+
+### The folder follows the assets
+
+The grouping criterion: a test that owns **its own** asset directories (`_fixtures/`, `_expected/`, `_seeds/`, …) gets **its own** domain folder; specs **without local assets** (or sharing the `specs/_shared/_fixtures/` pool) group as sibling `<aspect>.spec.ts` files inside a named **group** folder. Both shapes are legal — the assets decide, and a nascent single-test domain is legitimate. The static rule `specs-at-declared-depth` checks only placement; which of the two shapes is right is the review call.
+
+Placement itself is **declared**, because a spec tree may legitimately have a shape this package cannot know:
+
+```jsonc
+"jterrazz/specs-at-declared-depth": ["error", { "depth": "facet-domain" }] // the default
+```
+
+| `depth`          | The tree                                                                                                                                                                                            |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `'facet-domain'` | the default — `specs/<facet>/<domain>/<aspect>.spec.ts`, `*.specification.ts` at the facet root; an api or cli spec's domain is its subject's standard name, one folder or several (`events/list/`) |
+| `'facet'`        | the assets decide the folder — a spec at the facet root (`specs/<facet>/<aspect>.spec.ts`) OR one domain down, never deeper; `*.specification.ts` at the facet root                                 |
+| `'mirror'`       | the tree mirrors a structure outside itself (a command tree, a source tree): a spec at any depth ≥ 1, named `<dir>/<dir>.spec.ts`                                                                   |
+| `'off'`          | no placement check — for a tree whose shape is guarded by something stronger and project-specific                                                                                                   |
+
+A project states the shape it has — `facet` when asset-less tests sit beside their siblings at the facet root, `mirror` when the tree mirrors something outside itself — and keeps a checked shape, instead of switching the rule off and keeping none.
+
+One clause of the rule is not the project's to declare, and holds in every mode, `off` included: **a folder named `_fixtures/`, `_expected/`, `_requests/` or `_seeds/` is ground, never a facet, domain or suite folder**, so no spec lives inside one — and a domain named with one of the four words is refused. Depth is a shape a tree may choose; the ground/member split is the naming law recapped in [The naming recap](#the-naming-recap).
+
+Ground is not always inert. It may be **code** the specs stand on — the build of the subject under test, a harness the runner spawns — and code carries its unit test as a sibling under [`test-beside-its-module`](#source-code-architecture). So the clause lets exactly one pairing through: `<module>.test.ts` NEXT to the `<module>.ts` it is named after, inside the ground it belongs to. A test with no module beside it, or a `*.specification.ts`, is a spec that wandered in and is still reported — which is why the clause needs no `off`, and why no project has to switch off a rule it cannot switch off.
+
+### `output-asserted-as-a-golden` — the whole result, not a cluster of greps
+
+**Every test compares its whole result.** A response, a json, a table, a tool's output (a linter, a compiler, a product CLI) is asserted as a **full snapshot per scoped use case** — written where the test reads it, ``expect(result.response).toMatch(`…`)``, or in a file when several tests share it — and a precise assertion on one property is allowed only beside it, stating what the case is about (`no-vitest-snapshot` mechanizes it for a response, a json and a table). Each case gets **its own fixture project** (its small valid/invalid files) — the fixture IS the Given, no shared `beforeAll` state — and the assertion is the whole snapshot (``expect(result.stdout).toMatch(`…`)`` + `exitCode`), volatile parts covered by tokens, written by `TEST_UPDATE=1` from an empty `toMatch('')`.
+
+`.grep()` / `toContain` remain the **scalpel** — targeted probes, never the default mode. They are legitimate only for:
+
+- **(a)** assertions of **absence**;
+- **(b)** output **cut at an arbitrary instant** (`waitFor`, a long-running process);
+- **(c)** **container-log probes**;
+- **(d)** asserting **rule ids** in the E2E lint specs (avoiding coupling to a third-party binary's exact format);
+- **(e)** probes into **third-party-formatted** output.
+
+Every other use is converted to a full snapshot. A single "kitchen-sink" project + full snapshot serves as the whole-surface regression net (it churns — that is its job). The static channel cannot tell a legitimate grep from a lazy one, hence the process channel. The mechanized boundary for a result (a response, a json or a table read and never compared whole) is `no-vitest-snapshot`, and a lone HTTP-status probe `no-status-only-test`; the negative-fixture guard is `negative-golden-frozen` (wrapped forms) plus a process rule for helper-routed residue.
+
 ## Source-code architecture
 
 The `architecture` family governs the source tree rather than the spec tree, and it splits in two.
@@ -233,54 +235,11 @@ The `architecture` family governs the source tree rather than the spec tree, and
 
 **The test-file rules need no declaration.** `test-beside-its-module` (a module's test is its sibling) and `no-module-mock` (no `vi.mock`, `__mocks__/`, `__fixtures__/` or data-asset imports under `src/`) hold in any repository that adopts this preset — they are part of the floor described above, not of the layer map. A module's typed fixtures are a sibling `<file>.fixtures.ts`, as the naming recap says.
 
-## Which test earns its place
+## A message teaches
 
-The law is the estate's, and it is not restated here: [doctrine § A test earns its place](https://github.com/jterrazz/jterrazz-os/blob/main/home/_all/doctrine.md). This section is how it reads in a repository that tests with this package. [The fork](05-getting-started.md#which-kind-of-test) says which kind a test is; this says whether it should exist at all.
+A finding is the only page of the catalogue most readers ever see, so it carries what the reader needs to act without opening another: **what was found** and where, **why** the convention holds, **the fix for this case** — its paths and names, and `make fix` when a fixer does it — and **where to read** the rule whole. A message that names the fault and stops sends its reader to the chapter for what the line could have said; one that states the rule and not the case sends them back to the code to find out what it saw.
 
-**End to end is the default.** A behaviour a user relies on is specified through the surface the user meets, on a facet under `specs/`, with the real engines — the app in-process, a declared service ([18](18-services.md)), a real Chromium, the built binary. A module test is the exception, and it is kept only when one of two criteria holds:
-
-| Keep the module test when                                                                                           | Because                                                                                                 |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
-| the module is a pure algorithm — a parser, a matcher, a ranking — whose edge cases are cheaper at its own level     | each edge through the surface costs a whole chain, and at the module it costs one line of a `test.each` |
-| the failure it proves is one no end-to-end path can provoke honestly — a broken invariant, a race, a refused engine | reaching it from the surface would mean faking the engine, and the spec would then prove the fake       |
-
-**Every test file is given one verdict, and only one.**
-
-| Verdict     | When                                                                                                             | What is done                                                             |
-| ----------- | ---------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------ |
-| keep-module | one of the two criteria above holds                                                                              | it stays beside its module                                               |
-| promote     | it proves something a user relies on, at the wrong level                                                         | the spec is written through the surface, then the module test is deleted |
-| delete      | it restates the implementation, repeats a spec, tests a private helper, or stays green when the behaviour breaks | it is deleted, not kept for the count                                    |
-| strengthen  | it earns its place, and its assertions probe a part of an outcome that can be compared whole                     | its oracle becomes the whole outcome                                     |
-
-**A published package is specified from its artefact.** What a package publishes — every subpath of its `exports` map under each condition, the declarations a consumer compiles against, every bin — is proven against the tarball `npm pack` writes, installed in a fixture's `node_modules/` as a consumer installs it — the package beside what its `dependencies` and required peers reach and what the fixture's own manifest declares, never the checkout's whole install — and never against the checkout's `src/` or its own `dist/`: a file the `files` field leaves out, or an import the manifest does not declare, passes every spec that reads the checkout and fails every consumer. This package does it on `specs/cli/packed-cli.specification.ts` — `specs/cli/node/` loads every published subpath and resolves every package the browser build imports under the browser condition, `specs/cli/tsc/` compiles a consumer module against the installed `.d.ts` ([03 — Testing](03-testing.md#the-meta-test-channel)). The browser build is checked from the install for resolution only: it runs in the component project, which aliases `@jterrazz/test` to the checkout's `dist/browser/index.js`.
-
-**An assertion compares an outcome someone would care about**, whole when it can. That half is mechanized, in the `expectations` family of the catalogue ([24](24-linting.md)): `result-compared-whole`, `no-status-only-test`, `no-existence-only-assertion`, `no-probe-cluster`, `no-double-only-assertion`, `no-sampled-value-in-expectation`.
-
-**Mutants measure a suite, not lines.** Full line coverage with surviving mutants proves only that the lines ran; a mutant that survives names the assertion that is missing or too weak. This repository's measure is `make mutation`, never part of `make check` ([02 § The loop](02-developing.md#the-loop)).
-
-**Why no rule decides the verdict.** Whether a module is a pure algorithm, whether a failure is provokable from the surface, and whether a test repeats a spec are readings of the product, not shapes of a file: a rule would have to know every path the specs drive. What a machine can take is taken — the assertion rules above, and the surviving mutant, which is the evidence a verdict is argued from ([What stays human](#what-stays-human-and-why)).
-
-## The backlog — the criterion written, coded on its first occurrence
-
-A rule is written when its defect class has been SEEN once and its criterion is decidable. A class nobody has seen yet is not a rule: it is a line here, with the criterion it would be written against, so the day it appears the guard is a translation rather than a design. The estate dry run — the whole catalogue run over every repository of the workbench — is what moves a line either way.
-
-| Line                                | The criterion, ready to code                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `no-intercept-in-a-loop`            | an `.intercept(` call inside a `for`/`while` body, or a `.map(`/`forEach(` callback, in a test file                                                                                                                                                                                                                                                                                                                                                              |
-| `no-marker-inside-a-declaration`    | a Given/When/Then marker whose offset falls inside a `VariableDeclaration` with ≥ 2 declarators                                                                                                                                                                                                                                                                                                                                                                  |
-| `no-domain-repeated-in-golden-path` | a `toMatch(file(` path whose directory part repeats the leaf's own domain folder                                                                                                                                                                                                                                                                                                                                                                                 |
-| `no-ground-under-a-screen-facet`    | a `_seeds/` or `_requests/` under a facet whose specification constructs `website()` or `mobile()` — a screen owns no database                                                                                                                                                                                                                                                                                                                                   |
-| `no-unseeded-value-in-golden`       | a uuid, or an iso8601 whose time is NOT midnight UTC, in a file under `_expected/` that appears in no `_seeds/`, `_requests/`, `_fixtures/`, `stubs/` or referring test of the same leaf, nor in the `specs/_shared/_fixtures/` pool. The hour is part of the criterion: a clock read during a run is never exactly midnight, a publication date always is ([ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md) records what the dry run found) |
-| `no-golden-in-module-test`          | a `toMatch(file(…))` in a `module`-role file OUTSIDE every `specs/` tree: a unit test standing on a golden file is an integration spec, and `specs/integration/` is where it belongs (`golden-path-has-extension` holds the same call inside a specs tree)                                                                                                                                                                                                       |
-| `no-unreachable-only-negative`      | a test whose stub list is `http.unreachable()` on every feed and whose assertions name `result.error` alone: the case proves the call FAILED, not that it never happened. The fix it teaches is [`http.never(request)`](17-stubs.md#never--a-call-that-must-not-happen)                                                                                                                                                                                          |
-| `no-empty-golden`                   | a file under `_expected/` whose trimmed content is exactly `{{any}}`                                                                                                                                                                                                                                                                                                                                                                                             |
-| `no-duplicate-stub-payload`         | two response payloads with the same content hash under one `stubs/` tree, outside the shared pool                                                                                                                                                                                                                                                                                                                                                                |
-| `no-inline-body-beside-requests`    | a request body written inline in a test that also carries a `_requests/` directory                                                                                                                                                                                                                                                                                                                                                                               |
-| `no-retry`                          | a `retry:` option on `test(`/`describe(`, or `test.retry(`, or `retry` in a vitest config — react-query's `retry: false` is not one                                                                                                                                                                                                                                                                                                                              |
-| `no-namespace-spy`                  | a `vi.spyOn(<namespace import>, …)` — a module's own export spied through its namespace object                                                                                                                                                                                                                                                                                                                                                                   |
-
-**Parked**, for a criterion that is not settled: **`no-negated-golden`** (15 hits on the workbench, every one a `toMatch(/re/)` the criterion must exclude) and **`no-unreachable-stub`** (the criterion has to compare filter arguments, not just methods and urls).
+The four parts are the same everywhere a rule speaks — a static rule, a checker pass, a refusal the runtime throws — and none is optional. How each channel prints them is [24 — Linting](24-linting.md#what-a-finding-says)'s. The runtime throws nothing else: an error only the framework can cause — a broken invariant of its own — says so, and that the bug is not the reader's to fix.
 
 ## What stays human, and why
 
@@ -303,24 +262,38 @@ takes of them anyway, so neither side is silently dropped.
 | whether a module test earns its place — a pure algorithm, or a failure no end-to-end path provokes                                                                  | it is a reading of the product and of every path its specs drive                                          | the `expectations` rules hold the oracle; a surviving mutant under `make mutation` names the weak test                                                                 |
 | the depth a repository declares                                                                                                                                     | reviewed once, when the tree is born                                                                      | `specs-at-declared-depth` thereafter                                                                                                                                   |
 
-## A message teaches
+## The backlog — the criterion written, coded on its first occurrence
 
-A finding is the only page of the catalogue most readers ever see, so it carries what the reader needs to act without opening another: **what was found** and where, **why** the convention holds, **the fix for this case** — its paths and names, and `make fix` when a fixer does it — and **where to read** the rule whole. A message that names the fault and stops sends its reader to the chapter for what the line could have said; one that states the rule and not the case sends them back to the code to find out what it saw.
+A rule is written when its defect class has been SEEN once and its criterion is decidable. A class nobody has seen yet is not a rule: it is a line here, with the criterion it would be written against, so the day it appears the guard is a translation rather than a design. The estate dry run — the whole catalogue run over every repository of the workbench — is what moves a line either way.
 
-The four parts are the same everywhere a rule speaks — a static rule, a checker pass, a refusal the runtime throws — and none is optional. How each channel prints them is [24 — Linting](24-linting.md#what-a-finding-says)'s. The runtime throws nothing else: an error only the framework can cause — a broken invariant of its own — says so, and that the bug is not the reader's to fix.
+| Line                                | The criterion, ready to code                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| ----------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `no-intercept-in-a-loop`            | an `.intercept(` call inside a `for`/`while` body, or a `.map(`/`forEach(` callback, in a test file                                                                                                                                                                                                                                                                                                                                                              |
+| `no-marker-inside-a-declaration`    | a Given/When/Then marker whose offset falls inside a `VariableDeclaration` with ≥ 2 declarators                                                                                                                                                                                                                                                                                                                                                                  |
+| `no-domain-repeated-in-golden-path` | a `toMatch(file(` path whose directory part repeats the leaf's own domain folder                                                                                                                                                                                                                                                                                                                                                                                 |
+| `no-ground-under-a-screen-facet`    | a `_seeds/` or `_requests/` under a facet whose specification constructs `website()` or `mobile()` — a screen owns no database                                                                                                                                                                                                                                                                                                                                   |
+| `no-unseeded-value-in-golden`       | a uuid, or an iso8601 whose time is NOT midnight UTC, in a file under `_expected/` that appears in no `_seeds/`, `_requests/`, `_fixtures/`, `stubs/` or referring test of the same leaf, nor in the `specs/_shared/_fixtures/` pool. The hour is part of the criterion: a clock read during a run is never exactly midnight, a publication date always is ([ADR-006](decisions/006-the-catalogue-reaches-a-file-by-its-role.md) records what the dry run found) |
+| `no-golden-in-module-test`          | a `toMatch(file(…))` in a `module`-role file OUTSIDE every `specs/` tree: a unit test standing on a golden file is an integration spec, and `specs/integration/` is where it belongs (`golden-path-has-extension` holds the same call inside a specs tree)                                                                                                                                                                                                       |
+| `no-unreachable-only-negative`      | a test whose stub list is `http.unreachable()` on every feed and whose assertions name `result.error` alone: the case proves the call FAILED, not that it never happened. The fix it teaches is [`http.never(request)`](17-stubs.md#never--a-call-that-must-not-happen)                                                                                                                                                                                          |
+| `no-empty-golden`                   | a file under `_expected/` whose trimmed content is exactly `{{any}}`                                                                                                                                                                                                                                                                                                                                                                                             |
+| `no-duplicate-stub-payload`         | two response payloads with the same content hash under one `stubs/` tree, outside the shared pool                                                                                                                                                                                                                                                                                                                                                                |
+| `no-inline-body-beside-requests`    | a request body written inline in a test that also carries a `_requests/` directory                                                                                                                                                                                                                                                                                                                                                                               |
+| `no-retry`                          | a `retry:` option on `test(`/`describe(`, or `test.retry(`, or `retry` in a vitest config — react-query's `retry: false` is not one                                                                                                                                                                                                                                                                                                                              |
+| `no-namespace-spy`                  | a `vi.spyOn(<namespace import>, …)` — a module's own export spied through its namespace object                                                                                                                                                                                                                                                                                                                                                                   |
 
-## Maintaining the constitution
+**Parked**, for a criterion that is not settled: **`no-negated-golden`** (15 hits on the workbench, every one a `toMatch(/re/)` the criterion must exclude) and **`no-unreachable-stub`** (the criterion has to compare filter arguments, not just methods and urls).
 
-- A new **mechanizable** rule is added to the **code** (`lint/consumer/catalogue/manifest.ts` + its implementation), not here — then `npm run docs` regenerates the catalogue. The freshness meta-test fails if the committed catalogue is no longer byte-identical.
-- A new **principle** or a non-mechanizable criterion is added here, in its family section or as a process rule.
-- Never duplicate a mechanized rule in this constitution: the code is its single source of truth.
+## Changing the conventions
+
+- A rule a machine can check is added to the code — its row in `lint/consumer/catalogue/manifest.ts` beside its implementation — and `npm run docs` regenerates the catalogue. It is never written here: the code is its one source.
+- A principle, or a criterion no machine can settle, is added here, as a process rule or in [What stays human](#what-stays-human-and-why).
+- A defect class seen once and decidable becomes a rule; one nobody has seen yet is a line of [the backlog](#the-backlog--the-criterion-written-coded-on-its-first-occurrence).
 
 ## Pitfalls
 
-- **Treating these docs as the spec.** They explain and illustrate; this constitution and the generated catalogue ([24 — Linting](24-linting.md)) decide. When you find a discrepancy in the docs, fix the docs in the same change — [02 — Developing](02-developing.md) § What a change owes.
+- **Treating these docs as the spec.** They explain and illustrate; this constitution and the generated catalogue ([24 — Linting](24-linting.md)) decide. When the docs and the catalogue disagree, the docs are fixed in the same change.
 - **Editing the generated catalogue by hand.** The [24 — Linting](24-linting.md) catalogue is GENERATED from `lint/consumer/catalogue/manifest.ts` — a hand edit is overwritten by the next `npm run docs` and fails the freshness meta-test. Change the rule's text in the code; regenerate.
-- **Adding a mechanized rule to the constitution.** A machine-checkable rule lives in the code (its `meta.docs` / the manifest), not in this chapter. The constitution holds principles and non-mechanizable criteria only.
 
 ## Related
 
-[01 — Architecture](01-architecture.md) · [02 — Developing](02-developing.md) · [03 — Testing](03-testing.md) · [21 — Assertions](21-assertions.md) · [24 — Linting](24-linting.md) · [08 — Integration specs](08-integration.md)
+[05 — Getting started](05-getting-started.md) · [19 — Time and doubles](19-time-and-doubles.md) · [21 — Assertions](21-assertions.md) · [24 — Linting](24-linting.md)
