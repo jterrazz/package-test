@@ -36,4 +36,19 @@ describe('templates', () => {
             'found: .get("/users/:id", { params }): :id has no value, `userId` is no parameter of it',
         );
     });
+
+    test('a template handed no values is refused, naming the parameter it holds', async () => {
+        // Given - a caller the types do not reach, sending a template without its params
+        const send = api.get as (path: string) => Promise<unknown>;
+
+        // Then - refused rather than sent with `:id` as a literal segment
+        await expect(send('/users/:id')).rejects.toThrow(
+            [
+                'found: .get("/users/:id") names :id and is handed no params',
+                'why: A request written as its route template is handed exactly the parameters the template names.',
+                'fix: write .get("/users/:id", { params: { id: … } })',
+                'read: docs/19-linting.md#route-written-as-template-at-runtime',
+            ].join('\n'),
+        );
+    });
 });

@@ -36,4 +36,41 @@ describe('service-database', () => {
             [2, 'Grace'],
         ]);
     });
+
+    test('a seed naming the lone database is refused as redundant, before anything runs', () => {
+        // Given - the one sqlite service, named on the seed
+        // Then - the option is refused where it is stated
+        // checker-disable-next-line database-named-only-when-several -- the run-time twin of the rule is the subject: the name is written to be refused
+        expect(() => cli.seed(file('./_seeds/users.sql'), { database: 'db' })).toThrow(
+            [
+                'found: seed() names a database, and "db" is the only one declared',
+                'why: With two SQL databases or more, a seed or a table names the `database:` it reads, and with exactly one it names none.',
+                "fix: delete { database: 'db' }",
+                'read: docs/19-linting.md#database-named-only-when-several-at-runtime',
+            ].join('\n'),
+        );
+    });
+
+    test('a seed handed a directory, or a path as a plain string, is refused naming the one file it reads', () => {
+        // Given - a caller the types do not reach, seeding a folder and then a bare path
+        // Then - each is refused before anything runs, with the `file()` to write
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a directory is what the type refuses; this test IS the caller the type does not reach
+        expect(() => cli.seed(directory('./_seeds/') as never)).toThrow(
+            [
+                'found: seed(directory("./_seeds/")), a directory where one file is read',
+                'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
+                "fix: name one file: seed(file('./_seeds/rows.sql'))",
+                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+        );
+        // oxlint-disable-next-line typescript/no-unsafe-type-assertion -- a bare path is what the type refuses; this test IS the caller the type does not reach
+        expect(() => cli.seed('./_seeds/users.sql' as never)).toThrow(
+            [
+                'found: seed("./_seeds/users.sql"), a value where a file is read',
+                'why: A verb that reads the disk takes a `file()` or a `directory()`, whose path starts with `./` or `../` and ends in `/` exactly when it names a directory.',
+                "fix: name one file: seed(file('./_seeds/rows.sql'))",
+                'read: docs/19-linting.md#disk-named-by-relative-path-at-runtime',
+            ].join('\n'),
+        );
+    });
 });

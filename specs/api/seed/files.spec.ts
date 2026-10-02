@@ -103,7 +103,12 @@ describe('files', () => {
                 .seed(file('../_seeds/one-user.sql'), { database: 'nonexistent-db' })
                 .get('/users'),
         ).rejects.toThrow(
-            'found: seed() targets the database "nonexistent-db", and none is declared under that key',
+            [
+                'found: seed() targets the database "nonexistent-db", and none is declared under that key',
+                'why: `database:` names a key of the services record.',
+                'fix: name a declared database: analyticsDb, db',
+                'read: docs/17-services.md#the-database-rule',
+            ].join('\n'),
         );
     });
 
@@ -119,7 +124,12 @@ describe('files', () => {
             try {
                 // Then - the chain fails because nothing can execute the SQL
                 await expect(bareApi.seed(file('../_seeds/one-user.sql')).get('/')).rejects.toThrow(
-                    'found: seed(), and no database is declared',
+                    [
+                        'found: seed(), and no database is declared',
+                        'why: A seed writes into a declared database.',
+                        'fix: declare a database in the specification’s `services` — `postgres()` or `sqlite()` — or drop the seed',
+                        'read: docs/17-services.md#the-database-rule',
+                    ].join('\n'),
                 );
             } finally {
                 await stop();

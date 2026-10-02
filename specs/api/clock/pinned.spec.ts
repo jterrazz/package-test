@@ -67,4 +67,17 @@ describe('pinned', () => {
             startedAt: '2026-03-04T09:30:00.000Z',
         });
     });
+
+    test('a pin that is no instant is refused when the chain runs, naming the form to write', async () => {
+        // Given - a chain pinned at a word
+        // Then - refused before the app is asked anything
+        await expect(api.clock('soon').get('/session')).rejects.toThrow(
+            [
+                'found: clock.at("soon"), and "soon" is not an instant',
+                'why: A clock is pinned at an instant, written as an ISO-8601 string.',
+                "fix: pass an ISO-8601 string: clock.at('2026-03-04T09:30:00Z')",
+                'read: docs/05-module-tests.md#time',
+            ].join('\n'),
+        );
+    });
 });

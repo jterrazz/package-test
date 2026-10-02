@@ -1,5 +1,6 @@
 import { directory, file } from '@jterrazz/test';
 /* oxlint-disable typescript/no-unsafe-type-assertion -- every path here is one the types refuse: its refusal at run time, for a caller they do not reach, is the subject */
+import { resolve } from 'node:path';
 import { describe, expect, test } from 'vitest';
 
 import { cli } from '../cli.specification.js';
@@ -52,6 +53,46 @@ describe('refused', () => {
                 'found: fixture("./_fixtures/chain-ground/"), a value where the disk is read',
                 WHY,
                 "fix: name the disk: fixture(file('./…')) for a file, fixture(directory('./…/')) for a directory",
+                READ,
+            ].join('\n'),
+        );
+    });
+
+    test('a path naming the other kind on disk than it says is refused when the chain runs, naming the form that matches', async () => {
+        // Given - a directory named as a file, and a file named as a directory
+        // Then - each refusal names what the disk holds, and the call that reads it
+        // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: the path names the other kind on purpose
+        await expect(cli.fixture(file('./_fixtures/chain-ground')).exec('help')).rejects.toThrow(
+            [
+                'found: fixture: "./_fixtures/chain-ground" names a directory',
+                WHY,
+                "fix: end its path in /: directory('./_fixtures/chain-ground/') — its contents are spread into the working directory",
+                READ,
+            ].join('\n'),
+        );
+        // checker-disable-next-line named-path-exists -- the kind on disk is the refusal under test: the path names the other kind on purpose
+        const fileAsDirectory = cli.fixture(directory('./_fixtures/invalid.ts/'));
+        await expect(fileAsDirectory.exec('help')).rejects.toThrow(
+            [
+                'found: fixture: "./_fixtures/invalid.ts/" names a file',
+                WHY,
+                "fix: drop the /: file('./_fixtures/invalid.ts')",
+                READ,
+            ].join('\n'),
+        );
+    });
+
+    test('a path that names nothing is refused with the path it resolved to', async () => {
+        // Given - a fixture the leaf does not hold
+        const resolved = resolve(import.meta.dirname, '_fixtures/absent.txt');
+
+        // Then - refused before the binary runs, naming where it looked
+        // checker-disable-next-line named-path-exists -- the absence is the refusal under test
+        await expect(cli.fixture(file('./_fixtures/absent.txt')).exec('help')).rejects.toThrow(
+            [
+                `found: fixture: "./_fixtures/absent.txt" names nothing — ${resolved} does not exist`,
+                WHY,
+                `fix: create ${resolved}, or correct the path`,
                 READ,
             ].join('\n'),
         );

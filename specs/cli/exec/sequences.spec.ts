@@ -45,6 +45,26 @@ describe('sequences', () => {
             cli
                 .fixture(directory('../_fixtures/specimen-cli/'))
                 .exec(['build', 'start'], { waitFor: 'x' }),
-        ).rejects.toThrow('found: .exec([…], { waitFor/timeout }), options on a command sequence');
+        ).rejects.toThrow(
+            [
+                'found: .exec([…], { waitFor/timeout }), options on a command sequence',
+                'why: `waitFor` and `timeout` wait on one long-running process.',
+                'fix: wait on one long-running command: .exec(args, { waitFor, timeout }), or drop the options',
+                'read: docs/12-cli.md#long-running-processes-waitfor--timeout',
+            ].join('\n'),
+        );
+    });
+
+    test('an empty sequence is refused, naming the form that runs one command at least', async () => {
+        // Given - a sequence of no command
+        // Then - refused rather than run as a binary called bare
+        await expect(cli.fixture(directory('../_fixtures/specimen-cli/')).exec([])).rejects.toThrow(
+            [
+                'found: .exec([]), a sequence of no command',
+                'why: A sequence runs its commands in order, and runs at least one.',
+                "fix: name at least one command: .exec(['build', 'test'])",
+                'read: docs/12-cli.md#sequences-array-form',
+            ].join('\n'),
+        );
     });
 });
