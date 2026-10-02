@@ -108,7 +108,7 @@ export const ARCHITECTURE_TOOLCHAIN_RULES: Row[] = [
         audience: 'self',
         channel: 'toolchain',
         sentence:
-            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, the entries\u2019 tests `index.test.ts` and `index.vitest.test.ts`, the type channel `index.test-d.ts`, and the trees of the sentence — `facets/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config — and nothing else. An error at the stray entry.',
+            'The source root reads the sentence of a test: `src/` holds the node entry `index.ts`, the page entry `index.browser.ts`, the runner-config entry `index.vitest.ts`, and the trees of the sentence — `facets/`, what is tested; `visitor/`, how a screen is touched; `expectations/`, how a result is judged; `stubs/`, `services/`, `disk/`, `clock/` and `mocks/`, what surrounds the subject; `chain/`, the machinery that composes them; `vitest/`, the runner config — and nothing else. An error at the stray entry.',
         facet: 'model',
         family: 'architecture',
         fix: 'Move the module into the tree whose concept it is — what is tested (`facets/`), how a screen is touched (`visitor/`), how a result is judged (`expectations/`), what surrounds the subject (`stubs/`, `services/`, `disk/`, `clock/`, `mocks/`), the machinery (`chain/`) or the runner config (`vitest/`).',

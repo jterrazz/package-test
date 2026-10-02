@@ -1,8 +1,20 @@
 /* oxlint-disable jterrazz/runner-in-specification-file, typescript/no-unsafe-call, typescript/no-unsafe-return, typescript/no-unsafe-type-assertion -- every line below is a call the compiler REFUSES, and its `@ts-expect-error` is the assertion: a refused call has no type, and no runner is constructed */
 import { expect } from 'vitest';
 
-import { directory, file, mockOf, postgres, specification } from './index.js';
-import type { ComponentChain, ComponentVisitor, MobileVisitor, WebsiteVisitor } from './index.js';
+import { directory, file, mockOf, postgres, specification } from '@jterrazz/test';
+import type {
+    ApiSpecification,
+    CliSpecification,
+    ComponentChain,
+    ComponentVisitor,
+    IntegrationSpecification,
+    JobSpecification,
+    LintSpecification,
+    MobileSpecification,
+    MobileVisitor,
+    WebsiteSpecification,
+    WebsiteVisitor,
+} from '@jterrazz/test';
 
 type Mailer = { send: (to: string) => Promise<void> };
 
@@ -39,6 +51,30 @@ export type ComponentSetsViewport = Assert<Carries<ComponentChain, 'viewport'>>;
 export type ComponentSetsClock = Assert<Carries<ComponentChain, 'clock'>>;
 export type ComponentIntercepts = Assert<Carries<ComponentChain, 'intercept'>>;
 export type ComponentWraps = Assert<Carries<ComponentChain, 'wrap'>>;
+
+type Same<A, B> = [A] extends [B] ? ([B] extends [A] ? true : false) : false;
+
+type SharedBy<Chain> = Chain extends { with: (context: infer Context) => unknown }
+    ? keyof Context
+    : never;
+
+// A chain's `with()` takes the settings its facet composes and nothing else, under a consumer's `strict` alone, and hands back the same chain.
+export type ApiSharesClockAndHeaders = Assert<
+    Same<SharedBy<ApiSpecification<'db'>>, 'clock' | 'headers'>
+>;
+export type WebsiteSharesClockAndHeaders = Assert<
+    Same<SharedBy<WebsiteSpecification>, 'clock' | 'headers'>
+>;
+export type JobSharesTheClockAlone = Assert<Same<SharedBy<JobSpecification<'db'>>, 'clock'>>;
+export type IntegrationSharesTheClockAlone = Assert<
+    Same<SharedBy<IntegrationSpecification>, 'clock'>
+>;
+export type CliSharesItsEnvironment = Assert<Same<SharedBy<CliSpecification<'db'>>, 'env'>>;
+export type WithKeepsTheChain = Assert<
+    Same<ReturnType<JobSpecification<'db'>['with']>, JobSpecification<'db'>>
+>;
+export type MobileSharesNothing = Assert<Carries<MobileSpecification, 'with'> extends false ? true : false>;
+export type LintSharesNothing = Assert<Carries<LintSpecification, 'with'> extends false ? true : false>;
 
 export async function typeRows(): Promise<void> {
     await specification.api({

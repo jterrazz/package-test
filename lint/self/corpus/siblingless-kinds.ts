@@ -15,7 +15,10 @@ const oneOf =
 export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
     {
         claims: oneOf(
+            'src/index.ts',
             'src/index.browser.ts',
+            'src/index.vitest.ts',
+            'lint/index.oxlint.ts',
             'src/facets/api/api.face.ts',
             'src/facets/cli/cli.face.ts',
             'src/facets/component/component.face.ts',
@@ -32,7 +35,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/self/preset.ts',
         ),
         name: 'composition root or barrel',
-        why: 'it wires and re-exports; what it publishes is held by `package-exports.test.ts` and by every spec that imports the entry',
+        why: 'it wires and re-exports; what it publishes is held by the specs that install the packed package (`specs/cli/node/`, `specs/cli/tsc/`) and by every spec that imports the entry',
     },
     {
         claims: oneOf(
@@ -66,7 +69,7 @@ export const SIBLINGLESS_KINDS: SiblinglessKind[] = [
             'lint/engine/project/rule.ts',
         ),
         name: 'type-only declaration',
-        why: 'it declares a shape and executes nothing; the compiler is its test, and `index.test-d.ts` holds what the compiler must refuse',
+        why: 'it declares a shape and executes nothing; the compiler is its test, and the consumer module `specs/cli/tsc/_fixtures/consumer/consumer.ts` holds, against the installed declarations, what the compiler must refuse',
     },
     {
         claims: oneOf(

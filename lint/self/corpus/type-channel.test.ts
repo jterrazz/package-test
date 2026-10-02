@@ -5,7 +5,7 @@ import { describe, expect, test } from 'vitest';
 import { refusalsOf, typeRowsOf } from './type-channel.js';
 
 const ROOT = resolve(import.meta.dirname, '../../..');
-const CHANNEL = resolve(ROOT, 'src/index.test-d.ts');
+const CHANNEL = resolve(ROOT, 'specs/cli/tsc/_fixtures/consumer/consumer.ts');
 const CACHE = resolve(ROOT, 'node_modules/.cache');
 const A_TSC_RUN_OVER_SRC = 60_000;
 

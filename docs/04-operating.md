@@ -20,7 +20,7 @@ The tarball is what `files` declares and nothing else: `dist/`, minus `dist/rout
 
 The shipped chapters keep their links to the two pages left home, so from inside an install such a link reaches nothing: both are read in the repository, at <https://github.com/jterrazz/package-test/tree/main/docs>.
 
-**The manual ships with the code**, because the code points at it: every relative link of the shipped `README.md` and every `(… — see docs/19-linting.md#…)` a rule message ends on is read from inside an install, and a chapter that is not there makes both a dead end. The `package-exports` meta-test holds it — a citation whose file the manifest does not publish fails the suite.
+**The manual ships with the code**, because the code points at it: every relative link of the shipped `README.md` and every `(… — see docs/19-linting.md#…)` a rule message ends on is read from inside an install, and a chapter that is not there makes both a dead end. `specs/cli/node/pages.spec.ts` holds it from the packed tarball: every chapter the installed README and modules cite is listed with whether the install holds it.
 
 The entries that reach a consumer are the whole public contract, and they are listed once — [01 — Architecture § What the tree publishes](01-architecture.md#what-the-tree-publishes). What matters here is only that the ROOT entry resolves by CONDITION: a bundler serving a page takes `browser`, node takes `import`, and both are described by one `types` entry.
 

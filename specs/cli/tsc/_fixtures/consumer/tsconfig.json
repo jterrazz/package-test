@@ -1,0 +1,13 @@
+{
+    "compilerOptions": {
+        "module": "nodenext",
+        "moduleResolution": "nodenext",
+        "noEmit": true,
+        "skipLibCheck": true,
+        "strict": true,
+        "target": "esnext"
+    },
+    "include": [
+        "consumer.ts"
+    ]
+}

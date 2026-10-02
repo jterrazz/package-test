@@ -1,4 +1,4 @@
-dist/index.d.ts:
+@jterrazz/test:
     ApiHandle
     ApiSpecification
     ApiSpecificationOptions
@@ -189,7 +189,45 @@ dist/index.d.ts:
     waitUntil
     within
 
-dist/browser/index.js:
+@jterrazz/test/vitest:
+    ApiProjectOptions
+    CliProjectOptions
+    ComponentProjectOptions
+    FacetProjectOptions
+    IntegrationProjectOptions
+    JobProjectOptions
+    LintProjectOptions
+    LiterateDoor
+    LiterateOptions
+    LiteratePlugin
+    MobileProjectOptions
+    SpecConfig
+    UnitProjectOptions
+    WebsiteProjectOptions
+    api
+    cli
+    component
+    defineSpecConfig
+    integration
+    job
+    lint
+    literate
+    mobile
+    unit
+    website
+
+@jterrazz/test/config:
+    TestSettings
+    test
+
+@jterrazz/test/oxlint:
+    MaterialKind
+    default
+    materialAt
+    recommendedRules
+    testPackageOf
+
+@jterrazz/test (browser):
     Matcher
     ProcessHandle
     anthropic
@@ -240,29 +278,4 @@ dist/browser/index.js:
     waitUntil
     within
 
-dist/vitest.d.ts:
-    ApiProjectOptions
-    CliProjectOptions
-    ComponentProjectOptions
-    FacetProjectOptions
-    IntegrationProjectOptions
-    JobProjectOptions
-    LintProjectOptions
-    LiterateDoor
-    LiterateOptions
-    LiteratePlugin
-    MobileProjectOptions
-    SpecConfig
-    UnitProjectOptions
-    WebsiteProjectOptions
-    api
-    cli
-    component
-    defineSpecConfig
-    integration
-    job
-    lint
-    literate
-    mobile
-    unit
-    website
+the page build lacks of the node build's values: none

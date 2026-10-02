@@ -20,13 +20,22 @@ const config = defineSpecConfig({
             unit({ exclude: [], include: ['src/**/*.test.ts', 'lint/**/*.test.ts'] }),
             // The plugins and the checkers are loaded from the build: it runs after `npm run build`.
             lint(),
-            // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs.
-            cli({
-                literate: {
-                    include: ['specs/cli/run/*.spec.yaml'],
-                    specification: './specs/cli/literate-cli.specification.ts',
+            // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs. The tarball is packed once per run, for the consumer's specs.
+            mergeConfig(
+                {
+                    test: {
+                        globalSetup: [
+                            resolve(import.meta.dirname, 'specs/cli/_setup/packed/per-run.ts'),
+                        ],
+                    },
                 },
-            }),
+                cli({
+                    literate: {
+                        include: ['specs/cli/run/*.spec.yaml'],
+                        specification: './specs/cli/literate-cli.specification.ts',
+                    },
+                }),
+            ),
             api(),
             job(),
             // Serial: its probes start their own infrastructure, and in parallel they starve each other's healthchecks.

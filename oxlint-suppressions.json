@@ -961,14 +961,6 @@
             "count": 1
         }
     },
-    "src/index.test-d.ts": {
-        "max-lines-per-function": {
-            "count": 1
-        },
-        "vitest/max-expects": {
-            "count": 2
-        }
-    },
     "src/services/containers/testcontainers.adapter.ts": {
         "typescript/no-explicit-any": {
             "count": 1

@@ -625,7 +625,7 @@ describe('manifest', () => {
                 'type',
                 (entry) =>
                     [`// ${entry.name} —`, `@ts-expect-error ${entry.name} —`].some((marker) =>
-                        read('src/index.test-d.ts').includes(marker),
+                        read('specs/cli/tsc/_fixtures/consumer/consumer.ts').includes(marker),
                     ),
             ],
             ['runtime', (entry) => runtimeMarkers().has(entry.name)],
