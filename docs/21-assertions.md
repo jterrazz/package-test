@@ -106,7 +106,7 @@ A header mismatch has the same shape (`Response header mismatch (name)`, with `h
 
 `.not`: `expect(result.response).not.toMatch(file('./_expected/user-created.http'))` passes when any part diverges. Rarely useful — prefer positive fixtures.
 
-## `result.table(name, { database }?)` — database tables (api, job, cli)
+## `result.table(name, { database }?)` — database tables (api, job, cli, integration)
 
 Always `await expect(…)` (IO). When to name the `database:` is [18 § The `database:` rule (`database-named-only-when-several`)](18-services.md#the-database-rule)'s.
 
@@ -225,7 +225,7 @@ Same semantics as `result.directory(…)`, rooted at the cwd itself. `.files()` 
 
 Available when the runner declares `docker: { envVar, nameLabel, testRunLabel }`; results must be bound with `await using` (rule `docker-exec-bound-with-await-using`). `result.container(name)` looks a container up by its `nameLabel` value — lazily: no Docker call happens until you touch it. Absent containers return `exists: false` instead of throwing.
 
-The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.job()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing.
+The runner handle itself also exposes a `docker(containerId)` reader (returned by `specification.api()` and `specification.cli()`, not `specification.job()`): given a raw container id, it lazily runs `docker inspect` and returns the **same** `ContainerAccessor` type — so it works with `await expect(spec.docker(id)).toBeRunning()` and every read accessor below. An unknown id yields an accessor with `exists: false` rather than throwing. The app of an api spec runs in the test process, but it can still start containers through the Docker daemon, as an API that deploys or provisions something does: the response hands back an id, and `docker(id)` reads the container the request left behind.
 
 | Subject / matcher                                     | Sync/async | Example                                                                                                |
 | ----------------------------------------------------- | ---------- | ------------------------------------------------------------------------------------------------------ |
@@ -334,7 +334,7 @@ The budget defaults to 5 000 ms and the poll to 50 ms; the failure names the con
 - **`file('./_expected/help')` without extension.** The extension is part of the path (rule `golden-path-has-extension`); a tree is `directory('./_expected/help/')`.
 - **A golden written as a value on `.text`.** `expect(result.stdout.text).toMatch('help.txt')` is vitest's substring check, which passes when the output contains the words "help.txt". The whole stream is `expect(result.stdout).toMatch(…)`, its text in place or `file('./_expected/help.txt')` (rule `one-verb-per-meaning`).
 - **A bare name.** `file('help.txt')` does not compile, and forced through it is refused: every file is named by its path from the spec (rules `disk-named-by-relative-path`, `disk-named-by-relative-path-at-runtime`).
-- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([22 § Where tokens work](22-tokens.md#where-tokens-work)) — and a substring check on it is refused (`no-raw-bypass`).
+- **Asserting raw ANSI.** Streams are stripped before comparison; if you truly need the raw bytes, that is what `.raw` is for ([22 § Where tokens work](22-tokens.md#where-tokens-work)) — a RegExp on it is allowed, as in the scalar table above, while a substring check (`toContain`) on it is refused (`no-raw-bypass`).
 - **`database:` on a single-database project** (or missing on a multi-database one) — [18 § The `database:` rule (`database-named-only-when-several`)](18-services.md#the-database-rule).
 - **Using `.not.toMatch(file(…))` as a lazy negative.** It passes for _any_ divergence, including ones you did not intend. Prefer a positive fixture or a targeted `toContain`.
 - **A deliberately-wrong fixture without `{ frozen: true }`.** `TEST_UPDATE=1` overwrites it — [22 § Frozen fixtures](22-tokens.md#frozen-fixtures--opting-a-negative-fixture-out-of-the-rewrite).
