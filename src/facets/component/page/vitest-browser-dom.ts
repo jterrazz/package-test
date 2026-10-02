@@ -138,14 +138,14 @@ function isGone(locator: Locator, target: Target): boolean {
     return node === null || (byPresence(target) ? false : !node.checkVisibility());
 }
 
-/** What is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. */
+/** What is left of the test's budget: a bare `expect.poll` falls back to one second. The 100ms margin is vitest's own, so the poll fails before the test times out. Read on `performance`: `Date` may be the page's pinned clock, months away, and a poll timer past 2^31 ms fires at once. */
 function remainingBudget(): number | undefined {
     const current = TestRunner.getCurrentTest();
-    const started = current?.result?.startTime;
-    if (current === undefined || started === undefined) {
+    const started = (current?.result?.startTime ?? Number.NaN) - performance.timeOrigin;
+    if (current === undefined || Number.isNaN(started)) {
         return undefined;
     }
-    return Math.max(current.timeout - (Date.now() - started) - 100, 0);
+    return Math.max(current.timeout - (performance.now() - started) - 100, 0);
 }
 
 function polling<T>(probe: () => T, message: string): ReturnType<typeof expect.poll<T>> {
