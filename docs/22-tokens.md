@@ -76,10 +76,10 @@ Every token matches one value of its family at its position. The normative defin
 
 ### Paths
 
-| Token         | Matches                                                                                                                                | Example value             |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- | ------------------------- |
-| `{{path}}`    | Filesystem path                                                                                                                        | `/tmp/x/dist/index.js`    |
-| `{{workdir}}` | **The exact cwd of the current spec** — the framework knows the temp directory it created, so this is an equality check, not a pattern | `/tmp/shoply-spec-a1b2c3` |
+| Token         | Matches                                                                                                                                | Example value                                                  |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `{{path}}`    | Filesystem path                                                                                                                        | `/tmp/x/dist/index.js`                                         |
+| `{{workdir}}` | **The exact cwd of the current spec** — the framework knows the temp directory it created, so this is an equality check, not a pattern | `/tmp/jterrazz-test-runs-501/48213-Xk2pQa/spec-command-a1B2c3` |
 
 `{{workdir}}` holds the **resolved** cwd — the spelling a child process reports, after any symlink on the way (macOS's `$TMPDIR` sits under `/var`, a link to `/private/var`). The `$WORKDIR` token that `.env()` and a document's `env:` expand is that same resolved path, so a directory the runner hands to the binary comes back in its output matching the token: `.env({ CACHE_DIR: '$WORKDIR/cache' })` is asserted as `{{workdir}}/cache`.
 
@@ -148,7 +148,7 @@ Example — starting from actual output:
 
 ```text
 shoply v9.1.0
-Started at 2026-07-17T09:12:44.031Z in /tmp/shoply-spec-x9y8z7
+Started at 2026-07-17T09:12:44.031Z in /tmp/jterrazz-test-runs-501/48213-Xk2pQa/spec-command-x9Y8z7
 Done in 0.83s
 ```
 
@@ -166,7 +166,7 @@ The same preservation and `{{workdir}}` substitution apply identically across ev
 
 ### A value written in place is rewritten in the test
 
-A `toMatch(<value>)` is rewritten where it stands, in the test file, the gesture vitest's `toMatchInlineSnapshot` makes: the call is found from the stack of the assertion, and its argument — up to its comma or its closing parenthesis, whatever template, string or nested call it holds — is replaced by the actual result, merged with the tokens the old value had where the result still matches them. A text is written as a template literal indented one level deeper than its call, a json as its JSON, a table one row per line. An empty value — `toMatch('')` — is the one an author leaves to be recorded: outside update mode it fails naming the run that fills it. A value that matches is never touched, and neither is a `{ frozen: true }` one or a `.not` — a negation asserts a mismatch, and records nothing. Every rewrite of one file during a run is laid on the source the run loaded, so a second rewrite lands where its stack says even when a first one moved the lines below it. Under the preset the test file is written when the run ENDS, after its report: vitest frames a failure by reading the file on disk at the line the run loaded, so a file rewritten mid-run would frame a later failure at another test's code. The preset's global setup hands each project a pending folder under `.artifacts/vitest/in-place/` and writes what waits there once the report is printed — in watch mode, when the watcher exits; a run outside the preset writes each file at once. A component's value is rewritten the same way through a server command, the page's stack mapped back to the test's source by the browser server. What update mode writes is code the formatter has not seen: `make fix` gives it the repository's quotes.
+A `toMatch(<value>)` is rewritten where it stands, in the test file, the gesture vitest's `toMatchInlineSnapshot` makes: the call is found from the stack of the assertion, and its argument — up to its comma or its closing parenthesis, whatever template, string or nested call it holds — is replaced by the actual result, merged with the tokens the old value had where the result still matches them. A text is written as a template literal indented one level deeper than its call, a json as its JSON, a table one row per line. An empty value — `toMatch('')` — is the one an author leaves to be recorded: outside update mode it fails naming the run that fills it. A value that matches is never touched, and neither is a `{ frozen: true }` one or a `.not` — a negation asserts a mismatch, and records nothing. Every rewrite of one file during a run is laid on the source the run loaded, so a second rewrite lands where its stack says even when a first one moved the lines below it. Under the preset the test file is written when the run ENDS, after its report: vitest frames a failure by reading the file on disk at the line the run loaded, so a file rewritten mid-run would frame a later failure at another test's code. The preset's global setup hands each project a pending folder under `.artifacts/vitest/in-place/` and writes what waits there once the report is printed — in watch mode, when the watcher exits; a run outside the preset writes each file at once. A component's value is rewritten the same way through a server command, the page's stack mapped back to the test's source by the browser server. What update mode writes is code the formatter has not seen: run your formatter (`npx typescript fix`) to give it the repository's quotes.
 
 This is why `transform` on `specification.cli` is only an escape hatch (rule `no-transform-duplicating-tokens`): the token grammar plus ANSI stripping covers the standard sources of nondeterminism, and a transform that merely re-implements standard tokens is refused by `no-transform-duplicating-tokens` ([no-transform-duplicating-tokens](24-linting.md#no-transform-duplicating-tokens)).
 
@@ -210,7 +210,7 @@ The grammar is deliberately small; three edges are worth knowing:
 ## Appendix — canonical accepted forms (normative, as implemented)
 
 The exact grammar of each token, one tested regular expression per token
-(defined in `src/expectations/tokens/structural.ts`, the vocabulary list in `match.ts`). In embedded positions the pattern is
+(defined in [`src/expectations/tokens/structural.ts`](https://github.com/jterrazz/package-test/blob/main/src/expectations/tokens/structural.ts), the vocabulary list in `match.ts` beside it). In embedded positions the pattern is
 anchored to its surroundings; as a whole JSON value, numeric tokens also
 accept native JSON numbers.
 

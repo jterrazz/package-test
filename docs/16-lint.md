@@ -12,6 +12,8 @@ What it does not do: judge the tree it runs in. The facet lints a fixture laid i
 
 ## The constructor
 
+The examples below are a package that ships an oxlint plugin and a preset, both built to its own `dist/`: `dist/oxlint.js` is that package's built plugin, and `dist/config.js` exports its preset, here called `acme()`. Use the paths your build writes, or the published specifier of your package (`'@acme/lint/oxlint'`). A plugin is loaded from what was built, so build before the lint project runs ([§ Pitfalls](#pitfalls)).
+
 ```typescript
 // specs/lint/lint.specification.ts
 import { afterAll } from 'vitest';
