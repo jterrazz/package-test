@@ -4,8 +4,6 @@ import { expect } from 'vitest';
 import { directory, file, mockOf, postgres, specification } from './index.js';
 import type { ComponentChain, ComponentVisitor, MobileVisitor, WebsiteVisitor } from './index.js';
 
-/** Each `@ts-expect-error` below is the assertion: `typescript check` fails the day the line compiles. */
-
 type Mailer = { send: (to: string) => Promise<void> };
 
 type Assert<Row extends true> = Row;
