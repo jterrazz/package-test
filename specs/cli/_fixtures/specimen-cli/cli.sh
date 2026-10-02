@@ -143,6 +143,18 @@ case "$COMMAND" in
     ansi)
         printf '\x1b[31mred\x1b[0m plain \x1b[1mbold\x1b[0m\n'
         ;;
+    ansi-stderr)
+        printf '\x1b[31mred\x1b[0m plain \x1b[1mbold\x1b[0m\n' >&2
+        ;;
+    session)
+        SESSION="$(node -e 'console.log(require("crypto").randomUUID())')"
+        echo "session $SESSION"
+        echo "session $SESSION" >&2
+        ;;
+    two-sessions)
+        echo "session $(node -e 'console.log(require("crypto").randomUUID())')"
+        echo "session $(node -e 'console.log(require("crypto").randomUUID())')" >&2
+        ;;
     ansi-json)
         printf '\x1b[32m{"status":"ok","value":42}\x1b[0m\n'
         ;;
