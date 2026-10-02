@@ -92,7 +92,7 @@ The package proves itself in five layers, and they are meant to be read from the
 | ----------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------ | ----- |
 | Module tests            | `src/**/*.test.ts` beside the module                          | one module, through its own exports, with nothing started                | 82    |
 | Rule tests              | `lint/consumer/rules/<family>/<rule>.test.ts` beside the rule | one rule: what it flags, what it leaves alone, and the message it prints | 54    |
-| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 183   |
+| The package’s own specs | `specs/<facet>/`                                              | the framework's own facets, each met through its constructor             | 188   |
 | The lint specs          | `specs/lint/<rule>/`, on the lint facet                       | the built plugins, checkers and preset end to end, over fixture trees    | 115   |
 | Meta-tests              | `lint/self/catalogue/*.test.ts`, `lint/self/corpus/*.test.ts` | the corpus itself: the catalogue, the matrix, the skill, the floor       | 22    |
 
@@ -284,12 +284,12 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability     | api | job | cli | lint | integration | website | mobile | component | module |
 | -------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `.clock()`     | 1   | 2   | —   | —    | 2           | 1       | —      | 1         | —      |
-| `.headers()`   | 5   | —   | —   | —    | —           | 1       | —      | —         | —      |
-| `.intercept()` | 11  | 1   | —   | —    | 2           | 2       | 1      | 6         | —      |
+| `.headers()`   | 5   | —   | —   | —    | —           | 2       | —      | —         | —      |
+| `.intercept()` | 12  | 1   | —   | —    | 2           | 2       | 1      | 6         | —      |
 | `.seed()`      | 9   | 1   | 1   | —    | 3           | —       | —      | —         | —      |
 | `.with()`      | 4   | 1   | 1   | —    | 1           | 1       | —      | —         | —      |
 | `.env()`       | —   | —   | 5   | —    | —           | —       | —      | —         | —      |
-| `.fixture()`   | —   | —   | 43  | 113  | —           | —       | —      | —         | —      |
+| `.fixture()`   | —   | —   | 44  | 113  | —           | —       | —      | —         | —      |
 | `.link()`      | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.rules()`     | —   | —   | —   | 2    | —           | —       | —      | —         | —      |
 | `.viewport()`  | —   | —   | —   | —    | —           | —       | —      | 2         | —      |
@@ -300,15 +300,15 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability   | api | job | cli | lint | integration | website | mobile | component | module |
 | ------------ | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `.request()` | 2   | —   | —   | —    | —           | —       | —      | —         | —      |
-| `.get()`     | 22  | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.get()`     | 23  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.post()`    | 7   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.put()`     | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.delete()`  | 1   | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.trigger()` | —   | 7   | —   | —    | —           | —       | —      | —         | —      |
-| `.exec()`    | —   | —   | 53  | —    | —           | —       | —      | —         | —      |
+| `.exec()`    | —   | —   | 56  | —    | —           | —       | —      | —         | —      |
 | `.run()`     | —   | —   | 5   | 114  | —           | —       | —      | —         | —      |
 | `.call()`    | —   | —   | —   | —    | 10          | —       | —      | —         | —      |
-| `.visit()`   | —   | —   | —   | —    | —           | 21      | —      | —         | —      |
+| `.visit()`   | —   | —   | —   | —    | —           | 22      | —      | —         | —      |
 | `.fetch()`   | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.open()`    | —   | —   | —   | —    | —           | —       | 7      | —         | —      |
 | `.render()`  | —   | —   | —   | —    | —           | —       | —      | 30        | —      |
@@ -371,16 +371,16 @@ What the framework can do, and how many of this package’s own test FILES exerc
 
 | Capability      | api | job | cli | lint | integration | website | mobile | component | module |
 | --------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
-| `.response`     | 24  | —   | —   | —    | —           | —       | —      | —         | —      |
+| `.response`     | 25  | —   | —   | —    | —           | —       | —      | —         | —      |
 | `.status`       | 1   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.table()`      | 7   | 4   | 1   | —    | 2           | —       | —      | —         | —      |
 | `.file()`       | 1   | —   | 13  | 7    | 3           | —       | —      | —         | —      |
 | `.directory()`  | 1   | —   | 4   | 7    | 1           | —       | —      | —         | —      |
-| `.stdout`       | —   | —   | 33  | —    | —           | —       | —      | —         | —      |
-| `.stderr`       | —   | —   | 12  | —    | —           | —       | —      | —         | —      |
+| `.stdout`       | —   | —   | 35  | —    | —           | —       | —      | —         | —      |
+| `.stderr`       | —   | —   | 14  | —    | —           | —       | —      | —         | —      |
 | `.exitCode`     | —   | —   | 41  | —    | —           | —       | —      | —         | —      |
 | `.json`         | —   | —   | 6   | —    | —           | 2       | —      | —         | —      |
-| `.filesystem`   | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
+| `.filesystem`   | —   | —   | 2   | —    | —           | —       | —      | —         | —      |
 | `.container()`  | —   | —   | 3   | —    | —           | —       | —      | —         | —      |
 | `.containerIds` | —   | —   | 1   | —    | —           | —       | —      | —         | —      |
 | `.report`       | —   | —   | —   | 113  | —           | —       | —      | —         | —      |
@@ -390,7 +390,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `.content`      | —   | —   | —   | —    | —           | 10      | 5      | 18        | —      |
 | `.console`      | —   | —   | —   | —    | —           | 4       | —      | 4         | —      |
 | `.errors`       | —   | —   | —   | —    | —           | 8       | —      | 8         | —      |
-| `.html`         | —   | —   | —   | —    | —           | 2       | —      | 5         | —      |
+| `.html`         | —   | —   | —   | —    | —           | 3       | —      | 5         | —      |
 | `.title`        | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.url`          | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
 | `.head`         | —   | —   | —   | —    | —           | 3       | —      | —         | —      |
@@ -409,13 +409,13 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | Capability             | api | job | cli | lint | integration | website | mobile | component | module |
 | ---------------------- | --- | --- | --- | ---- | ----------- | ------- | ------ | --------- | ------ |
 | `toMatch(file())`      | 1   | —   | 10  | —    | 4           | 0       | —      | 1         | 1      |
-| `toMatch(directory())` | 1   | —   | 5   | 7    | 1           | —       | —      | —         | 1      |
+| `toMatch(directory())` | 1   | —   | 6   | 7    | 1           | —       | —      | —         | 1      |
 | `toMatch(<rows>)`      | 7   | 4   | 1   | —    | 1           | —       | —      | —         | —      |
 | `.http exchange`       | 3   | —   | —   | —    | —           | —       | —      | —         | 4      |
 | `.aria.yaml tree`      | —   | —   | —   | —    | —           | 0       | —      | 1         | —      |
 | `.json body`           | 3   | —   | 9   | —    | 3           | 0       | —      | —         | 7      |
 | `.txt stream`          | 1   | —   | 11  | —    | 1           | 1       | —      | —         | 5      |
-| `{ frozen }`           | 2   | —   | 12  | —    | —           | —       | —      | 1         | 2      |
+| `{ frozen }`           | 2   | —   | 14  | —    | —           | —       | —      | 1         | 2      |
 
 ### Time & doubles
 
@@ -449,7 +449,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 | `{{time}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{ulid}}`     | 0   | —   | 0   | —    | 0           | 0       | —      | —         | 1      |
 | `{{url}}`      | 0   | —   | 4   | —    | 0           | 0       | —      | —         | 1      |
-| `{{uuid}}`     | 2   | —   | 0   | —    | 0           | 0       | —      | —         | 3      |
+| `{{uuid}}`     | 2   | —   | 2   | —    | 0           | 0       | —      | —         | 3      |
 | `{{workdir}}`  | 0   | —   | 8   | —    | 0           | 0       | —      | —         | 1      |
 
 ### Exemptions
@@ -457,7 +457,7 @@ What the framework can do, and how many of this package’s own test FILES exerc
 - a lint specification resolves its plugins and checkers from the project it sits in, and `no-redundant-root` refuses a `root` the walk already finds; the option is proven where a facet runs a product of its own (api, integration) — `root`·lint
 - what a repository adds beside its presets is `@jterrazz/typescript`'s to resolve, and its own lint specs run it (`declared-preset-lint`); this package states its additions as the `self()` preset, which `presets` carries — `settings`·lint
 - every golden of this facet's tree is read by one test, so it is written in place (`ground-shared-or-inline`); the file form is proven where goldens are shared — `toMatch(file())`·website, `.aria.yaml tree`·website, `.json body`·website
-- the matcher owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·cli, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
+- the matcher owns the family (proven in the module column); a facet uses the ones its goldens need — `{{any}}`·api, `{{any}}`·integration, `{{any}}`·website, `{{base64}}`·api, `{{base64}}`·cli, `{{base64}}`·integration, `{{base64}}`·website, `{{date}}`·api, `{{date}}`·cli, `{{date}}`·integration, `{{date}}`·website, `{{duration}}`·api, `{{duration}}`·integration, `{{duration}}`·website, `{{email}}`·api, `{{email}}`·cli, `{{email}}`·integration, `{{email}}`·website, `{{float}}`·api, `{{float}}`·cli, `{{float}}`·integration, `{{float}}`·website, `{{hex}}`·api, `{{hex}}`·cli, `{{hex}}`·integration, `{{hex}}`·website, `{{int}}`·api, `{{int}}`·cli, `{{int}}`·integration, `{{int}}`·website, `{{ip}}`·api, `{{ip}}`·cli, `{{ip}}`·integration, `{{ip}}`·website, `{{iso8601}}`·cli, `{{number}}`·cli, `{{number}}`·integration, `{{number}}`·website, `{{path}}`·cli, `{{path}}`·integration, `{{path}}`·website, `{{port}}`·api, `{{port}}`·cli, `{{port}}`·integration, `{{port}}`·website, `{{semver}}`·api, `{{semver}}`·integration, `{{semver}}`·website, `{{sha}}`·api, `{{sha}}`·cli, `{{sha}}`·integration, `{{sha}}`·website, `{{string}}`·integration, `{{string}}`·website, `{{time}}`·api, `{{time}}`·cli, `{{time}}`·integration, `{{time}}`·website, `{{ulid}}`·api, `{{ulid}}`·cli, `{{ulid}}`·integration, `{{ulid}}`·website, `{{url}}`·api, `{{url}}`·integration, `{{url}}`·website, `{{uuid}}`·integration, `{{uuid}}`·website, `{{workdir}}`·api, `{{workdir}}`·integration, `{{workdir}}`·website
 
 <!-- /GENERATED:matrix -->
 
