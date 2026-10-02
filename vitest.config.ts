@@ -14,44 +14,46 @@ import {
     website,
 } from './src/index.vitest.js';
 
+export const nodeSpecs = [
+    // The plugins and the checkers are loaded from the build: it runs after `npm run build`.
+    lint(),
+    // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs. The tarball is packed once per run, for the consumer's specs.
+    mergeConfig(
+        {
+            test: {
+                globalSetup: [resolve(import.meta.dirname, 'specs/cli/_setup/packed/per-run.ts')],
+            },
+        },
+        cli({
+            literate: {
+                include: ['specs/cli/run/*.spec.yaml'],
+                specification: './specs/cli/literate-cli.specification.ts',
+            },
+        }),
+    ),
+    api(),
+    job(),
+    // Serial: its probes start their own infrastructure, and in parallel they starve each other's healthchecks.
+    integration({ serial: true }),
+    website(),
+    // The protocol double's setup comes first, so it still answers when `mobile()`'s own ends the session.
+    mergeConfig(
+        {
+            test: {
+                globalSetup: [
+                    resolve(import.meta.dirname, 'specs/_shared/_setup/appium/per-run.ts'),
+                ],
+            },
+        },
+        mobile(),
+    ),
+];
+
 const config = defineSpecConfig({
     test: {
         projects: [
             unit({ exclude: [], include: ['src/**/*.test.ts', 'lint/**/*.test.ts'] }),
-            // The plugins and the checkers are loaded from the build: it runs after `npm run build`.
-            lint(),
-            // Depth 1 only: the deliberately-wrong twins under `run/_fixtures/` stay inputs to the negative specs. The tarball is packed once per run, for the consumer's specs.
-            mergeConfig(
-                {
-                    test: {
-                        globalSetup: [
-                            resolve(import.meta.dirname, 'specs/cli/_setup/packed/per-run.ts'),
-                        ],
-                    },
-                },
-                cli({
-                    literate: {
-                        include: ['specs/cli/run/*.spec.yaml'],
-                        specification: './specs/cli/literate-cli.specification.ts',
-                    },
-                }),
-            ),
-            api(),
-            job(),
-            // Serial: its probes start their own infrastructure, and in parallel they starve each other's healthchecks.
-            integration({ serial: true }),
-            website(),
-            // The protocol double's setup comes first, so it still answers when `mobile()`'s own ends the session.
-            mergeConfig(
-                {
-                    test: {
-                        globalSetup: [
-                            resolve(import.meta.dirname, 'specs/_shared/_setup/appium/per-run.ts'),
-                        ],
-                    },
-                },
-                mobile(),
-            ),
+            ...nodeSpecs,
             component({
                 // Every value is away from its default, so the app proves each one reaches the page.
                 clock: '2026-01-02T03:04:05.000Z',
