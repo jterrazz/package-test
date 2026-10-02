@@ -1,20 +1,14 @@
 # 20 — The visitor
 
-Three facets drive something a person can see — a served page ([10](10-website.md)), a mounted unit ([09](09-component.md)), a screen on a simulator ([11](11-mobile.md)) — and each hands its scenario a **visitor**: what acts on the surface as a person would. The visitor speaks **one vocabulary**, owned here and restated nowhere: its **verbs**, the **targets** they act on, and the **matching** that turns a target into exactly one element. A facet chapter says what its surface adds; it does not redefine a word.
+Three kinds of test drive something a person can see — a served page ([10](10-website.md)), a mounted component ([09](09-component.md)) and a screen on a simulator ([11](11-mobile.md)). Each hands its scenario a **visitor**, which acts on the surface the way a person would:
 
-The vocabulary is user-facing by construction (rule `test-id-states-what-is-missing`): there is no CSS surface, no XPath and no raw predicate. A test names what a person would name.
+```typescript
+await visitor.fill(field('Email'), 'visitor@site.test');
+await visitor.click(button('Subscribe'));
+await visitor.see(content('Thanks for subscribing'));
+```
 
-| The shape            | Held below                                                                                  |
-| -------------------- | ------------------------------------------------------------------------------------------- |
-| The actions          | [Verbs](#verbs)                                                                             |
-| Waiting              | [`see()` and `gone()` are the synchronization](#see-and-gone-are-the-synchronization)       |
-| Which facet has what | [The per-facet matrix](#the-per-facet-matrix)                                               |
-| The words            | [Targets](#targets)                                                                         |
-| The states           | [Modifiers](#modifiers)                                                                     |
-| Narrowing            | [`within(scope, target)`](#withinscope-target)                                              |
-| The escape hatch     | [`testId()`](#testid--the-one-escape-hatch)                                                 |
-| One element, exactly | [Matching](#matching)                                                                       |
-| A name, whole        | [A name designates the accessible name WHOLE](#a-name-designates-the-accessible-name-whole) |
+The visitor has one vocabulary on all three surfaces, and this chapter owns it: the **verbs** (`fill`, `click`, `see` …), the **targets** they act on (`field()`, `button()`, `content()` …), and the **matching** that turns a target into exactly one element. A target names what a person would name — a role and an accessible name. There is no CSS selector, no XPath and no raw predicate; the one escape hatch, `testId()`, must say in a comment what the element lacks (rule `test-id-states-what-is-missing`).
 
 ## Verbs
 
