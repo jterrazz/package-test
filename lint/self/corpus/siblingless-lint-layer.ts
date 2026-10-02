@@ -43,7 +43,6 @@ export const SIBLINGLESS_LINT_LAYER = [
     'lint/consumer/checks/adapter-named-for-its-port.ts',
     'lint/consumer/checks/reserved-folder-in-closed-list.ts',
     'lint/consumer/checks/setup-module-at-lowest-common-folder.ts',
-    'lint/consumer/checks/spec-code-in-setup-folder.ts',
     'lint/consumer/rulebook/preset.ts',
     'lint/self/checks/source-root-holds-known-entries.ts',
     'lint/engine/project/specs-modules.ts',

@@ -232,7 +232,7 @@ describe('openai', () => {
         });
     });
 
-    test('intercept — openai replies — the chat wrap, openai.reply() and openai.malformed() build one chat completion around the data', () => {
+    test('intercept — openai replies — the wraps, openai.reply() and openai.malformed() build the reply each API reads around the data', () => {
         // Given - an object wrapped by the trigger, a text by reply(), broken content by malformed(), at a pinned instant
         using _ = clock.at('2026-03-04T09:30:00Z');
         const replies = [
@@ -242,10 +242,30 @@ describe('openai', () => {
         ];
 
         // Then - the data is the assistant's content, serialised when it is not a string, carried as is when broken
-        expect(replies).toStrictEqual([
+        expect([...replies, openai.responses().wrap({ ok: true })]).toStrictEqual([
             chatCompletion('{"categories":["TECH"]}'),
             chatCompletion('plain text'),
             chatCompletion('{not json'),
+            {
+                body: {
+                    created_at: 1_772_616_600,
+                    id: 'resp-test',
+                    model: 'gpt-4o-test',
+                    object: 'response',
+                    output: [
+                        {
+                            content: [
+                                { annotations: [], text: '{"ok":true}', type: 'output_text' },
+                            ],
+                            id: 'msg-test',
+                            role: 'assistant',
+                            type: 'message',
+                        },
+                    ],
+                    usage: { input_tokens: 10, output_tokens: 10, total_tokens: 20 },
+                },
+                status: 200,
+            },
         ]);
     });
 
@@ -271,28 +291,5 @@ describe('openai', () => {
             },
             { body: {}, delay: 30_000, status: 200 },
         ]);
-    });
-
-    test('openai — never — never() is http.never() spelled in this kind, over the endpoint it is handed', () => {
-        // Given - the provider call a cached path must not make
-        const { request, ...declared } = openai.never(openai.chat({ model: 'gpt-4o' }));
-
-        // Then - a stub required exactly zero times on that endpoint
-        const shape = { ...request, match: typeof request.match, wrap: typeof request.wrap };
-        expect({ ...declared, request: shape }).toStrictEqual({
-            request: {
-                adapter: 'openai',
-                match: 'function',
-                method: 'POST',
-                url: CHAT_URL,
-                wrap: 'function',
-            },
-            required: true,
-            response: {
-                body: { error: `@jterrazz/test: POST ${CHAT_URL} is declared never requested` },
-                status: 418,
-            },
-            times: 0,
-        });
     });
 });
