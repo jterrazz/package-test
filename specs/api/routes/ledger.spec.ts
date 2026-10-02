@@ -18,7 +18,7 @@ describe('ledger', () => {
         app.use(async (_context, proceed) => {
             await proceed();
         });
-        app.get('/ping', (context) => context.text('pong'));
+        app.get('/written', (context) => context.text('pong'));
         const directory = inject('routesLedger') ?? '';
         const before = new Set(ledgersIn(directory));
 
@@ -27,18 +27,18 @@ describe('ledger', () => {
             root: '../../_shared/_fixtures/specimen-api',
             server: () => app,
         });
-        await api.get('/ping');
+        await api.get('/written');
         await cleanup();
 
         // Then - its ledger names the route (the middleware left out) and the request that reached it
         const written = ledgersIn(directory)
             .filter((name) => !before.has(name))
             .map((name) => JSON.parse(readFileSync(join(directory, name), 'utf8')) as unknown)
-            .filter((ledger) => JSON.stringify(ledger).includes('/ping'));
+            .filter((ledger) => JSON.stringify(ledger).includes('/written'));
         expect(written).toStrictEqual([
             {
-                declared: [{ method: 'GET', path: '/ping' }],
-                reached: [{ method: 'GET', path: '/ping' }],
+                declared: [{ method: 'GET', path: '/written' }],
+                reached: [{ method: 'GET', path: '/written' }],
             },
         ]);
     });
