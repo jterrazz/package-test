@@ -155,6 +155,17 @@ case "$COMMAND" in
         echo "session $(node -e 'console.log(require("crypto").randomUUID())')"
         echo "session $(node -e 'console.log(require("crypto").randomUUID())')" >&2
         ;;
+    session-file)
+        SESSION="$(node -e 'console.log(require("crypto").randomUUID())')"
+        echo "session $SESSION"
+        mkdir -p out
+        echo "session $SESSION" > out/session.txt
+        ;;
+    two-session-files)
+        echo "session $(node -e 'console.log(require("crypto").randomUUID())')"
+        mkdir -p out
+        echo "session $(node -e 'console.log(require("crypto").randomUUID())')" > out/session.txt
+        ;;
     ansi-json)
         printf '\x1b[32m{"status":"ok","value":42}\x1b[0m\n'
         ;;
