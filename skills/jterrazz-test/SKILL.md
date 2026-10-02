@@ -7,9 +7,11 @@ metadata:
 
 # `@jterrazz/test`
 
-What to decide BEFORE writing a test. Everything else — every option, every matcher, every rule — is in the chapter this page sends you to, and the types say the API. Before the kind, whether the test earns its place: end to end through the public surface, a published package from its packed tarball; a module test only for a pure algorithm or a failure no end-to-end path provokes ([docs/23 § Which test earns its place](../../docs/23-conventions.md#which-test-earns-its-place)).
+What to decide BEFORE writing a test, and which chapter to read next. Every option, matcher and rule is in the chapter this page sends you to; the types say the API. New to the package: [docs/05 — Getting started](../../docs/05-getting-started.md) has the five ideas and a first spec.
 
-## Which kind — ask the fork first
+First, whether the test should exist: end to end through the surface a user meets, a published package from its packed tarball; a module test only for a pure algorithm or a failure no end-to-end path provokes ([docs/23 § Which test earns its place](../../docs/23-conventions.md#which-test-earns-its-place)).
+
+## Which kind — ask the fork
 
 Ask in order; the first yes is the kind, and the kind fixes the file, the constructor and the project ([docs/05 § Which kind of test](../../docs/05-getting-started.md#which-kind-of-test) carries the table, and a meta-test holds this list to it).
 
@@ -19,17 +21,17 @@ Ask in order; the first yes is the kind, and the kind fixes the file, the constr
 4. Answers HTTP? → **api**, `specs/api/<resource>/<action>/<aspect>.spec.ts` — the folder derived from the route (`GET /events` → `events/list/`)
 5. Triggered by name, in-process? → **job**, `specs/job/<job>/<aspect>.spec.ts`
 6. A binary? → **cli**, `specs/cli/<command>/<case>.spec.yaml` (or `<aspect>.spec.ts`)
-7. A rule the project ships — a plugin, a checker, a preset? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`, each error at its `line` and `column`
+7. A rule the project ships — a plugin, a checker, a preset? → **lint**, `specs/lint/<rule>/<aspect>.spec.ts`; the rule's visitor alone is a module test on `ruleTester()`
 8. A module needing a real service, or whose oracle is a golden? → **integration**, `specs/integration/<domain>/<aspect>.spec.ts`
 9. A module alone? → **module**, `<file>.test.ts` beside `<file>.ts`
 10. The repository itself, a suite over several apps? → **repository suite**, `specs/<suite>/<domain>/<aspect>.test.ts`
 
-The suffix IS the kind: `.test.ts(x)` beside the code, `.spec.ts` under `specs/<facet>/`, `<case>.spec.yaml` for a document, `<facet>.specification.ts` for the file that builds a runner. A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect, under 400 lines, each test's body under 60. A colocated `.test.ts(x)` holds one `describe` too, titled with its subject — the export of the module beside it (`describe('LocaleNote', …)`). `make fix` splits, moves and retitles ([docs/23](../../docs/23-conventions.md#one-file-one-subject)).
+A spec file asks ONE question (its name, the aspect — never `misc`) of ONE subject (its folder), in one `describe` titled with the aspect; a colocated `.test.ts(x)` holds one `describe` titled with the export it covers. `make fix` splits, moves and retitles ([docs/23 § One file, one subject](../../docs/23-conventions.md#one-file-one-subject)).
 
 ## The shape every spec has
 
 ```typescript
-// specs/api/api.specification.ts
+// specs/api/api.specification.ts — the runner, once per suite, at the facet root
 import { afterAll } from 'vitest';
 import { postgres, specification } from '@jterrazz/test';
 
@@ -60,60 +62,43 @@ describe('shape', () => {
 });
 ```
 
-- One chain, zero or more setups, exactly ONE terminal action; every assertion through `expect()`.
-- A runner lives in a `*.specification.ts` at the facet root, destructured under its canonical name, with `afterAll(cleanup)`.
+- One chain: zero or more setups, exactly ONE action; every assertion through `expect()`.
+- The runner is destructured under its canonical name, with `afterAll(cleanup)`.
 - Every test carries a `// Given -` line, then a `// Then -` line.
 
-## A string is a value; the disk is `file()` or `directory()`
+## What goes wrong most
 
-What a test stands on is named by one of two calls, with the path relative to the spec file spelled in full; the verbs keep simple names and the type refuses a bare string where a file is meant:
-
-| Call                                                                      | Reads                                                                                    |
-| ------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
-| `.seed(file('./_seeds/users.sql'))`                                       | database state, before the action — never SQL inline                                     |
-| `.request(file('./_requests/create.http'))`                               | a complete request — the terminal action                                                 |
-| `.post('/orders', file('./_requests/order.json'))`                        | a request body, sent as the file holds it                                                |
-| `.fixture(file('./_fixtures/config.toml'))`                               | one file copied into the working directory, or a `directory()`'s contents spread into it |
-| `.link('@acme/sdk', directory('./_fixtures/sdk/'))`                       | a package, linked into the cwd's `node_modules`                                          |
-| `cli.run(file('./build.spec.yaml'))`                                      | a cli document, run from a test                                                          |
-| `expect(x).toMatch(file('./_expected/out.txt'))`                          | a golden file, `{{token}}`s resolved                                                     |
-| `await expect(result.filesystem).toMatch(directory('./_expected/tree/'))` | a golden tree                                                                            |
-
-`toMatch` on a result — a response, a stream, a json, a table — compares the WHOLE result: to the value written in place (``toMatch(`HTTP/1.1 200 OK …`)``, `toMatch([[1, 'Alice']])`, tokens allowed), or to `file()`/`directory()`. On a plain string it is vitest's own, and a `file()` there is refused — wrap the string to golden it, `expect(text(message)).toMatch(file(…))`: a stream's text is its `.text` — ANSI stripped, the runner's `transform` applied — `expect(result.stdout.text).toMatch(/built/)`; `.raw` is the capture as it was. Ground sits in four reserved folders — `_fixtures/`, `_expected/`, `_requests/`, `_seeds/` — each verb reads its own, and the same four under the specs root's one `_shared/` folder (`specs/_shared/_fixtures/`, `specs/_shared/_seeds/`, …) hold what several leaves share, reached by the path that climbs to them. `TEST_UPDATE=1` writes a golden; read the diff, then run again without it. A package needs no disk at all when the spec's own project installed it: `.link('@acme/sdk')` links the package the spec's own project installed, found as Node finds it from the spec ([`.link()`](../../docs/14-cli.md#link--a-package-the-working-directory-resolves)); `directory()` is for a stub install, a broken one, an older version.
-
-## Pitfalls
-
-- **A bare string where a file is meant** — `.seed('users.sql')` and `file('users.sql')` do not compile, and a document's `fixture: shop/` is refused on its line. Write `file('./_seeds/users.sql')`.
-- **A filled path where the route has parameters** — `.get('/indicators/btc/chart')` hides that `btc` is a value. Write the route as the app declares it, the values beside it: `.get('/indicators/:symbol/chart', { params: { symbol: 'btc' } })` — the template types the params, files the spec and is what route coverage reads.
-- **A probe where the whole result belongs** — a test reading a response, a json or a table compares it WHOLE, its value written in place (``toMatch(`HTTP/1.1 200 OK …`)``), then adds a precise assertion only if one property is the subject.
-- **A folder that is no subject, spelled without its `_`** — `fixtures/`, `seeds/`, `setup/`, `doubles/`: the folders under `specs/` that are no subject form a closed list, `_setup/` (code that prepares specs), `_seeds/`, `_requests/`, `_expected/`, `_fixtures/` (ground) and `_shared/` at the root (`reserved-folder-in-closed-list`). Helpers, test adapters (`<port>.adapter.ts`) and stubs go in a `_setup/`, never beside the specs nor in a `*.fixtures.ts` (`spec-code-in-setup-folder`).
-- **Reaching into a sibling leaf** — a path may leave its leaf only by climbing, into the ground of a folder that encloses it or `specs/_shared/<role>/` (`no-reach-into-sibling-ground`). What several leaves share — data or `_setup/` code — sits in the reserved folder of the lowest folder they share (`ground-shared-or-inline`, `setup-module-at-lowest-common-folder`).
-- **`expect(result.stdout).toContain('built')`** — a stream is not a string, and it does not compile: a value matcher reads the stream's `.text`, the text a golden compares. A golden is `.toMatch(file('./_expected/help.txt'))`. A part of a result is no comparison of it either: `expect(result.response).toMatch(/200/)` does not compile — a response takes its whole `.http` text or its `file()`, a json its value, a table its rows, a tree its `directory()`.
-- **An `expect` in a helper or a loop** — a `_setup/` module, a test adapter or a `*.specification.ts` returns what it reads, and the test asserts it (`no-expect-outside-a-test`); a loop asserts nothing over an empty collection, so compare the collection whole or state the cases with `test.each` (`no-expect-in-a-loop`).
-- **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles". Write the name whole, or scope it with `within(…)`.
-- **Awaiting a sync matcher, or not awaiting an IO one** — a table's `toMatch(<rows>)`, `toMatch(directory(…))`, `toBeEmpty` are awaited; `toMatch(file(…))` is not, except on a subject captured inside a page (the types say which: `typescript/no-floating-promises`, `typescript/await-thenable`).
-- **A double before the real thing** — the ladder is: the real thing → a declared service → a stub (`.intercept()`) → a typed port double (`mockOf<T>()`). Take the first rung that fits. A call that must not happen is `.intercept(http.never(http.post(url)))` — `http.unreachable()` and an empty error say it failed, not that it never happened. A request that must NOT carry a header is matched by `http.get(url, { without: { headers: ['authorization'] } })` — a `headers` subset proves presence only ([`http.*`](../../docs/17-stubs.md#http--any-url)).
-- **Time** — `clock` only (`.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope); never `vi.useFakeTimers`.
-- **A setting every chain of a file repeats** — state it once, on a view: `const events = api.with({ clock: '<iso>', headers })`; a seed or a stub stays on its test's chain.
+- **A bare string where a file is meant** — `.seed('users.sql')` does not compile. Name the disk with `file('./_seeds/users.sql')` or `directory(…)`, relative to the spec, in the test that reads it.
+- **A probe where the whole result belongs** — compare a response, a json, a table or an output WHOLE, written in place (``toMatch(`HTTP/1.1 200 OK …`)``) or in `_expected/` when several tests share it; add one precise assertion only if one property is the subject ([docs/21](../../docs/21-assertions.md)).
+- **A value that moves** — a `{{token}}`, never a literal; `TEST_UPDATE=1` writes the expected value, then read the diff ([docs/22](../../docs/22-tokens.md)).
+- **A double before the real thing** — the real thing → a declared service → a stub (`.intercept()`) → `mockOf<T>()`, the first rung that fits ([docs/19](../../docs/19-time-and-doubles.md#the-doubles-ladder)). A call that must not happen is `http.never(…)` ([docs/17](../../docs/17-stubs.md)).
+- **Time** — `clock` only: `.clock('<iso>')` on a chain, `using _ = clock.at('<iso>')` in scope; never `vi.useFakeTimers` ([docs/19](../../docs/19-time-and-doubles.md#the-clock)).
+- **A folder that is no subject, spelled without its `_`** — `_setup/`, `_seeds/`, `_requests/`, `_expected/`, `_fixtures/`, and `_shared/` at the specs root are the closed list; what several leaves share sits in the lowest folder they share ([docs/23 § The naming recap](../../docs/23-conventions.md#the-naming-recap)).
+- **A partial element name** — names are exact: `link('Articles')` does not reach "Read Articles"; scope with `within(…)` ([docs/20](../../docs/20-visitor.md)).
+- **An `expect` in a scenario, a helper or a loop** — a scenario is the When; a helper returns what it reads; a loop asserts nothing over an empty collection.
+- **Awaiting a sync matcher, or not awaiting an IO one** — a table, a directory and a page-captured subject are awaited; the types say which.
+- **A setting every chain of a file repeats** — state it once, on a view: `const morning = api.with({ clock, headers })` ([docs/23 § What a file shares](../../docs/23-conventions.md#what-a-file-shares)).
 
 ## Read next
 
-| The test you are writing                    | Chapter                                                  |
-| ------------------------------------------- | -------------------------------------------------------- |
-| module                                      | [docs/07-module-tests.md](../../docs/07-module-tests.md) |
-| integration                                 | [docs/08-integration.md](../../docs/08-integration.md)   |
-| component                                   | [docs/09-component.md](../../docs/09-component.md)       |
-| website                                     | [docs/10-website.md](../../docs/10-website.md)           |
-| mobile                                      | [docs/11-mobile.md](../../docs/11-mobile.md)             |
-| api                                         | [docs/12-api.md](../../docs/12-api.md)                   |
-| job                                         | [docs/13-job.md](../../docs/13-job.md)                   |
-| cli                                         | [docs/14-cli.md](../../docs/14-cli.md)                   |
-| a cli `<case>.spec.yaml`                    | [docs/15-documents.md](../../docs/15-documents.md)       |
-| lint — a rule over a tree, or alone         | [docs/16-lint.md](../../docs/16-lint.md)                 |
-| naming an element on any surface that draws | [docs/20-visitor.md](../../docs/20-visitor.md)           |
-| a matcher, sync or awaited                  | [docs/21-assertions.md](../../docs/21-assertions.md)     |
-| a `{{token}}`, or update mode               | [docs/22-tokens.md](../../docs/22-tokens.md)             |
-| what the network replies                    | [docs/17-stubs.md](../../docs/17-stubs.md)               |
-| a database, a cache, a process              | [docs/18-services.md](../../docs/18-services.md)         |
-| a rule id, or wiring the `test()` preset    | [docs/24-linting.md](../../docs/24-linting.md)           |
-| anything else — the API is the types        | [docs/README.md](../../docs/README.md), the manual's map |
+| The test you are writing, or the question       | Chapter                                                                                    |
+| ----------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| install, the vitest config, the `test()` preset | [docs/06-setting-up.md](../../docs/06-setting-up.md)                                       |
+| module                                          | [docs/07-module-tests.md](../../docs/07-module-tests.md)                                   |
+| integration                                     | [docs/08-integration.md](../../docs/08-integration.md)                                     |
+| component                                       | [docs/09-component.md](../../docs/09-component.md)                                         |
+| website                                         | [docs/10-website.md](../../docs/10-website.md)                                             |
+| mobile                                          | [docs/11-mobile.md](../../docs/11-mobile.md)                                               |
+| api                                             | [docs/12-api.md](../../docs/12-api.md)                                                     |
+| job                                             | [docs/13-job.md](../../docs/13-job.md)                                                     |
+| cli, and a `<case>.spec.yaml`                   | [docs/14-cli.md](../../docs/14-cli.md), [docs/15-documents.md](../../docs/15-documents.md) |
+| lint — a rule over a tree, or alone             | [docs/16-lint.md](../../docs/16-lint.md)                                                   |
+| what the network replies                        | [docs/17-stubs.md](../../docs/17-stubs.md)                                                 |
+| a database, a cache, a process                  | [docs/18-services.md](../../docs/18-services.md)                                           |
+| the clock, a port double                        | [docs/19-time-and-doubles.md](../../docs/19-time-and-doubles.md)                           |
+| naming an element on any surface that draws     | [docs/20-visitor.md](../../docs/20-visitor.md)                                             |
+| a matcher, sync or awaited                      | [docs/21-assertions.md](../../docs/21-assertions.md)                                       |
+| a `{{token}}`, or update mode                   | [docs/22-tokens.md](../../docs/22-tokens.md)                                               |
+| why a convention holds, what review judges      | [docs/23-conventions.md](../../docs/23-conventions.md)                                     |
+| a rule id, a finding, the ratchet               | [docs/24-linting.md](../../docs/24-linting.md)                                             |
+| anything else — the API is the types            | [docs/README.md](../../docs/README.md), the manual's map                                   |
