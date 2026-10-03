@@ -8,6 +8,21 @@ const COMPONENT = '/repo/src/web/post-table.test.tsx';
 ruleTester().run('scenario-ends-settled', scenarioEndsSettled, {
     invalid: [
         {
+            name: 'A then whose continuation does nothing settles nothing.',
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next')).then(() => {});
+            });`,
+            errors: [{ column: 22, line: 2, messageId: 'unsettled' }],
+            filename: SPEC,
+        },
+        {
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next')).then();
+            });`,
+            errors: [{ column: 22, line: 2, messageId: 'unsettled' }],
+            filename: SPEC,
+        },
+        {
             name: 'The capture is taken on whatever the click left on the screen.',
             code: `const result = await website.visit('/', async (visitor) => {
                 await visitor.click(button('Next'));
@@ -44,6 +59,67 @@ ruleTester().run('scenario-ends-settled', scenarioEndsSettled, {
         },
     ],
     valid: [
+        {
+            name: 'A switch whose every case reads, a wait in the tail of a then, and one branch that reads, settle it.',
+            code: `const result = await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next'));
+                switch (step) {
+                    case 1:
+                        await visitor.see(heading('One'));
+                        break;
+                    default:
+                        await visitor.see(heading('Other'));
+                }
+            });
+            await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next')).then(() => visitor.see(heading('Two')));
+            });
+            await website.visit('/', async (visitor) => {
+                if (a) {
+                    await visitor.click(button('Next'));
+                } else {
+                    await visitor.see(heading('Three'));
+                }
+            });`,
+            filename: SPEC,
+        },
+        {
+            name: 'A wait in the tail of a then written as a function settles it too.',
+            code: `await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next')).then(function () {
+                    return visitor.see(heading('Two'));
+                });
+            });`,
+            filename: SPEC,
+        },
+        {
+            name: "Another receiver's action, a scenario that neither acts nor reads, a callback with no visitor, a call that is no scenario, and a module outside specs/ are none of this rule's.",
+            code: `await website.visit('/', async (visitor) => {
+                await other.click(button('Next'));
+            });
+            await website.visit('/', async (visitor) => {
+                await visitor.wait(1);
+            });
+            await website.visit('/', async () => {
+                await click(button('Next'));
+            });
+            await website.fetch('/', async (visitor) => {
+                await visitor.click(button('Next'));
+            });`,
+            filename: SPEC,
+        },
+        {
+            code: `await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next'));
+            });`,
+            filename: '/repo/src/home.test.ts',
+        },
+        {
+            code: `await website.visit('/', async (visitor) => {
+                await visitor.click(button('Next'));
+            });`,
+            filename: '/repo/specs/website/_setup/visits.ts',
+        },
         {
             name: 'The action names what it produced.',
             code: `const result = await website.visit('/', async (visitor) => {

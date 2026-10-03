@@ -37,6 +37,7 @@ const INSIDE: Record<string, string[]> = {
 
 function terminalsOf(node: AstNode | undefined): AstNode[] {
     if (node === undefined) {
+        // Stryker disable next-line ArrayDeclaration: an entry that is no node settles nothing
         return [];
     }
     if (node.type === 'BlockStatement') {
@@ -52,36 +53,35 @@ function terminalsOf(node: AstNode | undefined): AstNode[] {
 }
 
 function verbOn(node: AstNode | undefined, visitor: string): string | undefined {
+    // Stryker disable next-line ConditionalExpression,OptionalChaining,BlockStatement: a node that is no call has no callee below
     if (node?.type !== 'CallExpression') {
         return undefined;
     }
     const callee = child(node, 'callee');
+    // Stryker disable next-line ConditionalExpression,LogicalOperator: a call always has a callee
     if (callee === undefined || chainRootName(callee) !== visitor) {
         return undefined;
     }
     return memberPropertyName(callee);
 }
 
+/** A promise chain settles where its last continuation does: the wait is in the tail. */
 function settles(node: AstNode, visitor: string): boolean {
-    const verb = verbOn(node, visitor);
-    if (verb !== undefined) {
-        return TERMINALS.has(verb);
-    }
-    // invariant: the wait is in the tail.
     const callee = child(node, 'callee');
-    if (node.type !== 'CallExpression' || callee === undefined) {
-        return false;
+    // Stryker disable next-line ConditionalExpression: only a call has a callee
+    if (node.type === 'CallExpression' && memberPropertyName(callee ?? node) === 'then') {
+        const continuation = childList(node, 'arguments').at(-1);
+        const body =
+            // Stryker disable next-line ConditionalExpression: a continuation that is no function has no body to read
+            continuation?.type === 'ArrowFunctionExpression' ||
+            continuation?.type === 'FunctionExpression'
+                ? child(continuation, 'body')
+                : undefined;
+        return terminalsOf(body).some((terminal) => settles(terminal, visitor));
     }
-    if (memberPropertyName(callee) !== 'then') {
-        return false;
-    }
-    const continuation = childList(node, 'arguments').at(-1);
-    const body =
-        continuation?.type === 'ArrowFunctionExpression' ||
-        continuation?.type === 'FunctionExpression'
-            ? child(continuation, 'body')
-            : undefined;
-    return terminalsOf(body).some((terminal) => settles(terminal, visitor));
+    const verb = verbOn(node, visitor);
+    // Stryker disable next-line ConditionalExpression: no verb is in the set
+    return verb !== undefined && TERMINALS.has(verb);
 }
 
 const row = rowNamed(consumerRows, 'scenario-ends-settled');
@@ -111,16 +111,19 @@ export const scenarioEndsSettled = defineRule(
                 },
                 CallExpression(node: AstNode) {
                     const scenario = scenarioCallbackOf(node);
+                    // Stryker disable next-line ConditionalExpression,BlockStatement: no scenario has no visitor below
                     if (scenario === undefined) {
                         return;
                     }
                     const visitor = identifierName(childList(scenario, 'params')[0]);
+                    // Stryker disable next-line ConditionalExpression,BlockStatement: no visitor is the root of no call
                     if (visitor === undefined) {
                         return;
                     }
                     let acts = false;
                     walk(scenario, (inner) => {
                         const verb = verbOn(inner, visitor);
+                        // Stryker disable next-line ConditionalExpression,LogicalOperator: no verb is in the set
                         if (verb !== undefined && ACTIONS.has(verb)) {
                             acts = true;
                         }
